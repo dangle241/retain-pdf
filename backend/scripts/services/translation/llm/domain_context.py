@@ -9,7 +9,7 @@ import time
 
 import fitz
 
-from foundation.shared.prompt_loader import render_prompt
+from foundation.shared.prompt_loader import load_prompt
 
 from services.pipeline_shared.events import emit_stage_progress
 from services.pipeline_shared.events import emit_stage_transition
@@ -52,17 +52,12 @@ def _domain_context_deadline(timeout_secs: int):
             signal.setitimer(signal.ITIMER_REAL, previous_timer[0], previous_timer[1])
 
 
-def _empty_domain_context(
-    preview_text: str = "",
-    *,
-    target_language_name: str = "Tiếng Việt",
-) -> dict[str, str]:
+def _empty_domain_context(preview_text: str = "") -> dict[str, str]:
     return {
         "domain": "",
         "summary": "",
         "translation_guidance": "",
         "preview_text": preview_text,
-        "target_language_name": target_language_name,
     }
 
 
@@ -90,26 +85,13 @@ def extract_pdf_preview_text(source_pdf_path: Path, max_pages: int = 2) -> str:
         doc.close()
 
 
-def build_domain_inference_messages(
-    preview_text: str,
-    *,
-    target_language_name: str = "Tiếng Việt",
-) -> list[dict[str, str]]:
+def build_domain_inference_messages(preview_text: str) -> list[dict[str, str]]:
     user_payload = {
-        "task": render_prompt(
-            "domain_inference_task.txt",
-            target_language_name=target_language_name,
-        ),
+        "task": load_prompt("domain_inference_task.txt"),
         "preview_text": preview_text,
     }
     return [
-        {
-            "role": "system",
-            "content": render_prompt(
-                "domain_inference_system.txt",
-                target_language_name=target_language_name,
-            ),
-        },
+        {"role": "system", "content": load_prompt("domain_inference_system.txt")},
         {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
     ]
 
@@ -126,47 +108,27 @@ def load_cached_domain_context(output_dir: Path | None) -> dict[str, str] | None
         return None
     if not isinstance(payload, dict):
         return None
-    result = {
+    return {
         "domain": str(payload.get("domain", "")).strip(),
         "summary": str(payload.get("summary", "")).strip(),
         "translation_guidance": str(payload.get("translation_guidance", "")).strip(),
         "preview_text": str(payload.get("preview_text", "") or ""),
     }
-    target_language_name = str(payload.get("target_language_name", "") or "").strip()
-    if target_language_name:
-        result["target_language_name"] = target_language_name
-    return result
 
 
-def _shared_domain_context_path(
-    preview_text: str,
-    *,
-    model: str,
-    target_language_name: str,
-) -> Path:
+def _shared_domain_context_path(preview_text: str, *, model: str) -> Path:
     import hashlib
 
     from foundation.config.paths import DOMAIN_CONTEXT_CACHE_DIR
 
-    key = hashlib.sha256(
-        f"{model}\n{target_language_name.strip()}\n{preview_text.strip()}".encode("utf-8")
-    ).hexdigest()
+    key = hashlib.sha256(f"{model}\n{preview_text.strip()}".encode("utf-8")).hexdigest()
     return DOMAIN_CONTEXT_CACHE_DIR / f"{key}.json"
 
 
-def _load_shared_domain_context(
-    preview_text: str,
-    *,
-    model: str,
-    target_language_name: str,
-) -> dict[str, str] | None:
+def _load_shared_domain_context(preview_text: str, *, model: str) -> dict[str, str] | None:
     # 按内容寻址的跨任务缓存:同一文档换个任务目录重跑,不必重付
     # 4-5s 的领域识别调用(原有的 per-job 缓存只在同一任务目录内生效)。
-    path = _shared_domain_context_path(
-        preview_text,
-        model=model,
-        target_language_name=target_language_name,
-    )
+    path = _shared_domain_context_path(preview_text, model=model)
     try:
         if not path.exists():
             return None
@@ -181,28 +143,15 @@ def _load_shared_domain_context(
         "translation_guidance": str(payload.get("translation_guidance", "")).strip(),
         "preview_text": str(payload.get("preview_text", "") or ""),
     }
-    target_language_name = str(payload.get("target_language_name", "") or "").strip()
-    if target_language_name:
-        result["target_language_name"] = target_language_name
     if not (result["summary"] or result["translation_guidance"]):
         return None
     return result
 
 
-def _store_shared_domain_context(
-    preview_text: str,
-    *,
-    model: str,
-    target_language_name: str,
-    context: dict[str, str],
-) -> None:
+def _store_shared_domain_context(preview_text: str, *, model: str, context: dict[str, str]) -> None:
     if not (str(context.get("summary", "") or "").strip() or str(context.get("translation_guidance", "") or "").strip()):
         return
-    path = _shared_domain_context_path(
-        preview_text,
-        model=model,
-        target_language_name=target_language_name,
-    )
+    path = _shared_domain_context_path(preview_text, model=model)
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         temp_path = path.with_suffix(f".{os.getpid()}.tmp")
@@ -218,41 +167,25 @@ def infer_domain_context_from_preview_text(
     api_key: str,
     model: str,
     base_url: str,
-    target_language_name: str = "Tiếng Việt",
     output_dir: Path | None = None,
 ) -> dict[str, str]:
     if not preview_text:
-        result = _empty_domain_context(
-            "",
-            target_language_name=target_language_name,
-        )
+        result = _empty_domain_context("")
         if output_dir is not None:
             save_domain_context(output_dir, result)
         return result
     cached = load_cached_domain_context(output_dir)
-    if (
-        cached is not None
-        and str(cached.get("preview_text", "") or "").strip() == preview_text.strip()
-        and str(cached.get("target_language_name", "") or "").strip()
-        == target_language_name.strip()
-    ):
+    if cached is not None and str(cached.get("preview_text", "") or "").strip() == preview_text.strip():
         print("domain-infer: cache hit", flush=True)
         return cached
-    shared_cached = _load_shared_domain_context(
-        preview_text,
-        model=model,
-        target_language_name=target_language_name,
-    )
+    shared_cached = _load_shared_domain_context(preview_text, model=model)
     if shared_cached is not None:
         print("domain-infer: shared cache hit", flush=True)
         if output_dir is not None:
             save_domain_context(output_dir, shared_cached)
         return shared_cached
 
-    messages = build_domain_inference_messages(
-        preview_text,
-        target_language_name=target_language_name,
-    )
+    messages = build_domain_inference_messages(preview_text)
     total_timeout = _domain_context_total_timeout()
     started = time.perf_counter()
     emit_stage_transition(
@@ -281,10 +214,7 @@ def infer_domain_context_from_preview_text(
             )
     except DomainContextTimeoutError:
         elapsed_ms = int(round((time.perf_counter() - started) * 1000))
-        result = _empty_domain_context(
-            preview_text,
-            target_language_name=target_language_name,
-        )
+        result = _empty_domain_context(preview_text)
         if output_dir is not None:
             save_domain_context(output_dir, result)
         print(
@@ -308,19 +238,13 @@ def infer_domain_context_from_preview_text(
         return result
     try:
         result = parse_domain_context_response(content, preview_text=preview_text)
-        result["target_language_name"] = target_language_name
     except Exception:
         if output_dir is not None:
             save_domain_context_raw(output_dir, content)
         raise
     if output_dir is not None:
         save_domain_context(output_dir, result)
-    _store_shared_domain_context(
-        preview_text,
-        model=model,
-        target_language_name=target_language_name,
-        context=result,
-    )
+    _store_shared_domain_context(preview_text, model=model, context=result)
     emit_stage_progress(
         stage="domain_inference",
         substage="domain_inference",
@@ -342,7 +266,6 @@ def infer_domain_context(
     api_key: str,
     model: str,
     base_url: str,
-    target_language_name: str = "Tiếng Việt",
     preview_text_fallback: str = "",
     output_dir: Path | None = None,
 ) -> dict[str, str]:
@@ -354,7 +277,6 @@ def infer_domain_context(
         api_key=api_key,
         model=model,
         base_url=base_url,
-        target_language_name=target_language_name,
         output_dir=output_dir,
     )
 

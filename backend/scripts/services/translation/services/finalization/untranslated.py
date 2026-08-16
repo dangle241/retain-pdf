@@ -45,7 +45,7 @@ def recover_blocking_untranslated_items(
     api_key: str,
     model: str,
     base_url: str,
-    target_language_name: str = "Tiếng Việt",
+    target_language_name: str = "简体中文",
     max_items: int = DEFAULT_MAX_ITEMS,
     workers: int = DEFAULT_MAX_WORKERS,
     request_chat_content_fn=request_chat_content,
@@ -187,11 +187,7 @@ def _recover_one(
         }
         issues = [
             issue
-            for issue in review_translation_item(
-                item,
-                payload,
-                target_language_name=target_language_name,
-            ).issues
+            for issue in review_translation_item(item, payload).issues
             if issue.severity == "error"
         ]
         if issues:

@@ -29,7 +29,6 @@ def translate_single_item_formula_segment_text_with_retries(
     base_url: str = DEFAULT_BASE_URL,
     request_label: str = "",
     domain_guidance: str = "",
-    target_language_name: str = "Tiếng Việt",
     policy: SegmentationPolicy | None = None,
     diagnostics: TranslationDiagnosticsCollector | None = None,
     attempt_limit: int = 4,
@@ -61,7 +60,6 @@ def translate_single_item_formula_segment_text_with_retries(
                 model=model,
                 base_url=base_url,
                 domain_guidance=domain_guidance,
-                target_language_name=target_language_name,
                 timeout_s=timeout_s,
                 request_label=f"{request_label} seg#{attempt}" if request_label else "",
                 request_chat_content_fn=request_chat_content_fn,
@@ -69,12 +67,7 @@ def translate_single_item_formula_segment_text_with_retries(
             rebuilt_text = rebuild_formula_segment_translation(skeleton, translated_segments)
             result = {item["item_id"]: result_entry("translate", rebuilt_text)}
             result = canonicalize_batch_result([item], result)
-            validate_batch_result(
-                [item],
-                result,
-                diagnostics=diagnostics,
-                target_language_name=target_language_name,
-            )
+            validate_batch_result([item], result, diagnostics=diagnostics)
             if request_label:
                 elapsed = time.perf_counter() - started
                 print(f"{request_label}: segmented-formula ok in {elapsed:.2f}s", flush=True)
@@ -103,7 +96,6 @@ def translate_single_item_formula_segment_windows_with_retries(
     base_url: str = DEFAULT_BASE_URL,
     request_label: str = "",
     domain_guidance: str = "",
-    target_language_name: str = "Tiếng Việt",
     policy: SegmentationPolicy | None = None,
     diagnostics: TranslationDiagnosticsCollector | None = None,
     attempt_limit: int = 4,
@@ -127,7 +119,6 @@ def translate_single_item_formula_segment_windows_with_retries(
             base_url=base_url,
             request_label=request_label,
             domain_guidance=domain_guidance,
-            target_language_name=target_language_name,
             attempt_limit=attempt_limit,
             timeout_s=timeout_s,
             request_chat_content_fn=request_chat_content_fn,
@@ -135,12 +126,7 @@ def translate_single_item_formula_segment_windows_with_retries(
         rebuilt_text = rebuild_formula_segment_translation(skeleton, translated_segments)
         result = {item["item_id"]: result_entry("translate", rebuilt_text)}
         result = canonicalize_batch_result([item], result)
-        validate_batch_result(
-            [item],
-            result,
-            diagnostics=diagnostics,
-            target_language_name=target_language_name,
-        )
+        validate_batch_result([item], result, diagnostics=diagnostics)
         if request_label:
             print(f"{request_label}: single-window-formula rebuilt ok translated_windows=1/1", flush=True)
         return result
@@ -161,7 +147,6 @@ def translate_single_item_formula_segment_windows_with_retries(
                     base_url=base_url,
                     request_label=request_label,
                     domain_guidance=domain_guidance,
-                    target_language_name=target_language_name,
                     attempt_limit=attempt_limit,
                     timeout_s=timeout_s,
                     request_chat_content_fn=request_chat_content_fn,
@@ -200,12 +185,7 @@ def translate_single_item_formula_segment_windows_with_retries(
     rebuilt_text = rebuild_formula_segment_translation(skeleton, translated_segments)
     result = {item["item_id"]: result_entry("translate", rebuilt_text)}
     result = canonicalize_batch_result([item], result)
-    validate_batch_result(
-        [item],
-        result,
-        diagnostics=diagnostics,
-        target_language_name=target_language_name,
-    )
+    validate_batch_result([item], result, diagnostics=diagnostics)
     if request_label:
         print(
             f"{request_label}: windowed-formula rebuilt ok translated_windows={successful_windows}/{len(windows)}",

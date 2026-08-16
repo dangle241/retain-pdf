@@ -15,34 +15,18 @@ TranslationReviewResult = TranslationQualityReport
 class ConsistencyReviewerAgent:
     name = "consistency_reviewer"
 
-    def __init__(
-        self,
-        glossary_entries: list[GlossaryEntry | dict] | None = None,
-        *,
-        target_language_name: str = "Tiếng Việt",
-    ):
+    def __init__(self, glossary_entries: list[GlossaryEntry | dict] | None = None):
         self._glossary_entries = normalize_glossary_entries(glossary_entries)
-        self._target_language_name = target_language_name
 
     def review_batch(
         self,
         batch: list[dict],
         result: dict[str, dict[str, str]],
     ) -> TranslationReviewResult:
-        return review_translation_batch(
-            batch,
-            result,
-            glossary_entries=self._glossary_entries,
-            target_language_name=self._target_language_name,
-        )
+        return review_translation_batch(batch, result, glossary_entries=self._glossary_entries)
 
     def review_item(self, item: dict, translated_result: dict[str, str]) -> TranslationReviewResult:
-        return review_translation_item(
-            item,
-            translated_result,
-            glossary_entries=self._glossary_entries,
-            target_language_name=self._target_language_name,
-        )
+        return review_translation_item(item, translated_result, glossary_entries=self._glossary_entries)
 
 
 __all__ = [
