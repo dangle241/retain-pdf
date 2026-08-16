@@ -89,6 +89,7 @@ def review_translation_batch(
     result: dict[str, dict[str, str]],
     *,
     glossary_entries: list[GlossaryEntry | dict] | None = None,
+    target_language_name: str = "Tiếng Việt",
 ) -> TranslationQualityReport:
     normalized_glossary = normalize_glossary_entries(glossary_entries)
     issues: list[TranslationQualityIssue] = []
@@ -123,6 +124,7 @@ def review_translation_batch(
                 item,
                 result.get(item_id, {}),
                 glossary_entries=normalized_glossary,
+                target_language_name=target_language_name,
             ).issues
         )
     return TranslationQualityReport(issues=issues, reviewed_item_count=len(batch))
@@ -133,6 +135,7 @@ def review_translation_item(
     translated_result: dict[str, str],
     *,
     glossary_entries: list[GlossaryEntry | dict] | None = None,
+    target_language_name: str = "Tiếng Việt",
 ) -> TranslationQualityReport:
     normalized_glossary = normalize_glossary_entries(glossary_entries)
     item_id = str(item.get("item_id", "") or "")
@@ -157,7 +160,15 @@ def review_translation_item(
     if decision == KEEP_ORIGIN_LABEL:
         return TranslationQualityReport(issues=issues, reviewed_item_count=1)
 
-    issues.extend(_review_translated_text(item, item_id, source_text, translated_text))
+    issues.extend(
+        _review_translated_text(
+            item,
+            item_id,
+            source_text,
+            translated_text,
+            target_language_name=target_language_name,
+        )
+    )
     if not is_direct_math_mode(item):
         issues.extend(review_placeholders(item_id, source_text, translated_text))
     issues.extend(_review_glossary_terms(item_id, source_text, translated_text, normalized_glossary))
@@ -169,6 +180,8 @@ def _review_translated_text(
     item_id: str,
     source_text: str,
     translated_text: str,
+    *,
+    target_language_name: str,
 ) -> list[TranslationQualityIssue]:
     issues: list[TranslationQualityIssue] = []
     if not translated_text.strip():
@@ -217,7 +230,11 @@ def _review_translated_text(
                 details={"leaked_math": context_bleed[:5]},
             )
         )
-    if looks_like_untranslated_english_output(item, translated_text):
+    if looks_like_untranslated_english_output(
+        item,
+        translated_text,
+        target_language_name=target_language_name,
+    ):
         issues.append(
             TranslationQualityIssue(
                 item_id=item_id,
@@ -226,7 +243,11 @@ def _review_translated_text(
                 message="Translated output still looks predominantly English",
             )
         )
-    elif looks_like_mixed_english_residue_output(item, translated_text):
+    elif looks_like_mixed_english_residue_output(
+        item,
+        translated_text,
+        target_language_name=target_language_name,
+    ):
         issues.append(
             TranslationQualityIssue(
                 item_id=item_id,
@@ -235,7 +256,11 @@ def _review_translated_text(
                 message="Translated output still contains long copied English residue spans",
             )
         )
-    elif looks_like_predominantly_english_output(item, translated_text):
+    elif looks_like_predominantly_english_output(
+        item,
+        translated_text,
+        target_language_name=target_language_name,
+    ):
         issues.append(
             TranslationQualityIssue(
                 item_id=item_id,

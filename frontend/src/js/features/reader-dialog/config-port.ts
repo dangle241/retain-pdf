@@ -23,7 +23,7 @@ export function createReaderDialogConfigPort({
     if (!normalizedJobId) {
       return "";
     }
-    // iframe 是独立文档,mock 场景需要显式透传,否则嵌入式阅读器会去请求真实后端
+    // iframe là tài liệu độc lập; tình huống mô phỏng cần truyền rõ ràng, nếu không trình đọc nhúng sẽ gọi backend thật.
     const scenario = currentMockScenarioSafe();
     const pageIdx = Number(anchor?.pageIdx);
     return buildPageUrl("./reader.html", {
@@ -36,7 +36,7 @@ export function createReaderDialogConfigPort({
     });
   }
 
-  // 馆藏文档"读原文":没有 job,用 document_id 打开只读源文档阅读器(F4)。
+  // "Đọc nguyên văn" cho tài liệu thư viện: không có job, dùng document_id để mở trình đọc tài liệu nguồn chỉ đọc (F4).
   function buildReaderDocumentPageUrl(documentId, anchor = null) {
     const normalizedId = `${documentId || ""}`.trim();
     if (!normalizedId) {

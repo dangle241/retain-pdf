@@ -37,7 +37,16 @@ pub(crate) fn default_paddle_model() -> String {
     crate::ocr_provider::paddle_default_model()
 }
 pub(crate) fn default_language() -> String {
-    "ch".to_string()
+    "en".to_string()
+}
+pub(crate) fn default_source_language() -> String {
+    "en".to_string()
+}
+pub(crate) fn default_target_language() -> String {
+    "vi".to_string()
+}
+pub(crate) fn default_target_language_name() -> String {
+    "Tiếng Việt".to_string()
 }
 pub(crate) fn default_cache_tolerance() -> i64 {
     900

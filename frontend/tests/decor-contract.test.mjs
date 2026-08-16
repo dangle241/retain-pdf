@@ -83,13 +83,13 @@ test("未注册 slot / slot 重复占用被拒", () => {
   unknown.layers[1].slot = "left-middle";
   const r1 = validateDecorManifest(unknown);
   assert.equal(r1.ok, false);
-  assert.ok(r1.errors.some((e) => e.includes("不在 slots.ts 注册表")));
+  assert.ok(r1.errors.some((e) => e.includes("không có trong registry slots.ts")));
 
   const dup = sampleManifest();
   dup.layers[1].slot = "left-top"; // 与 layers[2] 撞
   const r2 = validateDecorManifest(dup);
   assert.equal(r2.ok, false);
-  assert.ok(r2.errors.some((e) => e.includes("重复占用")));
+  assert.ok(r2.errors.some((e) => e.includes("bị dùng trùng")));
 });
 
 test("backdrop 禁挂 3D;3D 图层数超上限被拒", () => {
@@ -97,7 +97,7 @@ test("backdrop 禁挂 3D;3D 图层数超上限被拒", () => {
   bg3d.layers[0] = { type: "model", slot: "backdrop", src: "bg.glb", fallback: "bg.webp" };
   const r1 = validateDecorManifest(bg3d);
   assert.equal(r1.ok, false);
-  assert.ok(r1.errors.some((e) => e.includes("背景 slot 禁止挂 3D")));
+  assert.ok(r1.errors.some((e) => e.includes("slot nền không được gắn mô hình 3D")));
 
   const slots = ["left-top", "left-bottom", "right-top", "right-bottom"];
   const many = {
@@ -113,14 +113,14 @@ test("backdrop 禁挂 3D;3D 图层数超上限被拒", () => {
   assert.ok(slots.length > MAX_MODEL_LAYERS, "测试前提:超过模型上限");
   const r2 = validateDecorManifest(many);
   assert.equal(r2.ok, false);
-  assert.ok(r2.errors.some((e) => e.includes("3D 图层")));
+  assert.ok(r2.errors.some((e) => e.includes("lớp 3D")));
 });
 
 test("路径逃逸 / 协议 / 错误扩展名被拒", () => {
   const cases = [
-    { patch: { src: "../secret.webp" }, hint: "相对路径" },
-    { patch: { src: "/abs/path.webp" }, hint: "相对路径" },
-    { patch: { src: "https://cdn.evil/x.webp" }, hint: "相对路径" },
+    { patch: { src: "../secret.webp" }, hint: "đường dẫn tương đối" },
+    { patch: { src: "/abs/path.webp" }, hint: "đường dẫn tương đối" },
+    { patch: { src: "https://cdn.evil/x.webp" }, hint: "đường dẫn tương đối" },
     { patch: { src: "photo.jpeg" }, hint: "webp/png/svg/avif" },
   ];
   for (const { patch, hint } of cases) {
@@ -173,5 +173,5 @@ test("图层总数超上限被拒", () => {
   };
   const result = validateDecorManifest(m);
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some((e) => e.includes("超过上限")));
+  assert.ok(result.errors.some((e) => e.includes("vượt quá giới hạn")));
 });

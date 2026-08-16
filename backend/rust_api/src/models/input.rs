@@ -25,6 +25,9 @@ mod tests {
                 "model": "deepseek-v4-flash",
                 "base_url": "https://api.deepseek.com/v1",
                 "api_key": "sk-test",
+                "source_language": "en",
+                "target_language": "vi",
+                "target_language_name": "Tiếng Việt",
                 "context_mode": "all",
                 "glossary_mode": "all",
                 "memory_mode": "broad"
@@ -40,6 +43,9 @@ mod tests {
         assert_eq!(input.translation.model, "deepseek-v4-flash");
         assert_eq!(input.translation.base_url, "https://api.deepseek.com/v1");
         assert_eq!(input.translation.api_key, "sk-test");
+        assert_eq!(input.translation.source_language, "en");
+        assert_eq!(input.translation.target_language, "vi");
+        assert_eq!(input.translation.target_language_name, "Tiếng Việt");
         assert_eq!(input.translation.context_mode, "all");
         assert_eq!(input.translation.glossary_mode, "all");
         assert_eq!(input.translation.memory_mode, "broad");
@@ -95,6 +101,9 @@ mod tests {
         assert_eq!(input.workflow, WorkflowKind::Translate);
         assert_eq!(input.source.upload_id, "upload-translate");
         assert_eq!(input.translation.model, "deepseek-v4-flash");
+        assert_eq!(input.translation.source_language, "en");
+        assert_eq!(input.translation.target_language, "vi");
+        assert_eq!(input.translation.target_language_name, "Tiếng Việt");
     }
 
     #[test]

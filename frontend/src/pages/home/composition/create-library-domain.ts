@@ -57,9 +57,9 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
     apiPrefix: API_PREFIX,
   });
 
-  // 下层 port 工厂 `= {}` 默认参会丢掉无默认字段（openJob / closeDialog 等）。
+  // Tham số mặc định `= {}` của factory port lớp dưới làm mất các trường không mặc định như openJob / closeDialog.
   const recentJobsJobRuntimePort = createRecentJobsRuntimePort({
-    // 网格点任务：仅 silent 轮询（进度在详情 Tab）；不抬主工作流
+    // Bấm tác vụ trong lưới: chỉ poll silent, tiến độ ở tab chi tiết; không mở workflow chính.
     openJob: (jobId: string) => (
       features.jobRuntimeFeature.startPolling(jobId, {
         silent: true,
@@ -67,7 +67,7 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
         publishLibrary: false,
       })
     ),
-    // 冷启动恢复活跃任务：silent，不抬主状态区、不刷库 create 事件
+    // Khôi phục tác vụ đang hoạt động khi khởi động lạnh: silent, không mở vùng trạng thái chính hay phát sự kiện create tới thư viện.
     recoverJob: (jobId: string) => (
       features.jobRuntimeFeature.startPolling(jobId, { silent: true })
     ),
@@ -78,7 +78,7 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
     openReader: (jobId: string, anchor: ReaderAnchor = null) => {
       const normalizedJobId = `${jobId || ""}`.trim();
       if (!normalizedJobId) return;
-      // 阅读器不需要抬主工作流区 / 刷库 create；silent 盯 job 即可
+      // Trình đọc không cần mở vùng workflow chính/phát create tới thư viện; chỉ cần theo dõi job bằng silent.
       features.jobRuntimeFeature.startPolling(normalizedJobId, { silent: true });
       documentRef.dispatchEvent(new globalThis.CustomEvent(APP_EVENTS.openReaderRequested, {
         detail: {
@@ -98,7 +98,7 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
     doc: documentRef,
   });
 
-  // startPolling/openReader/closeRecentJobsDialog 可由 navigationPort 兜底；签名仍标必填。
+  // navigationPort có thể dự phòng startPolling/openReader/closeRecentJobsDialog; chữ ký vẫn đánh dấu bắt buộc.
   const recentJobActions = createRecentJobActions({
     apiPrefix: API_PREFIX,
     deleteLibraryBook,

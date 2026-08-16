@@ -1,7 +1,7 @@
-// BookCard「翻译」动作 —— 独立模块，改翻译入口只动本文件。
+// Thao tác "Dịch" của BookCard: mô-đun độc lập; sửa entry dịch chỉ đổi tệp này.
 //
-// 默认不上卡片；由调用方显式 concat。
-// 展示条件：馆藏未翻译 或 job 失败，且有 document_id + onTranslate。
+// Mặc định không thêm vào thẻ; bên gọi concat rõ ràng.
+// Điều kiện hiển thị: tài liệu thư viện chưa dịch hoặc job thất bại, đồng thời có document_id + onTranslate.
 
 import type { BookCardAction, BookCardActionHandlers, LibraryCardItem } from "../types.js";
 import { isLibraryOnlyItem } from "../../../composition/external.js";
@@ -9,9 +9,9 @@ import { isLibraryOnlyItem } from "../../../composition/external.js";
 export const BOOK_CARD_ACTION_TRANSLATE = "translate";
 
 /**
- * @param item 书架 item
+ * @param item Mục trên giá sách.
  * @param handlers onTranslate
- * @returns 0 或 1 个 action
+ * @returns 0 hoặc 1 action.
  */
 export function buildTranslateBookCardAction(
   item: LibraryCardItem = {},
@@ -29,7 +29,7 @@ export function buildTranslateBookCardAction(
 
   return [{
     id: BOOK_CARD_ACTION_TRANSLATE,
-    label: "翻译",
+    label: "Dịch",
     icon: "languages",
     className: "book-card-action book-card-action-translate",
     onClick: (_event, current) => {

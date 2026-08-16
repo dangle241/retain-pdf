@@ -39,7 +39,9 @@ export function resolveSubmitControlState({
   return {
     disabled: !readiness.ready,
     label: workflowSubmitLabel(workflow),
-    actionVisible: !(readiness.credentialsMissing || (needsUpload ? !readiness.uploadReady : false)),
+    // Vùng hành động còn chứa nút "Chỉ lưu", nên vẫn phải hiện khi PDF đã tải xong
+    // dù nút dịch đang bị khóa do thiếu credentials.
+    actionVisible: needsUpload ? readiness.uploadReady : true,
     pageRangeVisible: showPageRangeButton,
     readiness,
   };

@@ -48,7 +48,7 @@ async fn should_skip_job_execution(deps: &ProcessRuntimeDeps, job_id: &str) -> R
 fn persist_queued_job(deps: &ProcessRuntimeDeps, job: &mut JobSnapshot) -> Result<()> {
     job.status = JobStatusKind::Queued;
     job.stage = Some("queued".to_string());
-    job.stage_detail = Some("任务排队中，等待可用执行槽位".to_string());
+    job.stage_detail = Some("Tác vụ đang chờ lượt xử lý".to_string());
     job.updated_at = now_iso();
     job.sync_runtime_state();
     job.replace_failure_info(None);
@@ -133,9 +133,9 @@ async fn run_job(deps: ProcessRuntimeDeps, job_id: String) -> Result<()> {
     Ok(())
 }
 
-/// 任务终态后的图书馆维护:job 归属 document、置 active_job_id、重建
-/// 该文档的 FTS 全文索引。全部尽力而为——FTS 是可重建的派生索引,
-/// 这里失败只记日志,绝不影响任务状态。
+/// Sau khi tác vụ kết thúc: liên kết tác vụ với tài liệu, đặt active_job_id và
+/// dựng lại chỉ mục FTS. Đây là dữ liệu dẫn xuất có thể tạo lại, nên lỗi tại
+/// đây chỉ được ghi log và không làm thay đổi trạng thái tác vụ.
 fn update_document_after_job(deps: &ProcessRuntimeDeps, job: &JobRuntimeState) {
     let Some(upload_id) = job.upload_id.as_deref().filter(|id| !id.is_empty()) else {
         return;
@@ -144,7 +144,10 @@ fn update_document_after_job(deps: &ProcessRuntimeDeps, job: &JobRuntimeState) {
         Ok(Some(document_id)) => document_id,
         Ok(None) => return,
         Err(error) => {
-            error!("library: link job {} to document failed: {error}", job.job_id);
+            error!(
+                "library: link job {} to document failed: {error}",
+                job.job_id
+            );
             return;
         }
     };
@@ -154,18 +157,27 @@ fn update_document_after_job(deps: &ProcessRuntimeDeps, job: &JobRuntimeState) {
     if matches!(job.workflow, WorkflowKind::Ocr) {
         return;
     }
-    if let Err(error) = deps.db.set_document_active_job(&document_id, &job.job_id, None) {
+    if let Err(error) = deps
+        .db
+        .set_document_active_job(&document_id, &job.job_id, None)
+    {
         error!("library: set active job for {document_id} failed: {error}");
     }
     let job_root = deps.persist.output_root.join(&job.job_id);
     match crate::db::documents::build_fts_rows_from_job_dir(&job_root) {
         Ok(rows) => {
-            if let Err(error) = deps.db.replace_document_fts(&document_id, &job.job_id, &rows) {
+            if let Err(error) = deps
+                .db
+                .replace_document_fts(&document_id, &job.job_id, &rows)
+            {
                 error!("library: fts rebuild for {document_id} failed: {error}");
             }
         }
         Err(error) => {
-            error!("library: fts rows from {} failed: {error}", job_root.display());
+            error!(
+                "library: fts rows from {} failed: {error}",
+                job_root.display()
+            );
         }
     }
 }

@@ -1,21 +1,21 @@
-// 新建/管理合集对话框(shadcn 改造后新增的第 10 个对话框,和其余 9 个同一套
-// 路:DialogPrimitive.Root/Portal/Overlay/Content + desktop-dialog/
+// Hộp thoại tạo/quản lý bộ sưu tập (hộp thoại thứ 10 thêm sau chuyển shadcn, cùng bộ với 9 hộp thoại còn lại
+// theo luồng DialogPrimitive.Root/Portal/Overlay/Content + desktop-dialog/
 // desktop-shell + useDialogReturnFocus)。
 //
-// 交互借鉴参考项目 PDF_MD_lib 的 FolderManageModal(名称输入 + 从书库勾选),
-// 简化成单栏勾选(不做手动排序——本次不做拖拽/排序,见调研计划「不做的事」)。
+// Tương tác tham khảo FolderManageModal của dự án PDF_MD_lib (nhập tên + chọn từ thư viện),
+// đơn giản thành chọn một cột; không sắp xếp thủ công, kéo/thả hay sắp xếp trong lần này.
 //
-// dialogStore.payload = 正在编辑的 CollectionRecord,或 null(新建模式)。
-// open() 由 CategoriesView.jsx 调用。这个对话框和 CategoriesView 是 HomeApp.jsx
-// 下的兄弟节点(不是父子),保存/删除成功后没法直接 prop 回调回去——靠
-// services.collections.reloadSignal(一个只有 version 字段的极简 store)桥接,
-// 这里 bump 一次,CategoriesView 订阅到变化就重新拉取列表。
+// dialogStore.payload = CollectionRecord đang sửa hoặc null trong chế độ tạo mới.
+// open() được CategoriesView.jsx gọi. Hộp thoại này và CategoriesView là các nút anh em trong HomeApp.jsx
+// chứ không phải cha con; sau khi lưu/xóa thành công không thể callback trực tiếp qua prop nên dùng
+// services.collections.reloadSignal (store tối giản chỉ có version) làm bridge,
+// bump một lần tại đây để CategoriesView đăng ký thay đổi và tải lại danh sách.
 
 import { useEffect, useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size 在未注解源文件里被推断为必填;unstyled 路径运行时不用 size。
+// Button.size bị suy ra là bắt buộc trong tệp nguồn chưa chú kiểu; luồng unstyled không dùng size ở runtime.
 const Button = ButtonBase as any;
 import { useHomeServices } from "../../home-services-context.js";
 import { useDialogState } from "../../state/use-dialog-state.js";
@@ -47,7 +47,7 @@ export function CollectionManageDialog() {
     let cancelled = false;
     setError("");
     setName(editing?.name || "");
-    // 已有书目数据时 soft 重拉（切编辑目标），不整表 loading 闪空
+    // Khi đã có dữ liệu sách, tải lại soft lúc đổi mục sửa, không làm cả bảng nháy trống vì loading.
     setLoading((prev) => (allDocuments.length === 0 ? true : prev));
     const documentsPromise = controller.listAllDocuments();
     const memberIdsPromise = editing
@@ -66,7 +66,7 @@ export function CollectionManageDialog() {
         if (cancelled) {
           return;
         }
-        setError(err?.message || "加载书目失败，请稍后重试。");
+        setError(err?.message || "Không thể tải danh mục sách, vui lòng thử lại sau.");
       })
       .finally(() => {
         if (cancelled) {
@@ -74,9 +74,9 @@ export function CollectionManageDialog() {
         }
         setLoading(false);
       });
-    // 关闭后快速为另一个合集重新打开(比如先编辑"化学"再编辑"机器学习"),
-    // 两次 fetch 谁先 resolve 不确定——没有这个守卫的话,后关闭的那次请求
-    // 如果晚到,会把已经在显示"机器学习"的表单覆盖回"化学"的书目数据。
+    // Sau khi đóng rồi nhanh chóng mở cho bộ sưu tập khác (ví dụ sửa "Hóa học" rồi "Học máy"),
+    // Không xác định lần fetch nào resolve trước; nếu thiếu guard này, yêu cầu của lần đóng sau
+    // nếu tới muộn sẽ ghi đè biểu mẫu đang hiển thị "Học máy" bằng dữ liệu sách của "Hóa học".
     return () => {
       cancelled = true;
     };
@@ -98,7 +98,7 @@ export function CollectionManageDialog() {
   async function handleSave() {
     const trimmed = name.trim();
     if (!trimmed) {
-      setError("请输入合集名称。");
+      setError("Vui lòng nhập tên bộ sưu tập.");
       return;
     }
     setSaving(true);
@@ -124,7 +124,7 @@ export function CollectionManageDialog() {
       reloadSignal.actions.bump();
       dialogStore.close();
     } catch (err) {
-      setError(err?.message || (isCreate ? "新建合集失败，请稍后重试。" : "保存失败，请稍后重试。"));
+      setError(err?.message || (isCreate ? "Không thể tạo bộ sưu tập, vui lòng thử lại sau." : "Lưu thất bại, vui lòng thử lại sau."));
     } finally {
       setSaving(false);
     }
@@ -142,7 +142,7 @@ export function CollectionManageDialog() {
       reloadSignal.actions.bump();
       dialogStore.close();
     } catch (err) {
-      setError(err?.message || "删除合集失败，请稍后重试。");
+      setError(err?.message || "Không thể xóa bộ sưu tập, vui lòng thử lại sau.");
       setSaving(false);
     }
   }
@@ -159,30 +159,30 @@ export function CollectionManageDialog() {
           <div className="desktop-shell">
             <div className="desktop-head">
               <DialogPrimitive.Title asChild>
-                <h2>{isCreate ? "新建合集" : "管理合集"}</h2>
+                <h2>{isCreate ? "Tạo bộ sưu tập" : "Quản lý bộ sưu tập"}</h2>
               </DialogPrimitive.Title>
               <DialogPrimitive.Close asChild>
-                <button id="collection-manage-close-btn" type="button" className="dialog-close-btn" aria-label="关闭">×</button>
+                <button id="collection-manage-close-btn" type="button" className="dialog-close-btn" aria-label="Đóng">×</button>
               </DialogPrimitive.Close>
             </div>
             <div className="desktop-body collection-manage-body">
               <label className="collection-name-field">
-                <span>名称</span>
+                <span>Tên</span>
                 <input
                   id="collection-name-input"
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="例如：化学"
+                  placeholder="Ví dụ: Hóa học"
                   autoFocus
                 />
               </label>
               <div className="collection-doc-picker">
-                <p className="muted">从书库勾选加入这个合集的书</p>
+                <p className="muted">Chọn sách từ thư viện để thêm vào bộ sưu tập này</p>
                 {loading ? (
-                  <div className="collection-doc-list-empty">正在加载书目…</div>
+                  <div className="collection-doc-list-empty">Đang tải danh mục sách…</div>
                 ) : allDocuments.length === 0 ? (
-                  <div className="collection-doc-list-empty">书库还没有书</div>
+                  <div className="collection-doc-list-empty">Thư viện chưa có sách</div>
                 ) : (
                   <ul className="collection-doc-list">
                     {allDocuments.map((doc) => (
@@ -210,7 +210,7 @@ export function CollectionManageDialog() {
                   disabled={saving}
                   onClick={handleDelete}
                 >
-                  {confirmingDelete ? "确认删除？" : "删除合集"}
+                  {confirmingDelete ? "Xác nhận xóa?" : "Xóa bộ sưu tập"}
                 </Button>
               ) : <span />}
               <Button
@@ -219,7 +219,7 @@ export function CollectionManageDialog() {
                 disabled={saving || loading}
                 onClick={handleSave}
               >
-                {saving ? "保存中…" : "保存"}
+                {saving ? "Đang lưu…" : "Lưu"}
               </Button>
             </div>
           </div>

@@ -120,6 +120,8 @@ def _extract_provider_stage(text: str) -> str:
 def _failure_category_for(*, failure_code: str, failed_stage: str) -> str:
     if failure_code in {"auth_failed"}:
         return "auth"
+    if failure_code in {"quota_exhausted"}:
+        return "billing"
     if failure_code in {"dns_resolution_failed"}:
         return "network"
     if failure_code in {"upstream_timeout"}:
@@ -150,6 +152,7 @@ def _failure_category_for(*, failure_code: str, failed_stage: str) -> str:
 def _suggestion_for(*, failure_code: str, failure_category: str, provider: str) -> str:
     provider_label = provider.strip() or "上游服务"
     suggestions = {
+        "quota_exhausted": f"{provider_label} đã hết hạn mức API; hãy nạp credit hoặc bật billing rồi thử lại từ bước dịch.",
         "auth_failed": f"检查 {provider_label} 凭据、模型 API Key 或相关访问令牌是否有效。",
         "dns_resolution_failed": "检查当前机器的 DNS / 网络连通性，确认目标域名可解析后再重试。",
         "upstream_timeout": "检查网络质量、上游服务负载或适当增大超时后再重试。",
@@ -167,6 +170,7 @@ def _suggestion_for(*, failure_code: str, failure_category: str, provider: str) 
     if failure_code in suggestions:
         return suggestions[failure_code]
     category_suggestions = {
+        "billing": f"Kiểm tra credit và cấu hình billing của {provider_label}.",
         "auth": f"检查 {provider_label} 鉴权配置和权限范围。",
         "network": "检查网络、代理和 DNS 配置后再重试。",
         "timeout": "检查上游服务响应时间或增大超时后再试。",
@@ -218,6 +222,17 @@ def classify_exception(exc: BaseException, *, default_stage: str, provider: str 
         error_type = "render_failed"
         summary = "排版或编译阶段失败"
         retryable = True
+    elif any(
+        token in lowered
+        for token in (
+            "insufficient_quota",
+            "exceeded your current quota",
+            "check your plan and billing details",
+        )
+    ):
+        error_type = "quota_exhausted"
+        summary = "Đã hết hạn mức API của dịch vụ dịch"
+        retryable = False
     elif http_status_code == 429 or any(token in lowered for token in ("rate limited", "rate limit", "too many requests", "retry-after")):
         error_type = "upstream_rate_limited"
         summary = "外部服务请求被限流"

@@ -26,6 +26,12 @@ pub struct TranslationInput {
     pub mode: String,
     #[serde(default = "default_math_mode")]
     pub math_mode: String,
+    #[serde(default = "default_source_language")]
+    pub source_language: String,
+    #[serde(default = "default_target_language")]
+    pub target_language: String,
+    #[serde(default = "default_target_language_name")]
+    pub target_language_name: String,
     #[serde(default)]
     pub skip_title_translation: bool,
     #[serde(default = "default_classify_batch_size")]
@@ -73,6 +79,9 @@ impl Default for TranslationInput {
         Self {
             mode: default_mode(),
             math_mode: default_math_mode(),
+            source_language: default_source_language(),
+            target_language: default_target_language(),
+            target_language_name: default_target_language_name(),
             skip_title_translation: false,
             classify_batch_size: default_classify_batch_size(),
             rule_profile_name: default_rule_profile_name(),

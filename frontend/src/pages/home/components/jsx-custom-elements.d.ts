@@ -1,5 +1,5 @@
-// home 页仍使用的自定义元素标签(legacy islands / 占位契约)。
-// 部分标签仍写 class= 而非 className，故在 HTMLAttributes 上补充 class。
+// Các thẻ phần tử tùy chỉnh vẫn dùng trên trang home (đảo legacy / hợp đồng giữ chỗ).
+// Một số thẻ vẫn dùng class= thay vì className nên bổ sung class vào HTMLAttributes.
 
 import type { HTMLAttributes, ReactNode } from "react";
 

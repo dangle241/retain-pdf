@@ -1,6 +1,6 @@
-// 详情弹窗：payload + 书架 live 行合并。
-// 与 status/merge-snapshot-with-fallback 共用 isPollingBootstrapPlaceholder，
-// 避免 startPolling 首帧把已完成书盖成「排队中」。
+// Hộp thoại chi tiết: hợp nhất payload + dòng live giá sách.
+// Dùng chung isPollingBootstrapPlaceholder với status/merge-snapshot-with-fallback,
+// tránh khung đầu startPolling ghi đè sách hoàn tất thành "Đang xếp hàng".
 
 import { useMemo } from "react";
 import { useStoreSnapshot } from "../../../../../shared/react/use-store.js";

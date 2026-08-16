@@ -96,20 +96,20 @@ export async function mountPdfViewer({
   try {
     pdfDocument = await loadPdfDocument({ itemOrUrl, fetchProtected });
   } catch (error) {
-    // loadPdfDocument 内部对 pdfjsLib.getDocument(...).promise 没有兜底——
-    // 404/CORS/损坏的 PDF 会在这里 reject,原来直接向上抛,最终被
-    // mountReaderPdfPair 的 Promise.allSettled 吞掉,控制台不留任何痕迹,
-    // 用户只会看到"这块 PDF 不显示"却无从判断是哪一种原因。这里补上日志,
-    // 不改变外部可见行为(仍然落到下面的空状态展示)。
-    console.error(`[reader] ${label || key} 加载失败`, error);
+    // Bên trong loadPdfDocument không có dự phòng cho pdfjsLib.getDocument(...).promise;
+    // PDF 404/CORS/hỏng sẽ reject ở đây, trước kia bị ném thẳng lên và cuối cùng
+    // bị Promise.allSettled của mountReaderPdfPair nuốt mà không để dấu vết trên console;
+    // người dùng chỉ thấy "PDF này không hiển thị" mà không biết nguyên nhân. Thêm log tại đây
+    // mà không đổi hành vi bên ngoài; vẫn lùi về trạng thái trống bên dưới.
+    console.error(`[reader] không thể tải ${label || key}`, error);
     showReaderPaneEmpty(key, emptyId);
     return null;
   }
   if (!pdfDocument) {
-    // loadPdfDocument 在"没有可用 URL"时静默返回 null(没有 URL 可解析,
-    // 或 itemOrUrl 本身是空字符串)——同样补一条日志,方便区分"没有 URL"
-    // 和上面 catch 到的"有 URL 但加载失败"这两种不同原因。
-    console.warn(`[reader] ${label || key} 没有可用的资源地址,跳过挂载`, { itemOrUrl });
+    // loadPdfDocument âm thầm trả null khi "không có URL khả dụng" (không có URL để phân tích,
+    // hoặc itemOrUrl là chuỗi rỗng); thêm log để phân biệt "không có URL"
+    // với "có URL nhưng tải thất bại" được catch bên trên.
+    console.warn(`[reader] ${label || key} không có địa chỉ tài nguyên khả dụng, bỏ qua việc gắn`, { itemOrUrl });
     showReaderPaneEmpty(key, emptyId);
     return null;
   }

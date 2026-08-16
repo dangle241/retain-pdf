@@ -77,9 +77,9 @@ test("buildAnnotationsMarkdown 输出标题/页小节/引用块/译文/笔记", 
   });
   assert.equal(
     markdown,
-    "# Attention 批注\n" +
+    "# Chú thích cho Attention\n" +
       "\n" +
-      "## 第 1 页\n" +
+      "## Trang 1\n" +
       "\n" +
       "> 图注\n" +
       "\n" +
@@ -88,17 +88,17 @@ test("buildAnnotationsMarkdown 输出标题/页小节/引用块/译文/笔记", 
       "> —— trans1\n" +
       "> trans2\n" +
       "\n" +
-      "笔记:重要\n" +
+      "Ghi chú: 重要\n" +
       "\n" +
-      "## 第 2 页\n" +
+      "## Trang 2\n" +
       "\n" +
       "> 第二页数据\n",
   );
 });
 
 test("buildAnnotationsMarkdown 空列表输出占位文案", () => {
-  assert.equal(buildAnnotationsMarkdown({ title: "Attention", annotations: [] }), "# Attention 批注\n\n(暂无批注)\n");
-  assert.equal(buildAnnotationsMarkdown({}), "# 批注\n\n(暂无批注)\n");
+  assert.equal(buildAnnotationsMarkdown({ title: "Attention", annotations: [] }), "# Chú thích cho Attention\n\n(Chưa có chú thích)\n");
+  assert.equal(buildAnnotationsMarkdown({}), "# Chú thích\n\n(Chưa có chú thích)\n");
 });
 
 test("annotationAnchor 只暴露跳转所需的页码与块 id", () => {

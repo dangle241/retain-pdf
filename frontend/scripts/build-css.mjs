@@ -1,11 +1,11 @@
-// 按页编译 CSS：home / detail / reader 独立产物，切断「一份 styles.css 打天下」。
+// Biên dịch CSS theo trang: home / detail / reader có đầu ra riêng, không còn dùng một styles.css cho tất cả.
 //
 //   src/styles/entries/home.css          → dist/css/home.css
 //   src/styles/entries/detail.css        → dist/css/detail.css
-//   src/styles/entries/reader.css        → dist/css/reader.css      (默认 react-pdf)
-//   src/styles/entries/reader-legacy.css → dist/css/reader-legacy.css (?engine=legacy 附加)
+//   src/styles/entries/reader.css        → dist/css/reader.css      (react-pdf mặc định)
+//   src/styles/entries/reader-legacy.css → dist/css/reader-legacy.css (được nạp thêm với ?engine=legacy)
 //
-// 兼容：仍写一份 styles.css = home 的副本，避免外部脚本/文档旧路径立刻挂掉。
+// Tương thích: vẫn tạo styles.css là bản sao của home để đường dẫn cũ trong script/tài liệu bên ngoài không hỏng ngay.
 
 import { spawnSync } from "node:child_process";
 import { copyFileSync, mkdirSync, existsSync } from "node:fs";
@@ -47,7 +47,7 @@ function runOne(entry, { watchMode = false } = {}) {
 }
 
 if (watch) {
-  // 并行 watch 三个入口
+  // Theo dõi song song ba entry
   const kids = ENTRIES.map((entry) => {
     const args = [
       "tailwindcss",
@@ -71,7 +71,7 @@ for (const entry of ENTRIES) {
   runOne(entry);
 }
 
-// 兼容旧路径 styles.css（= 主页包）
+// Tương thích đường dẫn cũ styles.css (= bundle trang chính)
 const homeOut = join(ROOT, "dist/css/home.css");
 const legacyOut = join(ROOT, "styles.css");
 if (existsSync(homeOut)) {

@@ -98,7 +98,7 @@ function makePorts() {
   };
   const eventItems = [
     { seq: 1, event: "stage_transition", level: "info", message: "开始翻译", display_stage: "translation" },
-    { seq: 2, event: "stage_transition", level: "info", message: "渲染完成", display_stage: "render" },
+    { seq: 2, event: "stage_transition", level: "info", message: "Kết xuất hoàn tất", display_stage: "render" },
   ];
   const calls = { events: [] };
   return {
@@ -149,7 +149,7 @@ test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框"
   }));
   // 等待 overview + markdown 两段异步编排全部落地
   await waitFor(
-    () => /已加载/.test(byId("detail-markdown-status")?.textContent || ""),
+    () => /Đã tải/.test(byId("detail-markdown-status")?.textContent || ""),
     "markdown 状态就绪",
   );
 
@@ -159,7 +159,7 @@ test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框"
   assert.notEqual(byId("detail-status-summary")?.textContent, "-");
 
   // 断点恢复:resumePlan 可恢复 → 文案与按钮状态(命令式写入)
-  assert.match(byId("detail-rerun-status")?.textContent || "", /可从 translation 恢复/);
+  assert.match(byId("detail-rerun-status")?.textContent || "", /Có thể tiếp tục từ translation/);
   assert.equal(byId("detail-rerun-btn")?.disabled, false);
 
   // 动作链接:setActionLink 适配(reader/pdf 均就绪)
@@ -168,11 +168,11 @@ test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框"
   assert.equal(byId("detail-pdf-btn")?.classList.contains("disabled"), false);
 
   // 产物清单:保留的 artifacts.js 经 overview-renderer 命令式写入 React 容器
-  assert.equal(byId("detail-artifacts-summary")?.textContent, "共 2 项");
+  assert.equal(byId("detail-artifacts-summary")?.textContent, "Tổng cộng 2 mục");
   assert.equal(host.querySelectorAll(".detail-artifact-row").length, 2);
 
   // Markdown:markdown-flow 复用 → 状态与预览
-  assert.match(byId("detail-markdown-status")?.textContent || "", /已加载 \/markdown JSON/);
+  assert.match(byId("detail-markdown-status")?.textContent || "", /Đã tải JSON \/markdown/);
   assert.match(byId("detail-markdown-preview")?.textContent || "", /# 测试文档/);
   assert.equal(byId("detail-markdown-image-count")?.textContent, "0");
 
@@ -196,7 +196,7 @@ test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框"
   );
 
   // 事件流:按需分页拉全量 + 页内缓存 + 按钮文案变为「查看」
-  assert.equal(byId("detail-open-events-btn")?.textContent, "按需加载");
+  assert.equal(byId("detail-open-events-btn")?.textContent, "Tải khi cần");
   assert.equal(byId("detail-events-modal"), null, "初始未打开时不挂载");
   click(byId("detail-open-events-btn"));
   await waitFor(
@@ -205,8 +205,8 @@ test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框"
   );
   assert.ok(byId("detail-events-modal"), "事件流模态框已挂载");
   assert.deepEqual(ports.calls.events, [["job-react-detail", "/api/v1", 200, 0]]);
-  assert.equal(byId("detail-events-status")?.textContent, "全部事件 · 2 条");
-  assert.equal(byId("detail-open-events-btn")?.textContent, "查看");
+  assert.equal(byId("detail-events-status")?.textContent, "Tất cả sự kiện · 2 mục");
+  assert.equal(byId("detail-open-events-btn")?.textContent, "Xem");
 
   // 再次打开不重复请求(页内缓存)
   click(byId("detail-close-events-btn"));
@@ -247,7 +247,7 @@ test("DetailApp:缺少 job_id 时提示且不发起请求", async () => {
     resumePort: { submit: async () => ({}) },
   }));
   await waitFor(
-    () => host.querySelector("#detail-head-note")?.textContent === "缺少 job_id，请通过 detail.html?job_id=... 打开。",
+    () => host.querySelector("#detail-head-note")?.textContent === "Thiếu job_id; vui lòng mở bằng detail.html?job_id=...",
     "缺少 job_id 提示",
   );
   assert.equal(overviewCalls, 0);

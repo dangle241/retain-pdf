@@ -69,6 +69,12 @@ function typeInput(element, value) {
   element.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
 }
 
+function selectOption(element, value) {
+  const setter = Object.getOwnPropertyDescriptor(dom.window.HTMLSelectElement.prototype, "value").set;
+  setter.call(element, value);
+  element.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+}
+
 function mockValidators(overrides = {}) {
   return {
     validateOcrToken: async (_apiPrefix, _providerId, token) => {
@@ -76,18 +82,18 @@ function mockValidators(overrides = {}) {
         return { ok: false, status: "unauthorized", summary: "缺少 token" };
       }
       if (token === "bad-token") {
-        return { ok: false, status: "unauthorized", summary: "Token 无效" };
+        return { ok: false, status: "unauthorized", summary: "Token không hợp lệ" };
       }
-      return { ok: true, status: "valid", summary: "Token 有效" };
+      return { ok: true, status: "valid", summary: "Token hợp lệ" };
     },
     validateDeepSeekToken: async (_apiPrefix, payload) => {
       if (!payload?.api_key) {
         return { ok: false, status: 0 };
       }
       if (payload.api_key === "bad-key") {
-        return { ok: false, status: 401, summary: "DeepSeek Key 无效或已过期。" };
+        return { ok: false, status: 401, summary: "API Key không hợp lệ hoặc đã hết hạn." };
       }
-      return { ok: true, status: 200, summary: "DeepSeek 接口连接成功。" };
+      return { ok: true, status: 200, summary: "Kết nối API mô hình thành công." };
     },
     queryDeepSeekBalance: async () => ({
       ok: true,
@@ -138,6 +144,9 @@ test("CredentialsDialog：常规入口走设置 API；setupMode 仍开独立首�
   await waitFor(() => byId("browser-api-key") !== null, "API 区内嵌工作台");
   assert.equal(byId("browser-credentials-dialog"), null, "常规不再弹独立接口设置窗");
   assert.ok(byId("browser-credentials-save-btn"), "内嵌工作台有保存");
+  assert.equal(byId("browser-model-provider").value, "openai");
+  assert.equal(byId("browser-model-base-url").value, "https://api.openai.com/v1");
+  assert.equal(byId("browser-model-name").value, "gpt-4.1-mini");
 
   services.settingsHub.dialogStore.close();
   await waitFor(() => byId("app-settings-dialog") === null, "关闭设置");
@@ -147,19 +156,20 @@ test("CredentialsDialog：常规入口走设置 API；setupMode 仍开独立首�
     detail: { setupMode: true },
   }));
   await waitFor(() => byId("browser-credentials-dialog") !== null, "setupMode 打开独立弹窗");
-  await waitFor(() => byId("browser-credentials-title")?.textContent === "首次配置", "setupMode 标题切换");
+  await waitFor(() => byId("browser-credentials-title")?.textContent === "Cấu hình ban đầu", "setupMode 标题切换");
 
   for (const id of [
     "browser-credentials-title", "browser-credentials-close-btn", "browser-credentials-status",
     "browser-credentials-tabs", "browser-credential-tab-api", "browser-credential-tab-task",
     "browser-credentials-save-btn", "browser-paddle-token", "browser-paddle-validate-btn",
     "browser-paddle-validation", "browser-api-key", "browser-deepseek-validate-btn",
-    "browser-deepseek-validation", "browser-deepseek-top-up-link", "browser-job-math-mode",
+    "browser-deepseek-validation", "browser-deepseek-top-up-link", "browser-model-provider",
+    "browser-model-base-url", "browser-model-name", "browser-job-math-mode",
   ]) {
     assert.ok(byId(id), `契约 id 缺失：#${id}`);
   }
 
-  assert.equal(byId("browser-credentials-save-btn").textContent, "保存并启动");
+  assert.equal(byId("browser-credentials-save-btn").textContent, "Lưu và khởi động");
   assert.equal(byId("browser-credentials-tabs").classList.contains("hidden"), true);
   assert.equal(byId("browser-credentials-dialog").dataset.setupMode, "1");
 
@@ -199,7 +209,7 @@ test("凭据入口：设置 API 区内嵌工作台；#credential-gate-action 也
   host.remove();
 });
 
-test("CredentialsDialog：OCR/DeepSeek 校验三态(缺失/错误/通过)", async () => {
+test("CredentialsDialog：OCR/API mô hình 校验三态(缺失/错误/通过)", async () => {
   const services = createServices();
   const { host, root } = await mountHome(services);
 
@@ -210,18 +220,23 @@ test("CredentialsDialog：OCR/DeepSeek 校验三态(缺失/错误/通过)", asyn
 
   // ---- OCR(paddle):缺失 → 错误 → 通过 ----
   click(byId("browser-paddle-validate-btn"));
-  await waitFor(() => byId("browser-paddle-validation").title === "请先填写 Paddle Access Token。", "OCR 缺失态");
+  await waitFor(() => byId("browser-paddle-validation").title === "Vui lòng nhập Paddle Access Token trước.", "OCR 缺失态");
   assert.equal(byId("browser-paddle-validation").classList.contains("is-error"), true);
 
   typeInput(byId("browser-paddle-token"), "bad-token");
   click(byId("browser-paddle-validate-btn"));
-  await waitFor(() => byId("browser-paddle-validation").title === "Token 无效", "OCR 错误态");
+  await waitFor(() => byId("browser-paddle-validation").title === "Token không hợp lệ", "OCR 错误态");
   assert.equal(byId("browser-paddle-validation").classList.contains("is-error"), true);
 
   typeInput(byId("browser-paddle-token"), "good-token");
   click(byId("browser-paddle-validate-btn"));
-  await waitFor(() => byId("browser-paddle-validation").title === "Token 有效", "OCR 通过态");
+  await waitFor(() => byId("browser-paddle-validation").title === "Token hợp lệ", "OCR 通过态");
   assert.equal(byId("browser-paddle-validation").classList.contains("is-valid"), true);
+
+  // Chọn preset DeepSeek để kiểm tra thêm nhánh số dư riêng của nhà cung cấp này.
+  selectOption(byId("browser-model-provider"), "deepseek");
+  assert.equal(byId("browser-model-base-url").value, "https://api.deepseek.com/v1");
+  assert.equal(byId("browser-model-name").value, "deepseek-chat");
 
   // ---- DeepSeek:缺失 → 错误 → 通过(含充值提示,余额 < 2 元时才出现——
   //      mock 返回 88 元,不应显示充值链接) ----
@@ -229,20 +244,20 @@ test("CredentialsDialog：OCR/DeepSeek 校验三态(缺失/错误/通过)", asyn
   // Key"分支直接 return,不写校验徽标(与 OCR 分支的语义不同,这是既有
   // 业务逻辑,不是本域重写的行为)——缺失态改由保存按钮的守卫触发验证。
   click(byId("browser-credentials-save-btn"));
-  await waitFor(() => byId("browser-deepseek-validation").title === "请先填写 DeepSeek Key。", "DeepSeek 缺失态(经保存守卫触发)");
+  await waitFor(() => byId("browser-deepseek-validation").title === "Vui lòng nhập API Key của mô hình trước.", "API Key 缺失态(经保存守卫触发)");
   assert.equal(byId("browser-deepseek-validation").classList.contains("is-error"), true);
   assert.notEqual(byId("app-settings-dialog"), null, "缺字段时保存应被拦截,设置对话框不关闭");
 
   typeInput(byId("browser-api-key"), "bad-key");
   click(byId("browser-deepseek-validate-btn"));
-  await waitFor(() => byId("browser-deepseek-validation").title === "DeepSeek Key 无效或已过期。", "DeepSeek 错误态");
+  await waitFor(() => byId("browser-deepseek-validation").title === "API Key không hợp lệ hoặc đã hết hạn.", "API Key 错误态");
   assert.equal(byId("browser-deepseek-validation").classList.contains("is-error"), true);
   assert.equal(byId("browser-deepseek-top-up-link").classList.contains("hidden"), true);
 
   typeInput(byId("browser-api-key"), "good-key");
   click(byId("browser-deepseek-validate-btn"));
   await waitFor(() => byId("browser-deepseek-validation").classList.contains("is-valid"), "DeepSeek 通过态");
-  assert.match(byId("browser-deepseek-validation").title, /余额 CNY 88\.00/);
+  assert.match(byId("browser-deepseek-validation").title, /Số dư CNY 88\.00/);
   assert.equal(byId("browser-deepseek-top-up-link").classList.contains("hidden"), true, "余额充足不提示充值");
 
   root.unmount();
@@ -268,6 +283,9 @@ test("CredentialsDialog：保存(浏览器模式)——写隐藏 input、同步 
 
   typeInput(byId("browser-paddle-token"), "paddle-secret");
   typeInput(byId("browser-api-key"), "deepseek-secret");
+  selectOption(byId("browser-model-provider"), "custom");
+  typeInput(byId("browser-model-base-url"), "https://gateway.example.test/v1");
+  typeInput(byId("browser-model-name"), "custom-translation-model");
 
   click(byId("browser-credentials-save-btn"));
   await waitFor(
@@ -282,6 +300,13 @@ test("CredentialsDialog：保存(浏览器模式)——写隐藏 input、同步 
   const credentials = defaultCredentialsStatePort.getCredentials();
   assert.equal(credentials.paddleToken, "paddle-secret");
   assert.equal(credentials.modelApiKey, "deepseek-secret");
+  await waitFor(
+    () => localStorage.getItem("retainpdf.developer.config.v1") !== null,
+    "Cấu hình Base URL/model được lưu",
+  );
+  const developerConfig = JSON.parse(localStorage.getItem("retainpdf.developer.config.v1"));
+  assert.equal(developerConfig.baseUrl, "https://gateway.example.test/v1");
+  assert.equal(developerConfig.model, "custom-translation-model");
 
   root.unmount();
   services.dispose();

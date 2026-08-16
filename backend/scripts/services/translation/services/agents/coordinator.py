@@ -35,7 +35,10 @@ class TranslationAgentCoordinator:
         glossary_entries = list(scoped_context.glossary_entries or [])
         return cls(
             terminology_agent=TerminologyAgent(glossary_entries),
-            reviewer_agent=ConsistencyReviewerAgent(glossary_entries),
+            reviewer_agent=ConsistencyReviewerAgent(
+                glossary_entries,
+                target_language_name=context.target_language_name,
+            ),
             repair_agent=RepairAgent(glossary_entries=glossary_entries),
         )
 

@@ -52,6 +52,7 @@ def build_translation_execution_plan(request: TranslationExecutionRequest) -> Tr
         model=request.model,
         base_url=request.base_url,
         output_dir=request.output_dir,
+        target_language_name=request.target_language_name,
         rule_profile_name=request.rule_profile_name,
         custom_rules_text=request.custom_rules_text,
     )
@@ -67,6 +68,9 @@ def build_translation_execution_plan(request: TranslationExecutionRequest) -> Tr
     translation_context = build_translation_context_from_policy(
         policy_config,
         glossary_entries=glossary_entries,
+        source_lang=request.source_language,
+        target_lang=request.target_language,
+        target_language_name=request.target_language_name,
         model=request.model,
         base_url=request.base_url,
         context_mode=request.context_mode,

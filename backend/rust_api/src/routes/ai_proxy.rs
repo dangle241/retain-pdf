@@ -51,8 +51,8 @@ pub async fn ask_proxy(
             ))
         })?;
 
-    let status = StatusCode::from_u16(upstream.status().as_u16())
-        .unwrap_or(StatusCode::BAD_GATEWAY);
+    let status =
+        StatusCode::from_u16(upstream.status().as_u16()).unwrap_or(StatusCode::BAD_GATEWAY);
     let content_type = upstream
         .headers()
         .get(reqwest::header::CONTENT_TYPE)

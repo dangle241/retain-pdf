@@ -13,9 +13,9 @@ from services.translation.services.terms import normalize_glossary_entries
 def build_translation_context(
     *,
     mode: str = "fast",
-    source_lang: str = "auto",
-    target_lang: str = "zh-CN",
-    target_language_name: str = "简体中文",
+    source_lang: str = "en",
+    target_lang: str = "vi",
+    target_language_name: str = "Tiếng Việt",
     domain_guidance: str = "",
     rule_guidance: str = "",
     extra_guidance: str = "",
@@ -56,6 +56,9 @@ def build_translation_context_from_policy(
     glossary_entries: list[GlossaryEntry] | None = None,
     abbreviation_entries: list[AbbreviationEntry] | None = None,
     retrieval_entries: list[RetrievalEvidence] | None = None,
+    source_lang: str = "en",
+    target_lang: str = "vi",
+    target_language_name: str = "Tiếng Việt",
     model: str = "",
     base_url: str = "",
     context_mode: str = "needed",
@@ -74,6 +77,9 @@ def build_translation_context_from_policy(
         )
     return build_translation_context(
         mode=policy_config.mode,
+        source_lang=source_lang,
+        target_lang=target_lang,
+        target_language_name=target_language_name,
         domain_guidance=policy_config.document_domain_guidance,
         rule_guidance=policy_config.rule_guidance,
         extra_guidance="\n\n".join(extra_guidance_parts).strip(),

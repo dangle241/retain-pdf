@@ -135,6 +135,9 @@ async fn markdown_document_rewrites_html_img_and_titled_markdown_links() {
         .expect("absolute markdown");
     let expected = "http://127.0.0.1:41000/api/v1/jobs/markdown-html-img-job/markdown/images/page-2/imgs/fig.png";
     assert!(abs.contains(expected), "html img rewritten: {abs}");
-    assert!(abs.contains(&format!("![cap]({expected})")), "titled md rewritten: {abs}");
+    assert!(
+        abs.contains(&format!("![cap]({expected})")),
+        "titled md rewritten: {abs}"
+    );
     assert!(!abs.contains("/markdown/images/images/"));
 }

@@ -1,5 +1,5 @@
-// SettingsHubDialog 的开合状态实例(state/dialog-store.js 通用工厂)。
-// payload 承载"打开时激活哪个 tab"(api/glossary/update),默认 "api"。
+// Instance trạng thái đóng/mở của SettingsHubDialog (factory dùng chung state/dialog-store.js).
+// Payload chứa "tab cần kích hoạt khi mở" (api/glossary/update), mặc định là "api".
 
 import { createDialogStore } from "../../state/dialog-store.js";
 

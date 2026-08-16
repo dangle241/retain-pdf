@@ -1,4 +1,4 @@
-// credentials 特性 + dialog stores。
+// Tính năng credentials + các dialog store.
 
 import {
   API_PREFIX,
@@ -92,7 +92,7 @@ export function createCredentials({
     });
   }
 
-  // balance/legacy ports 在 mount 内有默认实现；下层签名仍标成必填。
+  // balance/legacy ports có triển khai mặc định trong mount; chữ ký lớp dưới vẫn đánh dấu bắt buộc.
   const browserCredentialsFeature = mountBrowserCredentialsFeature({
     apiPrefix: API_PREFIX,
     state: {},
@@ -112,7 +112,7 @@ export function createCredentials({
     queryDeepSeekBalance: queryDeepSeekBalanceOverride,
     onCredentialStateChange: () => {
       features.workflowFeature.applyWorkflowMode();
-      // 通知 AI 输入门禁等：仅认设置里的 modelApiKey
+      // Thông báo cổng nhập AI, v.v.: chỉ công nhận modelApiKey trong cài đặt.
       try {
         // dynamic import path avoided — event is fire-and-forget string
         document.dispatchEvent(new CustomEvent("retainpdf:credentials-changed"));

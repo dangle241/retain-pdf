@@ -23,8 +23,8 @@ function buildRuntimeConfig(config) {
     apiBase: "http://127.0.0.1:41000",
     xApiKey: "retain-pdf-desktop",
     ...buildBrowserConfig(config),
-    model: "deepseek-v4-flash",
-    baseUrl: "https://api.deepseek.com/v1",
+    model: "gpt-4.1-mini",
+    baseUrl: "https://api.openai.com/v1",
     developerConfig: config.developerConfig || {},
   };
 }
@@ -136,7 +136,7 @@ const [{ saveDesktopConfig }, { state }] = await Promise.all([
 
 let caughtMessage = "";
 try {
-  // 当前签名: saveDesktopConfig(browserConfig, afterSave)
+  // Chữ ký hiện tại: saveDesktopConfig(browserConfig, afterSave)
   await saveDesktopConfig(
     {
       ocrProvider: "paddle",
@@ -164,7 +164,7 @@ if (ensureElement("browser-credentials-dialog").open !== false) {
   throw new Error("expected setup dialog to close after first-run save");
 }
 
-if (!caughtMessage.includes("首次配置已保存")) {
+if (!caughtMessage.includes("Đã lưu cấu hình ban đầu")) {
   throw new Error(`expected saved-first-run connectivity error, got: ${caughtMessage || "<empty>"}`);
 }
 

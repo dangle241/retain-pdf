@@ -196,7 +196,7 @@ def test_provider_stage_spec_loads_paddle_provider_fields(tmp_path: Path, monkey
         encoding="utf-8",
     )
     default_spec = ProviderStageSpec.load(default_spec_path)
-    assert default_spec.ocr.paddle_model == "PaddleOCR-VL-1.6"
+    assert default_spec.ocr.paddle_model == "PaddleOCR-VL-1.5"
 
 
 def test_provider_stage_spec_loads_ocr_options(tmp_path: Path) -> None:

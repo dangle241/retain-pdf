@@ -1,39 +1,39 @@
-// 阶段时间线 / 事件流:两张触发卡片 + 两个模态框。
-// 视图为 src/js/job-detail/events.js 字符串模板的 JSX 重写(类名/结构照搬);
-// 事件条目视图模型复用保留的纯逻辑 status-view-model.js 与 job/ 层格式化函数。
+// Dòng thời gian giai đoạn / luồng sự kiện: hai thẻ kích hoạt + hai modal.
+// View là bản viết lại JSX từ template chuỗi src/js/job-detail/events.js, giữ nguyên tên class/cấu trúc;
+// View model của mục sự kiện dùng lại status-view-model.js logic thuần và hàm định dạng lớp job/ được giữ lại.
 //
-// Dialog 渲染层(阶段 C 收官批,shadcn 改造):两个模态从 bespoke
+// Lớp kết xuất Dialog (đợt kết thúc giai đoạn C, chuyển đổi shadcn): hai modal chuyển từ bespoke
 // <section className="detail-modal"><div role="dialog" aria-modal="true">
-// 换成 Radix Dialog(DialogPrimitive.Root/Portal/Overlay/Content),统一到
-// home 页那套 desktop-dialog/desktop-shell/desktop-head/desktop-body 视觉
-// 骨架,不再维持 detail 页独立的 .detail-modal/.detail-modal-panel/
-// .detail-modal-head 结构(这三个类的 CSS 已随之从
-// src/styles/pages/detail/modal.css 删除)。detail-modal-title/-subtitle/
-// -close/-status 这几个纯排版类名原样保留(挂载点从旧结构的子级换成
-// desktop-head/desktop-body 的子级,视觉不变,内容也不共享,不值得再统一成
-// 跨对话框共用的 dialog-close-btn 等——尤其 detail-modal-close 的描边色
-// #d5d7dd 和 dialog-close-btn 的 #d2d2d7 字面值不同,贸然合并会引入肉眼难辨
-// 但 pixelmatch 可能捕捉到的差异)。新增的 detail-timeline-dialog/
-// detail-timeline-overlay 覆盖类复刻旧 .detail-modal/.detail-modal-panel 的
-// 像素级视觉(920px 宽上限/82vh 高上限/28px 圆角/#e5e7eb 描边/更深的阴影),
-// 定义见 pages/detail/modal.css。
+// sang Radix Dialog (DialogPrimitive.Root/Portal/Overlay/Content), thống nhất với
+// khung hình ảnh desktop-dialog/desktop-shell/desktop-head/desktop-body của trang home,
+// không còn duy trì cấu trúc riêng .detail-modal/.detail-modal-panel/ của trang detail
+// .detail-modal-head (CSS của ba class này đã được xóa khỏi
+// src/styles/pages/detail/modal.css). detail-modal-title/-subtitle/
+// -close/-status là các class thuần bố cục được giữ nguyên (điểm gắn chuyển từ con của cấu trúc cũ sang
+// con của desktop-head/desktop-body; hình ảnh không đổi, nội dung không dùng chung nên không đáng thống nhất thành
+// dialog-close-btn dùng chung giữa hộp thoại; đặc biệt màu viền của detail-modal-close
+// #d5d7dd khác literal #d2d2d7 của dialog-close-btn; hợp nhất vội sẽ tạo khác biệt khó thấy bằng mắt
+// nhưng pixelmatch có thể bắt được). Các class mới detail-timeline-dialog/
+// detail-timeline-overlay tái tạo hình ảnh từng pixel của .detail-modal/.detail-modal-panel cũ
+// (rộng tối đa 920px/cao tối đa 82vh/bo góc 28px/viền #e5e7eb/bóng đậm hơn),
+// định nghĩa tại pages/detail/modal.css.
 //
-// open 状态仍然是 DetailApp.jsx 的 stageHistoryOpen/eventsOpen 两个 useState
-// (铁律:不改状态管理本身,只换渲染层),onOpenChange(false) 统一路由到
-// onClose 回调回写 state。
+// Trạng thái open vẫn là hai useState stageHistoryOpen/eventsOpen trong DetailApp.jsx
+// (quy tắc cứng: không đổi quản lý trạng thái, chỉ đổi lớp kết xuất); onOpenChange(false) được định tuyến thống nhất tới
+// callback onClose để ghi lại state.
 //
-// 焦点归还:两个模态的触发按钮(StageHistoryTriggerCard/EventsTriggerCard)
-// 虽然和模态本身在同一个 DetailApp 组件树内,但既没有用
-// DialogPrimitive.Trigger 包裹触发按钮,Radix 默认的 triggerRef 也就永远是
-// null——这个根因和"是否跨子树"无关(参见 use-dialog-return-focus.js 头
-// 注释),所以这里同样接入 useDialogReturnFocus,和 home 页 7 个对话框保持
-// 一致,不因为"看起来在同一棵树里"就假设可以省略。
+// Trả focus: nút kích hoạt của hai modal (StageHistoryTriggerCard/EventsTriggerCard)
+// dù nằm cùng cây thành phần DetailApp với modal nhưng không dùng
+// DialogPrimitive.Trigger bọc nút kích hoạt, nên triggerRef mặc định của Radix luôn là
+// null; nguyên nhân này không liên quan việc "có qua cây con hay không" (xem chú thích đầu
+// use-dialog-return-focus.js), vì vậy cũng dùng useDialogReturnFocus để nhất quán với 7 hộp thoại trang home,
+// không giả định có thể bỏ chỉ vì "trông như trong cùng một cây".
 //
-// body 滚动锁定:DetailApp.jsx 原有的手写 document.body.style.overflow 锁定
-// 已删除(见该文件对应注释)——Radix Dialog modal 模式自带等价锁定
-// (react-remove-scroll,随 Content 挂载/卸载自动加锁/解锁),两个模态互斥
-// (只要一个打开,遮罩 + focus trap 就会让另一个的触发卡片不可达),不会出现
-// 两套机制同时争抢 body 样式的场景。
+// Khóa cuộn body: khóa document.body.style.overflow viết tay trước đây trong DetailApp.jsx
+// đã bị xóa (xem chú thích tương ứng); chế độ modal của Radix Dialog có khóa tương đương
+// (react-remove-scroll tự khóa/mở theo lúc Content gắn/gỡ); hai modal loại trừ nhau
+// (khi một cái mở, overlay + focus trap làm thẻ kích hoạt cái kia không thể truy cập), nên không có
+// tình huống hai cơ chế cùng tranh chấp style body.
 
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useDialogReturnFocus } from "../../../shared/react/use-dialog-return-focus.js";
@@ -45,7 +45,7 @@ import {
   buildJobDetailEventViewModel,
 } from "../external.js";
 
-// —— 以下三个私有函数照搬旧 events.js,保证耗时/载荷文案逐字节一致 ——
+// — Ba hàm riêng dưới đây được sao chép từ events.js cũ để nội dung thời lượng/payload giống từng byte —
 
 function parseIsoTime(value) {
   const raw = `${value || ""}`.trim();
@@ -93,10 +93,10 @@ export function StageHistoryTriggerCard({ onOpen }) {
     <article className="detail-card">
       <div className="detail-modal-trigger">
         <div className="detail-trigger-head">
-          <h2>阶段时间线</h2>
-          <button id="detail-open-stage-history-btn" type="button" className="detail-trigger-btn" onClick={onOpen}>查看</button>
+          <h2>Dòng thời gian giai đoạn</h2>
+          <button id="detail-open-stage-history-btn" type="button" className="detail-trigger-btn" onClick={onOpen}>Xem</button>
         </div>
-        <p className="detail-trigger-copy">默认收起，不再把整页拉长。需要时再打开查看完整阶段切换记录。</p>
+        <p className="detail-trigger-copy">Mặc định thu gọn để trang không bị kéo dài. Mở khi cần xem đầy đủ lịch sử chuyển giai đoạn.</p>
       </div>
     </article>
   );
@@ -107,10 +107,10 @@ export function EventsTriggerCard({ buttonText, onOpen }) {
     <article className="detail-card">
       <div className="detail-modal-trigger">
         <div className="detail-trigger-head">
-          <h2>事件流</h2>
+          <h2>Luồng sự kiện</h2>
           <button id="detail-open-events-btn" type="button" className="detail-trigger-btn" onClick={onOpen}>{buttonText}</button>
         </div>
-        <p className="detail-trigger-copy">默认不请求事件流。只有点击查看时才加载，避免分享页初次打开就消耗过多流量。</p>
+        <p className="detail-trigger-copy">Mặc định không yêu cầu luồng sự kiện. Dữ liệu chỉ được tải khi bấm xem để tránh tiêu tốn quá nhiều băng thông khi mở trang chia sẻ lần đầu.</p>
       </div>
     </article>
   );
@@ -119,7 +119,7 @@ export function EventsTriggerCard({ buttonText, onOpen }) {
 function DetailModal({ modalId, titleId, title, subtitle, closeButtonId, open, onClose, children }) {
   const { onCloseAutoFocus } = useDialogReturnFocus(open);
 
-  // Esc / 背板点击 / 关闭按钮都经这一个回调回写 DetailApp.jsx 的 useState。
+  // Esc / bấm nền / nút đóng đều ghi lại useState của DetailApp.jsx qua một callback này.
   function handleOpenChange(nextOpen) {
     if (!nextOpen) {
       onClose();
@@ -145,7 +145,7 @@ function DetailModal({ modalId, titleId, title, subtitle, closeButtonId, open, o
                 <p className="detail-modal-subtitle">{subtitle}</p>
               </div>
               <DialogPrimitive.Close asChild>
-                <button id={closeButtonId} type="button" className="detail-modal-close" aria-label="关闭">×</button>
+                <button id={closeButtonId} type="button" className="detail-modal-close" aria-label="Đóng">×</button>
               </DialogPrimitive.Close>
             </div>
             <div className="desktop-body">
@@ -160,7 +160,7 @@ function DetailModal({ modalId, titleId, title, subtitle, closeButtonId, open, o
 
 function StageHistoryItem({ entry, index, job }) {
   const enterAt = entry?.enter_at ? formatEventTimestamp(entry.enter_at) : "-";
-  const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isJobTerminal(job) ? "-" : "进行中");
+  const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isJobTerminal(job) ? "-" : "Đang thực hiện");
   const terminalText = entry?.terminal_status ? ` · ${entry.terminal_status}` : "";
   const display = stageHistoryDisplay(entry);
   return (
@@ -181,13 +181,13 @@ export function StageHistoryModal({ open, job, onClose }) {
     <DetailModal
       modalId="detail-stage-history-modal"
       titleId="detail-stage-history-modal-title"
-      title="阶段时间线"
-      subtitle="按阶段展示进入、退出与耗时。"
+      title="Dòng thời gian giai đoạn"
+      subtitle="Hiển thị thời điểm bắt đầu, kết thúc và thời lượng theo từng giai đoạn."
       closeButtonId="detail-close-stage-history-btn"
       open={open}
       onClose={onClose}
     >
-      <div id="detail-stage-history-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>暂无阶段记录</div>
+      <div id="detail-stage-history-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>Chưa có bản ghi giai đoạn</div>
       <div id="detail-stage-history-list" className={hasItems ? "detail-list" : "detail-list hidden"}>
         {history.map((entry, index) => (
           <StageHistoryItem key={index} entry={entry} index={index} job={job} />
@@ -253,14 +253,14 @@ export function EventsModal({ open, eventsPayload, status, onClose }) {
     <DetailModal
       modalId="detail-events-modal"
       titleId="detail-events-modal-title"
-      title="事件流"
-      subtitle="只有打开时才会请求完整事件流，首次加载后会在当前页面缓存。"
+      title="Luồng sự kiện"
+      subtitle="Luồng sự kiện đầy đủ chỉ được yêu cầu khi mở; sau lần tải đầu tiên, dữ liệu được lưu đệm trên trang hiện tại."
       closeButtonId="detail-close-events-btn"
       open={open}
       onClose={onClose}
     >
       <div id="detail-events-status" className="detail-modal-status">{status}</div>
-      <div id="detail-events-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>暂无事件</div>
+      <div id="detail-events-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>Chưa có sự kiện</div>
       <div id="detail-events-list" className={hasItems ? "detail-list" : "detail-list hidden"}>
         {items.map((item, index) => (
           <EventItem key={item?.seq ?? index} item={item} />

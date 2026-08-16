@@ -32,6 +32,7 @@ class _ValidationItemState:
     translated_result: dict[str, str]
     translated_text: str
     decision: str
+    target_language_name: str
 
 
 ValidationRule = Callable[[_ValidationItemState, TranslationDiagnosticsCollector | None], None]
@@ -72,7 +73,11 @@ def _validate_translated_item(
     state: _ValidationItemState,
     diagnostics: TranslationDiagnosticsCollector | None,
 ) -> None:
-    report = review_translation_item(state.item, state.translated_result)
+    report = review_translation_item(
+        state.item,
+        state.translated_result,
+        target_language_name=state.target_language_name,
+    )
     for issue in report.issues:
         _handle_quality_issue(state, issue, diagnostics)
     if state.translated_text.strip() == state.source_text.strip() and _allow_same_text_output(state):
@@ -200,6 +205,7 @@ def validate_batch_result(
     result: dict[str, dict[str, str]],
     *,
     diagnostics: TranslationDiagnosticsCollector | None = None,
+    target_language_name: str = "Tiếng Việt",
 ) -> None:
     expected_ids = {item["item_id"] for item in batch}
     actual_ids = set(result)
@@ -235,6 +241,7 @@ def validate_batch_result(
                 translated_result=translated_result,
                 translated_text=translated_text,
                 decision=decision,
+                target_language_name=target_language_name,
             ),
             diagnostics,
         )

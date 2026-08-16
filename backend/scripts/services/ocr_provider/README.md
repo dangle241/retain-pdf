@@ -339,21 +339,21 @@ backend/config/ocr_providers.json
 当前默认：
 
 ```text
-PaddleOCR-VL-1.6
+PaddleOCR-VL-1.5
 ```
 
 可用环境变量覆盖：
 
 ```bash
 export RETAIN_OCR_PROVIDER_CONFIG=/path/to/ocr_providers.json
-export RETAIN_PADDLE_DEFAULT_MODEL=PaddleOCR-VL-1.6
+export RETAIN_PADDLE_DEFAULT_MODEL=PaddleOCR-VL-1.5
 ```
 
 Rust API 同时支持：
 
 ```bash
 export RUST_API_OCR_PROVIDER_CONFIG=/path/to/ocr_providers.json
-export RUST_API_PADDLE_DEFAULT_MODEL=PaddleOCR-VL-1.6
+export RUST_API_PADDLE_DEFAULT_MODEL=PaddleOCR-VL-1.5
 ```
 
 ## Provider Options / Credential Spec / 动态发现
@@ -395,9 +395,9 @@ GET /api/v1/providers/ocr
   "options": {
     "paddle_model": {
       "type": "string",
-      "default": "PaddleOCR-VL-1.6",
+      "default": "PaddleOCR-VL-1.5",
       "aliases": {
-        "paddleocr-vl": "PaddleOCR-VL-1.6"
+        "paddleocr-vl": "PaddleOCR-VL-1.5"
       }
     }
   }

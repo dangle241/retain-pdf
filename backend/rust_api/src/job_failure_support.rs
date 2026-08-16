@@ -45,7 +45,7 @@ pub(super) fn raw_diagnostic_from_structured(
     structured: &PythonStructuredFailure,
 ) -> JobRawDiagnostic {
     JobRawDiagnostic {
-        structured_error_type: structured.failure_code.clone(),
+        structured_error_type: structured.resolved_failure_code(),
         raw_exception_type: structured.raw_exception_type.clone(),
         raw_exception_message: structured.raw_exception_message.clone(),
         traceback: structured.traceback.clone(),

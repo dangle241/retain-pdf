@@ -112,7 +112,7 @@ test("DOM 布线:表单提交产出问答气泡,新建按钮清空线程", async
 
   documentRef.getElementById("reader-ai-new-btn")
     .dispatchEvent(new dom.window.MouseEvent("click", { bubbles: true }));
-  await waitFor(() => bubbleTexts().length === 0, "新对话线程为空");
+  await waitFor(() => bubbleTexts().length === 0, "Cuộc trò chuyện mới线程为空");
   assert.equal(historyStore.listSessions().length, 2);
 });
 
@@ -123,7 +123,7 @@ test("切换会话:载回目标会话的气泡", async () => {
   assert.ok(idA, "首次提交后应有 active 会话");
 
   await controller().newConversation();
-  assert.equal(bubbleTexts().length, 0, "新对话线程为空");
+  assert.equal(bubbleTexts().length, 0, "Cuộc trò chuyện mới线程为空");
   await controller().submit("第二段问题");
   assert.ok(bubbleTexts().some((t) => t.includes("第二段问题")));
   assert.ok(!bubbleTexts().some((t) => t.includes("第一段问题")));
@@ -157,7 +157,7 @@ test("会话切换栏:提交后下拉出现带标题的选项", async () => {
 test("提交状态流转:完成后状态为「可以继续提问」,输入框清空", async () => {
   const { controller } = await makeChat();
   await controller().submit("状态流转问题");
-  await waitFor(() => statusText() === "可以继续提问", "终态状态落定");
+  await waitFor(() => statusText() === "Có thể tiếp tục đặt câu hỏi", "终态状态落定");
   assert.equal(documentRef.getElementById("reader-ai-input").value, "");
   const texts = bubbleTexts();
   assert.equal(texts.length, 2);
@@ -183,9 +183,9 @@ test("后端 502 时回退本地检索:状态与气泡注记", async () => {
   });
   await controller().submit("Explain fallback");
 
-  await waitFor(() => statusText() === "已用本地检索回答", "回退状态落定");
+  await waitFor(() => statusText() === "Đã trả lời bằng tìm kiếm cục bộ", "回退状态落定");
   const assistantText = bubbleTexts().at(-1);
   assert.match(assistantText, /Local fallback/);
-  assert.match(assistantText, /引用/);
+  assert.match(assistantText, /Trích dẫn/);
   assert.match(assistantText, /502 provider failed/);
 });

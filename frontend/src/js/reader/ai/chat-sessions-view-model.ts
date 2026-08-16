@@ -1,5 +1,5 @@
-// 多会话对话管理的纯逻辑:标题派生、摘要排序、上限截断。
-// 无 DOM、无 storage,便于单测;store 与 chat 控制器共用同一套语义。
+// Logic thuần quản lý nhiều hội thoại: suy ra tiêu đề, sắp xếp tóm tắt, cắt theo giới hạn.
+// Không DOM, không storage để dễ unit test; store và bộ điều khiển chat dùng chung ngữ nghĩa.
 
 import type {
   ReaderAiChatSession,
@@ -10,7 +10,7 @@ import type {
 export const MAX_SESSIONS = 20;
 const TITLE_MAX = 18;
 
-// 会话标题:取首条用户消息(清洗空白后裁剪);无用户消息则回退占位。
+// Tiêu đề hội thoại: lấy thông điệp user đầu tiên, làm sạch khoảng trắng rồi cắt; nếu không có thì dùng chỗ giữ chỗ.
 export function deriveSessionTitle(session: ReaderAiChatSession = {}) {
   const messages = Array.isArray(session?.messages) ? session.messages : [];
   const firstUser = messages.find(
@@ -18,12 +18,12 @@ export function deriveSessionTitle(session: ReaderAiChatSession = {}) {
   );
   const raw = `${firstUser?.text || session?.title || ""}`.replace(/\s+/g, " ").trim();
   if (!raw) {
-    return "新对话";
+    return "Cuộc trò chuyện mới";
   }
   return raw.length > TITLE_MAX ? `${raw.slice(0, TITLE_MAX).trim()}…` : raw;
 }
 
-// 会话摘要:按 updatedAt 倒序(新在前),标记 active,供下拉渲染。
+// Tóm tắt hội thoại: sắp updatedAt giảm dần, mới trước, đánh dấu active để kết xuất menu.
 export function summarizeSessions({
   sessions = [],
   activeId = "",
@@ -40,7 +40,7 @@ export function summarizeSessions({
     .sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
-// 上限截断:保留最近更新的 max 个;active 会话始终保留(挤掉最旧的一个)。
+// Cắt theo giới hạn: giữ max hội thoại cập nhật gần nhất; luôn giữ active bằng cách loại mục cũ nhất.
 export function trimSessions(
   { sessions = [], activeId = "" }: ReaderAiSessionsBag = {},
   max = MAX_SESSIONS,

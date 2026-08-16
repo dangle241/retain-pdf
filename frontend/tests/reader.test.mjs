@@ -331,11 +331,11 @@ test("reader bottom hud shows page progress and reader mode", () => {
   readerView.setReaderModeHud("translated");
 
   assert.equal(elements["reader-page-indicator"].classList.values.has("hidden"), false);
-  assert.equal(elements["reader-bottom-hud-page"].textContent, "第 2 / 5 页");
+  assert.equal(elements["reader-bottom-hud-page"].textContent, "Trang 2 / 5");
   assert.equal(elements["reader-page-indicator"].dataset.readerProgress, "40");
-  assert.equal(elements["reader-page-indicator"].attributes.get("aria-label"), "第 2 / 5 页 · 40%");
+  assert.equal(elements["reader-page-indicator"].attributes.get("aria-label"), "Trang 2 / 5 · 40%");
   assert.equal(progressStyle.get("--reader-progress"), "40%");
-  assert.equal(elements["reader-bottom-hud-mode"].textContent, "译文");
+  assert.equal(elements["reader-bottom-hud-mode"].textContent, "Bản dịch");
 
   global.document = previousDocument;
 });
@@ -1148,8 +1148,8 @@ test("reader download actions resolve artifact urls and disabled reasons", () =>
   assert.equal(emptyUrls.source, "");
   assert.equal(emptyUrls.sideBySide, "");
   assert.equal(emptyUrls.translated, "");
-  assert.match(readerDownloadResolve.disabledReason("source", emptyUrls), /原始 PDF/);
-  assert.match(readerDownloadResolve.disabledReason("translated", emptyUrls), /译文 PDF/);
+  assert.match(readerDownloadResolve.disabledReason("source", emptyUrls), /PDF gốc/);
+  assert.match(readerDownloadResolve.disabledReason("translated", emptyUrls), /PDF bản dịch/);
   assert.match(readerDownloadResolve.disabledReason("sideBySide", emptyUrls), /PDF/);
 });
 
@@ -1191,7 +1191,7 @@ test("reader ai context can switch to selection scope", () => {
   });
 
   assert.equal(context.scope(), "selection");
-  assert.equal(contextEl.textContent, "当前选区：第 4 页 · 120 × 64");
+  assert.equal(contextEl.textContent, "Vùng chọn hiện tại: Trang 4 · 120 × 64");
   assert.equal(buttons[1].classList.values.has("is-active"), true);
   assert.deepEqual(opened, ["ai"]);
 });
@@ -1340,28 +1340,28 @@ test("reader page state owns boot progress snapshots", () => {
 
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 8,
-    text: "正在准备对照阅读…",
+    text: "Đang chuẩn bị chế độ đọc đối chiếu…",
     stage: "boot",
   });
 
   state.progress.metadataReady = true;
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 24,
-    text: "正在加载原始 PDF 和译文 PDF…",
+    text: "Đang tải PDF gốc và PDF bản dịch…",
     stage: "pdfs",
   });
 
   state.progress.sourceDone = true;
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 54,
-    text: "原始 PDF 已加载，正在加载译文 PDF…",
+    text: "Đã tải PDF gốc, đang tải PDF bản dịch…",
     stage: "pdfs",
   });
 
   state.progress.translatedDone = true;
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 92,
-    text: "对照阅读已就绪",
+    text: "Chế độ đọc đối chiếu đã sẵn sàng",
     stage: "readying",
   });
 
@@ -1397,17 +1397,17 @@ test("reader progress presenter writes view state and posts progress messages", 
 
   assert.deepEqual(snapshot, {
     percent: 54,
-    text: "原始 PDF 已加载，正在加载译文 PDF…",
+    text: "Đã tải PDF gốc, đang tải PDF bản dịch…",
     stage: "pdfs",
   });
   assert.deepEqual(calls, [
-    ["text", "原始 PDF 已加载，正在加载译文 PDF…"],
+    ["text", "Đã tải PDF gốc, đang tải PDF bản dịch…"],
     ["animate", true, 54],
     ["message", {
       type: "retainpdf-reader-progress",
       stage: "pdfs",
       percent: 54,
-      text: "原始 PDF 已加载，正在加载译文 PDF…",
+      text: "Đã tải PDF gốc, đang tải PDF bản dịch…",
     }, "https://retainpdf.reader"],
   ]);
 });

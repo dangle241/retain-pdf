@@ -125,7 +125,7 @@ function progressTextForRecord(
     return substageDetail(substageKey) || progressRecord.progressText || "";
   }
   if (substageKey === "translation_batches" && ratio >= 1) {
-    return "翻译批次完成";
+    return "Đợt dịch hoàn tất";
   }
   return progressRecord.progressText || substageDetail(substageKey) || "";
 }

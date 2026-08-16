@@ -114,7 +114,7 @@ test("normalizeJobPayload exposes canonical stage snapshot", () => {
 
   assert.equal(job.stage_snapshot.stageKey, "translate");
   assert.equal(job.stage_snapshot.publicStage, "translation");
-  assert.equal(job.stage_snapshot.detail, "正在翻译正文内容");
+  assert.equal(job.stage_snapshot.detail, "Đang dịch nội dung chính");
   assert.equal(job.stage_snapshot.progress.current, 30);
   assert.equal(job.stage_snapshot.progress.total, 100);
   assert.equal(job.stage_snapshot.progress.unit, "batch");

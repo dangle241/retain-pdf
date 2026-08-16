@@ -1,4 +1,4 @@
-/* AI 悬浮窗 · Notion 式一体圆角输入卡 */
+/* Cửa sổ nổi AI · Thẻ nhập bo góc liền khối kiểu Notion. */
 
 .reader-float-ai .aui-scroll-bottom-btn {
   position: sticky;
@@ -35,7 +35,7 @@
   background: var(--paper);
 }
 
-/* 无模型 Key：不渲染可编辑输入 */
+/* Không có khóa mô hình: không render ô nhập có thể chỉnh sửa. */
 .reader-float-ai .aui-composer-locked {
   gap: 6px;
 }
@@ -43,16 +43,16 @@
 .reader-float-ai .aui-llm-lock-msg {
   margin: 0;
   padding: 10px 12px;
-  border: 1px solid color-mix(in srgb, var(--danger, #c44) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 22%, transparent);
   border-radius: 10px;
-  background: color-mix(in srgb, var(--danger, #c44) 6%, var(--paper));
-  color: color-mix(in srgb, var(--danger, #c44) 80%, var(--ink));
+  background: color-mix(in srgb, var(--danger) 6%, var(--paper));
+  color: color-mix(in srgb, var(--danger) 80%, var(--ink));
   font-size: 12.5px;
   font-weight: 500;
   line-height: 1.45;
 }
 
-/* 一体输入壳：软阴影 + 大圆角 */
+/* Vỏ nhập liền khối: bóng mềm + bo góc lớn. */
 .reader-float-ai .aui-composer-shell {
   display: grid;
   gap: 0;
@@ -136,7 +136,7 @@
   margin-left: auto;
 }
 
-/* 圆形发送 / 停止 — 对齐 Notion ↑ */
+/* Gửi / Dừng hình tròn, căn với Notion ↑. */
 .reader-float-ai .aui-send {
   display: grid;
   place-items: center;
@@ -154,7 +154,7 @@
     opacity 140ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
 }
 .reader-float-ai .aui-send:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--ink) 88%, #000);
+  background: color-mix(in srgb, var(--ink) 88%, var(--shadow-color));
 }
 .reader-float-ai .aui-send:active:not(:disabled) {
   transform: scale(0.94);
@@ -166,12 +166,12 @@
   opacity: 0.7;
 }
 .reader-float-ai .aui-send-stop {
-  background: color-mix(in srgb, var(--danger, #c44) 12%, var(--paper));
-  color: var(--danger, #c44);
-  border: 1px solid color-mix(in srgb, var(--danger, #c44) 28%, transparent);
+  background: color-mix(in srgb, var(--danger) 12%, var(--paper));
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, transparent);
 }
 .reader-float-ai .aui-send-stop:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--danger, #c44) 18%, var(--paper));
+  background: color-mix(in srgb, var(--danger) 18%, var(--paper));
 }
 
 .reader-float-ai .aui-hint {
@@ -184,7 +184,7 @@
   letter-spacing: 0.01em;
 }
 
-/* 兼容旧类名（若别处仍引用） */
+/* Tương thích tên lớp cũ (nếu nơi khác vẫn tham chiếu). */
 .reader-float-ai .aui-composer-foot {
   display: flex;
   align-items: center;
@@ -218,9 +218,9 @@
   border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
 }
 .reader-float-ai .aui-btn-stop {
-  background: color-mix(in srgb, var(--danger, #c44) 8%, var(--paper));
-  color: var(--danger, #c44);
-  border: 1px solid color-mix(in srgb, var(--danger, #c44) 35%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, var(--paper));
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
 }
 .reader-float-ai .aui-running {
   display: inline-flex;

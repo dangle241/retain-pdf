@@ -97,9 +97,9 @@ class RetrievalEvidence:
 @dataclass(frozen=True)
 class TranslationControlContext:
     mode: str = "fast"
-    source_lang: str = "auto"
-    target_lang: str = "zh-CN"
-    target_language_name: str = "简体中文"
+    source_lang: str = "en"
+    target_lang: str = "vi"
+    target_language_name: str = "Tiếng Việt"
     domain_guidance: str = ""
     rule_guidance: str = ""
     extra_guidance: str = ""
@@ -294,9 +294,9 @@ class TranslationControlContext:
 def build_translation_control_context(
     *,
     mode: str = "fast",
-    source_lang: str = "auto",
-    target_lang: str = "zh-CN",
-    target_language_name: str = "简体中文",
+    source_lang: str = "en",
+    target_lang: str = "vi",
+    target_language_name: str = "Tiếng Việt",
     domain_guidance: str = "",
     rule_guidance: str = "",
     extra_guidance: str = "",

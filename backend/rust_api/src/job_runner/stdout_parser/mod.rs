@@ -199,7 +199,7 @@ mod tests {
         assert_eq!(job.stage.as_deref(), Some("queued"));
         assert_eq!(
             job.stage_detail.as_deref(),
-            Some("任务已创建，等待可用执行槽位")
+            Some("Đã tạo tác vụ, đang chờ lượt xử lý")
         );
     }
 

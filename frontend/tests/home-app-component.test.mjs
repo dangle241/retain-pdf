@@ -144,7 +144,7 @@ test("HomeApp：契约 id、idle 链、工作流对话框事件契约与交互",
   assert.equal(events.open, 1, "打开必须经 APP_EVENTS.openTranslationWorkflow(3b 刷新挂起依赖)");
   assert.equal(dialog.dataset.open, "1");
   assert.equal(dialog.classList.contains("is-upload-mode"), true);
-  assert.equal(byId("translation-workflow-title").textContent, "添加 PDF");
+  assert.equal(byId("translation-workflow-title").textContent, "Thêm PDF");
   assert.equal(dom.window.document.documentElement.classList.contains("translation-workflow-open"), true);
   await waitFor(() => byId("library-add-pdf-btn").getAttribute("aria-expanded") === "true", "触发按钮 aria 同步");
   assert.equal(byId("library-add-pdf-btn").dataset.workflowOpen, "1");
@@ -185,10 +185,10 @@ test("HomeApp：契约 id、idle 链、工作流对话框事件契约与交互",
   await waitFor(() => byId("page-range-dialog") === null, "关闭按钮点击后对话框卸载");
 
   // ---- idle 复位链:上传瓦片回到默认态,提交按钮置灰 ----
-  assert.equal(byId("file-label").textContent, "点击选择文件或拖到这里");
-  assert.equal(byId("upload-help").textContent, "选择 PDF 后，可直接翻译或仅收藏到书架。");
+  assert.equal(byId("file-label").textContent, "Bấm để chọn tệp hoặc kéo thả vào đây");
+  assert.equal(byId("upload-help").textContent, "Sau khi chọn PDF, bạn có thể dịch ngay hoặc chỉ lưu vào giá sách.");
   assert.equal(byId("submit-btn").disabled, true);
-  assert.equal(byId("submit-btn").textContent, "直接翻译");
+  assert.equal(byId("submit-btn").textContent, "Dịch ngay");
   assert.equal(byId("job-warning").classList.contains("hidden"), true);
   assert.equal(byId("status-section").classList.contains("hidden"), true);
 
@@ -212,7 +212,7 @@ test("HomeApp：契约 id、idle 链、工作流对话框事件契约与交互",
   services.bridge.setWorkflowSections({ job_id: "job-1", status: "running" });
   await waitFor(() => byId("status-section").classList.contains("hidden") === false, "状态区显示");
   await waitFor(() => dialog.classList.contains("is-status-mode"), "对话框切到状态模式");
-  assert.equal(byId("translation-workflow-title").textContent, "任务进度");
+  assert.equal(byId("translation-workflow-title").textContent, "Tiến độ tác vụ");
   services.bridge.setWorkflowSections(null);
   await waitFor(() => byId("status-section").classList.contains("hidden") === true, "状态区隐藏");
   await waitFor(() => dialog.classList.contains("is-upload-mode"), "对话框回到上传模式");

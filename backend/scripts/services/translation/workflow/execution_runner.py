@@ -68,6 +68,9 @@ def run_translation_execution_plan(
         glossary=glossary_summary,
         summary={
             "math_mode": request.math_mode,
+            "source_language": request.source_language,
+            "target_language": request.target_language,
+            "target_language_name": request.target_language_name,
             **diagnostics_summary,
             "review_issue_count": review_summary.get("issue_count", 0),
             "review_has_errors": review_summary.get("has_errors", False),
@@ -91,6 +94,9 @@ def run_translation_execution_plan(
         "translation_review": review_summary,
         "invocation": request.invocation or {},
         "math_mode": request.math_mode,
+        "source_language": request.source_language,
+        "target_language": request.target_language,
+        "target_language_name": request.target_language_name,
         "translation_context": plan.translation_context,
         "translation_run_diagnostics": plan.run_diagnostics,
     }

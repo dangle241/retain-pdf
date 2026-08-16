@@ -167,9 +167,9 @@ test("RecentJobsLibrary：卡片交互(select / reader / delete 确认与取消 
   host.remove();
 });
 
-test("RecentJobsLibrary：卡片眼睛=快速阅读(已完成→对照阅读;失败无源→不误触发)", async () => {
+test("RecentJobsLibrary：卡片眼睛=快速阅读(Đã hoàn tất→对照阅读;失败无源→不误触发)", async () => {
   // 卡片改成照搬 PDF_MD_lib 的 BookCard 后,删除/翻译都挪进书籍详情弹窗,卡片
-  // 只留一个眼睛=快速阅读:已完成派发对照阅读;没有可读目标(失败且无 document_id)
+  // 只留一个眼睛=快速阅读:Đã hoàn tất派发对照阅读;没有可读目标(失败且无 document_id)
   // 点了不派发任何东西(不再一路捅进阅读器深处报错)。
   const dom = makeDom("?mock=parallel");
   const { services, root, host } = await bootHomeApp(dom);
@@ -195,9 +195,9 @@ test("RecentJobsLibrary：卡片眼睛=快速阅读(已完成→对照阅读;失
   await wait(30);
   assert.equal(readerDetail, null, "失败且无源:点眼睛不触发 openReaderRequested");
 
-  // 已完成 → 对照阅读
+  // Đã hoàn tất → 对照阅读
   click(dom, cardOf("job-2").querySelector(".recent-job-reader"));
-  await waitFor(() => readerDetail?.jobId === "job-2", "已完成点眼睛派发对照阅读");
+  await waitFor(() => readerDetail?.jobId === "job-2", "Đã hoàn tất点眼睛派发对照阅读");
 
   root.unmount();
   services.dispose();
@@ -221,7 +221,7 @@ test("RecentJobsLibrary：馆藏文档卡(未翻译)——徽标/点卡片开详
   const card = byId(dom, "recent-jobs-list").querySelector('.recent-job-item[data-library-only="true"]');
   assert.ok(card, "馆藏卡片渲染出来了");
   assert.equal(card.getAttribute("data-document-id"), "doc-ref-6a1f2c");
-  assert.match(card.textContent, /馆藏/, "显示馆藏徽标");
+  assert.match(card.textContent, /Thư viện/, "显示馆藏徽标");
   assert.equal(card.querySelector(".recent-job-delete"), null, "卡片无删除(在详情弹窗里)");
 
   const { APP_EVENTS } = await import("../src/js/contracts/app-contract.js");

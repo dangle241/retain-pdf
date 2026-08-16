@@ -1,5 +1,5 @@
-// dialog-store(createDialogStore)→ React 订阅 hook。state 对象引用只在
-// open()/close() 时更新,直接喂 useSyncExternalStore(镜像 reader 的
+// dialog-store (createDialogStore) → hook đăng ký React. Tham chiếu đối tượng state chỉ cập nhật khi
+// open()/close(), cấp trực tiếp cho useSyncExternalStore (phản chiếu reader).
 // use-drawer-active.js)。
 
 import { useSyncExternalStore } from "react";

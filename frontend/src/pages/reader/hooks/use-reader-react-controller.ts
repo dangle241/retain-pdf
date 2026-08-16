@@ -108,7 +108,7 @@ export function useReaderReactController(): ReaderReactController {
   );
 
   const goToPage = useCallback((page: number) => {
-    // 取已加载栏的最大页数；未知时传 0，由 clampPageNumber 放行目标页
+    // Lấy số trang lớn nhất trong các cột đã tải; khi chưa biết thì truyền 0 để clampPageNumber cho phép trang đích.
     const total = Math.max(
       Number(panes.hudNumPages) || 0,
       Number(panes.primaryNumPages) || 0,
@@ -118,7 +118,7 @@ export function useReaderReactController(): ReaderReactController {
     goToPageWithTotal(page, total);
   }, [goToPageWithTotal, panes.hudNumPages, panes.primaryNumPages, panes.numPagesByPane]);
 
-  // 收藏 / 搜索回跳：URL ?page_idx= → 页码（0 基 → 1 基）
+  // Nhảy lại từ mục đã lưu / tìm kiếm: URL ?page_idx= → số trang (bắt đầu từ 0 → bắt đầu từ 1).
   useUrlAnchorJump({
     enabled: !session.boot.loading && !session.boot.failed && session.assetsReady,
     numPages: panes.hudNumPages || 0,
@@ -158,7 +158,7 @@ export function useReaderReactController(): ReaderReactController {
   }, [notes, clearSelection]);
 
   const jumpToNote = useCallback((note: ReaderNote) => {
-    // 若批注在译文/原文栏，尽量切到对应单栏或对照
+    // Nếu chú thích nằm ở cột bản dịch/bản gốc, cố gắng chuyển sang cột đơn tương ứng hoặc đối chiếu.
     if (note.pane === "translated" && session.mode === "source") {
       beginModeSwitch();
       session.setMode("compare");
@@ -183,7 +183,7 @@ export function useReaderReactController(): ReaderReactController {
     enabled: showHud,
   });
 
-  // tools 对象引用稳定到 active 变化时
+  // Giữ tham chiếu đối tượng tools ổn định cho tới khi active thay đổi.
   const toolsApi = useMemo(() => tools, [tools.active, tools.open, tools.close, tools.toggle, tools.isOpen]);
 
   return {

@@ -75,7 +75,12 @@ def translate_stable_placeholder_text(
         route_path=["block_level"],
         output_mode_path=["tagged"],
     )
-    validate_batch_result([item], restored, diagnostics=diagnostics)
+    validate_batch_result(
+        [item],
+        restored,
+        diagnostics=diagnostics,
+        target_language_name=context.target_language_name,
+    )
     return restored
 
 

@@ -1,5 +1,5 @@
-// 书架列表视图的行(照搬 PDF_MD_lib 的 BookListRow):小封面缩略图 + 标题/副标题/
-// 更新日期 + 右侧眼睛(快速阅读)。点行 → 书籍详情弹窗。数据/动作与卡片一致。
+// Hàng trong view danh sách giá sách, dựa trên BookListRow của PDF_MD_lib: bìa nhỏ + tiêu đề/phụ đề/
+// ngày cập nhật + biểu tượng mắt bên phải (đọc nhanh). Bấm hàng → hộp thoại chi tiết. Dữ liệu/hành động giống thẻ.
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ function formatDate(value: string | null | undefined) {
   if (!raw) return "—";
   const parsed = new Date(raw);
   if (Number.isNaN(parsed.getTime())) return raw;
-  return new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "numeric", day: "numeric" }).format(parsed);
+  return new Intl.DateTimeFormat("vi-VN", { year: "numeric", month: "numeric", day: "numeric" }).format(parsed);
 }
 
 type BookListRowProps = {
@@ -89,7 +89,7 @@ function BookListRowImpl({
       if (documentId) onToggleSelect?.(documentId);
       return;
     }
-    // 优先详情弹窗（翻译 Tab 内嵌进度）；不走旧工作流弹窗
+    // Ưu tiên hộp thoại chi tiết với tiến độ nhúng trong tab Dịch; không dùng hộp thoại workflow cũ.
     if (onOpenDetail && (documentId || jobId)) {
       onOpenDetail(item);
       return;
@@ -161,7 +161,7 @@ function BookListRowImpl({
 
       <div className="relative min-w-0 flex-1 pr-2 pt-0.5">
         <h3 className="recent-job-id line-clamp-2 min-w-0 text-sm font-semibold leading-snug text-foreground" title={fullTitle}>{title}</h3>
-        <p className="mt-2 text-[11px] tabular-nums text-muted-foreground/55">{pageCount} 页 · 更新 {formatDate(item.updated_at)}</p>
+        <p className="mt-2 text-[11px] tabular-nums text-muted-foreground/55">{pageCount} trang · Cập nhật {formatDate(item.updated_at)}</p>
       </div>
 
       {batchMode ? null : (
@@ -169,8 +169,8 @@ function BookListRowImpl({
           <button
             type="button"
             className="recent-job-reader flex h-9 w-9 items-center justify-center rounded-xl bg-muted/50 text-foreground transition hover:bg-muted active:scale-90"
-            title={readerAvailable ? "对照阅读" : "读原文"}
-            aria-label={readerAvailable ? "对照阅读" : "读原文"}
+            title={readerAvailable ? "Đọc đối chiếu" : "Đọc bản gốc"}
+            aria-label={readerAvailable ? "Đọc đối chiếu" : "Đọc bản gốc"}
             onClick={handleEye}
           >
             <IconEye />

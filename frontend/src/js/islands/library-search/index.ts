@@ -28,10 +28,10 @@ export interface LibrarySearchAppHandle {
   unmount: () => void;
 }
 
-// React 岛约定(试点):
-// - 宿主是普通 light-DOM 自定义元素,负责与既有页面的耦合(监听搜索框、派发契约事件);
-// - React 应用经动态 import 惰性加载:首个非空查询才拉起,node 测试环境不解析 JSX;
-// - 数据经 ports 注入,组件内不直接 import api 层。
+// Quy ước đảo React (thử nghiệm):
+// - Host là phần tử tùy chỉnh light-DOM thường, phụ trách liên kết với trang hiện có (lắng nghe ô tìm kiếm, phát sự kiện hợp đồng);
+// - Ứng dụng React được tải lười bằng import động: chỉ khởi chạy khi có truy vấn không rỗng đầu tiên; môi trường test node không phân tích JSX;
+// - Dữ liệu được chèn qua ports; thành phần không import trực tiếp lớp api.
 class LibrarySearchIsland extends HTMLElement {
   querySubscribers: Set<LibrarySearchQuerySubscriber>;
   appPromise: Promise<LibrarySearchAppHandle | null> | null;
@@ -100,8 +100,8 @@ class LibrarySearchIsland extends HTMLElement {
         .then((module) => module.mountLibrarySearchApp(this, this.buildPorts()))
         .catch((error) => {
           this.appPromise = null;
-          // node 测试环境无法解析 JSX,这里静默降级;浏览器构建产物已内联该模块
-          console.error("library-search island 加载失败", error);
+          // Môi trường test node không phân tích JSX nên lùi im lặng tại đây; bundle trình duyệt đã nội tuyến mô-đun này.
+          console.error("Không thể tải khu vực tìm kiếm thư viện", error);
           return null;
         });
     }
@@ -109,9 +109,9 @@ class LibrarySearchIsland extends HTMLElement {
   }
 }
 
-// node --test 环境下部分组件测试直接 import HomeApp.jsx 而不搭建完整 jsdom
-// window(customElements 未定义)。守卫不影响真实浏览器行为——customElements
-// 在浏览器/jsdom 里恒存在。
+// Trong môi trường node --test, một số test thành phần import trực tiếp HomeApp.jsx mà không dựng jsdom đầy đủ
+// window (customElements chưa định nghĩa). Guard không ảnh hưởng hành vi trình duyệt thật vì customElements
+// luôn tồn tại trong trình duyệt/jsdom.
 if (typeof customElements !== "undefined" && !customElements.get("library-search-island")) {
   customElements.define("library-search-island", LibrarySearchIsland);
 }

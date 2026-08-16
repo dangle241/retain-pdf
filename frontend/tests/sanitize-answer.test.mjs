@@ -4,10 +4,10 @@ import { sanitizeAssistantAnswer } from "../src/js/reader/ai/sanitize-answer.ts"
 
 test("maps bracketed block_id to [n]", () => {
   const out = sanitizeAssistantAnswer(
-    "制备氯取代的螺环吖啶（SA）前体 [p002-b0004] 已完成。",
+    "制备氯取代的螺环吖啶（SA）前体 [p002-b0004] Đã hoàn tất。",
     [{ ref: 2, block_id: "p002-b0004", page_idx: 1, snippet: "x" }],
   );
-  assert.equal(out, "制备氯取代的螺环吖啶（SA）前体 [2] 已完成。");
+  assert.equal(out, "制备氯取代的螺环吖啶（SA）前体 [2] Đã hoàn tất。");
 });
 
 test("strips unknown block_id markers", () => {

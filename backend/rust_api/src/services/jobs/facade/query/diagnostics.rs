@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use crate::job_failure::classify_job_failure;
+use crate::job_failure::resolve_job_failure;
 use crate::models::api::{JobDiagnosticsView, JobResumePlanView};
 use crate::models::domain::{JobFailureInfo, JobSnapshot, JobStatusKind};
 use crate::services::jobs::stage_plan::resume_plan;
@@ -50,9 +50,11 @@ fn build_job_diagnostics_view(
                 job.error
                     .clone()
                     .filter(|value| !value.trim().is_empty())
-                    .unwrap_or_else(|| "任务失败，但暂未识别出明确原因".to_string())
+                    .unwrap_or_else(|| {
+                        "Tác vụ thất bại nhưng chưa xác định được nguyên nhân".to_string()
+                    })
             } else {
-                "任务当前没有失败诊断".to_string()
+                "Tác vụ hiện không có chẩn đoán lỗi".to_string()
             },
             detail: job.error.clone(),
             suggestion: None,
@@ -91,8 +93,37 @@ fn build_resume_plan_view(job: &JobSnapshot) -> JobResumePlanView {
 }
 
 fn resolved_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
-    job.failure
-        .clone()
-        .map(JobFailureInfo::with_formal_fields)
-        .or_else(|| classify_job_failure(job).map(JobFailureInfo::with_formal_fields))
+    resolve_job_failure(job).map(localize_legacy_failure)
+}
+
+fn localize_legacy_failure(mut failure: JobFailureInfo) -> JobFailureInfo {
+    let failure_code = failure
+        .failure_code
+        .as_deref()
+        .unwrap_or(failure.category.as_str());
+    if failure_code == "upstream_timeout"
+        && [
+            failure.summary.as_str(),
+            failure.root_cause.as_deref().unwrap_or_default(),
+            failure.suggestion.as_deref().unwrap_or_default(),
+        ]
+        .iter()
+        .any(|value| contains_han(value))
+    {
+        failure.summary = "Yêu cầu tới dịch vụ bên ngoài bị hết thời gian chờ".to_string();
+        failure.root_cause = Some(
+            "Dịch vụ OCR hoặc mô hình phản hồi quá chậm và vượt quá thời gian chờ".to_string(),
+        );
+        failure.suggestion = Some(
+            "Có thể thử lại ngay; nếu lỗi thường xuyên, hãy giảm số luồng hoặc kiểm tra đường truyền"
+                .to_string(),
+        );
+    }
+    failure
+}
+
+fn contains_han(value: &str) -> bool {
+    value
+        .chars()
+        .any(|character| ('\u{4e00}'..='\u{9fff}').contains(&character))
 }

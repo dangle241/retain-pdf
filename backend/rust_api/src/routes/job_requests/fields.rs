@@ -21,6 +21,9 @@ pub(super) fn apply_multipart_request_field(
         "job_id" => request.runtime.job_id = value.to_string(),
         "mode" => request.translation.mode = value.to_string(),
         "math_mode" => request.translation.math_mode = value.to_string(),
+        "source_language" => request.translation.source_language = value.to_string(),
+        "target_language" => request.translation.target_language = value.to_string(),
+        "target_language_name" => request.translation.target_language_name = value.to_string(),
         "skip_title_translation" => {
             request.translation.skip_title_translation = parse_bool_like(value)
         }
@@ -124,6 +127,17 @@ mod tests {
         .expect("base_url");
         apply_multipart_request_field(&mut request, &mut developer_mode, "api_key", "sk-test")
             .expect("api_key");
+        apply_multipart_request_field(&mut request, &mut developer_mode, "source_language", "en")
+            .expect("source_language");
+        apply_multipart_request_field(&mut request, &mut developer_mode, "target_language", "vi")
+            .expect("target_language");
+        apply_multipart_request_field(
+            &mut request,
+            &mut developer_mode,
+            "target_language_name",
+            "Tiếng Việt",
+        )
+        .expect("target_language_name");
         apply_multipart_request_field(&mut request, &mut developer_mode, "render_mode", "auto")
             .expect("render_mode");
         apply_multipart_request_field(&mut request, &mut developer_mode, "timeout_seconds", "600")
@@ -137,6 +151,9 @@ mod tests {
         assert_eq!(request.ocr.paddle_token, "paddle-secret");
         assert_eq!(request.translation.base_url, "https://api.deepseek.com/v1");
         assert_eq!(request.translation.api_key, "sk-test");
+        assert_eq!(request.translation.source_language, "en");
+        assert_eq!(request.translation.target_language, "vi");
+        assert_eq!(request.translation.target_language_name, "Tiếng Việt");
         assert_eq!(request.render.render_mode, "auto");
         assert_eq!(request.runtime.timeout_seconds, 600);
     }

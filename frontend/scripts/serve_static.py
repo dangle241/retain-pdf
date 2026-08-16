@@ -21,8 +21,8 @@ DEFAULT_OCR_PROVIDER = os.environ.get("RETAIN_PDF_FRONTEND_OCR_PROVIDER", "").st
 DEFAULT_PADDLE_TOKEN = os.environ.get("RETAIN_PDF_FRONTEND_PADDLE_TOKEN", "").strip()
 DEFAULT_MINERU_TOKEN = os.environ.get("RETAIN_PDF_FRONTEND_MINERU_TOKEN", "").strip()
 DEFAULT_MODEL_API_KEY = os.environ.get("RETAIN_PDF_FRONTEND_MODEL_API_KEY", "").strip()
-DEFAULT_MODEL = os.environ.get("RETAIN_PDF_FRONTEND_MODEL", "deepseek-v4-flash").strip()
-DEFAULT_BASE_URL = os.environ.get("RETAIN_PDF_FRONTEND_BASE_URL", "https://api.deepseek.com/v1").strip()
+DEFAULT_MODEL = os.environ.get("RETAIN_PDF_FRONTEND_MODEL", "gpt-4.1-mini").strip()
+DEFAULT_BASE_URL = os.environ.get("RETAIN_PDF_FRONTEND_BASE_URL", "https://api.openai.com/v1").strip()
 
 
 def default_api_base() -> str:
@@ -100,9 +100,9 @@ class FrontendRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(encoded)
             return
         if self.path == "/runtime-config.local.js":
-            # 策略：磁盘文件只放非密钥项；密钥不进仓库/本地配置文件。
-            # - model/OCR key：仅当显式设置了对应环境变量时才注入（默认空 → UI 门禁生效）
-            # - 后端 X-API-Key：可从 env 或 auth.local.json 注入，方便本地连 Rust API
+            # Chỉ lưu các mục không bí mật trên đĩa; khóa không được đưa vào repo hay tệp cấu hình cục bộ.
+            # - Khóa model/OCR: chỉ chèn khi biến môi trường tương ứng được đặt rõ ràng (mặc định rỗng để UI chặn truy cập).
+            # - X-API-Key backend: có thể lấy từ biến môi trường hoặc auth.local.json để kết nối Rust API cục bộ.
             root = Path(self.directory).resolve()
             disk_local = root / "runtime-config.local.js"
             chunks: list[str] = []

@@ -157,13 +157,7 @@ mod tests {
         let job_runner = crate::config::JobRunnerConfig::default();
         let canceled_jobs: RwLock<HashSet<String>> = RwLock::new(HashSet::new());
 
-        let deps = ControlDeps::new(
-            &db,
-            &job_runner,
-            &data_root,
-            &output_root,
-            &canceled_jobs,
-        );
+        let deps = ControlDeps::new(&db, &job_runner, &data_root, &output_root, &canceled_jobs);
 
         // Hold the registry write lock so that cancel_job's
         // `deps.runtime.request_cancel(job_id).await` call is forced to

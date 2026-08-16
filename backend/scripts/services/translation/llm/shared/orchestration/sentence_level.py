@@ -224,7 +224,12 @@ def sentence_level_fallback(
         "latency_ms": 0,
         **formula_route_diagnostics(item, context=context),
     }
-    validate_batch_result([item], {item["item_id"]: payload}, diagnostics=diagnostics)
+    validate_batch_result(
+        [item],
+        {item["item_id"]: payload},
+        diagnostics=diagnostics,
+        target_language_name=context.target_language_name,
+    )
     return {item["item_id"]: payload}
 
 

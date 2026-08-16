@@ -1,20 +1,19 @@
-// 主页图书馆级 AI 问答：全库 / @ 文档 + 会话列表（侧栏历史）
+// Hỏi đáp AI cấp thư viện ở trang chính: toàn thư viện / @ tài liệu + danh sách hội thoại (lịch sử bên).
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { askLibraryAi, AiAskError } from "../../../../js/api/ai.js";
 import {
+  AiAskError,
+  askLibraryAi,
   deleteConversation,
   getConversation,
-  listConversations,
-  patchConversation,
-  type ConversationRecord,
-} from "../../../../js/api/conversations.js";
-import {
   hasModelApiKey,
+  listConversations,
   MISSING_MODEL_API_KEY_MESSAGE,
+  patchConversation,
   resolveReaderAiConfig,
-} from "../../../../js/reader/ai/config.js";
-import { sanitizeAssistantAnswer } from "../../../../js/reader/ai/sanitize-answer.js";
+  sanitizeAssistantAnswer,
+  type ConversationRecord,
+} from "../../composition/external.js";
 import { resolveCollectionDocuments } from "./document-picker.js";
 import type { HomeAskCitation, HomeAskDocScope, HomeAskMessage, HomeAskScope } from "./types.js";
 
@@ -56,20 +55,20 @@ function makeId(prefix: string) {
 function describeToolEvent(event: unknown): string {
   const e = event as { tool?: string; name?: string } | null;
   const tool = `${e?.tool || e?.name || ""}`.trim();
-  if (!tool) return "正在检索…";
-  if (tool.includes("search")) return "正在全文检索…";
-  if (tool.includes("read")) return "正在阅读相关段落…";
-  if (tool.includes("list")) return "正在浏览文档库…";
-  if (tool.includes("favorite")) return "正在查阅收藏…";
-  return `正在调用 ${tool}…`;
+  if (!tool) return "Đang tìm kiếm…";
+  if (tool.includes("search")) return "Đang tìm kiếm toàn văn…";
+  if (tool.includes("read")) return "Đang đọc các đoạn liên quan…";
+  if (tool.includes("list")) return "Đang duyệt thư viện tài liệu…";
+  if (tool.includes("favorite")) return "Đang xem các mục đã lưu…";
+  return `Đang gọi ${tool}…`;
 }
 
 function labelScope(s: HomeAskScope): string {
   if (s.kind === "collection") {
-    const n = s.document_count != null ? `（${s.document_count} 篇）` : "";
-    return `合集「${s.title}」${n}`;
+    const n = s.document_count != null ? `(${s.document_count} tài liệu)` : "";
+    return `Bộ sưu tập “${s.title}” ${n}`;
   }
-  return `文档「${s.title}」`;
+  return `Tài liệu “${s.title}”`;
 }
 
 function buildScopedQuestion(
@@ -83,7 +82,7 @@ function buildScopedQuestion(
 
   const hasCollection = scopes.some((s) => s.kind === "collection");
   if (!hasCollection && scopes.length === 1 && scopes[0].kind === "document") {
-    return `（范围：文档「${scopes[0].title}」）${q}`;
+    return `(Phạm vi: tài liệu “${scopes[0].title}”) ${q}`;
   }
 
   const scopeLines = scopes.map((s, i) => `${i + 1}. ${labelScope(s)}`).join("\n");
@@ -92,18 +91,18 @@ function buildScopedQuestion(
       .slice(0, 40)
       .map((d, i) => `  ${i + 1}. ${d.title} (document_id=${d.id})`)
       .join("\n");
-    const more = resolvedDocs.length > 40 ? `\n  …共 ${resolvedDocs.length} 篇` : "";
+    const more = resolvedDocs.length > 40 ? `\n  …tổng cộng ${resolvedDocs.length} tài liệu` : "";
     return (
-      `请仅在下列范围内检索与回答（不要使用范围外的文献）：\n`
-      + `范围选择：\n${scopeLines}\n`
-      + `包含文档：\n${docLines}${more}\n\n`
-      + `问题：${q}`
+      `Chỉ tìm kiếm và trả lời trong phạm vi sau (không sử dụng tài liệu ngoài phạm vi):\n`
+      + `Phạm vi đã chọn:\n${scopeLines}\n`
+      + `Tài liệu bao gồm:\n${docLines}${more}\n\n`
+      + `Câu hỏi: ${q}`
     );
   }
-  return `请在以下范围内检索并回答：\n${scopeLines}\n\n问题：${q}`;
+  return `Hãy tìm kiếm và trả lời trong phạm vi sau:\n${scopeLines}\n\nCâu hỏi: ${q}`;
 }
 
-/** 展开 scopes → 文档列表；单文档硬 scope 时返回 primary */
+/** Mở scopes → danh sách tài liệu; trả primary khi hard scope chỉ có một tài liệu. */
 async function resolveScopesForAsk(scopes: HomeAskScope[]): Promise<{
   primaryDoc: HomeAskDocScope | null;
   resolvedDocs: HomeAskDocScope[];
@@ -132,17 +131,17 @@ async function resolveScopesForAsk(scopes: HomeAskScope[]): Promise<{
         }
       }
     } catch {
-      // 合集展开失败时仍靠 prompt 里的合集名提示模型
+      // Khi mở bộ sưu tập thất bại, vẫn dùng tên bộ sưu tập trong prompt để gợi ý mô hình.
     }
   }
 
-  // 仅一个文档（无论直接 @ 还是合集里只有一篇）→ 硬限定
+  // Chỉ một tài liệu, dù @ trực tiếp hay bộ sưu tập chỉ có một mục → giới hạn cứng.
   const primaryDoc = docs.length === 1 ? docs[0] : null;
   return { primaryDoc, resolvedDocs: docs };
 }
 
 function recordToSession(c: ConversationRecord): HomeAskSession {
-  const title = `${c.title || ""}`.trim() || "未命名对话";
+  const title = `${c.title || ""}`.trim() || "Cuộc trò chuyện chưa đặt tên";
   return {
     id: `${c.conversation_id || ""}`.trim(),
     title,
@@ -195,7 +194,7 @@ export function useHomeAskRuntime() {
   const runningRef = useRef(false);
   const conversationIdRef = useRef(conversationId);
   const abortRef = useRef<AbortController | null>(null);
-  /** 当前流式 assistant 消息 id，停止时用于收尾文案 */
+  /** id thông điệp assistant streaming hiện tại, dùng để kết thúc nội dung khi dừng. */
   const streamingAssistantIdRef = useRef("");
   conversationIdRef.current = conversationId;
 
@@ -212,7 +211,7 @@ export function useHomeAskRuntime() {
         .filter((s) => s.id);
       setSessions(list);
     } catch {
-      // 列表失败不挡主流程
+      // Lỗi danh sách không chặn luồng chính.
     } finally {
       setSessionsLoading(false);
     }
@@ -222,7 +221,7 @@ export function useHomeAskRuntime() {
     void refreshSessions();
   }, [refreshSessions]);
 
-  // 启动时若有粘性 conversationId，尝试 hydrate（失败则当新对话）
+  // Khi khởi động, nếu có conversationId liên kết thì thử hydrate; lỗi thì coi là hội thoại mới.
   useEffect(() => {
     const id = loadConversationId();
     if (!id) return;
@@ -258,7 +257,7 @@ export function useHomeAskRuntime() {
   }, []);
 
   const newSession = useCallback(() => {
-    // 新对话时若正在生成，先中止
+    // Khi tạo hội thoại mới, dừng lượt đang tạo trước.
     if (runningRef.current) {
       try {
         abortRef.current?.abort();
@@ -284,7 +283,7 @@ export function useHomeAskRuntime() {
       saveConversationId(next);
       setMessages(messagesFromDetail(detail));
     } catch {
-      // 切失败保持现状
+      // Nếu chuyển thất bại, giữ trạng thái hiện tại.
     } finally {
       setSessionBusy(false);
     }
@@ -336,7 +335,7 @@ export function useHomeAskRuntime() {
     const question = `${rawQuestion || ""}`.trim();
     if (!question || runningRef.current) return;
 
-    // 门禁：无 LLM Key 不发起任何检索/会话写，避免「先忙活再报错」
+    // Cổng: không có LLM Key thì không tìm kiếm/ghi hội thoại, tránh làm việc trước rồi mới báo lỗi.
     const config = resolveReaderAiConfig();
     const apiKey = `${config.apiKey || ""}`.trim();
     if (!apiKey) {
@@ -355,10 +354,10 @@ export function useHomeAskRuntime() {
     const userId = makeId("u");
     const assistantId = makeId("a");
     const displayUser = scopes.length
-      ? `${question}\n\n${scopes.map((s) => (s.kind === "collection" ? `@合集:${s.title}` : `@${s.title}`)).join(" ")}`
+      ? `${question}\n\n${scopes.map((s) => (s.kind === "collection" ? `@Bộ-sưu-tập:${s.title}` : `@${s.title}`)).join(" ")}`
       : question;
 
-    // 新请求前中止上一轮
+    // Dừng lượt trước trước khi gửi yêu cầu mới.
     try {
       abortRef.current?.abort();
     } catch {
@@ -377,7 +376,7 @@ export function useHomeAskRuntime() {
         id: assistantId,
         role: "assistant",
         content: "",
-        progress: scopes.some((s) => s.kind === "collection") ? "正在解析合集…" : "正在准备…",
+        progress: scopes.some((s) => s.kind === "collection") ? "Đang phân tích bộ sưu tập…" : "Đang chuẩn bị…",
         status: "streaming",
       },
     ]);
@@ -390,7 +389,7 @@ export function useHomeAskRuntime() {
       if (scopes.some((s) => s.kind === "collection") && resolvedDocs.length === 0) {
         const emptyCol = scopes.find((s) => s.kind === "collection");
         patchMessage(assistantId, {
-          content: `合集「${emptyCol?.title || ""}」里还没有文档，请先往合集加入文献后再问。`,
+          content: `Bộ sưu tập “${emptyCol?.title || ""}” chưa có tài liệu; hãy thêm tài liệu trước khi đặt câu hỏi.`,
           progress: "",
           status: "error",
           citations: [],
@@ -439,7 +438,7 @@ export function useHomeAskRuntime() {
         ? result.citations
         : []) as HomeAskCitation[];
       const answer = sanitizeAssistantAnswer(
-        `${result?.answer || ""}`.trim() || "没有找到可用回答。",
+        `${result?.answer || ""}`.trim() || "Không tìm thấy câu trả lời phù hợp.",
         citations,
       );
       const nextConv = `${result?.conversationId || ""}`.trim();
@@ -465,15 +464,15 @@ export function useHomeAskRuntime() {
         || abort.signal.aborted
       );
       if (aborted) {
-        // 保留已流式输出的正文，追加「已停止」
+        // Giữ nội dung đã streaming và thêm "Đã dừng".
         setMessages((prev) => prev.map((m) => {
           if (m.id !== assistantId) return m;
           const partial = `${m.content || ""}`.trim();
           return {
             ...m,
             content: partial
-              ? `${partial}\n\n_（已停止生成）_`
-              : "_（已停止生成）_",
+              ? `${partial}\n\n_(Đã dừng tạo)_`
+              : "_(Đã dừng tạo)_",
             progress: "",
             status: "complete" as const,
           };
@@ -483,7 +482,7 @@ export function useHomeAskRuntime() {
           ? error.message
           : error instanceof Error
             ? error.message
-            : "生成回答失败，请重试。";
+            : "Không thể tạo câu trả lời, vui lòng thử lại.";
         patchMessage(assistantId, {
           content: msg,
           progress: "",
@@ -508,7 +507,7 @@ export function useHomeAskRuntime() {
     sessions,
     sessionsLoading,
     sessionBusy,
-    /** 是否已配置模型 Key（门禁；每次调用现读 storage） */
+    /** Key mô hình đã cấu hình hay chưa (cổng; đọc storage mới mỗi lần gọi). */
     hasLlmKey: hasModelApiKey,
     send,
     stop,

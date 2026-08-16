@@ -1,7 +1,7 @@
-// StatusDetailDialog 家族的唯一装配面(蓝图 §1.2)——把 composition.js 的
-// statusDetail 域(services.statusDetail:{store, dialogStore, controller})
-// 折成一个 hook,组件只订阅需要的切片,不各自重复 useStoreSnapshot/
-// useDialogState 样板(镜像 useCredentialsController.js 的先例)。
+// Bề mặt lắp ráp duy nhất của họ StatusDetailDialog (thiết kế §1.2): gom miền
+// statusDetail trong composition.js (services.statusDetail:{store, dialogStore, controller})
+// thành một hook; component chỉ đăng ký các lát cắt cần thiết, không lặp lại
+// mẫu useStoreSnapshot/useDialogState ở từng nơi (theo tiền lệ useCredentialsController.js).
 
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
 import { useHomeServices } from "../../home-services-context.js";
@@ -18,7 +18,7 @@ import type {
 } from "./status-detail-dialog-store.js";
 import type { DialogState } from "../../state/dialog-store.js";
 
-/** controller 表面（JSX 直接调用的方法） */
+/** Bề mặt controller (các phương thức JSX gọi trực tiếp). */
 export type StatusDetailControllerApi = {
   openStatusDetailDialog: (tabName?: string) => void;
   activateDetailTab: (tabName?: string) => void;
@@ -29,6 +29,7 @@ export type StatusDetailControllerApi = {
   replayTranslationItem?: (...args: unknown[]) => unknown;
   replayCurrentItem?: (...args: unknown[]) => unknown;
   rerunCurrentJob?: () => Promise<unknown> | unknown;
+  renderManualTranslation?: () => Promise<unknown> | unknown;
   ensureOverviewData?: (options?: { force?: boolean }) => Promise<unknown> | unknown;
   ensureTranslationData?: (options?: { force?: boolean }) => Promise<unknown> | unknown;
   syncRerunAction?: (statusText?: string) => unknown;

@@ -1,5 +1,5 @@
-// 详情右栏 Tab 切换壳：图标 + 短文案；选中黑底白字。
-// 样式见 library-shell.css（.book-detail-right-tab.is-active）。
+// Vỏ chuyển tab cột phải: biểu tượng + nhãn ngắn; khi chọn nền đen chữ trắng.
+// Xem style trong library-shell.css (.book-detail-right-tab.is-active).
 
 import { useEffect, useState } from "react";
 import { Tabs as TabsPrimitive } from "radix-ui";
@@ -35,11 +35,11 @@ function IconMore(props) {
   );
 }
 
-// shortLabel 用于按钮显示，避免挤占关闭钮；title 完整名称给悬停/无障碍
+// shortLabel dùng trên nút để không lấn nút đóng; title đầy đủ cho hover/trợ năng.
 export const BOOK_DETAIL_TABS = Object.freeze([
-  { id: "overview", label: "简介", title: "书籍简介", Icon: IconBook },
-  { id: "translate", label: "翻译", title: "翻译", Icon: IconTranslate },
-  { id: "more", label: "更多", title: "其他操作", Icon: IconMore },
+  { id: "overview", label: "Giới thiệu", title: "Giới thiệu sách", Icon: IconBook },
+  { id: "translate", label: "Dịch", title: "Dịch", Icon: IconTranslate },
+  { id: "more", label: "Thêm", title: "Thao tác khác", Icon: IconMore },
 ]);
 
 /**
@@ -87,7 +87,7 @@ export function BookDetailRightTabs({
     >
       <TabsPrimitive.List
         className="book-detail-right-tabs-list"
-        aria-label="书籍详情分区"
+        aria-label="Khu vực chi tiết sách"
       >
         {BOOK_DETAIL_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -109,7 +109,7 @@ export function BookDetailRightTabs({
         })}
       </TabsPrimitive.List>
 
-      {/* forceMount：面板始终在 DOM（用 CSS 隐藏），便于测试定位 + 保留表单状态 */}
+      {/* forceMount: bảng luôn trong DOM, ẩn bằng CSS, để test dễ định vị và giữ trạng thái biểu mẫu. */}
       <TabsPrimitive.Content
         value="overview"
         forceMount

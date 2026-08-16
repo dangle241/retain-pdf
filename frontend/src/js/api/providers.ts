@@ -24,7 +24,7 @@ export async function validateDeepSeekToken(apiPrefix, payload) {
       summary: "mock mode: token validation skipped",
     };
   }
-  return submitJson(buildApiEndpoint(apiPrefix, "providers/deepseek/validate-token"), payload);
+  return submitJson(buildApiEndpoint(apiPrefix, "providers/model/validate-token"), payload);
 }
 
 export async function queryDeepSeekBalance(apiPrefix, payload) {
@@ -34,7 +34,7 @@ export async function queryDeepSeekBalance(apiPrefix, payload) {
     return {
       ok: true,
       status: "available",
-      summary: "mock mode: DeepSeek 余额可用：CNY 100.00",
+      summary: "chế độ mô phỏng: số dư DeepSeek khả dụng: CNY 100.00",
       is_available: true,
       balance_infos: [
         {

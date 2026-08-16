@@ -1,8 +1,8 @@
-// 秒表 hook(蓝图 §2 features/status/,§3.5)。
+// Hook đồng hồ bấm giờ (thiết kế §2 features/status/, §3.5).
 //
-// 独立于 statusCardStore 驱动(store 里故意不放 elapsed——见
-// status-card-store.js 顶部注释)。1s tick,终态(succeeded/failed/canceled)
-// 即停,直接复用 job/elapsed-view-model.js 的纯函数。
+// Được điều khiển độc lập với statusCardStore (cố ý không đưa elapsed vào store; xem
+// comment đầu status-card-store.js). Tick 1 giây, dừng ở trạng thái cuối (succeeded/failed/canceled)
+// và tái sử dụng trực tiếp hàm thuần trong job/elapsed-view-model.js.
 
 import { useEffect, useState } from "react";
 import {
@@ -24,6 +24,6 @@ export function useElapsedTicker(job, { finishedAtFallback = "" } = {}) {
     return () => clearInterval(timer);
   }, [terminal, job?.job_id, status]);
 
-  void tick; // 仅用于每秒触发重渲,值本身不参与计算
+  void tick; // Chỉ dùng để kích hoạt render lại mỗi giây; bản thân giá trị không tham gia tính toán.
   return buildElapsedViewModel(job, { finishedAtFallback });
 }

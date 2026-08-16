@@ -96,7 +96,7 @@ export function isMockMode() {
   return !!mockScenario();
 }
 
-/** 模块快照为空时再读一次 window（runtime-config.local.js 晚注入等边缘情况）。 */
+/** Khi snapshot mô-đun rỗng, đọc lại window một lần (trường hợp biên như runtime-config.local.js được chèn muộn). */
 function liveRuntimeString(key: string): string {
   if (typeof window === "undefined") {
     return "";
@@ -133,8 +133,8 @@ export function defaultOcrProvider() {
 }
 
 export function defaultModelApiKey() {
-  // 两把钥匙之一：下游 LLM（DeepSeek 等）的 Bearer key，随 ask 请求 body.llm_api_key 上传。
-  // 勿与 xApiKey（Rust/AI 服务 X-API-Key）混淆。
+  // Một trong hai khóa: Bearer key của LLM phía dưới (DeepSeek, v.v.), được gửi trong body.llm_api_key của yêu cầu ask.
+  // Không nhầm với xApiKey (X-API-Key của dịch vụ Rust/AI).
   const fromModule = typeof runtimeConfig.modelApiKey === "string" ? runtimeConfig.modelApiKey.trim() : "";
   return fromModule || liveRuntimeString("modelApiKey");
 }

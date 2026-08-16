@@ -7,8 +7,9 @@ use crate::ocr_provider::{provider_public_definitions, OcrProviderPublicDefiniti
 use crate::routes::common::build_provider_route_deps;
 use crate::services::provider_probe::{
     query_deepseek_balance_view, validate_deepseek_token_view, validate_mineru_token_view,
-    validate_paddle_token_view, DeepSeekBalanceView, DeepSeekTokenValidationRequest,
-    MineruTokenValidationRequest, MineruTokenValidationView, PaddleTokenValidationRequest,
+    validate_model_api_key_view, validate_paddle_token_view, DeepSeekBalanceView,
+    DeepSeekTokenValidationRequest, MineruTokenValidationRequest, MineruTokenValidationView,
+    PaddleTokenValidationRequest,
 };
 use crate::AppState;
 
@@ -41,6 +42,15 @@ pub async fn validate_deepseek_token(
 ) -> Result<Json<ApiResponse<MineruTokenValidationView>>, AppError> {
     let deps = build_provider_route_deps(&state);
     let view = validate_deepseek_token_view(payload, deps.deepseek_runtime).await?;
+    Ok(Json(ApiResponse::ok(view)))
+}
+
+pub async fn validate_model_api_key(
+    State(state): State<AppState>,
+    Json(payload): Json<DeepSeekTokenValidationRequest>,
+) -> Result<Json<ApiResponse<MineruTokenValidationView>>, AppError> {
+    let deps = build_provider_route_deps(&state);
+    let view = validate_model_api_key_view(payload, deps.deepseek_runtime).await?;
     Ok(Json(ApiResponse::ok(view)))
 }
 

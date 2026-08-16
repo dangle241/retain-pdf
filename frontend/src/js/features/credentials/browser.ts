@@ -39,6 +39,7 @@ export interface CredentialDialogElements {
   dialog?: HTMLDialogElement | HTMLElement | boolean | null;
   paddleInput?: HTMLInputElement | null;
   apiKeyInput?: HTMLInputElement | null;
+  modelProviderSelect?: HTMLSelectElement | null;
   modelBaseUrlInput?: HTMLInputElement | null;
   modelNameInput?: HTMLInputElement | null;
   mathModeSelect?: HTMLSelectElement | null;
@@ -221,8 +222,20 @@ export function mountBrowserCredentialsFeature({
     viewPort.syncOcrProviderControls(activeProvider);
   }
 
-  function readCurrentCredentials() {
-    return credentialsStatePort.getCredentials?.() || readHiddenCredentialInputs();
+  function readCurrentCredentials(): CredentialsFields {
+    const current = credentialsStatePort.getCredentials?.();
+    if (current) {
+      return current;
+    }
+    const hidden = readHiddenCredentialInputs();
+    const fields = hidden && typeof hidden === "object"
+      ? hidden as Partial<CredentialsFields>
+      : {};
+    return {
+      ocrProvider: normalizeOcrProvider(fields.ocrProvider),
+      paddleToken: `${fields.paddleToken || ""}`.trim(),
+      modelApiKey: `${fields.modelApiKey || ""}`.trim(),
+    };
   }
 
   function syncBrowserDialogFromCredentialState() {
@@ -258,9 +271,9 @@ export function mountBrowserCredentialsFeature({
   }
 
   /**
-   * 设置面板内嵌模式（SettingsHubDialog API 区）：只做"从凭据状态回填表单 +
-   * 复位到 api tab"，不经 viewPort.openDialog()——表单宿主是设置面板本身，
-   * 没有独立弹窗可开。首次配置门（setupMode）仍走 openBrowserCredentialsDialog。
+   * Chế độ nhúng trong bảng cài đặt (khu API của SettingsHubDialog): chỉ "điền lại biểu mẫu từ trạng thái xác thực +
+   * đặt lại về tab api", không qua viewPort.openDialog(); host của biểu mẫu là chính bảng cài đặt,
+   * không có hộp thoại độc lập để mở. Cổng cấu hình đầu tiên (setupMode) vẫn dùng openBrowserCredentialsDialog.
    */
   function prepareCredentialsPanels() {
     syncBrowserDialogFromCredentialState();
@@ -350,6 +363,7 @@ export function mountBrowserCredentialsFeature({
       apiPrefix,
       state,
       defaultModelApiKey,
+      defaultModelBaseUrl,
       validateDeepSeekToken,
       queryDeepSeekBalance,
       onBalanceChange: onCredentialStateChange,
@@ -364,6 +378,7 @@ export function mountBrowserCredentialsFeature({
       apiPrefix,
       state,
       defaultModelApiKey,
+      defaultModelBaseUrl,
       validateDeepSeekToken,
       queryDeepSeekBalance,
       onBalanceChange: onCredentialStateChange,
@@ -378,7 +393,7 @@ export function mountBrowserCredentialsFeature({
     const definition = getOcrProviderDefinition(currentOcrProvider());
     const existing = readCurrentCredentials();
     const raw = readCredentialDialogValues({ elementsPort: dialogElementsPort });
-    // 密码框未回填/被清空时：空串表示「沿用已保存值」，避免把 localStorage 冲掉
+    // Khi ô mật khẩu chưa được điền lại/bị xóa: chuỗi rỗng nghĩa là "giữ giá trị đã lưu", tránh ghi đè localStorage.
     const values = {
       ...raw,
       paddleToken: `${raw.paddleToken || ""}`.trim() || `${existing.paddleToken || ""}`.trim(),
@@ -393,7 +408,7 @@ export function mountBrowserCredentialsFeature({
       if (!modelApiKey) {
         viewPort.setDeepSeekValidationMessage(TRANSLATION_PROVIDER_DEFINITION.validationMissingMessage, "error");
       }
-      viewPort.setDialogStatus("请填写 OCR Token 与模型 API Key 后再保存", "error");
+      viewPort.setDialogStatus("Vui lòng nhập OCR Token và API Key của mô hình trước khi lưu", "error");
       return;
     }
 
@@ -403,13 +418,13 @@ export function mountBrowserCredentialsFeature({
       modelApiKey,
     };
 
-    // 保存只做落盘；联网校验留给「检测」按钮。
-    // 必须 await 完整持久化（含桌面 snapshot），再通知 AI 门禁刷新。
+    // Lưu chỉ ghi dữ liệu; việc kiểm tra qua mạng dành cho nút "Kiểm tra".
+    // Phải await quá trình lưu bền vững đầy đủ (gồm desktop snapshot) rồi mới báo cổng AI làm mới.
     try {
       credentialsStatePort.setCredentials?.(nextCredentials);
-      // 统一走 savePersisted*：localStorage + 桌面 snapshot/IPC 一次写齐
+      // Dùng thống nhất savePersisted*: ghi localStorage + desktop snapshot/IPC trong một lần.
       await savePersistedBrowserStoredConfig(nextCredentials);
-      // 兼容旧注入（桌面 markConfigured / 任务选项）
+      // Tương thích injection cũ (desktop markConfigured / tùy chọn tác vụ).
       if (runtimeEnv.isDesktopMode() && saveDesktopConfig) {
         await persistDesktopCredentials({
           currentOcrProvider,
@@ -438,7 +453,7 @@ export function mountBrowserCredentialsFeature({
           values: { ...values, paddleToken: ocrToken, modelApiKey },
         });
       }
-      // 再次保证内存态与刚写入的 next 一致
+      // Đảm bảo lại trạng thái trong bộ nhớ khớp với next vừa ghi.
       credentialsStatePort.setCredentials?.(nextCredentials);
     } catch (error) {
       const message = (error as { message?: string })?.message || String(error);
@@ -446,12 +461,12 @@ export function mountBrowserCredentialsFeature({
       viewPort.setDeepSeekValidationMessage(message, "error");
       return;
     }
-    // 写回可见输入，避免保存后输入框仍显示空
+    // Ghi lại vào ô nhập hiển thị để tránh ô vẫn trống sau khi lưu.
     syncBrowserDialogFromCredentialState();
     onCredentialStateChange?.();
     notifyCredentialsChanged();
-    viewPort.setDialogStatus("已保存", "valid");
-    // 首次配置弹窗保存后关闭；设置中心内嵌时保持打开以便继续改任务选项
+    viewPort.setDialogStatus("Đã lưu", "valid");
+    // Đóng hộp thoại cấu hình đầu tiên sau khi lưu; khi nhúng trong trung tâm cài đặt thì giữ mở để tiếp tục sửa tùy chọn tác vụ.
     if (setupModePort.currentSetupMode?.()) {
       viewPort.closeDialog();
     }

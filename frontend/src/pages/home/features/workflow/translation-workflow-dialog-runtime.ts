@@ -5,19 +5,19 @@ import {
 } from "../../composition/external.js";
 import type { TranslationWorkflowDialogStatePort } from "../../composition/external.js";
 
-// 翻译工作流对话框 runtime(React 世界版控制器)。
+// Runtime hộp thoại workflow dịch (controller bản React).
 //
-// 复用纯逻辑:state.js 的 dialogStatePort(store 驱动开合/模式,并同步 home
-// viewMode)、contract.js 的模式常量、status-area-port 契约。旧 controller.js
-// 的 DOM 绑定(dialogElement/closeButton addEventListener)由 React 组件的
-// onClick 取代,这里只保留 document 级事件桥。
+// Tái sử dụng logic thuần: dialogStatePort trong state.js (store điều khiển đóng/mở/chế độ và đồng bộ
+// viewMode của home), hằng số chế độ trong contract.js và hợp đồng status-area-port. Phần gắn DOM của controller.js cũ
+// (dialogElement/closeButton addEventListener) được thay bằng
+// onClick của component React; tại đây chỉ giữ cầu nối sự kiện cấp document.
 //
-// 事件契约(蓝图风险 5,不可破坏):
-// - 用户侧开合入口(添加按钮 / 关闭按钮 / 背板 / Escape)一律先 dispatch
-//   APP_EVENTS.openTranslationWorkflow / closeTranslationWorkflow,再由本
-//   runtime 的 document 监听统一落状态——3b recent-jobs 的库刷新挂起/恢复
-//   (bindings.js)与 app-actions 提交流程都依赖这两个事件在 document 上可见。
-// - translationWorkflowSync / statusAreaVisibilityChanged → 同步模式。
+// Hợp đồng sự kiện (rủi ro thiết kế 5, không được phá):
+// - Mọi điểm vào đóng/mở phía người dùng (nút Thêm / nút đóng / nền sau / Escape) trước tiên đều dispatch
+//   APP_EVENTS.openTranslationWorkflow / closeTranslationWorkflow, sau đó listener document của
+//   runtime này thống nhất ghi trạng thái; việc tạm dừng/tiếp tục làm mới thư viện trong recent-jobs 3b
+//   (bindings.js) và luồng gửi app-actions đều phụ thuộc việc hai sự kiện này hiển thị trên document.
+// - translationWorkflowSync / statusAreaVisibilityChanged → đồng bộ chế độ.
 
 export interface TranslationWorkflowStatusAreaPort {
   isVisible?: () => boolean;
@@ -50,17 +50,17 @@ export function createTranslationWorkflowDialogRuntime({
   uploadSessionPort = null,
   documentRef = globalThis.document,
 }: CreateTranslationWorkflowDialogRuntimeOptions = {}) {
-  // 3b 修复(实测发现,非预先设计):recent-jobs 的 refresh-environment.js
-  // 默认 isWorkflowOpen 读的是 #translation-workflow-dialog 的 data-open
-  // 属性(DOM),不是任何 store——而 React 的 DOM 提交相对 store 写入是异步的。
-  // close() 触发的"store 写入 → bindings.js 的 closeTranslationWorkflow 监听器
-  // 读 DOM 判断 isSuspended()"全部发生在同一个同步事件派发调用栈内,此时 React
-  // 还没来得及重渲提交新的 data-open,DOM 读到的仍是打开前的旧值——实测复现为
-  // "关闭工作流对话框后库刷新永久卡死"(蓝图风险 5 的具体翻车形态)。
-  // mountRecentJobsFeature 未开放 environment 注入口(见 composition.js 里的
-  // 说明),没法从上游注入读 store 的 isWorkflowOpen,只能反过来:在 store 写入
-  // 的同一拍,把这个属性也同步写一份到 DOM,消除给 DOM 读方的竞态窗口。
-  // React 之后仍会按自己的节奏把同一个值再渲一遍(幂等,无副作用)。
+  // Bản sửa 3b (phát hiện khi kiểm tra thực tế, không được thiết kế trước): refresh-environment.js của recent-jobs
+  // mặc định để isWorkflowOpen đọc thuộc tính data-open của #translation-workflow-dialog
+  // trong DOM, không đọc store nào; còn việc React commit DOM là bất đồng bộ so với ghi store.
+  // Chuỗi do close() kích hoạt: "ghi store → listener closeTranslationWorkflow trong bindings.js
+  // đọc DOM để xác định isSuspended()" diễn ra trong cùng call stack phân phát sự kiện đồng bộ; lúc này React
+  // chưa kịp render lại và commit data-open mới, DOM vẫn đọc giá trị cũ trước khi đóng; kiểm tra thực tế tái hiện thành
+  // "sau khi đóng hộp thoại workflow, làm mới thư viện bị kẹt vĩnh viễn" (biểu hiện cụ thể của rủi ro thiết kế 5).
+  // mountRecentJobsFeature không mở điểm inject environment (xem
+  // giải thích trong composition.js), không thể inject isWorkflowOpen đọc store từ thượng nguồn; chỉ có thể làm ngược lại: cùng nhịp ghi store,
+  // ghi đồng bộ thêm thuộc tính này vào DOM để loại bỏ cửa sổ race condition cho phía đọc DOM.
+  // Sau đó React vẫn render lại cùng giá trị theo nhịp riêng (idempotent, không có tác dụng phụ).
   function syncOpenAttributeToDom(open: boolean) {
     const dialogEl = documentRef?.getElementById?.(TRANSLATION_WORKFLOW_DIALOG.ids.dialog);
     if (dialogEl?.dataset) {
@@ -82,7 +82,7 @@ export function createTranslationWorkflowDialogRuntime({
     return Boolean(dialogStatePort.getSnapshot().open);
   }
 
-  // ---- 状态落地(document 监听调用;镜像旧 controller 的 openUpload/openFromEvent/close/sync) ----
+  // ---- Ghi trạng thái (listener document gọi; phản chiếu openUpload/openFromEvent/close/sync của controller cũ) ----
 
   function openUpload() {
     statusAreaPort?.hide?.();
@@ -111,7 +111,7 @@ export function createTranslationWorkflowDialogRuntime({
     dialogStatePort.setMode(resolveMode());
   }
 
-  // ---- 用户侧入口(React 组件调用;只发事件,不直接改状态) ----
+  // ---- Điểm vào phía người dùng (component React gọi; chỉ phát sự kiện, không sửa trạng thái trực tiếp) ----
 
   function dispatch(eventName: string, detail?: unknown) {
     if (documentRef?.dispatchEvent && typeof globalThis.CustomEvent === "function") {
@@ -123,17 +123,17 @@ export function createTranslationWorkflowDialogRuntime({
     dispatch(APP_EVENTS.openTranslationWorkflow, { mode: TRANSLATION_WORKFLOW_MODES.UPLOAD });
   }
 
-  // 关闭 = 直接关对话框,一次点击到位(不管当前是上传态还是任务进度态)。
+  // Đóng = đóng hộp thoại trực tiếp bằng một lần bấm (bất kể đang ở trạng thái tải lên hay tiến độ tác vụ).
   //
-  // 旧的"两段式关闭"(状态可见时先 returnHome、对话框不关,再点一次才真关)被
-  // 用户判定为不符合预期:点任务进度的 × 会先弹回"翻译 PDF"空上传表单、还顺带
-  // 悄悄 stopPolling 把任务重置掉,像是"点关闭反而退回上一步"。现在统一成"× =
-  // 关闭"。想中止运行中的任务有 StatusCard 上专门的"取消任务"按钮
-  // (cancelCurrentJob),不靠关闭对话框来兼职做这件事。
+  // Cách "đóng hai bước" cũ (khi trạng thái hiển thị thì returnHome trước nhưng không đóng hộp thoại, phải bấm lần nữa mới đóng) được
+  // người dùng đánh giá là trái kỳ vọng: bấm × ở tiến độ tác vụ sẽ quay về biểu mẫu tải lên "Dịch PDF" trống và còn âm thầm
+  // stopPolling để đặt lại tác vụ, giống như "bấm đóng nhưng lại lùi một bước". Nay thống nhất thành "× =
+  // đóng". Muốn dừng tác vụ đang chạy thì dùng nút "Hủy tác vụ" chuyên dụng trên StatusCard
+  // (cancelCurrentJob), không dùng việc đóng hộp thoại để kiêm nhiệm.
   //
-  // 关闭不影响后台任务:job-runtime 轮询独立于对话框挂载生命周期,任务到终态
-  // 时 controller.js 会自己 pollingPort.stop()(见该文件 §renderJob),不会因为
-  // 关了对话框就漏掉一个常驻轮询;图书馆网格的卡片仍会显示该任务的实时进度。
+  // Đóng không ảnh hưởng tác vụ nền: polling job-runtime độc lập với vòng đời mount của hộp thoại; khi tác vụ tới trạng thái cuối,
+  // controller.js tự gọi pollingPort.stop() (xem §renderJob trong file đó); việc đóng hộp thoại không làm
+  // mất một polling thường trực; thẻ trong lưới thư viện vẫn hiển thị tiến độ thời gian thực của tác vụ.
   function requestClose() {
     dispatch(APP_EVENTS.closeTranslationWorkflow);
   }

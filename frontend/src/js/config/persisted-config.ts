@@ -12,8 +12,13 @@ import {
   writeBrowserStoredConfig,
   writeDeveloperStoredConfig,
 } from "./storage.js";
+import {
+  defaultModelApiKey,
+  defaultOcrProvider,
+  defaultPaddleToken,
+} from "./runtime.js";
 
-function preferNonEmpty(primary = "", fallback = "") {
+function preferNonEmpty(primary: unknown = "", fallback: unknown = "") {
   const a = `${primary ?? ""}`.trim();
   if (a) {
     return a;
@@ -21,14 +26,41 @@ function preferNonEmpty(primary = "", fallback = "") {
   return `${fallback ?? ""}`.trim();
 }
 
+export function mergeBrowserConfigWithRuntimeDefaults(
+  primary: Record<string, unknown> | object | null | undefined = {},
+  fallback: Record<string, unknown> | object | null | undefined = {},
+) {
+  const source = primary && typeof primary === "object"
+    ? primary as Record<string, unknown>
+    : {};
+  const defaults = fallback && typeof fallback === "object"
+    ? fallback as Record<string, unknown>
+    : {};
+  const sourceProvider = typeof source.ocrProvider === "string" ? source.ocrProvider.trim() : "";
+  const fallbackProvider = typeof defaults.ocrProvider === "string" ? defaults.ocrProvider.trim() : "";
+  return normalizeBrowserStoredConfig({
+    ocrProvider: sourceProvider || fallbackProvider,
+    paddleToken: preferNonEmpty(source.paddleToken, defaults.paddleToken),
+    modelApiKey: preferNonEmpty(source.modelApiKey, defaults.modelApiKey),
+  });
+}
+
 /**
- * 读取用户凭据：
- * - 浏览器：localStorage
- * - 桌面：desktop snapshot 与 localStorage shadow 合并（非空优先）
- *   避免「刚保存进 shadow / state，但 snapshot 仍是空 Key」导致 AI 门禁误锁。
+ * Đọc thông tin xác thực của người dùng:
+ * - Trình duyệt: localStorage
+ * - Desktop: hợp nhất desktop snapshot với bản sao localStorage (ưu tiên giá trị không rỗng)
+ *   Tránh khóa nhầm cổng AI khi giá trị vừa lưu vào bản sao/state nhưng snapshot vẫn có Key rỗng.
  */
 export function loadBrowserStoredConfig() {
-  const fromStorage = normalizeBrowserStoredConfig(readBrowserStoredConfig());
+  const runtimeDefaults = {
+    ocrProvider: defaultOcrProvider(),
+    paddleToken: defaultPaddleToken(),
+    modelApiKey: defaultModelApiKey(),
+  };
+  const fromStorage = mergeBrowserConfigWithRuntimeDefaults(
+    readBrowserStoredConfig(),
+    runtimeDefaults,
+  );
   if (!isDesktopMode()) {
     return fromStorage;
   }
@@ -36,12 +68,7 @@ export function loadBrowserStoredConfig() {
   if (!snapshot?.browserConfig) {
     return fromStorage;
   }
-  const fromSnap = normalizeBrowserStoredConfig(snapshot.browserConfig);
-  return normalizeBrowserStoredConfig({
-    ocrProvider: fromSnap.ocrProvider || fromStorage.ocrProvider,
-    paddleToken: preferNonEmpty(fromSnap.paddleToken, fromStorage.paddleToken),
-    modelApiKey: preferNonEmpty(fromSnap.modelApiKey, fromStorage.modelApiKey),
-  });
+  return mergeBrowserConfigWithRuntimeDefaults(snapshot.browserConfig, fromStorage);
 }
 
 export function saveBrowserStoredConfig(payload = {}) {

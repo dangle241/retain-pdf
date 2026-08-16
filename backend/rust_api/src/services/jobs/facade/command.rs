@@ -1,5 +1,6 @@
 mod control;
 mod creation;
+mod manual_translation;
 mod rerun;
 mod stage_retry;
 mod stage_retry_overrides;

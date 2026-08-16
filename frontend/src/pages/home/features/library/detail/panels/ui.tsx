@@ -1,4 +1,4 @@
-// 详情弹窗 panel 共用小工具（样式 / 图标），无业务。
+// Tiện ích dùng chung cho panel hộp thoại chi tiết (style / biểu tượng), không có nghiệp vụ.
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button.jsx";

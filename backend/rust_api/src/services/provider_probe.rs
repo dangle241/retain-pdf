@@ -83,13 +83,18 @@ pub struct DeepSeekBalanceView {
 /// `allow_private_urls` is the per-deployment escape hatch
 /// (`RUST_API_ALLOW_PRIVATE_PROVIDER_URLS=1`) for self-hosted setups (e.g. a
 /// local Ollama/OpenAI-compatible endpoint on `localhost`).
-fn validate_provider_base_url(raw_base_url: &str, allow_private_urls: bool) -> Result<(), AppError> {
+fn validate_provider_base_url(
+    raw_base_url: &str,
+    allow_private_urls: bool,
+) -> Result<(), AppError> {
     let trimmed = raw_base_url.trim();
     let parsed = url::Url::parse(trimmed)
         .map_err(|_| AppError::bad_request("base_url must be a valid absolute http(s) URL"))?;
 
     if parsed.scheme() != "http" && parsed.scheme() != "https" {
-        return Err(AppError::bad_request("base_url scheme must be http or https"));
+        return Err(AppError::bad_request(
+            "base_url scheme must be http or https",
+        ));
     }
 
     if !parsed.username().is_empty() || parsed.password().is_some() {
@@ -238,7 +243,7 @@ pub async fn validate_paddle_token_view(
     Ok(view)
 }
 
-pub async fn validate_deepseek_token_view(
+pub async fn validate_model_api_key_view(
     payload: DeepSeekTokenValidationRequest,
     runtime: DeepSeekRuntimeConfig,
 ) -> Result<MineruTokenValidationView, AppError> {
@@ -253,7 +258,7 @@ pub async fn validate_deepseek_token_view(
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(runtime.probe_timeout_secs))
         .build()
-        .map_err(|err| AppError::internal(format!("build deepseek probe client failed: {err}")))?;
+        .map_err(|err| AppError::internal(format!("build model API probe client failed: {err}")))?;
     let models_url = format!("{}/models", base_url.trim_end_matches('/'));
 
     let response = client.get(&models_url).bearer_auth(api_key).send().await;
@@ -263,6 +268,13 @@ pub async fn validate_deepseek_token_view(
     };
 
     Ok(view)
+}
+
+pub async fn validate_deepseek_token_view(
+    payload: DeepSeekTokenValidationRequest,
+    runtime: DeepSeekRuntimeConfig,
+) -> Result<MineruTokenValidationView, AppError> {
+    validate_model_api_key_view(payload, runtime).await
 }
 
 pub async fn query_deepseek_balance_view(
@@ -343,7 +355,7 @@ async fn classify_deepseek_probe_response(
         return MineruTokenValidationView {
             ok: true,
             status: "valid",
-            summary: "DeepSeek API Key 可用".to_string(),
+            summary: "Kết nối API mô hình thành công.".to_string(),
             retryable: false,
             provider_code: Some(status_code.as_u16().to_string()),
             provider_message: summarize_deepseek_models_payload(&body_text),
@@ -364,11 +376,11 @@ async fn classify_deepseek_probe_response(
         "provider_error"
     };
     let summary = if status == "unauthorized" {
-        "DeepSeek API Key 无效".to_string()
+        "API Key không hợp lệ hoặc đã hết hạn.".to_string()
     } else if status == "network_error" {
-        "DeepSeek 连通性校验失败".to_string()
+        "Không thể kết nối API mô hình.".to_string()
     } else {
-        format!("DeepSeek 接口返回 {}", status_code.as_u16())
+        format!("API mô hình trả về HTTP {}", status_code.as_u16())
     };
 
     MineruTokenValidationView {
@@ -399,9 +411,9 @@ fn classify_deepseek_probe_transport_error(
         || lowered.contains("connection")
         || lowered.contains("connect")
     {
-        ("network_error", "DeepSeek 连通性校验失败")
+        ("network_error", "Không thể kết nối API mô hình.")
     } else {
-        ("provider_error", "DeepSeek API Key 校验失败")
+        ("provider_error", "Kiểm tra API mô hình thất bại.")
     };
 
     MineruTokenValidationView {
