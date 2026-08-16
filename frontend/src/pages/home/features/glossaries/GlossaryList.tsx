@@ -1,5 +1,5 @@
-// 术语表列表面板(对照 glossary-manager-dialog-template.js 的
-// .glossary-list-panel 区块 + view.js:renderGlossaryList 逐节点镜像)。
+// Bảng danh sách thuật ngữ, đối chiếu vùng .glossary-list-panel trong
+// glossary-manager-dialog-template.js + phản chiếu từng nút view.js:renderGlossaryList.
 
 import { EmptyState } from "../../../../shared/icons/EmptyState.jsx";
 import { GLOSSARY_DOM_IDS } from "./glossaries-dom-ids.js";
@@ -9,14 +9,14 @@ export function GlossaryList({ items, selectedId, onSelect, onCreateNew }) {
   return (
     <aside className="glossary-list-panel">
       <div className="glossary-panel-head">
-        <strong>列表</strong>
+        <strong>Danh sách</strong>
         <button
           id={GLOSSARY_DOM_IDS.newButton}
           type="button"
           className="app-button secondary"
           onClick={onCreateNew}
         >
-          新建
+          Tạo mới
         </button>
       </div>
       <div id={GLOSSARY_DOM_IDS.list} className="glossary-list">
@@ -33,7 +33,7 @@ export function GlossaryList({ items, selectedId, onSelect, onCreateNew }) {
               onClick={() => onSelect(glossaryId)}
             >
               <strong>{item.name || glossaryId}</strong>
-              <span>{Number(item.entry_count) || 0} 条</span>
+              <span>{Number(item.entry_count) || 0} mục</span>
             </button>
           );
         })}
@@ -42,8 +42,8 @@ export function GlossaryList({ items, selectedId, onSelect, onCreateNew }) {
         {!hasItems ? (
           <EmptyState
             instrument="atom"
-            title="暂无术语表"
-            hint="点右上角「新建」，为领域术语建一份对照表。"
+            title="Chưa có bảng thuật ngữ"
+            hint="Bấm “Tạo mới” ở góc trên bên phải để lập bảng đối chiếu thuật ngữ chuyên ngành."
           />
         ) : null}
       </div>

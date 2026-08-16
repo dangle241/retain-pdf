@@ -1,17 +1,17 @@
-// BookCard —— 图书馆一等 UI 组件：纯「壳」。
+// BookCard: thành phần UI hạng nhất của thư viện, chỉ là "vỏ".
 //
-// 壳负责:
-//   - 封面 / 占位 / 状态徽标 / 进度条
-//   - 标题 + 副标题
-//   - 点卡片本体 → 打开详情(或批量选中)
-//   - hover 遮罩上渲染 actions 按钮列表
+// Vỏ phụ trách:
+//   - Bìa / chỗ giữ chỗ / huy hiệu trạng thái / thanh tiến độ
+//   - Tiêu đề + phụ đề
+//   - Bấm thân thẻ → mở chi tiết hoặc chọn hàng loạt
+//   - Kết xuất danh sách nút actions trên overlay hover
 //
-// 壳不负责:
-//   - 决定有哪些按钮、按钮干什么(由 props.actions 注入)
-//   - 翻译 / 删除 / 合集等业务(放在 action.onClick 或 BookDetail)
+// Vỏ không phụ trách:
+//   - Quyết định có nút nào và nút làm gì, được props.actions chèn
+//   - Nghiệp vụ dịch / xóa / bộ sưu tập, nằm trong action.onClick hoặc BookDetail
 //
-// 默认按钮见 ../actions/ → buildDefaultBookCardActions。
-// 加按钮 = 调用方拼更大的 actions 数组,不必改本文件。
+// Xem nút mặc định tại ../actions/ → buildDefaultBookCardActions.
+// Thêm nút = bên gọi ghép mảng actions lớn hơn, không cần sửa tệp này.
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
@@ -36,14 +36,14 @@ function formatCardDate(value: string | null | undefined) {
   if (!raw) return "-";
   const parsed = new Date(raw);
   if (Number.isNaN(parsed.getTime())) return raw;
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat("vi-VN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(parsed);
 }
 
-/** memo / 列表行共用：item 展示签名（进度与标题变了才重渲）。 */
+/** Dùng chung cho memo / hàng danh sách: chữ ký hiển thị item, chỉ kết xuất lại khi tiến độ/tiêu đề đổi. */
 export function cardSignatureOf(item: LibraryCardItem = {}) {
   const progress = item.progress && typeof item.progress === "object" ? item.progress : {};
   const runtimeProgress =
@@ -134,13 +134,13 @@ function resolveActionIcon(icon) {
   if (icon == null || icon === "eye") return <IconEye aria-hidden="true" />;
   if (icon === "languages") return <IconLanguages aria-hidden="true" />;
   if (icon === "info") return <IconInfo aria-hidden="true" />;
-  // 自定义 React 节点
+  // Nút React tùy chỉnh.
   return icon;
 }
 
 /**
- * 壳上的单个圆形操作钮(封面 hover 区)。
- * 也可被外部单独 import 复用。
+ * Nút thao tác tròn đơn trên vỏ, ở vùng hover bìa.
+ * Cũng có thể được import riêng để dùng lại.
  */
 export function BookCardActionButton({
   action,
@@ -151,7 +151,7 @@ export function BookCardActionButton({
   item?: LibraryCardItem;
   className?: string;
 }) {
-  const label = `${action?.label || action?.id || "操作"}`.trim();
+  const label = `${action?.label || action?.id || "Thao tác"}`.trim();
   return (
     <button
       type="button"
@@ -183,7 +183,7 @@ function areBookCardPropsEqual(prev: BookCardProps, next: BookCardProps) {
     prev.batchMode === next.batchMode &&
     prev.selected === next.selected &&
     prev.onToggleSelect === next.onToggleSelect &&
-    // 兼容旧 props:未显式传 actions 时仍比 onReader/onReadSource
+    // Tương thích props cũ: khi không truyền actions rõ ràng, vẫn ưu tiên chi tiết sách hơn onReader/onReadSource,
     prev.onReader === next.onReader &&
     prev.onReadSource === next.onReadSource &&
     bookCardActionsSignature(prev.actions) === bookCardActionsSignature(next.actions) &&
@@ -238,7 +238,7 @@ function BookCardImpl({
       if (documentId) onToggleSelect?.(documentId);
       return;
     }
-    // 优先书籍详情（含运行中进度 Tab）；不再用 selectJob 弹旧工作流窗
+    // gồm tab tiến độ đang chạy; không còn dùng selectJob bật cửa sổ workflow cũ.
     if (onOpenDetail && (documentId || jobId)) {
       onOpenDetail(item);
       return;
@@ -292,10 +292,10 @@ function BookCardImpl({
           </div>
         )}
 
-        {/* 进行中：封面中央 loading，不在右上角写 OCR/翻译/渲染（易截断） */}
+        {/* Đang chạy: loading giữa bìa, không ghi OCR/dịch/kết xuất ở góc trên phải vì dễ bị cắt. */}
         {processing ? <BookCardProcessingOverlay /> : null}
 
-        {/* 右上角终态/馆藏：禁止 truncate/flex 收缩，否则「已翻译」会被裁成省略号 */}
+        {/* Trạng thái cuối/thư viện góc trên phải: cấm truncate/flex co lại, nếu không "Đã dịch" bị cắt thành dấu ba chấm. */}
         {badge && !processing ? (
           <div className="pointer-events-none absolute right-2 top-2 z-10 max-w-[none]">
             <span
@@ -363,7 +363,7 @@ function BookCardImpl({
           {title}
         </h3>
         <p className="book-card-meta recent-job-real-id line-clamp-1 text-[10px] text-muted-foreground">
-          {pageCount} 页 · {updatedAt}
+          {pageCount} trang · {updatedAt}
         </p>
       </div>
     </div>
@@ -372,7 +372,7 @@ function BookCardImpl({
 
 export const BookCard = memo(BookCardImpl, areBookCardPropsEqual);
 
-// 工厂 re-export：阅读 / 翻译各自独立模块，见 book-card-actions/
+// Re-export factory: đọc / dịch là mô-đun riêng, xem book-card-actions/.
 export {
   BOOK_CARD_ACTION_READ,
   BOOK_CARD_ACTION_TRANSLATE,

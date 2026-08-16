@@ -12,6 +12,7 @@ export interface CredentialDialogValues {
 export interface CredentialDialogElementsLike {
   paddleInput?: { value?: string } | null;
   apiKeyInput?: { value?: string } | null;
+  modelProviderSelect?: { value?: string } | null;
   modelBaseUrlInput?: { value?: string } | null;
   modelNameInput?: { value?: string } | null;
   mathModeSelect?: { value?: string } | null;
@@ -56,7 +57,7 @@ export function readCredentialDialogValues({
 export function buildBrowserCredentialConfig({
   values,
   currentOcrProvider,
-  // defaultModelApiKey 保留参数兼容调用方，但不再静默写入设置（密钥只认对话框/用户输入）
+  // Giữ tham số defaultModelApiKey để tương thích bên gọi nhưng không còn âm thầm ghi vào cài đặt (khóa chỉ lấy từ hộp thoại/đầu vào người dùng).
   defaultModelApiKey: _defaultModelApiKey,
 }: BuildBrowserCredentialConfigOptions) {
   return {

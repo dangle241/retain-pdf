@@ -1,10 +1,10 @@
-// Tab「翻译」——迁移自 translation-workflow-dialog 的进度 + 发起区。
-// 改翻译相关 UI：BookTranslationWorkflowPanel / BookTranslateProgressPanel。
+// Tab "Dịch": tiến độ + vùng bắt đầu di chuyển từ translation-workflow-dialog.
+// Sửa UI dịch tại BookTranslationWorkflowPanel / BookTranslateProgressPanel.
 
 import { BookTranslationWorkflowPanel } from "../panels/BookTranslationWorkflowPanel.jsx";
 
 /**
- * @param {object} props 透传给 BookTranslationWorkflowPanel 的业务 props
+ * @param {object} props Props nghiệp vụ truyền qua BookTranslationWorkflowPanel.
  */
 export function BookDetailTranslateTab(props) {
   return (

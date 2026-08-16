@@ -9,6 +9,7 @@ import {
   fetchJobDiagnostics,
   fetchResumePlan,
   rerunJob,
+  retryJobStage,
   fetchTranslationDiagnostics,
   fetchTranslationItems,
   fetchTranslationItem,
@@ -73,6 +74,7 @@ export function createStatusDomain({
     fetchTranslationItems,
     fetchTranslationItem,
     replayTranslationItem,
+    retryJobStage,
     rerunJob,
     renderJob: statusCardPresenter.renderMain,
     startPolling: (jobId: string) => features.jobRuntimeFeature?.startPolling(jobId),
@@ -81,8 +83,8 @@ export function createStatusDomain({
     dialogStore: statusDetailDialogStore,
   });
 
-  // 阅读已改为跳转独立 reader.html，主页不再挂 iframe 对话框；
-  // isReaderOpen 恒为 false，job-runtime 的 sync/close 钩子成为 no-op。
+  // Chế độ đọc đã chuyển sang reader.html độc lập; trang chính không còn gắn hộp thoại iframe;
+  // isReaderOpen luôn false, hook sync/close của job-runtime trở thành no-op.
   const jobRuntimeShellViewPort = {
     closeDialogs: () => statusDetailDialogStore.close(),
     isReaderOpen: () => false,

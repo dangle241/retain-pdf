@@ -1,19 +1,17 @@
-// 主页 AI 消息列表：轻量 markdown 预览 + 引用跳阅读器
+// Danh sách thông điệp AI trang chính: xem trước markdown nhẹ + trích dẫn chuyển tới trình đọc.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, FlaskConical, ListTree, Loader2, Sparkles } from "lucide-react";
 import {
+  buildFrontendPageUrl,
   injectCitationMarkers,
   isAgenticCitation,
   neutralizeMarkdownAnchors,
-  renderCitationFooter,
-  type AiCitationLike,
-} from "../../../../js/reader/ai/answer-enhance.js";
-import {
   renderFinalAnswerHtml,
   renderStreamingPreviewHtml,
-} from "../../../../js/reader/ai/render-answer-html.js";
-import { buildFrontendPageUrl } from "../../../../js/config/runtime.js";
+  renderCitationFooter,
+  type AiCitationLike,
+} from "../../composition/external.js";
 import { navigateToReader } from "../reader/navigate-to-reader.js";
 import type { HomeAskCitation, HomeAskMessage } from "./types.js";
 
@@ -23,23 +21,23 @@ export const HOME_ASK_SUGGESTIONS: Array<{
   icon: typeof BookOpen;
 }> = [
   {
-    prompt: "最近入库的文献里，有哪些值得优先阅读的主题？",
-    label: "浏览馆藏主题",
+    prompt: "Trong các tài liệu mới thêm gần đây, chủ đề nào đáng ưu tiên đọc?",
+    label: "Khám phá chủ đề trong thư viện",
     icon: BookOpen,
   },
   {
-    prompt: "帮我对比不同文献对同一问题的主要结论。",
-    label: "跨文献对比结论",
+    prompt: "Hãy giúp tôi so sánh kết luận chính của các tài liệu khác nhau về cùng một vấn đề.",
+    label: "So sánh kết luận giữa các tài liệu",
     icon: ListTree,
   },
   {
-    prompt: "有哪些常用的方法或实验设计？",
-    label: "梳理方法模型",
+    prompt: "Có những phương pháp hoặc thiết kế thí nghiệm phổ biến nào?",
+    label: "Tổng hợp phương pháp và mô hình",
     icon: FlaskConical,
   },
   {
-    prompt: "用几句话总结图书馆里一篇核心论文。",
-    label: "快速总结一篇",
+    prompt: "Tóm tắt một bài báo cốt lõi trong thư viện bằng vài câu.",
+    label: "Tóm tắt nhanh một tài liệu",
     icon: Sparkles,
   },
 ];
@@ -158,7 +156,7 @@ export function HomeAskThread({ messages, isRunning = false }: HomeAskThreadProp
     bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [messages, isRunning]);
 
-  // 空态由 HomeAskView 的 hero 区渲染（Notion：问候 + 居中输入 + 建议）
+  // Trạng thái trống được vùng hero của HomeAskView kết xuất (kiểu Notion: lời chào + ô nhập giữa + gợi ý).
   if (empty) {
     return null;
   }
@@ -188,7 +186,7 @@ export function HomeAskThread({ messages, isRunning = false }: HomeAskThreadProp
             {streaming && !m.progress && !hasBody ? (
               <div className="home-ask-thinking" role="status">
                 <Loader2 className="home-ask-spin" size={13} strokeWidth={2.4} aria-hidden />
-                <span>思考中…</span>
+                <span>Đang suy nghĩ…</span>
               </div>
             ) : null}
             {hasBody || m.status === "error" ? (

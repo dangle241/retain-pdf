@@ -1,13 +1,13 @@
-// 主页顶部"图书馆 / 合集 / 收藏 / AI 问答"分栏(裸 Tabs 原语,不经 src/components/ui/tabs.jsx
-// 默认皮肤——同 StatusDetailDialog/SettingsHubDialog 的既有选择,用项目自有
-// class,不接 shadcn 默认视觉)。
+// Các tab trên trang chính "Thư viện / Bộ sưu tập / Đã lưu / Hỏi đáp AI" dùng primitive Tabs thô, không qua src/components/ui/tabs.jsx
+// với giao diện mặc định; giống lựa chọn hiện có của StatusDetailDialog/SettingsHubDialog, dùng
+// class riêng của dự án, không dùng giao diện mặc định shadcn.
 //
-// 图标化:每个 tab 前置语义图标 + 短文字(纯图标伤 wayfinding)。
-// 激活 tab 是纯页面级 UI 态(HomeApp useState),不持久化——刷新回到图书馆。
+// Dùng biểu tượng: mỗi tab có biểu tượng ngữ nghĩa + nhãn ngắn; chỉ biểu tượng làm giảm khả năng định hướng.
+// Tab active là state UI cấp trang thuần (HomeApp useState), không lưu; tải lại quay về thư viện.
 
 import { Tabs as TabsPrimitive } from "radix-ui";
 
-// 图书馆:书脊排列在书架上
+// Thư viện: gáy sách xếp trên giá.
 function IconLibrary() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -18,7 +18,7 @@ function IconLibrary() {
     </svg>
   );
 }
-// 合集:多层叠书
+// Bộ sưu tập: nhiều lớp sách chồng.
 function IconLayers() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -28,7 +28,7 @@ function IconLayers() {
     </svg>
   );
 }
-// 收藏:书签(段落级摘录/笔记,与合集=文档分组区分)
+// Đã lưu: dấu trang (trích đoạn/ghi chú cấp đoạn, khác bộ sưu tập là nhóm tài liệu).
 function IconBookmark() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -36,7 +36,7 @@ function IconBookmark() {
     </svg>
   );
 }
-// AI 问答:星芒
+// Hỏi đáp AI: tia sáng.
 function IconSparkles() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -46,13 +46,13 @@ function IconSparkles() {
   );
 }
 
-// key 保持 "categories"(契约 id library-top-tab-categories / 测试引用不变)。
-// "favorites" / "ask" 为后续入口。
+// Giữ key "categories"; id hợp đồng library-top-tab-categories / tham chiếu test không đổi.
+// "favorites" / "ask" là entry sau.
 const TABS = [
-  { key: "library", label: "图书馆", Icon: IconLibrary },
-  { key: "categories", label: "合集", Icon: IconLayers },
-  { key: "favorites", label: "收藏", Icon: IconBookmark },
-  { key: "ask", label: "AI 问答", Icon: IconSparkles },
+  { key: "library", label: "Thư viện", Icon: IconLibrary },
+  { key: "categories", label: "Bộ sưu tập", Icon: IconLayers },
+  { key: "favorites", label: "Đã lưu", Icon: IconBookmark },
+  { key: "ask", label: "Hỏi đáp AI", Icon: IconSparkles },
 ];
 
 export function LibraryTopTabs({ active, onChange }) {
@@ -62,7 +62,7 @@ export function LibraryTopTabs({ active, onChange }) {
       value={active}
       onValueChange={onChange}
     >
-      <TabsPrimitive.List className="library-top-tabs" aria-label="图书馆视图">
+      <TabsPrimitive.List className="library-top-tabs" aria-label="Chế độ xem thư viện">
         {TABS.map((tab) => (
           <TabsPrimitive.Trigger
             key={tab.key}
@@ -72,7 +72,7 @@ export function LibraryTopTabs({ active, onChange }) {
           >
             <tab.Icon />
             <span>{tab.label}</span>
-            {/* 装饰钩子：默认无样式零渲染，皮肤可在 CSS 里给 tab 贴图换装 */}
+            {/* Hook trang trí: mặc định không style/kết xuất; giao diện có thể gắn ảnh cho tab bằng CSS. */}
             <span className="library-top-tab-ornament" aria-hidden="true" />
           </TabsPrimitive.Trigger>
         ))}

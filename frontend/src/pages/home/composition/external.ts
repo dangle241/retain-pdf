@@ -1,10 +1,11 @@
-// composition 层对 src/js/* 的统一出口。
-// pages/home/features 与 create-*.ts 禁止再直接 import ../../../js/**；缺符号只改本文件。
+// Entry thống nhất từ lớp composition tới src/js/*.
+// Cấm pages/home/features và create-*.ts import trực tiếp ../../../js/**; thiếu symbol chỉ sửa tệp này.
 
 // —— config / constants ——
 export { API_PREFIX } from "../../../js/config/api-constants.js";
 export {
   apiBase,
+  buildFrontendPageUrl,
   defaultModelApiKey,
   defaultModelBaseUrl,
   defaultModelName,
@@ -15,6 +16,12 @@ export {
   isTrustedWindowMessage,
   mockScenario,
 } from "../../../js/config/runtime.js";
+export {
+  CREDENTIALS_CHANGED_EVENT,
+  hasModelApiKey,
+  MISSING_MODEL_API_KEY_MESSAGE,
+  resolveReaderAiConfig,
+} from "../../../js/reader/ai/config.js";
 export {
   DEFAULT_FILE_LABEL,
   FRONT_MAX_BYTES,
@@ -30,8 +37,12 @@ export {
 export { openDesktopOutputDirectory } from "../../../js/config/desktop-persistence.js";
 export { DEFAULT_MODEL_VERSION } from "../../../js/config/model-constants.js";
 export {
+  getTranslationProviderPreset,
+  inferTranslationProvider,
+  isOfficialDeepSeekBaseUrl,
   OCR_PROVIDER_DEFINITIONS,
   TRANSLATION_PROVIDER_DEFINITION,
+  TRANSLATION_PROVIDER_PRESETS,
 } from "../../../js/config/providers.js";
 export {
   DEFAULT_BATCH_SIZE,
@@ -44,6 +55,9 @@ export {
   DEFAULT_INNER_BBOX_SHRINK_X,
   DEFAULT_INNER_BBOX_SHRINK_Y,
   DEFAULT_LANGUAGE,
+  DEFAULT_SOURCE_LANGUAGE,
+  DEFAULT_TARGET_LANGUAGE,
+  DEFAULT_TARGET_LANGUAGE_NAME,
   DEFAULT_MODE,
   DEFAULT_PDF_COMPRESS_DPI,
   DEFAULT_RENDER_MODE,
@@ -162,6 +176,7 @@ export {
   deleteDocument,
   patchDocument,
 } from "../../../js/api/documents.js";
+export type { DocumentRecord } from "../../../js/api/documents.js";
 export {
   listCollections,
   createCollection,
@@ -180,6 +195,14 @@ export {
   queryDeepSeekBalance,
   validatePaddleToken,
 } from "../../../js/api/providers.js";
+export { askLibraryAi, AiAskError } from "../../../js/api/ai.js";
+export {
+  deleteConversation,
+  getConversation,
+  listConversations,
+  patchConversation,
+} from "../../../js/api/conversations.js";
+export type { ConversationRecord } from "../../../js/api/conversations.js";
 export {
   fetchGlossaries as fetchGlossariesApi,
   fetchGlossary as fetchGlossaryApi,
@@ -195,9 +218,21 @@ export {
   fetchTranslationItem,
   replayTranslationItem,
 } from "../../../js/api/translation-debug.js";
+export {
+  injectCitationMarkers,
+  isAgenticCitation,
+  neutralizeMarkdownAnchors,
+  renderCitationFooter,
+} from "../../../js/reader/ai/answer-enhance.js";
+export type { AiCitationLike } from "../../../js/reader/ai/answer-enhance.js";
+export {
+  renderFinalAnswerHtml,
+  renderStreamingPreviewHtml,
+} from "../../../js/reader/ai/render-answer-html.js";
+export { sanitizeAssistantAnswer } from "../../../js/reader/ai/sanitize-answer.js";
 
 // —— feature controllers / ports ——
-// pages/home/features 不得直接 import ../../../js/features/*；统一从本文件拿。
+// pages/home/features không được import trực tiếp ../../../js/features/*; lấy thống nhất từ tệp này.
 
 // home / upload / workflow
 export { createHomeStatePort, HOME_LOADING_STATES } from "../../../js/features/home/state.js";

@@ -1,12 +1,12 @@
-// Credentials/SettingsHub 对话框的 DOM 契约 id 拷贝。
+// Bản sao id hợp đồng DOM của hộp thoại Credentials/SettingsHub.
 //
-// 拷贝自 src/js/features/credentials/credentials-dom-contract.js(该文件名
-// 命中 architecture-boundaries.test.mjs 的 features/*dom-contract.js 防回弹
-// 正则,即便内容本身只是零逻辑 id 常量——3b 状态卡域已用同一手法拷贝出
-// status-card-dom-ids.js,这里照此处理)与
-// src/js/components/dialogs/app-settings-dialog-contract.js(该目录整体属旧
-// 自定义元素视图层,禁止 pages import)。id 字符串逐一保留,视觉基线与
-// 门禁按这些 id 断言;新增 id 一律不改名旧世界字符串。
+// Sao chép từ src/js/features/credentials/credentials-dom-contract.js; tên tệp này
+// khớp regex chống hồi quy features/*dom-contract.js trong architecture-boundaries.test.mjs,
+// dù nội dung chỉ là hằng id không logic; miền thẻ trạng thái 3b đã dùng cùng cách để sao chép
+// status-card-dom-ids.js và tại đây làm tương tự, cùng
+// src/js/components/dialogs/app-settings-dialog-contract.js (toàn thư mục thuộc
+// lớp view phần tử tùy chỉnh cũ, cấm pages import). Giữ từng chuỗi id vì đường cơ sở hình ảnh và
+// cổng kiểm tra xác nhận theo các id này; id mới không đổi tên chuỗi cũ.
 
 export const CREDENTIAL_DOM_IDS = {
   dialog: "browser-credentials-dialog",
@@ -30,6 +30,7 @@ export const CREDENTIAL_DOM_IDS = {
     saveButton: "browser-credentials-save-btn",
     ocrProviderSelect: "browser-ocr-provider-select",
     apiKey: "browser-api-key",
+    modelProvider: "browser-model-provider",
     modelBaseUrl: "browser-model-base-url",
     modelName: "browser-model-name",
     mathMode: "browser-job-math-mode",
@@ -39,8 +40,8 @@ export const CREDENTIAL_DOM_IDS = {
   },
 };
 
-// OCR provider 面板/校验/token 输入 id 全部按 provider.id 拼接(镜像旧
-// components/dialogs/browser-credentials-dialog.js 的模板拼接规则)。
+// Id của bảng/kiểm tra/ô token nhà cung cấp OCR đều ghép theo provider.id, phản chiếu quy tắc template cũ
+// trong components/dialogs/browser-credentials-dialog.js.
 export function credentialTokenInputId(providerId = "") {
   return `browser-${providerId}-token`;
 }
@@ -60,16 +61,16 @@ export const CREDENTIAL_DOM_DATASETS = {
   ocrProviderPanel: "ocrProviderPanel",
 };
 
-// SettingsHubDialog(蓝图 §0.4,拷贝自
+// SettingsHubDialog (bản thiết kế §0.4, sao chép từ nguồn cũ).
 // src/js/components/dialogs/app-settings-dialog-contract.js)。
 export const APP_SETTINGS_DIALOG_IDS = {
   dialog: "app-settings-dialog",
   openButton: "app-settings-btn",
   closeButton: "app-settings-close-btn",
-  /** 已退役（设置 v2：API 区内嵌 CredentialsWorkbench，无二层弹窗入口）。
-   *  保留常量仅供历史对照，勿再新增消费点。 */
+  /** Đã ngừng dùng (Cài đặt v2: vùng API nhúng CredentialsWorkbench, không có entry hộp thoại tầng hai).
+   * Giữ hằng chỉ để đối chiếu lịch sử; không thêm nơi sử dụng mới. */
   credentialsButton: "credentials-btn",
-  // 词表/更新两个 tab 本阶段只占位(蓝图 §0.4);id 先落地供后续 agent 对齐。
+  // Hai tab Thuật ngữ/Cập nhật chỉ là chỗ giữ chỗ ở giai đoạn này (bản thiết kế §0.4); đặt id trước để agent sau căn chỉnh.
   glossaryButton: "glossary-btn",
   appUpdateButton: "app-update-btn",
 };

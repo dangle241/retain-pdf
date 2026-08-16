@@ -9,6 +9,9 @@ import {
   DEFAULT_INNER_BBOX_SHRINK_X,
   DEFAULT_INNER_BBOX_SHRINK_Y,
   DEFAULT_LANGUAGE,
+  DEFAULT_SOURCE_LANGUAGE,
+  DEFAULT_TARGET_LANGUAGE,
+  DEFAULT_TARGET_LANGUAGE_NAME,
   DEFAULT_MODE,
   DEFAULT_PDF_COMPRESS_DPI,
   DEFAULT_RENDER_MODE,
@@ -20,12 +23,12 @@ import {
   DEFAULT_MODEL_VERSION,
 } from "../../composition/external.js";
 
-// 工作流常量与归一化。
+// Hằng số và chuẩn hóa workflow.
 //
-// 拷贝自 bootstrap/workflow-constants.js 与 bootstrap/workflow-normalizers.js:
-// bootstrap/ 属旧 DI 装配层,architecture-boundaries 门禁禁止 pages import;
-// 常量本体仍从 src/js/config/(纯逻辑)取,拷贝的只是组装样板。
-// home cutover 删除旧世界时,bootstrap 版随之退役,此处成为唯一出处。
+// Sao chép từ bootstrap/workflow-constants.js và bootstrap/workflow-normalizers.js:
+// bootstrap/ thuộc tầng lắp ráp DI cũ; cổng architecture-boundaries cấm pages import;
+// bản thân hằng số vẫn lấy từ src/js/config/ (logic thuần), chỉ sao chép mẫu lắp ráp.
+// Khi cutover home xóa hệ thống cũ, bản bootstrap cũng ngừng dùng và đây trở thành nguồn duy nhất.
 
 export const WORKFLOW_BOOK = "book";
 export const WORKFLOW_TRANSLATE = "translate";
@@ -40,6 +43,9 @@ export function workflowConstants() {
     DEFAULT_TIMEOUT_SECONDS,
     DEFAULT_MODEL_VERSION,
     DEFAULT_LANGUAGE,
+    DEFAULT_SOURCE_LANGUAGE,
+    DEFAULT_TARGET_LANGUAGE,
+    DEFAULT_TARGET_LANGUAGE_NAME,
     DEFAULT_MODE,
     DEFAULT_RULE_PROFILE,
     DEFAULT_RENDER_MODE,

@@ -1,10 +1,10 @@
-// 新阅读器批注模型（与旧 favorites / selection-favorites 无关）
+// Mô hình chú thích của trình đọc mới (không liên quan favorites / selection-favorites cũ).
 
 export type ReaderNotePane = "source" | "translated";
 
 export type ReaderNote = {
   id: string;
-  /** 1-based 页码 */
+  /** Số trang bắt đầu từ 1. */
   page: number;
   pane: ReaderNotePane;
   quote: string;
@@ -59,20 +59,20 @@ export function groupNotesByPage(list: ReaderNote[]): Array<{ page: number; item
 }
 
 export function buildNotesMarkdown(title: string, list: ReaderNote[]): string {
-  const heading = title ? `# ${title} · 批注` : "# 批注";
+  const heading = title ? `# ${title} · Chú thích` : "# Chú thích";
   const groups = groupNotesByPage(list);
   if (!groups.length) {
-    return `${heading}\n\n（暂无批注）\n`;
+    return `${heading}\n\n(Chưa có chú thích)\n`;
   }
   const lines = [heading, ""];
   for (const group of groups) {
-    lines.push(`## 第 ${group.page} 页`, "");
+    lines.push(`## Trang ${group.page}`, "");
     for (const item of group.items) {
       for (const row of item.quote.split("\n")) {
         lines.push(`> ${row}`);
       }
       if (item.note) {
-        lines.push("", `笔记：${item.note}`);
+        lines.push("", `Ghi chú: ${item.note}`);
       }
       lines.push("");
     }

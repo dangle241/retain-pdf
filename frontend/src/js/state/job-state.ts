@@ -72,7 +72,7 @@ function syncCurrentJobStoreReset(target) {
 
 function syncRuntimePollingStoreReset(target) {
   const store = storeBySymbol(target, "retainpdf.runtimePollingStore");
-  // startJob("") 会顺带递增 generation,使在途轮询自然失效
+  // startJob("") đồng thời tăng generation để poll đang chạy tự hết hiệu lực.
   store?.actions?.startJob?.("");
 }
 

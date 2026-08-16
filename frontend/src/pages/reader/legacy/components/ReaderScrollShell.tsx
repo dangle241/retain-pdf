@@ -1,19 +1,19 @@
-// 共享滚动容器 + 双 PDF 面板(Phase 2a 的技术闸门本体)。
+// Container cuộn dùng chung + hai panel PDF (cổng kỹ thuật chính của giai đoạn 2a).
 //
-// #reader-scroll-shell 仍是唯一纵向滚动容器(绝对定位于左右栏之间,overflow:auto),
-// react-resizable-panels 的 Group 是它的子元素,替代旧 main#reader-grid(grid 1fr/1fr)。
+// #reader-scroll-shell vẫn là container cuộn dọc duy nhất (định vị tuyệt đối giữa cột trái/phải, overflow:auto),
+// Group của react-resizable-panels là phần tử con, thay main#reader-grid cũ (grid 1fr/1fr).
 //
-// rrp v4 预研核实的 style 覆盖(照抄计划,不自行发明):
-// - Group 默认 height:100%; overflow:hidden 必须覆盖为 height:auto + overflow:visible,
-//   让两 pane 拉到内容最高者、由父 shell 统一滚动。
-//   预研写 minHeight:'100%',但 .reader-page 是 auto 高,百分比 min-height 解析不出来;
-//   旧 .reader-grid 的下限是 min-height:100vh,这里取 100vh 保持像素等价。
-// - Panel 双层结构:外层 flex item 的 maxHeight:100% 在 auto 高 Group 下自动失效;
-//   内层(接收 className/style)覆盖 maxHeight:'none'、overflowY:'visible'、overflowX:'clip'。
-// - Separator 取 0 宽:对照模式两 pane 在旧布局就是各占一半、不可拖;分隔视觉
-//   由译文面板的 1px 左边框复刻(旧 CSS .reader-panel + .reader-panel 因中间隔着
-//   Separator 元素不再命中)。0 宽保证两 pane 与基线严格同宽——pane 宽度进 pdf.js
-//   缩放计算,差 1px 会让整片文本亚像素漂移。
+// Ghi đè style đã được khảo sát/xác minh cho rrp v4 (theo đúng kế hoạch, không tự nghĩ thêm):
+// - Group mặc định height:100%; overflow:hidden phải được ghi đè thành height:auto + overflow:visible,
+//   để hai pane kéo tới chiều cao nội dung lớn nhất và shell cha cuộn thống nhất.
+//   Khảo sát ghi minHeight:'100%', nhưng .reader-page có chiều cao auto nên min-height phần trăm không phân giải được;
+//   giới hạn dưới của .reader-grid cũ là min-height:100vh, tại đây dùng 100vh để giữ tương đương pixel.
+// - Cấu trúc Panel hai tầng: maxHeight:100% của flex item ngoài tự mất hiệu lực dưới Group có chiều cao auto;
+//   tầng trong (nhận className/style) ghi đè maxHeight:'none', overflowY:'visible', overflowX:'clip'.
+// - Separator rộng 0: trong chế độ đối chiếu, hai pane ở bố cục cũ mỗi bên chiếm một nửa và không kéo được; đường phân cách hình ảnh
+//   được tái tạo bằng viền trái 1px của panel bản dịch (CSS cũ .reader-panel + .reader-panel không còn khớp vì
+//   có phần tử Separator ở giữa). Chiều rộng 0 bảo đảm hai pane đúng bằng baseline; chiều rộng pane đi vào phép
+//   tính thu phóng pdf.js, lệch 1px sẽ khiến toàn bộ văn bản lệch dưới pixel.
 
 import { Group, Separator } from "react-resizable-panels";
 import { PdfPane } from "./PdfPane.jsx";
@@ -27,14 +27,14 @@ export function ReaderScrollShell() {
         <Group
           id="reader-grid"
           orientation="horizontal"
-          // minWidth:0:.reader-page 是 display:grid,Group 作为 grid item 的
-          // min-width:auto 会被 PDF 内容撑破 100%(旧布局用 minmax(0,1fr) 规避同一问题)
+          // minWidth:0: .reader-page là display:grid; Group là grid item có
+          // min-width:auto sẽ bị nội dung PDF kéo vượt 100% (bố cục cũ dùng minmax(0,1fr) để tránh cùng vấn đề).
           style={{ height: "auto", minHeight: "100vh", minWidth: 0, overflow: "visible" }}
         >
           <PdfPane pane="source" />
           <Separator
             id="reader-grid-separator"
-            aria-label="调整原文/译文面板宽度"
+            aria-label="Điều chỉnh chiều rộng bảng nguyên văn/bản dịch"
             style={{ width: 0, minWidth: 0, flexBasis: 0 }}
           />
           <PdfPane pane="translated" />

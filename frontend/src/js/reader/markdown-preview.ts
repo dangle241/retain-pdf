@@ -15,8 +15,8 @@ function loadMarked() {
   return markedModulePromise;
 }
 
-// 渲染产物只来自本站管线,这里仍做一层基础清洗:
-// 去掉脚本节点、内联事件与 javascript: 链接
+// Đầu ra kết xuất chỉ đến từ pipeline của site này nhưng vẫn làm sạch cơ bản tại đây:
+// loại bỏ nút script, sự kiện nội tuyến và liên kết javascript:.
 function sanitizeRenderedMarkdown(container) {
   container.querySelectorAll("script, iframe, object, embed").forEach((node) => node.remove());
   container.querySelectorAll("*").forEach((node) => {
@@ -59,8 +59,8 @@ export function createReaderMarkdownPreview({
     }
   }
 
-  // 后端图片需要 X-API-Key,<img> 发不了请求头,换成 blob URL。
-  // src 已在挂载前改存到 data-reader-md-src,避免浏览器先发一次裸请求
+  // Ảnh backend cần X-API-Key; <img> không gửi được header nên đổi sang blob URL.
+  // src đã được chuyển sang data-reader-md-src trước khi gắn để trình duyệt không gửi yêu cầu trần trước.
   async function hydrateImages(container) {
     const images = [...container.querySelectorAll("img[data-reader-md-src]")];
     await Promise.allSettled(images.map(async (img) => {
@@ -68,7 +68,7 @@ export function createReaderMarkdownPreview({
       try {
         const response = await fetchProtected?.(src);
         if (!response?.ok) {
-          throw new Error(`图片加载失败(${response?.status ?? "网络错误"})`);
+          throw new Error(`Tải ảnh thất bại (${response?.status ?? "lỗi mạng"})`);
         }
         const objectUrl = URL.createObjectURL(await response.blob());
         objectUrls.push(objectUrl);
@@ -76,7 +76,7 @@ export function createReaderMarkdownPreview({
       } catch (_err) {
         const fallback = img.ownerDocument.createElement("span");
         fallback.className = "reader-markdown-image-missing";
-        fallback.textContent = `[图片暂不可用] ${img.getAttribute("alt") || src}`;
+        fallback.textContent = `[Ảnh tạm thời không khả dụng] ${img.getAttribute("alt") || src}`;
         fallback.title = src;
         img.replaceWith(fallback);
       }
@@ -84,12 +84,12 @@ export function createReaderMarkdownPreview({
   }
 
   async function load() {
-    setStatus("正在加载 Markdown…");
+    setStatus("Đang tải Markdown…");
     const payload = await loadMarkdownPayload?.(jobId);
     const content = `${payload?.content_with_absolute_image_urls || payload?.content || ""}`;
     const imagesBaseUrl = `${payload?.images_base_url || payload?.images_base_path || ""}`.trim();
     if (!content.trim()) {
-      setStatus("该任务暂无 Markdown 产物");
+      setStatus("Tác vụ chưa có đầu ra Markdown");
       return false;
     }
     const { marked } = await loadMarked();
@@ -97,14 +97,14 @@ export function createReaderMarkdownPreview({
     if (!container) {
       return false;
     }
-    // 先保护 $公式$ 再 marked，再 MathJax→SVG；图片在 template 内挂载前去掉 src
+    // Bảo vệ $công thức$ trước marked rồi MathJax→SVG; xóa src của ảnh trong template trước khi gắn.
     const html = await parseMarkdownWithMath(content, (src) =>
       String(marked.parse(src, { async: false })),
     );
     const template = container.ownerDocument.createElement("template");
     template.innerHTML = html;
     sanitizeRenderedMarkdown(template.content);
-    // 动态 import 避免 circular；resolveMarkdownAssetUrl 剥 images/ 双前缀
+    // Import động để tránh vòng; resolveMarkdownAssetUrl bỏ tiền tố images/ kép.
     const { resolveMarkdownAssetUrl } = await import("../job/artifacts.js");
     template.content.querySelectorAll("img[src]").forEach((img) => {
       const raw = img.getAttribute("src") || "";
@@ -123,7 +123,7 @@ export function createReaderMarkdownPreview({
     if (!loadPromise) {
       loadPromise = load().catch((error) => {
         loadPromise = null;
-        setStatus(error?.message || "Markdown 加载失败，重开抽屉可重试");
+        setStatus(error?.message || "Tải Markdown thất bại; hãy mở lại ngăn để thử lại");
         return false;
       });
     }

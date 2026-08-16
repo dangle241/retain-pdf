@@ -1,4 +1,4 @@
-// 新阅读器批注状态：本地列表 + CRUD，不依赖旧抽屉/favorites 链路。
+// Trạng thái chú thích trình đọc mới: danh sách cục bộ + CRUD, không phụ thuộc chuỗi drawer/favorites cũ.
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -42,7 +42,7 @@ export function useReaderAnnotations(
   const [notes, setNotes] = useState<ReaderNote[]>(() => loadNotes(docKey));
   const onAfterAdd = options.onAfterAdd;
 
-  // 文档切换时重载
+  // Tải lại khi đổi tài liệu.
   useEffect(() => {
     setNotes(loadNotes(docKey));
   }, [docKey.jobId, docKey.documentId]);

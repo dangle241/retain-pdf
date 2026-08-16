@@ -1,10 +1,10 @@
-/* 下载进度 toast（home/detail/reader 共用，从 components.utilities 拆出） */
+/* Toast tiến độ tải xuống (home/detail/reader dùng chung, tách từ components.utilities). */
 
-/* download-toast(固定定位外壳)已随阶段 B 的 Sonner 迁移退役——外层定位/层级/
-   移动端断点现在由 <Toaster/>(src/components/ui/sonner.jsx,底层
-   [data-sonner-toaster])负责,不再需要项目自己的 fixed 容器。旧的
-   [data-tone] 渐变色选择器原本挂在 .download-toast(外层)上,现在 tone 直接
-   设置在 download-toast-card 这张卡片 div 本身,选择器一并挪到这里。 */
+/* download-toast (vỏ định vị fixed) đã ngừng dùng sau khi chuyển sang Sonner ở giai đoạn B; định vị ngoài/tầng/
+   breakpoint di động hiện do <Toaster/> (src/components/ui/sonner.jsx, bên dưới là
+   [data-sonner-toaster]) phụ trách, không còn cần container fixed riêng của dự án. Selector gradient [data-tone] cũ
+   vốn gắn trên .download-toast (lớp ngoài), nay tone được đặt trực tiếp
+   trên chính div thẻ download-toast-card, selector cũng chuyển tới đây. */
 @utility download-toast-card {
   display: grid;
   gap: 10px;

@@ -1,4 +1,4 @@
-// 清洗模型偶发输出的内部 block_id 引用，并尽量映射到 [n]。
+// Làm sạch tham chiếu block_id nội bộ đôi khi mô hình xuất ra và cố gắng ánh xạ sang [n].
 
 import type { AiCitationLike } from "./answer-enhance.js";
 
@@ -9,13 +9,13 @@ function normBlockId(id: string): string {
   return `${id || ""}`.trim().toLowerCase().replace(/_/g, "-");
 }
 
-// 代码保护：围栏块（含流式末尾未闭合的）+ 行内 code 整段抽出，
-// 免遭空白压扁/block_id 清洗——Python 缩进、表格对齐曾被压成一行（审计 P1-6）
+// Bảo vệ mã: tách toàn bộ khối fenced (gồm khối chưa đóng cuối luồng) + code nội tuyến,
+// tránh bị nén khoảng trắng/làm sạch block_id; thụt lề Python và căn bảng từng bị ép thành một dòng (kiểm toán P1-6).
 const CODE_SEGMENT_RE = /```[\s\S]*?(?:```|$)|`[^`\n]+`/g;
 const CODE_SLOT_PREFIX = "CODE_";
 const CODE_SLOT_SUFFIX = "";
 
-/** 将 [p002-b0004] / 裸 p002-b0004 换成 [n]；无法映射则删除。代码段原样保留。 */
+/** Đổi [p002-b0004] / p002-b0004 thô thành [n]; xóa nếu không ánh xạ được. Giữ nguyên khối mã. */
 export function sanitizeAssistantAnswer(
   text: string,
   citations: AiCitationLike[] = [],
@@ -47,7 +47,7 @@ export function sanitizeAssistantAnswer(
     return ref ? `[${ref}]` : "";
   });
 
-  // 去掉残留的内部字段口癖
+  // Loại bỏ cách diễn đạt còn sót lại từ trường nội bộ
   out = out.replace(/\bblock_id\s*[=:：]\s*\S+/gi, "");
   out = out.replace(/\bpage_idx\s*[=:：]\s*\d+/gi, "");
   out = out.replace(/[ \t]{2,}/g, " ");

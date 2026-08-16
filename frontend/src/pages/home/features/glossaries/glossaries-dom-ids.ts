@@ -1,9 +1,9 @@
-// GlossariesDialog 的 id/选择器契约(蓝图 §3 + §0.1)。
+// Hợp đồng id/selector của GlossariesDialog (bản thiết kế §3 + §0.1).
 //
-// 拷贝自 src/js/components/dialogs/glossary-manager-dialog-dom-contract.js
-// (旧自定义元素视图层,architecture-boundaries 门禁禁止 src/pages/** 直接
-// import js/components/**)——同一手法已在 credentials-dom-ids.js 用过一次。
-// 字面量必须与旧契约逐一对齐:视觉基线与门禁按这些 id 精确定位,不得改名。
+// Sao chép từ src/js/components/dialogs/glossary-manager-dialog-dom-contract.js
+// (lớp view phần tử tùy chỉnh cũ; cổng architecture-boundaries cấm src/pages/** import trực tiếp
+// js/components/**); cùng cách đã dùng trong credentials-dom-ids.js.
+// Literal phải khớp từng mục với hợp đồng cũ; đường cơ sở hình ảnh và cổng kiểm tra định vị chính xác theo id nên không đổi tên.
 
 export const GLOSSARY_DOM_IDS = Object.freeze({
   triggerButton: "glossary-btn",
@@ -28,13 +28,13 @@ export const GLOSSARY_DOM_IDS = Object.freeze({
 });
 
 export const ENTRY_LEVEL_OPTIONS = [
-  ["preserve", "保留"],
-  ["canonical", "固定译法"],
-  ["preferred", "偏好译法"],
+  ["preserve", "Giữ nguyên"],
+  ["canonical", "Bản dịch cố định"],
+  ["preferred", "Bản dịch ưu tiên"],
 ];
 
 export const MATCH_MODE_OPTIONS = [
-  ["case_insensitive", "忽略大小写"],
-  ["exact", "精确"],
-  ["regex", "正则"],
+  ["case_insensitive", "Không phân biệt hoa thường"],
+  ["exact", "Chính xác"],
+  ["regex", "Biểu thức chính quy"],
 ];

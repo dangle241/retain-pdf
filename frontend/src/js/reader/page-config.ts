@@ -17,8 +17,8 @@ export function resolveReaderJobId({
   if (jobId) {
     return jobId;
   }
-  // ?document_id= 是馆藏文档"读原文"入口(F4):此时没有 job,不应回退到 mock job,
-  // 否则源文档阅读器会误挂 mock 任务。
+  // ?document_id= là entry "Đọc nguyên văn" cho tài liệu thư viện (F4): lúc này không có job và không được lùi về mock job,
+  // nếu không trình đọc tài liệu nguồn sẽ gắn nhầm tác vụ mock.
   const documentId = new URLSearchParams(search).get("document_id")?.trim() || "";
   if (documentId) {
     return "";
@@ -26,12 +26,12 @@ export function resolveReaderJobId({
   return isMock() ? mockJobId() : "";
 }
 
-// 馆藏文档"读原文"(F4):无 job、仅 document_id 时,阅读器走只读源文档分支。
+// "Đọc nguyên văn" tài liệu thư viện (F4): khi không có job, chỉ có document_id, trình đọc dùng nhánh tài liệu nguồn chỉ đọc.
 export function resolveReaderDocumentId({ search = defaultSearch() } = {}) {
   return new URLSearchParams(search).get("document_id")?.trim() || "";
 }
 
-// 锚点 (page_idx, block_id) 来自搜索命中/收藏回跳的 URL 透传
+// Điểm neo (page_idx, block_id) được truyền qua URL từ kết quả tìm kiếm/mục đã lưu quay lại.
 export function resolveReaderAnchor({ search = defaultSearch() } = {}) {
   const params = new URLSearchParams(search);
   const rawPageIdx = `${params.get("page_idx") ?? ""}`.trim();

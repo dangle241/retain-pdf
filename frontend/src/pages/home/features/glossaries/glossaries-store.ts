@@ -1,18 +1,18 @@
-// GlossariesDialog 的纯视图态 + 与 features/glossaries/controller.js(kept
-// 控制器)对接的 store 驱动 viewPort(蓝图 §3,镜像
-// credentials-view-store.js 的写法)。
+// Trạng thái view thuần của GlossariesDialog + viewPort dựa trên store nối với features/glossaries/controller.js được giữ
+// (bản thiết kế §3, phản chiếu cách viết của
+// credentials-view-store.js).
 //
-// 旧世界 glossary-view-port.js/view.js 全部是 DOM 直写(死,不 import);这里
-// 用同名方法签名重新实现,只是"写"的目的地从 DOM 换成 store,让
-// GlossariesDialog.jsx 系的组件订阅渲染。controller.js(reload/select/save/
-// delete/export/applyImport 等编排逻辑)一行不改地复用。
+// glossary-view-port.js/view.js cũ đều ghi DOM trực tiếp nên không import; tại đây
+// triển khai lại chữ ký cùng tên, chỉ đổi đích "ghi" từ DOM sang store để
+// các thành phần GlossariesDialog.jsx đăng ký và kết xuất. controller.js (reload/select/save/
+// delete/export/applyImport và logic điều phối khác) được dùng lại không sửa dòng nào.
 
 import type { DialogStore } from "../../state/dialog-store.js";
 import type { HandlersBag } from "../../composition/types.js";
 import { createStore } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-/** 列表项（API 列表摘要） */
+/** Mục danh sách (tóm tắt danh sách API). */
 export type GlossaryListItem = {
   glossary_id?: string;
   name?: string;
@@ -22,7 +22,7 @@ export type GlossaryListItem = {
   [key: string]: unknown;
 };
 
-/** 编辑器行（受控表格） */
+/** Hàng trình sửa (bảng có kiểm soát). */
 export type GlossaryEntryRow = {
   source: string;
   target: string;
@@ -36,7 +36,7 @@ export type GlossaryDraft = {
   entries: GlossaryEntryRow[];
 };
 
-/** save() 读取的编辑器 payload（含 preserve 语义） */
+/** Payload trình sửa do save() đọc, gồm ngữ nghĩa preserve. */
 export type GlossaryEditorPayload = {
   name: string;
   entries: Array<{
@@ -98,11 +98,11 @@ function normalizeEntryForRow(entry: Partial<GlossaryEntryRow> = {}): GlossaryEn
   };
 }
 
-// 抄自 src/js/features/glossaries/view.js:155-184
-// (readGlossaryEditorPayload)——尤其第 165 行的 preserve 语义必须原样保留:
-// level==="preserve" 且用户没有手填译文时,target 用 source 回填(“保留原词”
-// 语义,不是“译文缺失”);level 不是 preserve 时留空则视为“漏填译文”,计入
-// skippedMissingTarget,由 controller.js 的 save() 拦截并提示错误。
+// Sao chép từ src/js/features/glossaries/view.js:155-184
+// (readGlossaryEditorPayload); đặc biệt phải giữ nguyên ngữ nghĩa preserve ở dòng 165:
+// khi level==="preserve" và người dùng chưa nhập bản dịch, target được điền bằng source (ngữ nghĩa "giữ từ gốc",
+// không phải "thiếu bản dịch"); khi level không phải preserve mà để trống thì coi là "chưa nhập bản dịch" và tính vào
+// skippedMissingTarget; save() của controller.js chặn và báo lỗi.
 function readEditorPayloadFromDraft(draft: GlossaryDraft): GlossaryEditorPayload {
   const entries: GlossaryEditorPayload["entries"] = [];
   const skippedMissingTarget: string[] = [];
@@ -128,7 +128,7 @@ function readEditorPayloadFromDraft(draft: GlossaryDraft): GlossaryEditorPayload
     });
   }
   return {
-    name: `${draft.name || ""}`.trim() || "未命名术语表",
+    name: `${draft.name || ""}`.trim() || "Bảng thuật ngữ chưa đặt tên",
     entries,
     skippedMissingTarget,
   };
@@ -196,11 +196,11 @@ export function createGlossariesViewFeature({
     },
   });
 
-  // controller.js 在装配时同步调用一次 feature.bindEvents()(见
-  // composition.js)捕获 open/close/reload/selectGlossary/createNew/addRow/
-  // save/deleteCurrent/exportCurrent/showImport/hideImport/applyImport 等
-  // 处理函数——React 世界没有旧 view.js 那种全局 DOM 监听步骤,JSX 按钮的
-  // onClick 直接从这里取用(见 useGlossariesController.js)。
+  // controller.js gọi đồng bộ feature.bindEvents() một lần khi lắp ráp (xem
+  // composition.js) để bắt open/close/reload/selectGlossary/createNew/addRow/
+  // save/deleteCurrent/exportCurrent/showImport/hideImport/applyImport và các
+  // hàm xử lý khác; React không có bước listener DOM toàn cục như view.js cũ, nên onClick của nút JSX
+  // lấy trực tiếp từ đây (xem useGlossariesController.js).
   const handlersRef: { current: HandlersBag | null } = { current: null };
 
   const viewPort = {

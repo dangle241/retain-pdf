@@ -1,4 +1,4 @@
-// 阅读器工具开合：单一 active、互斥（对齐 legacy drawer-store）
+// Đóng/mở công cụ trình đọc: một active duy nhất, loại trừ nhau (căn với drawer-store legacy).
 
 import { useCallback, useState } from "react";
 import type { ReaderToolId } from "../tools/registry.js";

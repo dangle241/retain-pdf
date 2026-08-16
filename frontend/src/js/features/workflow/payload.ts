@@ -21,6 +21,9 @@ export interface WorkflowDeveloperConfig {
 export interface WorkflowPayloadConstants {
   DEFAULT_MODEL_VERSION?: string;
   DEFAULT_LANGUAGE?: string;
+  DEFAULT_SOURCE_LANGUAGE?: string;
+  DEFAULT_TARGET_LANGUAGE?: string;
+  DEFAULT_TARGET_LANGUAGE_NAME?: string;
   DEFAULT_MODE?: string;
   DEFAULT_RULE_PROFILE?: string;
   DEFAULT_RENDER_MODE?: string;
@@ -106,6 +109,9 @@ export function buildTranslationPayload({
   return {
     mode: constants.DEFAULT_MODE,
     math_mode: developerConfig.mathMode,
+    source_language: constants.DEFAULT_SOURCE_LANGUAGE,
+    target_language: constants.DEFAULT_TARGET_LANGUAGE,
+    target_language_name: constants.DEFAULT_TARGET_LANGUAGE_NAME,
     model: developerConfig.model,
     base_url: developerConfig.baseUrl,
     api_key: modelApiKey || "",

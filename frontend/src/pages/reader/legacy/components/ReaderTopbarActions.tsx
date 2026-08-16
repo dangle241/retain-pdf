@@ -1,15 +1,15 @@
-// 顶栏动作组:四个工具开合按钮 + 下载菜单。
-// 开合状态订阅 drawer store(替代旧 side-drawers.js 对按钮 aria-expanded/is-active
-// 的命令式写入);下载菜单为 React 组件,context 由 boot 在清单加载后注入。
+// Nhóm hành động thanh trên: bốn nút đóng/mở công cụ + menu tải xuống.
+// Trạng thái đóng/mở đăng ký drawer store (thay thao tác ghi mệnh lệnh aria-expanded/is-active lên nút
+// của side-drawers.js cũ); menu tải xuống là component React, context được boot inject sau khi tải manifest.
 
 import { useDrawerActive } from "../state/use-drawer-active.js";
 import { ReaderDownloadMenu } from "./ReaderDownloadMenu.jsx";
 
 const TOOL_BUTTONS = [
   { key: "markdown", id: "reader-markdown-toggle-btn", controls: "reader-markdown-drawer", label: "Markdown" },
-  { key: "favorites", id: "reader-favorites-toggle-btn", controls: "reader-favorites-drawer", label: "摘录" },
-  { key: "annotations", id: "reader-annotations-toggle-btn", controls: "reader-annotations-drawer", label: "批注" },
-  { key: "ai", id: "reader-ai-toggle-btn", controls: "reader-ai-drawer", label: "AI 问答" },
+  { key: "favorites", id: "reader-favorites-toggle-btn", controls: "reader-favorites-drawer", label: "Trích đoạn" },
+  { key: "annotations", id: "reader-annotations-toggle-btn", controls: "reader-annotations-drawer", label: "Chú thích" },
+  { key: "ai", id: "reader-ai-toggle-btn", controls: "reader-ai-drawer", label: "Hỏi đáp AI" },
 ];
 
 export function ReaderTopbarActions({ drawerStore, downloadContext }) {

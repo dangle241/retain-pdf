@@ -22,6 +22,7 @@ import {
 import { resolveSubmitControlState } from "./submit-controls.js";
 import { resolveTranslationBudgetState } from "./budget.js";
 import { defaultWorkflowConfigPort } from "./config-port.js";
+import { isOfficialDeepSeekBaseUrl } from "../../config/providers.js";
 
 export interface WorkflowSubmitValues {
   ocrProvider?: string;
@@ -150,7 +151,7 @@ export function mountWorkflowFeature({
   defaultPaddleToken,
   defaultOcrProvider,
   defaultModelApiKey,
-  defaultFileLabel = "选择 PDF",
+  defaultFileLabel = "Chọn PDF",
   normalizeWorkflow,
   normalizeMathMode,
   constants,
@@ -274,12 +275,16 @@ export function mountWorkflowFeature({
   function currentBudgetState(workflow = currentWorkflow()) {
     const uploadState = getUploadState();
     const balanceState = getDeepSeekBalanceState();
+    const developerConfig = developerConfigWithDefaults();
     return resolveTranslationBudgetState({
       pageRanges: currentPageRanges(),
       uploadedPageCount: uploadState.uploadedPageCount,
       balanceCny: balanceState.balanceCny,
       balanceChecked: balanceState.balanceChecked,
-      needsTranslation: workflowNeedsUpload(workflow) && workflowUsesTranslation(workflow) && Boolean(uploadState.uploadId),
+      needsTranslation: workflowNeedsUpload(workflow)
+        && workflowUsesTranslation(workflow)
+        && Boolean(uploadState.uploadId)
+        && isOfficialDeepSeekBaseUrl(developerConfig.baseUrl),
     });
   }
 
@@ -394,11 +399,11 @@ export function mountWorkflowFeature({
     });
   }
 
-  // 馆藏文档"翻译整本/选定页码"(F5)复用主流程的凭据组装:从当前已配置的
-  // 凭据(credentialsStatePort,与对话框是否打开无关——readSubmitValues 读的是
-  // 凭据 state 而非弹窗 DOM)拼出 ocr(PaddleOCR)+ translation(DeepSeek)。
-  // 不含 source——后端会从文档已存的 upload 注入 upload_id。pageRanges 缺省
-  // 空串=整本。
+  // "Dịch toàn bộ/phạm vi trang" cho tài liệu thư viện (F5) dùng lại cách ghép thông tin xác thực của luồng chính: từ
+  // thông tin đã cấu hình (credentialsStatePort, không phụ thuộc hộp thoại có mở hay không; readSubmitValues đọc
+  // state xác thực chứ không phải DOM hộp thoại) để ghép OCR (PaddleOCR) + API dịch đã chọn.
+  // Không gồm source; backend sẽ chèn upload_id từ upload đã lưu của tài liệu. pageRanges mặc định
+  // chuỗi rỗng = toàn bộ.
   function buildTranslateJobConfig(pageRanges = "") {
     const developerConfig = developerConfigWithDefaults();
     const submitValues = currentWorkflowSubmitValues();

@@ -1,7 +1,7 @@
-// 下载菜单(原始/对照/译文 PDF):旧 src/js/reader/download-actions.js 的 React 化。
-// URL 解析/文件名/禁用原因全部复用纯逻辑(src/js/reader/downloads/resolve.js);
-// 受保护下载与进度 toast 走 features/reader-dialog/downloads.js(与旧实现同一条链)。
-// context 为 null(boot 未就绪)时三个按钮禁用——与旧页 sync() 前的初始 disabled 一致。
+// Menu tải xuống (PDF gốc/đối chiếu/bản dịch): chuyển src/js/reader/download-actions.js cũ sang React.
+// Phân giải URL/tên file/lý do vô hiệu hóa đều tái sử dụng logic thuần (src/js/reader/downloads/resolve.js);
+// tải được bảo vệ và toast tiến độ dùng features/reader-dialog/downloads.js (cùng chuỗi với triển khai cũ).
+// Khi context là null (boot chưa sẵn sàng), vô hiệu hóa cả ba nút; giống disabled ban đầu trước sync() của trang cũ.
 
 import { useRef, useState } from "react";
 import {
@@ -30,7 +30,7 @@ export function ReaderDownloadMenu({ context }) {
     if (!descriptor || !url || busyAction) {
       return;
     }
-    // 点选后收起 popover(旧 closeMenu 语义)
+    // Thu popover sau khi chọn (ngữ nghĩa closeMenu cũ).
     if (menuRef.current?.open) {
       menuRef.current.open = false;
     }
@@ -45,19 +45,19 @@ export function ReaderDownloadMenu({ context }) {
         (busy) => setBusyAction(busy ? action : ""),
       );
     } catch (err) {
-      // 诊断信息进控制台(旧实现经 onStatus 外送,reader 页从未接收方);toast 面向用户
+      // Thông tin chẩn đoán vào console (triển khai cũ gửi qua onStatus nhưng trang reader chưa từng có phía nhận); toast dành cho người dùng.
       console.error(buildErrorDiagnostic(err, {
         operation: descriptor.operation,
         url,
         jobId: context?.jobId || "",
       }));
-      failDownloadToast(err.message || "下载失败");
+      failDownloadToast(err.message || "Tải xuống thất bại");
     }
   }
 
   return (
     <details className="reader-download-menu" ref={menuRef}>
-      <summary className="reader-topbar-action-btn reader-download-trigger" aria-label="下载 PDF">下载</summary>
+      <summary className="reader-topbar-action-btn reader-download-trigger" aria-label="Tải PDF">Tải xuống</summary>
       <div className="reader-download-popover">
         {ACTION_ORDER.map((action) => {
           const url = trimString(urls[action]);
@@ -71,7 +71,7 @@ export function ReaderDownloadMenu({ context }) {
               disabled={!enabled}
               aria-disabled={enabled ? "false" : "true"}
               title={enabled
-                ? `下载${READER_DOWNLOAD_ACTIONS[action]?.label || "PDF"}`
+                ? `Tải ${READER_DOWNLOAD_ACTIONS[action]?.label || "PDF"}`
                 : disabledReason(action, urls)}
               data-busy={busyAction === action ? "1" : ""}
               onClick={() => void handleDownload(action, url)}

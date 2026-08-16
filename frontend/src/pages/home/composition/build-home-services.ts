@@ -1,4 +1,4 @@
-// 组装 HomeServices 对外 bag（HomeApp / useHomeServices 消费）。
+// Ghép bag HomeServices công khai cho HomeApp / useHomeServices sử dụng.
 
 import type {
   HomeBridge,
@@ -7,6 +7,7 @@ import type {
   HomeServicesDomains,
   HomeServicesViews,
 } from "./types.js";
+import type { LibraryCardItem } from "../features/library/types.js";
 
 export function buildHomeServices({
   bridge,
@@ -72,7 +73,7 @@ export function buildHomeServices({
       recentJobsStore: library.recentJobsStatePort.store,
       actions: {
         ...library.recentJobActions,
-        // 网格选任务 → 详情翻译 Tab（永不弹 #translation-workflow-dialog）
+        // Chọn tác vụ trong lưới → tab dịch ở chi tiết (không bao giờ bật #translation-workflow-dialog).
         selectJob: (jobId: string) => {
           library.libraryController.selectJobForDetail(jobId, {
             findItem: (id) => {
@@ -81,7 +82,7 @@ export function buildHomeServices({
                 items.find((row) => `${row?.job_id || ""}`.trim() === id)
                 || items.find((row) => `${row?.active_job_id || ""}`.trim() === id)
                 || null
-              );
+              ) as LibraryCardItem | null;
             },
           });
         },

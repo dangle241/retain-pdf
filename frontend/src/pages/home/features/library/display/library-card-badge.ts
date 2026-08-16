@@ -1,5 +1,5 @@
-// 书架卡片右上角终态徽标。
-// 进行中（排队/OCR/翻译/渲染）不在角标写文案（易截断），改由封面中央加载动画表达。
+// Huy hiệu trạng thái cuối ở góc trên phải thẻ giá sách.
+// Khi đang chạy (xếp hàng/OCR/dịch/kết xuất), không ghi nội dung vào huy hiệu góc vì dễ bị cắt; dùng hoạt ảnh loading giữa bìa.
 
 import type { LibraryCardBadge, LibraryCardItem } from "../types.js";
 import {
@@ -9,12 +9,12 @@ import {
 } from "../../../composition/external.js";
 
 /**
- * @returns 终态/馆藏徽标；进行中返回 null（用中央 loading 代替）
+ * @returns Huy hiệu trạng thái cuối/thư viện; đang chạy trả null và dùng loading giữa.
  */
 export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge | null {
   if (isLibraryOnlyItem(item)) {
     return {
-      label: "馆藏",
+      label: "Thư viện",
       icon: "archive",
       cls: "border border-border bg-white/95 text-muted-foreground",
     };
@@ -25,42 +25,42 @@ export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge |
 
   if (status === "failed" || stageKey === "failed") {
     return {
-      label: "失败",
+      label: "Thất bại",
       icon: "alert",
       cls: "bg-destructive/12 text-destructive",
     };
   }
   if (status === "canceled" || status === "cancelled" || stageKey === "canceled") {
     return {
-      label: "已取消",
+      label: "Đã hủy",
       icon: "clock",
       cls: "bg-muted text-muted-foreground",
     };
   }
 
-  // 进行中（含重试）：不角标，封面中央 loading
+  // Đang chạy, gồm thử lại: không huy hiệu góc, loading giữa bìa.
   if (isLibraryCardProcessing(item)) {
     return null;
   }
 
-  // 已完成
+  // Đã hoàn tất
   if (status === "succeeded" || stageKey === "done") {
     return {
-      label: "已翻译",
+      label: "Đã dịch",
       icon: "languages",
       cls: "bg-primary text-primary-foreground",
     };
   }
 
-  // 排队 / 运行中（兜底）
+  // Xếp hàng / đang chạy (dự phòng).
   if (isRecentJobActive(item) || status === "queued" || status === "running") {
     return null;
   }
 
-  // 兜底：有 done 阶段
+  // Dự phòng: có giai đoạn done.
   if (stageKey === "done") {
     return {
-      label: "已翻译",
+      label: "Đã dịch",
       icon: "languages",
       cls: "bg-primary text-primary-foreground",
     };
@@ -69,21 +69,21 @@ export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge |
   return null;
 }
 
-/** 是否应在封面中央显示处理中加载动画 */
+/** Có nên hiển thị hoạt ảnh đang xử lý giữa bìa không. */
 export function isLibraryCardProcessing(item: LibraryCardItem = {}): boolean {
   if (isLibraryOnlyItem(item)) return false;
   const status = `${item.status || ""}`.trim().toLowerCase();
   if (status === "failed" || status === "canceled" || status === "cancelled") {
     return false;
   }
-  // 明确运行中
+  // Rõ ràng đang chạy.
   if (status === "queued" || status === "running" || status === "pending") {
     return true;
   }
-  // 重试后偶发 status 未及时变、但 stage 已回到 ocr/翻译/渲染
+  // Sau thử lại đôi khi status chưa đổi kịp nhưng stage đã quay về ocr/dịch/kết xuất.
   const stage = stageKeyForRecentJobLabel(item);
   if (["ocr", "translate", "render", "queued"].includes(stage)) {
-    // succeeded + stage=done 是真完成；succeeded + stage=ocr 视为重试脏态 → 仍转圈
+    // succeeded + stage=done là hoàn tất thật; succeeded + stage=ocr là trạng thái bẩn khi thử lại → vẫn xoay.
     if (status === "succeeded" && stage === "done") return false;
     if (status === "succeeded" || status === "") return true;
   }

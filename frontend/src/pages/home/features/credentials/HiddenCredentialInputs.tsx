@@ -1,24 +1,24 @@
-// 4 个隐藏凭据 input(蓝图风险 1 的核心接线点)——3a HeroUpload/WorkflowPanel
-// 的上传表单读取这些 DOM 节点的 .value 提交任务;3b 本域负责让它们跟
-// default-state-port.js 单例双向同步。
+// Bốn input xác thực ẩn (điểm đấu nối cốt lõi của rủi ro 1 trong bản thiết kế); HeroUpload/WorkflowPanel 3a
+// đọc .value của các nút DOM này để gửi tác vụ; miền 3b chịu trách nhiệm đồng bộ chúng hai chiều với
+// singleton default-state-port.js.
 //
-// 只在这一处渲染(WorkflowPanel.jsx 已把原先的 4 个静态占位 input 换成本
-// 组件,注释里写明"隐藏凭据 input 由 3b credentials 域接管镜像")——全码库
-// 只允许这一份,重复渲染会制造重复 DOM id。
+// Chỉ kết xuất tại đây; WorkflowPanel.jsx đã thay bốn input giữ chỗ tĩnh bằng
+// thành phần này với chú thích "input xác thực ẩn được miền credentials 3b tiếp quản phản chiếu"; toàn codebase
+// chỉ cho phép một bản vì kết xuất lặp sẽ tạo DOM id trùng.
 //
-// 受控(与蓝图原计划的"非受控 ref 挂 mirrorCredentialsToHiddenInputs"不同,
-// 这里是刻意的实现调整,原因见下):直接订阅 credentialsStatePort.store 渲染
-// value——实测(jsdom + React 18/19 host diff)证实,React 渲染的
-// <input defaultValue> 一旦被外部代码用 mirrorCredentialsToHiddenInputs 的
-// 裸 `node.value = x` 改写,只要这棵子树里*任何*兄弟组件重渲染提交
-// (HeroUpload 在上传进度期间几乎每秒都在提交),React 的表单元素
-// 受控态回收逻辑就会把 .value 悄悄拉回 defaultValue(""),等于把刚保存的
-// token 静默清空——不是测试假象,生产环境同样会复现(上传中途 token 消失)。
-// 让 credentialsStatePort 直接驱动 value= 从根上消除这个类别的问题:
-// store 是唯一真值,DOM 只是投影,不存在"外部裸写 vs React 回收"的竞争。
-// default-state-port.js 的 mirrorToDom(mirrorCredentialsToHiddenInputs)副作用
-// 仍照常触发(browser.js 内部一路调用),现在只是多余但无害——真正生效的
-// 写入路径是这里的 store 订阅。
+// Có kiểm soát, khác kế hoạch ban đầu "ref không kiểm soát gắn mirrorCredentialsToHiddenInputs";
+// đây là điều chỉnh triển khai có chủ ý vì lý do dưới đây: đăng ký trực tiếp credentialsStatePort.store để kết xuất
+// value. Kiểm thử thực tế với jsdom + host diff React 18/19 xác nhận rằng
+// khi <input defaultValue> do React kết xuất bị mã ngoài thay đổi qua mirrorCredentialsToHiddenInputs bằng
+// `node.value = x` trực tiếp, chỉ cần *bất kỳ* thành phần anh em nào trong cây con kết xuất lại và commit
+// (HeroUpload commit gần mỗi giây trong lúc tải lên), logic thu hồi trạng thái
+// của phần tử biểu mẫu React sẽ âm thầm kéo .value về defaultValue(""), tương đương xóa
+// token vừa lưu; đây không phải giả tượng test mà cũng tái hiện ở production khi token biến mất giữa lúc tải lên.
+// Cho credentialsStatePort điều khiển trực tiếp value= để loại bỏ tận gốc loại lỗi này:
+// store là nguồn sự thật duy nhất, DOM chỉ là projection; không còn cạnh tranh "ghi ngoài trực tiếp với thu hồi React".
+// Tác dụng phụ mirrorToDom (mirrorCredentialsToHiddenInputs) của default-state-port.js
+// vẫn chạy bình thường qua các lệnh gọi trong browser.js; giờ chỉ thừa nhưng vô hại, còn luồng ghi thật sự
+// có hiệu lực là đăng ký store tại đây.
 
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
 import { useHomeServices } from "../../home-services-context.js";

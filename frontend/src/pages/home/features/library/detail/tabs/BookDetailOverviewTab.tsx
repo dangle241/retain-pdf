@@ -1,9 +1,17 @@
-// Tab「书籍简介」——标题 / 作者 / 标签 / 编辑 + 元信息网格。
-// 改简介相关 UI 只动本文件（或 TitleMetaPanel）。
-// 元信息（页数/大小/入库/合集）自左栏迁入：右栏不再空旷，左栏纯粹封面+主操作。
+// Tab "Giới thiệu sách": tiêu đề / tác giả / nhãn / sửa + lưới siêu dữ liệu.
+// Sửa UI giới thiệu chỉ đổi tệp này hoặc TitleMetaPanel.
+// Siêu dữ liệu (số trang/dung lượng/ngày thêm/bộ sưu tập) chuyển từ cột trái: cột phải bớt trống, cột trái chỉ còn bìa + thao tác chính.
 
 import { IconLayers } from "../panels/ui.jsx";
 import { TitleMetaPanel } from "../panels/TitleMetaPanel.jsx";
+import type { ComponentProps, ReactNode } from "react";
+
+type BookDetailOverviewTabProps = ComponentProps<typeof TitleMetaPanel> & {
+  pageCount?: number | string | null;
+  bytes?: number | string | null;
+  addedAt?: string | null;
+  memberCollections?: string[];
+};
 
 function formatBytes(bytes) {
   const n = Number(bytes);
@@ -16,14 +24,14 @@ function formatDate(value) {
   if (!raw) return "";
   const parsed = new Date(raw);
   if (Number.isNaN(parsed.getTime())) return raw;
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat("vi-VN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(parsed);
 }
 
-function MetaCell({ label, children }) {
+function MetaCell({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
       <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">{label}</dt>
@@ -33,7 +41,7 @@ function MetaCell({ label, children }) {
 }
 
 /**
- * @param {object} props TitleMetaPanel 业务 props + 元信息（pageCount/bytes/addedAt/memberCollections）
+ * @param {object} props Props nghiệp vụ TitleMetaPanel + siêu dữ liệu (pageCount/bytes/addedAt/memberCollections).
  */
 export function BookDetailOverviewTab({
   pageCount,
@@ -41,7 +49,7 @@ export function BookDetailOverviewTab({
   addedAt,
   memberCollections = [],
   ...titleMetaProps
-}) {
+}: BookDetailOverviewTabProps) {
   const sizeText = formatBytes(bytes);
   const dateText = formatDate(addedAt);
   return (
@@ -52,14 +60,14 @@ export function BookDetailOverviewTab({
       <TitleMetaPanel {...titleMetaProps} />
 
       <dl className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border border-border/60 p-4 sm:grid-cols-4">
-        <MetaCell label="页数">{pageCount ? `${pageCount} 页` : "—"}</MetaCell>
-        <MetaCell label="大小">{sizeText || "—"}</MetaCell>
-        <MetaCell label="入库">{dateText || "—"}</MetaCell>
-        <MetaCell label="合集">
+        <MetaCell label="Số trang">{pageCount ? `${pageCount} trang` : "—"}</MetaCell>
+        <MetaCell label="Dung lượng">{sizeText || "—"}</MetaCell>
+        <MetaCell label="Đã thêm vào thư viện">{dateText || "—"}</MetaCell>
+        <MetaCell label="Bộ sưu tập">
           <span className="inline-flex min-w-0 max-w-full items-center gap-1">
             <IconLayers className="shrink-0 text-muted-foreground" />
             <span className="truncate">
-              {memberCollections.length ? memberCollections.join("、") : "未加入"}
+              {memberCollections.length ? memberCollections.join("、") : "Chưa thêm"}
             </span>
           </span>
         </MetaCell>

@@ -1,4 +1,7 @@
-import { TRANSLATION_PROVIDER_DEFINITION } from "../../config/providers.js";
+import {
+  isOfficialDeepSeekBaseUrl,
+  TRANSLATION_PROVIDER_DEFINITION,
+} from "../../config/providers.js";
 import {
   runDeepSeekBalanceCheck,
   runDeepSeekConnectivityCheck,
@@ -21,6 +24,7 @@ export async function handleBrowserDeepSeekValidate({
   apiPrefix,
   state,
   defaultModelApiKey,
+  defaultModelBaseUrl,
   validateDeepSeekToken,
   queryDeepSeekBalance,
   onBalanceChange,
@@ -37,15 +41,20 @@ export async function handleBrowserDeepSeekValidate({
   if (apiKeyInput && !apiKeyInput.value && modelApiKey) {
     apiKeyInput.value = modelApiKey;
   }
-  const baseUrl = modelBaseUrlInput?.value?.trim() || "";
+  const baseUrl = modelBaseUrlInput?.value?.trim() || defaultModelBaseUrl?.() || "";
   credentialsStatePort.resetDeepSeekBalance?.();
   onBalanceChange?.();
   if (!modelApiKey) {
+    if (!silent) {
+      viewPort.setValidationMessage(TRANSLATION_PROVIDER_DEFINITION.validationMissingMessage, "error");
+    }
     return { ok: false, status: "missing_key" };
   }
   viewPort.setTopUpVisible(false);
   if (!silent) {
-    viewPort.setValidationMessage("正在检测 DeepSeek 和余额…");
+    viewPort.setValidationMessage(
+      isOfficialDeepSeekBaseUrl(baseUrl) ? "Đang kiểm tra DeepSeek và số dư…" : "Đang kiểm tra API mô hình…",
+    );
   }
   const result = await runDeepSeekConnectivityCheck({
     apiPrefix,
@@ -56,6 +65,16 @@ export async function handleBrowserDeepSeekValidate({
     showResult: false,
   });
   if (result.ok) {
+    if (!isOfficialDeepSeekBaseUrl(baseUrl)) {
+      viewPort.setTopUpVisible(false);
+      if (!silent) {
+        viewPort.setValidationMessage(
+          result.summary || TRANSLATION_PROVIDER_DEFINITION.validationSuccessMessage,
+          "valid",
+        );
+      }
+      return result;
+    }
     const balance = await runDeepSeekBalanceCheck({
       apiPrefix,
       apiKey: modelApiKey,
@@ -64,13 +83,13 @@ export async function handleBrowserDeepSeekValidate({
     });
     if (balance.status === "unsupported_provider") {
       if (!silent) {
-        viewPort.setValidationMessage("DeepSeek 可用", "valid");
+        viewPort.setValidationMessage("DeepSeek khả dụng", "valid");
       }
       return balance;
     }
     if (balance.status === "network_error") {
       if (!silent) {
-        viewPort.setValidationMessage("DeepSeek 可用，余额查询失败", "valid");
+        viewPort.setValidationMessage("DeepSeek khả dụng nhưng truy vấn số dư thất bại", "valid");
       }
       return balance;
     }
@@ -81,7 +100,7 @@ export async function handleBrowserDeepSeekValidate({
     const shouldTopUp = balanceAmount < DEEPSEEK_LOW_BALANCE_THRESHOLD;
     viewPort.setTopUpVisible(shouldTopUp);
     viewPort.setValidationMessage(
-      `DeepSeek 可用，${balanceSummary}${shouldTopUp ? "，余额低于 2 元" : ""}`,
+      `DeepSeek khả dụng, ${balanceSummary}${shouldTopUp ? ", số dư dưới 2 CNY" : ""}`,
       balance.is_available ? "valid" : "error",
     );
     return balance;

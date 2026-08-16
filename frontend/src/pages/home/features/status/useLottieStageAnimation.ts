@@ -1,26 +1,26 @@
-// lottie 阶段动画 hook——命令式孤岛(蓝图 §2 features/status/,风险 §8.2)。
+// Hook hoạt ảnh giai đoạn Lottie; vùng mệnh lệnh độc lập (thiết kế §2 features/status/, rủi ro §8.2).
 //
-// 拷贝自 components/status/job-status-card-animation.js 的
-// createStatusStageAnimationController(该文件属"死,由 StatusCard.jsx 家族
-// 替代"清单,js/components/ 禁止 import;STAGE_ANIMATIONS 表拷贝自
-// job-status-card-presets.js;resolveVisualStageKeyForSnapshot 拷贝自
-// job-status-card-visuals.js;resolveLottieVendorUrl 是 runtime/ 纯工具,
-// 合法直接 import)。
+// Sao chép từ
+// createStatusStageAnimationController trong components/status/job-status-card-animation.js (file thuộc danh sách "bị loại và được họ StatusCard.jsx
+// thay thế"; cấm import js/components/; bảng STAGE_ANIMATIONS sao chép từ
+// job-status-card-presets.js; resolveVisualStageKeyForSnapshot sao chép từ
+// job-status-card-visuals.js; resolveLottieVendorUrl là tiện ích thuần trong runtime/
+// nên có thể import trực tiếp).
 //
-// 铁律(风险 §8.2):desiredKey 三重检查原样保留——lottie-web 是通过动态
-// <script> 标签异步加载的,加载期间用户可能连续切换阶段(甚至连续切换 job),
-// 三次核对 stageAnimationDesiredKey 是为了保证"加载完成时仍是当前想要展示的
-// 阶段"才真正 loadAnimation,否则会出现"网络慢时旧阶段动画在新阶段渲染完成
-// 后才姗姗来迟地把新动画覆盖掉"的竞态闪烁。
+// Nguyên tắc bắt buộc (rủi ro §8.2): giữ nguyên ba lần kiểm tra desiredKey; lottie-web được tải bất đồng bộ bằng
+// thẻ <script> động; trong lúc tải, người dùng có thể đổi giai đoạn liên tiếp (thậm chí đổi tác vụ liên tiếp),
+// ba lần đối chiếu stageAnimationDesiredKey nhằm bảo đảm "khi tải xong, đây vẫn là
+// giai đoạn đang muốn hiển thị" rồi mới thực sự loadAnimation; nếu không sẽ có race condition "khi mạng chậm, hoạt ảnh giai đoạn cũ
+// đến muộn sau khi giai đoạn mới render xong và ghi đè hoạt ảnh mới", gây chớp.
 //
-// React 化的方式:lottie 实例本身是纯命令式(容器 DOM ref),但"是否显示动画
-// 容器 / 是否 translate 态"两个视觉标记原样上抛为 hook 返回值,由
-// StatusCard.jsx 以声明式 className/dataset 渲染(不必要的命令式 DOM 写)。
+// Cách chuyển sang React: bản thân instance Lottie hoàn toàn theo kiểu mệnh lệnh (DOM ref của container), nhưng hai dấu hiệu hình ảnh "có hiển thị container hoạt ảnh
+// / có ở trạng thái translate hay không" được trả nguyên trạng từ hook và để
+// StatusCard.jsx render khai báo bằng className/dataset (không ghi DOM theo kiểu mệnh lệnh nếu không cần).
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { resolveLottieVendorUrl } from "../../composition/external.js";
 
-// 用站点根路径，避免详情弹窗 / 子路径下相对 ./src 解析失败导致动画空盒
+// Dùng đường dẫn từ gốc trang để tránh việc ./src tương đối không phân giải được dưới hộp thoại chi tiết / đường dẫn con và tạo khung hoạt ảnh trống.
 const TRANSLATION_ANIMATION_PATH = "/src/assets/animations/deepseek_lottie.json";
 const OCR_ANIMATION_PATH = "/src/assets/animations/ocr_Lottie.json";
 const UPLOAD_ANIMATION_PATH = "/src/assets/animations/pdf_upload_Lottie.json";
@@ -159,8 +159,8 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
     }
     loadLottieWeb()
       .then((lottie) => {
-        // 三重 desiredKey 核对(风险 §8.2,原样保留):异步加载期间用户可能
-        // 连续切换阶段,任何一次检查失败都说明这次加载结果已经过期。
+        // Ba lần đối chiếu desiredKey (rủi ro §8.2, giữ nguyên): trong lúc tải bất đồng bộ, người dùng có thể
+        // đổi giai đoạn liên tiếp; bất kỳ lần kiểm tra nào thất bại đều cho biết kết quả tải này đã hết hiệu lực.
         if (stageAnimationDesiredKeyRef.current !== stageKey) {
           return;
         }
@@ -207,8 +207,8 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
 
   useEffect(() => clearStageAnimation, []);
 
-  // syncProgressSpeed 是副作用(读写 ref + 调 lottie 实例的 setSpeed),必须
-  // 在 effect 里跑,不能在渲染期间直接调用(渲染函数体必须是纯函数)。
+  // syncProgressSpeed là tác dụng phụ (đọc/ghi ref + gọi setSpeed trên instance Lottie), bắt buộc
+  // chạy trong effect, không được gọi trực tiếp khi render (thân hàm render phải là hàm thuần).
   const { stageKey = "", current = NaN, total = NaN, progressUnit = "" } = progressSample || {} as ProgressSample;
   useEffect(() => {
     const normalizedStageKey = `${stageKey || ""}`.trim();

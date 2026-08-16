@@ -11,20 +11,28 @@ import {
 } from "../mock/documents.js";
 import { buildJobDetailEndpoint, submitJson } from "./http.js";
 
+type JobActionRecord = Record<string, unknown>;
+
+function asJobActionRecord(value: unknown): JobActionRecord {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as JobActionRecord
+    : {};
+}
+
 export async function fetchJobDiagnostics(jobId, apiPrefix) {
   if (isMockMode()) {
-    // 与 mock/job.js 的 failure 字段保持同源,避免详情弹窗(读 job.failure)
-    // 与 detail 页(读本端点)在 mock 下显示不一致
+    // Giữ cùng nguồn với trường failure trong mock/job.js để hộp thoại chi tiết (đọc job.failure)
+    // không hiển thị khác trang detail (đọc endpoint này) trong chế độ mô phỏng.
     if (currentMockScenario() !== "failed") {
       return null;
     }
     return {
       job_id: jobId,
-      summary: "任务失败，但这是前端 mock 场景。",
+      summary: "Tác vụ thất bại, nhưng đây là tình huống mô phỏng ở frontend.",
       category: "mock_render_failure",
       failed_stage: "render",
-      root_cause: "用于 UI 调试的模拟失败。",
-      suggestion: "切换 ?mock=succeeded 查看成功态。",
+      root_cause: "Lỗi mô phỏng dùng để gỡ lỗi giao diện.",
+      suggestion: "Chuyển sang ?mock=succeeded để xem trạng thái thành công.",
       detail: "",
       retryable: true,
       resume_available: true,
@@ -37,7 +45,7 @@ export async function fetchJobDiagnostics(jobId, apiPrefix) {
     if (resp.status === 404) {
       return null;
     }
-    throw new Error(`读取失败诊断失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Không thể tải chẩn đoán lỗi, vui lòng thử lại sau. (${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -61,7 +69,7 @@ export async function fetchResumePlan(jobId, apiPrefix) {
     if (resp.status === 404) {
       return null;
     }
-    throw new Error(`读取恢复计划失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Không thể tải kế hoạch khôi phục, vui lòng thử lại sau. (${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -81,9 +89,9 @@ export async function fetchJobStageActions(jobId, apiPrefix) {
     return {
       job_id: jobId,
       stages: [
-        { stage: "ocr", label: "重新 OCR", can_retry: true, disabled_reason: "" },
-        { stage: "translation", label: "重新翻译", can_retry: true, disabled_reason: "" },
-        { stage: "render", label: "重新渲染", can_retry: true, disabled_reason: "" },
+        { stage: "ocr", label: "Chạy lại OCR", can_retry: true, disabled_reason: "" },
+        { stage: "translation", label: "Dịch lại", can_retry: true, disabled_reason: "" },
+        { stage: "render", label: "Kết xuất lại", can_retry: true, disabled_reason: "" },
       ],
     };
   }
@@ -94,7 +102,7 @@ export async function fetchJobStageActions(jobId, apiPrefix) {
     if (resp.status === 404) {
       return null;
     }
-    throw new Error(`读取阶段操作失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Không thể tải thao tác giai đoạn, vui lòng thử lại sau. (${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -102,13 +110,13 @@ export async function fetchJobStageActions(jobId, apiPrefix) {
 export async function retryJobStage(jobId, apiPrefix, stage, payload = {}) {
   const normalizedStage = `${stage || ""}`.trim();
   if (!normalizedStage) {
-    throw new Error("阶段重试失败: 缺少 stage");
+    throw new Error("Không thể thử lại giai đoạn: thiếu stage");
   }
   if (isMockMode()) {
-    // 从指定阶段起跑；务必绑回原 document，否则书架会多一张「job_id 空壳卡」
-    const bookMeta = payload && typeof payload === "object" ? payload : {};
-    // snapshot 常缺 document_id：用源 job → 文档表反查
-    const linkedDoc = getMockDocumentByJobId(jobId);
+    // Chạy từ giai đoạn chỉ định; phải gắn lại document gốc, nếu không giá sách sẽ có thêm một thẻ rỗng chỉ chứa job_id.
+    const bookMeta = asJobActionRecord(payload);
+    // snapshot thường thiếu document_id: dùng job nguồn để tra ngược bảng tài liệu.
+    const linkedDoc = asJobActionRecord(getMockDocumentByJobId(jobId));
     const documentId = `${bookMeta.document_id || linkedDoc?.document_id || ""}`.trim();
     const bookTitle = `${bookMeta.title || bookMeta.display_name || linkedDoc?.title || ""}`.trim();
     const live = registerLiveMockJob({
@@ -118,10 +126,10 @@ export async function retryJobStage(jobId, apiPrefix, stage, payload = {}) {
       pageCount: Number(bookMeta.page_count || linkedDoc?.page_count) || undefined,
       fromStage: normalizedStage,
     });
-    const docBound = documentId
+    const docBound = asJobActionRecord(documentId
       ? bindMockDocumentActiveJob(documentId, live.jobId, { previousJobId: jobId })
-      : null;
-    const snapshot = buildLiveMockJobPayload(live.jobId) || {};
+      : null);
+    const snapshot = asJobActionRecord(buildLiveMockJobPayload(live.jobId));
     return {
       job_id: live.jobId,
       source_job_id: jobId,
@@ -143,12 +151,12 @@ export async function retryJobStage(jobId, apiPrefix, stage, payload = {}) {
       rerun_from_stage: normalizedStage,
     };
   }
-  const result = await submitJson(`${buildJobDetailEndpoint(jobId, apiPrefix)}/retry-stage`, {
+  const result = asJobActionRecord(await submitJson(`${buildJobDetailEndpoint(jobId, apiPrefix)}/retry-stage`, {
     stage: normalizedStage,
     ...payload,
-  });
-  // 真实后端不回书目字段：补上 source/document/标题，避免书架插 job_id 空壳卡
-  const bookMeta = payload && typeof payload === "object" ? payload : {};
+  }));
+  // Backend thật không trả trường thư mục: bổ sung source/document/tiêu đề để tránh chèn thẻ rỗng job_id vào giá sách.
+  const bookMeta = asJobActionRecord(payload);
   const nextJobId = `${result?.job_id || result?.id || jobId}`.trim();
   return {
     ...result,

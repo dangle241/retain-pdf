@@ -56,8 +56,8 @@ export function normalizeJobPayload(payload: JobPayloadInput | unknown = null): 
   }
 
   const requestPayload = (unwrapped.request_payload || null) as JobRequestPayload | null;
-  // 书目 / 重试身份字段必须透传：silent 轮询与阶段重试靠 document_id / source_job_id
-  // 把进度合并回主页原卡；丢了会「状态卡在跑、书架仍显示已翻译」。
+  // Phải truyền nguyên trường định danh sách / thử lại: poll silent và thử lại giai đoạn dựa vào document_id / source_job_id
+  // để hợp nhất tiến độ vào thẻ gốc trang chính; nếu mất sẽ xảy ra "thẻ trạng thái đang chạy nhưng giá sách vẫn hiển thị đã dịch".
   const documentId = firstNonEmpty(
     unwrapped.document_id,
     (unwrapped as JobLike & { book_summary?: { document_id?: string } }).book_summary?.document_id,
@@ -70,7 +70,7 @@ export function normalizeJobPayload(payload: JobPayloadInput | unknown = null): 
     request_payload_page_ranges: firstNonEmpty(requestPayload?.ocr?.page_ranges),
     request_payload_math_mode: firstNonEmpty(requestPayload?.translation?.math_mode),
     job_id: jobId || "",
-    // 图书馆卡片身份（重试换 job_id 时靠这些找原卡）
+    // Định danh thẻ thư viện (dùng để tìm thẻ gốc khi thử lại đổi job_id).
     document_id: documentId,
     source_job_id: firstNonEmpty(unwrapped.source_job_id),
     active_job_id: firstNonEmpty(unwrapped.active_job_id, jobId),

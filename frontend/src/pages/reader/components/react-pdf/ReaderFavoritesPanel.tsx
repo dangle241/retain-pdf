@@ -1,4 +1,4 @@
-// 摘录悬浮窗：当前文档的服务端收藏列表（对齐 legacy 云端区）
+// Cửa sổ nổi trích đoạn: danh sách mục đã lưu phía server của tài liệu hiện tại (căn với vùng đám mây legacy).
 
 import { useCallback, useEffect, useState } from "react";
 import { Bookmark } from "lucide-react";
@@ -22,10 +22,10 @@ export type ReaderFavoritesPanelProps = {
 
 function kindLabel(kind: string) {
   const k = `${kind || ""}`.trim();
-  if (k === "figure") return "图表";
-  if (k === "data") return "数据";
-  if (k === "sentence") return "摘录";
-  return k || "摘录";
+  if (k === "figure") return "Biểu đồ";
+  if (k === "data") return "Dữ liệu";
+  if (k === "sentence") return "Trích đoạn";
+  return k || "Trích đoạn";
 }
 
 export function ReaderFavoritesPanel({
@@ -42,7 +42,7 @@ export function ReaderFavoritesPanel({
   const reload = useCallback(async () => {
     if (!jobId && !documentId) {
       setItems([]);
-      setError("当前没有可关联的文档");
+      setError("Hiện không có tài liệu để liên kết");
       return;
     }
     setLoading(true);
@@ -53,14 +53,17 @@ export function ReaderFavoritesPanel({
         const port = createReaderServerFavoritesPort({ jobId });
         list = await port.loadServerFavorites();
       } else if (documentId) {
-        const { favorites = [] } = await fetchFavorites(API_PREFIX, { documentId });
+        const payload = await fetchFavorites(API_PREFIX, { documentId }) as {
+          favorites?: unknown[];
+        };
+        const { favorites = [] } = payload;
         list = (Array.isArray(favorites) ? favorites : [])
           .map((raw) => normalizeServerFavorite(raw))
           .filter(Boolean) as ServerFavorite[];
       }
       setItems(list);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "读取摘录失败");
+      setError(err instanceof Error ? err.message : "Không thể tải trích đoạn");
       setItems([]);
     } finally {
       setLoading(false);
@@ -76,16 +79,16 @@ export function ReaderFavoritesPanel({
     <ReaderFloatShell
       id="reader-favorites-panel"
       open={open}
-      title="摘录"
-      subtitle="本书云端收藏 · 本地保存"
+      title="Trích đoạn"
+      subtitle="Mục đã lưu trên đám mây của sách này · Lưu cục bộ"
       titleIcon={<Bookmark size={14} strokeWidth={2.25} aria-hidden />}
       storageKey="retainpdf.reader.favorites-float.pos.v1"
-      ariaLabel="摘录"
+      ariaLabel="Trích đoạn"
       onClose={onClose}
       toolbar={(
         <>
           <span className="reader-notes-count">
-            {loading ? "加载中…" : `${items.length} 条`}
+            {loading ? "Đang tải…" : `${items.length} mục`}
           </span>
           <button
             type="button"
@@ -93,7 +96,7 @@ export function ReaderFavoritesPanel({
             disabled={loading}
             onClick={() => void reload()}
           >
-            刷新
+            Làm mới
           </button>
         </>
       )}
@@ -101,10 +104,10 @@ export function ReaderFavoritesPanel({
       {error ? (
         <p className="reader-notes-empty" role="alert">{error}</p>
       ) : loading ? (
-        <p className="reader-notes-empty">正在加载摘录…</p>
+        <p className="reader-notes-empty">Đang tải trích đoạn…</p>
       ) : items.length === 0 ? (
         <p className="reader-notes-empty">
-          暂无摘录。在阅读时选中文字添加批注，或从主页收藏跳转过来。
+          Chưa có trích đoạn. Chọn văn bản khi đọc để thêm chú thích hoặc mở từ mục đã lưu ở trang chính.
         </p>
       ) : (
         items.map((item) => (
@@ -117,7 +120,7 @@ export function ReaderFavoritesPanel({
                   className="reader-notes-link"
                   onClick={() => onJumpPage(Math.max(1, (item.pageIdx || 0) + 1))}
                 >
-                  第 {(item.pageIdx || 0) + 1} 页
+                  Trang {(item.pageIdx || 0) + 1}
                 </button>
               </div>
             </div>

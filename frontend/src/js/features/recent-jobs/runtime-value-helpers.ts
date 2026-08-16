@@ -27,8 +27,8 @@ export function normalizeRuntimeDisplayStage(value = "") {
 
 // Backends sometimes flip display_stage / stage_snapshot.publicStage to "done"
 // (or set pdf_ready before the run actually reaches a terminal status). Without
-// this guard the recent-jobs card label would jump from "渲染中" straight to
-// "已完成" while the job is still running. Clamp "done" back to "render"
+// Nếu thiếu guard này, nhãn thẻ recent-jobs sẽ nhảy thẳng từ "Đang kết xuất" sang
+// "Đã hoàn tất" khi job vẫn đang chạy. Giới hạn "done" về lại "render".
 // unless the job's own status says it's truly succeeded.
 export function clampRuntimeStageKeyForJob(stageKey = "", jobOrStatus: any = {}) {
   if (`${stageKey || ""}`.trim() !== "done") {

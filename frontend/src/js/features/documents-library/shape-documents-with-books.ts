@@ -1,14 +1,14 @@
-// "一批文档 → 一批网格卡片 item"的唯一编排(重构②)。
+// Luồng duy nhất cho "một batch tài liệu → một batch mục thẻ lưới" (tái cấu trúc ②).
 //
-// 之前这套"收集有 active_job_id 的文档 → 批量取 library/books 活态 → 建
-// bookMap → 逐篇 shapeDocumentCardItem"的编排被抄了两份:图书馆主网格
-// (document-library-source.js)和合集展开(collections/controller.js)。两份
-// 发散是"空合集" bug 的根源——合集那份是 F2 文档中心化之前的旧拷贝,自己
-// filter 掉了馆藏文档。收成这一个函数后,任何"列一批文档成卡片"的界面
-// (图书馆/合集/搜索/未来的新入口)都穿过它,不会再各自发散。
+// Trước đây luồng "thu thập tài liệu có active_job_id → lấy hàng loạt trạng thái library/books → tạo
+// bookMap → shapeDocumentCardItem cho từng tài liệu" bị sao chép hai lần: lưới thư viện chính
+// (document-library-source.js) và phần mở rộng bộ sưu tập (collections/controller.js). Hai bản
+// phân kỳ là nguồn gốc lỗi "bộ sưu tập trống"; bản của bộ sưu tập là bản cũ trước F2 tài liệu trung tâm và tự
+// lọc mất tài liệu thư viện. Sau khi gom vào một hàm, mọi giao diện "liệt kê một batch tài liệu thành thẻ"
+// (thư viện/bộ sưu tập/tìm kiếm/entry mới tương lai) đều đi qua đây và không còn phân kỳ riêng.
 //
-// 只负责 documents → cards 的映射(保序,不去重/不分页/不搜索过滤——那些是
-// 各消费方自己的关切,留在调用方)。
+// Chỉ phụ trách ánh xạ documents → cards (giữ thứ tự, không loại trùng/phân trang/lọc tìm kiếm; đó là
+// mối quan tâm riêng của từng bên dùng và được giữ ở bên gọi).
 
 import { shapeDocumentCardItem } from "./document-card-item.js";
 
@@ -16,10 +16,10 @@ function normalizedJobId(value) {
   return `${value || ""}`.trim();
 }
 
-// documents: /documents 返回的文档数组
-// fetchLibraryBookList: (apiPrefix, { jobIds, limit }: any) => { items } 端口(可缺省)
-// 返回:与 documents 等长、同序的卡片 item 数组(已翻译叠加 book 活态,馆藏走
-// 合成 job_id)。
+// documents: mảng tài liệu trả về từ /documents
+// fetchLibraryBookList: cổng (apiPrefix, { jobIds, limit }: any) => { items } (có thể bỏ qua)
+// Trả về: mảng mục thẻ cùng độ dài và thứ tự với documents (tài liệu đã dịch được bổ sung trạng thái book; tài liệu thư viện dùng
+// job_id tổng hợp).
 export async function shapeDocumentsWithBooks(documents, { fetchLibraryBookList, apiPrefix }: any = {}) {
   const docs = Array.isArray(documents) ? documents : [];
   const jobIds = docs.map((doc) => normalizedJobId(doc?.active_job_id)).filter(Boolean);

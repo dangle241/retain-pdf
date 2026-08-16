@@ -20,6 +20,7 @@ export const CREDENTIAL_DOM_IDS = {
     ocrProviderSelect: "browser-ocr-provider-select",
     paddleToken: "browser-paddle-token",
     apiKey: "browser-api-key",
+    modelProvider: "browser-model-provider",
     modelBaseUrl: "browser-model-base-url",
     modelName: "browser-model-name",
     mathMode: "browser-job-math-mode",

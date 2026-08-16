@@ -1,14 +1,14 @@
-/* 设置面板 v2：左导航 + 右内容区（原"门厅弹窗"横向 pill 布局退役）。
+/* Panel cài đặt v2: điều hướng trái + vùng nội dung phải (bỏ bố cục pill ngang của "hộp thoại sảnh" cũ).
  *
- * DOM 契约（ids / data-attrs / hidden 语义）由 SettingsHubDialog.tsx 保证，
- * 测试锁定；本文件只管观感。颜色一律语义 token（棘轮门禁）。
- * 旧版曾注册全局短名 @utility is-active（status-card.css 头注释明令禁止的
- * 模式，会波及全站同名 class）——v2 改回嵌套写法，短名不再外泄。 */
+ * Hợp đồng DOM (ID / data-attrs / ngữ nghĩa hidden) do SettingsHubDialog.tsx bảo đảm,
+ * được kiểm thử khóa; file này chỉ phụ trách giao diện. Màu luôn dùng token ngữ nghĩa (cổng ratchet).
+ * Bản cũ từng đăng ký tên ngắn toàn cục @utility is-active (mẫu bị comment đầu status-card.css cấm rõ ràng,
+ * sẽ ảnh hưởng class cùng tên toàn trang); v2 đổi về cách viết lồng, tên ngắn không rò ra ngoài nữa. */
 
 @utility app-settings-dialog {
   width: min(860px, calc(100vw - 24px));
-  /* inset-0 + m-auto 的居中要求宽高皆定值：不写 height 时元素纵向撑满、
-     壳贴顶（"弹窗不在中间"的根因）。fit-content 让 m-auto 真正双轴居中。 */
+  /* Căn giữa bằng inset-0 + m-auto yêu cầu cả chiều rộng và cao có giá trị xác định: không viết height thì phần tử kéo đầy dọc,
+     vỏ dính đỉnh (nguyên nhân gốc của "hộp thoại không ở giữa"). fit-content giúp m-auto thực sự căn giữa hai trục. */
   height: fit-content;
 }
 
@@ -24,7 +24,7 @@
   min-height: 0;
 }
 
-/* —— 左导航栏 —— */
+/* —— Thanh điều hướng trái —— */
 
 @utility app-settings-rail {
   display: flex;
@@ -95,7 +95,7 @@
   }
 }
 
-/* —— 右内容窗格 —— */
+/* —— Khung nội dung phải —— */
 
 @utility app-settings-pane {
   position: relative;
@@ -113,7 +113,7 @@
 }
 
 @utility app-settings-panel {
-  /* 切区微升进场（hidden→显示重播动画，形成内容区过渡节奏） */
+  /* Khi đổi vùng, nội dung nâng nhẹ khi vào (hidden → hiển thị phát lại hoạt ảnh, tạo nhịp chuyển vùng nội dung). */
   animation: dialog-body-in 220ms var(--ease-out) both;
 
   &[hidden] {
@@ -123,7 +123,7 @@
 
 @utility app-settings-pane-head {
   margin: 0 0 18px;
-  padding-right: 40px; /* 给右上关闭钮让位 */
+  padding-right: 40px; /* Nhường chỗ cho nút đóng góc trên phải. */
 
   & h3 {
     margin: 0;
@@ -140,7 +140,7 @@
   }
 }
 
-/* API / 词表：启动区（真实表单在独立子对话框，本区是干净的入口说明） */
+/* API / Bảng thuật ngữ: vùng khởi chạy (biểu mẫu thật nằm trong hộp thoại con độc lập, vùng này là phần giới thiệu điểm vào gọn gàng). */
 @utility app-settings-launcher {
   display: grid;
   justify-items: start;
@@ -187,7 +187,7 @@
   }
 }
 
-/* —— 外观：主题卡片网格 —— */
+/* —— Giao diện: lưới thẻ chủ đề —— */
 
 @utility theme-appearance {
   display: grid;
@@ -247,8 +247,8 @@
   }
 }
 
-/* 迷你窗口预览：bg 场 + paper 卡 + accent 条 + ink 文字行 + danger 点。
- * 色值来自 registry preview（内联 style），本文件不写死颜色。 */
+/* Xem trước cửa sổ thu nhỏ: nền bg + thẻ paper + thanh accent + dòng chữ ink + chấm danger.
+ * Giá trị màu đến từ preview trong registry (style inline), file này không hardcode màu. */
 @utility theme-option-swatch {
   position: relative;
   display: block;

@@ -3,8 +3,8 @@ import {
   mockScenario,
 } from "../../composition/external.js";
 
-// Mock 演示模式提示条：URL 带 ?mock=demo / parallel 等时显示。
-// 引导用户打开馆藏书 → 翻译 Tab → 翻译整本，看 live 进度动画。
+// Thanh gợi ý chế độ demo mock: hiển thị khi URL có ?mock=demo / parallel, v.v.
+// Hướng dẫn người dùng mở sách thư viện → tab Dịch → Dịch toàn bộ để xem hoạt ảnh tiến độ live.
 
 export function MockModeBanner() {
   if (!isMockMode()) {
@@ -18,11 +18,11 @@ export function MockModeBanner() {
       role="status"
       data-mock-scenario={scenario}
     >
-      <strong>Mock 演示模式</strong>
+      <strong>Chế độ demo mô phỏng</strong>
       <span>
-        当前 <code>?mock={scenario}</code>
-        ：不连真实后端。打开带「馆藏」徽标的书 →「翻译」Tab →「翻译整本」，
-        可在详情内看到约 16 秒的假进度（OCR → 翻译 → 渲染 → 完成）。
+        Hiện tại <code>?mock={scenario}</code>
+        : không kết nối backend thật. Mở sách có huy hiệu “Thư viện” → tab “Dịch” → “Dịch toàn bộ”,
+        bạn sẽ thấy tiến trình mô phỏng khoảng 16 giây trong phần chi tiết (OCR → Dịch → Kết xuất → Hoàn tất).
       </span>
     </div>
   );
