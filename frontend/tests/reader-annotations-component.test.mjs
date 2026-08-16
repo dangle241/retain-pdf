@@ -120,10 +120,10 @@ test("批注面板:分组渲染、笔记编辑、乐观删除与 Markdown 导出
 
   // 基础渲染:分组标题、卡片、徽章、已有笔记
   assert.ok(host.querySelector(".reader-annotations-panel"), "面板已渲染");
-  assert.equal(host.querySelector(".reader-annotations-count")?.textContent, "3 条批注");
+  assert.equal(host.querySelector(".reader-annotations-count")?.textContent, "3 chú thích");
   const groupTitles = [...host.querySelectorAll(".reader-annotations-group-title")];
   assert.equal(groupTitles.length, 2, "两个分组标题");
-  assert.deepEqual(groupTitles.map((node) => node.textContent), ["第 1 页", "第 3 页"]);
+  assert.deepEqual(groupTitles.map((node) => node.textContent), ["Trang 1", "Trang 3"]);
   const items = [...host.querySelectorAll(".reader-annotations-item")];
   assert.equal(items.length, 3, "三张批注卡片");
   assert.deepEqual(
@@ -161,11 +161,11 @@ test("批注面板:分组渲染、笔记编辑、乐观删除与 Markdown 导出
   // 导出 Markdown:含 "# " 标题与 "> " 引用块,按钮短暂变为「已复制」
   click(host.querySelector(".reader-annotations-export"));
   // 等按钮真正变成「已复制」(异步 export 完成 + 重渲之后),而不是猜固定毫秒。
-  await waitUntil(() => host.querySelector(".reader-annotations-export")?.textContent === "已复制", "按钮变已复制");
+  await waitUntil(() => host.querySelector(".reader-annotations-export")?.textContent === "Đã sao chép", "按钮变已复制");
   assert.equal(exportCalls.length, 1, "exportMarkdown 被调用一次");
   assert.ok(exportCalls[0].includes("# "), "Markdown 含标题");
   assert.ok(exportCalls[0].includes("> "), "Markdown 含引用块");
-  assert.equal(host.querySelector(".reader-annotations-export")?.textContent, "已复制");
+  assert.equal(host.querySelector(".reader-annotations-export")?.textContent, "Đã sao chép");
 
   // 删除:乐观移除且 deleteAnnotation 被调
   click(host.querySelector(".reader-annotations-item .reader-annotations-remove"));

@@ -65,17 +65,305 @@ def test_paddle_request_does_not_retry_auth_failures(monkeypatch: pytest.MonkeyP
     assert session.calls == 1
 
 
-def test_paddle_optional_payload_sets_page_limit() -> None:
-    payload = paddle_api.build_optional_payload("PaddleOCR-VL-1.5")
-    assert payload["max_num_input_imgs"] == 999
+def test_paddle_submit_retries_unexpected_tls_eof(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    class SuccessResponse:
+        def json(self):
+            return {
+                "errorCode": 0,
+                "errorMsg": "Success",
+                "logId": "trace-test",
+                "data": {"jobId": "paddle-test"},
+            }
 
-    structure_payload = paddle_api.build_optional_payload("PP-StructureV3")
-    assert structure_payload["max_num_input_imgs"] == 999
+    calls = 0
+    sleeps: list[float] = []
+
+    def fake_request(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            ssl_error = requests.exceptions.SSLError(
+                "[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol"
+            )
+            try:
+                raise ssl_error
+            except requests.exceptions.SSLError as cause:
+                raise paddle_api.PaddleNetworkError("TLS submit failed") from cause
+        return SuccessResponse()
+
+    source = tmp_path / "source.pdf"
+    source.write_bytes(b"%PDF-1.4\n")
+    monkeypatch.setattr(paddle_api, "_request_with_retry", fake_request)
+    monkeypatch.setattr(paddle_api.time, "sleep", lambda seconds: sleeps.append(seconds))
+    monkeypatch.setenv(paddle_api.PADDLE_SUBMIT_RETRY_ATTEMPTS_ENV, "3")
+
+    job_id, trace_id = paddle_api.submit_local_file(
+        token="test-token",
+        file_path=source,
+        model="PaddleOCR-VL-1.6",
+        optional_payload={},
+        timeout=1,
+    )
+
+    assert job_id == "paddle-test"
+    assert trace_id == "trace-test"
+    assert calls == 2
+    assert sleeps == [0.5]
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Paddle OCR submit transport retry 1/3" in captured.err
+
+
+def test_paddle_submit_retries_dns_resolution_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    class SuccessResponse:
+        def json(self):
+            return {
+                "errorCode": 0,
+                "errorMsg": "Success",
+                "logId": "trace-dns-test",
+                "data": {"jobId": "paddle-dns-test"},
+            }
+
+    calls = 0
+
+    def fake_request(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            dns_error = requests.exceptions.ConnectionError(
+                "NameResolutionError: Failed to resolve "
+                "'paddleocr.aistudio-app.com' ([Errno -2] Name or service not known)"
+            )
+            try:
+                raise dns_error
+            except requests.exceptions.ConnectionError as cause:
+                raise paddle_api.PaddleNetworkError("DNS submit failed") from cause
+        return SuccessResponse()
+
+    source = tmp_path / "source.pdf"
+    source.write_bytes(b"%PDF-1.4\n")
+    monkeypatch.setattr(paddle_api, "_request_with_retry", fake_request)
+    monkeypatch.setattr(paddle_api.time, "sleep", lambda _seconds: None)
+    monkeypatch.setenv(paddle_api.PADDLE_SUBMIT_RETRY_ATTEMPTS_ENV, "3")
+
+    job_id, trace_id = paddle_api.submit_local_file(
+        token="test-token",
+        file_path=source,
+        model="PaddleOCR-VL-1.6",
+        optional_payload={},
+        timeout=1,
+    )
+
+    assert job_id == "paddle-dns-test"
+    assert trace_id == "trace-dns-test"
+    assert calls == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Paddle OCR submit transport retry 1/3" in captured.err
+
+
+def test_paddle_submit_retries_remote_disconnect(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    class SuccessResponse:
+        def json(self):
+            return {
+                "errorCode": 0,
+                "errorMsg": "Success",
+                "logId": "trace-disconnect-test",
+                "data": {"jobId": "paddle-disconnect-test"},
+            }
+
+    calls = 0
+
+    def fake_request(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            disconnect_error = requests.exceptions.ConnectionError(
+                "('Connection aborted.', "
+                "RemoteDisconnected('Remote end closed connection without response'))"
+            )
+            try:
+                raise disconnect_error
+            except requests.exceptions.ConnectionError as cause:
+                raise paddle_api.PaddleNetworkError("submit connection closed") from cause
+        return SuccessResponse()
+
+    source = tmp_path / "source.pdf"
+    source.write_bytes(b"%PDF-1.4\n")
+    monkeypatch.setattr(paddle_api, "_request_with_retry", fake_request)
+    monkeypatch.setattr(paddle_api.time, "sleep", lambda _seconds: None)
+    monkeypatch.setenv(paddle_api.PADDLE_SUBMIT_RETRY_ATTEMPTS_ENV, "3")
+
+    job_id, trace_id = paddle_api.submit_local_file(
+        token="test-token",
+        file_path=source,
+        model="PaddleOCR-VL-1.6",
+        optional_payload={},
+        timeout=1,
+    )
+
+    assert job_id == "paddle-disconnect-test"
+    assert trace_id == "trace-disconnect-test"
+    assert calls == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Paddle OCR submit transport retry 1/3" in captured.err
+
+
+def test_paddle_submit_retries_connection_refused(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class SuccessResponse:
+        def json(self):
+            return {
+                "errorCode": 0,
+                "errorMsg": "Success",
+                "logId": "trace-connect-test",
+                "data": {"jobId": "paddle-connect-test"},
+            }
+
+    calls = 0
+
+    def fake_request(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            connect_error = requests.exceptions.ConnectionError(
+                "Failed to establish a new connection: [Errno 111] Connection refused"
+            )
+            try:
+                raise connect_error
+            except requests.exceptions.ConnectionError as cause:
+                raise paddle_api.PaddleNetworkError("connect failed") from cause
+        return SuccessResponse()
+
+    source = tmp_path / "source.pdf"
+    source.write_bytes(b"%PDF-1.4\n")
+    monkeypatch.setattr(paddle_api, "_request_with_retry", fake_request)
+    monkeypatch.setattr(paddle_api.time, "sleep", lambda _seconds: None)
+    monkeypatch.setenv(paddle_api.PADDLE_SUBMIT_RETRY_ATTEMPTS_ENV, "3")
+
+    job_id, trace_id = paddle_api.submit_local_file(
+        token="test-token",
+        file_path=source,
+        model="PaddleOCR-VL-1.6",
+        optional_payload={},
+        timeout=1,
+    )
+
+    assert job_id == "paddle-connect-test"
+    assert trace_id == "trace-connect-test"
+    assert calls == 2
+
+
+def test_paddle_submit_retries_write_timeout(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class SuccessResponse:
+        def json(self):
+            return {
+                "errorCode": 0,
+                "errorMsg": "Success",
+                "logId": "trace-write-test",
+                "data": {"jobId": "paddle-write-test"},
+            }
+
+    calls = 0
+
+    def fake_request(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            write_error = requests.exceptions.ConnectionError(
+                "('Connection aborted.', TimeoutError('The write operation timed out'))"
+            )
+            try:
+                raise write_error
+            except requests.exceptions.ConnectionError as cause:
+                raise paddle_api.PaddleNetworkError("write failed") from cause
+        return SuccessResponse()
+
+    source = tmp_path / "source.pdf"
+    source.write_bytes(b"%PDF-1.4\n")
+    monkeypatch.setattr(paddle_api, "_request_with_retry", fake_request)
+    monkeypatch.setattr(paddle_api.time, "sleep", lambda _seconds: None)
+    monkeypatch.setenv(paddle_api.PADDLE_SUBMIT_RETRY_ATTEMPTS_ENV, "3")
+
+    job_id, trace_id = paddle_api.submit_local_file(
+        token="test-token",
+        file_path=source,
+        model="PaddleOCR-VL-1.6",
+        optional_payload={},
+        timeout=1,
+    )
+
+    assert job_id == "paddle-write-test"
+    assert trace_id == "trace-write-test"
+    assert calls == 2
+
+
+def test_paddle_curl_submit_keeps_token_out_of_process_arguments(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source = tmp_path / "source, test.pdf"
+    source.write_bytes(b"%PDF-1.4\n")
+    captured: dict[str, object] = {}
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        captured["input"] = kwargs["input"]
+        return paddle_api.subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=(
+                b'{"errorCode":0,"errorMsg":"Success","logId":"curl-trace",'
+                b'"data":{"jobId":"curl-job"}}\n200'
+            ),
+            stderr=b"",
+        )
+
+    monkeypatch.setenv(paddle_api.PADDLE_SUBMIT_TRANSPORT_ENV, "curl")
+    monkeypatch.setattr(paddle_api.shutil, "which", lambda _name: "/usr/bin/curl")
+    monkeypatch.setattr(paddle_api.subprocess, "run", fake_run)
+
+    job_id, trace_id = paddle_api.submit_local_file(
+        token="secret-test-token",
+        file_path=source,
+        model="PaddleOCR-VL-1.5",
+        optional_payload={"useDocUnwarping": False},
+        timeout=30,
+    )
+
+    assert job_id == "curl-job"
+    assert trace_id == "curl-trace"
+    assert "secret-test-token" not in " ".join(captured["command"])
+    assert b"secret-test-token" in captured["input"]
+    assert "@-" in captured["command"]
+    assert any('file=@"' in argument for argument in captured["command"])
+
+
+def test_paddle_optional_payload_matches_async_api_contract() -> None:
+    payload = paddle_api.build_optional_payload("PaddleOCR-VL-1.5")
+    assert payload == {
+        "useDocOrientationClassify": False,
+        "useDocUnwarping": False,
+        "useChartRecognition": False,
+    }
+
+    ocr_payload = paddle_api.build_optional_payload("PP-OCRv5")
+    assert ocr_payload["useTextlineOrientation"] is False
+    assert "useChartRecognition" not in ocr_payload
 
 
 def test_paddle_model_defaults_and_aliases_use_shared_config() -> None:
-    assert paddle_api.normalize_model_name("") == "PaddleOCR-VL-1.6"
-    assert paddle_api.normalize_model_name("paddleocr-vl") == "PaddleOCR-VL-1.6"
+    assert paddle_api.normalize_model_name("") == "PaddleOCR-VL-1.5"
+    assert paddle_api.normalize_model_name("paddleocr-vl") == "PaddleOCR-VL-1.5"
     assert paddle_api.normalize_model_name("paddle-ocr-vl-1.6") == "PaddleOCR-VL-1.6"
     assert paddle_api.normalize_model_name("paddleocr-vl-1.5") == "PaddleOCR-VL-1.5"
 

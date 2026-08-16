@@ -1,10 +1,10 @@
-/* 合集管理弹窗（从 components.utilities 拆出） */
+/* Hộp thoại quản lý bộ sưu tập (tách từ components.utilities). */
 
 
-/* CollectionManageDialog(分类文件夹 新建/管理弹窗)——名称输入镜像
-   professional-glossary-field 的字段样式(span 标题 + 12px 圆角输入),勾选
-   清单是本项目第一处 checkbox 列表,没有现成样式可直接复用,新写一份和
-   lib-search-hit/recent-job-delete-popover 同一视觉语言的浅色卡片列表。 */
+/* CollectionManageDialog (hộp thoại tạo/quản lý thư mục phân loại): ô nhập tên phản chiếu
+   kiểu trường professional-glossary-field (tiêu đề span + input bo góc 12px); danh sách checkbox
+   là danh sách checkbox đầu tiên trong dự án, không có style sẵn để tái sử dụng trực tiếp, nên viết mới theo cùng ngôn ngữ hình ảnh với
+   danh sách thẻ sáng lib-search-hit/recent-job-delete-popover. */
 @utility collection-name-field {
   display: grid;
   gap: 8px;
@@ -112,7 +112,7 @@
   background: color-mix(in srgb, var(--bg) 55%, var(--paper));
 }
 
-/* 合集管理弹窗宽度略收 */
+/* Thu hẹp nhẹ chiều rộng hộp thoại quản lý bộ sưu tập. */
 @utility collection-manage-dialog {
   width: min(480px, calc(100vw - 24px));
 }

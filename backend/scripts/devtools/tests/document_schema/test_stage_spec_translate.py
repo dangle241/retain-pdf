@@ -53,6 +53,9 @@ def test_translate_stage_spec_loads_and_resolves_env_credential(tmp_path: Path, 
                     "batch_size": 8,
                     "workers": 4,
                     "mode": "sci",
+                    "source_language": "en",
+                    "target_language": "vi",
+                    "target_language_name": "Tiếng Việt",
                     "skip_title_translation": False,
                     "classify_batch_size": 12,
                     "rule_profile_name": "general_sci",
@@ -79,6 +82,9 @@ def test_translate_stage_spec_loads_and_resolves_env_credential(tmp_path: Path, 
 
     assert spec.stage == "translate"
     assert spec.params.model == "deepseek-v4-flash"
+    assert spec.params.source_language == "en"
+    assert spec.params.target_language == "vi"
+    assert spec.params.target_language_name == "Tiếng Việt"
     assert resolve_credential_ref(spec.params.credential_ref) == "sk-stage-test"
 
 
@@ -121,5 +127,8 @@ def test_translate_stage_spec_defaults_math_mode_to_direct_typst(tmp_path: Path)
     spec = TranslateStageSpec.load(spec_path)
 
     assert spec.params.math_mode == "direct_typst"
+    assert spec.params.source_language == "en"
+    assert spec.params.target_language == "vi"
+    assert spec.params.target_language_name == "Tiếng Việt"
 
 

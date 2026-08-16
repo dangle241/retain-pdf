@@ -88,7 +88,7 @@ test("馆藏卡打开书籍详情:元数据 + 阅读状态切换 + 翻译/读原
   // 标题默认是只读大标题(不是常驻输入框),编辑才出现输入框
   await waitFor(() => dlg.querySelector(".book-detail-title")?.textContent?.trim(), "标题就位");
   assert.equal(byId("book-detail-title-input"), null, "默认只读,无标题输入框");
-  assert.ok(dlg.querySelector(".book-detail-status")?.textContent.includes("未翻译"), "馆藏显示未翻译");
+  assert.ok(dlg.querySelector(".book-detail-status")?.textContent.includes("Chưa dịch"), "馆藏显示未翻译");
   // 未翻译：轻量空态 + StageFlow 预览（尚无真实 job，不嵌完整 StatusCard）
   assert.ok(byId("book-detail-translate-progress"), "馆藏有翻译进度面板");
   assert.ok(byId("book-detail-stage-flow"), "未翻译进度区有 StageFlow 预览");
@@ -104,7 +104,7 @@ test("馆藏卡打开书籍详情:元数据 + 阅读状态切换 + 翻译/读原
   // 阅读状态切换 → patchDocument(mock),按钮变激活
   const { getMockDocument } = await import("../src/js/mock/documents.js");
   const readBtns = dlg.querySelectorAll(".book-detail-reading-btn");
-  const doneBtn = Array.from(readBtns).find((b) => b.textContent === "读完");
+  const doneBtn = Array.from(readBtns).find((b) => b.textContent === "Đã đọc xong");
   click(dom, doneBtn);
   await waitFor(() => doneBtn.classList.contains("is-active"), "读完变激活");
   await waitFor(() => getMockDocument(documentId).reading_status === "done", "patchDocument 落库 reading_status=done");
@@ -135,8 +135,8 @@ test("已翻译卡打开书籍详情:有对照阅读,无翻译按钮", async () 
   );
   // 已翻译书默认落在「翻译」Tab；进度卡应立刻在 DOM
   await waitFor(
-    () => dlg.querySelector(".book-detail-status")?.textContent?.includes("已完成"),
-    "显示已完成",
+    () => dlg.querySelector(".book-detail-status")?.textContent?.includes("Đã hoàn tất"),
+    "显示Đã hoàn tất",
   );
   const statusCard = await waitFor(() => byId("book-detail-job-status-card"), "翻译 Tab 内嵌 StatusCard");
   assert.ok(statusCard.classList.contains("bd-job-status-card"), "详情专用进度卡");
@@ -170,7 +170,7 @@ test("已翻译卡打开书籍详情:有对照阅读,无翻译按钮", async () 
     "完成阶段高亮",
   );
   const valueText = statusCard.querySelector(".bd-job-status-value")?.textContent?.trim();
-  assert.ok(valueText && valueText !== "准备中", `完成态应有进度文案，实际: ${valueText}`);
+  assert.ok(valueText && valueText !== "Đang chuẩn bị", `完成态应有进度文案，实际: ${valueText}`);
   // 详情进度卡已从 ring 改为 bar 布局（StatusCardEmbedded：.bd-job-status-percent）
   const pct = statusCard.querySelector(".bd-job-status-percent")?.textContent?.trim();
   assert.equal(pct, "100%", "完成态进度条 100%");

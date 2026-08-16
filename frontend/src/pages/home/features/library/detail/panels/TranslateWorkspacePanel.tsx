@@ -1,5 +1,5 @@
-// 兼容入口：翻译 Tab 工作台 = BookTranslationWorkflowPanel。
-// 新代码请直接 import BookTranslationWorkflowPanel。
+// Entry tương thích: bàn làm việc tab Dịch = BookTranslationWorkflowPanel.
+// Mã mới hãy import trực tiếp BookTranslationWorkflowPanel.
 
 export {
   BookTranslationWorkflowPanel as TranslateWorkspacePanel,

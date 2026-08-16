@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// 流式渲染中间态(React 组件版):旧版驱动 chat.js,Phase 2b 迁入 React 后
+// 流式Đang kết xuất间态(React 组件版):旧版驱动 chat.js,Phase 2b 迁入 React 后
 // 改为渲染 ReaderAiChat 并经 DOM 提交驱动;断言语义不变——onAnswerDelta 到达时
 // 气泡应出现"只含前几段"的中间渲染态(证明边流边渲染,而非只在末尾一次性渲染)。
 

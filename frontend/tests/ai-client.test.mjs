@@ -68,7 +68,7 @@ test("readAiAskStream:流中断(无 done)抛出可重试错误", async () => {
     readAiAskStream(sseStream([
       'data: {"type": "tool", "round": 1, "tool": "read_blocks", "arguments": {}}\n\n',
     ])),
-    (error) => error instanceof AiAskError && /中断/.test(error.message),
+    (error) => error instanceof AiAskError && /bị gián đoạn/.test(error.message),
   );
 });
 
@@ -120,7 +120,7 @@ test("askLibraryAi:502 抛出带 status 的 AI 服务未运行错误", async () 
       question: "hi",
       fetchImpl: async () => ({ ok: false, status: 502, text: async () => "" }),
     }),
-    (error) => error instanceof AiAskError && error.status === 502 && /AI 服务未运行/.test(error.message),
+    (error) => error instanceof AiAskError && error.status === 502 && /Dịch vụ AI chưa chạy/.test(error.message),
   );
 });
 
@@ -154,7 +154,7 @@ test("askLibraryAi:400 缺 LLM key 时透传/归并可读文案", async () => {
     }),
     (error) => error instanceof AiAskError
       && error.status === 400
-      && /LLM API Key|模型 API Key|凭据/.test(error.message),
+      && /Thiếu API Key|API Key của mô hình|Cài đặt API/.test(error.message),
   );
 });
 
@@ -177,7 +177,7 @@ test("buildScopedQuestion:页/选区范围以前缀写进 question 文本", () =
   assert.equal(buildScopedQuestion({ question: "总结一下", scope: "document" }), "总结一下");
   assert.equal(
     buildScopedQuestion({ question: "总结一下", scope: "page", context: { page: 4 } }),
-    "（当前第 4 页）总结一下",
+    "(Trang hiện tại: 4) 总结一下",
   );
   assert.equal(
     buildScopedQuestion({
@@ -186,11 +186,11 @@ test("buildScopedQuestion:页/选区范围以前缀写进 question 文本", () =
       context: { page: 2, rect: {} },
       resolveQuote: () => ({ quoteText: "选中的  原文\n片段" }),
     }),
-    "（针对选中的原文片段：「选中的 原文 片段」）解释这段",
+    "(Dành cho đoạn văn gốc đã chọn: “选中的 原文 片段”) 解释这段",
   );
   assert.equal(
     buildScopedQuestion({ question: "解释这段", scope: "selection", context: { page: 2 }, resolveQuote: () => null }),
-    "（针对第 2 页的选区内容）解释这段",
+    "(Dành cho nội dung được chọn ở trang 2) 解释这段",
   );
 });
 
@@ -272,7 +272,7 @@ test("chat:agentic 回答渲染 [n] 可点击引用与脚注,模型文本 XSS �
   );
 
   const assistant = documentRef.querySelector(".reader-ai-message-assistant");
-  assert.deepEqual(progressTexts, ["正在检索文档内容…"], "tool 事件应渲染为过程提示行");
+  assert.deepEqual(progressTexts, ["Đang Tìm kiếm nội dung tài liệu…"], "tool 事件应渲染为过程提示行");
   assert.ok(!assistant.className.includes("reader-ai-message-progress"), "完成后应移除过程态样式");
   assert.ok(!assistant.innerHTML.includes("<img"), "模型文本必须按纯文本插入");
   assert.match(assistant.textContent, /<img src=x/);
@@ -282,7 +282,7 @@ test("chat:agentic 回答渲染 [n] 可点击引用与脚注,模型文本 XSS �
   refButton.click();
   const footerButtons = assistant.querySelectorAll(".reader-ai-citations .reader-ai-citation-item");
   assert.equal(footerButtons.length, 1);
-  assert.match(footerButtons[0].textContent, /^\[1\] 命中片段文本 · 第 4 页$/);
+  assert.match(footerButtons[0].textContent, /^\[1\] 命中片段文本 · Trang 4$/);
   footerButtons[0].click();
   assert.deepEqual(jumps, [citation, citation], "正文标记与脚注点击都跳同一引用");
 });
@@ -319,7 +319,7 @@ test("ask answerer:按 job_id 直查 document_id 且只查一次", async () => {
   assert.deepEqual(listCalls[0][1], "job-b", "按 job_id 直查");
   assert.equal(askCalls[0].documentId, "doc-b");
   assert.equal(askCalls[0].jobId, "job-b");
-  assert.equal(askCalls[1].question, "（当前第 3 页）问题二");
+  assert.equal(askCalls[1].question, "(Trang hiện tại: 3) 问题二");
   assert.equal(toolEvents.length, 1);
 });
 
@@ -336,7 +336,7 @@ test("ask answerer:反查不到 document 时 fail closed，不静默全库", asy
   });
   await assert.rejects(
     answerer.answer({ question: "这篇讲什么?", scope: "document" }),
-    /无法关联当前文档/,
+    /Không thể liên kết tài liệu hiện tại/,
   );
   assert.equal(askCalls.length, 0);
 });
@@ -358,7 +358,7 @@ test("ask answerer:无模型 Key 时不查文档、不发 ask", async () => {
   });
   await assert.rejects(
     answerer.answer({ question: "hi", scope: "document" }),
-    /缺少模型 API Key/,
+    /Thiếu API Key của mô hình/,
   );
   assert.equal(listCalls.length, 0, "缺 Key 不得先查文档");
   assert.equal(askCalls.length, 0, "缺 Key 不得发 ask");

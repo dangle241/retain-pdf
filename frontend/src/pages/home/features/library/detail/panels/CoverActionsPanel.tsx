@@ -1,6 +1,6 @@
-// 左栏：封面 + 对照/原版主操作。
-// 元信息摘要（页数/大小/入库/合集）已迁到右栏简介 Tab 的信息网格
-// （BookDetailOverviewTab）——左栏纯粹化，右栏不再空旷。
+// Cột trái: bìa + thao tác chính đối chiếu/bản gốc.
+// Tóm tắt siêu dữ liệu (số trang/dung lượng/ngày thêm/bộ sưu tập) đã chuyển sang lưới thông tin tab giới thiệu bên phải
+// (BookDetailOverviewTab); cột trái gọn hơn và cột phải không còn trống.
 
 import { btn, IconCompare, IconEye } from "./ui.jsx";
 import { BookCardProcessingOverlay } from "../../display/BookCardProcessingOverlay.jsx";
@@ -11,7 +11,7 @@ import { BookCardProcessingOverlay } from "../../display/BookCardProcessingOverl
  * @param {boolean} props.readerAvailable
  * @param {string} props.documentId
  * @param {string|boolean} props.busy
- * @param {boolean} [props.processing] 翻译/重试进行中：封面中央 loading
+ * @param {boolean} [props.processing] Đang dịch/thử lại: loading giữa bìa.
  * @param {() => void} props.onCompare
  * @param {() => void} props.onReadSource
  */
@@ -31,7 +31,7 @@ export function CoverActionsPanel({
         style={coverUrl ? { backgroundImage: `url("${coverUrl}")` } : undefined}
         data-cover-processing={processing ? "true" : "false"}
       >
-        {coverUrl ? null : <span className="text-xs text-muted-foreground">无封面</span>}
+        {coverUrl ? null : <span className="text-xs text-muted-foreground">Không có bìa</span>}
         {processing ? <BookCardProcessingOverlay /> : null}
       </div>
       <div className="flex flex-col gap-2 pt-1">
@@ -43,7 +43,7 @@ export function CoverActionsPanel({
             onClick={onCompare}
           >
             <IconCompare className="mr-1" />
-            对照阅读
+            Đọc đối chiếu
           </button>
         ) : null}
         <button
@@ -53,7 +53,7 @@ export function CoverActionsPanel({
           onClick={onReadSource}
         >
           <IconEye className="mr-1" />
-          查看原版
+          Xem bản gốc
         </button>
       </div>
     </div>

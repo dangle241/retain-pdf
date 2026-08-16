@@ -1,10 +1,10 @@
-// 3b app-update React 化(蓝图 §5)唯一的 APP_VERSION 出口。
+// 3b chuyển app-update sang React (bản thiết kế §5): entry APP_VERSION duy nhất.
 //
-// 直接 re-export generated/app-version.js 的 APP_VERSION——
-// architecture-boundaries 门禁禁止 src/pages/**、src/shared/** 直接 import
-// src/js/generated/**(预编译/生成产物)。这个薄 re-export 文件本身仍在旧
-// 世界(src/js/features/app-update/),不受该门禁约束;新世界从这里间接拿到
-// 版本号,不复制字面量、不违反门禁,版本号更新脚本(generate-app-version.mjs)
-// 改一处两边同时生效。
+// Re-export trực tiếp APP_VERSION từ generated/app-version.js;
+// cổng architecture-boundaries cấm src/pages/** và src/shared/** import trực tiếp
+// src/js/generated/** (đầu ra biên dịch trước/được tạo). Bản thân tệp re-export mỏng này vẫn nằm trong
+// phần cũ (src/js/features/app-update/) nên không bị cổng này ràng buộc; phần mới lấy gián tiếp
+// số phiên bản từ đây, không sao chép literal và không vi phạm cổng; script cập nhật phiên bản (generate-app-version.mjs)
+// chỉ cần sửa một chỗ để cả hai phía cùng có hiệu lực.
 
 export { APP_VERSION } from "../../generated/app-version.js";

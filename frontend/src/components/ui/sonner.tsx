@@ -8,9 +8,9 @@ import {
 } from "lucide-react"
 import { Toaster as Sonner } from "sonner";
 
-// 项目不是 Next.js,没有 next-themes 包,tokens.css 目前也只有单一 :root
-// (无暗色模式)。shadcn 默认实现靠 next-themes 的 useTheme() 读取当前主题,
-// 这里去掉这层间接,固定传 "light",行为等价且不引入多余依赖。
+// Dự án không dùng Next.js, không có gói next-themes và tokens.css hiện chỉ có một :root
+// (không có chế độ tối). Cách triển khai mặc định của shadcn dùng useTheme() từ next-themes để đọc theme hiện tại;
+// ở đây bỏ lớp gián tiếp này và cố định giá trị "light"; hành vi tương đương mà không thêm phụ thuộc thừa.
 const Toaster = ({
   ...props
 }) => {

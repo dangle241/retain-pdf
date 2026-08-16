@@ -1,6 +1,6 @@
-/* 状态详情 · 翻译调试 tab（列表/筛选/详情/重放） */
+/* Chi tiết trạng thái · Tab gỡ lỗi bản dịch (danh sách/bộ lọc/chi tiết/replay). */
 
-/* 状态详情 / 翻译调试 / 事件时间线工具类（从 components.utilities 拆出） */
+/* Utility chi tiết trạng thái / gỡ lỗi bản dịch / dòng thời gian sự kiện (tách từ components.utilities). */
 
 
 @utility translation-debug-content {
@@ -8,10 +8,128 @@
   gap: 16px;
 }
 
+@utility manual-translation-import {
+  margin-bottom: 16px;
+  gap: 12px;
+
+  & .status-panel-head h3 {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  & svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+  }
+}
+
+@utility manual-translation-import-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+@utility manual-translation-export-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+@utility manual-translation-batch-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  color: var(--muted);
+  font-size: 12px;
+
+  & .button-link {
+    width: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0;
+  }
+}
+
+@utility manual-translation-import-button {
+  position: relative;
+  min-height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &.disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.55;
+  }
+}
+
+@utility manual-translation-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@utility manual-translation-file-name {
+  min-width: 0;
+  max-width: min(100%, 520px);
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+@utility manual-translation-import-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+
+  &.is-error {
+    color: var(--danger);
+  }
+
+  &.is-success {
+    color: var(--ok);
+  }
+}
+
+@utility manual-translation-spin {
+  animation: manual-translation-spin 0.8s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@utility manual-translation-render-button {
+  justify-self: start;
+  min-height: 38px;
+  border-radius: 8px;
+}
+
+@keyframes manual-translation-spin {
+  to { transform: rotate(360deg); }
+}
+
 
 
 @utility translation-debug-column {
-  /* 统计条与筛选行不做卡片,只有列表/详情两栏保留一层浅容器 */
+  /* Thanh thống kê và hàng bộ lọc không dùng thẻ; chỉ hai cột danh sách/chi tiết giữ một lớp container sáng. */
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--paper);
@@ -49,7 +167,7 @@
     overflow-wrap: anywhere;
   }
 
-  /* Provider 是文本型指标(如 deepseek_official),比数字长,降一级字号 */
+  /* Provider là chỉ số văn bản (như deepseek_official), dài hơn số nên giảm một cấp cỡ chữ. */
   & #translation-provider-family {
     font-size: 14px;
     line-height: 1.6;
@@ -458,7 +576,7 @@
 
 
 @utility detail-info-list {
-  /* 提高特异性:后文的 .detail-info-list 定义了两列,这里要单列扁平键值行 */
+  /* Tăng specificity: .detail-info-list phía sau định nghĩa hai cột, tại đây cần hàng key-value phẳng một cột. */
   &.translation-detail-grid {
     margin: 0;
     display: grid;
@@ -476,7 +594,7 @@
 
 
 @utility translation-detail-grid {
-  /* 提高特异性:后文的 .detail-info-list 定义了两列,这里要单列扁平键值行 */
+  /* Tăng specificity: .detail-info-list phía sau định nghĩa hai cột, tại đây cần hàng key-value phẳng một cột. */
   &.detail-info-list {
     margin: 0;
     display: grid;
@@ -496,7 +614,7 @@
 
 
 @utility info-row {
-  /* 详情字段用扁平键值行,盖掉 .info-row 的卡片样式 */
+  /* Trường chi tiết dùng hàng key-value phẳng, ghi đè kiểu thẻ .info-row. */
   &.translation-detail-row {
     grid-template-columns: minmax(120px, auto) 1fr;
     align-items: baseline;
@@ -538,7 +656,7 @@
 
 
 @utility translation-detail-row {
-  /* 详情字段用扁平键值行,盖掉 .info-row 的卡片样式 */
+  /* Trường chi tiết dùng hàng key-value phẳng, ghi đè kiểu thẻ .info-row. */
   &.info-row {
     grid-template-columns: minmax(120px, auto) 1fr;
     align-items: baseline;

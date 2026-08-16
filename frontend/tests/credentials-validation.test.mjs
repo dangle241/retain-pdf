@@ -189,7 +189,7 @@ test("handleBrowserDeepSeekValidate writes balance through credentials state por
     viewPort: {
       elements: () => ({
         apiKeyInput: createCredentialNode({ value: "" }),
-        modelBaseUrlInput: createCredentialNode({ value: "" }),
+        modelBaseUrlInput: createCredentialNode({ value: "https://api.deepseek.com/v1" }),
       }),
       setTopUpVisible: (visible) => calls.push(["top-up", visible]),
       setValidationMessage: (message, tone) => messages.push([message, tone]),
@@ -199,7 +199,38 @@ test("handleBrowserDeepSeekValidate writes balance through credentials state por
   assert.equal(result.ok, true);
   assert.ok(calls.some((call) => call[0] === "state-reset"));
   assert.ok(calls.some((call) => call[0] === "state-set" && call[1] === 3.25 && call[2] === true));
-  assert.deepEqual(messages.at(-1), ["DeepSeek 可用，余额 CNY 3.25", "valid"]);
+  assert.deepEqual(messages.at(-1), ["DeepSeek khả dụng, Số dư CNY 3.25", "valid"]);
+});
+
+test("handleBrowserDeepSeekValidate skips the DeepSeek balance API for OpenAI-compatible endpoints", async () => {
+  let balanceCalled = false;
+  const messages = [];
+  const result = await handleBrowserDeepSeekValidate({
+    apiPrefix: "/custom/api",
+    defaultModelApiKey: () => "sk-test",
+    defaultModelBaseUrl: () => "https://api.openai.com/v1",
+    validateDeepSeekToken: async () => ({ ok: true, status: "valid" }),
+    queryDeepSeekBalance: async () => {
+      balanceCalled = true;
+      return { ok: true };
+    },
+    credentialsStatePort: {
+      getCredentials: () => ({ modelApiKey: "sk-test" }),
+      resetDeepSeekBalance() {},
+    },
+    viewPort: {
+      elements: () => ({
+        apiKeyInput: createCredentialNode({ value: "" }),
+        modelBaseUrlInput: createCredentialNode({ value: "https://api.openai.com/v1" }),
+      }),
+      setTopUpVisible() {},
+      setValidationMessage: (message, tone) => messages.push([message, tone]),
+    },
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(balanceCalled, false);
+  assert.deepEqual(messages.at(-1), ["Kết nối API mô hình thành công.", "valid"]);
 });
 
 test("credentials DOM contract centralizes hidden inputs and browser dialog ids", () => {

@@ -354,7 +354,7 @@ test("upload controller clears stale upload state before selecting a new file", 
   assert.ok(calls.some((call) => call[0] === "clear-input"));
   const errorCall = calls.find((call) => call[0] === "text" && call[1] === "error-box");
   assert.equal(errorCall[2].kind, "error-diagnostic");
-  assert.equal(errorCall[2].summary, "校验 PDF 文件失败：stop before upload");
+  assert.equal(errorCall[2].summary, "Kiểm tra tệp PDF thất bại: stop before upload");
   assert.match(errorCall[2].diagnostic, /file_name: new\.pdf/);
 });
 

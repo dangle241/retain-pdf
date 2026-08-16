@@ -39,9 +39,9 @@ test("mock 文档列表支持 reading_status 与 tag 过滤", () => {
   );
   const reading = getMockDocumentList({ readingStatus: "reading" });
   assert.ok(reading.documents.every((doc) => doc.reading_status === "reading"));
-  const tagged = getMockDocumentList({ tag: "化学" });
+  const tagged = getMockDocumentList({ tag: "Hóa học" });
   assert.ok(tagged.documents.length >= 1);
-  assert.ok(tagged.documents.every((doc) => doc.tags.includes("化学")));
+  assert.ok(tagged.documents.every((doc) => doc.tags.includes("Hóa học")));
 });
 
 test("translateMockDocument:给馆藏文档挂 active_job_id 并返回提交视图", () => {
@@ -159,7 +159,7 @@ test("删除被收藏引用的 job:呈现收藏数量提示而非自动强删", 
   assert.equal(deleteCalls.length, 1, "绝不自动 force 重试");
   assert.deepEqual(deleteCalls[0][1], {});
   assert.equal(errors.length, 1);
-  assert.match(errors[0], /该文档有 3 条收藏，请先删除收藏/);
+  assert.match(errors[0], /Tài liệu này có 3 mục yêu thích; vui lòng xóa các mục đó trước/);
 });
 
 test("按 job_id 直查文档:active_job_id 命中 + 历史 run 也解析到同一文档", async () => {

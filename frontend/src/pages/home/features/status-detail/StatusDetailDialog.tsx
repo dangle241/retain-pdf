@@ -1,47 +1,48 @@
-// StatusDetailDialog(蓝图 §1 主组件)——对照
-// components/dialogs/status-detail-dialog-template.js 逐 id/class 镜像。
+// StatusDetailDialog (component chính trong thiết kế §1), đối chiếu với
+// components/dialogs/status-detail-dialog-template.js và phản chiếu từng ID/class.
 //
-// Dialog 渲染层(阶段 C 第二批,shadcn 改造):从原生 <dialog>+showModal/close
-// 换成 radix-ui 的 Dialog 原语(DialogPrimitive.Root/Portal/Overlay/Content),
-// 不经 src/components/ui/dialog.jsx 默认皮肤(className 继续用现有的
-// desktop-dialog/desktop-shell 这套 bespoke CSS,和 status-detail-dialog 专属
-// 覆盖并存)。open 受控于 dialogStore(useStatusDetailOverview 的 open),
-// onOpenChange 在 next===false 时统一调用 dialogStore.close()——这不是
-// TranslationWorkflowDialog 那种两态语义(上传/状态),关闭就是关闭,不需要
-// 分流。Escape、点击背板(DismissableLayer 的 outside-click 检测)、点击关闭
-// 按钮(DialogPrimitive.Close,替代原来 <form method="dialog"> 的
-// type="submit" 隐式提交关闭)三条路径都走这一个回调。
+// Tầng render Dialog (đợt hai giai đoạn C, chuyển đổi shadcn): từ <dialog> native + showModal/close
+// sang primitive Dialog của radix-ui (DialogPrimitive.Root/Portal/Overlay/Content),
+// không dùng giao diện mặc định của src/components/ui/dialog.jsx (className tiếp tục dùng bộ hiện có
+// desktop-dialog/desktop-shell với CSS tùy chỉnh, đồng thời tồn tại cùng phần ghi đè riêng
+// của status-detail-dialog). open được điều khiển bởi dialogStore (open của useStatusDetailOverview),
+// onOpenChange luôn gọi dialogStore.close() khi next===false; đây không phải
+// ngữ nghĩa hai trạng thái (tải lên/trạng thái) như TranslationWorkflowDialog; đóng là đóng, không cần
+// phân nhánh. Escape, bấm nền sau (phát hiện outside-click của DismissableLayer), bấm nút đóng
+// (DialogPrimitive.Close, thay cho thao tác đóng bằng submit ngầm trước đây của
+// type="submit" trong <form method="dialog">) đều đi qua cùng callback này.
 //
-// 不 forceMount Content(同 CredentialsDialog 等 4 个阶段 C 第一批对话框的
-// 决策,见 use-dialog-return-focus.js 头注释——forceMount 会让 Radix modal
-// Content 内部的 hideOthers() 副作用在应用启动时就永久生效)。
+// Không forceMount Content (cùng quyết định với CredentialsDialog và bốn hộp thoại đợt đầu giai đoạn C,
+// xem comment đầu use-dialog-return-focus.js; forceMount sẽ khiến tác dụng phụ hideOthers() bên trong
+// Content của Radix modal có hiệu lực vĩnh viễn ngay khi ứng dụng khởi động).
 //
-// 双层 forceMount 交互(本文件的风险点):内层 4 个 tab 依旧各自
-// TabsPrimitive.Content forceMount + 显式 hidden 覆盖(阶段 B 决策，语义见下方
-// 面板函数注释)——外层 Dialog 不再 forceMount 意味着对话框整个关闭时 Content
-// 连同内部 4 个 Tabs 一起卸载,tab 内部 useState(TranslationDebugTab 选中的
-// item 等)会被清空。这在产品语义上是可接受的：forceMount+hidden 的常驻挂载
-// 语义原本就只服务于"对话框打开期间切 tab 不丢状态"，从未承诺"对话框关闭
-// 再重开也保留"，两者并不冲突（已用 fresh Playwright 实测：打开期间切 4 个
-// tab、翻译调试选中态跨切换保留，见阶段 C 报告）。
+// Tương tác forceMount hai tầng (điểm rủi ro của file này): bốn tab bên trong vẫn có
+// TabsPrimitive.Content forceMount riêng + ghi đè hidden tường minh (quyết định giai đoạn B, xem comment hàm panel
+// bên dưới để hiểu ngữ nghĩa); Dialog ngoài không còn forceMount nghĩa là khi đóng toàn bộ hộp thoại, Content
+// cùng bốn Tabs bên trong sẽ unmount; useState trong tab (item được chọn của TranslationDebugTab
+// và các trạng thái khác) sẽ bị xóa. Điều này chấp nhận được về ngữ nghĩa sản phẩm: việc mount thường trực bằng forceMount+hidden
+// vốn chỉ phục vụ "không mất trạng thái khi đổi tab trong lúc hộp thoại mở", chưa bao giờ cam kết "đóng hộp thoại
+// rồi mở lại vẫn giữ nguyên"; hai điều không xung đột (đã kiểm tra bằng phiên Playwright mới: chuyển qua bốn
+// tab khi đang mở và trạng thái chọn trong gỡ lỗi bản dịch được giữ qua chuyển tab; xem báo cáo giai đoạn C).
 //
-// Tabs 实现(阶段 B,shadcn 改造):同 SettingsHubDialog/CredentialsDialog 的
-// 选择——直接用 radix-ui 的 Tabs 原语(不经 src/components/ui/tabs.jsx 默认
-// 皮肤,避免和 detail-tabs/detail-tab-panel 这套 bespoke CSS 冲突)。activeTab
-// 由 useStatusDetailOverview 的 controller.activateDetailTab 驱动,Radix 走
-// 受控模式。4 个面板全部转成 TabsPrimitive.Content(forceMount + 显式 hidden
-// 覆盖),验证过 Radix 的 forceMount 只保证"强制渲染 children"、可见性仍由
-// contentProps 里显式传入的 hidden 决定(晚于 Radix 内部计算的 hidden 展开,
-// 会覆盖它)——StageHistoryList/EventsList/TranslationDebugTab 的内部 useState
-// 因此继续不受 tab 切换影响,这是本文件迁移的最大风险点,已用组件测试 +
-// fresh Playwright 验证(见 status-detail-dialog-component.test.mjs 与阶段 B/C
-// 报告)。
+// Triển khai Tabs (giai đoạn B, chuyển đổi shadcn): cùng lựa chọn với SettingsHubDialog/CredentialsDialog,
+// dùng trực tiếp primitive Tabs của radix-ui (không qua giao diện mặc định của src/components/ui/tabs.jsx
+// để tránh xung đột với CSS tùy chỉnh detail-tabs/detail-tab-panel). activeTab
+// do controller.activateDetailTab của useStatusDetailOverview điều khiển; Radix chạy ở
+// chế độ có kiểm soát. Cả bốn panel chuyển thành TabsPrimitive.Content (forceMount + ghi đè hidden
+// tường minh); đã xác minh forceMount của Radix chỉ đảm bảo "buộc render children", còn khả năng hiển thị vẫn do
+// hidden truyền tường minh trong contentProps quyết định (được trải sau hidden do Radix tính nội bộ,
+// nên sẽ ghi đè nó); useState nội bộ của StageHistoryList/EventsList/TranslationDebugTab
+// vì vậy tiếp tục không bị ảnh hưởng khi đổi tab. Đây là rủi ro lớn nhất khi di chuyển file này và đã được xác minh bằng kiểm thử component +
+// phiên Playwright mới (xem status-detail-dialog-component.test.mjs và báo cáo giai đoạn B/C
+// ).
 
 import { Dialog as DialogPrimitive, Tabs as TabsPrimitive } from "radix-ui";
 import { useDialogReturnFocus } from "../../../../shared/react/use-dialog-return-focus.js";
 import { StageHistoryList } from "./StageHistoryList.jsx";
 import { EventsList, eventsStatusText } from "./EventsList.jsx";
 import { TranslationDebugTab } from "./TranslationDebugTab.jsx";
+import { ManualTranslationImport } from "./ManualTranslationImport.jsx";
 import { useStatusDetailOverview } from "./useStatusDetailOverview.js";
 import { useRerunAction } from "./useRerunAction.js";
 import { STATUS_DETAIL_DIALOG_IDS, STATUS_DETAIL_MARKDOWN_BUNDLE_ID } from "./status-detail-dom-ids.js";
@@ -51,16 +52,16 @@ import { useArtifactDownloadBusy } from "../../state/use-artifact-download-busy.
 import { Button } from "../../../../components/Button.jsx";
 
 const TABS = [
-  { key: "overview", label: "概览" },
-  { key: "failure", label: "失败" },
-  { key: "events", label: "事件" },
-  { key: "translation", label: "高级诊断", advanced: true },
+  { key: "overview", label: "Tổng quan" },
+  { key: "failure", label: "Thất bại" },
+  { key: "events", label: "Sự kiện" },
+  { key: "translation", label: "Chẩn đoán nâng cao", advanced: true },
 ];
 
 function DetailItem({ id, label, value, optional = false }) {
-  // optional 行照搬旧世界 view.js#toggleOptionalRuntimeRow 的语义:元素常驻
-  // DOM,只在值为空/"-"时给容器加 hidden 类(不是整行卸载)——lastTransition/
-  // terminalReason 两行是这个语义唯一的两个消费者。
+  // Hàng optional giữ nguyên ngữ nghĩa của view.js#toggleOptionalRuntimeRow trong hệ thống cũ: phần tử luôn nằm trong
+  // DOM, chỉ thêm lớp hidden cho container khi giá trị rỗng/"-" (không unmount cả hàng); lastTransition/
+  // terminalReason là hai nơi duy nhất dùng ngữ nghĩa này.
   const text = `${value ?? "-"}`.trim();
   const rowHidden = optional && (!text || text === "-");
   return (
@@ -69,20 +70,20 @@ function DetailItem({ id, label, value, optional = false }) {
 }
 
 function OverviewMarkdownBundleLink() {
-  // artifact-downloads 域(蓝图 §7)——下载状态源于 statusCardStore(与
-  // ResultActions.jsx 同一份 renderJob 回调注入点的产物,status-detail 打开时
-  // 展示的永远是同一个当前轮询 job,详见 composition.js「StatusDetailDialog
-  // 域」装配块注释;overview 自身的 fetch 段(events/diagnostics/resumePlan)
-  // 不含 markdownBundleUrl/Ready,不重复造一份派生逻辑)。点击行为走 document
-  // 级委托点击(controller.js 已在 composition.js 挂载 bindEvents()),本组件
-  // 不需要接 onClick,只订阅 busy store 驱动"下载中..."文案(方案二)。
+  // Miền artifact-downloads (thiết kế §7): trạng thái tải xuống đến từ statusCardStore (cùng
+  // sản phẩm của điểm inject callback renderJob với ResultActions.jsx; khi status-detail mở,
+  // nó luôn hiển thị cùng tác vụ đang được polling; xem chi tiết khối lắp ráp "miền StatusDetailDialog
+  // " trong composition.js; phần fetch của chính overview (events/diagnostics/resumePlan)
+  // không chứa markdownBundleUrl/Ready nên không tạo lại logic dẫn xuất). Hành vi click dùng
+  // ủy quyền click cấp document (controller.js đã gắn bindEvents() trong composition.js); component này
+  // không cần onClick, chỉ đăng ký busy store để điều khiển nội dung "Đang tải xuống..." (phương án hai).
   const services = useHomeServices();
   const cardSnapshot = useStoreSnapshot(services.statusCard.store);
   const busyState = useArtifactDownloadBusy(services.artifactDownloads.busyStore, STATUS_DETAIL_MARKDOWN_BUNDLE_ID);
   const ready = Boolean(cardSnapshot.snapshot?.markdownBundleReady);
   const url = cardSnapshot.snapshot?.markdownBundleUrl || "";
   const enabled = ready && Boolean(url) && !busyState.busy;
-  const label = busyState.busy ? (busyState.label || "下载中...") : "下载 Markdown ZIP";
+  const label = busyState.busy ? (busyState.label || "Đang tải xuống...") : "Tải ZIP Markdown";
   return (
     <a
       id={STATUS_DETAIL_MARKDOWN_BUNDLE_ID}
@@ -114,18 +115,18 @@ function OverviewPanel({ overview, active }) {
         <OverviewMarkdownBundleLink />
       </div>
       <div className="detail-grid">
-        <DetailItem id={ids.runtime.currentStage} label="当前阶段" value={runtime.currentStage} />
-        <DetailItem id={ids.runtime.stageElapsed} label="当前阶段耗时" value={runtime.stageElapsed} />
-        <DetailItem id={ids.runtime.totalElapsed} label="累计耗时" value={runtime.totalElapsed} />
-        <DetailItem id={ids.runtime.retryCount} label="重试次数" value={runtime.retryCount} />
-        <DetailItem id={ids.runtime.lastTransition} label="最近切换" value={runtime.lastTransition} optional />
-        <DetailItem id={ids.runtime.terminalReason} label="终态原因" value={runtime.terminalReason} optional />
-        <DetailItem id={ids.runtime.inputProtocol} label="输入协议" value={runtime.inputProtocol} />
+        <DetailItem id={ids.runtime.currentStage} label="Giai đoạn hiện tại" value={runtime.currentStage} />
+        <DetailItem id={ids.runtime.stageElapsed} label="Thời lượng giai đoạn hiện tại" value={runtime.stageElapsed} />
+        <DetailItem id={ids.runtime.totalElapsed} label="Tổng thời lượng" value={runtime.totalElapsed} />
+        <DetailItem id={ids.runtime.retryCount} label="Số lần thử lại" value={runtime.retryCount} />
+        <DetailItem id={ids.runtime.lastTransition} label="Lần chuyển gần nhất" value={runtime.lastTransition} optional />
+        <DetailItem id={ids.runtime.terminalReason} label="Lý do trạng thái cuối" value={runtime.terminalReason} optional />
+        <DetailItem id={ids.runtime.inputProtocol} label="Giao thức đầu vào" value={runtime.inputProtocol} />
         <DetailItem id={ids.runtime.stageSpecVersion} label="Stage Schema" value={runtime.stageSpecVersion} />
-        <DetailItem id={ids.runtime.mathMode} label="公式模式" value={runtime.mathMode} />
+        <DetailItem id={ids.runtime.mathMode} label="Chế độ công thức" value={runtime.mathMode} />
       </div>
       <div className="status-panel detail-stage-panel">
-        <div className="status-panel-head"><h3>过程时间线</h3></div>
+        <div className="status-panel-head"><h3>Dòng thời gian xử lý</h3></div>
         <StageHistoryList job={overview.job} finishedAtFallback={overview.finishedAtFallback} />
       </div>
     </TabsPrimitive.Content>
@@ -147,24 +148,24 @@ function FailurePanel({ overview, rerunPending, controller, active }) {
     >
       <div className="status-panel">
         <div className="status-panel-head">
-          <h3>失败诊断</h3>
-          <span className="status-panel-note">结构化失败摘要与排查建议</span>
+          <h3>Chẩn đoán lỗi</h3>
+          <span className="status-panel-note">Tóm tắt lỗi có cấu trúc và đề xuất khắc phục</span>
         </div>
         <div className="failure-action-row">
-          <button id={ids.failure.rerunButton} type="button" className="button-link secondary" disabled={rerun.disabled} onClick={rerun.run}>从断点恢复/重新运行</button>
-          <span id={ids.failure.rerunStatus} className="status-panel-note">{rerun.status || "失败后如后端允许，可基于已有产物创建恢复任务。"}</span>
+          <button id={ids.failure.rerunButton} type="button" className="button-link secondary" disabled={rerun.disabled} onClick={rerun.run}>Tiếp tục từ điểm dừng / Chạy lại</button>
+          <span id={ids.failure.rerunStatus} className="status-panel-note">{rerun.status || "Sau khi thất bại, nếu backend cho phép, có thể tạo tác vụ khôi phục từ đầu ra hiện có."}</span>
         </div>
         <div className="failure-hero-card">
-          <span className="label">失败摘要</span>
+          <span className="label">Tóm tắt lỗi</span>
           <span id={ids.failure.summary} className="info-value">{failure.summary}</span>
         </div>
         <div className="info-list detail-info-list">
-          <div className="info-row"><span className="label">分类</span><span id={ids.failure.category} className="info-value">{failure.category}</span></div>
-          <div className="info-row"><span className="label">阶段</span><span id={ids.failure.stage} className="info-value">{failure.stage}</span></div>
-          <div className="info-row"><span className="label">根因</span><span id={ids.failure.rootCause} className="info-value">{failure.rootCause}</span></div>
-          <div className="info-row"><span className="label">建议</span><span id={ids.failure.suggestion} className="info-value">{failure.suggestion}</span></div>
-          <div className="info-row"><span className="label">最近日志</span><span id={ids.failure.lastLogLine} className="info-value">{failure.lastLogLine}</span></div>
-          <div className="info-row"><span className="label">可重试</span><span id={ids.failure.retryable} className="info-value">{failure.retryable}</span></div>
+          <div className="info-row"><span className="label">Phân loại</span><span id={ids.failure.category} className="info-value">{failure.category}</span></div>
+          <div className="info-row"><span className="label">Giai đoạn</span><span id={ids.failure.stage} className="info-value">{failure.stage}</span></div>
+          <div className="info-row"><span className="label">Nguyên nhân gốc</span><span id={ids.failure.rootCause} className="info-value">{failure.rootCause}</span></div>
+          <div className="info-row"><span className="label">Đề xuất</span><span id={ids.failure.suggestion} className="info-value">{failure.suggestion}</span></div>
+          <div className="info-row"><span className="label">Nhật ký gần nhất</span><span id={ids.failure.lastLogLine} className="info-value">{failure.lastLogLine}</span></div>
+          <div className="info-row"><span className="label">Có thể thử lại</span><span id={ids.failure.retryable} className="info-value">{failure.retryable}</span></div>
         </div>
       </div>
     </TabsPrimitive.Content>
@@ -184,17 +185,17 @@ function EventsPanel({ overview, active }) {
     >
       <div className="status-panel">
         <div className="status-panel-head">
-          <h3>事件流</h3>
+          <h3>Luồng sự kiện</h3>
           <span id={ids.events.status} className="status-panel-note">{eventsStatusText(overview.eventsPayload)}</span>
         </div>
-        <p className="events-lead">按时间倒序展示最近事件，适合定位任务卡在哪个阶段以及最后一次失败前发生了什么。</p>
+        <p className="events-lead">Hiển thị sự kiện gần đây theo thứ tự thời gian giảm dần để xác định tác vụ bị kẹt ở giai đoạn nào và điều gì xảy ra trước lỗi gần nhất.</p>
         <EventsList eventsPayload={overview.eventsPayload} />
       </div>
     </TabsPrimitive.Content>
   );
 }
 
-function TranslationPanel({ translation, controller, active }) {
+function TranslationPanel({ overview, translation, controller, active }) {
   const ids = STATUS_DETAIL_DIALOG_IDS;
   return (
     <TabsPrimitive.Content
@@ -205,6 +206,11 @@ function TranslationPanel({ translation, controller, active }) {
       data-panel="translation"
       hidden={!active}
     >
+      <ManualTranslationImport
+        jobId={overview.headline.jobId}
+        onImported={() => controller.ensureTranslationData?.({ force: true })}
+        onRender={() => controller.renderManualTranslation?.()}
+      />
       <TranslationDebugTab translation={translation} controller={controller} />
     </TabsPrimitive.Content>
   );
@@ -215,9 +221,9 @@ export function StatusDetailDialog() {
   const ids = STATUS_DETAIL_DIALOG_IDS;
   const { onCloseAutoFocus } = useDialogReturnFocus(open);
 
-  // Escape / 背板点击(DismissableLayer 的 outside-click 检测)/ 关闭按钮
-  // (DialogPrimitive.Close)都经这一个回调回写 store——不是 TranslationWorkflowDialog
-  // 那种两态语义,next===false 直接 close() 即可。
+  // Escape / bấm nền sau (phát hiện outside-click của DismissableLayer) / nút đóng
+  // (DialogPrimitive.Close) đều ghi lại store qua cùng callback; đây không phải
+  // ngữ nghĩa hai trạng thái như TranslationWorkflowDialog, next===false chỉ cần gọi close().
   function handleOpenChange(nextOpen) {
     if (!nextOpen) {
       dialogStore.close();
@@ -248,7 +254,7 @@ export function StatusDetailDialog() {
                 <div className="status-detail-head-copy">
                   <div className="status-detail-head-top">
                     <DialogPrimitive.Title asChild>
-                      <h2>任务详情</h2>
+                      <h2>Chi tiết tác vụ</h2>
                     </DialogPrimitive.Title>
                     <p className="status-detail-job-meta">Job ID <span id={ids.headline.jobId} className="status-detail-job-id mono">{headline.jobId}</span></p>
                   </div>
@@ -256,7 +262,7 @@ export function StatusDetailDialog() {
                 </div>
               </div>
               <DialogPrimitive.Close asChild>
-                <Button size={undefined} id={ids.headline.closeButton} className="dialog-close-btn" aria-label="关闭">×</Button>
+                <Button size={undefined} id={ids.headline.closeButton} className="dialog-close-btn" aria-label="Đóng">×</Button>
               </DialogPrimitive.Close>
             </div>
             <TabsPrimitive.Root
@@ -265,7 +271,7 @@ export function StatusDetailDialog() {
               onValueChange={(tab) => controller.activateDetailTab(tab)}
             >
               <div className="desktop-body status-detail-body">
-                <TabsPrimitive.List className="detail-tabs" aria-label="任务详情">
+                <TabsPrimitive.List className="detail-tabs" aria-label="Chi tiết tác vụ">
                   {TABS.map((tab) => (
                     <TabsPrimitive.Trigger
                       key={tab.key}
@@ -283,7 +289,7 @@ export function StatusDetailDialog() {
                   <OverviewPanel overview={overview} active={activeTab === "overview"} />
                   <FailurePanel overview={overview} rerunPending={rerunPending} controller={controller} active={activeTab === "failure"} />
                   <EventsPanel overview={overview} active={activeTab === "events"} />
-                  <TranslationPanel translation={translation} controller={controller} active={activeTab === "translation"} />
+                  <TranslationPanel overview={overview} translation={translation} controller={controller} active={activeTab === "translation"} />
                 </div>
               </div>
             </TabsPrimitive.Root>

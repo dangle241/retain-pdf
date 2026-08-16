@@ -35,6 +35,7 @@ pub(super) async fn run_local_ocr_transport_paddle(
         .submit_local_file(
             upload_path,
             &model_name,
+            &job.request_payload.ocr.page_ranges,
             &build_paddle_optional_payload(&model_name, deps.paddle_runtime().max_input_images),
         )
         .await
@@ -67,6 +68,7 @@ pub(super) async fn run_remote_ocr_transport_paddle(
         .submit_remote_url(
             &job.request_payload.source.source_url,
             &model_name,
+            &job.request_payload.ocr.page_ranges,
             &build_paddle_optional_payload(&model_name, deps.paddle_runtime().max_input_images),
         )
         .await
@@ -98,7 +100,7 @@ async fn run_paddle_poll_loop(
     ocr_provider_diagnostics_mut(job).handle.task_id = Some(job_id.clone());
     job.append_log(&format!("task_id: {}", job_id));
     job.stage = Some("ocr_processing".to_string());
-    job.stage_detail = Some("Paddle 任务已提交，等待解析".to_string());
+    job.stage_detail = Some("Đã gửi tác vụ Paddle, đang chờ phân tích".to_string());
     job.updated_at = now_iso();
     save_ocr_job(deps, job, parent_job_id).await?;
 

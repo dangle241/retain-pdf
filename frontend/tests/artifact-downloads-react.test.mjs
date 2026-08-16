@@ -124,7 +124,7 @@ test("artifact-downloads：真实轮询(mock=done)驱动 ResultActions 三个下
   const { getMockJobId } = await import("../src/js/mock/index.js");
 
   services.features.jobRuntimeFeature.startPolling(getMockJobId());
-  await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "准备中", "真实任务数据到达");
+  await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "Đang chuẩn bị", "真实任务数据到达");
 
   const markdownBtn = byId(dom, "status-markdown-bundle-btn");
   const sourcePdfBtn = byId(dom, "source-pdf-btn");
@@ -150,7 +150,7 @@ test("artifact-downloads：点击 ResultActions 的 3 个受保护下载按钮�
 
   try {
     services.features.jobRuntimeFeature.startPolling(getMockJobId());
-    await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "准备中", "真实任务数据到达");
+    await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "Đang chuẩn bị", "真实任务数据到达");
     await waitFor(() => byId(dom, "pdf-btn").getAttribute("aria-disabled") === "false", "下载按钮就绪");
 
     const startHref = dom.window.location.href;
@@ -235,7 +235,7 @@ test("artifact-downloads：document 级委托覆盖全部 7 个契约 id(含当�
 
   try {
     services.features.jobRuntimeFeature.startPolling(getMockJobId());
-    await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "准备中", "真实任务数据到达");
+    await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "Đang chuẩn bị", "真实任务数据到达");
 
     // download-btn/markdown-btn/markdown-raw-btn 当前没有任何 React 组件渲染
     // (recent-jobs 承建方判定为死代码清单之外),但 controller.js 的
@@ -279,7 +279,7 @@ test("artifact-downloads：busy 态文案不被父组件(StatusCard)重渲染覆
   const { getMockJobId } = await import("../src/js/mock/index.js");
 
   services.features.jobRuntimeFeature.startPolling(getMockJobId());
-  await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "准备中", "真实任务数据到达");
+  await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "Đang chuẩn bị", "真实任务数据到达");
   await waitFor(() => byId(dom, "pdf-btn").getAttribute("aria-disabled") === "false", "下载按钮就绪");
 
   const { DOWNLOAD_ACTION_IDS } = await import("../src/js/contracts/download-action-contract.js");
@@ -309,7 +309,7 @@ test("artifact-downloads：busy 态文案不被父组件(StatusCard)重渲染覆
   // 下载结束(controller.js finally 分支 setLinkBusy(link, false))——文案应
   // 恢复原始 label 且重新可点击。
   services.artifactDownloads.busyStore.setBusy(actionId, false);
-  await waitFor(() => byId(dom, actionId).querySelector("span").textContent === "下载 PDF", "busy 结束后文案恢复");
+  await waitFor(() => byId(dom, actionId).querySelector("span").textContent === "Tải PDF", "busy 结束后文案恢复");
   assert.equal(byId(dom, actionId).getAttribute("aria-disabled"), "false");
 
   root.unmount();
@@ -342,7 +342,7 @@ test("artifact-downloads：StatusDetailDialog 概览下载按钮的 busy 态同�
   assert.equal(byId(dom, "markdown-bundle-btn").textContent, "下载中...", "切 tab 不应打回下载中文案");
 
   services.artifactDownloads.busyStore.setBusy("markdown-bundle-btn", false);
-  await waitFor(() => byId(dom, "markdown-bundle-btn").textContent === "下载 Markdown ZIP", "busy 结束后文案恢复");
+  await waitFor(() => byId(dom, "markdown-bundle-btn").textContent === "Tải ZIP Markdown", "busy 结束后文案恢复");
 
   root.unmount();
   services.dispose();

@@ -1,6 +1,6 @@
-// initialize / dispose：事件绑定 + idle 视图 + startup 路由。
-// 特性在 createRuntimeFeatures 已挂好；workflow 对话框事件在 composition
-// 里先于 recent-jobs 绑定（见 composition.js 注释）。
+// initialize / dispose: binding sự kiện + view idle + định tuyến startup.
+// Các tính năng đã được gắn trong createRuntimeFeatures; sự kiện hộp thoại workflow được bind trong composition
+// trước recent-jobs (xem chú thích composition.js).
 
 import {
   APP_EVENTS,

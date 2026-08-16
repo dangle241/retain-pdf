@@ -7,10 +7,6 @@ pub(super) fn build_retry_request(
     source_job: &JobSnapshot,
     stage: &RetryStageKind,
 ) -> Result<CreateJobInput, AppError> {
-    let artifacts = source_job
-        .artifacts
-        .as_ref()
-        .ok_or_else(|| AppError::bad_request("source job has no reusable artifacts"))?;
     let workflow = match stage {
         RetryStageKind::Ocr => WorkflowKind::Book,
         RetryStageKind::Translation => WorkflowKind::Book,
@@ -31,6 +27,7 @@ pub(super) fn build_retry_request(
             require_request_source(&request)?;
         }
         RetryStageKind::Translation => {
+            let artifacts = reusable_artifacts(source_job)?;
             require_artifact(
                 artifacts.normalized_document_json.as_ref(),
                 "normalized_document_json",
@@ -39,6 +36,7 @@ pub(super) fn build_retry_request(
             request.source.artifact_job_id = source_job.job_id.clone();
         }
         RetryStageKind::Render => {
+            let artifacts = reusable_artifacts(source_job)?;
             require_artifact(artifacts.translations_dir.as_ref(), "translations_dir")?;
             require_artifact(artifacts.source_pdf.as_ref(), "source_pdf")?;
             request.source.artifact_job_id = source_job.job_id.clone();
@@ -48,12 +46,19 @@ pub(super) fn build_retry_request(
     Ok(request)
 }
 
+fn reusable_artifacts(source_job: &JobSnapshot) -> Result<&crate::models::JobArtifacts, AppError> {
+    source_job
+        .artifacts
+        .as_ref()
+        .ok_or_else(|| AppError::bad_request("Tác vụ nguồn không có artifact để tái sử dụng"))
+}
+
 fn require_request_source(request: &CreateJobInput) -> Result<(), AppError> {
     if !request.source.upload_id.trim().is_empty() || !request.source.source_url.trim().is_empty() {
         return Ok(());
     }
     Err(AppError::bad_request(
-        "OCR retry requires the original upload_id or source_url",
+        "Thử lại OCR cần upload_id hoặc source_url ban đầu",
     ))
 }
 
@@ -62,6 +67,6 @@ fn require_artifact(value: Option<&String>, name: &str) -> Result<(), AppError> 
         return Ok(());
     }
     Err(AppError::bad_request(format!(
-        "source job missing required artifact: {name}"
+        "Tác vụ nguồn thiếu artifact bắt buộc: {name}"
     )))
 }

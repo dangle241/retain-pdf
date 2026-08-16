@@ -1,8 +1,8 @@
-/* 任务详情 CSS 入口 → dist/css/detail.css
- * 仅 detail.html 加载。
+/* Điểm vào CSS chi tiết tác vụ → dist/css/detail.css.
+ * Chỉ detail.html tải.
  *
- * 边界：禁止 import library-* / reader/* / status-detail 主页弹层域。
- * 共享仅限 tokens / base / components* / dialog-shell / download-toast。
+ * Ranh giới: cấm import library-* / reader/* / miền lớp nổi status-detail trang chủ.
+ * Chia sẻ chỉ giới hạn tokens / base / components* / dialog-shell / download-toast.
  */
 @import "tailwindcss";
 @import "../core/tailwind-theme.css";
@@ -12,7 +12,7 @@
 @source "../../shared/**/*.{js,jsx,ts,tsx}";
 @source "../../components/**/*.{js,jsx,ts,tsx}";
 @source "../../lib/**/*.{js,jsx,ts,tsx}";
-/* detail 仍用 job-detail / job-status 文案与下载 */
+/* detail vẫn dùng nội dung và tải xuống job-detail / job-status. */
 @source "../../js/job/**/*.{js,ts}";
 @source "../../js/job-detail/**/*.{js,ts}";
 @source "../../js/job-status/**/*.{js,ts}";
@@ -31,7 +31,7 @@
 @import "../dialog-shell.css";
 @import "../core/download-toast.css";
 
-/* 详情页专属 */
+/* Chỉ dành cho trang chi tiết. */
 @import "../pages.css" layer(pages);
 @import "../pages/detail/events.css" layer(pages);
 @import "../pages/detail/modal.css";

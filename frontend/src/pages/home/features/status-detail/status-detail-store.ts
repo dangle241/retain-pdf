@@ -1,20 +1,20 @@
 import { createStore } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-// StatusDetailDialog 的读面 store(蓝图 §1 "新 store"清单)。
+// Store phía đọc của StatusDetailDialog (danh sách "store mới" trong thiết kế §1).
 //
-// 两个并行段(数据源铁律,蓝图 §1.0 + §0 全局发现):
-// - overview 段:headline/runtime/failure/rerun/job/eventsPayload——job/
-//   eventsPayload 是原始数据(不是预拼好的 markup),StageHistoryList/
-//   EventsList 直接从这两个字段用纯函数计算结构化数组(见对应组件文件)。
-// - translation 段:createTranslationState() 状态袋的浅拷贝 + 少量 UI 态
+// Hai phần song song (nguyên tắc nguồn dữ liệu, phát hiện toàn cục trong thiết kế §1.0 + §0):
+// - Phần overview: headline/runtime/failure/rerun/job/eventsPayload; job/
+//   eventsPayload là dữ liệu gốc (không phải markup nối sẵn); StageHistoryList/
+//   EventsList dùng hàm thuần để tính trực tiếp mảng có cấu trúc từ hai trường này (xem file component tương ứng).
+// - Phần translation: bản sao nông của túi trạng thái createTranslationState() + một ít trạng thái UI
 //   (itemsLoading/itemDetailLoading/replayLoading/emptyMessage/errorText),
-//   随 translation-data-port.js(kept)每次读写后同步。
+//   được đồng bộ sau mỗi lần đọc/ghi qua translation-data-port.js (được giữ lại).
 //
-// 本 store 与 features/status/status-card-store.js 的 statusCardStore 是两条
-// 平行读路径,不合并——status-detail 自己 fetch(events/diagnostics/
-// resumePlan),写入频率远低于状态卡的 1s 轮询,合并会污染 StatusCard 的高频
-// 订阅快照(蓝图 §1.0 明确铁律)。
+// Store này và statusCardStore trong features/status/status-card-store.js là hai
+// đường đọc song song, không hợp nhất; status-detail tự fetch (events/diagnostics/
+// resumePlan), tần suất ghi thấp hơn nhiều so với polling 1 giây của thẻ trạng thái; hợp nhất sẽ làm nhiễu snapshot đăng ký tần suất cao
+// của StatusCard (nguyên tắc được nêu rõ trong thiết kế §1.0).
 
 export type StatusDetailHeadline = {
   iconMarkup: string;
@@ -49,16 +49,16 @@ export type StatusDetailRerun = {
   status: string;
 };
 
-/** 原始 job 载荷（StageHistoryList 等直接消费；API 形状宽） */
+/** Payload job gốc (StageHistoryList và các phần khác dùng trực tiếp; hình dạng API rộng). */
 export type StatusDetailJobPayload = Record<string, unknown>;
 
-/** 原始 events 载荷（EventsList 直接消费） */
+/** Payload events gốc (EventsList dùng trực tiếp). */
 export type StatusDetailEventsPayload = {
   items?: unknown[];
   [key: string]: unknown;
 };
 
-/** overview 段：buildStatusDetailSnapshot + job/events 原始载荷 */
+/** Phần overview: buildStatusDetailSnapshot + payload job/events gốc. */
 export type StatusDetailOverview = {
   headline: StatusDetailHeadline;
   runtime: StatusDetailRuntime;
@@ -77,8 +77,8 @@ export type StatusDetailTranslationQuery = {
 };
 
 /**
- * 翻译诊断 summary（嵌套 summary 口袋 + 顶层扩展字段）。
- * TranslationSummary 读 summary.summary.{status_summary,counts,provider_*}。
+ * Summary chẩn đoán bản dịch (túi summary lồng nhau + trường mở rộng cấp cao nhất).
+ * TranslationSummary đọc summary.summary.{status_summary,counts,provider_*}.
  */
 export type StatusDetailTranslationSummaryInner = {
   status_summary?: Record<string, unknown>;
@@ -94,7 +94,7 @@ export type StatusDetailTranslationSummary = {
   [key: string]: unknown;
 } | null;
 
-/** Item 列表行（TranslationItemsPanel） */
+/** Hàng danh sách item (TranslationItemsPanel). */
 export type StatusDetailTranslationListItem = {
   item_id?: string;
   block_type?: string;
@@ -104,7 +104,7 @@ export type StatusDetailTranslationListItem = {
   [key: string]: unknown;
 };
 
-/** 选中 item 详情（TranslationItemDetailPanel） */
+/** Chi tiết item đã chọn (TranslationItemDetailPanel). */
 export type StatusDetailTranslationSelectedItem = {
   item_id?: string;
   item?: StatusDetailTranslationListItem | null;
@@ -112,7 +112,7 @@ export type StatusDetailTranslationSelectedItem = {
   [key: string]: unknown;
 } | null;
 
-/** 重放结果袋 */
+/** Túi kết quả replay. */
 export type StatusDetailTranslationReplay = {
   payload?: {
     policy_before?: unknown;
@@ -124,7 +124,7 @@ export type StatusDetailTranslationReplay = {
   [key: string]: unknown;
 } | null;
 
-/** translation 段：createTranslationState 镜像 + UI loading/error */
+/** Phần translation: bản phản chiếu createTranslationState + trạng thái loading/error của UI. */
 export type StatusDetailTranslation = {
   jobId: string;
   loaded: boolean;

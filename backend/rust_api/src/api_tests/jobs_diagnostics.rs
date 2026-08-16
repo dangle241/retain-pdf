@@ -57,8 +57,18 @@ async fn diagnostics_route_exposes_stable_failure_summary() {
     let payload = read_json(response).await;
     assert_eq!(payload["data"]["failed_stage"], "translation");
     assert_eq!(payload["data"]["failed_substage"], "continuation_review");
-    assert_eq!(payload["data"]["summary"], "翻译阶段超时");
-    assert_eq!(payload["data"]["detail"], "provider timed out");
+    assert_eq!(
+        payload["data"]["summary"],
+        "Yêu cầu tới dịch vụ bên ngoài bị hết thời gian chờ"
+    );
+    assert_eq!(
+        payload["data"]["detail"],
+        "Dịch vụ OCR hoặc mô hình phản hồi quá chậm và vượt quá thời gian chờ"
+    );
+    assert_eq!(
+        payload["data"]["suggestion"],
+        "Có thể thử lại ngay; nếu lỗi thường xuyên, hãy giảm số luồng hoặc kiểm tra đường truyền"
+    );
     assert_eq!(payload["data"]["retryable"], true);
     assert_eq!(payload["data"]["resume_available"], false);
 }

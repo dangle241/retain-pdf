@@ -1,16 +1,16 @@
-// home 页文本注册表(id → 文案)store。
+// Store registry nội dung trang home (ID → nội dung).
 //
-// 旧世界 ui/text.js 的 setText(id, value) 是全局 DOM 写入口;React 世界改为
-// 写入本 store,由订阅了对应 id 的组件自行渲染。3a 阶段只有 error-box
-// (inline-error-box)消费;status-detail/job-runtime 等 3b 域的 id 先落在
-// store 里等占位组件接管——setText 回调接口因此对 3b 保持稳定。
+// Trong hệ thống cũ, setText(id, value) của ui/text.js là điểm ghi DOM toàn cục; trong React, chuyển thành
+// ghi store này để component đăng ký ID tương ứng tự render. Ở giai đoạn 3a chỉ error-box
+// (inline-error-box) sử dụng; ID của miền 3b như status-detail/job-runtime trước tiên được ghi vào
+// store chờ component placeholder tiếp quản; vì vậy giao diện callback setText giữ ổn định cho 3b.
 //
-// 特例口径(镜像 ui/text.js):"error-box" 的 value 允许是 error-diagnostic
-// 对象,展示层用 messageForErrorBox 提取摘要;这里原样存储,由组件解读。
+// Quy ước trường hợp đặc biệt (phản chiếu ui/text.js): value của "error-box" có thể là đối tượng error-diagnostic;
+// tầng hiển thị dùng messageForErrorBox trích xuất tóm tắt; tại đây lưu nguyên trạng để component diễn giải.
 
 import { createStore, type Store } from "../../../js/app-framework/store.js";
 
-/** error-diagnostics.buildErrorDiagnostic 的返回形状 */
+/** Hình dạng trả về của error-diagnostics.buildErrorDiagnostic. */
 export type ErrorDiagnosticText = {
   kind: "error-diagnostic";
   summary?: string;
@@ -19,8 +19,8 @@ export type ErrorDiagnosticText = {
 };
 
 /**
- * 文本槽位值：普通字符串、error-box 诊断对象，或其它展示载荷。
- * 用 unknown 收口，避免 any；ErrorDiagnosticText 供展示层窄化。
+ * Giá trị ô nội dung: chuỗi thường, đối tượng chẩn đoán error-box hoặc payload hiển thị khác.
+ * Dùng unknown để giới hạn, tránh any; ErrorDiagnosticText để tầng hiển thị thu hẹp kiểu.
  */
 export type HomeTextValue = unknown;
 
@@ -64,7 +64,7 @@ export function createHomeTextStore() {
     store.actions.set({ id, value });
   }
 
-  // selector 帮助函数:配合 useStoreSnapshot(store, selector) 使用
+  // Hàm trợ giúp selector: dùng cùng useStoreSnapshot(store, selector).
   function textOf(
     snapshot: HomeTextState | null | undefined,
     id: string,

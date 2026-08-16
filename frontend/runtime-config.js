@@ -11,6 +11,6 @@ window.__FRONT_RUNTIME_CONFIG__ = {
   paddleToken: "",
   // Downstream model credential, submitted under payload.translation.api_key.
   modelApiKey: "",
-  model: "deepseek-v4-flash",
-  baseUrl: "https://api.deepseek.com/v1",
+  model: "gpt-4.1-mini",
+  baseUrl: "https://api.openai.com/v1",
 };

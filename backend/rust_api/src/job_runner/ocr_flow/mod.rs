@@ -166,7 +166,7 @@ mod tests {
         );
         let failure = job.failure.as_ref().expect("failure");
         assert_eq!(failure.category, "source_pdf_missing");
-        assert_eq!(failure.summary, "源 PDF 缺失");
+        assert_eq!(failure.summary, "Thiếu PDF nguồn");
         assert!(!failure.retryable);
     }
 }

@@ -1,6 +1,6 @@
-// 库检索岛的纯逻辑层:不碰 DOM/React,便于 node 单测
+// Lớp logic thuần của đảo tìm kiếm thư viện: không chạm DOM/React, thuận tiện cho unit test node.
 
-// 后端 snippet 用 [ ] 包裹命中词,拆成分段供展示层渲染 <mark>
+// Snippet backend bọc từ khớp bằng [ ]; tách thành đoạn để lớp hiển thị kết xuất <mark>.
 export function highlightSegments(snippet = "") {
   const text = `${snippet || ""}`;
   const segments = [];
@@ -22,9 +22,9 @@ export function highlightSegments(snippet = "") {
 }
 
 export const READING_STATUS_META = Object.freeze({
-  unread: { label: "未读", order: 0 },
-  reading: { label: "在读", order: 1 },
-  done: { label: "读完", order: 2 },
+  unread: { label: "Chưa đọc", order: 0 },
+  reading: { label: "Đang đọc", order: 1 },
+  done: { label: "Đã đọc xong", order: 2 },
 });
 
 const READING_STATUS_CYCLE = ["unread", "reading", "done"];

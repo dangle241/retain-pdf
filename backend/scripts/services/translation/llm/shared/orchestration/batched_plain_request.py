@@ -74,7 +74,12 @@ def split_batched_plain_result_for_partial_retry(
             continue
         try:
             canonical = canonicalize_batch_result([item], {item_id: payload})
-            validate_batch_result([item], canonical, diagnostics=diagnostics)
+            validate_batch_result(
+                [item],
+                canonical,
+                diagnostics=diagnostics,
+                target_language_name=context.target_language_name,
+            )
             restored = restore_runtime_term_tokens(canonical, item=item)
             accepted.update(
                 attach_result_metadata(

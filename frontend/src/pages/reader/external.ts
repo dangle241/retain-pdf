@@ -1,14 +1,19 @@
-// 阅读器「新引擎 / 共享层」对 src/js/* 的出口。
+// Điểm xuất từ "engine mới / tầng dùng chung" của trình đọc tới src/js/*.
 //
-// 仅供 pages/reader 非 legacy 路径使用：
+// Chỉ dành cho đường dẫn không legacy trong pages/reader:
 //   hooks/、pdf/、annotations/、components/react-pdf/、ReaderAppReactPdf
-// 缺符号只改本文件。
+// Khi thiếu symbol chỉ sửa file này.
 //
-// legacy/** 与 ?engine=legacy 继续直接 import js/reader 命令式引擎
-// （pdf-controller / selection-favorites / regions…）——不要把它们塞进这里。
+// legacy/** và ?engine=legacy tiếp tục import trực tiếp engine js/reader theo kiểu mệnh lệnh
+// (pdf-controller / selection-favorites / regions…); không đưa chúng vào đây.
 
 // —— config / mock / messaging ——
 export { isMockMode } from "../../js/config/runtime.js";
+export {
+  CREDENTIALS_CHANGED_EVENT,
+  hasModelApiKey,
+  MISSING_MODEL_API_KEY_MESSAGE,
+} from "../../js/reader/ai/config.js";
 export { MOCK_DOCUMENT_SOURCE_PDF_URL } from "../../js/mock/documents.js";
 export { READER_DIALOG_MESSAGES } from "../../js/features/reader-dialog/contract.js";
 
@@ -20,7 +25,7 @@ export {
   resolveMarkedVendorUrl,
 } from "../../js/runtime/vendor-url.js";
 
-// —— js/reader 共享 ports（新引擎允许依赖的子集）——
+// —— Các port js/reader dùng chung (tập con engine mới được phép phụ thuộc) ——
 export { defaultReaderDataPort } from "../../js/reader/data-port.js";
 export {
   defaultReaderPageConfigPort,
@@ -35,7 +40,7 @@ export {
 } from "../../js/reader/resource-resolver.js";
 export { READER_PROGRESS_COPY } from "../../js/reader/page-state.js";
 
-// —— 下载（与 legacy 共用解析 / 受保护下载）——
+// —— Tải xuống (dùng chung phân giải / tải được bảo vệ với legacy) ——
 export {
   READER_DOWNLOAD_ACTIONS,
   disabledReason as readerDownloadDisabledReason,
@@ -46,11 +51,11 @@ export {
 export { downloadProtectedResource } from "../../js/features/reader-dialog/downloads.js";
 export { failDownloadToast } from "../../js/utils/download-feedback.js";
 
-// —— markdown 面板 ——
+// —— Panel Markdown ——
 export { resolveMarkdownAssetUrl } from "../../js/job/artifacts.js";
 export { parseMarkdownWithMath } from "../../js/reader/markdown-math.js";
 
-// —— AI 追问（react-pdf assistant）——
+// —— Hỏi tiếp bằng AI (trợ lý react-pdf) ——
 export { createReaderAskAnswerer } from "../../js/reader/ai/ask-answerer.js";
 export { createReaderMarkdownAnswerer } from "../../js/reader/ai/markdown-answerer.js";
 export {
@@ -112,7 +117,7 @@ export {
   clearStoredConversationId,
 } from "../../js/reader/ai/conversation-store.js";
 
-// —— 服务端收藏面板 ——
+// —— Panel mục đã lưu phía server ——
 export { API_PREFIX } from "../../js/config/api-constants.js";
 export { fetchFavorites } from "../../js/api/favorites.js";
 export {

@@ -1,6 +1,6 @@
-/* FAB 展开菜单：卡片 / 批注主行 */
+/* Menu mở rộng FAB: thẻ / hàng chú thích chính. */
 
-/* 菜单卡片 */
+/* Thẻ menu. */
 .reader-fab-menu {
   position: absolute;
   right: 0;
@@ -85,7 +85,7 @@
   transform: scale(0.94);
 }
 
-/* 批注主行 */
+/* Hàng chú thích chính. */
 .reader-fab-row {
   --fab-i: 0;
   display: grid;

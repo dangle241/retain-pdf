@@ -1,4 +1,4 @@
-// 统一空状态：科学仪器图标 + 标题 + 说明
+// Trạng thái rỗng thống nhất: biểu tượng dụng cụ khoa học + tiêu đề + mô tả.
 
 import type { ReactNode } from "react";
 import { InstrumentIcon, type InstrumentName } from "./InstrumentIcon.jsx";

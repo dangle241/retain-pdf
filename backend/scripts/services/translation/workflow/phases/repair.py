@@ -40,6 +40,7 @@ def run_garbled_reconstruction_stage(
     model: str,
     base_url: str,
     workers: int,
+    translation_context: TranslationControlContext,
     run_diagnostics: TranslationRunDiagnostics | None,
 ) -> None:
     if not _garbled_reconstruction_enabled():
@@ -73,6 +74,7 @@ def run_garbled_reconstruction_stage(
             api_key=api_key,
             model=model,
             base_url=base_url,
+            target_language_name=translation_context.target_language_name,
         ),
         progress_callback=lambda current, total, dirty_pages: emit_stage_progress(
             stage="garbled_repair",
@@ -130,6 +132,7 @@ def _garbled_reconstruction_runtime(
     api_key: str,
     model: str,
     base_url: str,
+    target_language_name: str,
 ) -> GarbledReconstructionRuntime:
     if _is_deepseek_provider(model=model, base_url=base_url):
         return GarbledReconstructionRuntime(
@@ -138,6 +141,7 @@ def _garbled_reconstruction_runtime(
             base_url=base_url,
             provider_reason="job_provider",
             request_chat_content_fn=request_chat_content,
+            target_language_name=target_language_name,
             normalize_base_url_fn=normalize_base_url,
         )
 
@@ -149,6 +153,7 @@ def _garbled_reconstruction_runtime(
             base_url=DEFAULT_BASE_URL,
             provider_reason="prefer_deepseek_api",
             request_chat_content_fn=request_chat_content,
+            target_language_name=target_language_name,
             normalize_base_url_fn=normalize_base_url,
         )
 
@@ -158,6 +163,7 @@ def _garbled_reconstruction_runtime(
         base_url=base_url,
         provider_reason="job_provider_fallback",
         request_chat_content_fn=request_chat_content,
+        target_language_name=target_language_name,
         normalize_base_url_fn=normalize_base_url,
     )
 
@@ -282,7 +288,7 @@ def run_final_untranslated_recovery_stage(
 ) -> dict[str, int]:
     target_language_name = str(
         getattr(translation_context, "target_language_name", "") if translation_context is not None else ""
-    ) or "简体中文"
+    ) or "Tiếng Việt"
     blocking_before = len(blocking_untranslated_items(page_payloads))
     if blocking_before <= 0:
         return {

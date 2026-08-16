@@ -1,5 +1,5 @@
-// pages/detail 对 src/js/* 的唯一出口。
-// DetailApp / components 禁止直接 import ../../js/**；缺符号只改本文件。
+// Entry duy nhất từ pages/detail tới src/js/*.
+// Cấm DetailApp / components import trực tiếp ../../js/**; khi thiếu symbol chỉ sửa tệp này.
 
 // —— job ——
 export { normalizeJobPayload } from "../../js/job/normalize.js";

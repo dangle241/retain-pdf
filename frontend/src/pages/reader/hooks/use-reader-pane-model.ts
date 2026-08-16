@@ -1,4 +1,4 @@
-// 双栏挂载/可见性 + 页数 + metrics 修订：从 ReaderAppReactPdf 抽出。
+// Hiệu chỉnh mount/hiển thị hai cột + số trang + metrics: tách từ ReaderAppReactPdf.
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { ReaderMode } from "./use-reader-session.js";

@@ -1,17 +1,17 @@
-// staged 进度动画 hook(蓝图 §2 features/status/,风险 §8.1——全项目最容易
-// 翻车的时序点)。
+// Hook hoạt ảnh tiến độ theo giai đoạn (thiết kế §2 features/status/, rủi ro §8.1; điểm thời gian dễ
+// gây lỗi nhất toàn dự án).
 //
-// 拷贝自 components/status/job-status-card-progress-animation.js 的
-// createStatusCardProgressAnimation(该文件属"死,由 StatusCard.jsx 家族
-// 替代"清单,js/components/ 禁止 import;buildProgressOptions/
-// shouldAnimateRenderPageProgress 是 job-status/ 纯 VM,原样 import)。
+// Sao chép từ
+// createStatusCardProgressAnimation trong components/status/job-status-card-progress-animation.js (file thuộc danh sách "bị loại và được họ StatusCard.jsx
+// thay thế"; cấm import js/components/; buildProgressOptions/
+// shouldAnimateRenderPageProgress là VM thuần trong job-status/ nên import nguyên trạng).
 //
-// 铁律(风险 §8.1):displayedProgressByStage 与 timer 必须是 useRef,不是
-// useState——每 120ms 跳一页的动画如果改用 useState,会导致每 tick 触发一次
-// 整组件重渲染,且闭包捕获的是旧的 state 值(setState 的函数式更新虽能绕开
-// 闭包旧值问题,但仍无法避免每 tick 重渲——ref 是唯一同时满足"跨 tick 持久化
-// 又不触发渲染"的方案)。真正需要触发渲染的只有 renderOptions(通过独立的
-// useState 输出,交给 ProgressBlock.jsx 渲染)。
+// Nguyên tắc bắt buộc (rủi ro §8.1): displayedProgressByStage và timer phải dùng useRef, không dùng
+// useState; nếu hoạt ảnh nhảy một trang mỗi 120ms dùng useState, mỗi tick sẽ kích hoạt
+// render lại toàn bộ component và closure sẽ bắt giá trị state cũ (cập nhật hàm của setState có thể tránh
+// vấn đề giá trị closure cũ nhưng vẫn không tránh được render lại mỗi tick; ref là giải pháp duy nhất vừa "duy trì qua các tick
+// vừa không kích hoạt render"). Chỉ renderOptions thực sự cần kích hoạt render (được xuất qua
+// useState độc lập và giao cho ProgressBlock.jsx render).
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -40,9 +40,9 @@ export function useStagedProgressAnimation({ selected, selectedIsCurrent, snapsh
     };
   }
 
-  // 换 job 复位(风险 §8.1 附带语义):displayedProgressByStage 是"跨阶段的
-  // 已显示进度记忆",job 切换后旧任务的记忆必须清空,否则新任务同名阶段会
-  // 复用旧任务的显示进度做动画起点。
+  // Đặt lại khi đổi tác vụ (ngữ nghĩa đi kèm rủi ro §8.1): displayedProgressByStage là "bộ nhớ tiến độ hiển thị
+  // xuyên giai đoạn"; sau khi đổi tác vụ phải xóa bộ nhớ của tác vụ cũ, nếu không giai đoạn cùng tên trong tác vụ mới sẽ
+  // dùng lại tiến độ hiển thị của tác vụ cũ làm điểm bắt đầu hoạt ảnh.
   useEffect(() => {
     clear();
     displayedProgressByStageRef.current = {};
@@ -79,9 +79,9 @@ export function useStagedProgressAnimation({ selected, selectedIsCurrent, snapsh
     };
     tick();
     return clear;
-    // selected/selectedIsCurrent/snapshot/selectedProgress 均来自 props 派生值,
-    // 每次上游快照变化时这些引用天然变化,依赖表随其变化重跑动画判定——
-    // 与旧世界 render({selected,...}) 每次快照回调都被调用一次的时序等价。
+    // selected/selectedIsCurrent/snapshot/selectedProgress đều là giá trị dẫn xuất từ props;
+    // mỗi khi snapshot thượng nguồn thay đổi, các tham chiếu này tự nhiên thay đổi và danh sách phụ thuộc sẽ chạy lại quyết định hoạt ảnh;
+    // thời điểm tương đương việc render({selected,...}) của hệ thống cũ được gọi một lần cho mỗi callback snapshot.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, selectedIsCurrent, snapshot, selectedProgress]);
 

@@ -1,11 +1,11 @@
-// 主页「软打开」阅读器：不 location.assign，用 history.pushState + 全屏层，
-// 主页 DOM 不卸载 → 关闭不刷新、滚动天然保留。
-// 地址栏会变成 reader.html?…，但 document 仍是主页 SPA。
+// Trang chủ "mở mềm" trình đọc: không location.assign, dùng history.pushState + lớp toàn màn hình,
+// không unmount DOM trang chủ → đóng không làm mới, vị trí cuộn được giữ tự nhiên.
+// Thanh địa chỉ đổi thành reader.html?…, nhưng document vẫn là SPA trang chủ.
 
 export const SOFT_READER_HISTORY_FLAG = "retainpdfSoftReader";
 export const SOFT_READER_OPEN_EVENT = "retainpdf:soft-reader-open";
 export const SOFT_READER_FORCE_CLOSE_EVENT = "retainpdf:soft-reader-force-close";
-/** iframe → 父页：请求关闭软阅读层 */
+/** iframe → trang cha: yêu cầu đóng lớp đọc mềm. */
 export const SOFT_READER_CLOSE_MESSAGE = "retainpdf:soft-reader-close";
 
 export type SoftReaderHistoryState = {
@@ -28,7 +28,7 @@ export function isSoftReaderHistoryState(state: unknown): state is SoftReaderHis
   );
 }
 
-/** 主页 SPA 是否仍挂着（软打开后 URL 已是 reader.html，但 #app-shell 还在） */
+/** SPA trang chủ có còn mount hay không (sau mở mềm URL đã là reader.html nhưng #app-shell vẫn còn). */
 export function isHomeSpaAlive(doc: Document = globalThis.document): boolean {
   if (typeof doc === "undefined" || !doc) return false;
   return Boolean(
@@ -40,9 +40,9 @@ export function isHomeSpaAlive(doc: Document = globalThis.document): boolean {
 }
 
 /**
- * 在主页 SPA 上软打开；成功返回 true。
- * 注意：软打开后 location.pathname 会变成 reader.html，但 document 仍是主页。
- * 因此不能只用 pathname 判断，否则第二次打开会误走 location.assign → 白屏/整页跳。
+ * Mở mềm trên SPA trang chủ; thành công trả true.
+ * Lưu ý: sau mở mềm, location.pathname đổi thành reader.html nhưng document vẫn là trang chủ.
+ * Vì vậy không thể chỉ dùng pathname để xác định, nếu không lần mở thứ hai sẽ đi nhầm location.assign → màn hình trắng/chuyển toàn trang.
  */
 export function trySoftOpenReader(url: string): boolean {
   if (typeof window === "undefined") return false;
@@ -53,11 +53,11 @@ export function trySoftOpenReader(url: string): boolean {
   const alreadySoft = isSoftReaderHistoryState(window.history.state);
   const spaAlive = isHomeSpaAlive();
 
-  // 仅当主页 SPA 还在时才能软开；独立打开的 reader.html 整页不走这条
+  // Chỉ có thể mở mềm khi SPA trang chủ còn tồn tại; reader.html độc lập toàn trang không dùng nhánh này.
   if (!onHomePath && !alreadySoft && !spaAlive) {
     return false;
   }
-  // pathname 已是 reader.html 且 SPA 已卸掉 → 交给 location.assign
+  // pathname đã là reader.html và SPA đã unmount → giao cho location.assign.
   if (!spaAlive && !onHomePath) {
     return false;
   }
@@ -71,7 +71,7 @@ export function trySoftOpenReader(url: string): boolean {
       [SOFT_READER_HISTORY_FLAG]: true,
       readerUrl: absolute,
     };
-    // 已在软阅读层：replace，避免 history 堆一串 reader
+    // Đã ở lớp đọc mềm: replace để tránh history chất một chuỗi reader.
     if (alreadySoft || (!onHomePath && spaAlive)) {
       window.history.replaceState(state, "", absolute);
     } else {
@@ -88,17 +88,17 @@ export function trySoftOpenReader(url: string): boolean {
   }
 }
 
-/** 父页收到关闭请求：优先 history.back 卸掉软层 */
+/** Trang cha nhận yêu cầu đóng: ưu tiên history.back để gỡ lớp mềm. */
 export function closeSoftReaderOnHost() {
   if (typeof window === "undefined") return;
   if (isSoftReaderHistoryState(window.history.state)) {
     window.history.back();
     return;
   }
-  // 无对应 history 条目时：URL 改回主页并强制卸层
+  // Khi không có mục history tương ứng: đổi URL về trang chủ và buộc gỡ lớp.
   try {
     const home = new URL("./index.html", window.location.href);
-    // 保留目录前缀：/foo/reader.html → /foo/index.html
+    // Giữ tiền tố thư mục: /foo/reader.html → /foo/index.html.
     const homePath = home.pathname.replace(/reader\.html$/i, "index.html");
     const href = `${homePath}${home.search}${home.hash}` || "./index.html";
     window.history.replaceState(null, "", href);

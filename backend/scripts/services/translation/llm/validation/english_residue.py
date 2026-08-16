@@ -125,6 +125,22 @@ def _looks_like_copy_dominant_english_output(source_text: str, translated_text: 
     return similarity >= 0.82
 
 
+def _looks_like_copied_english_span(source_text: str, translated_span: str) -> bool:
+    source_surface = _normalized_english_surface(source_text)
+    span_surface = _normalized_english_surface(translated_span)
+    if not source_surface or not span_surface or len(span_surface) < 32:
+        return False
+    if span_surface in source_surface:
+        return True
+    match = SequenceMatcher(None, source_surface, span_surface).find_longest_match()
+    return match.size / max(1, len(span_surface)) >= 0.82
+
+
+def _expects_chinese_output(target_language_name: str) -> bool:
+    normalized = str(target_language_name or "").strip().casefold()
+    return normalized in {"chinese", "simplified chinese", "traditional chinese", "中文", "简体中文", "繁體中文"}
+
+
 def _looks_like_author_name_list(text: str) -> bool:
     cleaned = strip_placeholders(text).strip()
     if not cleaned:
@@ -205,7 +221,12 @@ def _looks_like_term_preserving_mixed_output(item: dict, translated_text: str) -
     )
 
 
-def looks_like_predominantly_english_output(item: dict, translated_text: str) -> bool:
+def looks_like_predominantly_english_output(
+    item: dict,
+    translated_text: str,
+    *,
+    target_language_name: str = "Tiếng Việt",
+) -> bool:
     source_text = unit_source_text(item).strip()
     translated = str(translated_text or "").strip()
     if not translated:
@@ -220,6 +241,8 @@ def looks_like_predominantly_english_output(item: dict, translated_text: str) ->
         return False
     if _looks_like_author_name_list(source_text):
         return False
+    if not _expects_chinese_output(target_language_name):
+        return _looks_like_copy_dominant_english_output(source_text, translated)
     english_words = _english_word_count(translated)
     zh_chars = _zh_char_count(translated)
     if _looks_like_term_preserving_mixed_output(item, translated):
@@ -235,17 +258,31 @@ def looks_like_predominantly_english_output(item: dict, translated_text: str) ->
     return english_words >= max(12, zh_chars // 2)
 
 
-def looks_like_untranslated_english_output(item: dict, translated_text: str) -> bool:
+def looks_like_untranslated_english_output(
+    item: dict,
+    translated_text: str,
+    *,
+    target_language_name: str = "Tiếng Việt",
+) -> bool:
     translated = str(translated_text or "").strip()
-    if not looks_like_predominantly_english_output(item, translated):
+    if not looks_like_predominantly_english_output(
+        item,
+        translated,
+        target_language_name=target_language_name,
+    ):
         return False
-    if _zh_char_count(translated) > 0:
+    if _expects_chinese_output(target_language_name) and _zh_char_count(translated) > 0:
         return False
     source_text = unit_source_text(item).strip()
     return _looks_like_copy_dominant_english_output(source_text, translated)
 
 
-def looks_like_mixed_english_residue_output(item: dict, translated_text: str) -> bool:
+def looks_like_mixed_english_residue_output(
+    item: dict,
+    translated_text: str,
+    *,
+    target_language_name: str = "Tiếng Việt",
+) -> bool:
     translated = str(translated_text or "").strip()
     if not translated:
         return False
@@ -253,11 +290,11 @@ def looks_like_mixed_english_residue_output(item: dict, translated_text: str) ->
         return False
     if not should_force_translate_body_text(item):
         return False
-    if _is_formula_dense_body_item(item):
+    if _is_formula_dense_body_item(item) and _expects_chinese_output(target_language_name):
         return False
-    if _looks_like_term_preserving_mixed_output(item, translated):
+    if _expects_chinese_output(target_language_name) and _looks_like_term_preserving_mixed_output(item, translated):
         return False
-    if _zh_char_count(translated) <= 0:
+    if _expects_chinese_output(target_language_name) and _zh_char_count(translated) <= 0:
         return False
     source_text = unit_source_text(item).strip()
     if not looks_like_english_prose(source_text):
@@ -265,7 +302,7 @@ def looks_like_mixed_english_residue_output(item: dict, translated_text: str) ->
     for segment in _long_english_residue_spans(translated):
         if len(EN_WORD_RE.findall(segment)) < 12:
             continue
-        if _looks_like_copy_dominant_english_output(source_text, segment):
+        if _looks_like_copied_english_span(source_text, segment):
             return True
     return False
 

@@ -4,6 +4,7 @@ mod debug;
 mod downloads;
 mod facade;
 pub(super) mod live_stage;
+mod manual_translation;
 mod presentation;
 mod query;
 mod reader_ai;
@@ -23,6 +24,10 @@ pub(crate) use creation::{store_pdf_upload, UploadedPdfInput};
 pub(crate) use downloads::{DocumentDownloadKind, FileDownload, MarkdownDownload};
 pub(crate) use facade::build_jobs_facade;
 pub use facade::JobsFacade;
+pub use manual_translation::{
+    ManualTranslationBundleQuery, ManualTranslationBundleView,
+    ManualTranslationImportRequest, ManualTranslationImportView,
+};
 pub(crate) use readiness::job_readiness;
 
 pub use crate::services::job_validation::{

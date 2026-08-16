@@ -183,7 +183,7 @@ test("AppUpdateBanner：启动缓存命中(fresh)直接展示,不发起网络请
   click(byId("app-update-btn"));
   await waitFor(() => byId("app-update-dialog") !== null, "打开详情对话框");
   assert.match(byId("app-update-dialog").querySelector("h2").textContent, /RetainPDF 9\.9\.9/);
-  assert.equal(byId("app-update-dialog").querySelector("p").textContent, "当前 1.0.0 · 最新 9.9.9");
+  assert.equal(byId("app-update-dialog").querySelector("p").textContent, "Hiện tại 1.0.0 · Mới nhất 9.9.9");
   assert.equal(byId("app-update-dialog").querySelector(".app-update-link").classList.contains("hidden"), false);
 
   await wait(1400);
@@ -235,8 +235,8 @@ test("AppUpdateBanner：手动检查 loading → 成功(available/latest)三态�
   click(byId("app-update-check-btn"));
   await waitFor(() => byId("app-update-btn").dataset.updateState === "checking", "手动检查进入 loading 态");
   assert.equal(byId("app-update-status").classList.contains("hidden"), false);
-  assert.equal(byId("app-update-status").textContent, "正在检查 GitHub Releases...");
-  assert.equal(byId("app-update-dialog").querySelector("h2").textContent, "正在检查更新");
+  assert.equal(byId("app-update-status").textContent, "Đang kiểm tra GitHub Releases...");
+  assert.equal(byId("app-update-dialog").querySelector("h2").textContent, "Đang kiểm tra cập nhật");
 
   check1.resolve({
     tag_name: "v4.2.0",
@@ -257,7 +257,7 @@ test("AppUpdateBanner：手动检查 loading → 成功(available/latest)三态�
   host.remove();
 });
 
-test("AppUpdateBanner：手动检查失败态展示错误信息", async () => {
+test("AppUpdateBanner：手动Kiểm tra thất bại态展示错误信息", async () => {
   const check1 = deferred();
   const services = createHomeComposition({
     loadPersistedDeveloperConfig: () => ({}),
@@ -275,7 +275,7 @@ test("AppUpdateBanner：手动检查失败态展示错误信息", async () => {
   check1.reject(new Error("网络不可达"));
   await waitFor(() => byId("app-update-btn").dataset.updateState === "error", "失败后进入 error 态");
   assert.equal(byId("app-update-btn").classList.contains("has-update"), false);
-  assert.equal(byId("app-update-status").textContent, "检查失败");
+  assert.equal(byId("app-update-status").textContent, "Kiểm tra thất bại");
   assert.equal(byId("app-update-dialog").querySelector(".app-update-notes").textContent, "网络不可达");
 
   root.unmount();

@@ -15,7 +15,10 @@ import {
 
 const constants = {
   DEFAULT_MODEL_VERSION: "PP-StructureV3",
-  DEFAULT_LANGUAGE: "ch",
+  DEFAULT_LANGUAGE: "en",
+  DEFAULT_SOURCE_LANGUAGE: "en",
+  DEFAULT_TARGET_LANGUAGE: "vi",
+  DEFAULT_TARGET_LANGUAGE_NAME: "Tiếng Việt",
   DEFAULT_MODE: "full",
   DEFAULT_RULE_PROFILE: "retain-layout",
   DEFAULT_RENDER_MODE: "overlay",
@@ -69,6 +72,9 @@ test("buildTranslationPayload uses injected glossary and model key without DOM",
   assert.equal(payload.glossary_id, "glossary-selected");
   assert.equal(payload.model, "deepseek-chat");
   assert.equal(payload.base_url, "https://api.deepseek.com");
+  assert.equal(payload.source_language, "en");
+  assert.equal(payload.target_language, "vi");
+  assert.equal(payload.target_language_name, "Tiếng Việt");
   assert.equal(payload.skip_title_translation, false);
 });
 
@@ -96,6 +102,7 @@ test("buildOcrPayload maps provider token field and paddle api url", () => {
   assert.equal(payload.provider, "paddle");
   assert.equal(payload.paddle_token, "ocr-token");
   assert.equal(payload.paddle_api_url, "https://paddle.example/v1");
+  assert.equal(payload.language, "en");
   assert.equal(payload.page_ranges, "1-3");
 });
 

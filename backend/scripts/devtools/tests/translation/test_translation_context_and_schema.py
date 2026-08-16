@@ -489,6 +489,9 @@ def test_build_translation_context_from_policy_uses_policy_guidance() -> None:
         retrieval_entries=[session_context.RetrievalEvidence(source="rag", content="snippet")],
     )
     assert context.mode == "sci"
+    assert context.source_lang == "en"
+    assert context.target_lang == "vi"
+    assert context.target_language_name == "Tiếng Việt"
     assert "domain-summary" in context.merged_guidance
     assert "domain-guidance" in context.merged_guidance
     assert "rule-guidance" in context.merged_guidance

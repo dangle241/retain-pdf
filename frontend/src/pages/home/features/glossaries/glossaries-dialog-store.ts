@@ -1,6 +1,6 @@
-// GlossariesDialog 的开合状态实例(state/dialog-store.js 通用工厂,镜像
-// credentials-dialog-store.js)。payload 通道本域暂未使用,保留与通用契约
-// 一致,便于未来"带参数打开"(例如从 developer 术语表下拉直接定位某条)。
+// Instance trạng thái đóng/mở GlossariesDialog, dùng factory chung state/dialog-store.js và phản chiếu
+// credentials-dialog-store.js. Miền này chưa dùng kênh payload nhưng giữ nhất quán với hợp đồng chung
+// để sau này "mở kèm tham số", như định vị mục trực tiếp từ menu thuật ngữ developer.
 
 import { createDialogStore } from "../../state/dialog-store.js";
 

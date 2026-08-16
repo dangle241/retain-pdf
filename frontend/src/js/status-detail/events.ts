@@ -24,7 +24,7 @@ function formatEventPayload(payload) {
 
 export function buildEventsPresentation(eventsPayload) {
   const items = Array.isArray(eventsPayload?.items) ? eventsPayload.items : [];
-  // 文案承诺“按时间倒序”,这里显式排序,不依赖后端返回顺序
+  // Nội dung UI cam kết "theo thời gian giảm dần", nên sắp xếp rõ tại đây thay vì phụ thuộc thứ tự backend.
   const entries = items
     .map((item) => ({ item, record: normalizedStageEventRecord(item) }))
     .sort((a, b) => (Date.parse(b.record.timestamp) || 0) - (Date.parse(a.record.timestamp) || 0));
@@ -46,7 +46,7 @@ export function buildEventsPresentation(eventsPayload) {
         ${record.progressText && record.progressText !== title ? `<div class="event-progress">${escapeHtml(record.progressText)}</div>` : ""}
         ${payloadText ? `
           <details class="event-payload-wrap">
-            <summary class="event-payload-toggle">查看 payload</summary>
+            <summary class="event-payload-toggle">Xem payload</summary>
             <pre class="event-payload">${escapeHtml(payloadText)}</pre>
           </details>
         ` : ""}
@@ -56,7 +56,7 @@ export function buildEventsPresentation(eventsPayload) {
   return {
     markup,
     count: items.length,
-    emptyText: "暂无事件",
+    emptyText: "Chưa có sự kiện",
     hasItems: items.length > 0,
   };
 }

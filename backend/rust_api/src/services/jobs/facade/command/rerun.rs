@@ -5,7 +5,7 @@ use crate::models::request::{CreateJobInput, JobSourceInput};
 use crate::services::jobs::stage_plan::resume_plan;
 
 use super::super::super::creation::create_translation_job;
-use super::super::super::query::load_job_or_404;
+use super::super::super::query::load_supported_job;
 use super::super::JobsFacade;
 use crate::services::job_launcher::start_job_execution;
 
@@ -15,7 +15,11 @@ impl<'a> JobsFacade<'a> {
         base_url: &str,
         source_job_id: &str,
     ) -> Result<JobSubmissionView, AppError> {
-        let source_job = load_job_or_404(self.command.db, source_job_id)?;
+        let source_job = load_supported_job(
+            self.command.db,
+            self.command.control.data_root,
+            source_job_id,
+        )?;
         if resume_plan(&source_job).resume_workflow == Some(WorkflowKind::Render) {
             let job = prepare_in_place_render_job(source_job)?;
             let job = start_job_execution(&self.command.submit.launcher, job)?;
@@ -55,7 +59,7 @@ pub(super) fn prepare_in_place_render_job(mut job: JobSnapshot) -> Result<JobSna
     job.command.clear();
     job.error = None;
     job.stage = Some("queued".to_string());
-    job.stage_detail = Some("重渲染任务排队中，等待可用执行槽位".to_string());
+    job.stage_detail = Some("Tác vụ kết xuất lại đang chờ lượt xử lý".to_string());
     job.progress_current = Some(0);
     job.progress_total = None;
     job.log_tail.clear();
@@ -100,9 +104,13 @@ fn build_rerun_request(source_job: &JobSnapshot) -> Result<CreateJobInput, AppEr
         render: source_job.request_payload.render.clone(),
         runtime: source_job.request_payload.runtime.clone(),
     };
-    request.source.upload_id.clear();
-    request.source.source_url.clear();
-    request.source.artifact_job_id = source_job.job_id.clone();
+    if plan.from_stage.as_deref() == Some("ocr") {
+        request.source.artifact_job_id.clear();
+    } else {
+        request.source.upload_id.clear();
+        request.source.source_url.clear();
+        request.source.artifact_job_id = source_job.job_id.clone();
+    }
     request.runtime.job_id.clear();
     Ok(request)
 }

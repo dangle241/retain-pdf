@@ -1,11 +1,11 @@
 export const READER_PROGRESS_COPY = Object.freeze({
-  boot: "正在准备对照阅读…",
-  metadata: "正在读取任务信息…",
-  both: "正在加载原始 PDF 和译文 PDF…",
-  sourceOnly: "原始 PDF 已加载，正在加载译文 PDF…",
-  translatedOnly: "译文 PDF 已加载，正在加载原始 PDF…",
-  ready: "对照阅读已就绪",
-  failed: "对照阅读加载失败",
+  boot: "Đang chuẩn bị chế độ đọc đối chiếu…",
+  metadata: "Đang tải thông tin tác vụ…",
+  both: "Đang tải PDF gốc và PDF bản dịch…",
+  sourceOnly: "Đã tải PDF gốc, đang tải PDF bản dịch…",
+  translatedOnly: "Đã tải PDF bản dịch, đang tải PDF gốc…",
+  ready: "Chế độ đọc đối chiếu đã sẵn sàng",
+  failed: "Tải chế độ đọc đối chiếu thất bại",
 });
 
 export function createReaderPageState() {

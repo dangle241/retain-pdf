@@ -1,11 +1,11 @@
-// StatusDetailDialog 的 DOM 契约 id 拷贝(蓝图 §1 + §0.1)。
+// Bản sao ID hợp đồng DOM của StatusDetailDialog (thiết kế §1 + §0.1).
 //
-// 拷贝自 src/js/components/dialogs/status-detail-dialog-dom-contract.js(该
-// 目录整体属旧自定义元素视图层,architecture-boundaries.test.mjs 的
-// `/js/components/` 防回弹正则禁止 pages/** 直接 import)——CredentialsDialog
-// 域已用同一手法拷贝出 credentials-dom-ids.js,这里照此处理。id 字符串逐一
-// 保留,视觉基线(status-dialog-failed/status-dialog-translation)与门禁按
-// 这些 id 断言,新增/改动一律不改名旧世界字符串。
+// Sao chép từ src/js/components/dialogs/status-detail-dialog-dom-contract.js (
+// toàn bộ thư mục thuộc tầng view custom element cũ; regex chống hồi quy
+// `/js/components/` trong architecture-boundaries.test.mjs cấm pages/** import trực tiếp); miền CredentialsDialog
+// đã sao chép credentials-dom-ids.js theo cùng cách nên tại đây cũng làm tương tự. Từng chuỗi ID
+// được giữ nguyên; baseline hình ảnh (status-dialog-failed/status-dialog-translation) và cổng kiểm tra assert theo
+// các ID này; tuyệt đối không đổi tên chuỗi của hệ thống cũ khi thêm/sửa.
 
 export const STATUS_DETAIL_DIALOG_IDS = {
   openButton: "status-detail-btn",
@@ -89,8 +89,8 @@ export const STATUS_DETAIL_DIALOG_IDS = {
   },
 };
 
-// 拷贝自 src/js/contracts/download-action-contract.js 的 MARKDOWN_BUNDLE id
-// (该文件不在防回弹禁区,但概览面板下载行的 id 属 StatusDetailDialog 自身
-// 模板契约,和 status-card-dom-ids.js 的 STATUS_MARKDOWN_BUNDLE 是两个不同的
-// 物理 id,不冲突——直接内联避免多一层 re-export)。
+// ID MARKDOWN_BUNDLE sao chép từ src/js/contracts/download-action-contract.js
+// (file đó không nằm trong vùng cấm hồi quy, nhưng ID hàng tải xuống của panel tổng quan thuộc hợp đồng template riêng của StatusDetailDialog
+// và là một ID vật lý khác với STATUS_MARKDOWN_BUNDLE trong status-card-dom-ids.js,
+// không xung đột; inline trực tiếp để tránh thêm một tầng re-export).
 export const STATUS_DETAIL_MARKDOWN_BUNDLE_ID = "markdown-bundle-btn";

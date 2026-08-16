@@ -252,7 +252,7 @@ test("GlossariesDialog：新建草稿 + preserve 保存时用 source 回填空�
   await waitFor(() => calls.fetchGlossaries.length === glossariesBaseline + 1, "打开对话框触发一次列表加载");
 
   click(byId("glossary-new-btn"));
-  await waitFor(() => byId("glossary-name").value === "未命名术语表", "新建草稿回填默认名称");
+  await waitFor(() => byId("glossary-name").value === "Bảng thuật ngữ chưa đặt tên", "新建草稿回填默认名称");
 
   const sourceInput = byId("glossary-entries").querySelector(".glossary-entry-source");
   assert.ok(sourceInput, "新建草稿自动带一行空白词条");
@@ -286,7 +286,7 @@ test("GlossariesDialog：非 preserve 词条缺译文时保存被拦截(校验)"
   await waitFor(() => calls.fetchGlossaries.length === glossariesBaseline + 1, "打开对话框触发一次列表加载");
 
   click(byId("glossary-new-btn"));
-  await waitFor(() => byId("glossary-name").value === "未命名术语表", "新建草稿");
+  await waitFor(() => byId("glossary-name").value === "Bảng thuật ngữ chưa đặt tên", "新建草稿");
 
   const sourceInput = byId("glossary-entries").querySelector(".glossary-entry-source");
   const levelSelect = byId("glossary-entries").querySelector(".glossary-entry-level");
@@ -295,7 +295,7 @@ test("GlossariesDialog：非 preserve 词条缺译文时保存被拦截(校验)"
   // 译文(target)保持留空。
 
   click(byId("glossary-save-btn"));
-  await waitFor(() => byId("glossary-status").textContent === "固定译法/偏好译法需要填写译文。", "校验拦截提示");
+  await waitFor(() => byId("glossary-status").textContent === "Bản dịch cố định/ưu tiên cần có nội dung đích.", "校验拦截提示");
   assert.equal(byId("glossary-status").classList.contains("is-error"), true);
   assert.equal(calls.createGlossary.length, 0, "校验未通过不应调用保存接口");
 
@@ -329,7 +329,7 @@ test("GlossariesDialog：CSV 导入解析替换草稿词条", async () => {
   await waitFor(() => byId("glossary-entries").querySelectorAll(".glossary-entry-row").length === 1, "词条替换为解析结果");
   assert.equal(byId("glossary-entries").querySelector(".glossary-entry-source").value, "parsed-term");
   assert.equal(byId("glossary-csv-text").value, "", "解析成功后清空 CSV 文本框");
-  assert.match(byId("glossary-status").textContent, /已解析 1 条/);
+  assert.match(byId("glossary-status").textContent, /Đã phân tích 1 mục/);
 
   root.unmount();
   services.dispose();
@@ -353,7 +353,7 @@ test("GlossariesDialog：CSV 导出调用 exportGlossaryCsv 并提示成功", as
   click(byId("glossary-export-btn"));
   await waitFor(() => calls.exportGlossaryCsv.length === 1, "触发导出请求");
   assert.equal(calls.exportGlossaryCsv[0], "g-1");
-  await waitFor(() => /^已导出 g-1\.csv。$/.test(byId("glossary-status").textContent), "导出成功提示");
+  await waitFor(() => /^Đã xuất g-1\.csv\.$/.test(byId("glossary-status").textContent), "导出成功提示");
   assert.equal(byId("glossary-status").classList.contains("is-valid"), true);
 
   root.unmount();

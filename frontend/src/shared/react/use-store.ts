@@ -1,12 +1,12 @@
-// app-framework/store → React 的适配 hook。
+// Hook chuyển app-framework/store sang React.
 //
-// 雷点(实测):store.getSnapshot() 每次调用都返回全新 frozen clone(引用不稳定),
-// 直接作为 useSyncExternalStore 的 getSnapshot 会造成无限重渲染。
-// 解法:缓存 subscribe 通知时随参携带的快照(notify() 对所有监听器只生成一份),
-// getSnapshot 只读缓存;首次读取惰性调一次 store.getSnapshot() 初始化。
+// Điểm dễ lỗi (đã kiểm tra): store.getSnapshot() trả clone frozen hoàn toàn mới mỗi lần gọi (tham chiếu không ổn định),
+// dùng trực tiếp làm getSnapshot của useSyncExternalStore sẽ gây render lại vô hạn.
+// Giải pháp: cache snapshot đi kèm tham số khi subscribe thông báo (notify() chỉ tạo một bản cho mọi listener),
+// getSnapshot chỉ đọc cache; lần đọc đầu gọi store.getSnapshot() lười một lần để khởi tạo.
 //
-// selector 支持:对 selector 结果做浅比较缓存,高频轮询的大快照(recent-jobs)
-// 只在所选切片真正变化时才触发该组件重渲染。
+// Hỗ trợ selector: cache kết quả selector bằng so sánh nông; snapshot lớn được polling tần suất cao (recent-jobs)
+// chỉ kích hoạt component render lại khi lát cắt được chọn thực sự thay đổi.
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
 

@@ -1,23 +1,23 @@
-// SettingsHubDialog v2：左导航 + 右内容区（原"门厅弹窗"横向 pill 布局退役）。
+// SettingsHubDialog v2: điều hướng bên trái + vùng nội dung bên phải (bỏ bố cục pill ngang của "hộp thoại sảnh" cũ).
 //
-// 布局：左侧竖排导航（图标+名称，Radix Tabs orientation=vertical，方向键可用），
-// 右侧内容窗格（每区自带标题行 + 正文，独立滚动）。外观区升格为主题卡片网格
-// 的主舞台；API/词表因真实表单仍是独立顶层对话框（CredentialsDialog/
-// GlossariesDialog，各有 controller/store/测试契约），本面板作为"启动区"
-// 保留入口按钮——后续如要内嵌，动的是那两个 feature，不是这里。
+// Bố cục: điều hướng dọc bên trái (biểu tượng + tên, Radix Tabs orientation=vertical, dùng được phím mũi tên),
+// khung nội dung bên phải (mỗi vùng có hàng tiêu đề + nội dung và cuộn độc lập). Vùng giao diện được nâng thành lưới thẻ chủ đề
+// làm khu vực chính; API/bảng thuật ngữ vẫn là hộp thoại cấp cao độc lập do có biểu mẫu thật (CredentialsDialog/
+// GlossariesDialog, mỗi phần có controller/store/hợp đồng kiểm thử riêng), panel này đóng vai trò "khu khởi chạy"
+// và giữ nút truy cập; nếu cần nhúng sau này thì sửa hai feature đó, không sửa tại đây.
 //
-// 【测试契约，改版不许破】（credentials/glossaries/app-update component tests）：
+// [Hợp đồng kiểm thử, không được phá khi thiết kế lại] (kiểm thử component credentials/glossaries/app-update):
 // - #app-settings-dialog / #app-settings-close-btn
-// - [data-settings-tab="api|glossary|appearance|update"] 可点击
-// - [data-settings-panel=…] forceMount + hidden 属性切换（测试断言 .hidden）
-// - #credentials-btn / #glossary-btn 打开对应子对话框
-// - 外观面板 #theme-appearance-panel 与 #theme-option-<id>
+// - Có thể bấm [data-settings-tab="api|glossary|appearance|update"].
+// - [data-settings-panel=…] dùng forceMount + chuyển thuộc tính hidden (kiểm thử assert .hidden).
+// - #credentials-btn / #glossary-btn mở hộp thoại con tương ứng.
+// - Panel giao diện #theme-appearance-panel và #theme-option-<id>.
 //
-// 开合状态跨子树走 settings-hub-dialog-store；tab 切换是子树内瞬态（useState）。
-// 不 forceMount Dialog 的 Content/Overlay（Radix hideOthers 依赖真实
-// mount/unmount，见 CredentialsDialog 头注释）。AppUpdateBanner 的挂载生命
-// 周期说明见旧版头注释结论：后台自检由 composition 的纯逻辑控制器驱动，
-// 与本组件是否挂载无关。
+// Trạng thái đóng/mở xuyên cây con dùng settings-hub-dialog-store; chuyển tab là trạng thái tạm trong cây con (useState).
+// Không forceMount Content/Overlay của Dialog (Radix hideOthers phụ thuộc vào việc
+// mount/unmount thực tế, xem comment đầu CredentialsDialog). Vòng đời mount của AppUpdateBanner
+// được giải thích trong kết luận ở comment đầu bản cũ: tự kiểm tra nền do controller logic thuần của composition điều khiển,
+// không phụ thuộc component này có được mount hay không.
 
 import { useEffect, useState } from "react";
 import { Dialog as DialogPrimitive, Tabs as TabsPrimitive } from "radix-ui";
@@ -30,7 +30,7 @@ import { CredentialsWorkbench } from "../credentials/CredentialsWorkbench.jsx";
 import { ThemeAppearancePanel } from "./ThemeAppearancePanel.jsx";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size 在未注解源文件里被推断为必填;unstyled 路径运行时不用 size。
+// Button.size bị suy ra là bắt buộc trong tệp nguồn chưa chú kiểu; luồng unstyled không dùng size ở runtime.
 const Button = ButtonBase as any;
 
 function IconKey(props) {
@@ -69,17 +69,17 @@ function IconUpdate(props) {
 }
 
 const TABS = [
-  { id: "api", label: "API 设置", Icon: IconKey },
-  { id: "glossary", label: "词表", Icon: IconBook },
-  { id: "appearance", label: "外观", Icon: IconPalette },
-  { id: "update", label: "更新", Icon: IconUpdate },
+  { id: "api", label: "Cài đặt API", Icon: IconKey },
+  { id: "glossary", label: "Thuật ngữ", Icon: IconBook },
+  { id: "appearance", label: "Giao diện", Icon: IconPalette },
+  { id: "update", label: "Cập nhật", Icon: IconUpdate },
 ];
 
 const PANE_HEADS = {
-  api: { title: "API 设置", desc: "配置 OCR Token、DeepSeek Key、模型地址和任务选项，保存后立即生效。" },
-  glossary: { title: "术语表", desc: "维护固定译法、保留词和专业术语偏好。" },
-  appearance: { title: "外观", desc: "选择界面配色，立即生效并记住本机选择。" },
-  update: { title: "更新", desc: "查看当前版本，并从 GitHub Releases 重新检查更新。" },
+  api: { title: "Cài đặt API", desc: "Cấu hình OCR Token, DeepSeek Key, địa chỉ mô hình và tùy chọn tác vụ; thay đổi có hiệu lực ngay sau khi lưu." },
+  glossary: { title: "Bảng thuật ngữ", desc: "Quản lý bản dịch cố định, từ giữ nguyên và lựa chọn thuật ngữ chuyên ngành." },
+  appearance: { title: "Giao diện", desc: "Chọn bảng màu giao diện; thay đổi có hiệu lực ngay và được ghi nhớ trên máy này." },
+  update: { title: "Cập nhật", desc: "Xem phiên bản hiện tại và kiểm tra lại cập nhật từ GitHub Releases." },
 };
 
 function PaneHead({ tab }: { tab: keyof typeof PANE_HEADS }) {
@@ -106,8 +106,8 @@ export function SettingsHubDialog() {
     }
   }, [open]);
 
-  // API 区内嵌凭据工作台：进入 api tab 时从凭据状态回填表单（不开二层弹窗）。
-  // forceMount 保证面板已挂载；rAF 再补一次，避免 ref 尚未挂上导致密码框空白、保存读到空串。
+  // Vùng API nhúng bàn làm việc thông tin xác thực: khi vào tab api, điền lại biểu mẫu từ trạng thái xác thực (không mở hộp thoại tầng hai).
+  // forceMount bảo đảm panel đã mount; rAF điền thêm một lần để tránh ref chưa gắn khiến ô mật khẩu trống và thao tác lưu đọc chuỗi rỗng.
   useEffect(() => {
     if (!open || activeTab !== "api") {
       return;
@@ -129,7 +129,7 @@ export function SettingsHubDialog() {
   }
 
   function panelClass(tab: string) {
-    // 纯字面量拼接（含空格分隔），避开 v4 扫描器的 `x${y}` 模板坑
+    // Nối literal thuần (có dấu cách phân tách) để tránh lỗi scanner v4 với template `x${y}`.
     return activeTab === tab ? "app-settings-panel is-current" : "app-settings-panel";
   }
 
@@ -151,9 +151,9 @@ export function SettingsHubDialog() {
             >
               <aside className="app-settings-rail">
                 <DialogPrimitive.Title asChild>
-                  <h2>设置</h2>
+                  <h2>Cài đặt</h2>
                 </DialogPrimitive.Title>
-                <TabsPrimitive.List className="app-settings-nav" aria-label="设置分类">
+                <TabsPrimitive.List className="app-settings-nav" aria-label="Danh mục cài đặt">
                   {TABS.map(({ id, label, Icon }) => (
                     <TabsPrimitive.Trigger
                       key={id}
@@ -173,7 +173,7 @@ export function SettingsHubDialog() {
                   <Button
                     id={APP_SETTINGS_DIALOG_IDS.closeButton}
                     className="dialog-close-btn app-settings-close"
-                    aria-label="关闭"
+                    aria-label="Đóng"
                   >
                     ×
                   </Button>
@@ -187,8 +187,8 @@ export function SettingsHubDialog() {
                   data-settings-panel="api"
                 >
                   <PaneHead tab="api" />
-                  {/* 凭据工作台直接内嵌（无二层弹窗）；与首次配置门共用
-                      CredentialsWorkbench，状态同源。 */}
+                  {/* Nhúng trực tiếp bàn làm việc thông tin xác thực (không có hộp thoại tầng hai); dùng chung với cổng thiết lập lần đầu
+                      CredentialsWorkbench, cùng một nguồn trạng thái. */}
                   <CredentialsWorkbench />
                 </TabsPrimitive.Content>
 
@@ -202,11 +202,11 @@ export function SettingsHubDialog() {
                   <PaneHead tab="glossary" />
                   <div className="app-settings-launcher">
                     <p>
-                      词表决定翻译时的固定译法与保留词。可维护多张词表并
-                      按需启用，翻译任务发起时生效。
+                      Bảng thuật ngữ xác định bản dịch cố định và từ cần giữ nguyên. Có thể quản lý nhiều bảng và
+                      bật khi cần; chúng có hiệu lực khi bắt đầu tác vụ dịch.
                     </p>
                     <Button id={APP_SETTINGS_DIALOG_IDS.glossaryButton} className="app-settings-action" onClick={openGlossaries}>
-                      打开词表
+                      Mở bảng thuật ngữ
                     </Button>
                   </div>
                 </TabsPrimitive.Content>
@@ -230,8 +230,8 @@ export function SettingsHubDialog() {
                   data-settings-panel="update"
                 >
                   <PaneHead tab="update" />
-                  {/* AppUpdateBanner:按钮 + 详情 dialog 合并一体(蓝图 §5)。
-                      挂载生命周期与后台自检解耦的结论见文件头注释。 */}
+                  {/* AppUpdateBanner: kết hợp nút + hộp thoại chi tiết thành một khối (thiết kế §5).
+                      Xem comment đầu file về kết luận tách vòng đời mount khỏi tự kiểm tra nền. */}
                   <AppUpdateBanner />
                 </TabsPrimitive.Content>
               </div>

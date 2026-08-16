@@ -1,5 +1,5 @@
-// composition 层公共类型。HomeServices / HomeFeatures 表面 API 不用 any；
-// 深层 payload 用 unknown；store/port 复用已有模块类型。
+// Kiểu công khai của lớp composition. API bề mặt HomeServices / HomeFeatures không dùng any;
+// payload sâu dùng unknown; store/port dùng lại kiểu mô-đun hiện có.
 
 import type {
   Store,
@@ -22,8 +22,8 @@ import type {
 } from "../features/library/types.js";
 
 /**
- * 通用 app-framework store。
- * 用 Store 默认参（未建模 snapshot/actions），避免把消费方推成 never/unknown。
+ * Store app-framework dùng chung.
+ * Dùng tham số Store mặc định vì chưa mô hình hóa snapshot/actions, tránh đẩy bên dùng thành never/unknown.
  */
 export type AppStore = Store;
 
@@ -66,6 +66,7 @@ export type BrowserCredentialsFeature = {
   ensureOcrCredentialsReady: (options?: unknown) => Promise<boolean> | boolean | unknown;
   hasBrowserCredentials: () => boolean;
   openBrowserCredentialsDialog: (options?: unknown) => void;
+  prepareCredentialsPanels: () => void;
   refreshDeepSeekBalance: (options?: unknown) => Promise<unknown> | unknown;
   setDialogStatus: (message?: string, tone?: string) => void;
   updateCredentialGate: (options?: unknown) => void;
@@ -85,7 +86,7 @@ export type AppUpdateFeature = {
 export type AppActionsFeature = {
   checkApiConnectivity: () => Promise<unknown> | unknown;
   handleOpenOutputDir: () => unknown;
-  /** React SubmitEvent 与 DOM Event 均允许 */
+  /** Cho phép cả React SubmitEvent và DOM Event. */
   submitForm: (event?: { preventDefault?: () => void } | null) => unknown;
 };
 
@@ -99,7 +100,7 @@ export type JobRuntimeFeature = {
   cancelCurrentJob: () => unknown;
   currentJobId: () => string;
   fetchJob: (jobId?: string) => Promise<unknown> | unknown;
-  retryStage: (stage: string) => unknown;
+  retryStage: (stage: string, options?: { jobId?: string }) => unknown;
   returnToHome: () => void;
   startPolling: (jobId: string, options?: StartPollingOptions) => unknown;
   stopPolling: () => void;
@@ -121,7 +122,7 @@ export type AppShellFeature = {
   initializeIdleView: () => void;
 };
 
-/** 装配期逐步填满的 features 注册表 */
+/** Registry features được điền dần trong pha lắp ráp. */
 export type HomeFeatures = {
   workflowFeature?: WorkflowFeature;
   uploadFeature?: UploadFeature;
@@ -159,13 +160,14 @@ export type HomeStores = {
 
 // ── Domain bags ───────────────────────────────────────────────────────
 
-/** 事件处理函数表（viewPort.bindEvents 写入 handlersRef） */
+/** Bảng hàm xử lý sự kiện, viewPort.bindEvents ghi vào handlersRef. */
 export type HandlersBag = {
   [key: string]: ((...args: unknown[]) => unknown) | undefined | null;
 };
 
 export type CredentialsElementsRef = {
   apiKeyInput: HTMLInputElement | null;
+  modelProviderSelect: HTMLSelectElement | null;
   modelBaseUrlInput: HTMLInputElement | null;
   modelNameInput: HTMLInputElement | null;
   mathModeSelect: HTMLSelectElement | null;
@@ -226,7 +228,7 @@ export type LibraryActions = RecentJobActions & {
   openSourceReader: LibraryController["openSourceReader"];
   translateDocument: LibraryController["translateDocument"];
   deleteDocument: LibraryController["deleteDocument"];
-  /** 选择集可能是 unknown[]（view state），参数放宽 */
+  /** Tập chọn có thể là unknown[] từ view state nên nới tham số. */
   deleteDocuments: (
     documentIds?: Array<string | null | undefined | unknown>,
   ) => Promise<DeleteDocumentsResult>;
@@ -247,7 +249,7 @@ export type HomeBookDetail = {
   dialogStore: DialogStore<LibraryCardItem | null>;
 };
 
-/** 分类/合集控制器（createCollectionsController 返回面） */
+/** Bộ điều khiển phân loại/bộ sưu tập, bề mặt trả về từ createCollectionsController. */
 export type CollectionRecord = {
   collection_id?: string;
   name?: string;
@@ -284,7 +286,7 @@ export type CollectionsController = {
   fetchFolderBooks: (collectionId: string) => Promise<LibraryCardItem[]>;
 };
 
-/** createStore 返回的 actions 经 BoundStoreActions 后难精确建模；消费面只认 bump */
+/** actions từ createStore khó mô hình hóa chính xác sau BoundStoreActions; bề mặt dùng chỉ công nhận bump. */
 export type CollectionsReloadSignal = {
   getSnapshot: () => { version: number };
   subscribe: (listener: (snapshot: { version: number }, meta?: unknown) => void) => () => void;
@@ -342,7 +344,7 @@ export type HomeStatusDetail = {
   controller: StatusDetailController;
 };
 
-/** 主页阅读入口：跳转独立 reader.html（不再维护 dialogStore / iframe）。 */
+/** Entry đọc trang chính: chuyển tới reader.html độc lập, không còn duy trì dialogStore / iframe. */
 export type HomeReader = {
   openReader: (jobId: string, anchor?: unknown) => unknown;
 };
@@ -421,7 +423,7 @@ export type HomeServices = {
   statusCard: HomeStatusCard;
   statusDetail: HomeStatusDetail;
   reader: HomeReader;
-  /** text-store 的 selector 帮助函数（配合 useStoreSnapshot） */
+  /** Hàm trợ giúp selector của text-store, dùng cùng useStoreSnapshot. */
   textOf: (snapshot: unknown, id: string, fallback?: unknown) => unknown;
   uploadDomRefs: UploadDomRefs;
   uploadViewActions: UploadViewActions;
@@ -429,7 +431,7 @@ export type HomeServices = {
   workflowDialog: WorkflowDialogRuntime;
 };
 
-/** buildHomeServices 的 views 入参 */
+/** Đầu vào views của buildHomeServices. */
 export type HomeServicesViews = {
   textStore: {
     store: AppStore;
@@ -449,7 +451,7 @@ export type HomeServicesViews = {
   workflowDialog: WorkflowDialogRuntime;
 };
 
-/** buildHomeServices 的 domains 入参 */
+/** Đầu vào domains của buildHomeServices. */
 export type HomeServicesDomains = {
   credentials: {
     browserCredentialsFeature: BrowserCredentialsFeature;
@@ -477,7 +479,15 @@ export type HomeServicesDomains = {
   };
   library: {
     recentJobsViewPort: RecentJobsReactViewPort;
-    recentJobsStatePort: { store: AppStore };
+    recentJobsStatePort: {
+      store: AppStore;
+      getSnapshot: () => {
+        items?: Array<{
+          job_id?: unknown;
+          active_job_id?: unknown;
+        }>;
+      };
+    };
     recentJobActions: RecentJobActions;
     libraryController: LibraryController;
     bookDetailStore: DialogStore<LibraryCardItem | null>;

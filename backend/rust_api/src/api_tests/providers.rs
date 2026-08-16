@@ -37,11 +37,11 @@ async fn list_ocr_providers_returns_public_contract() {
     assert_eq!(paddle["options"]["paddle_model"]["type"], "string");
     assert_eq!(
         paddle["options"]["paddle_model"]["default"],
-        "PaddleOCR-VL-1.6"
+        "PaddleOCR-VL-1.5"
     );
     assert_eq!(
         paddle["options"]["paddle_model"]["aliases"]["paddleocr-vl"],
-        "PaddleOCR-VL-1.6"
+        "PaddleOCR-VL-1.5"
     );
     assert_eq!(local["provider_kind"], "local_command");
     assert!(local["credential"].is_null());

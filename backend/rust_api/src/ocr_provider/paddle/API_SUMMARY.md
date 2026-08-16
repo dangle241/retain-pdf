@@ -140,7 +140,7 @@ Python 读取口：
 
 当前默认模型名：
 
-- `PaddleOCR-VL-1.6`
+- `PaddleOCR-VL-1.5`
 
 默认值来自共享配置：
 

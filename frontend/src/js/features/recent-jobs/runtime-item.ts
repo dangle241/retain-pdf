@@ -37,7 +37,7 @@ export interface RuntimeStatus {
   [key: string]: unknown;
 }
 
-/** 图书馆 / recent-jobs 卡片条目(运行时合并态) */
+/** Mục thẻ thư viện / recent-jobs (trạng thái hợp nhất lúc chạy). */
 export interface LibraryJobItem {
   job_id?: string;
   id?: string;
@@ -121,13 +121,13 @@ function valueOrPrevious<T>(value: T | null | undefined | "", previousValue: T):
   return value === undefined || value === null || value === "" ? previousValue : value;
 }
 
-/** 是否像「用 job_id / mock 名冒充书名」的脏 title */
+/** Tiêu đề bẩn có giống kiểu "dùng job_id / tên mock giả làm tên sách" hay không. */
 function isPlaceholderBookTitle(title: string, jobId: string) {
   const t = `${title || ""}`.trim();
   const id = `${jobId || ""}`.trim();
   if (!t) return true;
   if (id && (t === id || t === `${id}.pdf`)) return true;
-  if (/^Mock(\s|重试|-|_)/i.test(t)) return true;
+  if (/^Mock(\s|\u91cd\u8bd5|-|_)/i.test(t)) return true;
   if (/^mock-/i.test(t)) return true;
   return false;
 }
@@ -278,7 +278,7 @@ export function mergeLibraryJobItem(
   const summarizedDetail = stageSnapshot.detail;
   const stageDetail = isBackgroundPatch
     ? firstNonEmpty(previousItem.stage_detail, job.stage_detail)
-    : summarizedDetail && summarizedDetail !== "等待任务开始"
+    : summarizedDetail && summarizedDetail !== "Đang chờ tác vụ bắt đầu"
     ? summarizedDetail
     : previousItem.stage_detail;
   const previousProgress = previousItem.progress && typeof previousItem.progress === "object"
@@ -317,7 +317,7 @@ export function mergeLibraryJobItem(
     ...previousItem,
     job_id: jobId,
     id: previousItem.id || jobId,
-    // 文档中心化：创建/补丁必须保留 document_id，否则详情 live 合并对不上馆藏行
+    // Tài liệu trung tâm: create/patch phải giữ document_id, nếu không hợp nhất live ở chi tiết sẽ không khớp dòng thư viện.
     document_id: firstNonEmpty(job.document_id, previousItem.document_id),
     active_job_id: firstNonEmpty(job.active_job_id, previousItem.active_job_id, jobId),
     library_only: nextLibraryOnly,
@@ -353,8 +353,8 @@ export function mergeLibraryJobItem(
     stage_detail: stageDetail,
     workflow: firstNonEmpty(job.workflow, job.job_type, previousItem.workflow),
     job_type: firstNonEmpty(job.job_type, job.workflow, previousItem.job_type),
-    // 书目元数据：轮询/重试补丁若带 job_id 或 "Mock 重试…" 当标题，不盖真书名；
-    // 真·改名补丁（title 与 job_id 不同）仍可更新。
+    // Siêu dữ liệu sách: nếu bản vá poll/thử lại dùng job_id hoặc "Mock thử lại…" làm tiêu đề thì không ghi đè tên sách thật;
+    // bản vá đổi tên thật (title khác job_id) vẫn được cập nhật.
     title: pickBookTitle(previousItem, job, jobId),
     display_name: pickBookDisplayName(previousItem, job, jobId),
     source_file_name: firstNonEmpty(
@@ -391,7 +391,7 @@ export function createLibraryJobItemFromRuntime(
     page_count: null,
     status: "queued",
     stage: "queued",
-    stage_detail: "任务已提交",
+    stage_detail: "Đã gửi tác vụ",
     progress: {},
     created_at: job.created_at || new Date().toISOString(),
     updated_at: job.updated_at || new Date().toISOString(),
@@ -404,7 +404,7 @@ export function mergeRuntimePatches(
   { stageAdapterPort = {} }: RuntimeItemOptions = {},
 ): LibraryJobItem[] {
   const list = Array.isArray(items) ? items : [];
-  // 按 job_id 索引；另建 document_id → 最新 patch（重试换 id 时用）
+  // Lập chỉ mục theo job_id; tạo thêm document_id → bản vá mới nhất để dùng khi thử lại đổi id.
   const patchByDocumentId = new Map<string, LibraryJobItem>();
   for (const patch of patches.values()) {
     const docId = firstNonEmpty(patch?.document_id);
@@ -422,7 +422,7 @@ export function mergeRuntimePatches(
     if (!patch) {
       return item;
     }
-    // 用 patch 的 job_id 覆盖（重试后书架仍是原位原书）
+    // Ghi đè bằng job_id của patch (sau khi thử lại, sách vẫn ở vị trí cũ trên giá).
     return mergeLibraryJobItem(item, {
       ...patch,
       job_id: firstNonEmpty(patch.job_id, item.job_id),

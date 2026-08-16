@@ -1,7 +1,7 @@
-// 主页「收藏」tab：跨书摘录/笔记列表。
+// Tab "Đã lưu" trang chính: danh sách trích đoạn/ghi chú xuyên sách.
 //
-// 与「合集」区分：合集 = 文档分组；收藏 = 阅读器里标的句子/图表/笔记。
-// 首版：拉全量 favorites → 空态 / 列表；点一项带锚点打开阅读器。
+// Phân biệt với "Bộ sưu tập": bộ sưu tập = nhóm tài liệu; đã lưu = câu/biểu đồ/ghi chú được đánh dấu trong trình đọc.
+// Bản đầu: lấy toàn bộ favorites → trạng thái trống/danh sách; bấm mục để mở trình đọc với điểm neo.
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -28,16 +28,16 @@ type FavoriteItem = {
 
 function kindLabel(kind: string) {
   const k = `${kind || ""}`.trim();
-  if (k === "figure") return "图表";
-  if (k === "data") return "数据";
-  if (k === "sentence") return "摘录";
-  return k || "摘录";
+  if (k === "figure") return "Biểu đồ";
+  if (k === "data") return "Dữ liệu";
+  if (k === "sentence") return "Trích đoạn";
+  return k || "Trích đoạn";
 }
 
 function formatPage(pageIdx: unknown) {
   const n = Number(pageIdx);
   if (!Number.isFinite(n) || n < 0) return "";
-  return `第 ${n + 1} 页`;
+  return `Trang ${n + 1}`;
 }
 
 function openFavoriteInReader(item: FavoriteItem): boolean {
@@ -77,7 +77,7 @@ export function FavoritesView() {
         setItems(list);
       })
       .catch((err: { message?: string }) => {
-        setError(err?.message || "读取收藏失败，请稍后重试。");
+        setError(err?.message || "Không thể tải mục đã lưu, vui lòng thử lại sau.");
         setItems([]);
       })
       .finally(() => setLoading(false));
@@ -88,19 +88,19 @@ export function FavoritesView() {
   }, [reload]);
 
   return (
-    <section id="favorites-view" className="library-view favorites-view" aria-label="收藏">
+    <section id="favorites-view" className="library-view favorites-view" aria-label="Đã lưu">
       <div className="favorites-head">
-        <h2 className="favorites-title">我的收藏</h2>
-        <p className="favorites-subtitle">阅读时选中文字即可收藏，在这里统一回看</p>
+        <h2 className="favorites-title">Mục đã lưu của tôi</h2>
+        <p className="favorites-subtitle">Chọn văn bản khi đọc để lưu và xem lại tập trung tại đây</p>
       </div>
 
       {loading ? (
-        <div className="events-empty" id="favorites-loading">正在加载收藏…</div>
+        <div className="events-empty" id="favorites-loading">Đang tải mục đã lưu…</div>
       ) : error ? (
         <div className="events-empty" id="favorites-error" role="alert">
           <p>{error}</p>
           <button type="button" className="app-button favorites-retry-btn" onClick={() => reload()}>
-            重试
+            Thử lại
           </button>
         </div>
       ) : items.length === 0 ? (
@@ -108,15 +108,15 @@ export function FavoritesView() {
           id="favorites-empty"
           className="favorites-empty"
           instrument="flask"
-          title="还没有收藏"
-          hint="打开一本书，选中段落或图表后点「收藏」，之后就能在这里快速跳回原文。"
+          title="Chưa có mục đã lưu"
+          hint="Mở một cuốn sách, chọn đoạn văn hoặc biểu đồ rồi bấm “Lưu”; sau đó bạn có thể nhanh chóng quay lại nguyên văn tại đây."
         >
           <button
             type="button"
             className="app-button empty-state-action"
             onClick={() => services.workflowDialog.requestOpenUpload()}
           >
-            上传 PDF
+            Tải PDF lên
           </button>
         </EmptyState>
       ) : (
@@ -135,7 +135,7 @@ export function FavoritesView() {
                   data-favorite-id={id}
                   onClick={() => {
                     if (!openFavoriteInReader(item)) {
-                      toast.error("无法打开：缺少关联书籍信息");
+                      toast.error("Không thể mở: thiếu thông tin sách liên quan");
                     }
                   }}
                 >
@@ -143,7 +143,7 @@ export function FavoritesView() {
                     <span className="favorites-card-kind">{kind}</span>
                     {page ? <span className="favorites-card-page">{page}</span> : null}
                   </div>
-                  <p className="favorites-card-quote">{quote || "（无摘录文本）"}</p>
+                  <p className="favorites-card-quote">{quote || "(Không có văn bản trích đoạn)"}</p>
                   {note ? <p className="favorites-card-note">{note}</p> : null}
                 </button>
               </li>

@@ -1,11 +1,11 @@
-// assistant-ui 分支树本地快照：按 job 存全量 parentId 树 + headId。
-// 与 conversation-store（Rust conversation_id 粘性）互补；不进服务端。
+// Snapshot cục bộ cây nhánh assistant-ui: lưu toàn bộ cây parentId + headId theo job.
+// Bổ sung cho conversation-store (liên kết Rust conversation_id); không gửi tới máy chủ.
 
 import { loadStoredConversationId } from "./conversation-store.js";
 
 const STORAGE_PREFIX = "retainpdf.reader.ai.thread-branch.v1:";
 
-/** 与 answer-enhance / runtime 中的引用形状兼容；此处用宽松结构避免循环依赖。 */
+/** Tương thích hình dạng trích dẫn trong answer-enhance/runtime; dùng cấu trúc linh hoạt để tránh phụ thuộc vòng. */
 export type ThreadBranchCitation = {
   ref?: number | string;
   block_id?: string;
@@ -38,7 +38,7 @@ export type ThreadBranchSnapshot = {
   version: 1;
   headId: string | null;
   items: ThreadBranchItem[];
-  /** 快照归属的会话 id（防串会话印章，审计 P2-10）；旧快照无此字段 */
+  /** id hội thoại sở hữu snapshot (dấu chống lẫn hội thoại, kiểm toán P2-10); snapshot cũ không có trường này. */
   conversationId?: string;
 };
 
@@ -84,7 +84,7 @@ function normalizeMessage(raw: unknown): ThreadBranchMessage | null {
     ? (raw.citations as ThreadBranchCitation[])
     : undefined;
   const progress = typeof raw.progress === "string" ? raw.progress : undefined;
-  // 不恢复 running：刷新后不应卡在「生成中」
+  // Không khôi phục running: sau tải lại không được kẹt ở "Đang tạo".
   let status = normalizeStatus(raw.status);
   if (status?.type === "running") {
     status = { type: "incomplete", reason: "cancelled" };
@@ -133,10 +133,10 @@ export function loadThreadBranchSnapshot(
   try {
     const raw = store.getItem(threadBranchStorageKey(jobId, conversationId));
     if (!raw && conversationId) {
-      // 兼容旧 key（仅 job）——但要防串会话（审计 P2-10）：
-      // 1. 带 conversationId 印章的快照，归属不符直接拒绝；
-      // 2. 无印章的真旧快照，只在"请求的正是本 job 的粘性会话"时才接受
-      //    （旧快照写入时代唯一可能代表的就是它）。
+      // Tương thích key cũ chỉ có job nhưng phải chống lẫn hội thoại (kiểm toán P2-10):
+      // 1. Snapshot có dấu conversationId sẽ bị từ chối nếu không đúng chủ sở hữu;
+      // 2. Snapshot cũ thật không có dấu chỉ được chấp nhận khi "yêu cầu đúng hội thoại liên kết của job này"
+      //    (đó là thứ duy nhất snapshot cũ có thể đại diện khi được ghi).
       const legacy = store.getItem(threadBranchStorageKey(jobId));
       if (!legacy) return null;
       const snapshot = normalizeSnapshot(JSON.parse(legacy));
@@ -193,7 +193,7 @@ export function clearThreadBranchSnapshot(
   try {
     store.removeItem(threadBranchStorageKey(jobId, conversationId));
     if (!conversationId) {
-      // 清 job 级旧 key
+      // Xóa key cũ cấp job.
       store.removeItem(threadBranchStorageKey(jobId));
     }
   } catch {
@@ -201,7 +201,7 @@ export function clearThreadBranchSnapshot(
   }
 }
 
-/** 可见路径：从 head 沿 parent 链回溯（parent 须先于 child 出现在 items 中）。 */
+/** Đường nhìn thấy: lần ngược từ head theo chuỗi parent (parent phải xuất hiện trước child trong items). */
 export function visiblePathFromSnapshot(
   snapshot: ThreadBranchSnapshot,
 ): ThreadBranchMessage[] {

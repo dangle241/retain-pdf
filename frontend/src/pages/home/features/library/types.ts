@@ -1,5 +1,5 @@
-// library 域共享类型：网格卡片 item、controller 契约、viewPort / viewStore。
-// 字段从 shapeDocumentCardItem / mergeLibraryJobItem / cardSignatureOf 反推。
+// Kiểu dùng chung miền library: mục thẻ lưới, hợp đồng controller, viewPort / viewStore.
+// Trường được suy ngược từ shapeDocumentCardItem / mergeLibraryJobItem / cardSignatureOf.
 
 import type { DialogStore } from "../../state/dialog-store.js";
 import type {
@@ -7,9 +7,9 @@ import type {
   StoreChangeMeta,
 } from "../../composition/external.js";
 
-// ─── 进度 / 运行时 ───────────────────────────────────────────────
+// ─── Tiến độ / runtime ────────────────────────────────────────────
 
-/** job 进度条（top-level progress 或 runtime_status.progress） */
+/** Thanh tiến độ job (progress cấp trên hoặc runtime_status.progress). */
 export type LibraryProgress = {
   current?: number | null;
   total?: number | null;
@@ -18,7 +18,7 @@ export type LibraryProgress = {
   [key: string]: unknown;
 };
 
-/** 运行时状态快照（轮询 / stage adapter 写入） */
+/** Snapshot trạng thái runtime, do poll / stage adapter ghi. */
 export type LibraryRuntimeStatus = {
   stageKey?: string;
   publicStage?: string;
@@ -30,7 +30,7 @@ export type LibraryRuntimeStatus = {
   [key: string]: unknown;
 };
 
-/** background lane 合并时附带的阶段片段 */
+/** Đoạn giai đoạn đi kèm khi hợp nhất background lane. */
 export type LibraryBackgroundStage = {
   display_stage?: string;
   stage?: string;
@@ -41,7 +41,7 @@ export type LibraryBackgroundStage = {
   [key: string]: unknown;
 };
 
-/** book 载荷上的摘要（merge 时回填 source_file_name / page_count） */
+/** Tóm tắt trên payload book, điền source_file_name / page_count khi merge. */
 export type LibraryBookSummary = {
   source_file_name?: string;
   page_count?: number | null;
@@ -49,26 +49,26 @@ export type LibraryBookSummary = {
   [key: string]: unknown;
 };
 
-// ─── 网格卡片 item ───────────────────────────────────────────────
+// ─── Mục thẻ lưới ─────────────────────────────────────────────────
 
 /**
- * 书架网格/列表/详情共用的卡片投影。
- * - 已翻译：真实 job_id + library/books 活态
- * - 馆藏：library_only + 合成 job_id `doc:<document_id>`
+ * Projection thẻ dùng chung cho lưới/danh sách/chi tiết giá sách.
+ * - Đã dịch: job_id thật + trạng thái sống library/books.
+ * - Thư viện: library_only + job_id tổng hợp `doc:<document_id>`.
  *
- * 扩展字段经 index signature 放行；已知字段尽量列全，避免 any。
+ * Trường mở rộng được phép qua index signature; liệt kê đầy đủ trường đã biết để tránh any.
  */
 export type LibraryCardItem = {
-  // 身份
+  // Định danh.
   job_id?: string;
   id?: string;
   document_id?: string;
   active_job_id?: string;
   library_only?: boolean;
-  /** 打开详情时优先落在「翻译」Tab（进度在 Tab 内，不弹工作流窗） */
+  /** Khi mở chi tiết, ưu tiên tab "Dịch"; tiến độ trong tab, không bật cửa sổ workflow. */
   prefer_translate_tab?: boolean;
 
-  // 展示
+  // Hiển thị.
   title?: string;
   display_name?: string;
   source_file_name?: string;
@@ -80,13 +80,13 @@ export type LibraryCardItem = {
   added_at?: string;
   last_opened_at?: string | null;
 
-  // 文档元数据
+  // Siêu dữ liệu tài liệu.
   reading_status?: string;
   tags?: string[];
   source_pdf_url?: string;
   bytes?: number | null;
 
-  // job 状态 / stage
+  // Trạng thái / stage của job.
   status?: string;
   stage?: string;
   display_stage?: string;
@@ -101,17 +101,17 @@ export type LibraryCardItem = {
   workflow?: string;
   job_type?: string;
 
-  // runtime merge / API 可能附带额外字段
+  // Runtime merge / API có thể kèm trường bổ sung.
   [key: string]: unknown;
 };
 
-/** job 中心命名别名（与 LibraryCardItem 同一形状） */
+/** Bí danh đặt tên theo job, cùng hình dạng với LibraryCardItem. */
 export type LibraryJobItem = LibraryCardItem;
 
-/** 历史命名别名（recent-jobs 引擎侧） */
+/** Bí danh tên cũ ở phía engine recent-jobs. */
 export type RecentJobItem = LibraryCardItem;
 
-// ─── 卡片操作 / 徽标 ─────────────────────────────────────────────
+// ─── Thao tác thẻ / huy hiệu ───────────────────────────────────────
 
 export type BookCardAction = {
   id: string;
@@ -134,7 +134,7 @@ export type LibraryCardBadge = {
   cls: string;
 };
 
-// ─── 文档 API payload ────────────────────────────────────────────
+// ─── Payload API tài liệu ─────────────────────────────────────────
 
 export type TranslateDocumentPayload = {
   ocr?: {
@@ -149,7 +149,7 @@ export type TranslateDocumentPayload = {
   [key: string]: unknown;
 };
 
-/** POST /documents/:id/translate 返回（JobSubmissionView） */
+/** Giá trị trả về từ POST /documents/:id/translate (JobSubmissionView). */
 export type JobSubmissionView = {
   job_id?: string;
   id?: string;
@@ -193,10 +193,10 @@ export type LibraryEventPort = {
   publishJobUpdated?: (job?: LibraryCardItem | Record<string, unknown> | null) => void;
 };
 
-/** 乐观删卡：从网格 store 按 document_id 过滤（可选注入） */
+/** Xóa thẻ lạc quan: lọc grid store theo document_id (có thể inject). */
 export type RemoveLibraryDocumentsFn = (documentIds: string[]) => void;
 
-/** 乐观改卡：按 document_id 合并字段 */
+/** Cập nhật thẻ lạc quan: hợp nhất trường theo document_id. */
 export type PatchLibraryDocumentItemFn = (
   documentId: string,
   patch: Partial<LibraryCardItem>,
@@ -206,9 +206,9 @@ export type LibraryControllerDeps = {
   documentRef?: Pick<Document, "dispatchEvent"> | null;
   libraryEventPort?: LibraryEventPort | null;
   reloadRecentJobs?: (opts?: ReloadRecentJobsOptions) => void | Promise<void>;
-  /** 乐观移除网格行；缺省则只靠 silent reload */
+  /** Xóa hàng lưới lạc quan; nếu bỏ qua thì chỉ dựa vào silent reload. */
   removeLibraryDocuments?: RemoveLibraryDocumentsFn | null;
-  /** 乐观更新网格行元数据 */
+  /** Cập nhật lạc quan siêu dữ liệu của hàng lưới. */
   patchLibraryDocumentItem?: PatchLibraryDocumentItemFn | null;
   deleteJob?: (jobId: string) => void | Promise<void>;
   buildTranslateConfig?: (
@@ -236,8 +236,8 @@ export type LibraryController = {
   deleteCard: (target?: DeleteCardTarget) => void;
   openBookDetail: (item?: LibraryCardItem | null) => void;
   /**
-   * 网格选中任务：有 document_id → 详情翻译 Tab + silent 进度；
-   * 否则 fallbackSelectJob（旧工作流弹窗）。
+   * Chọn tác vụ từ lưới: có document_id → tab Dịch trong chi tiết + tiến độ nền;
+   * nếu không thì fallbackSelectJob (hộp thoại workflow cũ).
    */
   selectJobForDetail: (
     jobId?: string | null,
@@ -250,7 +250,7 @@ export type LibraryController = {
     documentId?: string | null,
     payload?: UpdateDocumentPayload,
   ) => Promise<unknown>;
-  /** 详情内嵌进度：静默 startPolling，不弹工作流、不亮主状态区 */
+  /** Tiến độ nhúng trong chi tiết: startPolling âm thầm, không mở workflow và không làm sáng vùng trạng thái chính. */
   attachJobProgress: (jobId?: string | null) => void;
 };
 
@@ -312,5 +312,5 @@ export type RecentJobsReactViewPort = {
   setLoadMoreLoading: () => void;
 };
 
-// 再导出 StoreChangeMeta 供订阅方如需标注 meta 使用
+// Xuất thêm StoreChangeMeta để bên đăng ký có thể gắn meta khi cần.
 export type { StoreChangeMeta };

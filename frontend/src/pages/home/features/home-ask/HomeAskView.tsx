@@ -1,11 +1,11 @@
-// 主页 AI 问答：Notion 式 —— 左历史侧栏（可折叠）+ 中空态居中 / 对话流
+// Hỏi đáp AI trang chính kiểu Notion: thanh lịch sử trái có thể thu gọn + trạng thái trống giữa / luồng trò chuyện.
 
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import {
   CREDENTIALS_CHANGED_EVENT,
   hasModelApiKey,
-} from "../../../../js/reader/ai/config.js";
+} from "../../composition/external.js";
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
 import { useHomeServices } from "../../home-services-context.js";
 import { HomeAskComposer } from "./HomeAskComposer.js";
@@ -50,7 +50,7 @@ export function HomeAskView() {
   } = useHomeAskRuntime();
   const [scopes, setScopes] = useState<HomeAskScope[]>([]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(loadSidebarCollapsed);
-  // 凭据保存后立刻重算门禁：订阅 credentials store + 自定义事件
+  // Tính lại cổng ngay sau khi lưu xác thực: đăng ký credentials store + sự kiện tùy chỉnh.
   const [credTick, setCredTick] = useState(0);
   const credentialsSnap = useStoreSnapshot(services.ports.credentialsStatePort.store);
   const empty = messages.length === 0;
@@ -84,7 +84,7 @@ export function HomeAskView() {
         empty ? "is-empty" : "is-chat",
         sidebarCollapsed ? "is-sidebar-collapsed" : "",
       ].filter(Boolean).join(" ")}
-      aria-label="AI 问答"
+      aria-label="Hỏi đáp AI"
       data-home-ask=""
     >
       <HomeAskSidebar
@@ -110,7 +110,7 @@ export function HomeAskView() {
             <div className="home-ask-empty-mascot" aria-hidden>
               <Sparkles size={22} strokeWidth={1.85} />
             </div>
-            <h2 className="home-ask-empty-title">随时待命，有什么可以帮你？</h2>
+            <h2 className="home-ask-empty-title">Tôi luôn sẵn sàng. Tôi có thể giúp gì cho bạn?</h2>
             <HomeAskComposer
               isRunning={isRunning}
               missingLlmKey={missingLlmKey}
@@ -122,7 +122,7 @@ export function HomeAskView() {
               onStop={stop}
               variant="hero"
             />
-            <div className="home-ask-suggestions" role="group" aria-label="推荐问题">
+            <div className="home-ask-suggestions" role="group" aria-label="Câu hỏi gợi ý">
               {HOME_ASK_SUGGESTIONS.map((item) => {
                 const Icon = item.icon;
                 return (

@@ -1,14 +1,14 @@
-// CredentialsWorkbench：凭据表单主体（API/任务选项双 tab + 面板 + 保存行），
-// 从 CredentialsDialog 抽出的双宿主组件：
-//   1. SettingsHubDialog 的 API 区内嵌（常规入口，无二层弹窗）
-//   2. CredentialsDialog（仅剩首次配置门 setupMode 一个场景）
-// 两个宿主互斥挂载（设置是模态、门弹窗只从上传引导触发），BROWSER_IDS 的
-// DOM id 不会同屏重复。状态/保存/校验全部走 useCredentialsController 的
-// 单例 store——宿主只是壳。
+// CredentialsWorkbench: thân biểu mẫu xác thực (hai tab API/tùy chọn tác vụ + bảng + hàng lưu),
+// thành phần hai host tách từ CredentialsDialog:
+//   1. Nhúng trong vùng API của SettingsHubDialog (entry thông thường, không có hộp thoại tầng hai)
+//   2. CredentialsDialog (chỉ còn tình huống cổng cấu hình đầu tiên setupMode)
+// Hai host gắn loại trừ nhau (cài đặt là modal, hộp thoại cổng chỉ được kích hoạt từ hướng dẫn tải lên), nên
+// DOM id của BROWSER_IDS không trùng trên cùng màn hình. Trạng thái/lưu/kiểm tra đều dùng
+// singleton store của useCredentialsController; host chỉ là vỏ.
 //
-// TaskOptionsPanel 常驻挂载（不随 tab 卸载）的约束沿用 CredentialsDialog
-// 头注释结论：其字段 ref 在保存时被统一读取，卸载会复现"切到 API 面板点
-// 保存，任务选项静默丢失"。
+// Ràng buộc TaskOptionsPanel luôn gắn, không gỡ theo tab, tiếp tục theo kết luận trong chú thích đầu
+// CredentialsDialog: ref trường được đọc thống nhất khi lưu; gỡ sẽ tái hiện lỗi "chuyển sang bảng API rồi bấm
+// Lưu, tùy chọn tác vụ âm thầm mất".
 
 import { Tabs as TabsPrimitive } from "radix-ui";
 import { CREDENTIAL_DOM_IDS } from "./credentials-dom-ids.js";
@@ -18,14 +18,14 @@ import { DeepSeekPanel } from "./DeepSeekPanel.jsx";
 import { TaskOptionsPanel } from "./TaskOptionsPanel.jsx";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size 在未注解源文件里被推断为必填;unstyled 路径运行时不用 size。
+// Button.size bị suy ra là bắt buộc trong tệp nguồn chưa chú kiểu; luồng unstyled không dùng size ở runtime.
 const Button = ButtonBase as any;
 
 const { browser: BROWSER_IDS } = CREDENTIAL_DOM_IDS;
 
 const TABS = [
-  { id: "api", label: "API 设置" },
-  { id: "task", label: "任务选项" },
+  { id: "api", label: "Cài đặt API" },
+  { id: "task", label: "Tùy chọn tác vụ" },
 ];
 
 export function CredentialsWorkbench() {
@@ -52,7 +52,7 @@ export function CredentialsWorkbench() {
         <TabsPrimitive.List
           id={BROWSER_IDS.tabs}
           className={`developer-tabs credential-tabs${setupMode ? " hidden" : ""}`}
-          aria-label="接口设置"
+          aria-label="Cài đặt API"
         >
           {TABS.map((tab) => (
             <TabsPrimitive.Trigger
@@ -84,8 +84,8 @@ export function CredentialsWorkbench() {
               <DeepSeekPanel />
             </div>
           </TabsPrimitive.Content>
-          {/* 不套 TabsPrimitive.Content 的理由见 CredentialsDialog 原注释：
-              TaskOptionsPanel 自带 role=tabpanel，再包一层语义重复 */}
+          {/* Lý do không bọc TabsPrimitive.Content nằm trong chú thích gốc của CredentialsDialog:
+              TaskOptionsPanel đã có role=tabpanel, bọc thêm sẽ lặp ngữ nghĩa. */}
           <TaskOptionsPanel hidden={activeTab !== "task"} />
         </div>
         <div className="actions credential-dialog-actions">
@@ -95,7 +95,7 @@ export function CredentialsWorkbench() {
             className="app-button"
             onClick={() => handlers?.save?.()}
           >
-            {setupMode ? "保存并启动" : "保存"}
+            {setupMode ? "Lưu và khởi động" : "Lưu"}
           </Button>
         </div>
       </div>

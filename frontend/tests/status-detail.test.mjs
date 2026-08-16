@@ -98,7 +98,7 @@ test("status detail snapshot runtime stage follows public presentation", () => {
   }, { items: [] });
 
   assert.equal(/render|prewarm|渲染/.test(snapshot.runtime.currentStage), false);
-  assert.match(snapshot.runtime.currentStage, /translation|翻译|第 30\/100 批/);
+  assert.match(snapshot.runtime.currentStage, /translation|Đang dịch|Đợt 30\/100/);
 });
 
 test("status detail snapshot runtime stage follows normalized stage snapshot", () => {
@@ -116,7 +116,7 @@ test("status detail snapshot runtime stage follows normalized stage snapshot", (
       source: "public-stage",
       lane: "main",
       substage: "translation_batches",
-      detail: "正在翻译正文内容",
+      detail: "Đang dịch nội dung chính",
       progress: {
         current: 30,
         total: 100,
@@ -127,7 +127,7 @@ test("status detail snapshot runtime stage follows normalized stage snapshot", (
   }, { items: [] });
 
   assert.equal(/render|prewarm|渲染/.test(snapshot.runtime.currentStage), false);
-  assert.match(snapshot.runtime.currentStage, /翻译|第 30\/100 批/);
+  assert.match(snapshot.runtime.currentStage, /Đang dịch|Đợt 30\/100/);
 });
 
 test("status detail snapshot does not use legacy user_stage as runtime public stage", () => {
@@ -152,8 +152,8 @@ test("stage history display prefers public stage over raw internal stage", () =>
   };
   const display = stageHistoryDisplay(entry);
 
-  assert.equal(display.title, "翻译准备 / 跨栏跨页判断");
-  assert.equal(display.stage, "翻译准备 / 跨栏跨页判断");
+  assert.equal(display.title, "Chuẩn bị dịch / Kiểm tra qua cột và trang");
+  assert.equal(display.stage, "Chuẩn bị dịch / Kiểm tra qua cột và trang");
   assert.equal(/render|prewarm|渲染/.test(`${display.title} ${display.stage}`), false);
 
   const presentation = buildStageHistoryPresentation({
@@ -169,8 +169,21 @@ test("stage history display prefers public stage over raw internal stage", () =>
   });
 
   assert.equal(presentation.hasItems, true);
-  assert.match(presentation.markup, /翻译准备/);
+  assert.match(presentation.markup, /Chuẩn bị dịch/);
   assert.equal(/render_preprocess|prewarm/.test(presentation.markup), false);
+});
+
+test("stage history localizes legacy Chinese details", () => {
+  assert.deepEqual(
+    stageHistoryDisplay({
+      stage: "queued",
+      stage_detail: "任务排队中，等待可用执行槽位",
+    }),
+    {
+      title: "Tác vụ đang chờ lượt xử lý",
+      stage: "Tải PDF lên",
+    },
+  );
 });
 
 test("stage history presentation accepts backend runtime stage history payload", () => {
@@ -189,8 +202,8 @@ test("stage history presentation accepts backend runtime stage history payload",
   });
 
   assert.equal(presentation.hasItems, true);
-  assert.equal(presentation.emptyText, "暂无阶段记录");
-  assert.match(presentation.markup, /翻译准备/);
+  assert.equal(presentation.emptyText, "Chưa có bản ghi giai đoạn");
+  assert.match(presentation.markup, /Chuẩn bị dịch/);
   assert.equal(/后端未返回 runtime\.stage_history|render_preprocess/.test(presentation.markup), false);
 });
 
@@ -217,13 +230,13 @@ test("job detail config port owns reader detail urls and share note", () => {
   assert.equal(port.buildReaderPageUrl(""), "");
   assert.equal(port.buildDetailPageUrl("job-456"), "app://./detail.html?job_id=job-456");
   assert.equal(port.buildDetailPageUrl(""), "");
-  assert.equal(port.detailShareNote(), "当前为 mock 明细页，可直接分享当前链接。");
+  assert.equal(port.detailShareNote(), "Đây là trang chi tiết mô phỏng; có thể chia sẻ trực tiếp liên kết hiện tại.");
 
   const normalPort = createJobDetailConfigPort({
     buildPageUrl: () => "",
     isMock: () => false,
   });
-  assert.equal(normalPort.detailShareNote(), "当前详情页可直接通过 URL 分享给其他人。");
+  assert.equal(normalPort.detailShareNote(), "Có thể chia sẻ trực tiếp trang chi tiết hiện tại với người khác bằng URL.");
 });
 
 test("job detail data port owns overview markdown and action API calls", async () => {
@@ -362,22 +375,22 @@ test("job detail summary renderer owns runtime and failure text fields", () => {
   });
   renderJobDetailFailureSummary({ job, setText });
 
-  assert.equal(fields["detail-status-summary"], "任务已失败，请检查报错提示后重试。");
+  assert.equal(fields["detail-status-summary"], "Tác vụ thất bại; vui lòng kiểm tra thông báo lỗi rồi thử lại.");
   assert.equal(fields["detail-stage-detail"], "翻译失败");
   assert.equal(fields["detail-runtime-current-stage"], "翻译");
   assert.equal(fields["detail-runtime-stage-elapsed"], "1分钟");
   assert.equal(fields["detail-runtime-total-elapsed"], "2分钟");
   assert.equal(fields["detail-runtime-retry-count"], "2");
   assert.equal(fields["detail-runtime-terminal-reason"], "provider_error");
-  assert.equal(fields["detail-runtime-math-mode"], "placeholder - 公式占位保护");
+  assert.equal(fields["detail-runtime-math-mode"], "placeholder - bảo vệ chỗ giữ chỗ của công thức");
   assert.equal(fields["detail-failure-summary"], "翻译失败");
   assert.equal(fields["detail-failure-category"], "translation");
   assert.equal(fields["detail-failure-stage"], "translation");
   assert.equal(fields["detail-failure-root-cause"], "rate limit");
   assert.equal(fields["detail-failure-suggestion"], "retry later");
   assert.equal(fields["detail-failure-last-log-line"], "last line");
-  assert.equal(fields["detail-failure-retryable"], "是");
-  assert.equal(summarizeMathMode({ request_payload_math_mode: "direct_typst" }), "direct_typst - 模型直出公式");
+  assert.equal(fields["detail-failure-retryable"], "Có");
+  assert.equal(summarizeMathMode({ request_payload_math_mode: "direct_typst" }), "direct_typst - mô hình xuất công thức Typst trực tiếp");
 });
 
 test("job detail action links own reader and pdf readiness rules", () => {
@@ -458,7 +471,7 @@ test("job detail markdown flow owns loading state and status fallbacks", async (
     });
 
     assert.equal(state.markdownPayload, markdownPayload);
-    assert.equal(fields["detail-markdown-status"], "已加载 /markdown JSON · book.md");
+    assert.equal(fields["detail-markdown-status"], "Đã tải JSON /markdown · book.md");
     assert.equal(fields["detail-markdown-image-count"], "0");
     assert.equal(fields["detail-markdown-preview"], "# ok");
     assert.equal(links["detail-markdown-raw-btn"].enabled, true);
@@ -529,8 +542,8 @@ test("job detail overview renderer owns state updates and rerun status", () => {
   assert.equal(state.resumePlan.can_resume, true);
   assert.match(state.rerunActionUrl, /\/rerun\/job-overview$/);
   assert.equal(rerunButton.disabled, false);
-  assert.equal(fields["detail-rerun-status"], "可从 translation 恢复");
-  assert.equal(fields.eventsStatus, "尚未加载");
+  assert.equal(fields["detail-rerun-status"], "Có thể tiếp tục từ translation");
+  assert.equal(fields.eventsStatus, "Chưa tải");
   assert.equal(links["detail-reader-btn"].enabled, false);
 });
 
@@ -688,13 +701,13 @@ test("status detail resume actions route UI side effects through view port", asy
 
   assert.match(actionUrl, /\/api\/v1\/jobs\/job-resume-action\/rerun$/);
   assert.deepEqual(calls, [
-    ["action", true, "可从 translation 恢复"],
-    ["action", true, "正在提交恢复任务..."],
+    ["action", true, "Có thể tiếp tục từ translation"],
+    ["action", true, "Đang gửi tác vụ khôi phục..."],
     ["disabled", true],
     ["rerun", actionUrl],
     ["close"],
   ]);
-  assert.deepEqual(textCalls, [["error-box", "已创建恢复任务 job-resumed-action，开始轮询。"]]);
+  assert.deepEqual(textCalls, [["error-box", "Đã tạo tác vụ khôi phục job-resumed-action, bắt đầu thăm dò trạng thái."]]);
   assert.deepEqual(pollingCalls, ["job-resumed-action"]);
 });
 
@@ -1046,8 +1059,8 @@ test("job detail status view model follows main lane display stage", () => {
   );
 
   assert.equal(snapshot.stageKey, "translate");
-  assert.equal(snapshot.progressText, "第 29/5216 批");
-  assert.match(snapshot.runtimeCurrentStage, /翻译|第 29\/5216 批/);
+  assert.equal(snapshot.progressText, "Đợt 29/5216");
+  assert.match(snapshot.runtimeCurrentStage, /Đang dịch|Đợt 29\/5216/);
 });
 
 test("job detail status view model does not expose legacy stage detail fallback", () => {
@@ -1101,7 +1114,7 @@ test("job detail event view model uses structured progress fields", () => {
   assert.equal(viewModel.displayStage, "translation");
   assert.equal(viewModel.substage, "translation_batches");
   assert.equal(viewModel.lane, "main");
-  assert.equal(viewModel.progressText, "第 4000/5216 批");
+  assert.equal(viewModel.progressText, "Đợt 4000/5216");
   assert.equal(viewModel.progressCurrent, 4000);
   assert.equal(viewModel.progressTotal, 5216);
   assert.equal(viewModel.progressUnit, "batch");
@@ -1119,7 +1132,7 @@ test("job detail event view model does not promote canonical events without disp
   });
 
   assert.equal(viewModel.displayStage, "");
-  assert.equal(viewModel.stageText, "进度 1/3");
+  assert.equal(viewModel.stageText, "Tiến độ 1/3");
   assert.equal(viewModel.lane, "main");
   assert.equal(viewModel.progressCurrent, 1);
   assert.equal(viewModel.progressTotal, 3);
@@ -1139,8 +1152,8 @@ test("normalized event display record prefers structured progress over provider 
   });
 
   assert.equal(record.displayStage, "translation");
-  assert.equal(record.stageText, "第 4000/5216 批");
-  assert.equal(record.progressText, "第 4000/5216 批");
+  assert.equal(record.stageText, "Đợt 4000/5216");
+  assert.equal(record.progressText, "Đợt 4000/5216");
   assert.equal(record.progress.current, 4000);
   assert.equal(record.progress.total, 5216);
 });
@@ -1165,7 +1178,7 @@ test("status detail event presentation uses normalized progress records", () => 
   assert.equal(presentation.count, 1);
   assert.match(presentation.markup, /translation/);
   assert.match(presentation.markup, /translation_batches/);
-  assert.match(presentation.markup, /第 4001\/5216 批/);
+  assert.match(presentation.markup, /Đợt 4001\/5216/);
 });
 
 test("job status view model preserves status card snapshot fields", () => {
@@ -1191,7 +1204,7 @@ test("job status view model preserves status card snapshot fields", () => {
     progressCurrent: 100,
     progressTotal: 100,
     progressPercent: 100,
-    progressText: "已完成",
+    progressText: "Đã hoàn tất",
     progressUnit: "percent",
     progressIndeterminate: false,
     substageKey: "done",
@@ -1221,7 +1234,7 @@ test("job status view model preserves status card snapshot fields", () => {
   assert.deepEqual(snapshot, viewModel);
   assert.equal(viewModel.jobId, "job-status-model");
   assert.equal(viewModel.stageKey, "done");
-  assert.equal(viewModel.progressText, "已完成");
+  assert.equal(viewModel.progressText, "Đã hoàn tất");
   assert.equal(viewModel.errorText, "");
   assert.equal(viewModel.pdfReady, true);
 });
@@ -1282,7 +1295,7 @@ test("job status view model carries manifest actions and retry actions", () => {
       progressCurrent: 100,
       progressTotal: 100,
       progressPercent: 100,
-      progressText: "已完成",
+      progressText: "Đã hoàn tất",
       progressUnit: "percent",
       progressIndeterminate: false,
       substageKey: "done",
@@ -1318,7 +1331,7 @@ test("live duration helpers use explicit timing inputs instead of runtime global
     finishedAtFallback: "2026-01-01T00:05:00Z",
   });
 
-  assert.equal(durations.totalElapsedText, "5分 0秒");
+  assert.equal(durations.totalElapsedText, "5 phút 0 giây");
   assert.equal(
     resolveStageHistoryDuration(job.stage_history[0], job, {
       finishedAtFallback: "2026-01-01T00:05:00Z",
@@ -1346,8 +1359,8 @@ test("live duration helpers keep ambiguous succeeded payloads running", () => {
     now: "2026-01-01T00:06:00Z",
   });
 
-  assert.equal(durations.stageElapsedText, "4分 0秒");
-  assert.equal(durations.totalElapsedText, "6分 0秒");
+  assert.equal(durations.stageElapsedText, "4 phút 0 giây");
+  assert.equal(durations.totalElapsedText, "6 phút 0 giây");
   assert.equal(
     resolveStageHistoryDuration(job.stage_history[0], job, {
       finishedAtFallback: "2026-01-01T00:05:00Z",
@@ -1382,14 +1395,14 @@ test("job status view model accepts explicit finished-at fallback", () => {
       progressCurrent: 100,
       progressTotal: 100,
       progressPercent: 100,
-      progressText: "已完成",
+      progressText: "Đã hoàn tất",
       progressUnit: "percent",
       progressIndeterminate: false,
       substageKey: "done",
     },
   });
 
-  assert.equal(viewModel.elapsed, "4分 0秒");
+  assert.equal(viewModel.elapsed, "4 phút 0 giây");
 });
 
 test("job status view model does not read runtime finished-at fallback implicitly", () => {
@@ -1419,12 +1432,12 @@ test("job status view model does not read runtime finished-at fallback implicitl
       progressCurrent: 100,
       progressTotal: 100,
       progressPercent: 100,
-      progressText: "已完成",
+      progressText: "Đã hoàn tất",
       progressUnit: "percent",
       progressIndeterminate: false,
       substageKey: "done",
     },
   });
 
-  assert.equal(viewModel.elapsed, "2分 0秒");
+  assert.equal(viewModel.elapsed, "2 phút 0 giây");
 });

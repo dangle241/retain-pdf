@@ -1,5 +1,5 @@
-// Markdown 公式：在 marked 之前抽出 $...$ / $$...$$，渲染后再用 MathJax 转 SVG。
-// 若不保护，marked 会把 a_b 当成强调，公式整段被拆坏。
+// Công thức Markdown: tách $...$ / $$...$$ trước marked, sau kết xuất dùng MathJax đổi sang SVG.
+// Nếu không bảo vệ, marked coi a_b là nhấn mạnh và phá toàn bộ công thức.
 
 export type MarkdownMathSlot = {
   token: string;
@@ -35,8 +35,8 @@ function makeToken(index: number): string {
 }
 
 /**
- * 抽出 LaTeX 片段并换成占位符，避免 marked 破坏下标/命令。
- * 顺序：块级 $$ / \\[ \\] → 行内 \\( \\) / $...$
+ * Tách đoạn LaTeX và thay bằng chỗ giữ chỗ để marked không phá chỉ số dưới/lệnh.
+ * Thứ tự: khối $$ / \\[ \\] → nội tuyến \\( \\) / $...$.
  */
 export function extractMarkdownMath(source: string): ExtractMarkdownMathResult {
   const slots: MarkdownMathSlot[] = [];
@@ -52,12 +52,12 @@ export function extractMarkdownMath(source: string): ExtractMarkdownMathResult {
     return token;
   };
 
-  // 块级
+  // Dạng khối.
   text = text.replace(/\$\$([\s\S]+?)\$\$/g, (_m, tex: string) => push(tex, true));
   text = text.replace(/\\\[([\s\S]+?)\\\]/g, (_m, tex: string) => push(tex, true));
-  // 行内 \( ... \)
+  // Nội tuyến \( ... \).
   text = text.replace(/\\\(([\s\S]+?)\\\)/g, (_m, tex: string) => push(tex, false));
-  // 行内 $...$（单行；OCR 常在 $ 内侧加空格）
+  // Nội tuyến $...$ (một dòng; OCR thường thêm khoảng trắng bên trong $).
   text = text.replace(/(?<![\\$])\$(?!\$)((?:\\.|[^$\n])+?)\$(?!\$)/g, (full, tex: string) => {
     if (!`${tex}`.trim()) {
       return full;
@@ -100,7 +100,7 @@ function loadMathJaxEngine(): Promise<MathJaxEngine> {
         convert(tex: string, display: boolean): string {
           const node = document.convert(tex, { display });
           const html = adaptor.outerHTML(node);
-          // 完全失败（无 SVG）才抛，交给外层回退；含 merror 的 SVG 仍展示
+          // Chỉ ném khi thất bại hoàn toàn, không có SVG, để lớp ngoài dự phòng; SVG chứa merror vẫn hiển thị.
           if (!/<svg[\s>]/i.test(html)) {
             throw new Error("mathjax produced no svg");
           }
@@ -116,7 +116,7 @@ function loadMathJaxEngine(): Promise<MathJaxEngine> {
 }
 
 export function renderMathFallbackHtml(tex: string, display: boolean): string {
-  const body = `<code class="reader-md-math-error" title="公式渲染失败">${escapeHtml(tex)}</code>`;
+  const body = `<code class="reader-md-math-error" title="Kết xuất công thức thất bại">${escapeHtml(tex)}</code>`;
   if (display) {
     return `<div class="reader-md-math reader-md-math-display reader-md-math-failed">${body}</div>`;
   }
@@ -131,7 +131,7 @@ export function wrapMathSvgHtml(svgHtml: string, display: boolean): string {
   return `<${tag} class="${cls}">${svgHtml}</${tag}>`;
 }
 
-/** 将 HTML 中的占位符替换为 MathJax SVG（失败则回退为代码片段）。 */
+/** Thay chỗ giữ chỗ trong HTML bằng SVG MathJax; khi lỗi lùi về đoạn mã. */
 export async function materializeMarkdownMathHtml(
   html: string,
   slots: MarkdownMathSlot[],
@@ -164,7 +164,7 @@ export async function materializeMarkdownMathHtml(
   return out;
 }
 
-/** 完整管线：保护公式 → marked.parse → 还原 SVG。 */
+/** Pipeline đầy đủ: bảo vệ công thức → marked.parse → khôi phục SVG. */
 export async function parseMarkdownWithMath(
   markdown: string,
   parseMarkdown: (src: string) => string,

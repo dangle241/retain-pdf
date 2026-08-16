@@ -681,3 +681,12 @@ def test_direct_typst_single_prompt_moves_scoped_terms_into_user_message() -> No
     assert "SCF => 自洽场" not in messages[0]["content"]
     assert "术语要求：" in messages[1]["content"]
     assert "SCF => 自洽场" in messages[1]["content"]
+def test_formula_segment_prompt_targets_vietnamese() -> None:
+    from services.translation.llm.shared.orchestration.segment_prompts import (
+        segment_translation_system_prompt,
+    )
+
+    prompt = segment_translation_system_prompt(target_language_name="Tiếng Việt")
+
+    assert "Tiếng Việt" in prompt
+    assert "Simplified Chinese" not in prompt

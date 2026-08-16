@@ -7,7 +7,7 @@ use crate::api_tests::jobs_common::{read_json, test_state};
 use crate::app::build_app;
 use crate::models::{JobArtifacts, JobStatusKind};
 
-use super::common::{seed_ocr_checkpoint_files, source_job_with_artifacts};
+use super::common::{seed_ocr_checkpoint_files, seed_upload, source_job_with_artifacts};
 
 #[tokio::test]
 async fn retry_stage_route_creates_translation_recovery_job_with_overrides() {
@@ -233,4 +233,41 @@ async fn retry_stage_route_applies_overrides_for_in_place_render() {
         retry_job.request_payload.runtime.job_id,
         "job-retry-stage-render-in-place-overrides"
     );
+}
+
+#[tokio::test]
+async fn retry_ocr_does_not_require_existing_artifacts() {
+    let state = test_state("retry-stage-ocr-original-upload");
+    seed_upload(&state, "upload-retry-ocr");
+    let mut source_job =
+        source_job_with_artifacts("job-retry-stage-ocr-source", JobArtifacts::default());
+    source_job.status = JobStatusKind::Failed;
+    source_job.artifacts = None;
+    source_job.request_payload.source.upload_id = "upload-retry-ocr".to_string();
+    source_job.request_payload.ocr.provider = "paddle".to_string();
+    source_job.request_payload.ocr.paddle_token = "paddle-test-token".to_string();
+    state.db.save_job(&source_job).expect("save source job");
+
+    let response = build_app(state.clone())
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/api/v1/jobs/job-retry-stage-ocr-source/retry-stage")
+                .header("X-API-Key", "test-key")
+                .header("Content-Type", "application/json")
+                .body(Body::from(json!({ "stage": "ocr" }).to_string()))
+                .expect("retry OCR request"),
+        )
+        .await
+        .expect("retry OCR response");
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let payload = read_json(response).await;
+    let retry_job_id = payload["data"]["job_id"].as_str().expect("job id");
+    let retry_job = state.db.get_job(retry_job_id).expect("retry job");
+    assert_eq!(
+        retry_job.request_payload.source.upload_id,
+        "upload-retry-ocr"
+    );
+    assert!(retry_job.request_payload.source.artifact_job_id.is_empty());
 }

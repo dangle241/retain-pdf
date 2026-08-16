@@ -1,23 +1,23 @@
-// StatusDetailDialog 的组合逻辑(蓝图 §1 判决表的落地点)。
+// Logic tổ hợp của StatusDetailDialog (nơi triển khai bảng quyết định thiết kế §1).
 //
-// 与旧世界 features/status-detail/controller.js 的关系(关键偏离,写进汇报):
-// controller.js 的公开返回值只有 { activateDetailTab, bindEvents,
+// Quan hệ với features/status-detail/controller.js của hệ thống cũ (khác biệt quan trọng, cần ghi vào báo cáo):
+// Giá trị công khai controller.js trả về chỉ có { activateDetailTab, bindEvents,
 // openStatusDetailDialog, buildDetailPageUrl, ensureTranslationData,
 // syncRerunAction, ensureOverviewData } —— applyFilter/changePage/loadItem/
-// replay/rerunCurrentJob 全部是内部闭包,只能通过 bindEvents() 接的
-// event-commands.js 触达(document 委托点击,DOM 事件驱动设计)。JSX 组件需要
-// 直接调用这些动作(受控 select/input、按钮 onClick),这个"回调只认 DOM
-// 事件"的窄公开面在 React 世界不可行。
+// toàn bộ replay/rerunCurrentJob là closure nội bộ, chỉ có thể được gọi qua
+// event-commands.js gắn bởi bindEvents() (ủy quyền click trên document, thiết kế do sự kiện DOM điều khiển). Component JSX cần
+// gọi trực tiếp các hành động này (select/input có kiểm soát, onClick của nút); bề mặt công khai hẹp kiểu "callback chỉ nhận
+// sự kiện DOM" không khả thi trong React.
 //
-// 因此本文件不 import controller.js/translation-tab-port.js/
+// Vì vậy file này không import controller.js/translation-tab-port.js/
 // event-commands.js/navigation-view-port.js/dialog-view-port.js/
-// resume-view-port.js/translation-renderer.js/view.js(蓝图判死清单 + 均属
-// architecture-boundaries 防回弹禁区),改为直接组合蓝图判"保留"的纯逻辑层:
+// resume-view-port.js/translation-renderer.js/view.js (danh sách loại bỏ theo thiết kế + đều thuộc
+// vùng cấm hồi quy của architecture-boundaries), mà tổ hợp trực tiếp tầng logic thuần được thiết kế đánh dấu "giữ lại":
 // overview-coordinator.js / resume-actions.js / translation-data-port.js /
 // translation-tab-coordinator.js / translation-state.js / status-detail/
-// snapshot.js —— 用自己的 viewPort/render* 回调把它们的输出写进
-// status-detail-store.js,而不是拼 DOM markup。逐个方法在 pages 层重新
-// 暴露,JSX 直接调用。
+// snapshot.js: dùng callback viewPort/render* riêng để ghi đầu ra của chúng vào
+// status-detail-store.js thay vì nối DOM markup. Từng phương thức được
+// expose lại ở tầng pages để JSX gọi trực tiếp.
 
 import type { StatusDetailRuntimePort } from "./status-detail-runtime-port.js";
 import type { StatusDetailStore, StatusDetailTranslation } from "./status-detail-store.js";
@@ -74,6 +74,12 @@ export interface StatusDetailControllerDeps {
   ) => Promise<unknown>;
   fetchTranslationItem: (jobId: string, itemId: string, apiPrefix?: string) => Promise<unknown>;
   replayTranslationItem: (jobId: string, itemId: string, apiPrefix?: string) => Promise<unknown>;
+  retryJobStage: (
+    jobId: string,
+    apiPrefix: string | undefined,
+    stage: string,
+    payload?: Record<string, unknown>,
+  ) => Promise<Record<string, unknown>>;
   rerunJob: (actionUrl: string) => Promise<unknown>;
   renderJob?: (context?: StatusDetailOverviewRenderContext | null) => void;
   startPolling?: (jobId: string) => void;
@@ -94,6 +100,7 @@ export function createStatusDetailController({
   fetchTranslationItems,
   fetchTranslationItem,
   replayTranslationItem,
+  retryJobStage,
   rerunJob,
   renderJob,
   startPolling,
@@ -106,8 +113,8 @@ export function createStatusDetailController({
     return runtimePort.currentJobId();
   }
 
-  // ---- resume/rerun(resume-actions.js 保留;resumeViewPort 换 store 驱动,
-  //      不再走 view.js 的 dialogComponent() DOM 查询) ----
+  // ---- resume/rerun (giữ resume-actions.js; chuyển resumeViewPort sang điều khiển bằng store,
+  //      không còn dùng truy vấn DOM dialogComponent() của view.js) ----
   const resumeViewPort: StatusDetailResumeViewPort = {
     closeDialog: () => dialogStore.close(),
     setRerunAction: ({ enabled, status }: { enabled?: boolean; status?: string } = {}) => {
@@ -136,10 +143,49 @@ export function createStatusDetailController({
     });
   }
 
-  // ---- overview(overview-coordinator.js 保留;renderOverviewSnapshot 落到
-  //      store,job/eventsPayload 存原始值——蓝图 §1 判决表:history.js/
-  //      events.js 的 markup 拼接部分不用,StageHistoryList/EventsList 从这
-  //      两个原始字段用纯函数各自计算结构化数组) ----
+  async function renderManualTranslation() {
+    const jobId = getCurrentJobId();
+    if (!jobId) {
+      throw new Error("Không tìm thấy Job ID để kết xuất bản dịch.");
+    }
+    const snapshot = (runtimePort.currentJobSnapshot() || {}) as Record<string, unknown>;
+    const raw = snapshot.raw_response && typeof snapshot.raw_response === "object"
+      ? snapshot.raw_response as Record<string, unknown>
+      : snapshot;
+    const text = (...keys: string[]) => {
+      for (const key of keys) {
+        const value = `${snapshot[key] ?? raw[key] ?? ""}`.trim();
+        if (value) return value;
+      }
+      return "";
+    };
+    store.actions.setRerunPending(true);
+    try {
+      const result = await retryJobStage(jobId, apiPrefix, "render", {
+        create_new_job: true,
+        document_id: text("document_id"),
+        title: text("title", "display_name"),
+        display_name: text("display_name", "title"),
+        page_count: snapshot.page_count ?? raw.page_count,
+        cover_url: text("cover_url"),
+        thumbnail_url: text("thumbnail_url"),
+      });
+      const nextJobId = `${result.job_id || ""}`.trim();
+      if (!nextJobId) {
+        throw new Error("Backend không trả về Job ID của tác vụ kết xuất.");
+      }
+      dialogStore.close();
+      startPolling?.(nextJobId);
+      return result;
+    } finally {
+      store.actions.setRerunPending(false);
+    }
+  }
+
+  // ---- overview (giữ overview-coordinator.js; renderOverviewSnapshot ghi vào
+  //      store, job/eventsPayload lưu giá trị gốc; bảng quyết định thiết kế §1: history.js/
+  //      không dùng phần nối markup của events.js; StageHistoryList/EventsList lấy từ
+  //      hai trường gốc này và dùng hàm thuần để tính mảng có cấu trúc tương ứng) ----
   function renderOverviewSnapshot(context: StatusDetailOverviewRenderContext | null | undefined) {
     const job = context?.job || null;
     const eventsPayload = context?.events || null;
@@ -179,8 +225,8 @@ export function createStatusDetailController({
   }
 
   // ---- translation(translation-data-port.js + translation-tab-coordinator.js
-  //      保留;render* 回调改成"浅拷贝 translationState 写 store"——store 的
-  //      translation 段就是这份状态袋的镜像,加少量纯 UI 态(*Loading/
+  //      giữ lại; callback render* đổi thành "sao chép nông translationState vào store"; phần
+  //      translation của store là bản phản chiếu túi trạng thái này, cộng một ít trạng thái UI thuần (*Loading/
   //      *ErrorText)) ----
   const translationState = createTranslationState();
   const dataPort = createStatusDetailTranslationDataPort({
@@ -252,8 +298,8 @@ export function createStatusDetailController({
     }
   }
 
-  // ---- 对外统一入口(蓝图 §1:ResultActions.jsx 的 #status-detail-btn 直调
-  //      openStatusDetailDialog("overview"),不是事件分发) ----
+  // ---- Điểm vào công khai thống nhất (thiết kế §1: #status-detail-btn trong ResultActions.jsx gọi trực tiếp
+  //      openStatusDetailDialog("overview"), không phân phát sự kiện) ----
   function activateDetailTab(name = "overview") {
     dialogStore.open({ activeTab: name });
     if (name === "translation") {
@@ -282,6 +328,7 @@ export function createStatusDetailController({
     selectTranslationItem,
     replayCurrentItem,
     rerunCurrentJob,
+    renderManualTranslation,
     syncRerunAction,
   };
 }

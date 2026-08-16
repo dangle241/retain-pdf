@@ -18,25 +18,25 @@
   @apply flex justify-center;
 }
 
-/* 危险区修复:这条规则是"图书馆网格"改造成 PDF_MD_lib 风格 React 卡片
-   (RecentJobCard.jsx/BookListRow.jsx)之前、旧卡片结构用的布局规则。新卡片
-   完全靠自己 JSX 里的 Tailwind 类摆版(aspect-[3/4] 封面 + 下方标题区,纯
-   block 流,不需要 grid),但根节点仍然带着 `.recent-job-item` 这个 class
-   名当测试/契约锚点——于是这条 `@apply grid ... items-stretch ...` 依然
-   生效,把新卡片的根节点变成 display:grid。旧结构里两个子节点(封面+标题)
-   靠 items-stretch 撑满没问题,但新结构的封面 div 本身用 aspect-[3/4] 定
-   高宽比,在"无显式 grid-template-columns"的隐式单列网格里,轨道宽度会
-   按内容(真实封面图的内在尺寸)算而不是拉伸到父容器宽度——实测:同一行
-   里有真实封面图的卡片,封面宽度会比只有占位图标的卡片宽出 20%~30%,
-   连带高度也跟着变(浏览器里逐卡片量过 aspect-[3/4] 容器的 rect,数字对得
-   上"宽度算错→高度跟着算错")。因为嵌套选择器里引用的
+/* Sửa vùng nguy hiểm: quy tắc này được dùng trước khi "lưới thư viện" chuyển thành thẻ React phong cách PDF_MD_lib
+   (RecentJobCard.jsx/BookListRow.jsx), là quy tắc bố cục cho cấu trúc thẻ cũ. Thẻ mới
+   hoàn toàn dùng lớp Tailwind trong JSX riêng để bố cục (bìa aspect-[3/4] + vùng tiêu đề bên dưới, luồng
+   block thuần, không cần grid), nhưng nút gốc vẫn mang lớp `.recent-job-item`
+   làm neo kiểm thử/hợp đồng; vì vậy `@apply grid ... items-stretch ...` vẫn
+   có hiệu lực và biến nút gốc thẻ mới thành display:grid. Trong cấu trúc cũ, hai nút con (bìa + tiêu đề)
+   dùng items-stretch để lấp đầy không có vấn đề, nhưng div bìa của cấu trúc mới dùng aspect-[3/4] để đặt
+   tỷ lệ; trong grid một cột ngầm "không có grid-template-columns tường minh", chiều rộng track sẽ
+   tính theo nội dung (kích thước nội tại của ảnh bìa thật) thay vì kéo tới chiều rộng container cha. Kiểm tra thực tế: trong cùng hàng,
+   thẻ có ảnh bìa thật sẽ có bìa rộng hơn 20%~30% so với thẻ chỉ có biểu tượng placeholder,
+   kéo theo chiều cao cũng đổi (đã đo rect container aspect-[3/4] từng thẻ trong trình duyệt, số liệu khớp
+   với "tính sai chiều rộng → tính sai chiều cao"). Vì
    `.recent-job-hover-actions`/`.recent-job-delete`/`.recent-job-status`/
-   `.is-active-job`/`.is-confirming-delete` 在新卡片里全部不存在(旧卡片
-   的删除/翻译/状态文字这轮已经搬进书籍详情弹窗,参见 RecentJobCard.jsx 顶部
-   注释),整条规则纯粹是历史包袱,直接清空——`.recent-job-item` 这个 class
-   名继续留在 JSX 里当锚点,只是不再挂载任何 CSS。 */
+   `.is-active-job`/`.is-confirming-delete` được selector lồng tham chiếu đều không tồn tại trong thẻ mới (
+   xóa/dịch/nội dung trạng thái của thẻ cũ đã chuyển vào hộp thoại chi tiết sách trong đợt này; xem comment đầu RecentJobCard.jsx),
+   toàn bộ quy tắc chỉ là tồn đọng lịch sử nên xóa nội dung; lớp `.recent-job-item`
+   vẫn nằm trong JSX làm neo nhưng không còn gắn CSS nào. */
 @utility recent-job-item {
-  /* 空占位:见上方注释——只当 class 名锚点，不挂样式。*/
+  /* Placeholder rỗng: xem comment trên; chỉ làm neo tên lớp, không gắn style.*/
   box-sizing: border-box;
 }
 
@@ -45,20 +45,20 @@
 }
 
 /*
-  危险区修复(Tailwind v4 迁移):v3 原文件里 `.recent-job-cover` 的基础声明
-  和 `.recent-job-item:hover .recent-job-cover` 的 hover 覆盖是两条独立的
-  平级规则(hover 规则复合选择器特异度更高,天然覆盖 base,不依赖声明顺序)。
-  迁移工具把 hover 规则重写成 `@utility recent-job-cover {}` 内部的嵌套写法
-  `.recent-job-item:hover & { transform...; box-shadow...; }`,而这个嵌套块
-  和外层 base 声明里的 `box-shadow` 属性同名——触发 Tailwind v4 @utility 编译
-  器一个合并 bug:编译产物里裸 `.recent-job-cover{}` 的 base 声明(position/
+  Sửa vùng nguy hiểm (di chuyển Tailwind v4): trong file v3 gốc, khai báo cơ sở `.recent-job-cover`
+  và ghi đè hover `.recent-job-item:hover .recent-job-cover` là hai quy tắc độc lập
+  cùng cấp (selector phức hợp của quy tắc hover có specificity cao hơn, tự nhiên ghi đè base, không phụ thuộc thứ tự khai báo).
+  Công cụ di chuyển viết lại quy tắc hover thành dạng lồng bên trong `@utility recent-job-cover {}`
+  `.recent-job-item:hover & { transform...; box-shadow...; }`, và khối lồng này
+  có thuộc tính `box-shadow` trùng với khai báo base ngoài, kích hoạt
+  một lỗi merge của trình biên dịch @utility Tailwind v4: khai báo base của `.recent-job-cover{}` trần (position/
   display/aspect-ratio/width/place-items/overflow/border-radius/background/
-  transition 等)整体丢失,只剩嵌套块残留的 transform/box-shadow,导致封面图
-  容器在 v4 下高度塌陷为 0(可见于 home 视觉基线里 recent-job-cover 完全不
-  占位)。这里改回和 v3 等价的结构:base 声明保留在 `@utility` 内,hover 覆盖
-  拆成下面独立的平级复合选择器规则(不嵌套),规避该合并 bug;
-  `&.has-image .recent-job-cover-fallback` 同理拆出为独立规则,避免同一个
-  bug 模式再次触发。
+  transition, v.v.) mất hoàn toàn trong sản phẩm biên dịch, chỉ còn transform/box-shadow của khối lồng, khiến container ảnh bìa
+  sụp chiều cao về 0 dưới v4 (trong baseline hình ảnh home có thể thấy recent-job-cover hoàn toàn không
+  chiếm chỗ). Tại đây đổi về cấu trúc tương đương v3: giữ khai báo base trong `@utility`, còn ghi đè hover
+  tách thành quy tắc selector phức hợp độc lập cùng cấp bên dưới (không lồng), tránh lỗi merge này;
+  `&.has-image .recent-job-cover-fallback` tương tự được tách thành quy tắc độc lập để tránh cùng
+  mẫu lỗi kích hoạt lại.
 */
 @utility recent-job-cover {
   @apply relative grid aspect-[3/4] w-full place-items-center overflow-hidden rounded-[10px];
@@ -84,8 +84,8 @@
   opacity: 0;
 }
 
-/* flex(而非 grid place-items-center):馆藏文档卡有两个悬浮按钮(读原文 + 翻译),
-   grid 会把它们竖着堆成两行;flex 居中对"只有一个按钮"的已翻译卡片视觉完全等价。 */
+/* Dùng flex (không dùng grid place-items-center): thẻ tài liệu thư viện có hai nút nổi (Đọc bản gốc + Dịch),
+   grid sẽ xếp dọc thành hai hàng; flex căn giữa tương đương hoàn toàn về hình ảnh cho thẻ đã dịch "chỉ có một nút". */
 @utility recent-job-hover-actions {
   @apply pointer-events-none absolute inset-0 z-[4] flex items-center justify-center gap-2 bg-[var(--ink)]/0 opacity-0;
   transition:
@@ -198,13 +198,13 @@
   min-width: 0;
 }
 
-/* 同上一条 recent-job-item 的危险区修复:`.recent-job-id`/`.recent-job-real-id`
-   也是旧卡片遗留、新卡片(RecentJobCard.jsx/BookListRow.jsx)当锚点继续沿用
-   class 名。旧规则的 `truncate`(单行省略)会和新 JSX 里的 `line-clamp-2`
-   (两行截断)打架,字号(`text-xs`/`text-[10px]`)也和 BookListRow 想要的
-   `text-sm` 冲突——两条规则都是单类选择器、特异度相同,谁赢看编译产物里的
-   源码序,不可控。清空,新卡片自己的 Tailwind 类已经把字号/行高/颜色/截断
-   方式都定好了。 */
+/* Giống bản sửa vùng nguy hiểm recent-job-item phía trên: `.recent-job-id`/`.recent-job-real-id`
+   cũng là tồn đọng thẻ cũ; thẻ mới (RecentJobCard.jsx/BookListRow.jsx) tiếp tục dùng tên
+   class làm neo. `truncate` (rút gọn một dòng) của quy tắc cũ xung đột với `line-clamp-2`
+   (rút gọn hai dòng) trong JSX mới; cỡ chữ (`text-xs`/`text-[10px]`) cũng xung đột với
+   `text-sm` mà BookListRow cần; cả hai quy tắc là selector một lớp với cùng specificity, bên thắng phụ thuộc
+   thứ tự mã nguồn trong sản phẩm biên dịch, không kiểm soát được. Xóa nội dung; lớp Tailwind riêng của thẻ mới đã đặt cỡ chữ/line-height/màu/cách rút gọn
+   đầy đủ. */
 @utility recent-job-id {
   box-sizing: border-box;
 }
@@ -397,18 +397,18 @@
 }
 
 @utility status-detail-dialog {
-  /* 阶段 C(shadcn 改造):z-index 从共享的 desktop-dialog(101)提到 111——
-     StatusDetailDialog 的唯一打开入口(StatusCard 的"详情"按钮)必然嵌在已经
-     打开的 TranslationWorkflowDialog(Content z-101/Overlay z-100)内部,两者
-     都换成 Radix Dialog(常规 DOM 层叠,不再是原生 <dialog> 的浏览器 top-layer
-     promotion)后,若沿用相同的 101/100,StatusDetailDialog 自己的背板
-     (Overlay z-100)会因为 z-index 小于 TranslationWorkflowDialog 的 Content
-     (101)而盖不住它,导致"嵌套打开时背景应叠加变暗"这个原生 <dialog> 免费带来
-     的视觉效果丢失(fresh Playwright + 12 条视觉基线复现过:status-dialog-failed/
-     status-dialog-translation 差异一度达到 40%)。这里连同下面新增的
-     status-detail-dialog-overlay 一起垫高层级,确保永远盖过
-     TranslationWorkflowDialog(以及其余仍是 101/100 的 Credentials/Glossaries/
-     SettingsHub/AppUpdate,留出余量以防万一同时打开)。 */
+  /* Giai đoạn C (chuyển đổi shadcn): nâng z-index từ desktop-dialog dùng chung (101) lên 111;
+     điểm vào mở StatusDetailDialog duy nhất (nút "Chi tiết" của StatusCard) chắc chắn nằm trong
+     TranslationWorkflowDialog đang mở (Content z-101/Overlay z-100); cả hai
+     đã chuyển sang Radix Dialog (xếp lớp DOM thông thường, không còn được nâng lên browser top-layer như <dialog> native),
+     nếu giữ cùng 101/100 thì nền sau của StatusDetailDialog
+     (Overlay z-100) sẽ có z-index nhỏ hơn Content
+     (101) của TranslationWorkflowDialog nên không phủ được nó, làm mất hiệu ứng "khi mở lồng, nền phải tối thêm" mà <dialog> native
+     tự cung cấp (đã tái hiện bằng phiên Playwright mới + 12 baseline hình ảnh: khác biệt status-dialog-failed/
+     status-dialog-translation từng lên tới 40%). Tại đây nâng tầng cùng
+     status-detail-dialog-overlay mới bên dưới để bảo đảm luôn phủ lên
+     TranslationWorkflowDialog (và Credentials/Glossaries/
+     SettingsHub/AppUpdate vẫn ở 101/100, chừa khoảng an toàn nếu vô tình mở cùng lúc). */
   z-index: 111;
   width: min(960px, calc(100vw - 32px));
   height: min(760px, calc(100vh - 48px));

@@ -1,4 +1,7 @@
-import { normalizeOcrProvider } from "../../config/providers.js";
+import {
+  inferTranslationProvider,
+  normalizeOcrProvider,
+} from "../../config/providers.js";
 import { createCredentialDialogElementsPort } from "./dialog-elements-port.js";
 
 export function syncCredentialDialogFields({
@@ -11,6 +14,7 @@ export function syncCredentialDialogFields({
   const {
     paddleInput,
     apiKeyInput,
+    modelProviderSelect,
     modelBaseUrlInput,
     modelNameInput,
     mathModeSelect,
@@ -20,12 +24,15 @@ export function syncCredentialDialogFields({
     paddleInput.value = credentials.paddleToken || "";
   }
   if (apiKeyInput) {
-    // 只展示设置里已存的 Key，不从 runtime 回填（避免「设置空白却仍能问答」）
+    // Chỉ hiển thị Key đã lưu trong cài đặt, không điền từ runtime (tránh tình trạng cài đặt trống nhưng vẫn hỏi đáp được).
     void defaultModelApiKey;
     apiKeyInput.value = `${credentials.modelApiKey || ""}`.trim();
   }
   if (modelBaseUrlInput) {
     modelBaseUrlInput.value = taskOptions.baseUrl || defaultModelBaseUrl?.() || "";
+  }
+  if (modelProviderSelect) {
+    modelProviderSelect.value = inferTranslationProvider(modelBaseUrlInput?.value || taskOptions.baseUrl || "");
   }
   if (modelNameInput) {
     modelNameInput.value = taskOptions.model || "";
