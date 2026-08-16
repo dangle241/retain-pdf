@@ -1,4 +1,4 @@
-"""B2 memory: 抽取式压缩 + 窗口组装。"""
+"""B2 memory: nén kiểu trích xuất + dựng cửa sổ ngữ cảnh."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ def test_build_extractive_summary_contains_questions_and_citations():
 
 
 def test_maybe_compress_when_over_threshold():
-    messages = _turns(15)  # 15 轮 > default 12
+    messages = _turns(15)  # 15 lượt > mặc định 12
     result = maybe_compress_transcript(
         messages,
         window_turns=6,
@@ -56,7 +56,7 @@ def test_maybe_compress_when_over_threshold():
     assert result.summary_message["content"].startswith(SUMMARY_PREFIX)
     assert result.event["type"] == "compress"
     assert result.event["dropped_turns"] >= 1
-    # 新 transcript：1 条 summary + 至多 12 条窗口
+    # Transcript mới: 1 summary + tối đa 12 tin nhắn trong cửa sổ
     assert len(result.messages) <= 1 + 12
     assert result.messages[0]["content"].startswith(SUMMARY_PREFIX)
 
@@ -81,7 +81,7 @@ def test_force_compress_short_history():
         compress_after_turns=12,
         force=True,
     )
-    # 4 轮 > window 2 → 折叠前 2 轮
+    # 4 lượt > cửa sổ 2 → gộp 2 lượt đầu
     assert result.compressed is True
     assert result.event["dropped_turns"] == 2
 
@@ -95,9 +95,9 @@ def test_assemble_history_injects_summary_prefix():
     assembled = assemble_history(compressed.messages, window_turns=4)
     assert assembled.debug["had_summary"] is True
     assert assembled.history[0]["role"] == "user"
-    assert "摘要" in assembled.history[0]["content"]
+    assert "summary of the earlier conversation" in assembled.history[0]["content"]
     assert assembled.history[1]["role"] == "assistant"
-    # 后面应有窗口内容
+    # Phía sau phải có nội dung của cửa sổ
     assert any(m["role"] == "user" and "问题" in m["content"] for m in assembled.history[2:])
 
 

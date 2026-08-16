@@ -69,7 +69,7 @@ def test_agent_runs_tools_then_answers_with_cited_anchors():
 
     assert result.rounds == 2
     assert result.answer == "选择性来自共轭效应 [2]。"
-    # 只返回被引用的锚点,且编号写进了给模型看的工具结果
+    # Chỉ trả về các neo được trích dẫn, và số hiệu đã được ghi vào kết quả tool mà model nhìn thấy
     assert [citation.ref for citation in result.citations] == [2]
     assert result.citations[0].block_id == "p008-b0001"
     payload = json.loads(seen_tool_messages[0]["content"])
@@ -80,7 +80,7 @@ def test_agent_runs_tools_then_answers_with_cited_anchors():
 
 
 def test_agent_forces_document_id_into_search_tools():
-    """整本问答:即便模型没传 document_id,agent 也要强制注入。"""
+    """Hỏi đáp toàn cuốn: dù model không truyền document_id thì agent vẫn phải chèn cứng vào."""
     seen_args = []
 
     def capture(arguments):
@@ -134,7 +134,7 @@ def test_agent_forces_final_answer_when_rounds_exhausted():
                 "content": "",
                 "tool_calls": [_tool_call("search_fulltext", {"query": f"q{calls['n']}"})],
             }
-        # 收尾调用不给工具
+        # Lần gọi chốt câu trả lời không đưa tool
         assert messages[-1]["role"] == "user"
         return {"content": "基于已有证据的最终回答 [1]。", "tool_calls": []}
 
@@ -146,26 +146,26 @@ def test_agent_forces_final_answer_when_rounds_exhausted():
 
 
 def test_friendly_llm_error_maps_status_codes():
-    """审计 C1:402/429/401 必须译成用户可行动的中文,且截断上游详情。"""
+    """Kiểm toán C1: 402/429/401 phải được dịch thành thông báo người dùng hành động được, và cắt bớt chi tiết từ thượng nguồn."""
     from retainpdf_ai.agent import _friendly_llm_error
 
-    assert "余额不足" in str(_friendly_llm_error(402))
-    assert "限流" in str(_friendly_llm_error(429))
-    assert "Key 无效" in str(_friendly_llm_error(401))
-    assert "上游故障" in str(_friendly_llm_error(503))
+    assert "không đủ số dư" in str(_friendly_llm_error(402))
+    assert "giới hạn tần suất" in str(_friendly_llm_error(429))
+    assert "không hợp lệ" in str(_friendly_llm_error(401))
+    assert "lỗi phía thượng nguồn" in str(_friendly_llm_error(503))
     long_detail = "x" * 500
     msg = str(_friendly_llm_error(402, long_detail))
-    assert len(msg) < 300
+    assert len(msg) < 320
     assert "…" in msg
 
 
 def test_rounds_exhausted_final_call_uses_request_level_chat_fn():
-    """审计 A1 回归锁:env 不配 key(启动期 chat=_missing_key 形态)、按请求传
-    chat_fn 时,轮数耗尽的收尾轮必须继续用请求级 chat_fn,而不是 self._chat。"""
+    """Chốt hồi quy kiểm toán A1: khi env không cấu hình key (chat lúc khởi động ở dạng _missing_key)
+    và chat_fn được truyền theo request, vòng chốt lúc hết số vòng phải tiếp tục dùng chat_fn mức request chứ không phải self._chat."""
     registry = ToolRegistry([_search_tool(HITS)])
 
     def startup_chat_missing_key(_messages, _tools):
-        raise RuntimeError("缺少 LLM API Key")
+        raise RuntimeError("Thiếu LLM API Key")
 
     calls = {"n": 0}
 
@@ -243,7 +243,7 @@ def _tool_chunk():
 
 
 def test_streaming_tool_turn_preamble_not_emitted_as_answer_delta():
-    """审计 A3 回归锁:工具轮的 content 前言不得泄漏为 answer_delta。"""
+    """Chốt hồi quy kiểm toán A3: phần content mở đầu của vòng gọi tool không được rò rỉ thành answer_delta."""
     from retainpdf_ai.agent import assemble_streaming_message
 
     deltas = []
@@ -251,16 +251,16 @@ def test_streaming_tool_turn_preamble_not_emitted_as_answer_delta():
         _sse([_content_chunk("让我先"), _content_chunk("搜索一下…"), _tool_chunk()]),
         on_delta=deltas.append,
     )
-    assert deltas == [], f"工具轮前言泄漏: {deltas}"
+    assert deltas == [], f"Phần mở đầu của vòng gọi tool bị rò rỉ: {deltas}"
     assert message["tool_calls"][0]["function"]["name"] == "search_fulltext"
-    # content 仍保留在 message 里(回给模型的上下文完整)
+    # content vẫn được giữ trong message (ngữ cảnh trả lại cho model là đầy đủ)
     assert "搜索一下" in message["content"]
 
 
 def test_streaming_pure_answer_still_streams_and_short_answer_flushes():
     from retainpdf_ai.agent import assemble_streaming_message
 
-    # 长答案:攒满 64 字符定性后转直通
+    # Câu trả lời dài: sau khi gom đủ 64 ký tự để xác định tính chất thì chuyển sang truyền thẳng
     long_piece = "答" * 64
     deltas = []
     assemble_streaming_message(
@@ -268,9 +268,9 @@ def test_streaming_pure_answer_still_streams_and_short_answer_flushes():
         on_delta=deltas.append,
     )
     assert "".join(deltas) == long_piece + "尾巴"
-    assert len(deltas) == 2, "定性后应逐 piece 直通"
+    assert len(deltas) == 2, "Sau khi xác định tính chất thì phải truyền thẳng từng piece"
 
-    # 短答案:不足阈值,流结束一次性补发
+    # Câu trả lời ngắn: chưa đạt ngưỡng, gửi bù một lần khi luồng kết thúc
     deltas2 = []
     assemble_streaming_message(_sse([_content_chunk("短答案")]), on_delta=deltas2.append)
     assert "".join(deltas2) == "短答案"

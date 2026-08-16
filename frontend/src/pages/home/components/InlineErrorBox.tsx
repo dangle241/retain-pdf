@@ -15,7 +15,7 @@ const selectErrorBoxValue = (snapshot) => snapshot?.texts?.["error-box"];
 export function InlineErrorBox() {
   const services = useHomeServices();
   const value = useStoreSnapshot(services.stores.text, selectErrorBoxValue);
-  const [copyLabel, setCopyLabel] = useState("复制诊断");
+  const [copyLabel, setCopyLabel] = useState("Sao chép chẩn đoán");
 
   const summary = messageForErrorBox(value);
   const text = `${summary ?? ""}`.trim();
@@ -27,10 +27,10 @@ export function InlineErrorBox() {
   async function handleCopy() {
     try {
       await copyText(diagnostic);
-      setCopyLabel("已复制");
-      globalThis.window?.setTimeout(() => setCopyLabel("复制诊断"), 1600);
+      setCopyLabel("Đã sao chép");
+      globalThis.window?.setTimeout(() => setCopyLabel("Sao chép chẩn đoán"), 1600);
     } catch {
-      setCopyLabel("复制失败");
+      setCopyLabel("Sao chép thất bại");
     }
   }
 

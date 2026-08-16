@@ -1,16 +1,20 @@
-"""direct_typst 译文的机械格式规整。
+"""Chuẩn hóa định dạng cơ học cho bản dịch ở chế độ direct_typst.
 
-direct_typst 模式让模型直接输出 `$...$` inline LaTeX(渲染时由 mitex 解析)。
-模型可靠地完成语义任务(识别公式、翻译、修复 OCR 损伤),但偶尔违反机械格式
-规则:`$...$` 与正文紧贴、相邻公式 `$..$$..$`、双反斜杠命令。这些规则在 `$`
-边界存在的前提下是确定性文本操作,由本模块在翻译时统一保证(验证前、入缓存
-前),而不是靠提示词要求模型自律。
+Chế độ direct_typst cho phép model xuất thẳng `$...$` inline LaTeX (khi render sẽ do
+mitex phân tích). Model làm tốt phần ngữ nghĩa (nhận diện công thức, dịch, sửa hư hỏng
+do OCR) nhưng đôi khi vi phạm các quy tắc định dạng cơ học: `$...$` dính sát văn bản,
+hai công thức liền nhau `$..$$..$`, lệnh hai dấu chéo ngược. Khi biên `$` đã tồn tại,
+những quy tắc này là thao tác văn bản tất định, nên module này đảm bảo thống nhất ngay
+lúc dịch (trước khi kiểm tra, trước khi đưa vào cache) thay vì trông chờ model tự giữ
+kỷ luật qua prompt.
 
-`$` 扫描语义对齐渲染层 tokenizer(services/rendering/layout/text_tokens.py),
-使翻译时规整与渲染时 passthrough 对跨度边界的判定一致。渲染层既有的规整链
-(surround_inline_math_with_spaces 等)保持不动,作为旧缓存条目的幂等兜底。
-本模块必须保持零依赖:translation 与 rendering 都可以 import pipeline_shared,
-但二者不能互相 import。
+Ngữ nghĩa quét `$` được căn theo tokenizer của tầng render
+(services/rendering/layout/text_tokens.py), để việc chuẩn hóa lúc dịch và passthrough lúc
+render xác định biên của các đoạn giống nhau. Chuỗi chuẩn hóa sẵn có ở tầng render
+(surround_inline_math_with_spaces v.v.) được giữ nguyên, làm phương án dự phòng lũy đẳng
+cho các mục cache cũ.
+Module này bắt buộc không phụ thuộc gì: translation và rendering đều có thể import
+pipeline_shared, nhưng hai bên không được import lẫn nhau.
 """
 
 from __future__ import annotations
@@ -110,8 +114,9 @@ def _scan_math_spans(text: str) -> list[tuple[int, int, bool]]:
 
 
 def _collapse_newlines_inside_inline_math(text: str) -> str:
-    # 对齐渲染层 normalize_direct_typst_inline_math_whitespace:inline 数学
-    # 内的换行会让扫描器拒绝识别该跨度,必须先折叠成空格再扫描。
+    # Căn theo normalize_direct_typst_inline_math_whitespace ở tầng render: ký tự xuống dòng
+    # bên trong inline math khiến bộ quét không nhận diện đoạn đó, phải gộp thành dấu cách
+    # trước khi quét.
     chunks: list[str] = []
     index = 0
     in_inline_math = False
@@ -151,8 +156,8 @@ def normalize_direct_typst_translation(text: str) -> str:
     if not source or "$" not in source:
         return source
     if not has_balanced_unescaped_dollars(source):
-        # 定界符不平衡属于结构性损坏,交给 math_delimiter_unbalanced 验证和
-        # LLM 修复处理原始文本,不在残缺输入上做规整。
+        # Định giới không cân bằng là hư hỏng cấu trúc: để math_delimiter_unbalanced kiểm tra
+        # và LLM sửa trên văn bản gốc, không chuẩn hóa trên đầu vào khuyết.
         return source
     source = _collapse_newlines_inside_inline_math(source)
     spans = _scan_math_spans(source)
@@ -166,9 +171,10 @@ def normalize_direct_typst_translation(text: str) -> str:
         expr = _normalize_math_body(source[start:end], display=display)
         prev_char = source[start - 1] if start > 0 else ""
         next_char = source[end] if end < len(source) else ""
-        # 只修确定是违规的紧贴:跨度紧邻中文正文,或两个公式跨度直接相邻
-        # ($a$$b$)。ASCII 相邻不动——译文里可能出现字面 $ 变量(如 $rem),
-        # 扫描器会把 `$rem ... $` 误判成跨度,补空格会破坏字面文本。
+        # Chỉ sửa những chỗ dính sát chắc chắn sai: đoạn công thức nằm sát văn bản CJK, hoặc
+        # hai đoạn công thức dính liền nhau ($a$$b$). Cạnh ASCII thì không động — bản dịch
+        # có thể chứa biến $ theo nghĩa đen (ví dụ $rem), bộ quét sẽ hiểu nhầm
+        # `$rem ... $` là một đoạn, thêm dấu cách sẽ phá văn bản đó.
         prefix = " " if (_is_cjk_char(prev_char) and prev_char not in _LEFT_NO_SPACE) or start == prev_span_end else ""
         suffix = " " if _is_cjk_char(next_char) and next_char not in _RIGHT_NO_SPACE else ""
         chunks.append(f"{prefix}{expr}{suffix}")
@@ -178,11 +184,13 @@ def normalize_direct_typst_translation(text: str) -> str:
     return _MULTI_SPACE_RE.sub(" ", "".join(chunks))
 
 
-# mitex 不兼容写法数据库:与渲染层 sanitize_direct_typst_inline_math 的
-# 改写规则对应(services/rendering/layout/inline_content/core/inline_math.py)。
-# 用途:翻译前扫描源文本,匹配到哪条就把哪条提示给模型,由模型在语义层
-# 完成替换——复杂公式里正则改写必然出错,但"检测某命令出现过"是可靠的。
-# 渲染期正则改写保留作兜底。
+# Cơ sở dữ liệu các cách viết mitex không hỗ trợ: tương ứng với quy tắc viết lại của
+# sanitize_direct_typst_inline_math ở tầng render
+# (services/rendering/layout/inline_content/core/inline_math.py).
+# Công dụng: quét văn bản gốc trước khi dịch, khớp mục nào thì nhắc mục đó cho model để
+# model thay thế ở tầng ngữ nghĩa — viết lại bằng regex trong công thức phức tạp chắc
+# chắn sai, nhưng "phát hiện một lệnh có xuất hiện" thì đáng tin cậy.
+# Việc viết lại bằng regex lúc render vẫn giữ làm phương án dự phòng.
 MITEX_REWRITE_DATABASE: tuple[tuple[str, str], ...] = (
     (r"\hbar", "ℏ"),
     (r"\partial", "∂"),
@@ -191,7 +199,7 @@ MITEX_REWRITE_DATABASE: tuple[tuple[str, str], ...] = (
     (r"\varPhi", r"\Phi"),
     (r"\langle", "⟨"),
     (r"\rangle", "⟩"),
-    (r"\circled", r"\otimes 或普通字符"),
+    (r"\circled", r"\otimes or a plain character"),
 )
 
 

@@ -171,21 +171,21 @@ export function HomeAskComposer({
   const canSend = Boolean(text.trim()) && !disabled && !isRunning && !missingLlmKey;
 
   const scopeHint = (() => {
-    if (missingLlmKey) return "请先在设置 → API 设置中填写模型 API Key";
-    if (!scopes.length) return "全库 · @ 文章或合集";
+    if (missingLlmKey) return "Hãy nhập API Key của model tại Cài đặt → API";
+    if (!scopes.length) return "Toàn thư viện · @ bài viết hoặc bộ sưu tập";
     const cols = scopes.filter((s) => s.kind === "collection").length;
     const docs = scopes.filter((s) => s.kind === "document").length;
     const parts: string[] = [];
-    if (cols) parts.push(`${cols} 合集`);
-    if (docs) parts.push(`${docs} 篇`);
-    return parts.join(" · ") || "已限定";
+    if (cols) parts.push(`${cols} bộ sưu tập`);
+    if (docs) parts.push(`${docs} bài`);
+    return parts.join(" · ") || "Đã giới hạn";
   })();
 
   return (
     <div className={`home-ask-composer home-ask-composer-${variant}${missingLlmKey ? " is-locked" : ""}`}>
       {missingLlmKey ? (
         <div className="home-ask-key-banner" role="alert">
-          <p>未配置模型 API Key，无法输入或提问。</p>
+          <p>Chưa cấu hình API Key của model, không thể nhập hoặc đặt câu hỏi.</p>
           <button
             type="button"
             className="home-ask-key-banner-btn"

@@ -133,7 +133,7 @@
 
       function applyProgress(payload = {}) {
         const progress = Math.max(0, Math.min(100, Number(payload.progress || 0)));
-        titleEl.textContent = payload.title || "正在启动";
+        titleEl.textContent = payload.title || "Đang khởi động";
         detailEl.textContent = payload.detail || "";
         valueEl.textContent = `${Math.round(progress)}%`;
         barEl.style.width = `${progress}%`;

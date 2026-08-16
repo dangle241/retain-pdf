@@ -82,7 +82,7 @@ export function createAppActions({
       uploadStatePort.reset({ includePageRange: false });
       workflowView.setSubmitDisabled(true);
       uploadView.resetUploadedFileView();
-      setText("error-box", "当前上传文件已失效，请重新上传 PDF 后再提交。");
+      setText("error-box", "Tệp đã tải lên không còn hợp lệ, hãy tải lại PDF rồi gửi lại.");
     },
   };
 

@@ -11,7 +11,7 @@ export const HomeServicesProvider = HomeServicesContext.Provider;
 export function useHomeServices(): HomeServices {
   const services = useContext(HomeServicesContext);
   if (!services) {
-    throw new Error("useHomeServices 必须在 <HomeServicesProvider> 内使用(entry.jsx 先建 composition)");
+    throw new Error("useHomeServices phải được dùng bên trong <HomeServicesProvider> (entry.jsx tạo composition trước)");
   }
   return services;
 }
