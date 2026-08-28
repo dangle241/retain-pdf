@@ -135,7 +135,7 @@ test("Thẻ đã dịch mở chi tiết sách: có đọc đối chiếu, không
   );
   // Sách đã dịch mặc định nằm ở tab 'Dịch'; thẻ tiến độ nên hiển thị ngay trên DOM
   await waitFor(
-    () => dlg.querySelector(".book-detail-status")?.textContent?.includes("已完成"),
+    () => dlg.querySelector(".book-detail-status")?.textContent?.includes("Hoàn thành"),
     "Hiển thị trạng thái hoàn thành",
   );
   const statusCard = await waitFor(() => byId("book-detail-job-status-card"), "StatusCard được nhúng trong tab dịch");
