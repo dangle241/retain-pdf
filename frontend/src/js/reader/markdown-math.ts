@@ -54,9 +54,9 @@ export function extractMarkdownMath(source: string): ExtractMarkdownMathResult {
 
   // Khối
   text = text.replace(/\$\$([\s\S]+?)\$\$/g, (_m, tex: string) => push(tex, true));
-  text = text.replace(/\\\\[([\s\S]+?)\\\\]/g, (_m, tex: string) => push(tex, true));
+  text = text.replace(/\\\[([\s\S]+?)\\\]/g, (_m, tex: string) => push(tex, true));
   // Dòng \( ... \)
-  text = text.replace(/\\\\(([\s\S]+?)\\\\)/g, (_m, tex: string) => push(tex, false));
+  text = text.replace(/\\\(([\s\S]+?)\\\)/g, (_m, tex: string) => push(tex, false));
   // Dòng $...$ (đơn dòng; OCR thường thêm khoảng trắng bên trong $)
   text = text.replace(/(?<![\\$])\$(?!\$)((?:\\.|[^$\n])+?)\$(?!\$)/g, (full, tex: string) => {
     if (!`${tex}`.trim()) {
