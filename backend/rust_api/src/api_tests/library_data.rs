@@ -112,7 +112,7 @@ async fn documents_list_and_patch_roundtrip() {
         .unwrap_or("")
         .contains("/source.pdf"));
 
-    // 非法状态被拒绝
+    // Đã từ chối trạng thái bất hợp pháp
     let response = app
         .clone()
         .oneshot(
@@ -165,7 +165,7 @@ async fn favorites_crud_and_job_reference_guard() {
         .expect("create response");
     assert_eq!(response.status(), StatusCode::OK);
     let payload = json_response(response).await;
-    // 未显式给 job_id 时锚定到 active_job_id
+    // Không được cung cấp rõ ràng cho job_id khi neo vào active_job_id
     assert_eq!(payload["data"]["job_id"], "job-active");
     let favorite_id = payload["data"]["favorite_id"]
         .as_str()
@@ -237,7 +237,7 @@ async fn search_returns_anchored_hits() {
 
 #[tokio::test]
 async fn ai_proxy_returns_bad_gateway_when_upstream_is_down() {
-    // 指向必死端口:代理应干净地报 502,而不是挂起或 500
+    // Chỉ vào một cảng chết:Nhân viên chăm sóc khách hàng cần báo cáo rõ ràng 502,thay vì treo cổ hoặc 500
     std::env::set_var("RUST_API_AI_SERVICE_BASE", "http://127.0.0.1:9");
     let state = test_state("ai-proxy-down");
     let app = build_app(state);
@@ -262,7 +262,7 @@ async fn document_lookup_by_historical_job_id() {
     let state = test_state("library-job-lookup");
     let app = build_app(state.clone());
     let document_id = seed_document(&state, b"doc job lookup");
-    // 历史 job:归属该文档但不是 active run
+    // Sử học job:Có thể quy cho tài liệu nhưng không active run
     state
         .db
         .set_document_active_job(&document_id, "job-new", None)
@@ -292,7 +292,7 @@ async fn document_lookup_by_historical_job_id() {
     let payload = json_response(response).await;
     assert_eq!(payload["data"]["documents"][0]["document_id"], document_id);
 
-    // 只带 job_id 创建收藏:锚定到历史 run 的块空间,文档由后端解析
+    // Chỉ với job_id Tạo bộ sưu tập:Neo vào Lịch sử run Chặn không gian cho,Tài liệu được phân tích cú pháp bởi phụ trợ
     let response = app
         .clone()
         .oneshot(
@@ -370,7 +370,7 @@ async fn favorite_note_patch_updates_in_place() {
         .expect("patch");
     assert_eq!(response.status(), StatusCode::OK);
     let favorites = state.db.list_favorites(Some(&document_id)).expect("list");
-    // favorite_id 不变,note 原子更新
+    // favorite_id Không thay đổi,note Cập nhật nguyên tử
     assert_eq!(favorites[0].favorite_id, favorite_id);
     assert_eq!(favorites[0].note, "改后的笔记");
 }
@@ -413,7 +413,7 @@ async fn asset_upload_dedupes_and_serves_immutable() {
 
     let first = json_response(upload(app.clone()).await).await;
     let second = json_response(upload(app.clone()).await).await;
-    // 内容寻址:同字节两次上传同一 asset_id
+    // Địa chỉ nội dung:Cùng một byte, cùng một lần tải lên hai lần asset_id
     assert_eq!(first["data"]["asset_id"], second["data"]["asset_id"]);
     let asset_id = first["data"]["asset_id"].as_str().expect("asset id");
 
@@ -441,7 +441,7 @@ async fn asset_upload_dedupes_and_serves_immutable() {
         .unwrap()
         .contains("immutable"));
 
-    // 收藏挂图:kind=figure + asset_id + rect_json
+    // Bảng lật yêu thích:kind=figure + asset_id + rect_json
     let document_id = seed_document(&state, b"doc with figure");
     state
         .db
@@ -476,7 +476,7 @@ async fn asset_upload_dedupes_and_serves_immutable() {
     assert_eq!(payload["data"]["asset_id"], asset_id);
     assert!(payload["data"]["rect_json"].as_str().unwrap().contains("300"));
 
-    // 未上传的 asset_id 被拒绝
+    // Chưa tải lên asset_id Bị từ chối
     let response = app
         .clone()
         .oneshot(
@@ -564,7 +564,7 @@ async fn conversation_lifecycle_and_message_appending() {
         .await
         .expect("detail");
     let payload = json_response(response).await;
-    // 标题自动取首问前缀;消息按 seq 正序;引用快照原样保存
+    // Tiêu đề được tự động đặt trước câu hỏi đầu tiên;Báo chí tin nhắn seq Trực giao;Ảnh chụp nhanh tham chiếu được lưu như là
     assert!(payload["data"]["title"].as_str().unwrap().contains("溴锂交换"));
     assert_eq!(payload["data"]["message_count"], 2);
     assert_eq!(payload["data"]["messages"][0]["role"], "user");
@@ -573,7 +573,7 @@ async fn conversation_lifecycle_and_message_appending() {
         .as_str()
         .unwrap()
         .contains("ref"));
-    // head 落在最后一条;assistant 的 parent 为 user
+    // head Rơi xuống dòng cuối cùng;assistant của parent vì user
     assert_eq!(
         payload["data"]["head_id"].as_str().unwrap(),
         payload["data"]["messages"][1]["message_id"].as_str().unwrap()
@@ -587,7 +587,7 @@ async fn conversation_lifecycle_and_message_appending() {
         user_id
     );
 
-    // 分支:同 parent 再挂一条 assistant,并 PATCH head 切回第一条
+    // Ngành:cùng parent Treo thêm một cái nữa assistant,cũng PATCH head Chuyển trở lại mục đầu tiên
     let response = app
         .clone()
         .oneshot(
@@ -628,10 +628,10 @@ async fn conversation_lifecycle_and_message_appending() {
         )
         .await
         .expect("patch head");
-    // head 不能指向 user 若我们允许任何消息——我们允许任意 message_id 在会话内
+    // head Không thể trỏ đến user Nếu chúng tôi cho phép bất kỳ tin nhắn nào——Chúng tôi cho phép bất kỳ message_id Trong cuộc trò chuyện
     assert_eq!(response.status(), StatusCode::OK);
 
-    // 非法 role 被拒
+    // phi pháp role Bị từ chối
     let response = app
         .clone()
         .oneshot(
@@ -647,7 +647,7 @@ async fn conversation_lifecycle_and_message_appending() {
         .expect("bad role");
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 
-    // 删除级联清消息
+    // Xóa tin nhắn xóa theo tầng
     let response = app
         .clone()
         .oneshot(
@@ -674,7 +674,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
     let app = build_app(state.clone());
     let document_id = seed_document(&state, b"collections doc one");
 
-    // 创建
+    // Tạo
     let response = app
         .clone()
         .oneshot(
@@ -699,7 +699,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("collection_id")
         .to_string();
 
-    // 空名字被拒绝
+    // Tên trống bị từ chối
     let response = app
         .clone()
         .oneshot(
@@ -715,7 +715,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("empty name response");
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 
-    // 列表能看到刚创建的文件夹
+    // Danh sách hiển thị các thư mục bạn vừa tạo
     let response = app
         .clone()
         .oneshot(
@@ -731,7 +731,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
     let payload = json_response(response).await;
     assert_eq!(payload["data"]["collections"][0]["collection_id"], collection_id);
 
-    // 改名
+    // đổi tên
     let response = app
         .clone()
         .oneshot(
@@ -751,7 +751,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
     let payload = json_response(response).await;
     assert_eq!(payload["data"]["name"], "有机化学");
 
-    // 加入文档,document_count 同步更新
+    // Thêm tài liệu,document_count Cập nhật đồng bộ hóa
     let response = app
         .clone()
         .oneshot(
@@ -771,7 +771,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
     let payload = json_response(response).await;
     assert_eq!(payload["data"]["document_count"], 1);
 
-    // 不存在的文档被拒绝
+    // Tài liệu không tồn tại bị từ chối
     let response = app
         .clone()
         .oneshot(
@@ -789,7 +789,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("add missing document response");
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
 
-    // GET /api/v1/documents?collection_id= 能过滤出这篇文档
+    // GET /api/v1/documents?collection_id= có thể lọc tài liệu này
     let response = app
         .clone()
         .oneshot(
@@ -805,7 +805,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
     let payload = json_response(response).await;
     assert_eq!(payload["data"]["documents"][0]["document_id"], document_id);
 
-    // 移除文档
+    // Xóa tài liệu
     let response = app
         .clone()
         .oneshot(
@@ -822,7 +822,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("remove document response");
     assert_eq!(response.status(), StatusCode::OK);
 
-    // 重复移除报 404
+    // Báo cáo xóa trùng lặp 404
     let response = app
         .clone()
         .oneshot(
@@ -839,7 +839,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("remove again response");
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
 
-    // 删除文件夹本身
+    // Tự xóa thư mục
     let response = app
         .clone()
         .oneshot(
@@ -910,7 +910,7 @@ async fn library_books_job_ids_filter_returns_only_requested_jobs() {
     assert!(ids.contains(&"job-gamma"));
     assert!(!ids.contains(&"job-beta"));
 
-    // 不传 job_ids 时行为不变:三个 job 都在
+    // Không vượt qua job_ids Hành vi không thay đổi khi:Ba job đang ở
     let response = app
         .clone()
         .oneshot(
@@ -1063,7 +1063,7 @@ async fn document_translate_rejects_ocr_only_workflow() {
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 }
 
-// P0-2:删单个 job 后,悬空的 active_job_id 被 reconcile(重指剩余 job 或 NULL)
+// P0-2:Xóa cá nhân job xong,Treo cổ active_job_id bị reconcile(Số ngón tay còn lại job Hoặc NULL)
 #[tokio::test]
 async fn deleting_a_job_reconciles_document_active_job() {
     use crate::models::{CreateJobInput, JobSnapshot, JobStatusKind};
@@ -1087,13 +1087,13 @@ async fn deleting_a_job_reconciles_document_active_job() {
         )
         .expect("link job to document");
     }
-    // active 指向 job-b(finished_at 更晚)
+    // active chỉ hướng job-b(finished_at trễ hơn)
     state
         .db
         .set_document_active_job(&document_id, "job-b", None)
         .expect("set active");
 
-    // 删 job-b —— reconcile 应把 active 重指到剩余的 job-a
+    // xóa job-b —— reconcile Nó phải là active Tập trung vào phần còn lại job-a
     let response = app
         .clone()
         .oneshot(
@@ -1110,7 +1110,7 @@ async fn deleting_a_job_reconciles_document_active_job() {
     let doc = state.db.get_document(&document_id).expect("doc still exists");
     assert_eq!(doc.active_job_id.as_deref(), Some("job-a"));
 
-    // 再删 job-a —— 没有剩余 book job,active 降级为 NULL(干净馆藏,非僵尸)
+    // Xóa lại job-a —— Không còn book job,active Hạ cấp xuống NULL(Bộ sưu tập sạch,Không phải Zombie)
     let response = app
         .clone()
         .oneshot(
@@ -1128,7 +1128,7 @@ async fn deleting_a_job_reconciles_document_active_job() {
     assert_eq!(doc.active_job_id, None);
 }
 
-// P0-1:DELETE /documents/:id 删除文档行 + jobs + uploads + 文件;收藏引用 → 409
+// P0-1:DELETE /documents/:id Xóa mục hàng tài liệu + jobs + uploads + Tập tin;Tài liệu tham khảo yêu thích → 409
 #[tokio::test]
 async fn delete_document_removes_everything_and_guards_favorites() {
     use crate::models::{CreateJobInput, JobSnapshot, JobStatusKind};
@@ -1157,7 +1157,7 @@ async fn delete_document_removes_everything_and_guards_favorites() {
         .set_document_active_job(&document_id, "job-x", None)
         .expect("set active");
 
-    // 先挂一条收藏 → 删文档应 409
+    // Treo một bộ sưu tập trước → Việc xóa tài liệu nên 409
     let response = app
         .clone()
         .oneshot(
@@ -1198,7 +1198,7 @@ async fn delete_document_removes_everything_and_guards_favorites() {
         .expect("delete blocked");
     assert_eq!(response.status(), StatusCode::CONFLICT);
 
-    // 移除收藏后可删
+    // Có thể xóa sau khi xóa mục yêu thích
     app.clone()
         .oneshot(
             Request::builder()
@@ -1232,7 +1232,7 @@ async fn delete_document_removes_everything_and_guards_favorites() {
         .iter()
         .any(|v| v == "job-x"));
 
-    // 文档行、job 行、upload 行都没了
+    // Hàng tài liệu、job đi、upload điTất cả đã biến mất.
     assert!(state.db.get_document(&document_id).is_err());
     assert!(state.db.get_job("job-x").is_err());
     assert!(state
@@ -1241,7 +1241,7 @@ async fn delete_document_removes_everything_and_guards_favorites() {
         .expect("uploads query")
         .is_empty());
 
-    // 删不存在的文档 → 404
+    // Xóa tài liệu không tồn tại → 404
     let response = app
         .oneshot(
             Request::builder()
@@ -1256,15 +1256,15 @@ async fn delete_document_removes_everything_and_guards_favorites() {
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
 }
 
-// 孤儿治理:root-cause(retention 保护)+ 列表过滤 + 启动清理
+// Quản lý trẻ mồ côi:root-cause(retention Đã bảo vệ)+ Lọc danh sách + Khởi chạy Dọn dẹp
 #[tokio::test]
 async fn ingest_only_document_survives_and_orphans_are_hidden() {
     let state = test_state("library-orphan");
     let app = build_app(state.clone());
 
-    // 一篇"只入库"文档:有 upload、无 job(合法,必须保留可见)
+    // Một bài viết"Chỉ chiều về"Tài liệu:có upload、Không có job(Pháp lý,Phải hiển thị)
     let ingest_only = seed_document(&state, b"ingest only doc");
-    // 一个孤儿文档:直接建 documents 行,不建任何 upload(源文件已丢)
+    // Một tài liệu mồ côi:Được xây dựng trực tiếp documents đi,Không xây dựng bất cứ thứ gì upload(Thiếu tệp nguồn)
     {
         let conn = rusqlite::Connection::open(state.config.jobs_db_path.clone()).expect("open db");
         conn.execute(
@@ -1275,7 +1275,7 @@ async fn ingest_only_document_survives_and_orphans_are_hidden() {
         .expect("insert orphan");
     }
 
-    // 列表:只入库文档在,孤儿被过滤掉
+    // Danh sách:Chỉ áp dụng cho các tài liệu gửi đến trong,Trẻ mồ côi được lọc ra
     let response = app
         .clone()
         .oneshot(
@@ -1303,7 +1303,7 @@ async fn retention_preserves_document_backed_uploads() {
     use crate::models::domain::UploadRecord;
 
     let state = test_state("library-retention-guard");
-    // 一个陈旧的、无 job 引用、但被 document 支撑的 upload(只入库场景)
+    // Một người già、Không có job trích dẫn、Nhưng là document Hỗ trợ upload(Chỉ các kịch bản gửi đến)
     let hash = crate::db::documents::sha256_hex(b"retained ingest doc");
     let upload = UploadRecord {
         upload_id: "up-old-ingest".to_string(),
@@ -1318,7 +1318,7 @@ async fn retention_preserves_document_backed_uploads() {
     state.db.save_upload(&upload).expect("save upload");
     state.db.upsert_document_from_upload(&upload).expect("upsert doc");
 
-    // 一个陈旧、无 job、也无 document 支撑的 upload(真正的废上传,应被 GC)
+    // Một lỗi thời、Không có job、cũngKhông có document Hỗ trợ upload(Tải lên Phế liệu Thực,Nên GC)
     let junk = UploadRecord {
         upload_id: "up-old-junk".to_string(),
         filename: "junk.pdf".to_string(),
@@ -1336,7 +1336,7 @@ async fn retention_preserves_document_backed_uploads() {
         .cleanup_orphaned_uploads(48)
         .expect("cleanup orphaned uploads");
     let removed_ids: Vec<&str> = removed.iter().map(|u| u.upload_id.as_str()).collect();
-    // 废上传被清,document-backed 的被保护
+    // Nội dung tải lên bị bỏ qua đã bị xóa,document-backed Được bảo vệ
     assert!(removed_ids.contains(&"up-old-junk"));
     assert!(!removed_ids.contains(&"up-old-ingest"));
     assert!(state.db.get_upload("up-old-ingest").is_ok());

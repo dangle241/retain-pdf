@@ -767,10 +767,10 @@ test("library books resource invalidation helper tolerates missing resources", (
 });
 
 test("recent jobs page commit refreshes active cards without auto-opening jobs", () => {
-  // 旧 DOM 直写 viewPort(createRecentJobsViewPort() 默认值)已随 cutover 删除
-  // (controller/runtime/loader/commit/bindings 5 处默认参数改必传;view.js 等
-  // 视图层随之物理删除)。这里改用最小 stub 直接捕获 renderList 的 items,
-  // 不再模拟 document/fragment——断言意图不变(渲染了哪些 job id)。
+// viewPort ghi trực tiếp DOM cũ (giá trị mặc định createRecentJobsViewPort()) đã bị xóa trong cutover
+// (5 tham số mặc định trong controller/runtime/loader/commit/bindings được chuyển thành bắt buộc; các lớp view như view.js
+// cũng bị xóa về mặt vật lý). Ở đây dùng stub tối thiểu để trực tiếp bắt items của renderList,
+// không mô phỏng document/fragment — ý định xác nhận không đổi (những job id nào được render).
   const rendered = [];
   const recovered = [];
   const refreshCalls = [];
@@ -933,7 +933,7 @@ test("recent jobs page commit can route rendering through the view port", () => 
 });
 
 test("recent jobs page commit appends only collected items while preserving state patches", () => {
-  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub 直接捕获渲染 items。
+  // viewPort ghi trực tiếp DOM cũ đã bị xóa trong cutover, dùng stub tối thiểu để bắt items render.
   const rendered = [];
   const viewPort = {
     renderList: ({ items }) => {
@@ -1197,7 +1197,7 @@ test("recent jobs loader preserves runtime patches that arrive during load-more"
 });
 
 test("recent jobs loader does not append runtime-created cards during load-more rendering", async () => {
-  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub 直接捕获 renderList。
+  // viewPort ghi trực tiếp DOM cũ đã bị xóa trong cutover, dùng stub tối thiểu để bắt renderList.
   const rendered = [];
   const viewPort = {
     hasView: () => true,

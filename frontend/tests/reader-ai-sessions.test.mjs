@@ -22,7 +22,7 @@ const KEY = "retainpdf-ai-chat-v1:job-1";
 // ===== view-model 纯逻辑 =====
 
 test("会话标题:取首条用户消息并裁剪,空则占位", () => {
-  assert.equal(deriveSessionTitle({ messages: [] }), "新对话");
+  assert.equal(deriveSessionTitle({ messages: [] }), "Hội thoại mới");
   assert.equal(
     deriveSessionTitle({ messages: [{ role: "assistant", text: "先回答" }, { role: "user", text: "  卤素锂交换是什么  " }] }),
     "卤素锂交换是什么",

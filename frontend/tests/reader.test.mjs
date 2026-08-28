@@ -1191,7 +1191,7 @@ test("reader ai context can switch to selection scope", () => {
   });
 
   assert.equal(context.scope(), "selection");
-  assert.equal(contextEl.textContent, "当前选区：第 4 页 · 120 × 64");
+  assert.equal(contextEl.textContent, "Vùng chọn hiện tại: Trang 4 · 120 × 64");
   assert.equal(buttons[1].classList.values.has("is-active"), true);
   assert.deepEqual(opened, ["ai"]);
 });
@@ -1340,28 +1340,28 @@ test("reader page state owns boot progress snapshots", () => {
 
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 8,
-    text: "正在准备对照阅读…",
+    text: "Đang chuẩn bị đọc đối chiếu…",
     stage: "boot",
   });
 
   state.progress.metadataReady = true;
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 24,
-    text: "正在加载原始 PDF 和译文 PDF…",
+    text: "Đang tải PDF gốc và PDF dịch…",
     stage: "pdfs",
   });
 
   state.progress.sourceDone = true;
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 54,
-    text: "原始 PDF 已加载，正在加载译文 PDF…",
+    text: "PDF gốc đã tải xong, đang tải PDF dịch…",
     stage: "pdfs",
   });
 
   state.progress.translatedDone = true;
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 92,
-    text: "对照阅读已就绪",
+    text: "Đọc đối chiếu đã sẵn sàng",
     stage: "readying",
   });
 

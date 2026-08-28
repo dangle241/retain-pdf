@@ -79,24 +79,24 @@ test("馆藏卡打开书籍详情:元数据 + 阅读状态切换 + 翻译/读原
 
   const card = await waitFor(
     () => dom.window.document.querySelector('#recent-jobs-list .recent-job-item[data-library-only="true"]'),
-    "馆藏卡就位",
+    "Thẻ lưu trữ đã sẵn sàng",
   );
   const documentId = card.getAttribute("data-document-id");
   click(dom, card);
 
-  const dlg = await waitFor(() => byId("book-detail-dialog"), "书籍详情弹窗打开");
+  const dlg = await waitFor(() => byId("book-detail-dialog"), "Mở hộp thoại chi tiết sách");
   // 标题默认是只读大标题(不是常驻输入框),编辑才出现输入框
   await waitFor(() => dlg.querySelector(".book-detail-title")?.textContent?.trim(), "标题就位");
-  assert.equal(byId("book-detail-title-input"), null, "默认只读,无标题输入框");
-  assert.ok(dlg.querySelector(".book-detail-status")?.textContent.includes("未翻译"), "馆藏显示未翻译");
+  assert.equal(byId("book-detail-title-input"), null, "Mặc định chỉ đọc, không có ô nhập tiêu đề");
+  assert.ok(dlg.querySelector(".book-detail-status")?.textContent.includes("Chưa dịch"), "Mục lưu trữ hiển thị Chưa dịch");
   // 未翻译：轻量空态 + StageFlow 预览（尚无真实 job，不嵌完整 StatusCard）
-  assert.ok(byId("book-detail-translate-progress"), "馆藏有翻译进度面板");
-  assert.ok(byId("book-detail-stage-flow"), "未翻译进度区有 StageFlow 预览");
-  assert.equal(byId("book-detail-job-status-card"), null, "未翻译不嵌 StatusCard");
+  assert.ok(byId("book-detail-translate-progress"), "Mục lưu trữ có bảng tiến độ dịch");
+  assert.ok(byId("book-detail-stage-flow"), "Khu vực tiến độ Chưa dịch có bản xem trước StageFlow");
+  assert.equal(byId("book-detail-job-status-card"), null, "Chưa dịch không nhúng StatusCard");
   // 馆藏:有翻译 + 读原文,无对照阅读
-  assert.ok(byId("book-detail-translate-btn"), "馆藏有翻译按钮");
-  assert.ok(byId("book-detail-read-source-btn"), "有读原文");
-  assert.equal(byId("book-detail-compare-btn"), null, "馆藏没有对照阅读");
+  assert.ok(byId("book-detail-translate-btn"), "Mục lưu trữ có nút dịch");
+  assert.ok(byId("book-detail-read-source-btn"), "Có nút đọc bản gốc");
+  assert.equal(byId("book-detail-compare-btn"), null, "Mục lưu trữ không có đọc đối chiếu");
   // 点"编辑"进入标题/标签编辑
   click(dom, byId("book-detail-edit-btn"));
   await waitFor(() => byId("book-detail-title-input"), "点编辑出现标题输入框");
@@ -104,9 +104,9 @@ test("馆藏卡打开书籍详情:元数据 + 阅读状态切换 + 翻译/读原
   // 阅读状态切换 → patchDocument(mock),按钮变激活
   const { getMockDocument } = await import("../src/js/mock/documents.js");
   const readBtns = dlg.querySelectorAll(".book-detail-reading-btn");
-  const doneBtn = Array.from(readBtns).find((b) => b.textContent === "读完");
+  const doneBtn = Array.from(readBtns).find((b) => b.textContent === "Đã đọc");
   click(dom, doneBtn);
-  await waitFor(() => doneBtn.classList.contains("is-active"), "读完变激活");
+  await waitFor(() => doneBtn.classList.contains("is-active"), "Đã đọc chuyển sang trạng thái active");
   await waitFor(() => getMockDocument(documentId).reading_status === "done", "patchDocument 落库 reading_status=done");
 
   root.unmount();
@@ -114,7 +114,7 @@ test("馆藏卡打开书籍详情:元数据 + 阅读状态切换 + 翻译/读原
   host.remove();
 });
 
-test("已翻译卡打开书籍详情:有对照阅读,无翻译按钮", async () => {
+test("Thẻ đã dịch mở chi tiết sách: có đọc đối chiếu, không có nút dịch", async () => {
   const dom = makeDom("?mock=parallel");
   const byId = (id) => dom.window.document.getElementById(id);
   const { services, root, host } = await bootHomeApp(dom);
@@ -122,43 +122,43 @@ test("已翻译卡打开书籍详情:有对照阅读,无翻译按钮", async () 
   // mock 里 att-001/scl-002 等合成 book 是 succeeded 的已翻译文档
   const card = await waitFor(
     () => dom.window.document.querySelector('#recent-jobs-list .recent-job-item[data-library-only="false"][data-status="succeeded"]'),
-    "已翻译卡就位",
+    "Thẻ đã dịch đã sẵn sàng",
   );
   click(dom, card);
 
-  const dlg = await waitFor(() => byId("book-detail-dialog"), "书籍详情弹窗打开");
+  const dlg = await waitFor(() => byId("book-detail-dialog"), "Mở hộp thoại chi tiết sách");
   // 默认在「简介」：不应弹出工作流对话框
   assert.equal(
     services.stores.dialog.getSnapshot().open,
     false,
-    "打开书籍详情不得自动打开工作流弹窗",
+    "Mở chi tiết sách không được tự động mở hộp thoại workflow",
   );
   // 已翻译书默认落在「翻译」Tab；进度卡应立刻在 DOM
   await waitFor(
     () => dlg.querySelector(".book-detail-status")?.textContent?.includes("已完成"),
-    "显示已完成",
+    "Hiển thị trạng thái hoàn thành",
   );
-  const statusCard = await waitFor(() => byId("book-detail-job-status-card"), "翻译 Tab 内嵌 StatusCard");
-  assert.ok(statusCard.classList.contains("bd-job-status-card"), "详情专用进度卡");
-  assert.equal(statusCard.getAttribute("data-embedded"), "true", "embedded 模式");
+  const statusCard = await waitFor(() => byId("book-detail-job-status-card"), "StatusCard được nhúng trong tab dịch");
+  assert.ok(statusCard.classList.contains("bd-job-status-card"), "Thẻ tiến độ dành riêng cho chi tiết");
+  assert.equal(statusCard.getAttribute("data-embedded"), "true", "Chế độ embedded");
   assert.ok(
     statusCard.closest("#book-detail-panel-translate"),
-    "StatusCard 在翻译 Tab 面板内",
+    "StatusCard nằm trong bảng tab dịch",
   );
   // 书籍详情专用内部结构（bd-job-status-*），固定高度
-  assert.ok(statusCard.classList.contains("bd-job-status-card"), "bd-job-status-card 根类");
-  assert.ok(statusCard.querySelector(".bd-job-status-inner"), "独立 inner，非 status-card-shell");
-  assert.ok(statusCard.querySelector(".bd-job-status-main"), "固定高度主区");
+  assert.ok(statusCard.classList.contains("bd-job-status-card"), "Lớp gốc bd-job-status-card");
+  assert.ok(statusCard.querySelector(".bd-job-status-inner"), "inner độc lập, không phải status-card-shell");
+  assert.ok(statusCard.querySelector(".bd-job-status-main"), "Khu vực chính có chiều cao cố định");
   assert.ok(
     statusCard.querySelector(".status-stage-flow .status-stage-step"),
-    "含阶段流",
+    "Có luồng giai đoạn",
   );
-  assert.equal(statusCard.querySelector(".status-card-shell"), null, "不使用主流程 shell");
-  assert.equal(statusCard.querySelector(".status-progress-hero"), null, "不使用主流程 hero");
+  assert.equal(statusCard.querySelector(".status-card-shell"), null, "Không dùng shell của luồng chính");
+  assert.equal(statusCard.querySelector(".status-progress-hero"), null, "Không dùng hero của luồng chính");
   await waitFor(
     () => `${statusCard.getAttribute("data-status") || ""}` === "succeeded"
       || statusCard.querySelector(".status-stage-step.is-active, .status-stage-step.is-done"),
-    "StatusCard 进入完成/有阶段高亮",
+    "StatusCard hoàn thành/có giai đoạn được tô sáng",
   );
   const doneStep = statusCard.querySelector(
     '.status-stage-flow .status-stage-step[data-stage-key="done"]',
@@ -167,26 +167,26 @@ test("已翻译卡打开书籍详情:有对照阅读,无翻译按钮", async () 
     doneStep?.classList.contains("is-active")
       || doneStep?.classList.contains("is-selected")
       || doneStep?.classList.contains("is-done"),
-    "完成阶段高亮",
+    "Giai đoạn hoàn thành được tô sáng",
   );
   const valueText = statusCard.querySelector(".bd-job-status-value")?.textContent?.trim();
-  assert.ok(valueText && valueText !== "准备中", `完成态应有进度文案，实际: ${valueText}`);
+  assert.ok(valueText && valueText !== "Đang chuẩn bị", `Trạng thái hoàn thành phải có văn bản tiến độ, thực tế: ${valueText}`);
   // 详情进度卡已从 ring 改为 bar 布局（StatusCardEmbedded：.bd-job-status-percent）
   const pct = statusCard.querySelector(".bd-job-status-percent")?.textContent?.trim();
-  assert.equal(pct, "100%", "完成态进度条 100%");
+  assert.equal(pct, "100%", "Thanh tiến độ trạng thái hoàn thành 100%");
   assert.ok(
     statusCard.querySelector(".bd-job-status-bar.is-done"),
-    "完成态进度条 is-done",
+    "Thanh tiến độ trạng thái hoàn thành có is-done",
   );
   // 仍然不得弹工作流
   assert.equal(
     services.stores.dialog.getSnapshot().open,
     false,
-    "切换翻译 Tab / 加载进度后仍不打开工作流弹窗",
+    "Sau khi chuyển tab dịch / tải tiến độ vẫn không mở hộp thoại workflow",
   );
-  assert.ok(byId("book-detail-compare-btn"), "已翻译有对照阅读");
-  assert.equal(byId("book-detail-translate-btn"), null, "已翻译没有翻译按钮");
-  assert.ok(byId("book-detail-read-source-btn"), "仍可读原文");
+  assert.ok(byId("book-detail-compare-btn"), "Thẻ đã dịch có đọc đối chiếu");
+  assert.equal(byId("book-detail-translate-btn"), null, "Thẻ đã dịch không có nút dịch");
+  assert.ok(byId("book-detail-read-source-btn"), "Vẫn có thể đọc bản gốc");
 
   root.unmount();
   services.dispose();
