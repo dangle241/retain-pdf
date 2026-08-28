@@ -167,9 +167,9 @@ test("RecentJobsLibrary: tương tác thẻ (select / reader / xác nhận và h
 });
 
 test("RecentJobsLibrary: mắt thẻ = đọc nhanh (đã hoàn thành → đọc đối chiếu; thất bại không nguồn → không kích hoạt nhầm)", async () => {
-  // 卡片改为沿用 PDF_MD_lib 的 BookCard 后，导入/导出功能转入书籍详情弹窗中，卡片
-  // 只保留一个眼睛图标用于快速阅读：已完成的任务派发对照阅读，没有可读目标（失败且无 document_id）
-  // 点击时不派发任何内容（不再一路深入阅读器底部出错）。
+  // Thẻ đã chuyển sang dùng BookCard của PDF_MD_lib, chức năng nhập/xuất nằm trong popup chi tiết sách,
+  // thẻ chỉ giữ biểu tượng mắt để đọc nhanh: nhiệm vụ hoàn thành sẽ mở đọc đối chiếu, không có nguồn đọc (thất bại và không có document_id)
+  // khi nhấn sẽ không kích hoạt gì (không còn đi sâu vào trình đọc gây lỗi).
   const dom = makeDom("?mock=parallel");
   const { services, root, host } = await bootHomeApp(dom);
 
@@ -194,7 +194,7 @@ test("RecentJobsLibrary: mắt thẻ = đọc nhanh (đã hoàn thành → đọ
   await wait(30);
   assert.equal(readerDetail, null, "Thất bại và không có nguồn: nhấn mắt không kích hoạt openReaderRequested");
 
-  // 已完成 → 对照阅读
+  // Đã hoàn thành → đọc đối chiếu
   click(dom, cardOf("job-2").querySelector(".recent-job-reader"));
   await waitFor(() => readerDetail?.jobId === "job-2", "Đã hoàn thành nhấn mắt gửi đọc đối chiếu");
 

@@ -1191,7 +1191,7 @@ test("job status view model preserves status card snapshot fields", () => {
     progressCurrent: 100,
     progressTotal: 100,
     progressPercent: 100,
-    progressText: "已完成",
+    progressText: "Hoàn thành",
     progressUnit: "percent",
     progressIndeterminate: false,
     substageKey: "done",
@@ -1221,7 +1221,7 @@ test("job status view model preserves status card snapshot fields", () => {
   assert.deepEqual(snapshot, viewModel);
   assert.equal(viewModel.jobId, "job-status-model");
   assert.equal(viewModel.stageKey, "done");
-  assert.equal(viewModel.progressText, "已完成");
+  assert.equal(viewModel.progressText, "Hoàn thành");
   assert.equal(viewModel.errorText, "");
   assert.equal(viewModel.pdfReady, true);
 });
@@ -1282,7 +1282,7 @@ test("job status view model carries manifest actions and retry actions", () => {
       progressCurrent: 100,
       progressTotal: 100,
       progressPercent: 100,
-      progressText: "已完成",
+      progressText: "Hoàn thành",
       progressUnit: "percent",
       progressIndeterminate: false,
       substageKey: "done",
@@ -1297,7 +1297,7 @@ test("job status view model carries manifest actions and retry actions", () => {
   assert.equal(viewModel.stageRetryActions.translate.canRetry, true);
   assert.equal(viewModel.stageRetryActions.translate.stage, "translation");
   assert.equal(viewModel.stageRetryActions.render.canRetry, false);
-  assert.equal(viewModel.stageRetryActions.render.disabledReason, "等待翻译完成");
+  assert.equal(viewModel.stageRetryActions.render.disabledReason, "Đang chờ dịch xong");
 });
 
 test("live duration helpers use explicit timing inputs instead of runtime globals", () => {
@@ -1375,14 +1375,14 @@ test("job status view model accepts explicit finished-at fallback", () => {
     publicErrorText: "",
     finishedAtFallback: "2026-01-01T00:04:00Z",
     stagePresentation: {
-      label: "完成",
-      detail: "翻译 PDF 已生成",
+      label: "Hoàn thành",
+      detail: "PDF dịch đã tạo xong",
       stageKey: "done",
       visualStageKey: "done",
       progressCurrent: 100,
       progressTotal: 100,
       progressPercent: 100,
-      progressText: "已完成",
+      progressText: "Hoàn thành",
       progressUnit: "percent",
       progressIndeterminate: false,
       substageKey: "done",
@@ -1412,14 +1412,14 @@ test("job status view model does not read runtime finished-at fallback implicitl
     stageActions: null,
     publicErrorText: "",
     stagePresentation: {
-      label: "完成",
-      detail: "翻译 PDF 已生成",
+      label: "Hoàn thành",
+      detail: "PDF dịch đã tạo xong",
       stageKey: "done",
       visualStageKey: "done",
       progressCurrent: 100,
       progressTotal: 100,
       progressPercent: 100,
-      progressText: "已完成",
+      progressText: "Hoàn thành",
       progressUnit: "percent",
       progressIndeterminate: false,
       substageKey: "done",
