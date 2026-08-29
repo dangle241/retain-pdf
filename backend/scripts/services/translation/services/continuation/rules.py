@@ -7,7 +7,7 @@ TERMINAL_PUNCTUATION = (".", "!", "?", ":", ";")
 LOWER_START_RE = re.compile(r"^[a-z]")
 UPPER_START_RE = re.compile(r"^[A-Z]")
 HEADING_START_RE = re.compile(r"^(?:\(?\d+(?:\.\d+)*\)?[.)]?\s+|[A-Z][A-Z\s\-]{3,}|[•\-*]\s+)")
-# Multi-level section numbers like "2.2.1 Title" / "2.1 Lithium-halogen..." — not body continuations.
+    # Số thứ tự nhiều cấp như "2.2.1 Title" / "2.1 Lithium-halogen..." — không phải tiếp nối thân văn.
 SECTION_NUMBER_START_RE = re.compile(r"^\d+(?:\.\d+){1,}\s+[A-Z]")
 SOFT_BREAK_PUNCTUATION = (",",)
 CONTINUATION_START_WORDS = {
@@ -53,7 +53,7 @@ CONTINUATION_END_WORDS = {
     "many",
     "more",
     "less",
-    # Common mid-sentence cuts at column/page boundaries (SCI dual-column).
+    # Các câu bị cắt giữa chừng thường gặp tại ranh giới cột/trang (SCI hai cột).
     "under",
     "only",
     "into",
@@ -248,10 +248,10 @@ def is_reading_boundary_cross_page_pair(prev_item: dict, next_item: dict) -> boo
 
 
 def is_same_page_cross_column_pair(prev_item: dict, next_item: dict) -> bool:
-    """True when next item is the right-hand column peer of prev on the same page.
+    """Đúng khi mục tiếp theo là đối tượng cột bên phải của mục trước trên cùng trang.
 
-    Prefer layout_zone (stable for dual-column papers). BBox fallback allows a
-    narrow gutter: next may start only a few points to the right of prev.x1.
+    Ưu tiên layout_zone (ổn định cho bài báo hai cột). Fallback bbox cho phép
+    khe hẹp: mục tiếp theo có thể bắt đầu chỉ vài điểm bên phải prev.x1.
     """
     if not same_page(prev_item, next_item):
         return False

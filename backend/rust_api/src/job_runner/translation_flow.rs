@@ -97,7 +97,7 @@ async fn run_book_job_from_artifacts(
         &deps,
         job,
         &source_job_id,
-        "继续翻译并渲染",
+        "Tiếp tục dịch và kết xuất",
     )
     .await?;
     let job_paths = build_job_paths(&deps.persist.output_root, &job.job_id)?;

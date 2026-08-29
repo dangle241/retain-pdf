@@ -25,11 +25,11 @@ function makeDom(search) {
   globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
   // Radix Presence/Tabs (giới thiệu giai đoạn B) cần cancelAnimationFrame trong jsdom
   // (dọn dẹp bộ đếm thời gian hoạt ảnh mount của TabsContent) và getComputedStyle (đọc Presence
-  // animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
-  // 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。NodeFilter
-  // 是阶段 C(StatusDetailDialog 换 Radix Dialog)新增的需要——Dialog.Content 的
-  // FocusScope 用它做可聚焦元素树遍历(@radix-ui/react-focus-scope 的
-  // getTabbableCandidates),不是 Tabs 需要的。
+  // animation-name để xác định hoạt ảnh thoát đã kết thúc) — jsdom có sẵn trên window,
+  // chỉ chưa được sao chép ra global trần như requestAnimationFrame, nên bổ sung ở đây. NodeFilter
+  // là nhu cầu mới của giai đoạn C (StatusDetailDialog đổi sang Radix Dialog) — Dialog.Content
+  // FocusScope dùng nó để duyệt cây phần tử có thể focus (@radix-ui/react-focus-scope
+  // getTabbableCandidates), không phải Tabs cần.
   globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
   globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -135,7 +135,7 @@ test("StatusDetailDialog: chuyển đổi 4 tab + hợp đồng thuộc tính hi
     assert.ok(byId(dom, id), `契约 id 缺失：#${id}`);
   }
 
-  // 默认打开落在 overview,其余三个面板用 hidden 属性隐藏(不卸载)。
+  // Mặc định mở ở overview, ba panel còn lại dùng thuộc tính hidden để ẩn (không unmount).
   assert.equal(byId(dom, "detail-tab-overview").getAttribute("aria-selected"), "true");
   assert.equal(byId(dom, "detail-panel-overview").hidden, false);
   assert.equal(byId(dom, "detail-panel-failure").hidden, true);
@@ -168,7 +168,7 @@ test("StatusDetailDialog: chiếm chỗ màn hình đầu overview (đồng bộ
   const { services, root, host } = await bootHomeApp(dom);
   await openStatusDetailDialog(dom, services);
 
-  // 打开瞬间(同步链内)job-id 已经来自 currentJobStore 的占位快照,不是空白。
+  // Khi mở ra (trong chuỗi đồng bộ) job-id đã đến từ snapshot giữ chỗ của currentJobStore, không phải trống.
   assert.notEqual(byId(dom, "status-detail-job-id").textContent.trim(), "-");
   assert.notEqual(byId(dom, "status-detail-job-id").textContent.trim(), "");
 
@@ -199,7 +199,7 @@ test("StatusDetailDialog: StageHistoryList/EventsList có cấu trúc JSX render
   await waitFor(() => byId(dom, "overview-stage-list").querySelectorAll(".stage-history-item").length > 0, "阶段时间线渲染出条目");
   const stageItems = byId(dom, "overview-stage-list").querySelectorAll(".stage-history-item");
   assert.equal(byId(dom, "overview-stage-empty").classList.contains("hidden"), true);
-  // 逐条断言结构(索引/标题/耗时三个子节点都在),取代旧世界的 markup 字符串断言。
+  // Từng dòng assertion cấu trúc (ba nút con: chỉ số/tiêu đề/thời gian đều có), thay thế assertion chuỗi markup của thế giới cũ.
   stageItems.forEach((item, index) => {
     assert.equal(item.querySelector(".stage-history-index").textContent.trim(), `${index + 1}`);
     assert.ok(item.querySelector(".stage-history-title").textContent.trim().length > 0);
@@ -265,15 +265,15 @@ test("StatusDetailDialog: tab gỡ lỗi dịch —— tóm tắt/lọc/chọn/c
   assert.equal(byId(dom, "translation-provider-family").textContent.trim(), summary.provider_family);
 
   await waitFor(() => byId(dom, "translation-items-list").querySelectorAll(".translation-item-card").length === allItems.length, "item 列表渲染完成");
-  // 默认自动选中首条 item。
+  // Mặc định tự động chọn item đầu tiên.
   await waitFor(() => byId(dom, "translation-item-detail").classList.contains("hidden") === false, "首条 item 详情自动加载");
   assert.match(byId(dom, "translation-item-meta").textContent, new RegExp(allItems[0].item_id));
 
-  // 分页契约:mock 数据量小于 limit(20),prev/next 均应 disabled。
+  // Không phân trang: lượng dữ liệu mock nhỏ hơn limit(20), prev/next đều disabled.
   assert.equal(byId(dom, "translation-items-prev").disabled, true);
   assert.equal(byId(dom, "translation-items-next").disabled, true);
 
-  // 筛选:切到 kept_origin,列表收窄为该分类数量。
+  // Lọc: chuyển sang kept_origin, danh sách thu hẹp về số lượng phân loại này.
   const keptOriginItems = allItems.filter((item) => item.final_status === "kept_origin");
   selectOption(dom, byId(dom, "translation-filter-final-status"), "kept_origin");
   click(dom, byId(dom, "translation-filter-apply"));
@@ -282,7 +282,7 @@ test("StatusDetailDialog: tab gỡ lỗi dịch —— tóm tắt/lọc/chọn/c
     "筛选 kept_origin 后列表收窄",
   );
 
-  // 选中列表中的一条 item,断言详情面板切换。
+  // Chọn một item trong danh sách, assertion panel chi tiết chuyển.
   const secondCard = byId(dom, "translation-items-list").querySelectorAll(".translation-item-card")[
     keptOriginItems.length > 1 ? 1 : 0
   ];
@@ -290,7 +290,7 @@ test("StatusDetailDialog: tab gỡ lỗi dịch —— tóm tắt/lọc/chọn/c
   click(dom, secondCard);
   await waitFor(() => byId(dom, "translation-item-meta").textContent.includes(targetItemId), "点击选中另一条 item 更新详情");
 
-  // 重放当前 item。
+  // Phát lại item hiện tại.
   click(dom, byId(dom, "translation-item-replay"));
   await waitFor(() => byId(dom, "translation-replay-result").classList.contains("hidden") === false, "重放结果渲染");
   assert.match(byId(dom, "translation-replay-status").textContent, /重放完成|重放返回错误/);
@@ -308,7 +308,7 @@ test("StatusDetailDialog: nguồn dữ liệu độc lập — overview của st
 
   const detailSnapshot = services.statusDetail.store.getSnapshot();
   const cardSnapshot = services.statusCard.store.getSnapshot();
-  // 两个 store 是不同的实例(蓝图 §1.0 数据源铁律),各自持有 job 字段。
+  // Hai store là instance khác nhau (luật nguồn dữ liệu Blueprint §1.0), mỗi store giữ trường job.
   assert.notEqual(services.statusDetail.store, services.statusCard.store);
   assert.ok(detailSnapshot.overview.job, "status-detail 自行持有 job 原始数据");
   assert.ok(cardSnapshot.snapshot.job, "statusCardStore 也持有 job(并行读路径,互不依赖)");

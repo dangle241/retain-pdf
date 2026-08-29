@@ -42,7 +42,7 @@ FIXTURE_HEADERS = [
 def resolve_job_root(value: str) -> Path:
     raw = str(value or "").strip()
     if not raw:
-        raise RuntimeError("missing job_root")
+        raise RuntimeError("thiếu job_root")
     path = Path(raw).expanduser()
     if not path.is_absolute():
         path = (REPO_ROOT / "data" / "jobs" / raw).resolve()
@@ -211,7 +211,7 @@ def load_saved_translation_item(job_root_value: str, item_id: str, case_artifact
             fallback_job_root=str(job_root_value),
             item_id=item_id,
         )
-    raise RuntimeError(f"translation item not found: {job_root}/{item_id}")
+        raise RuntimeError(f"không tìm thấy mục dịch: {job_root}/{item_id}")
 
 
 def build_saved_case_snapshot(payload: dict[str, object]) -> dict[str, object]:

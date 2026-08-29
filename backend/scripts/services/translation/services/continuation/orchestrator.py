@@ -70,7 +70,7 @@ def review_candidate_continuation_pairs(
     pairs = candidate_continuation_pairs(flat_payload)
     boundary_pairs = _filter_boundary_candidate_pairs(flat_payload, pairs)
     if pairs and len(boundary_pairs) != len(pairs):
-        print(f"book: continuation review filtered {len(pairs)} -> {len(boundary_pairs)} boundary pairs", flush=True)
+        print(f"book: continuation review đã lọc {len(pairs)} -> {len(boundary_pairs)} cặp biên", flush=True)
     if not boundary_pairs:
         finalize_orchestration_metadata_by_page(page_payloads)
         return 0
@@ -88,7 +88,7 @@ def review_candidate_continuation_pairs(
         finalize_orchestration_metadata_by_page(page_payloads)
         if applied:
             save_pages_fn(page_payloads, translation_paths)
-            print(f"book: continuation review approved={applied} items from auto-joined pairs={len(auto_join_pairs)}", flush=True)
+            print(f"book: continuation review đã duyệt={applied} mục từ auto-joined pairs={len(auto_join_pairs)}", flush=True)
         return applied
 
     def chunked(seq: list[dict], size: int) -> list[list[dict]]:

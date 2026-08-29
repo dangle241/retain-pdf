@@ -32,16 +32,16 @@ def build_direct_typst_repair_messages(
         system_prompt = f"{system_prompt}\n\n文档术语和风格约束：\n{domain_guidance.strip()}"
     user_prompt = "\n".join(
         [
-            "原文：",
+            "Bản gốc:",
             _source_text(item),
             "",
-            "当前译文：",
+            "Bản dịch hiện tại:",
             str(broken_translation or "").strip(),
             "",
-            "校验错误：",
+            "Lỗi kiểm tra:",
             str(error_message or "").strip(),
             "",
-            "请只输出修复后的译文正文：",
+            "Chỉ xuất bản dịch đã sửa:",
         ]
     ).strip()
     return [

@@ -1,4 +1,4 @@
-"""Policy subsystem for translation payload filtering and mode control."""
+"""Hệ thống chính sách để lọc payload dịch và điều khiển chế độ."""
 
 from services.translation.services.policy.body_text_filter import find_narrow_body_noise_item_ids
 from services.translation.services.policy.config import TranslationPolicyConfig

@@ -67,13 +67,13 @@ pub async fn store_pdf_upload(
 
     if upload_max_bytes > 0 && byte_count > upload_max_bytes {
         return Err(AppError::bad_request(format!(
-            "当前服务限制：PDF 文件大小必须不超过 {:.2}MB",
+            "Giới hạn dịch vụ hiện tại: kích thước PDF phải không quá {:.2}MB",
             upload_max_bytes as f64 / 1024.0 / 1024.0
         )));
     }
     if upload_max_pages > 0 && page_count > upload_max_pages {
         return Err(AppError::bad_request(format!(
-            "当前服务限制：PDF 页数必须不超过 {} 页",
+            "Giới hạn dịch vụ hiện tại: số trang PDF phải không quá {} trang",
             upload_max_pages
         )));
     }

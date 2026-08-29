@@ -162,7 +162,7 @@ impl JobInit {
             trace_id: None,
             schema_version: None,
             stage: Some("queued"),
-            stage_detail: Some("渲染任务已创建，等待可用执行槽位"),
+            stage_detail: Some("Nhiệm vụ kết xuất đã được tạo, đang chờ khe thực thi khả dụng"),
         }
     }
 }

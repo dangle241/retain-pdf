@@ -125,7 +125,7 @@ def _run_render_source_prewarm(spec: RenderPrewarmSpec, manifest_path: Path) -> 
         emit_stage_progress(
             stage="render_preprocess",
             substage="render_prewarm",
-            message=f"渲染预热完成，mode={effective_render_mode} pages={len(spec.translated_pages)}",
+            message=f"Khởi động kết xuất hoàn tất, mode={effective_render_mode} pages={len(spec.translated_pages)}",
             progress_current=3,
             progress_total=3,
             elapsed_ms=int((time.perf_counter() - started) * 1000),
@@ -143,7 +143,7 @@ def _run_render_source_prewarm(spec: RenderPrewarmSpec, manifest_path: Path) -> 
         emit_stage_progress(
             stage="render_preprocess",
             substage="render_prewarm",
-            message=f"渲染预热失败：{type(exc).__name__}: {exc}",
+            message=f"Khởi động kết xuất thất bại:{type(exc).__name__}: {exc}",
             progress_current=3,
             progress_total=3,
             elapsed_ms=int((time.perf_counter() - started) * 1000),

@@ -150,13 +150,12 @@ def validate_placeholder_inventory(
     *,
     diagnostics: TranslationDiagnosticsCollector | None = None,
 ) -> None:
-    """Validate only the placeholder inventory of a translated text against its source.
+    """Chỉ kiểm kê placeholder của văn bản đã dịch so với nguồn.
 
-    Unlike ``validate_batch_result``, this does not re-run the english-residue,
-    empty-translation, protocol-shell, or math-delimiter checks, so it is safe to
-    call on text that is known to still contain english residue (e.g. from the
-    english-residue salvage path) without immediately re-raising
-    ``EnglishResidueError``.
+    Khác với ``validate_batch_result``, hàm này không chạy lại các kiểm tra
+    english-residue, empty-translation, protocol-shell hay math-delimiter,
+    nên an toàn khi gọi trên văn bản vẫn còn sót tiếng Anh (ví dụ từ luồng
+    cứu vớt english-residue) mà không lập tức ném lại ``EnglishResidueError``.
     """
 
     item_id = str(item.get("item_id", "") or "")
@@ -206,7 +205,7 @@ def validate_batch_result(
     if actual_ids != expected_ids:
         missing = sorted(expected_ids - actual_ids)
         extra = sorted(actual_ids - expected_ids)
-        raise ValueError(f"translation item_id mismatch: missing={missing} extra={extra}")
+        raise ValueError(f"item_id dịch không khớp: thiếu={missing} thừa={extra}")
 
     for item in batch:
         item_id = item["item_id"]
@@ -221,7 +220,7 @@ def validate_batch_result(
                     item_id=item_id,
                     page_idx=item.get("page_idx"),
                     severity="warning",
-                    message="Suspicious keep_origin for long English body text",
+                    message="keep_origin đáng ngờ cho đoạn văn bản tiếng Anh dài",
                     retryable=True,
                 )
             raise SuspiciousKeepOriginError(item_id, result)

@@ -84,7 +84,7 @@ def compile_book_overlay_pdf_chunks(
             emit_render_page_progress(
                 current=min(completed_pages, total_pages),
                 total=total_pages,
-                message=f"正在分片编译 Typst overlay，第 {min(completed_pages, total_pages)}/{total_pages} 页",
+                message=f"Đang biên dịch phân đoạn Typst overlay，第 {min(completed_pages, total_pages)}/{total_pages} trang",
                 payload={
                     "render_stage": "typst_chunked_book_compile",
                     "chunk_index": chunk_index,

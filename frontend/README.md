@@ -17,7 +17,7 @@
 
 The repository root also has `frontend-react/`: **independent Vite experiment/migration area**, port 40002, **does not replace** this directory. Daily development and releases use `frontend/` as the standard.
 
-## 常用命令
+## Các lệnh thường dùng
 
 ```bash
 npm run build        # css + js + stamp

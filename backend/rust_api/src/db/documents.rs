@@ -1074,25 +1074,25 @@ mod tests {
                 page_idx: 2,
                 block_id: "p003-b0001".to_string(),
                 source_text: "vibrationally resolved optical spectra".to_string(),
-                translated_text: "振动分辨光学光谱的有效计算方法".to_string(),
+                translated_text: "Phương pháp tính toán hiệu quả cho quang phổ quang học phân giải dao động".to_string(),
             }],
         )
         .expect("fts insert");
-        let hits = db.search_blocks("光学光谱", 10, None).expect("search zh");
+        let hits = db.search_blocks("quang phổ quang học", 10, None).expect("search vi");
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].document_id, hash);
         assert_eq!(hits[0].page_idx, 2);
         assert_eq!(hits[0].block_id, "p003-b0001");
         // 2 ký tự truy vấn vẫn khớp nhờ FTS5 tokenize='trigram'
-        let short_hits = db.search_blocks("光谱", 10, None).expect("search short");
+        let short_hits = db.search_blocks("quang phổ", 10, None).expect("search short");
         assert_eq!(short_hits.len(), 1);
         // Lọc theo document: document_id không tồn tại sẽ không có kết quả
         let scoped_miss = db
-            .search_blocks("光学光谱", 10, Some("no-such-doc"))
+            .search_blocks("quang phổ quang học", 10, Some("no-such-doc"))
             .expect("search scoped miss");
         assert!(scoped_miss.is_empty());
         let scoped_hit = db
-            .search_blocks("光学光谱", 10, Some(&hash))
+            .search_blocks("quang phổ quang học", 10, Some(&hash))
             .expect("search scoped hit");
         assert_eq!(scoped_hit.len(), 1);
         // Xây dựng lại Idempotency:Chỉ còn lại một hàng sau khi thay thế nó một lần nữa
@@ -1103,11 +1103,11 @@ mod tests {
                 page_idx: 2,
                 block_id: "p003-b0001".to_string(),
                 source_text: "updated".to_string(),
-                translated_text: "更新后的光学光谱".to_string(),
+                translated_text: "Quang phổ quang học đã cập nhật".to_string(),
             }],
         )
         .expect("fts rebuild");
-        let rebuilt = db.search_blocks("光学光谱", 10, None).expect("search rebuilt");
+        let rebuilt = db.search_blocks("quang phổ quang học", 10, None).expect("search rebuilt");
         assert_eq!(rebuilt.len(), 1);
         assert_eq!(rebuilt[0].job_id, "job-2");
     }
@@ -1124,20 +1124,20 @@ mod tests {
         let updated = db
             .update_document_fields(
                 &hash,
-                Some("光谱计算方法综述"),
+                Some("Tổng quan phương pháp tính toán quang phổ"),
                 Some("reading"),
-                Some(&["化学".to_string(), "光谱".to_string()]),
+                Some(&["Hóa học".to_string(), "Quang phổ".to_string()]),
             )
             .expect("patch");
-        assert_eq!(updated.title, "光谱计算方法综述");
+        assert_eq!(updated.title, "Tổng quan phương pháp tính toán quang phổ");
         assert_eq!(updated.reading_status, "reading");
-        assert_eq!(updated.tags, vec!["光谱".to_string(), "化学".to_string()]);
+        assert_eq!(updated.tags, vec!["Quang phổ".to_string(), "Hóa học".to_string()]);
         let filtered = db
-            .list_documents(10, 0, None, Some("化学"), None)
+            .list_documents(10, 0, None, Some("Hóa học"), None)
             .expect("list by tag");
         assert_eq!(filtered.len(), 1);
         let missed = db
-            .list_documents(10, 0, None, Some("生物"), None)
+            .list_documents(10, 0, None, Some("Sinh học"), None)
             .expect("list by other tag");
         assert!(missed.is_empty());
     }

@@ -39,7 +39,7 @@ function walkJsFiles(dir) {
 
 const jsFiles = SCAN_ROOTS.filter((root) => existsSync(root)).flatMap(walkJsFiles);
 
-test("retainpdf:* 事件名只允许定义在 contracts/app-contract.js", () => {
+test("Tên sự kiện retainpdf:* chỉ được định nghĩa trong contracts/app-contract.js", () => {
   const violations = [];
   for (const file of jsFiles) {
     if (file === EVENT_CONTRACT_FILE) {
@@ -81,6 +81,6 @@ test("命令总线与 CustomEvent 不允许裸字符串事件名", () => {
   assert.deepEqual(
     violations,
     [],
-    `发现裸字符串事件/命令名,请引用契约常量:\n  ${violations.join("\n  ")}`,
+    `Phát hiện tên sự kiện/lệnh chuỗi trần, vui lòng tham chiếu hằng số hợp đồng:\n  ${violations.join("\n  ")}`,
   );
 });

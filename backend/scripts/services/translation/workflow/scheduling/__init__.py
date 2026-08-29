@@ -1,5 +1,5 @@
-"""Translation batch scheduling and retry orchestration.
+"""Lên lịch lô dịch và phối hợp thử lại.
 
-This package is the future split point for queue allocation, worker pools,
-result draining, tail retry, and flush strategy.
+Gói này là điểm tách tương lai cho phân bổ hàng đợi, nhóm worker,
+xả kết quả, thử lại cuối và chiến lược flush.
 """

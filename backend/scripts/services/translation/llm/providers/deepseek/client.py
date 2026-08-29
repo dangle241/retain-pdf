@@ -227,7 +227,7 @@ def _read_streaming_chat_content(response: requests.Response) -> tuple[str, dict
         piece = _extract_stream_delta_text(data)
         if piece:
             chunks.append(piece)
-        # DeepSeek reports token usage on the final stream chunk.
+        # DeepSeek báo cáo mức sử dụng token trên đoạn stream cuối.
         chunk_usage = data.get("usage")
         if isinstance(chunk_usage, dict):
             usage = chunk_usage

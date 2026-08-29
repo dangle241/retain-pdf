@@ -58,7 +58,7 @@ def call_api(prompt: str, options: dict[str, Any] | None = None, context: dict[s
             replay_error["stderr"] = captured_stderr
             payload["replay_error"] = replay_error
         return {
-            "output": f"__REPLAY_ERROR__ {error_type}: {error_message}".strip(),
+            "output": f"__LỖI_PHÁT_LẠI__ {error_type}: {error_message}".strip(),
             "metadata": payload,
         }
     if captured_stderr:

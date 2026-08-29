@@ -11,14 +11,13 @@ from services.pipeline_shared.direct_typst_math import has_balanced_unescaped_do
 from services.translation.core.context import TranslationItemContext
 
 
-JSON_ONLY_INSTRUCTION = 'Return only valid JSON with the schema {"translations":[{"item_id":"...","translated_text":"..."}]}.'
-# Legacy Chinese prompt string: kept to maintain compatibility and remove
-# old version prompt templates.
+JSON_ONLY_INSTRUCTION = 'Chỉ trả về JSON hợp lệ với schema {"translations":[{"item_id":"...","translated_text":"..."}]}.'
+# Chuỗi prompt JSON cũ: giữ lại để duy trì khả năng tương thích và xóa các mẫu prompt phiên bản cũ.
 LEGACY_JSON_ONLY_INSTRUCTION_ZH = (
-    "Return only valid JSON with the following schema:\n"
+    "Chỉ trả về JSON hợp lệ với schema sau:\n"
     '{"translations":[{"item_id":"...","translated_text":"..."}]}'
 )
-DEFAULT_TARGET_LANGUAGE_NAME = "Simplified Chinese"
+DEFAULT_TARGET_LANGUAGE_NAME = "Tiếng Trung giản thể"
 SOURCE_TERMINAL_RE = re.compile(r"[.!?。！？；;:：)\]）】”’\"']\s*$")
 
 

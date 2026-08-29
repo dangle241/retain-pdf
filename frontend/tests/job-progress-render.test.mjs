@@ -103,7 +103,7 @@ test("resolveDisplayedStagePresentation preserves composite render prewarm progr
   assert.equal(presentation.progressCurrent, 5);
   assert.equal(presentation.progressTotal, 100);
   assert.equal(presentation.progressUnit, "percent");
-  assert.equal(presentation.progressText, "预热 2/4");
+  assert.equal(presentation.progressText, "Preheat 2/4");
 });
 
 test("resolveDisplayedStagePresentation accepts structured event progress objects", () => {
@@ -209,7 +209,7 @@ test("main render event does not advance an explicit translation snapshot", () =
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.progressText, "翻译批次完成");
+  assert.equal(presentation.progressText, "Hoàn thành lô dịch");
   assert.equal(presentation.progressUnit, "batch");
 });
 
@@ -270,7 +270,7 @@ test("render page progress is preferred over render step progress for historical
     },
   );
 
-  assert.equal(progressByKey.render.progressText, "正在编译 PDF");
+  assert.equal(progressByKey.render.progressText, "Đang biên dịch PDF");
   assert.equal(progressByKey.render.progressUnit, "percent");
   assert.equal(progressByKey.render.current, 85);
   assert.equal(progressByKey.render.total, 100);
@@ -384,7 +384,7 @@ test("render compile event without counts does not fall back to stale page progr
           progress: {
             unit: "step",
           },
-          stage_detail: "开始编译 PDF",
+          stage_detail: "Bắt đầu biên dịch PDF",
         },
       ],
     },
@@ -430,7 +430,7 @@ test("render progress compatibility API uses normalized event records", () => {
     { shouldReplaceCurrentStageProgress },
   );
 
-  assert.equal(progress.progressText, "第 25/100 页");
+  assert.equal(progress.progressText, "Trang 25/100");
   assert.equal(progress.progressUnit, "percent");
   assert.equal(progress.current, 28);
   assert.equal(progress.total, 100);
@@ -451,7 +451,7 @@ test("stage progress adapters own translation substage and render composite poli
     current: 10,
     total: 20,
     progressUnit: "batch",
-    progressText: "第 10/20 批",
+    progressText: "Lô 10/20",
     payload: { progress_unit: "batch", progress_current: 10, progress_total: 20 },
   }, {
     shouldReplaceCurrentStageProgress: replace,
@@ -463,7 +463,7 @@ test("stage progress adapters own translation substage and render composite poli
     current: 2,
     total: 5,
     progressUnit: "page",
-    progressText: "第 2/5 页",
+    progressText: "Trang 2/5",
     payload: { substage: "garbled_repair", progress_unit: "page", progress_current: 2, progress_total: 5 },
   }, {
     shouldReplaceCurrentStageProgress: replace,
@@ -471,8 +471,8 @@ test("stage progress adapters own translation substage and render composite poli
   });
 
   const translationProgress = translationAdapter.final(translationContext);
-  assert.equal(translationProgress.bySubstage.translation_batches.progressText, "第 10/20 批");
-  assert.equal(translationProgress.bySubstage.garbled_repair.progressText, "第 2/5 页");
+  assert.equal(translationProgress.bySubstage.translation_batches.progressText, "Lô 10/20");
+  assert.equal(translationProgress.bySubstage.garbled_repair.progressText, "Trang 2/5");
 
   const renderContext = {
     latest: null,
@@ -487,7 +487,7 @@ test("stage progress adapters own translation substage and render composite poli
     current: 50,
     total: 100,
     progressUnit: "page",
-    progressText: "第 50/100 页",
+    progressText: "Trang 50/100",
     payload: { progress_unit: "page", progress_current: 50, progress_total: 100 },
   }, {
     shouldReplaceCurrentStageProgress: replace,
@@ -499,7 +499,7 @@ test("stage progress adapters own translation substage and render composite poli
     current: 1,
     total: 2,
     progressUnit: "step",
-    progressText: "编译 1/2",
+    progressText: "Biên dịch 1/2",
     payload: { substage: "render_compile", progress_unit: "step", progress_current: 1, progress_total: 2 },
   }, {
     shouldReplaceCurrentStageProgress: replace,
@@ -507,13 +507,13 @@ test("stage progress adapters own translation substage and render composite poli
   });
 
   const renderProgress = renderAdapter.final(renderContext);
-  assert.equal(renderProgress.progressText, "正在编译 PDF");
+  assert.equal(renderProgress.progressText, "Đang biên dịch PDF");
   assert.equal(renderProgress.progressUnit, "percent");
   assert.equal(renderProgress.current, 90);
   assert.equal(renderProgress.total, 100);
-  assert.equal(renderProgress.bySubstage.render_pages.progressText, "第 50/100 页");
+  assert.equal(renderProgress.bySubstage.render_pages.progressText, "Trang 50/100");
   assert.equal(renderProgress.bySubstage.render_pages.current, 45);
-  assert.equal(renderProgress.bySubstage.render_compile.progressText, "正在编译 PDF");
+  assert.equal(renderProgress.bySubstage.render_compile.progressText, "Đang biên dịch PDF");
   assert.equal(renderProgress.bySubstage.render_compile.current, 90);
 });
 
@@ -542,16 +542,16 @@ test("render compile substage hides internal step count in substage progress", (
             current: 4,
             total: 4,
           },
-          stage_detail: "编译 4/4",
+          stage_detail: "Biên dịch 4/4",
         },
       ],
     },
   );
 
-  assert.equal(progressByKey.render.progressText, "渲染完成");
+  assert.equal(progressByKey.render.progressText, "Hoàn thành render");
   assert.equal(progressByKey.render.current, 100);
   assert.equal(progressByKey.render.total, 100);
-  assert.equal(progressByKey.render.bySubstage.render_compile.progressText, "渲染完成");
+  assert.equal(progressByKey.render.bySubstage.render_compile.progressText, "Hoàn thành render");
   assert.equal(progressByKey.render.bySubstage.render_compile.current, 100);
 });
 
@@ -593,7 +593,7 @@ test("render pages compose into percent progress before compile starts", () => {
 
   assert.equal(presentation.stageKey, "render");
   assert.equal(presentation.substageKey, "render_pages");
-  assert.equal(presentation.progressText, "第 18/34 页");
+  assert.equal(presentation.progressText, "Trang 18/34");
   assert.equal(presentation.progressCurrent, 47);
   assert.equal(presentation.progressTotal, 100);
   assert.equal(presentation.displayPercent, 47);

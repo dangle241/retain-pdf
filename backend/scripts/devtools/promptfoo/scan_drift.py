@@ -20,47 +20,47 @@ from devtools.replay_translation_item import replay_translation_item
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Replay selected translation items in a job and summarize policy drift."
+        description="Phát lại các mục dịch đã chọn trong một job và tóm tắt drift chính sách."
     )
     parser.add_argument(
         "--job-root",
         required=True,
-        help="Absolute job root path or job id under data/jobs.",
+        help="Đường dẫn job root tuyệt đối hoặc job id dưới data/jobs.",
     )
     parser.add_argument(
         "--saved-final-status",
         default="kept_origin",
-        help="Only scan saved items with this final_status. Use empty string to disable.",
+        help="Chỉ quét mục đã lưu có final_status này. Dùng chuỗi rỗng để tắt.",
     )
     parser.add_argument(
         "--saved-skip-reason",
         default="",
-        help="Only scan saved items with this skip_reason.",
+        help="Chỉ quét mục đã lưu có skip_reason này.",
     )
     parser.add_argument(
         "--page",
         type=int,
         default=None,
-        help="Only scan one page number (1-based).",
+        help="Chỉ quét một số trang (1-based).",
     )
     parser.add_argument(
         "--q",
         default="",
-        help="Case-insensitive substring matched against item id, source text, skip reason, or classification label.",
+        help="Chuỗi con không phân biệt hoa thường khớp với item id, source text, skip reason hoặc classification label.",
     )
-    parser.add_argument("--limit", type=int, default=20, help="Candidate limit after saved-side filtering.")
-    parser.add_argument("--offset", type=int, default=0, help="Candidate offset after saved-side filtering.")
+    parser.add_argument("--limit", type=int, default=20, help="Giới hạn ứng viên sau lọc saved-side.")
+    parser.add_argument("--offset", type=int, default=0, help="Offset ứng viên sau lọc saved-side.")
     parser.add_argument(
         "--all",
         dest="only_drifted",
         action="store_false",
         default=True,
-        help="Show all replayed candidates, not just drifted ones.",
+        help="Hiển thị tất cả ứng viên đã replay, không chỉ drifted.",
     )
     parser.add_argument(
         "--write-json",
         default="",
-        help="Optional path to write the JSON report.",
+        help="Đường dẫn tùy chọn để ghi báo cáo JSON.",
     )
     return parser.parse_args()
 

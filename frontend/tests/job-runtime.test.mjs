@@ -122,8 +122,8 @@ test("elapsed view model owns runtime duration text", () => {
     now: "2026-06-16T00:02:00Z",
   });
   assert.equal(viewModel.hasSnapshot, true);
-  assert.equal(viewModel.stageElapsedText, "1分 0秒");
-  assert.equal(viewModel.totalElapsedText, "2分 0秒");
+  assert.equal(viewModel.stageElapsedText, "1 phút 0 giây");
+  assert.equal(viewModel.totalElapsedText, "2 phút 0 giây");
 });
 
 test("fetchRecentJobEvents returns the latest event page for long jobs", async () => {
@@ -748,7 +748,7 @@ test("secondary resource scheduler port owns controller scheduling dependencies"
   assert.equal(patches.some((patch) => patch.source === "stageActions"), true);
   assert.equal(patches.find((patch) => patch.source === "events").context.events.items.at(-1).progress.current, 4);
   assert.equal(patches.find((patch) => patch.source === "manifest").context.manifest.requestedJobId, jobId);
-  // Resource phụ events không còn đẩy library (do poll chính phụ trách), tránh publish kép gây rung grid
+  // Tài nguyên phụ events không còn đẩy library (do poll chính phụ trách), tránh publish kép gây rung grid
   assert.deepEqual(libraryUpdates, []);
   assert.equal(portCalls.some((call) => call[0] === "cache" && call[1] === "events"), true);
   assert.equal(portCalls.some((call) => call[0] === "currentFor" && call[1] === jobId), true);
@@ -1336,14 +1336,14 @@ test("job runtime startPolling({ silent: true }) skips library create and workfl
 
   feature.startPolling("job-silent", { silent: true });
 
-  assert.deepEqual(libraryCreated, [], "silent 不 publishJobCreated");
-  assert.deepEqual(workflowCalls, [], "silent 不 setWorkflowSections");
+  assert.deepEqual(libraryCreated, [], "silent không publishJobCreated");
+  assert.deepEqual(workflowCalls, [], "silent không setWorkflowSections");
   // silent: thay đổi status/stage vẫn notify (nút xoay cover), nhưng không refresh toàn trang
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.ok(libraryUpdated.length >= 1, "silent 首帧/阶段变化应 notify 书架以驱动封面 loading");
+  assert.ok(libraryUpdated.length >= 1, "silent khung đầu/thay đổi giai đoạn nên notify kệ sách để điều khiển cover loading");
   assert.ok(
     libraryUpdated.every((job) => job.job_id === "job-silent"),
-    "silent notify 仅当前 job",
+    "silent notify chỉ job hiện tại",
   );
 });
 
@@ -1462,7 +1462,7 @@ test("secondary event refresh uses patch renderer instead of full job render", a
   assert.equal(patches.find((patch) => patch.source === "manifest").context.manifest.artifacts.length, 0);
   assert.equal(patches.find((patch) => patch.source === "stageActions").context.stageActions.actions.length, 0);
   assert.deepEqual(currentJobStateModule.currentJobSnapshot(runtimeState), job);
-  // Resource phụ events không còn đẩy library
+  // Tài nguyên phụ events không còn đẩy library
   assert.deepEqual(libraryUpdates, []);
 });
 

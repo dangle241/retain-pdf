@@ -29,8 +29,8 @@ test("readAiAskStream:sự kiện tool gọi lại theo thứ tự, sự kiện 
     ': keep-alive\n',
     'data: {"type": "tool", "round": 1, "tool": "list_documents", "arguments": {"limit": 200}}\r\n\r\n',
     'data: {"type": "tool", "round": 2, "tool": "search_f',
-    'ulltext", "arguments": {"query": "光谱"}}\n\n',
-    'data: {"type": "done", "answer": "结论 [1]。", "citations": [{"ref": 1, "document_id": "doc-1", "job_id": "job-1", "page_idx": 3, "block_id": "p004-b0002", "snippet": "命中片段"}], "tool_trace": [{"round": 1, "tool": "list_documents"}], "rounds": 3}\n\n',
+    'ulltext", "arguments": {"query": "quang phổ"}}\n\n',
+    'data: {"type": "done", "answer": "Kết luận [1].", "citations": [{"ref": 1, "document_id": "doc-1", "job_id": "job-1", "page_idx": 3, "block_id": "p004-b0002", "snippet": "Đoạn khớp"}], "tool_trace": [{"round": 1, "tool": "list_documents"}], "rounds": 3}\n\n',
   ]), {
     onToolEvent: (event) => toolEvents.push(event),
   });
@@ -39,7 +39,7 @@ test("readAiAskStream:sự kiện tool gọi lại theo thứ tự, sự kiện 
     [1, "list_documents"],
     [2, "search_fulltext"],
   ]);
-  assert.equal(result.answer, "结论 [1]。");
+  assert.equal(result.answer, "Kết luận [1].");
   assert.equal(result.rounds, 3);
   assert.equal(result.citations.length, 1);
   assert.deepEqual(result.citations[0], {
@@ -48,7 +48,7 @@ test("readAiAskStream:sự kiện tool gọi lại theo thứ tự, sự kiện 
     job_id: "job-1",
     page_idx: 3,
     block_id: "p004-b0002",
-    snippet: "命中片段",
+    snippet: "Đoạn khớp",
   });
   assert.equal(result.toolTrace.length, 1);
 });
@@ -57,9 +57,9 @@ test("readAiAskStream:sự kiện error ném AiAskError", async () => {
   await assert.rejects(
     readAiAskStream(sseStream([
       'data: {"type": "tool", "round": 1, "tool": "search_fulltext", "arguments": {}}\n\n',
-      'data: {"type": "error", "message": "上游模型超时"}\n\n',
+      'data: {"type": "error", "message": "Model thượng nguồn hết thời gian chờ"}\n\n',
     ])),
-    (error) => error instanceof AiAskError && /上游模型超时/.test(error.message),
+    (error) => error instanceof AiAskError && /Model thượng nguồn hết thời gian chờ/.test(error.message),
   );
 });
 
@@ -68,7 +68,7 @@ test("readAiAskStream:luồng bị gián đoạn (không có done) ném lỗi c�
     readAiAskStream(sseStream([
       'data: {"type": "tool", "round": 1, "tool": "read_blocks", "arguments": {}}\n\n',
     ])),
-    (error) => error instanceof AiAskError && /中断/.test(error.message),
+    (error) => error instanceof AiAskError && /Bị gián đoạn/.test(error.message),
   );
 });
 
@@ -85,7 +85,7 @@ test("askLibraryAi:mang theo X-API-Key, body chứa question/document_id/job_id/
   setRuntimeConfig({ xApiKey: "test-key" });
   const calls = [];
   const result = await askLibraryAi({
-    question: "这篇讲什么?",
+    question: "Tài liệu này nói về điều gì?",
     documentId: "doc-9",
     jobId: "job-9",
     fetchImpl: async (url, options) => {
@@ -93,13 +93,13 @@ test("askLibraryAi:mang theo X-API-Key, body chứa question/document_id/job_id/
       return {
         ok: true,
         headers: { get: () => "text/event-stream" },
-        body: sseStream(['data: {"type": "done", "answer": "答", "citations": [], "tool_trace": [], "rounds": 1}\n\n']),
+        body: sseStream(['data: {"type": "done", "answer": "Trả lời", "citations": [], "tool_trace": [], "rounds": 1}\n\n']),
       };
     },
   });
   setRuntimeConfig({ xApiKey: "" });
 
-  assert.equal(result.answer, "答");
+  assert.equal(result.answer, "Trả lời");
   assert.equal(calls.length, 1);
   const [url, options] = calls[0];
   assert.match(url, /\/api\/v1\/ai\/ask$/);
@@ -107,7 +107,7 @@ test("askLibraryAi:mang theo X-API-Key, body chứa question/document_id/job_id/
   assert.equal(options.headers["X-API-Key"], "test-key");
   assert.equal(options.headers["Content-Type"], "application/json");
   assert.deepEqual(JSON.parse(options.body), {
-    question: "这篇讲什么?",
+    question: "Tài liệu này nói về điều gì?",
     document_id: "doc-9",
     job_id: "job-9",
     stream: true,
@@ -148,13 +148,13 @@ test("askLibraryAi:400 thiếu LLM key thì truyền qua/đưa về văn bản c
         ok: false,
         status: 400,
         text: async () => JSON.stringify({
-          detail: "缺少 LLM API Key:请在前端凭据设置中填写模型 API Key。",
+          detail: "Thiếu LLM API Key: Vui lòng điền Model API Key trong cài đặt thông tin xác thực frontend.",
         }),
       }),
     }),
     (error) => error instanceof AiAskError
       && error.status === 400
-      && /LLM API Key|模型 API Key|凭据/.test(error.message),
+      && /LLM API Key|Model API Key|thông tin xác thực/.test(error.message),
   );
 });
 
@@ -164,32 +164,32 @@ test("askLibraryAi:bao bì JSON envelope phi luồng dự phòng giải nén", a
     fetchImpl: async () => ({
       ok: true,
       headers: { get: () => "application/json" },
-      json: async () => ({ code: 0, data: { answer: "非流式", citations: [], tool_trace: [], rounds: 2 } }),
+      json: async () => ({ code: 0, data: { answer: "Không streaming", citations: [], tool_trace: [], rounds: 2 } }),
     }),
   });
-  assert.equal(result.answer, "非流式");
+  assert.equal(result.answer, "Không streaming");
   assert.equal(result.rounds, 2);
 });
 
 // ===== ask-answerer:document_id tra ngược bộ nhớ cache và tiền tố scope =====
 
 test("buildScopedQuestion:phạm vi trang/vùng chọn ghi vào văn bản question bằng tiền tố", () => {
-  assert.equal(buildScopedQuestion({ question: "总结一下", scope: "document" }), "总结一下");
+  assert.equal(buildScopedQuestion({ question: "Tóm tắt", scope: "document" }), "Tóm tắt");
   assert.equal(
-    buildScopedQuestion({ question: "总结一下", scope: "page", context: { page: 4 } }),
+    buildScopedQuestion({ question: "Tóm tắt lại", scope: "page", context: { page: 4 } }),
     "(Trang hiện tại 4) Tóm tắt",
   );
   assert.equal(
     buildScopedQuestion({
-      question: "解释这段",
+      question: "Giải thích đoạn này",
       scope: "selection",
       context: { page: 2, rect: {} },
-      resolveQuote: () => ({ quoteText: "选中的  原文\n片段" }),
+      resolveQuote: () => ({ quoteText: "Đoạn văn bản gốc đã chọn\nĐoạn trích" }),
     }),
     "(Dành cho đoạn văn bản gốc đã chọn: «đoạn văn bản gốc đã chọn») Giải thích đoạn này",
   );
   assert.equal(
-    buildScopedQuestion({ question: "解释这段", scope: "selection", context: { page: 2 }, resolveQuote: () => null }),
+    buildScopedQuestion({ question: "Giải thích đoạn này", scope: "selection", context: { page: 2 }, resolveQuote: () => null }),
     "(Dành cho nội dung vùng chọn ở trang 2) Giải thích đoạn này",
   );
 });
@@ -220,7 +220,7 @@ test("chat:render trả lời agentic [n] trích dẫn có thể nhấp và chú
     job_id: "job-x",
     page_idx: 3,
     block_id: "p004-b0002",
-    snippet: "命中片段文本",
+    snippet: "Đoạn văn bản khớp",
   };
   const jumps = [];
   const progressTexts = [];
@@ -239,7 +239,7 @@ test("chat:render trả lời agentic [n] trích dẫn có thể nhấp và chú
           onToolEvent?.({ type: "tool", round: 1, tool: "search_fulltext" });
           progressTexts.push(documentRef.querySelector(".reader-ai-message-assistant .reader-ai-message-body-el").textContent);
           return {
-            answer: '答案见 [1]。<img src=x onerror="alert(1)">',
+            answer: 'Câu trả lời xem tại [1].<img src=x onerror="alert(1)">',
             citations: [citation],
             rounds: 2,
           };
@@ -282,7 +282,7 @@ test("chat:render trả lời agentic [n] trích dẫn có thể nhấp và chú
   refButton.click();
   const footerButtons = assistant.querySelectorAll(".reader-ai-citations .reader-ai-citation-item");
   assert.equal(footerButtons.length, 1);
-  assert.match(footerButtons[0].textContent, /^\[1\] 命中片段文本 · 第 4 页$/);
+  assert.match(footerButtons[0].textContent, /^\[1\] Đoạn văn bản khớp · Trang 4$/);
   footerButtons[0].click();
   assert.deepEqual(jumps, [citation, citation], "đánh dấu văn bản và nhấp chú thích đều nhảy cùng trích dẫn");
 });
@@ -301,7 +301,7 @@ test("ask answerer:tra job_id trực tiếp document_id và chỉ tra một lầ
     ask: async (payload) => {
       askCalls.push(payload);
       payload.onToolEvent?.({ type: "tool", round: 1, tool: "search_fulltext" });
-      return { answer: "回答", citations: [], toolTrace: [], rounds: 1 };
+      return { answer: "Trả lời", citations: [], toolTrace: [], rounds: 1 };
     },
   });
 
@@ -311,9 +311,9 @@ test("ask answerer:tra job_id trực tiếp document_id và chỉ tra một lầ
     scope: "document",
     onToolEvent: (event) => toolEvents.push(event),
   });
-  await answerer.answer({ question: "问题二", scope: "page", context: { page: 3 } });
+  await answerer.answer({ question: "Câu hỏi hai", scope: "page", context: { page: 3 } });
 
-  assert.equal(first.answer, "回答");
+  assert.equal(first.answer, "Trả lời");
   assert.equal(first.scope, "document");
   assert.equal(listCalls.length, 1, "kết quả tra document_id nên được cache");
   assert.deepEqual(listCalls[0][1], "job-b", "tra theo job_id");
@@ -331,11 +331,11 @@ test("ask answerer:tra ngược không thấy document thì fail closed, không 
     documentByJobId: async () => null,
     ask: async (payload) => {
       askCalls.push(payload);
-      return { answer: "不应调用", citations: [], toolTrace: [], rounds: 0 };
+      return { answer: "Không nên gọi", citations: [], toolTrace: [], rounds: 0 };
     },
   });
   await assert.rejects(
-    answerer.answer({ question: "这篇讲什么?", scope: "document" }),
+    answerer.answer({ question: "Tài liệu này nói về điều gì?", scope: "document" }),
     /Không thể liên kết với tài liệu hiện tại/,
   );
   assert.equal(askCalls.length, 0);
@@ -353,7 +353,7 @@ test("ask answerer:không có model Key thì không tra tài liệu, không gử
     },
     ask: async (payload) => {
       askCalls.push(payload);
-      return { answer: "不应调用", citations: [], toolTrace: [], rounds: 0 };
+      return { answer: "Không nên gọi", citations: [], toolTrace: [], rounds: 0 };
     },
   });
   await assert.rejects(
@@ -376,7 +376,7 @@ test("askLibraryAi mang theo llm_api_key/base/model, chỉ trường không null
     };
   };
   await askLibraryAi({
-    question: "问题",
+    question: "Câu hỏi",
     documentId: "doc-1",
     apiPrefix: "/api/v1",
     fetchImpl: fakeFetch,

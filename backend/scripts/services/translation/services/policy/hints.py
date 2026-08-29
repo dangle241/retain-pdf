@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TranslationPolicyHint:
-    """A non-destructive policy hint attached before model translation."""
+    """Gợi ý chính sách không phá hủy được đính kèm trước khi dịch bằng mô hình."""
 
     item_id: str
     structure_kind: str

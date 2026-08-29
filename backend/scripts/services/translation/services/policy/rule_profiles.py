@@ -26,7 +26,7 @@ class RuleProfileContext:
         if self.profile_text.strip():
             parts.append(self.profile_text.strip())
         if self.custom_rules_text.strip():
-            parts.append("User custom rules:\n" + self.custom_rules_text.strip())
+            parts.append("Quy tắc tùy chỉnh của người dùng:\n" + self.custom_rules_text.strip())
         return "\n\n".join(parts).strip()
 
 

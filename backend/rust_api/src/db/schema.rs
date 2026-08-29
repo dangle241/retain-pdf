@@ -71,7 +71,7 @@ const VERSIONED_MIGRATIONS: &[&str] = &[
     // —— Chỉ báo giá citations_json ảnh chụp nhanh, đừng job loại bỏ bảo vệ。
     r#"
     CREATE TABLE IF NOT EXISTS assets (
-        asset_id    TEXT PRIMARY KEY,          -- sha256(文件字节)
+        asset_id    TEXT PRIMARY KEY,          -- sha256(byte tệp)
         mime        TEXT NOT NULL,
         bytes       INTEGER NOT NULL,
         width       INTEGER,

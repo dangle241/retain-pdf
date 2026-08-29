@@ -58,4 +58,4 @@ for (const page of PAGES) {
   }
 }
 
-console.log(`[stamp-cache-version] 已更新 ${changed} 个 HTML 的资源缓存串`);
+console.log(`[stamp-cache-version] Đã cập nhật ${changed} chuỗi cache tài nguyên HTML`);

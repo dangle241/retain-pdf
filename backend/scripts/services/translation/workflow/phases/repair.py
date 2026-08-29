@@ -47,7 +47,7 @@ def run_garbled_reconstruction_stage(
         emit_stage_progress(
             stage="garbled_repair",
             substage="garbled_repair",
-            message="乱码候选段修复已跳过",
+            message="Bỏ qua sửa đoạn nhiễu loạn",
             progress_current=0,
             progress_total=0,
             payload={"skipped_by_repair_profile": True, "repair_profile": _repair_profile()},
@@ -59,7 +59,7 @@ def run_garbled_reconstruction_stage(
     emit_stage_transition(
         stage="garbled_repair",
         substage="garbled_repair",
-        message="开始修复乱码候选段",
+        message="Bắt đầu sửa đoạn nhiễu loạn",
         progress_current=0,
         progress_total=len(page_payloads),
     )
@@ -77,7 +77,7 @@ def run_garbled_reconstruction_stage(
         progress_callback=lambda current, total, dirty_pages: emit_stage_progress(
             stage="garbled_repair",
             substage="garbled_repair",
-            message=f"正在修复乱码候选段，第 {current}/{total} 项",
+            message=f"Đang sửa đoạn nhiễu loạn，thứ {current}/{total} mục",
             progress_current=current,
             progress_total=total,
             payload={
@@ -98,7 +98,7 @@ def run_garbled_reconstruction_stage(
     emit_stage_progress(
         stage="garbled_repair",
         substage="garbled_repair",
-        message="乱码候选段修复完成",
+        message="Sửa đoạn nhiễu loạn hoàn tất",
         progress_current=len(page_payloads),
         progress_total=len(page_payloads),
         elapsed_ms=int((time.perf_counter() - reconstruct_started) * 1000),
@@ -201,7 +201,7 @@ def run_agent_repair_stage(
     emit_stage_transition(
         stage="agent_repair",
         substage="agent_repair",
-        message="开始执行翻译结果修复",
+        message="Bắt đầu sửa kết quả dịch",
         progress_current=0,
         progress_total=repair_limit,
         payload={"blocking_untranslated": len(blocking_untranslated)},
@@ -254,7 +254,7 @@ def run_agent_repair_stage(
     emit_stage_progress(
         stage="agent_repair",
         substage="agent_repair",
-        message="翻译结果修复完成",
+        message="Sửa kết quả dịch hoàn tất",
         progress_current=summary["repaired_items"],
         progress_total=summary["candidate_items"],
         elapsed_ms=int((time.perf_counter() - repair_started) * 1000),
@@ -282,7 +282,7 @@ def run_final_untranslated_recovery_stage(
 ) -> dict[str, int]:
     target_language_name = str(
         getattr(translation_context, "target_language_name", "") if translation_context is not None else ""
-    ) or "简体中文"
+    ) or "Tiếng Việt"
     blocking_before = len(blocking_untranslated_items(page_payloads))
     if blocking_before <= 0:
         return {
@@ -296,7 +296,7 @@ def run_final_untranslated_recovery_stage(
     emit_stage_transition(
         stage="final_untranslated_recovery",
         substage="final_untranslated_recovery",
-        message="开始最终未翻译收口",
+        message="Bắt đầu thu gom phần chưa dịch cuối cùng",
         progress_current=0,
         progress_total=blocking_before,
         payload={
@@ -317,7 +317,7 @@ def run_final_untranslated_recovery_stage(
     emit_stage_progress(
         stage="final_untranslated_recovery",
         substage="final_untranslated_recovery",
-        message="最终未翻译收口完成",
+        message="Thu gom phần chưa dịch cuối cùng hoàn tất",
         progress_current=summary["attempted_items"],
         progress_total=blocking_before,
         elapsed_ms=int((time.perf_counter() - started) * 1000),

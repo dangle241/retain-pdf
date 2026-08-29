@@ -167,7 +167,7 @@ def _subscript_write_keys(node: ast.AST) -> list[str]:
 
 
 def gated_field_writes(tree: ast.AST) -> dict[str, list[int]]:
-    """trở lại AST Ghi vào các trường được kiểm soát trong:field -> Danh sách số dòng。"""
+    """Quay lại AST ghi vào các trường được kiểm soát: field -> danh sách số dòng."""
     writes: dict[str, list[int]] = {}
     for node in ast.walk(tree):
         for key in _subscript_write_keys(node):
@@ -187,5 +187,5 @@ def check_translation_payload_field_writers(errors: list[str]) -> None:
             for line in lines:
                 errors.append(
                     f"{rel_path}:{line}: Cấm ghi trực tiếp vào trường payload \"{field}\"; "
-                    f"hãy sử dụng {owner_hint}, hoặc cập nhật quy tắc cho owner sau khi thu gọn trong translation_field_writers.py"
+                    f"hãy sử dụng {owner_hint}, hoặc cập nhật quy tắc cho owner mới sau khi đã thu gọn trong translation_field_writers.py"
                 )

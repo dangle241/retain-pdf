@@ -148,8 +148,7 @@ test("HomeApp: hợp đồng id, chuỗi idle, hợp đồng sự kiện hộp t
   await waitFor(() => byId("library-add-pdf-btn").getAttribute("aria-expanded") === "true", "Kích hoạt đồng b�� aria của nút");
   assert.equal(byId("library-add-pdf-btn").dataset.workflowOpen, "1");
 
-  // ---- job-form 家族 + status 区占位契约 id(挂在工作流对话框内部,只有打开
-  //      过才存在于 DOM) ----
+  // ---- Họ job-form + vùng trạng thái chiếm chỗ hợp đồng id (treo bên trong hộp thoại workflow, chỉ tồn tại trong DOM sau khi đã mở) ----
   const workflowContractIds = [
     "translation-workflow-close-btn", "job-warning",
     "job-form", "ocr_provider", "paddle_token", "api_key",
@@ -163,14 +162,7 @@ test("HomeApp: hợp đồng id, chuỗi idle, hợp đồng sự kiện hộp t
     assert.ok(byId(id), `Thiếu id hợp đồng：#${id}`);
   }
 
-  // ---- 专业翻译对话框(PageRangeDialog,阶段 C 收官批换 Radix,不
-  //      forceMount,只有点开过才挂载于 DOM):点击 #page-range-btn 打开,
-  //      契约 id 逐一存在,关闭按钮点击后卸载。背板点击/Esc 的纯关闭语义
-  //      统一(顺手修的真实 bug:原来背板点击会触发 applyPageRanges(),Esc
-  //      走另一条只清 flag 的路径,两者不一致)靠 fresh Playwright 实测验证——
-  //      jsdom 下 Radix DismissableLayer 的 outside-pointerdown 检测不可靠,
-  //      同其余已迁移对话框的既有测试先例(credentials-dialog-component.test.mjs
-  //      等同样只在这里测挂载/关闭按钮,不测背板/Esc)。 ----
+  // ---- Hộp thoại dịch nâng cao (PageRangeDialog, lô cuối giai đoạn C chuyển sang Radix, không forceMount, chỉ gắn vào DOM sau khi đã nhấp mở): nhấp #page-range-btn để mở, các id hợp đồng tồn tại từng cái, sau khi nhấp nút đóng thì gỡ bỏ. Ngữ nghĩa đóng thuần túy của nhấp backdrop/Esc được thống nhất (nhân tiện sửa bug thật: trước đây nhấp backdrop sẽ kích hoạt applyPageRanges(), Esc đi theo đường khác chỉ xóa flag, hai cái không nhất quán) dựa vào kiểm thử Playwright mới — dưới jsdom việc phát hiện outside-pointerdown của Radix DismissableLayer không đáng tin cậy, giống như các tiền lệ kiểm thử đã di chuyển khác (credentials-dialog-component.test.mjs cũng chỉ kiểm tra gắn/nút đóng ở đây, không kiểm tra backdrop/Esc). ----
   assert.equal(byId("page-range-dialog"), null, "Không gắn khi chưa mở");
   click(byId("page-range-btn"));
   await waitFor(() => byId("page-range-dialog") !== null, "Mở hộp thoại dịch nâng cao");
@@ -183,7 +175,7 @@ test("HomeApp: hợp đồng id, chuỗi idle, hợp đồng sự kiện hộp t
   click(byId("page-range-close-btn"));
   await waitFor(() => byId("page-range-dialog") === null, "Gỡ hộp thoại sau khi nhấn nút đóng");
 
-  // ---- idle 复位链:上传瓦片回到默认态,提交按钮置灰 ----
+  // ---- Chuỗi reset idle: ô tải lên trở về trạng thái mặc định, nút submit bị vô hiệu hóa ----
   assert.equal(byId("file-label").textContent, "Nhấp chọn tệp hoặc kéo vào đây");
   assert.equal(byId("upload-help").textContent, "Chọn PDF, có thể dịch trực tiếp hoặc chỉ lưu vào kệ sách.");
   assert.equal(byId("submit-btn").disabled, true);
@@ -191,11 +183,11 @@ test("HomeApp: hợp đồng id, chuỗi idle, hợp đồng sự kiện hộp t
   assert.equal(byId("job-warning").classList.contains("hidden"), true);
   assert.equal(byId("status-section").classList.contains("hidden"), true);
 
-  // ---- setText("error-box") 通道:inline-error-box 显隐(对话框仍处于打开
-  //      状态,元素挂载中) ----
+  // ---- Kênh setText("error-box"): hiển thị/ẩn inline-error-box (hộp thoại vẫn đang mở,
+  //      phần tử đang được gắn) ----
   services.bridge.setText("error-box", "Lỗi kênh tải lên");
   await waitFor(() => byId("error-box-inline").classList.contains("hidden") === false, "Hiển thị hộp lỗi");
-  assert.match(byId("error-box-inline").textContent, /上传通道异常/);
+  assert.match(byId("error-box-inline").textContent, /Kênh tải lên bất thường/);
   services.bridge.setText("error-box", "-");
   await waitFor(() => byId("error-box-inline").classList.contains("hidden") === true, "Ẩn hộp lỗi");
 
@@ -206,8 +198,7 @@ test("HomeApp: hợp đồng id, chuỗi idle, hợp đồng sự kiện hộp t
   typeInput(byId("page-range-start"), "99");
   await waitFor(() => byId("page-range-start").value === "10", "Trang bắt đầu bị giới hạn bởi tổng số trang");
 
-  // ---- 状态区可见性 → 对话框模式同步(statusAreaVisibilityChanged 契约,
-  //      对话框全程保持打开,不需要重新点击"添加") ----
+  // ---- Khả năng hiển thị vùng trạng thái → đồng bộ chế độ hộp thoại (hợp đồng statusAreaVisibilityChanged, hộp thoại giữ mở suốt, không cần nhấp lại "Thêm") ----
   services.bridge.setWorkflowSections({ job_id: "job-1", status: "running" });
   await waitFor(() => byId("status-section").classList.contains("hidden") === false, "Hiển thị vùng trạng thái");
   await waitFor(() => dialog.classList.contains("is-status-mode"), "Hộp thoại chuyển sang chế độ trạng thái");
@@ -216,8 +207,7 @@ test("HomeApp: hợp đồng id, chuỗi idle, hợp đồng sự kiện hộp t
   await waitFor(() => byId("status-section").classList.contains("hidden") === true, "Ẩn vùng trạng thái");
   await waitFor(() => dialog.classList.contains("is-upload-mode"), "Hộp thoại quay lại chế độ tải lên");
 
-  // ---- 状态模式下点 × = 一次点击直接关闭(不再是两段式:不 returnHome、不
-  //      弹回上传表单;中止任务由 StatusCard 的"取消任务"按钮负责) ----
+  // ---- Nhấp × ở chế độ trạng thái = một lần nhấp đóng trực tiếp (không còn hai bước: không returnHome, không bật lại biểu mẫu tải lên; hủy tác vụ do nút "Hủy tác vụ" của StatusCard phụ trách) ----
   services.bridge.setWorkflowSections({ job_id: "job-2", status: "running" });
   await waitFor(() => dialog.classList.contains("is-status-mode"), "Quay lại chế độ trạng thái");
   let returnHomeCount = 0;
@@ -229,18 +219,17 @@ test("HomeApp: hợp đồng id, chuỗi idle, hợp đồng sự kiện hộp t
   assert.equal(events.close, closesBefore + 1, "Đóng ở chế độ trạng thái nên phát một sự kiện closeTranslationWorkflow");
   assert.equal(dom.window.document.documentElement.classList.contains("translation-workflow-open"), false);
 
-  // ---- Escape 关闭路径(重新打开→Escape,验证 Escape 也一次到位、且经
-  //      closeTranslationWorkflow 事件,3b 库刷新恢复依赖) ----
+  // ---- Đường dẫn đóng bằng Escape (mở lại → Escape, xác minh Escape cũng hoàn tất một lần và qua sự kiện closeTranslationWorkflow, thư viện 3b làm mới khôi phục phụ thuộc) ----
   click(byId("library-add-pdf-btn"));
   await waitFor(() => byId("translation-workflow-dialog") !== null, "Mở lại (chế độ tải lên)");
   dom.window.document.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   await waitFor(() => byId("translation-workflow-dialog") === null, "Escape đóng hộp thoại");
   assert.equal(events.close, closesBefore + 2, "Escape đóng phải qua APP_EVENTS.closeTranslationWorkflow");
 
-  // ---- 关闭按钮路径(重新打开后走关闭按钮;顺带验证 openUpload 的会话复位) ----
+  // ---- Đường dẫn nút đóng (sau khi mở lại đi qua nút đóng; thuận tiện xác minh việc đặt lại phiên của openUpload) ----
   click(byId("library-add-pdf-btn"));
   await waitFor(() => byId("translation-workflow-dialog") !== null, "Mở lại");
-  // openUpload 会复位上传会话(uploadId 清空)
+  // openUpload sẽ đặt lại phiên tải lên (uploadId được xóa trống)
   assert.equal(services.ports.uploadStatePort.getSnapshot().uploadId, "");
   dialog = byId("translation-workflow-dialog");
   click(byId("translation-workflow-close-btn"));
@@ -265,7 +254,7 @@ test("HomeApp: phân cột thư viện/bộ sưu tập/yêu thích + hộp tho�
   await waitFor(() => byId("app-shell"), "HomeApp render khung đầu tiên");
   await wait(0);
 
-  // ---- 分栏契约:四个 tab 都在,默认落在图书馆 ----
+  // ---- Hợp đồng phân cột: cả bốn tab đều có, mặc định rơi vào thư viện ----
   assert.ok(byId("library-top-tab-library"), "Thiếu id hợp đồng：#library-top-tab-library");
   assert.ok(byId("library-top-tab-categories"), "Thiếu id hợp đồng：#library-top-tab-categories");
   assert.ok(byId("library-top-tab-favorites"), "Thiếu id hợp đồng：#library-top-tab-favorites");
@@ -276,7 +265,7 @@ test("HomeApp: phân cột thư viện/bộ sưu tập/yêu thích + hộp tho�
   assert.equal(byId("home-ask-view"), null, "Mặc định không gắn kết chế độ xem hỏi đáp AI");
   assert.ok(byId("library-search-input"), "Hộp tìm kiếm nên hiển thị trong tab thư viện");
 
-  // ---- 切到合集:图书馆网格卸载,合集视图挂载,搜索框隐藏 ----
+  // ---- Chuyển sang bộ sưu tập: lưới thư viện được gỡ, chế độ xem bộ sưu tập được gắn, hộp tìm kiếm ẩn ----
   click(byId("library-top-tab-categories"));
   await waitFor(() => byId("categories-view") !== null, "Gắn kết chế độ xem bộ sưu tập");
   assert.equal(byId("library-view"), null, "Sau khi chuyển sang bộ sưu tập, chế độ xem thư viện nên được gỡ bỏ");
@@ -284,7 +273,7 @@ test("HomeApp: phân cột thư viện/bộ sưu tập/yêu thích + hộp tho�
   assert.equal(byId("library-search-input"), null, "Hộp tìm kiếm nên ẩn trong tab bộ sưu tập");
   assert.ok(byId("categories-create-btn"), "Thiếu id hợp đồng：#categories-create-btn");
 
-  // ---- 新建合集对话框:挂载/契约 id/关闭卸载 ----
+  // ---- Hộp thoại tạo bộ sưu tập mới: gắn/id hợp đồng/đóng và gỡ ----
   assert.equal(byId("collection-manage-dialog"), null, "Không gắn khi chưa mở");
   click(byId("categories-create-btn"));
   await waitFor(() => byId("collection-manage-dialog") !== null, "Mở hộp thoại quản lý bộ sưu tập");
@@ -295,26 +284,26 @@ test("HomeApp: phân cột thư viện/bộ sưu tập/yêu thích + hộp tho�
   click(byId("collection-manage-close-btn"));
   await waitFor(() => byId("collection-manage-dialog") === null, "Gỡ hộp thoại sau khi nhấn nút đóng");
 
-  // ---- 切到收藏:合集卸载,收藏视图挂载,搜索框仍隐藏 ----
+  // ---- Chuyển sang yêu thích: bộ sưu tập được gỡ, chế độ xem yêu thích được gắn, hộp tìm kiếm vẫn ẩn ----
   click(byId("library-top-tab-favorites"));
   await waitFor(() => byId("favorites-view") !== null, "Gắn chế độ xem yêu thích");
   assert.equal(byId("categories-view"), null, "Sau khi chuyển sang yêu thích, chế độ xem bộ sưu tập nên được gỡ bỏ");
   assert.equal(byId("library-view"), null, "Tab yêu thích nên gỡ chế độ xem thư viện");
   assert.equal(byId("library-search-input"), null, "Hộp tìm kiếm nên ẩn trong tab yêu thích");
-  // 加载中 / 空态 / 列表 / 错误 四者之一
+  // Một trong bốn trạng thái: đang tải / trống / danh sách / lỗi
   await waitFor(
     () => byId("favorites-loading") || byId("favorites-empty") || byId("favorites-list") || byId("favorites-error"),
     "Chế độ xem yêu thích nên ở một trong các trạng thái loading/trống/danh sách/lỗi",
   );
 
-  // ---- 切到 AI 问答:收藏卸载,AI 视图挂载 ----
+  // ---- Chuyển sang hỏi đáp AI: yêu thích được gỡ, chế độ xem AI được gắn ----
   click(byId("library-top-tab-ask"));
   await waitFor(() => byId("home-ask-view") !== null, "Gắn chế độ xem hỏi đáp AI");
   assert.equal(byId("favorites-view"), null, "Tab AI nên gỡ chế độ xem yêu thích");
   assert.equal(byId("library-view"), null, "Tab AI nên gỡ chế độ xem thư viện");
   assert.equal(byId("library-search-input"), null, "Hộp tìm kiếm nên ẩn trong tab AI");
 
-  // ---- 切回图书馆:收藏/AI 卸载,图书馆网格与搜索框恢复 ----
+  // ---- Quay lại thư viện: yêu thích/AI được gỡ, lưới thư viện và hộp tìm kiếm được khôi phục ----
   click(byId("library-top-tab-library"));
   await waitFor(() => byId("library-view") !== null, "Quay lại thư viện");
   assert.equal(byId("categories-view"), null, "Sau khi quay lại thư viện, chế độ xem bộ sưu tập nên được gỡ bỏ");
@@ -328,10 +317,7 @@ test("HomeApp: phân cột thư viện/bộ sưu tập/yêu thích + hộp tho�
 });
 
 test("HomeApp: chuyển nhanh mục tiêu chỉnh sửa trong hộp thoại quản lý phân loại không bị phản hồi muộn ghi đè (hồi quy)", async () => {
-  // 回归覆盖:CollectionManageDialog 的 open-effect 曾经没有 cancelled 守卫——
-  // 快速为 A 打开对话框、关闭、再为 B 打开,如果 A 的网络请求比 B 的晚
-  // resolve(真实网络下完全可能发生的乱序),会把正在显示 B 的表单勾选状态
-  // 覆盖回 A 的旧数据。用可控 resolve 顺序的假 controller 复现这个乱序。
+  // Bao phủ hồi quy: open-effect của CollectionManageDialog trước đây không có guard cancelled — nhanh chóng mở hộp thoại cho A, đóng, rồi mở cho B, nếu yêu cầu mạng của A resolve muộn hơn B (trật tự hỗn loạn hoàn toàn có thể xảy ra dưới mạng thật), sẽ ghi đè trạng thái chọn của biểu mẫu đang hiển thị B trở lại dữ liệu cũ của A. Dùng controller giả với thứ tự resolve kiểm soát được để tái hiện trật tự hỗn loạn này.
   const host = dom.window.document.createElement("div");
   host.id = "home-root-race";
   dom.window.document.body.appendChild(host);
@@ -367,7 +353,7 @@ test("HomeApp: chuyển nhanh mục tiêu chỉnh sửa trong hộp thoại qu�
   await waitFor(() => byId("collection-name-input")?.value === "B", "Chuyển sang B");
   await wait(0);
 
-  // 乱序 resolve:B(doc-1 不属于 B)先到,A(doc-1 属于 A)后到。
+  // Resolve trật tự hỗn loạn: B (doc-1 không thuộc B) đến trước, A (doc-1 thuộc A) đến sau.
   memberResolvers["col-b"]([]);
   await wait(10);
   const checkboxAfterB = dom.window.document.querySelector("#collection-manage-dialog input[type=checkbox]");
@@ -384,9 +370,9 @@ test("HomeApp: chuyển nhanh mục tiêu chỉnh sửa trong hộp thoại qu�
   host.remove();
 });
 
-test("HomeApp：3b 回调桥接口定型(蓝图 §4)", () => {
+test("HomeApp: định hình interface cầu nối callback 3b (blueprint §4)", () => {
   const services = createServices();
-  // mountJobRuntimeFeature / status-detail / credentials 接线所需的回调名
+  // Tên callback cần thiết cho việc kết nối mountJobRuntimeFeature / status-detail / credentials
   const bridgeContract = [
     "setText",
     "setWorkflowSections",
@@ -403,9 +389,9 @@ test("HomeApp：3b 回调桥接口定型(蓝图 §4)", () => {
     "submitForm",
   ];
   for (const name of bridgeContract) {
-    assert.equal(typeof services.bridge[name], "function", `bridge.${name} 缺失`);
+    assert.equal(typeof services.bridge[name], "function", `Thiếu bridge.${name}`);
   }
-  // 3b workflow-open-port 注入口
+  // Điểm tiêm workflow-open-port 3b
   assert.equal(typeof services.workflowDialog.isOpen, "function");
   assert.equal(services.workflowDialog.isOpen(), false);
   services.dispose();

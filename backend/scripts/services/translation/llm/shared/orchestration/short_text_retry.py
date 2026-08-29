@@ -43,16 +43,16 @@ def translate_empty_short_text_retry(
     if not should_retry_empty_short_text(item):
         return None
     source = _source_text(item)
-    target_language_name = str(getattr(context, "target_language_name", "") or "简体中文")
+    target_language_name = str(getattr(context, "target_language_name", "") or "Tiếng Việt")
     request_fn = request_chat_content_fn or provider_runtime.request_chat_content
     content = request_fn(
         [
             {
                 "role": "system",
                 "content": (
-                    f"Translate the given short scientific sentence into {target_language_name}.\n"
-                    "Preserve inline LaTeX math exactly, including dollar signs.\n"
-                    "Output only the translated sentence. Do not output an empty response."
+                    f"Dịch câu khoa học ngắn đã cho sang {target_language_name}.\n"
+                    "Giữ nguyên toán học LaTeX nội dòng, bao gồm cả dấu dollar.\n"
+                    "Chỉ xuất ra câu đã dịch. Không xuất ra phản hồi trống."
                 ),
             },
             {

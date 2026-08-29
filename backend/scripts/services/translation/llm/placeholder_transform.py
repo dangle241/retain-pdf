@@ -145,12 +145,12 @@ def placeholder_stability_guidance(item: dict, source_sequence: list[str]) -> st
     if not source_sequence:
         return ""
     return (
-        "Placeholder safety rules for this item:\n"
-        f"- Allowed placeholders exactly: {', '.join(source_sequence)}\n"
-        f"- Placeholder sequence in source_text: {' -> '.join(source_sequence)}\n"
-        "- Keep placeholders as atomic tokens.\n"
-        "- Do not invent, renumber, duplicate, omit, split, or reorder placeholders.\n"
-        "- If a placeholder stands for a whole formula or expression, keep that placeholder as one unit."
+        "Quy tắc an toàn placeholder cho mục này:\n"
+        f"- Placeholder được phép chính xác: {', '.join(source_sequence)}\n"
+        f"- Thứ tự placeholder trong source_text: {' -> '.join(source_sequence)}\n"
+        "- Giữ placeholder là token nguyên tử.\n"
+        "- Không tự tạo, đổi số, nhân đôi, bỏ sót, tách hoặc đổi thứ tự placeholder.\n"
+        "- Nếu placeholder đại diện cho toàn bộ công thức hay biểu thức, hãy giữ placeholder đó là một đơn vị."
     )
 
 

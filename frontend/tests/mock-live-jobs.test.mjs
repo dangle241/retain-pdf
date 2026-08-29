@@ -62,7 +62,7 @@ test("live mock fromStage=translate starts at translation, not upload/ocr", () =
   assert.equal(at0.status, "running");
   assert.equal(at0.stage, "translating");
   assert.equal(at0.display_stage, "translation");
-  assert.match(`${at0.stage_detail}`, /翻译/);
+  assert.match(`${at0.stage_detail}`, /dịch/);
 
   // Bỏ ocr nên thời gian ngắn hơn: khoảng 7s dịch + 3s render
   const mid = buildLiveMockJobPayload(jobId, startedAtMs + 8_000);
@@ -109,7 +109,7 @@ test("translateMockDocument wires live payload via getMockJobPayload", () => {
 
   const early = getMockJobPayload(result.job_id);
   assert.equal(early.job_id, result.job_id);
-  assert.notEqual(early.status, "succeeded", "刚提交不应立刻 succeeded");
+  assert.notEqual(early.status, "succeeded", "Vừa submit không nên succeeded ngay");
   assert.ok(
     ["queued", "ocr_processing", "translating"].includes(`${early.stage}`),
     `early stage=${early.stage}`,
@@ -117,7 +117,7 @@ test("translateMockDocument wires live payload via getMockJobPayload", () => {
 
   assert.throws(
     () => translateMockDocument(targetId),
-    /409|翻译流程中/,
+    /409|Đang trong quy trình dịch/,
   );
 
   // Sau trạng thái cuối cùng, cho phép submit lại

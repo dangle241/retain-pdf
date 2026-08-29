@@ -140,7 +140,7 @@ function mockGlossaryApi(overrides = {}) {
       calls.parseGlossaryCsv.push(csvText);
       return {
         entry_count: 1,
-        entries: [{ source: "parsed-term", target: "解析术语", level: "canonical", match_mode: "case_insensitive", context: "", note: "" }],
+        entries: [{ source: "parsed-term", target: "Thuật ngữ phân tích", level: "canonical", match_mode: "case_insensitive", context: "", note: "" }],
       };
     },
     refreshWorkflowGlossaries: async (options) => {

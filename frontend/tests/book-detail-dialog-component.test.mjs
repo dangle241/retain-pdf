@@ -39,7 +39,7 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-  assert.fail(`等待超时：${description}`);
+  assert.fail(`Hết thời gian chờ：${description}`);
 }
 
 function click(dom, element) {
@@ -86,7 +86,7 @@ test("Thẻ lưu trữ mở chi tiết sách: metadata + chuyển trạng thái 
 
   const dlg = await waitFor(() => byId("book-detail-dialog"), "Mở hộp thoại chi tiết sách");
   // Tiêu đề mặc định là tiêu đề lớn chỉ đọc (không phải ô nhập thường trực), chỉnh sửa mới hiện ô nhập
-  await waitFor(() => dlg.querySelector(".book-detail-title")?.textContent?.trim(), "标题就位");
+  await waitFor(() => dlg.querySelector(".book-detail-title")?.textContent?.trim(), "Tiêu đề đã sẵn sàng");
   assert.equal(byId("book-detail-title-input"), null, "Mặc định chỉ đọc, không có ô nhập tiêu đề");
   assert.ok(dlg.querySelector(".book-detail-status")?.textContent.includes("Chưa dịch"), "Mục lưu trữ hiển thị Chưa dịch");
   // Chưa dịch: trạng thái trống nhẹ + xem trước StageFlow (chưa có job thật, không nhúng StatusCard đầy đủ)

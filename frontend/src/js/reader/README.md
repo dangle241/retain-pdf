@@ -12,7 +12,7 @@ The default product path is now **react-pdf** (`pages/reader/ReaderAppReactPdf`)
 | **Legacy engine** | `pdf-controller`, `pdf-renderer`, `viewer-mount-flow`, `selection-favorites`, `favorites/**`, `region-*`, chrome/mode… | Only `pages/reader/legacy/**` |
 | **Legacy AI** | `ai/ask-answerer`, `ai/chat-history-store`, `markdown-render`… | `legacy/ai`, `use-reader-boot` |
 
-## 已删除
+## Đã xóa
 
 | File | Description |
 |------|------|

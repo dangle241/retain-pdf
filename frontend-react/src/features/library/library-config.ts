@@ -178,9 +178,9 @@ export const libraryCopy = {
     ] satisfies LibrarySettingsSectionView[],
   },
   devPreview: {
-    title: 'Component Preview',
-    topBarTitle: 'Top Bar',
-    bookCardsTitle: 'Book Cards',
-    statusTitle: 'Status Card',
+    title: 'Xem trước thành phần',
+    topBarTitle: 'Thanh trên cùng',
+    bookCardsTitle: 'Thẻ sách',
+    statusTitle: 'Thẻ trạng thái',
   },
 }

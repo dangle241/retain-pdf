@@ -263,6 +263,6 @@ $("#copy-btn").addEventListener("click", () => navigator.clipboard.writeText($("
 $("#reset-btn").addEventListener("click", () => {
   draft.clear();
   iroot().removeAttribute("style");
-  $("#dirty-count").textContent = "0 项改动";
+  $("#dirty-count").textContent = "0 thay đổi";
   renderPanel();
 });

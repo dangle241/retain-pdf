@@ -167,7 +167,7 @@ def _emit_page_spec_progress(completed: int, total_pages: int, page_index: int) 
     emit_render_page_progress(
         current=completed,
         total=total_pages,
-        message=f"正在准备渲染页面，第 {completed}/{total_pages} 页",
+        message=f"Đang chuẩn bị trang kết xuất，第 {completed}/{total_pages} trang",
         payload={
             "render_stage": "layout_page_specs",
             "page_index": page_index,
@@ -300,7 +300,7 @@ def _compile_render_pages_pdf_resilient(
         emit_render_compile_progress(
             current=1,
             total=4,
-            message=f"正在编译整本 Typst 渲染，共 {len(page_specs)} 页",
+            message=f"Đang biên dịch toàn bộ kết xuất Typst，共 {len(page_specs)} trang",
             payload={"render_stage": "background_typst_compile_start"},
         )
         compiled_path = compile_typst_render_pages_pdf(
@@ -315,7 +315,7 @@ def _compile_render_pages_pdf_resilient(
         emit_render_compile_progress(
             current=4,
             total=4,
-            message=f"整本 Typst 渲染编译完成，共 {len(page_specs)} 页",
+            message=f"Biên dịch kết xuất Typst toàn bộ hoàn tất，共 {len(page_specs)} trang",
             payload={"render_stage": "background_typst_compile_done"},
         )
         return compiled_path, diagnostics
@@ -328,7 +328,7 @@ def _compile_render_pages_pdf_resilient(
         emit_render_compile_progress(
             current=2,
             total=5,
-            message="整本 Typst 渲染编译失败，开始定位不兼容页面",
+            message="Biên dịch kết xuất Typst toàn bộ thất bại, bắt đầu xác định trang không tương thích",
             payload={"render_stage": "background_typst_compile_failed"},
         )
         locate_started = time.perf_counter()
@@ -344,10 +344,10 @@ def _compile_render_pages_pdf_resilient(
         diagnostics["background_bad_page_locate_elapsed_seconds"] = time.perf_counter() - locate_started
         if failed_page_indices and len(failed_page_indices) <= _BACKGROUND_SANITIZE_ALL_THRESHOLD:
             sanitize_page_indices: set[int] | None = set(failed_page_indices)
-            message = f"已定位 {len(failed_page_indices)} 个 Typst 不兼容页面，开始定向修复"
+            message = f"Đã xác định {len(failed_page_indices)} trang Typst không tương thích, bắt đầu sửa có hướng"
         else:
             sanitize_page_indices = None
-            message = "无法小范围定位 Typst 不兼容页面，开始全量修复"
+            message = "Không thể xác định nhỏ trang Typst không tương thích, bắt đầu sửa toàn bộ"
         emit_render_compile_progress(
             current=3,
             total=5,
@@ -377,7 +377,7 @@ def _compile_render_pages_pdf_resilient(
         emit_render_compile_progress(
             current=4,
             total=5,
-            message="Typst 不兼容页面检查完成，开始重新编译",
+            message="Kiểm tra trang Typst không tương thích hoàn tất, bắt đầu biên dịch lại",
             payload={"render_stage": "background_typst_sanitize_done"},
         )
         sanitized_pages = {page_idx: items for page_idx, _w, _h, items in sanitized_background_specs}
@@ -408,7 +408,7 @@ def _compile_render_pages_pdf_resilient(
         emit_render_compile_progress(
             current=5,
             total=5,
-            message=f"修复后的整本 Typst 渲染编译完成，共 {len(sanitized_render_page_specs)} 页",
+            message=f"修复后的Biên dịch kết xuất Typst toàn bộ hoàn tất，共 {len(sanitized_render_page_specs)} trang",
             payload={"render_stage": "background_typst_sanitized_compile_done"},
         )
         return compiled_path, diagnostics

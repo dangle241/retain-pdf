@@ -26,37 +26,37 @@ def check_translation_worker_protocol(errors: list[str]) -> None:
     translate_only_text = read_text(TRANSLATE_ONLY_ENTRYPOINT)
     if "PipelineEventWriter(" not in translate_only_text:
         errors.append(
-            "services/translation/entrypoints/translate_only_pipeline.py: translate-only worker must initialize PipelineEventWriter"
+            "services/translation/entrypoints/translate_only_pipeline.py: worker translate-only phải khởi tạo PipelineEventWriter"
         )
     if "STDOUT_LABEL_EVENTS_JSONL" not in translate_only_text:
         errors.append(
-            "services/translation/entrypoints/translate_only_pipeline.py: translate-only worker must publish pipeline_events.jsonl via stdout contract"
+            "services/translation/entrypoints/translate_only_pipeline.py: worker translate-only phải xuất pipeline_events.jsonl qua stdout contract"
         )
     if 'artifact_key="pipeline_events_jsonl"' not in translate_only_text:
         errors.append(
-            "services/translation/entrypoints/translate_only_pipeline.py: translate-only worker must publish pipeline_events_jsonl artifact"
+            "services/translation/entrypoints/translate_only_pipeline.py: worker translate-only phải xuất artifact pipeline_events_jsonl"
         )
     if 'artifact_key="translation_diagnostics_json"' not in translate_only_text:
         errors.append(
-            "services/translation/entrypoints/translate_only_pipeline.py: translate-only worker must publish translation_diagnostics_json artifact"
+            "services/translation/entrypoints/translate_only_pipeline.py: worker translate-only phải xuất artifact translation_diagnostics_json"
         )
     if '"translation_diagnostics.json"' not in translate_only_text:
         errors.append(
-            "services/translation/entrypoints/translate_only_pipeline.py: translate-only worker must keep translation_diagnostics.json as stable diagnostics output"
+            "services/translation/entrypoints/translate_only_pipeline.py: worker translate-only phải giữ translation_diagnostics.json làm đầu ra chẩn đoán ổn định"
         )
 
     from_ocr_text = read_text(FROM_OCR_ENTRYPOINT)
     if "PipelineEventWriter(" not in from_ocr_text:
         errors.append(
-            "services/translation/entrypoints/from_ocr_pipeline.py: translate-from-ocr worker must initialize PipelineEventWriter"
+            "services/translation/entrypoints/from_ocr_pipeline.py: worker translate-from-ocr phải khởi tạo PipelineEventWriter"
         )
     if "STDOUT_LABEL_EVENTS_JSONL" not in from_ocr_text:
         errors.append(
-            "services/translation/entrypoints/from_ocr_pipeline.py: translate-from-ocr worker must publish pipeline_events.jsonl via stdout contract"
+            "services/translation/entrypoints/from_ocr_pipeline.py: worker translate-from-ocr phải xuất pipeline_events.jsonl qua stdout contract"
         )
     if 'artifact_key="pipeline_events_jsonl"' not in from_ocr_text:
         errors.append(
-            "services/translation/entrypoints/from_ocr_pipeline.py: translate-from-ocr worker must publish pipeline_events_jsonl artifact"
+            "services/translation/entrypoints/from_ocr_pipeline.py: worker translate-from-ocr phải xuất artifact pipeline_events_jsonl"
         )
 
 
@@ -69,7 +69,7 @@ def check_translation_pipeline_facade_boundary(errors: list[str]) -> None:
     for item in required:
         if item not in text:
             errors.append(
-                f"runtime/pipeline/translation_stage.py: must call translation public facade via '{item}'"
+                f"runtime/pipeline/translation_stage.py: phải gọi facade public dịch qua '{item}'"
             )
     forbidden = (
         "from services.translation.workflow import",
@@ -83,7 +83,7 @@ def check_translation_pipeline_facade_boundary(errors: list[str]) -> None:
     for item in forbidden:
         if item in text:
             errors.append(
-                f"runtime/pipeline/translation_stage.py: must not import workflow internals directly: '{item}'"
+                f"runtime/pipeline/translation_stage.py: không được import nội bộ workflow trực tiếp: '{item}'"
             )
 
 
@@ -113,7 +113,7 @@ def check_translation_public_surface_usage(errors: list[str]) -> None:
                     continue
                 if module_allowed(module, forbidden_prefixes):
                     errors.append(
-                        f"{rel(path)}: production code outside translation must import translation contracts through services.translation.public, not '{module}'"
+                        f"{rel(path)}: mã sản xuất ngoài dịch phải import contract dịch qua services.translation.public, không phải '{module}'"
                     )
                     break
 
@@ -141,7 +141,7 @@ def check_devtools_translation_internal_usage(errors: list[str]) -> None:
         if rel_path in DEVTOOLS_TRANSLATION_INTERNAL_IMPORT_ALLOWLIST:
             continue
         errors.append(
-            f"{rel(path)}: devtools script imports translation internals; add it to DEVTOOLS_TRANSLATION_INTERNAL_IMPORT_ALLOWLIST or use services.translation.public"
+            f"{rel(path)}: script devtools import nội bộ dịch; thêm vào DEVTOOLS_TRANSLATION_INTERNAL_IMPORT_ALLOWLIST hoặc dùng services.translation.public"
         )
 
 
@@ -154,6 +154,6 @@ def check_translation_rendering_separation(errors: list[str]) -> None:
             if module_allowed(module, exception_prefixes):
                 continue
             errors.append(
-                f"{rel(path)}: translation layer must not import rendering services directly: '{module}'"
+                f"{rel(path)}: lớp dịch không được import dịch vụ rendering trực tiếp: '{module}'"
             )
             break

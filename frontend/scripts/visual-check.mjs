@@ -110,7 +110,7 @@ const STATES = [
       await page.waitForSelector("#reader-boot-loading.hidden", { state: "attached", timeout: 20000 });
       // Mở rộng mặc định cột bên phải,Đặt câu hỏi trực tiếp(Không nhấp vào nút bật/tắt một lần nữa)
       await page.waitForSelector("#reader-ai-drawer.is-open", { timeout: 10000 });
-      await page.fill("#reader-ai-input", "共轭如何影响选择性?");
+      await page.fill("#reader-ai-input", "Liên hợp ảnh hưởng đến tính chọn lọc như thế nào?");
       await page.click("#reader-ai-submit-btn");
       await page.waitForSelector(".reader-ai-citation-item", { timeout: 10000 });
       await page.waitForTimeout(600);
@@ -132,7 +132,7 @@ const STATES = [
     url: `/index.html?mock=done`,
     prepare: async (page) => {
       await page.waitForTimeout(1500);
-      await page.fill("#library-search-input", "化学");
+      await page.fill("#library-search-input", "Hóa học");
       await page.waitForSelector(".lib-search-panel", { timeout: 8000 });
       await page.waitForTimeout(800);
     },
@@ -178,7 +178,7 @@ try {
     await page.close();
 
     if (consoleErrors.length) {
-      console.error(`✖ ${state.name}: 页面异常 ${consoleErrors[0]}`);
+      console.error(`✖ ${state.name}: Trang bất thường ${consoleErrors[0]}`);
       failures += 1;
       continue;
     }
@@ -186,7 +186,7 @@ try {
     const baselinePath = join(BASELINE_DIR, `${state.name}.png`);
     if (update || !existsSync(baselinePath)) {
       writeFileSync(baselinePath, shot);
-      console.log(`● ${state.name}: 基线已${update ? "更新" : "创建"}`);
+      console.log(`● ${state.name}: Baseline đã${update ? "cập nhật" : "tạo"}`);
       continue;
     }
 
@@ -194,7 +194,7 @@ try {
     const current = PNG.sync.read(shot);
     if (baseline.width !== current.width || baseline.height !== current.height) {
       writeFileSync(join(OUTPUT_DIR, `${state.name}.current.png`), shot);
-      console.error(`✖ ${state.name}: 尺寸变化 ${baseline.width}x${baseline.height} -> ${current.width}x${current.height}`);
+      console.error(`✖ ${state.name}: Kích thước thay đổi ${baseline.width}x${baseline.height} -> ${current.width}x${current.height}`);
       failures += 1;
       continue;
     }
@@ -209,10 +209,10 @@ try {
     if (ratio > stateThreshold) {
       writeFileSync(join(OUTPUT_DIR, `${state.name}.current.png`), shot);
       writeFileSync(join(OUTPUT_DIR, `${state.name}.diff.png`), PNG.sync.write(diff));
-      console.error(`✖ ${state.name}: 差异 ${(ratio * 100).toFixed(2)}%(${diffPixels}px),diff 见 tests/visual/output/`);
+      console.error(`✖ ${state.name}: Chênh lệch ${(ratio * 100).toFixed(2)}%(${diffPixels}px),diff xem tests/visual/output/`);
       failures += 1;
     } else {
-      console.log(`✔ ${state.name}: 一致(差异 ${(ratio * 100).toFixed(3)}%)`);
+      console.log(`✔ ${state.name}: Nhất quán(chênh lệch ${(ratio * 100).toFixed(3)}%)`);
     }
   }
 } finally {
@@ -221,6 +221,6 @@ try {
 }
 
 if (failures) {
-  console.error(`\n${failures} 个状态与基线不一致。确认改动符合预期后运行: npm run visual:update`);
+  console.error(`\n${failures} trạng thái không khớp baseline. Xác nhận thay đổi đúng kỳ vọng rồi chạy: npm run visual:update`);
   process.exit(1);
 }

@@ -85,9 +85,9 @@ mod tests {
 
     #[test]
     fn parses_embedded_json_envelope_fragment() {
-        let text = r#"prefix {"code":-60011,"msg":"获取有效文件失败","trace_id":"trace-123","data":null} suffix"#;
+        let text = r#"prefix {"code":-60011,"msg":"Không thể lấy tệp hợp lệ","trace_id":"trace-123","data":null} suffix"#;
         let parsed = parse_envelope_fragment(text).expect("parsed");
-        assert_eq!(parsed.msg, "获取有效文件失败");
+        assert_eq!(parsed.msg, "Không thể lấy tệp hợp lệ");
         assert_eq!(parsed.trace_id, "trace-123");
         assert_eq!(parsed.code, Value::from(-60011));
     }

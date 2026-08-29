@@ -23,38 +23,38 @@ function makeAnswerer(fakeAsk, jobId) {
   });
 }
 
-test("signal 透传到 ask,正常完成时回写会话粘性", async () => {
+test("signal truyền đến ask, khi hoàn thành bình thường thì ghi lại session keo dính", async () => {
   const seen = {};
   const answerer = makeAnswerer(async (args) => {
     seen.signal = args.signal;
-    return { answer: "答 [1]", citations: [], conversationId: "conv-live" };
+    return { answer: "Trả lời [1]", citations: [], conversationId: "conv-live" };
   }, "job-cancel-a");
 
   const controller = new AbortController();
-  const result = await answerer.answer({ question: "问", signal: controller.signal });
-  assert.equal(seen.signal, controller.signal, "signal 必须透传给 ask");
+  const result = await answerer.answer({ question: "Câu hỏi", signal: controller.signal });
+  assert.equal(seen.signal, controller.signal, "signal phải được truyền đến ask");
   assert.equal(result.conversationId, "conv-live");
-  assert.equal(answerer.getConversationId(), "conv-live", "正常完成回写内存粘性");
+  assert.equal(answerer.getConversationId(), "conv-live", "Hoàn thành bình thường ghi lại session keo dính trong bộ nhớ");
   assert.equal(
     loadStoredConversationId({ jobId: "job-cancel-a" }),
     "conv-live",
-    "正常完成回写 storage 粘性",
+    "Hoàn thành bình thường ghi lại session keo dính trong storage",
   );
 });
 
-test("aborted 的旧流禁止回写会话粘性(P0-4)", async () => {
+test("Luồng cũ bị aborted cấm ghi lại session keo dính (P0-4)", async () => {
   const answerer = makeAnswerer(async () => {
     // Giả lập: abort xảy ra khi stream đang chạy, nhưng done vẫn mang session ID cũ
-    return { answer: "迟到的旧答案", citations: [], conversationId: "conv-stale" };
+    return { answer: "Câu trả lời cũ muộn", citations: [], conversationId: "conv-stale" };
   }, "job-cancel-b");
 
   const controller = new AbortController();
   controller.abort();
-  await answerer.answer({ question: "问", signal: controller.signal });
-  assert.notEqual(answerer.getConversationId(), "conv-stale", "aborted 不得改内存粘性");
+  await answerer.answer({ question: "Câu hỏi", signal: controller.signal });
+  assert.notEqual(answerer.getConversationId(), "conv-stale", "aborted không được sửa session keo dính trong bộ nhớ");
   assert.notEqual(
     loadStoredConversationId({ jobId: "job-cancel-b" }),
     "conv-stale",
-    "aborted 不得写 storage 粘性",
+    "aborted không được ghi session keo dính vào storage",
   );
 });

@@ -125,7 +125,7 @@ if (watchMode) {
     PAGE_BUNDLES.map((page) => context(bundleOptions(page))),
   );
   await Promise.all(contexts.map((ctx) => ctx.watch()));
-  console.log(`[watch] 监听中:${PAGE_BUNDLES.map((p) => p.name).join(", ")}(Ctrl+C 退出)`);
+  console.log(`[watch] Đang theo dõi:${PAGE_BUNDLES.map((p) => p.name).join(", ")}(Ctrl+C để thoát)`);
 } else {
   for (const page of PAGE_BUNDLES) {
     await build(bundleOptions(page));

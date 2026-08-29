@@ -127,7 +127,7 @@ def run_post_translation_render_prewarm(
     emit_stage_progress(
         stage="render_preprocess",
         substage="render_prewarm",
-        message="正在准备渲染资源",
+        message="Đang chuẩn bị tài nguyên kết xuất",
         progress_current=1,
         progress_total=3,
         payload={"user_stage": "render", "progress_unit": "step"},
@@ -169,7 +169,7 @@ def run_post_translation_render_prewarm(
         emit_stage_progress(
             stage="render_preprocess",
             substage="render_prewarm",
-            message=f"渲染资源预热失败，将在渲染阶段同步准备: {error_type}",
+            message=f"Khởi động tài nguyên kết xuất thất bại, sẽ chuẩn bị đồng bộ ở giai đoạn kết xuất: {error_type}",
             progress_current=1,
             progress_total=3,
             payload={

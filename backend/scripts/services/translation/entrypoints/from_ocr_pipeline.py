@@ -30,7 +30,7 @@ from runtime.pipeline.book_pipeline import run_book_pipeline
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Translate and render from normalized OCR document.v1.json.",
+        description="Dịch và kết xuất từ OCR đã chuẩn hóa document.v1.json.",
     )
     parser.add_argument("--spec", type=str, required=True, help="Path to book stage spec JSON.")
     return parser.parse_args()
@@ -121,7 +121,7 @@ def main() -> None:
     with pipeline_event_writer_scope(event_writer):
         emit_stage_transition(
             stage="startup",
-            message="translate-from-ocr worker 已启动",
+            message="translate-from-ocr worker đã khởi động",
         )
         print(f"{STDOUT_LABEL_EVENTS_JSONL}: {event_writer.path}", flush=True)
         api_key = get_api_key(
@@ -131,7 +131,7 @@ def main() -> None:
         emit_stage_transition(
             stage="translating",
             substage="translation_batches",
-            message="开始准备翻译和渲染阶段",
+            message="Bắt đầu chuẩn bị giai đoạn dịch và kết xuất",
         )
         result = run_book_pipeline(
             source_json_path=source_json_path,
@@ -195,11 +195,11 @@ def main() -> None:
             artifact_key="pipeline_events_jsonl",
             path=event_writer.path,
             stage="saving",
-            message="统一事件流已写出",
+            message="Đã ghi luồng sự kiện thống nhất",
         )
         emit_stage_transition(
             stage="finished",
-            message="translate-from-ocr 全流程完成",
+            message="Toàn bộ quy trình translate-from-ocr hoàn thành",
         )
         print_pipeline_summary(
             job_root=job_dirs.root,

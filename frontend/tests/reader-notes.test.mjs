@@ -33,12 +33,12 @@ test("groupNotesByPage", () => {
   assert.equal(groups[1].page, 3);
 });
 
-test("buildNotesMarkdown exports quotes and notes", () => {
+test("buildNotesMarkdown xuất trích dẫn và ghi chú", () => {
   const md = buildNotesMarkdown("Demo", [
     { id: "1", page: 2, pane: "source", quote: "hello", note: "world", createdAt: "t" },
   ]);
   assert.match(md, /# Demo · 批注/);
-  assert.match(md, /## 第 2 页/);
+  assert.match(md, /## Trang 2/);
   assert.match(md, /> hello/);
-  assert.match(md, /笔记：world/);
+  assert.match(md, /Ghi chú：world/);
 });

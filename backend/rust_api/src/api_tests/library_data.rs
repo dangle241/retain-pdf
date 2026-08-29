@@ -363,7 +363,7 @@ async fn favorite_note_patch_updates_in_place() {
                 .uri(format!("/api/v1/favorites/{favorite_id}"))
                 .header("X-API-Key", "test-key")
                 .header("content-type", "application/json")
-                .body(Body::from(serde_json::json!({"note": "改后的笔记"}).to_string()))
+                .body(Body::from(serde_json::json!({"note": "Ghi chú đã sửa đổi"}).to_string()))
                 .expect("request"),
         )
         .await
@@ -372,7 +372,7 @@ async fn favorite_note_patch_updates_in_place() {
     let favorites = state.db.list_favorites(Some(&document_id)).expect("list");
     // favorite_id Không thay đổi,note Cập nhật nguyên tử
     assert_eq!(favorites[0].favorite_id, favorite_id);
-    assert_eq!(favorites[0].note, "改后的笔记");
+    assert_eq!(favorites[0].note, "Ghi chú đã sửa đổi");
 }
 
 #[tokio::test]
@@ -692,7 +692,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("create response");
     assert_eq!(response.status(), StatusCode::OK);
     let payload = json_response(response).await;
-    assert_eq!(payload["data"]["name"], "化学");
+    assert_eq!(payload["data"]["name"], "Hóa học");
     assert_eq!(payload["data"]["document_count"], 0);
     let collection_id = payload["data"]["collection_id"]
         .as_str()
@@ -749,7 +749,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("patch response");
     assert_eq!(response.status(), StatusCode::OK);
     let payload = json_response(response).await;
-    assert_eq!(payload["data"]["name"], "有机化学");
+    assert_eq!(payload["data"]["name"], "Hóa học hữu cơ");
 
     // Thêm tài liệu,document_count Cập nhật đồng bộ hóa
     let response = app

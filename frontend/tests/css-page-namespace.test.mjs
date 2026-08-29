@@ -109,7 +109,7 @@ function ruleSelectors(css) {
 }
 
 for (const group of GROUPS) {
-  test(`${group.name} 样式文件的选择器全部带页面命名空间`, () => {
+  test(`${group.name} tệp kiểu selector đều có namespace trang`, () => {
     const violations = [];
     for (const file of group.files) {
       for (const selector of ruleSelectors(readFileSync(file, "utf8"))) {

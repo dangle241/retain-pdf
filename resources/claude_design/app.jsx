@@ -1,10 +1,10 @@
 // app.jsx
-// Main shell: macOS-style app window with stage progress + main canvas + footer label.
+// Vỏ chính: cửa sổ ứng dụng kiểu macOS với tiến trình sân khấu + canvas chính + nhãn chân trang.
 
 const { useState, useEffect, useMemo } = React;
 
-// ── Stage timing ──────────────────────────────────────────────────────────
-// 15 substeps × 8s = 120s total.
+// ── Thời lượng sân khấu ───────────────────────────────────────────────────
+// 15 bước con × 8 giây = 120 giây tổng cộng.
 const SUBSTEP = 8;
 const STAGES = [
   {
@@ -35,16 +35,16 @@ const STAGES = [
     ],
   },
   {
-    id: 'done', label: '完成', subtitle: '交付',
+    id: 'done', label: 'Hoàn tất', subtitle: 'Giao hàng',
     substeps: [
-      { id: 'publish',    name: '产物发布',           keyword: 'publish · artifact' },
-      { id: 'summary',    name: '写 summary',         keyword: 'summary · stats' },
-      { id: 'download',   name: '可下载',             keyword: 'ready · download' },
+      { id: 'publish',    name: 'Xuất bản sản phẩm',       keyword: 'publish · artifact' },
+      { id: 'summary',    name: 'Viết tóm tắt',            keyword: 'summary · stats' },
+      { id: 'download',   name: 'Có thể tải xuống',        keyword: 'ready · download' },
     ],
   },
 ];
 
-// Build flat substep list with absolute time windows
+// Xây dựng danh sách bước con phẳng với cửa sổ thời gian tuyệt đối
 const FLAT = [];
 let _t = 0;
 for (let si = 0; si < STAGES.length; si++) {
@@ -66,7 +66,7 @@ window.__FLAT = FLAT;
 window.__TOTAL = TOTAL;
 window.__STAGES = STAGES;
 
-// ── Find current substep from time ─────────────────────────────────────────
+// ── Tìm bước con hiện tại từ thời gian ───────────────────────────────────
 function findSubAt(time) {
   for (let i = 0; i < FLAT.length; i++) {
     if (time >= FLAT[i].start && time < FLAT[i].end) return { ...FLAT[i], i };
@@ -74,7 +74,7 @@ function findSubAt(time) {
   return { ...FLAT[FLAT.length - 1], i: FLAT.length - 1 };
 }
 
-// ── App window chrome ──────────────────────────────────────────────────────
+// ── Chrome cửa sổ ứng dụng ──────────────────────────────────────────────
 function AppWindow({ children }) {
   return (
     <div style={{
@@ -124,7 +124,7 @@ function Dot({ color }) {
   return <div style={{ width: 12, height: 12, borderRadius: 6, background: color }} />;
 }
 
-// ── Stage progress strip ───────────────────────────────────────────────────
+// ── Dải tiến trình sân khấu ───────────────────────────────────────────────
 function StageStrip({ time }) {
   const cur = findSubAt(time);
   return (
@@ -136,14 +136,14 @@ function StageStrip({ time }) {
       borderBottom: `1px solid ${HAIRLINE}`,
       background: '#fff',
     }}>
-      {/* Stage row */}
+      {/* Hàng sân khấu */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
         {STAGES.map((s, i) => {
           const stageTime = i * 4 * SUBSTEP;
           const stageEnd = stageTime + s.substeps.length * SUBSTEP;
           const isPast = time >= stageEnd;
           const isCurrent = i === cur.stageIdx;
-          // Stage local progress
+          // Tiến độ địa phương của sân khấu
           const localProgress = isPast ? 1 : isCurrent ? (time - stageTime) / (s.substeps.length * SUBSTEP) : 0;
 
           const stepDone = isPast || isCurrent;
@@ -193,7 +193,7 @@ function StageStrip({ time }) {
                   }}>{s.subtitle}</div>
                 </div>
               </div>
-              {/* connector */}
+              {/* cầu nối */}
               {i < STAGES.length - 1 && (
                 <div style={{
                   flex: 1, height: 1.5, margin: '0 18px',
@@ -212,7 +212,7 @@ function StageStrip({ time }) {
         })}
       </div>
 
-      {/* Substep ticks */}
+      {/* Chấm bước con */}
       <div style={{ display: 'flex', gap: 4 }}>
         {FLAT.map((f, i) => {
           const isPast = time >= f.end;
@@ -237,7 +237,7 @@ function StageStrip({ time }) {
   );
 }
 
-// ── Footer with substep label + keyword ───────────────────────────────────
+// ── Chân trang với nhãn bước con + từ khóa ─────────────────────────────
 function Footer({ time }) {
   const cur = findSubAt(time);
   const stageNum = cur.stageIdx + 1;
@@ -258,7 +258,7 @@ function Footer({ time }) {
           textTransform: 'uppercase', letterSpacing: '0.08em',
           marginBottom: 4,
         }}>
-          STAGE {stageNum}/4 · STEP {subNum}/{totalSubs}
+          GIAI ĐOẠN {stageNum}/4 · BƯỚC {subNum}/{totalSubs}
         </div>
         <div style={{
           fontFamily: SANS, fontSize: 17, fontWeight: 600,
@@ -288,7 +288,7 @@ function ElapsedTimer({ time }) {
   const s = Math.floor(time % 60);
   const cs = Math.floor((time * 100) % 100);
   return <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-    elapsed {String(m).padStart(2,'0')}:{String(s).padStart(2,'0')}.{String(cs).padStart(2,'0')}
+    đã chạy {String(m).padStart(2,'0')}:{String(s).padStart(2,'0')}.{String(cs).padStart(2,'0')}
   </span>;
 }
 
@@ -300,7 +300,7 @@ function MainCanvas() {
   const localP = localTime / SUBSTEP;
   const props = { localTime, progress: localP, duration: SUBSTEP };
 
-  // Render the right scene component based on current substep id.
+  // Render cảnh thích hợp dựa trên id bước con hiện tại.
   let scene = null;
   switch (cur.sub.id) {
     case 'upload':      scene = <SceneUpload {...props} />; break;
@@ -332,20 +332,20 @@ function MainCanvas() {
   );
 }
 
-// ── Top-level App ────────────────────────────────────────────────────────
+// ── App cấp cao nhất ────────────────────────────────────────────────────────────────
 function App() {
   const [tweaks, setTweak] = useTweaks(window.TWEAK_DEFAULTS);
   const speed = parseFloat(tweaks.speed) || 1;
   const mode = tweaks.mode || 'sequence';
 
-  // We use a custom render instead of <Stage>'s default — to inject speed and loop mode.
+  // Chúng tôi sử dụng custom render thay vì <Stage>'s mặc định — để tiêm tốc độ và chế độ lặp.
   return (
     <SpeedyStage speed={speed} mode={mode}>
       <ShellAndScenes />
       <TweaksPanel title="Tweaks">
-        <TweakSection title="Playback">
+        <TweakSection title="Phát lại">
           <TweakRadio
-            label="Speed"
+            label="Tốc độ"
             value={String(tweaks.speed)}
             options={[
               { label: '0.5×', value: '0.5' },
@@ -355,7 +355,7 @@ function App() {
             onChange={(v) => setTweak('speed', parseFloat(v))}
           />
           <TweakRadio
-            label="Mode"
+            label="Chế độ"
             value={tweaks.mode}
             options={[
               { label: '顺播', value: 'sequence' },
@@ -380,7 +380,7 @@ function ShellAndScenes() {
   );
 }
 
-// ── SpeedyStage: a custom Stage that supports speed + per-substep loop mode ──
+// ── SpeedyStage: một Stage tùy chỉnh hỗ trợ tốc độ + chế độ lặp từng bước con ──
 function SpeedyStage({ speed = 1, mode = 'sequence', children }) {
   const width = 1440, height = 900;
   const duration = TOTAL;
@@ -395,10 +395,10 @@ function SpeedyStage({ speed = 1, mode = 'sequence', children }) {
   const rafRef = React.useRef(null);
   const lastTsRef = React.useRef(null);
 
-  // Persist
+  // Lưu trữ
   useEffect(() => { try { localStorage.setItem('lt:t', String(time)); } catch {} }, [time]);
 
-  // Auto-scale
+  // Tự động căn chỉnh
   useEffect(() => {
     if (!stageRef.current) return;
     const el = stageRef.current;
@@ -414,7 +414,7 @@ function SpeedyStage({ speed = 1, mode = 'sequence', children }) {
     return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
   }, []);
 
-  // Animation loop with speed + loop mode
+  // Vòng lặp hoạt hình với tốc độ + chế độ lặp
   useEffect(() => {
     if (!playing) { lastTsRef.current = null; return; }
     const step = (ts) => {
@@ -424,7 +424,7 @@ function SpeedyStage({ speed = 1, mode = 'sequence', children }) {
       setTime((t) => {
         let next = t + dt * speed;
         if (mode === 'loop') {
-          // Loop within current substep
+          // Lặp trong bước con hiện tại
           const sub = findSubAt(t);
           if (next >= sub.end) next = sub.start + (next - sub.end);
           if (next < sub.start) next = sub.start;
@@ -439,7 +439,7 @@ function SpeedyStage({ speed = 1, mode = 'sequence', children }) {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); lastTsRef.current = null; };
   }, [playing, speed, mode, duration]);
 
-  // Keyboard
+  // Phím tắt
   useEffect(() => {
     const onKey = (e) => {
       if (e.target?.tagName === 'INPUT' || e.target?.tagName === 'TEXTAREA') return;

@@ -32,7 +32,7 @@ function createDesktopLogger(app) {
       fs.mkdirSync(path.dirname(logPath), { recursive: true });
       fs.appendFileSync(logPath, `[${new Date().toISOString()}] ${message}\n`, "utf8");
     } catch (_error) {
-      // Startup logging must never block application startup.
+      // Nhật ký khởi động không bao giờ được làm chặn quá trình khởi động ứng dụng.
     }
   }
 

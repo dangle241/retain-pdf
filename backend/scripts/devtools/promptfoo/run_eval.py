@@ -82,9 +82,9 @@ def ensure_node_runtime() -> tuple[Path, Path, str]:
         fallback = _find_compatible_nvm_node()
         if fallback is not None:
             return fallback
-        raise RuntimeError("Node.js not found. promptfoo currently requires Node 20.20+ or 22.22+.") from exc
+        raise RuntimeError("Không tìm thấy Node.js. promptfoo hiện yêu cầu Node 20.20+ hoặc 22.22+.") from exc
     except subprocess.CalledProcessError as exc:
-        raise RuntimeError(f"failed to query Node.js version: {exc}") from exc
+        raise RuntimeError(f"không thể truy vấn phiên bản Node.js: {exc}") from exc
 
     version = _parse_node_version(completed.stdout)
     if _is_supported_promptfoo_node(version):
@@ -93,26 +93,26 @@ def ensure_node_runtime() -> tuple[Path, Path, str]:
     fallback = _find_compatible_nvm_node()
     if fallback is not None:
         return fallback
-    raise RuntimeError(
-        "Unsupported Node.js version for promptfoo. "
-        f"Detected {completed.stdout.strip() or version}, require 20.20+ or 22.22+."
-    )
+        raise RuntimeError(
+            "Phiên bản Node.js không được hỗ trợ cho promptfoo. "
+            f"Phát hiện {completed.stdout.strip() or version}, yêu cầu 20.20+ hoặc 22.22+."
+        )
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run promptfoo evaluation for translation replay fixtures.")
-    parser.add_argument("--compare", action="store_true", help="Use compare config with saved-artifact baseline.")
-    parser.add_argument("--saved-only", action="store_true", help="Use saved-artifact-only config without replaying the model.")
+    parser = argparse.ArgumentParser(description="Chạy đánh giá promptfoo cho fixture phát lại dịch.")
+    parser.add_argument("--compare", action="store_true", help="Dùng config compare với saved-artifact baseline.")
+    parser.add_argument("--saved-only", action="store_true", help="Dùng config saved-artifact-only không phát lại mô hình.")
     parser.add_argument(
         "--fixtures",
         type=str,
         default="",
-        help="Override fixture CSV path. Defaults to promptfoo/fixtures/cases.csv",
+        help="Ghi đè đường dẫn CSV fixture. Mặc định promptfoo/fixtures/cases.csv",
     )
     parser.add_argument(
         "promptfoo_args",
         nargs=argparse.REMAINDER,
-        help="Additional args passed to `promptfoo eval` after `--`.",
+        help="Đối số bổ sung truyền cho `promptfoo eval` sau `--`.",
     )
     return parser.parse_args()
 

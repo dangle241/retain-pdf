@@ -58,7 +58,7 @@ def classify_item_contexts(
     labels = {item["item_id"]: item["rule_label"] for item in filtered if item["rule_label"] != "review"}
     if review_items:
         if request_chat_content_fn is None:
-            raise ValueError("request_chat_content_fn is required when classification has review items")
+            raise ValueError("request_chat_content_fn là bắt buộc khi classification có review items")
         if request_label:
             print(f"{request_label}: review_items={len(review_items)} filtered={len(filtered)}", flush=True)
         content = request_chat_content_fn(

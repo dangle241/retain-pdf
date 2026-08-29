@@ -12,7 +12,7 @@ function memoryStorage() {
   };
 }
 
-test("聊天记录持久化:按 jobId 存取、截断、清空", () => {
+test("Lưu trữ lịch sử chat: truy cập, cắt bớt, làm trống theo jobId", () => {
   const storage = memoryStorage();
   const store = createReaderAiHistoryStore({ jobId: "job-1", storage });
   assert.equal(store.enabled, true);
@@ -20,10 +20,10 @@ test("聊天记录持久化:按 jobId 存取、截断、清空", () => {
 
   store.save({
     messages: [
-      { role: "user", text: "问题" },
-      { role: "assistant", text: "**回答** [1]", citations: [{ ref: 1, block_id: "b-1" }] },
+      { role: "user", text: "Câu hỏi" },
+      { role: "assistant", text: "**Trả lời** [1]", citations: [{ ref: 1, block_id: "b-1" }] },
     ],
-    history: [{ role: "user", content: "问题" }, { role: "assistant", content: "回答" }],
+    history: [{ role: "user", content: "Câu hỏi" }, { role: "assistant", content: "Trả lời" }],
   });
   const loaded = store.load();
   assert.equal(loaded.messages.length, 2);
@@ -31,7 +31,7 @@ test("聊天记录持久化:按 jobId 存取、截断、清空", () => {
   assert.equal(loaded.messages[1].citations[0].block_id, "b-1");
   assert.equal(loaded.history.length, 2);
 
-  // 不同 jobId 隔离
+  // Cách ly theo jobId khác nhau
   const other = createReaderAiHistoryStore({ jobId: "job-2", storage });
   assert.deepEqual(other.load(), { messages: [], history: [] });
 
@@ -39,7 +39,7 @@ test("聊天记录持久化:按 jobId 存取、截断、清空", () => {
   assert.deepEqual(store.load(), { messages: [], history: [] });
 });
 
-test("无 jobId 或无 storage 时禁用,静默不抛", () => {
+test("Vô hiệu hóa khi không có jobId hoặc storage, im lặng không ném lỗi", () => {
   const noJob = createReaderAiHistoryStore({ jobId: "", storage: memoryStorage() });
   assert.equal(noJob.enabled, false);
   assert.deepEqual(noJob.load(), { messages: [], history: [] });
@@ -50,12 +50,12 @@ test("无 jobId 或无 storage 时禁用,静默不抛", () => {
   assert.doesNotThrow(() => noStorage.save({ messages: [] }));
 });
 
-test("截断:超过上限只保留最近若干轮", () => {
+test("Cắt bớt: vượt quá giới hạn chỉ giữ lại vài vòng gần nhất", () => {
   const storage = memoryStorage();
   const store = createReaderAiHistoryStore({ jobId: "job-big", storage });
   const messages = Array.from({ length: 100 }, (_, i) => ({ role: "user", text: `q${i}` }));
   store.save({ messages, history: [] });
   const loaded = store.load();
   assert.ok(loaded.messages.length <= 40);
-  assert.equal(loaded.messages.at(-1).text, "q99", "保留最近的");
+  assert.equal(loaded.messages.at(-1).text, "q99", "Giữ lại gần nhất");
 });

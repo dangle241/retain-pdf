@@ -374,7 +374,7 @@ print(json.dumps({
             retryable: true,
             upstream_host: None,
             provider: Some("translation".to_string()),
-            suggestion: Some("查看日志".to_string()),
+            suggestion: Some("Xem nhật ký".to_string()),
             last_log_line: Some("RuntimeError: boom".to_string()),
             raw_excerpt: Some("RuntimeError: boom".to_string()),
             raw_error_excerpt: Some("RuntimeError: boom".to_string()),
@@ -459,7 +459,7 @@ print(json.dumps({
             .expect("failure_ai_diagnosed event");
         let payload = event.payload.as_ref().expect("event payload");
         assert_eq!(payload["category"], "unknown");
-        assert_eq!(payload["summary"], "任务失败，但暂未识别出明确根因");
+        assert_eq!(payload["summary"], "Nhiệm vụ thất bại, nhưng chưa xác định được nguyên nhân rõ ràng");
         assert_eq!(payload["ai_diagnostic"]["summary"], "AI diagnosis summary");
     }
 

@@ -15,7 +15,7 @@ function shippedManifest(pack) {
   return JSON.parse(readFileSync(join(PROJECT_ROOT, `decor/${pack}/manifest.json`), "utf8"));
 }
 
-test("随包发布的 jiangnan manifest 通过契约校验并产出计划", () => {
+test("Manifest jiangnan đi kèm gói vượt kiểm định hợp đồng và tạo kế hoạch", () => {
   const result = planStage(shippedManifest("jiangnan"), { assetBase: "decor/jiangnan" });
   assert.deepEqual(result.errors, []);
   assert.ok(result.ok);
@@ -27,11 +27,11 @@ test("随包发布的 jiangnan manifest 通过契约校验并产出计划", () =
   assert.equal(plan.layers.find((l) => l.slot === "backdrop")?.band, "bg");
   assert.equal(plan.layers.find((l) => l.slot === "left-bottom")?.band, "mid");
   // Câu đề
-  assert.equal(plan.quote?.text.includes("书藏万卷"), true);
+  assert.equal(plan.quote?.text.includes("Vạn quyển sách trân"), true);
   assert.equal(plan.quote?.writingMode, "vertical");
 });
 
-test("model 层在图片版舞台渲染 fallback 静态图", () => {
+test("model lớp render ảnh tĩnh fallback trong sân khấu phiên bản hình ảnh", () => {
   const manifest = {
     version: 1,
     id: "demo",
@@ -49,10 +49,10 @@ test("model 层在图片版舞台渲染 fallback 静态图", () => {
   const result = planStage(manifest, { assetBase: "decor/demo" });
   assert.ok(result.ok);
   const hero = result.plan.layers.find((l) => l.slot === "hero");
-  assert.equal(hero.src, "decor/demo/girl.webp", "model 层应落到 fallback 图");
+  assert.equal(hero.src, "decor/demo/girl.webp", "model lớp nên rơi về ảnh fallback");
 });
 
-test("reduced-motion 下 parallax 全部归零", () => {
+test("reduced-motion thì parallax toàn bộ về 0", () => {
   const result = planStage(shippedManifest("jiangnan"), {
     assetBase: "decor/jiangnan",
     reducedMotion: true,
@@ -61,20 +61,20 @@ test("reduced-motion 下 parallax 全部归零", () => {
   assert.ok(result.plan.layers.every((l) => l.parallax === 0));
 });
 
-test("非法 manifest 返回错误清单而非计划", () => {
+test("Manifest không hợp lệ trả về danh sách lỗi thay vì kế hoạch", () => {
   const result = planStage({ version: 1, id: "bad", layers: [] }, { assetBase: "x" });
   assert.equal(result.ok, false);
   assert.equal(result.plan, null);
   assert.ok(result.errors.length > 0);
 });
 
-test("assetBase 尾斜杠被规整,不产生双斜杠路径", () => {
+test("assetBase dấu gạch chéo cuối được chuẩn hóa, không tạo đường dẫn double slash", () => {
   const result = planStage(shippedManifest("jiangnan"), { assetBase: "decor/jiangnan/" });
   assert.ok(result.ok);
   assert.ok(result.plan.layers.every((l) => !l.src.includes("//")));
 });
 
-test("clickQuote 通过校验并随计划下发,非法值被拒", () => {
+test("clickQuote vượt qua kiểm tra và được gửi theo kế hoạch, giá trị không hợp lệ bị từ chối", () => {
   const manifest = {
     version: 1,
     id: "demo",

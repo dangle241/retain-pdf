@@ -85,7 +85,7 @@ def write_pipeline_summary(
         artifact_key="pipeline_summary_json",
         path=summary_path,
         stage="saving",
-        message="已写出 pipeline summary",
+        message="Đã ghi tóm tắt pipeline",
     )
 
 

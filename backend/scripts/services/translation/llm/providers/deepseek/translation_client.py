@@ -73,7 +73,7 @@ def translate_single_item_plain_text(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -112,7 +112,7 @@ def translate_single_item_plain_text_unstructured(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -143,11 +143,11 @@ def translate_single_item_plain_text_unstructured(
 
 
 def _group_member_payload_defect(item: dict, member_translations: list[dict[str, str]]) -> str:
-    """Kiểm tra nhóm member Tính toàn vẹn của thỏa thuận dịch thuật,Quay lại mô tả lỗi(Chuỗi trống cho biết đã vượt qua)。
+    """Kiểm tra tính toàn vẹn của thỏa thuận dịch nhóm member, trả về mô tả lỗi (chuỗi trống cho biết đã vượt qua).
 
-    trước đây member id Không xác thực bộ sưu tập、đuổi member Cũng không xác nhận các dấu phân cách:khuyết id Sẽ im lặng
-    suy biến thành phân đoạn hình học(Văn bản vị trí sai tiếp tuyến được nhấn sai cột),Nhịp phương trình member Ngắt kết nối và toàn bộ tính chẵn lẻ
-    Đã vượt qua xác minh、Kết xuất từng lỗi。Xác nhận rõ ràng tại đây,Cho lớp trên một cơ hội để thử lại。
+    Trước đây member id không xác thực bộ sưu tập, đuôi member cũng không xác nhận các dấu phân cách: khuyết id sẽ im lặng
+    suy biến thành phân đoạn hình học (văn bản vị trí sai tiếp tuyến được nhấn sai cột), nhịp phương trình member ngắt kết nối và toàn bộ tính chẵn lẻ
+    đã vượt qua xác minh, kết xuất từng lỗi. Xác nhận rõ ràng tại đây, cho lớp trên một cơ hội để thử lại.
     """
     expected_ids = [
         str(member_id or "").strip()
@@ -177,7 +177,7 @@ def translate_continuation_group_members(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -255,7 +255,7 @@ def translate_single_item_tagged_text(
     base_url: str = DEFAULT_BASE_URL,
     request_label: str = "",
     domain_guidance: str = "",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -292,7 +292,7 @@ def translate_single_item_with_decision(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -339,7 +339,7 @@ def translate_batch_once(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,

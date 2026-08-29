@@ -191,7 +191,7 @@ def infer_domain_context_from_preview_text(
     emit_stage_transition(
         stage="domain_inference",
         substage="domain_inference",
-        message="开始识别文档领域",
+        message="Bắt đầu nhận diện lĩnh vực tài liệu",
         progress_current=0,
         progress_total=1,
         payload={
@@ -224,7 +224,7 @@ def infer_domain_context_from_preview_text(
         emit_stage_progress(
             stage="domain_inference",
             substage="domain_inference",
-            message="领域识别超时，使用默认翻译上下文",
+            message="Nhận diện lĩnh vực hết thời gian, dùng ngữ cảnh dịch mặc định",
             progress_current=1,
             progress_total=1,
             elapsed_ms=elapsed_ms,
@@ -248,7 +248,7 @@ def infer_domain_context_from_preview_text(
     emit_stage_progress(
         stage="domain_inference",
         substage="domain_inference",
-        message="文档领域识别完成",
+        message="Nhận diện lĩnh vực tài liệu hoàn tất",
         progress_current=1,
         progress_total=1,
         elapsed_ms=int(round((time.perf_counter() - started) * 1000)),

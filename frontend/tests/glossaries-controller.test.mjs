@@ -15,7 +15,7 @@ function createGlossariesFeature({
       entries: [
         {
           source: "DFT",
-          target: "密度泛函理论",
+          target: "Lý thuyết hàm mật độ",
           level: "canonical",
           match_mode: "case_insensitive",
         },

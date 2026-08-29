@@ -31,7 +31,7 @@ test("extractMarkdownMath protects display and inline delimiters", () => {
   for (const slot of slots) {
     assert.ok(text.includes(slot.token), `token missing: ${slot.token}`);
   }
-  // 原文 $ 定界符已抽出，避免 marked 吃下标
+  // Dấu phân cách $ trong văn bản gốc đã được trích xuất, tránh marked nuốt chỉ số dưới
   assert.ok(!/\$E=mc\^2\$/.test(text));
   assert.ok(!/\$\$/.test(text));
 });

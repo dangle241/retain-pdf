@@ -29,22 +29,22 @@ def check_translation_internal_boundaries(errors: list[str]) -> None:
             continue
         if path.is_dir() and path.name not in TRANSLATION_ALLOWED_ROOT_DIRS:
             errors.append(
-                f"services/translation/{path.name}: unexpected translation root directory; update architecture rules or move it into a named layer"
+                f"services/translation/{path.name}: thư mục gốc dịch không mong đợi; cập nhật quy tắc kiến trúc hoặc di chuyển vào một lớp có tên"
             )
         if path.is_file() and path.name not in TRANSLATION_ALLOWED_ROOT_FILES:
             errors.append(
-                f"services/translation/{path.name}: unexpected translation root file; place new code inside entrypoints/workflow/core/services/llm/artifacts."
+                f"services/translation/{path.name}: tệp gốc dịch không mong đợi; đặt mã mới vào entrypoints/workflow/core/services/llm/artifacts."
             )
 
     workflow_root = TRANSLATION_ROOT / "workflow"
     for path in workflow_root.iterdir():
         if path.is_dir() and path.name not in TRANSLATION_WORKFLOW_ALLOWED_DIRS:
             errors.append(
-                f"{rel(path)}: unexpected workflow directory; use batching/legacy/phases/scheduling or update architecture rules"
+                f"{rel(path)}: thư mục workflow không mong đợi; dùng batching/legacy/phases/scheduling hoặc cập nhật quy tắc kiến trúc"
             )
         if path.is_file() and path.name not in TRANSLATION_WORKFLOW_ALLOWED_FILES:
             errors.append(
-                f"{rel(path)}: unexpected workflow root file; place implementation in phases/scheduling/batching/legacy"
+                f"{rel(path)}: tệp gốc workflow không mong đợi; đặt triển khai trong phases/scheduling/batching/legacy"
             )
 
     for path in scan_py_files(workflow_root):
@@ -64,7 +64,7 @@ def check_translation_internal_boundaries(errors: list[str]) -> None:
             if module_allowed(module, allowed_prefixes):
                 continue
             errors.append(
-                f"{rel(path)}: workflow/{subpackage} must not import '{module}' directly"
+                f"{rel(path)}: workflow/{subpackage} không được import '{module}' trực tiếp"
             )
 
     private_import_prefix = "services.translation.workflow."
@@ -80,7 +80,7 @@ def check_translation_internal_boundaries(errors: list[str]) -> None:
             if any(full_name.startswith(prefix) for prefix in exception_prefixes):
                 continue
             errors.append(
-                f"{rel(path)}: do not import private workflow symbol '{full_name}' across modules; expose a public helper or keep it local"
+                f"{rel(path)}: không import ký hiệu workflow private '{full_name}' giữa các mô-đun; công bố helper public hoặc giữ cục bộ"
             )
 
     public_init = TRANSLATION_ROOT / "public" / "__init__.py"
@@ -94,7 +94,7 @@ def check_translation_internal_boundaries(errors: list[str]) -> None:
     for item in forbidden_public_eager_imports:
         if item in public_text:
             errors.append(
-                f"{rel(public_init)}: public facade must stay lazy; register exports in _EXPORTS instead of eager import '{item}'"
+                f"{rel(public_init)}: facade public phải giữ lazy; đăng ký export trong _EXPORTS thay vì import eager '{item}'"
             )
             break
 
@@ -106,7 +106,7 @@ def check_translation_internal_boundaries(errors: list[str]) -> None:
         for module in imported_modules(path):
             if module_allowed(module, TRANSLATION_REMOVED_COMPAT_IMPORTS):
                 errors.append(
-                    f"{rel(path)}: removed translation compat import '{module}'; use the real core/entrypoints/llm path"
+                    f"{rel(path)}: import compat dịch đã bị xóa '{module}'; dùng đường dẫn core/entrypoints/llm thực tế"
                 )
                 break
 
@@ -120,7 +120,7 @@ def check_translation_internal_boundaries(errors: list[str]) -> None:
         for item in forbidden_runtime_imports:
             if item in text:
                 errors.append(
-                    f"{rel_path}: translation internals must not import runtime.pipeline directly"
+                    f"{rel_path}: nội bộ dịch không được import runtime.pipeline trực tiếp"
                 )
                 break
 
@@ -140,7 +140,7 @@ def check_translation_internal_boundaries(errors: list[str]) -> None:
         for item in forbidden:
             if item in text:
                 errors.append(
-                    f"{rel_path}: provider modules must stay transport-only and must not import workflow/policy/runtime"
+                    f"{rel_path}: mô-đun provider phải giữ transport-only và không được import workflow/policy/runtime"
                 )
                 break
 
@@ -166,7 +166,7 @@ def check_translation_internal_boundaries(errors: list[str]) -> None:
         for item in forbidden:
             if item in text:
                 errors.append(
-                    f"{rel_path}: payload layer must remain data construction/application only and must not import execution/cache/provider layers"
+                    f"{rel_path}: lớp payload phải giữ data construction/application only và không được import execution/cache/provider layers"
                 )
                 break
 
@@ -184,5 +184,5 @@ def check_translation_internal_boundaries(errors: list[str]) -> None:
             if module_allowed(module, allowed_prefixes) or module_allowed(module, exception_prefixes):
                 continue
             errors.append(
-                f"{rel(path)}: translation layer '{layer}' must not import '{module}' directly"
+                    f"{rel(path)}: lớp dịch '{layer}' không được import '{module}' trực tiếp"
             )

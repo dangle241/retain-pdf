@@ -119,7 +119,7 @@ async function mountHome(services) {
   services.initialize();
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-  await waitFor(() => byId("app-shell"), "HomeApp 首帧渲染");
+  await waitFor(() => byId("app-shell"), "Khung đầu tiên của HomeApp được render");
   await wait(0);
   return { host, root };
 }
@@ -136,7 +136,7 @@ test("CredentialsDialog: lối vào thông thường qua API cài đặt; setupM
   dom.window.document.dispatchEvent(new dom.window.CustomEvent(APP_EVENTS.openBrowserCredentials));
   await waitFor(() => byId("app-settings-dialog") !== null, "Mở trung tâm cài đặt thông thường");
   await waitFor(() => byId("browser-api-key") !== null, "Bàn làm việc nhúng trong khu vực API");
-  assert.equal(byId("browser-credentials-dialog"), null, "常规不再弹独立接口设置窗");
+  assert.equal(byId("browser-credentials-dialog"), null, "Giao diện thông thường không còn mở cửa sổ cài đặt độc lập");
   assert.ok(byId("browser-credentials-save-btn"), "Bàn làm việc nhúng có nút lưu");
 
   services.settingsHub.dialogStore.close();
@@ -176,7 +176,7 @@ test("Lối vào thông tin xác thực: bàn làm việc nhúng trong khu vực
   // #credentials-btn đã nghỉ hưu), không còn mở browser-credentials-dialog.
   click(byId("app-settings-btn"));
   await waitFor(() => byId("app-settings-dialog") !== null, "Mở hộp thoại cài đặt");
-  await waitFor(() => byId("browser-credentials-tabs") !== null, "API 区内嵌凭据工作台(tabs 挂载)");
+  await waitFor(() => byId("browser-credentials-tabs") !== null, "Khu vực API nhúng bàn làm việc thông tin xác thực(tabs gắn)");
   assert.ok(byId("browser-credentials-save-btn"), "Bàn làm việc nhúng có nút lưu");
   assert.equal(byId("credentials-btn"), null, "Nút sảnh đã nghỉ hưu");
   assert.equal(byId("browser-credentials-dialog"), null, "Không còn mở hộp thoại thông tin xác thực cấp hai trong cài đặt");
@@ -191,7 +191,7 @@ test("Lối vào thông tin xác thực: bàn làm việc nhúng trong khu vực
   await waitFor(() => byId("credential-gate-action"), "Sau khi mở hộp thoại workflow, credential-gate-action được gắn");
   click(byId("credential-gate-action"));
   await waitFor(() => byId("app-settings-dialog") !== null, "credential-gate-action mở trung tâm cài đặt");
-  await waitFor(() => byId("browser-api-key") !== null, "落到 API 设置工作台");
+  await waitFor(() => byId("browser-api-key") !== null, "Rơi vào bàn làm việc cài đặt API");
   assert.equal(byId("browser-credentials-dialog"), null, "Cổng thông thường không mở cửa sổ giao diện độc lập");
 
   root.unmount();
@@ -255,14 +255,14 @@ test("CredentialsDialog: lưu (chế độ trình duyệt) — ghi input ẩn, �
   const services = createServices();
   const { host, root } = await mountHome(services);
 
-  // 阶段 C(shadcn 改造):paddle_token/api_key/ocr_provider 等隐藏 input
-  // (HiddenCredentialInputs)挂在 TranslationWorkflowDialog 内部(job-form),
-  // 该对话框换成 Radix Dialog 后不 forceMount Content——需要先打开一次才会
-  // 挂载(同其余阶段 C 对话框的先例)。
+  // Giai đoạn C(cải tiến shadcn):các input ẩn paddle_token/api_key/ocr_provider
+  // (HiddenCredentialInputs) được gắn bên trong TranslationWorkflowDialog (job-form),
+  // sau khi hộp thoại chuyển sang Radix Dialog thì không forceMount Content——cần mở
+  // một lần trước khi được gắn (tương tự các hộp thoại giai đoạn C khác).
   services.workflowDialog.openUpload();
   await waitFor(() => byId("paddle_token"), "Sau khi mở hộp thoại workflow, input ẩn được gắn");
 
-  // 常规保存入口：设置 → API
+  // Lối lưu thông thường: Cài đặt → API
   dom.window.document.dispatchEvent(new dom.window.CustomEvent(APP_EVENTS.openBrowserCredentials));
   await waitFor(() => byId("app-settings-dialog") !== null, "Mở cài đặt");
   await waitFor(() => byId("browser-api-key") !== null, "Bàn làm việc API sẵn sàng");
@@ -301,9 +301,9 @@ test("CredentialsDialog: lưu (chế độ máy tính để bàn) — đi nhánh
   });
   const { host, root } = await mountHome(services);
 
-  // 阶段 C(shadcn 改造):saveDesktopConfig 分支同样会读 HiddenCredentialInputs
-  // 挂在 TranslationWorkflowDialog 内部的隐藏 input(paddle_token 等),需要先
-  // 打开一次工作流对话框才会挂载。
+  // Giai đoạn C(cải tiến shadcn):nhánh saveDesktopConfig cũng đọc HiddenCredentialInputs
+  // Gắn bên trong TranslationWorkflowDialog các input ẩn(paddle_token...),cần mở
+  // một lần hộp thoại workflow thì mới gắn.
   services.workflowDialog.openUpload();
   await waitFor(() => byId("paddle_token"), "Sau khi mở hộp thoại workflow, input ẩn được gắn");
 
@@ -328,25 +328,26 @@ test("CredentialsDialog: lưu (chế độ máy tính để bàn) — đi nhánh
 });
 
 test("CredentialsDialog: đồng bộ một chiều có điều khiển giữa input ẩn và credentialsStatePort (rủi ro thiết kế 1)", async () => {
-  // 实现调整说明(见 HiddenCredentialInputs.jsx 头注释):隐藏 input 改走
-  // 受控渲染(value 直接订阅 credentialsStatePort.store),不是蓝图原计划的
-  // "非受控 ref + mirrorCredentialsToHiddenInputs 双向同步"——实测证实那套
-  // 组合在任何兄弟组件重渲染时都会被 React 的表单元素受控态回收逻辑悄悄清空
-  // (上传进行中 HeroUpload 高频重渲染,会把刚保存的 token 冲掉),受控是唯一
-  // 不会被 React 自己吃掉的写法。store 是唯一真值,DOM 是纯投影,因此这里只
-  // 断言"store → 隐藏 input"单向同步,并确认"外部直接改 DOM"不会被采纳
-  // (证明真值确实是 store,不是可以被绕过的 DOM)。
+  // Giải thích điều chỉnh(tham khảo tiêu đề HiddenCredentialInputs.jsx):input ẩn chuyển sang
+  // render có điều khiển(value đăng ký trực tiếp credentialsStatePort.store),không phải kế hoạch
+  // ban đầu "ref không có điều khiển + mirrorCredentialsToHiddenInputs đồng bộ hai chiều"——thực tế
+  // chứng minh bộ đó sẽ bị React form controlled recovery logic xóa nhẹ trong bất kỳ render
+  // lại nào của component anh em( upload đang chạy HeroUpload render thường xuyên,làm mất token
+  // vừa lưu),controlled là cách duy nhất React không tự xóa. store là nguồn chân lý,DOM chỉ là
+  // hình chiếu nên ở đây chỉ khẳng định "store → hidden input" một chiều, xác nhận "ghi DOM trực tiếp
+  // từ bên ngoài" không được chấp nhận (chứng minh nguồn chân lý là store,không phải DOM có thể
+  // bị bypass).
   const services = createServices();
   const { host, root } = await mountHome(services);
 
-  // 阶段 C(shadcn 改造):隐藏 input 挂在 TranslationWorkflowDialog 内部
-  // (job-form),该对话框换成 Radix Dialog 后不 forceMount Content——需要先
-  // 打开一次才会挂载(同其余阶段 C 对话框的先例)。
+  // Giai đoạn C(cải tiến shadcn):input ẩn được gắn bên trong TranslationWorkflowDialog
+  // (job-form),sau khi hộp thoại chuyển sang Radix Dialog thì không forceMount Content——
+  // cần mở một lần trước khi gắn (tương tự các hộp thoại giai đoạn C khác).
   services.workflowDialog.openUpload();
   await waitFor(() => byId("paddle_token"), "Sau khi mở hộp thoại workflow, input ẩn được gắn");
 
-  // composition 初始化时 credentialsStatePort 已经写入过持久化配置;
-  // HiddenCredentialInputs 应把当前 store 状态实时投影进隐藏 input。
+  // composition khởi tạo khi credentialsStatePort đã ghi cấu hình bền vững;
+  // HiddenCredentialInputs nên chiếu trạng thái store hiện tại vào input ẩn.
   defaultCredentialsStatePort.setCredentials({
     ocrProvider: "paddle",
     paddleToken: "from-store",
@@ -355,13 +356,15 @@ test("CredentialsDialog: đồng bộ một chiều có điều khiển giữa i
   await waitFor(() => byId("paddle_token").value === "from-store", "Hình chiếu store → input ẩn");
   assert.equal(byId("api_key").value, "from-store-key");
 
-  // 外部直接改 DOM(模拟浏览器自动填充等非受控写入路径)不经过 store,
-  // 不会被采纳为"真值"——下一次任意 credentials 变更触发的重渲染都会把
-  // DOM 拉回 store 的值,证明 store 才是唯一真值,不存在"DOM 悄悄漂移、
-  // 表单提交读到脏值"的风险(这正是蓝图风险 1 要防的静默失败)。
+  // Bên ngoài sửa DOM trực tiếp(mô phỏng tự động điền trình duyệt, đường ghi không có điều khiển)
+  // không qua store,sẽ không được coi là"giá trị thật"—mỗi lần credentials thay đổi
+  // trigger render lại sẽ kéo DOM về giá trị store,chứng minh store là chân lý duy nhất,
+  // không có"DOM trôi dạt lặng lẽ,rủi ro đọc giá trị bẩn khi submit"(đây là điều blueprint
+  // risk 1 muốn ngăn:thất bại lặng lẽ).
   typeInput(byId("paddle_token"), "from-dom");
   assert.equal(byId("paddle_token").value, "from-dom", "Việc ghi bằng setter gốc sẽ có hiệu lực (không có onChange chặn)");
-  // 触发一次(哪怕内容不变的)credentials 更新,验证下一次渲染把 DOM 拉回 store
+  // Kích hoạt một lần(cả khi nội dung không đổi)credentials cập nhật,kiểm tra render
+// sau kéo DOM về giá trị thật của store,ghi từ bên ngoài không được chấp nhận
   defaultCredentialsStatePort.patchCredentials({});
   await waitFor(() => byId("paddle_token").value === "from-store", "Sau khi render lại, DOM được kéo về giá trị thực của store, ghi từ bên ngoài không được chấp nhận");
   assert.equal(defaultCredentialsStatePort.getCredentials().paddleToken, "from-store", "store không bị nhiễm bởi ghi DOM");
@@ -393,7 +396,7 @@ test("SettingsHubDialog: hợp đồng tab từ vựng/giao diện/cập nhật"
   assert.ok(byId("theme-option-seacliff"), "Tùy chọn mũi đá biển");
   assert.ok(byId("theme-option-night"), "Tùy chọn đêm ngói đen");
 
-  // 切换皮肤应写入 data-theme
+  // Chuyển giao diện nên ghi data-theme
   click(byId("theme-option-jiangnan"));
   await waitFor(
     () => dom.window.document.documentElement.dataset.theme === "jiangnan",

@@ -108,7 +108,7 @@ def _build_translation_batches(
         if should_skip:
             immediate_results.append(fast_path_keep_origin_result_fn(item, reason))
             continue
-        # Kích thước lô 1(Ngừng hoạt động hàng loạt)khi tất cả các mục nhập có một đường dẫn duy nhất,Không đánh dấu ứng viên hàng loạt nữa
+        # Kích thước lô 1 (ngừng hàng loạt) khi tất cả mục nhập có một đường dẫn duy nhất, không đánh dấu ứng viên hàng loạt nữa
         if effective_batch_size > 1 and _is_low_risk_batchable_item(
             item,
             translation_context=translation_context,

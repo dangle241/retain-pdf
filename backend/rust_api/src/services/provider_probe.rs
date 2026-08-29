@@ -187,7 +187,7 @@ pub async fn validate_mineru_token_view(
         Ok(result) => MineruTokenValidationView {
             ok: true,
             status: "valid",
-            summary: "MinerU Token 可用".to_string(),
+            summary: "MinerU Token khả dụng".to_string(),
             retryable: false,
             provider_code: Some("0".to_string()),
             provider_message: Some("ok".to_string()),
@@ -221,7 +221,7 @@ pub async fn validate_paddle_token_view(
         Ok(result) => MineruTokenValidationView {
             ok: true,
             status: "valid",
-            summary: "Paddle Access Token 可用".to_string(),
+            summary: "Paddle Access Token khả dụng".to_string(),
             retryable: false,
             provider_code: Some("0".to_string()),
             provider_message: Some("ok".to_string()),
@@ -343,7 +343,7 @@ async fn classify_deepseek_probe_response(
         return MineruTokenValidationView {
             ok: true,
             status: "valid",
-            summary: "DeepSeek API Key 可用".to_string(),
+            summary: "DeepSeek API Key khả dụng".to_string(),
             retryable: false,
             provider_code: Some(status_code.as_u16().to_string()),
             provider_message: summarize_deepseek_models_payload(&body_text),
@@ -399,9 +399,9 @@ fn classify_deepseek_probe_transport_error(
         || lowered.contains("connection")
         || lowered.contains("connect")
     {
-        ("network_error", "DeepSeek 连通性校验失败")
+        ("network_error", "DeepSeek kiểm tra kết nối thất bại")
     } else {
-        ("provider_error", "DeepSeek API Key 校验失败")
+        ("provider_error", "DeepSeek API Key kiểm tra thất bại")
     };
 
     MineruTokenValidationView {
@@ -514,10 +514,10 @@ async fn classify_deepseek_balance_response(
         "provider_error"
     };
     let summary = match status {
-        "unauthorized" => "DeepSeek API Key 无效".to_string(),
-        "insufficient_balance" => "DeepSeek 余额不足".to_string(),
-        "network_error" => "DeepSeek 余额查询失败".to_string(),
-        _ => format!("DeepSeek 余额接口返回 {}", status_code.as_u16()),
+        "unauthorized" => "DeepSeek API Key không hợp lệ".to_string(),
+        "insufficient_balance" => "DeepSeek số dư không đủ".to_string(),
+        "network_error" => "DeepSeek truy vấn số dư thất bại".to_string(),
+        _ => format!("DeepSeek kiểm tra số dư trả về {}", status_code.as_u16()),
     };
 
     DeepSeekBalanceView {
@@ -543,7 +543,7 @@ fn classify_deepseek_balance_transport_error(
     DeepSeekBalanceView {
         ok: false,
         status: "network_error",
-        summary: "DeepSeek 余额查询失败".to_string(),
+        summary: "DeepSeek truy vấn số dư thất bại".to_string(),
         retryable: true,
         is_available: false,
         balance_infos: vec![],
@@ -598,7 +598,7 @@ fn summarize_deepseek_balance(
     if is_available {
         format!("Số dư DeepSeek khả dụng: {}", parts.join(", "))
     } else {
-        format!("DeepSeek 余额不足：{}", parts.join("，"))
+        format!("DeepSeek số dư không đủ: {}", parts.join("，"))
     }
 }
 
@@ -625,9 +625,9 @@ fn classify_probe_error(
                 _ => "provider_error",
             },
             summary: match mapped.category {
-                OcrErrorCategory::Unauthorized => "MinerU Token 无效".to_string(),
-                OcrErrorCategory::CredentialExpired => "MinerU Token 已过期".to_string(),
-                _ => "MinerU Token 校验失败".to_string(),
+                OcrErrorCategory::Unauthorized => "MinerU Token không hợp lệ".to_string(),
+                OcrErrorCategory::CredentialExpired => "MinerU Token đã hết hạn".to_string(),
+                _ => "MinerU Token kiểm tra thất bại".to_string(),
             },
             retryable: !matches!(
                 mapped.category,
@@ -649,9 +649,9 @@ fn classify_probe_error(
         || lowered.contains("dns")
         || lowered.contains("connection")
     {
-        ("network_error", "MinerU 连通性校验失败", true)
+        ("network_error", "MinerU kiểm tra kết nối thất bại", true)
     } else {
-        ("provider_error", "MinerU Token 校验失败", true)
+        ("provider_error", "MinerU Token kiểm tra thất bại", true)
     };
 
     MineruTokenValidationView {
@@ -688,7 +688,7 @@ fn classify_paddle_probe_error(
                     .provider_message
                     .clone()
                     .or(Some("probe task not found".to_string())),
-                operator_hint: Some("鉴权已通过；随机探测任务不存在属于预期结果".to_string()),
+                operator_hint: Some("Đã xác thực; tác vụ thăm dò ngẫu nhiên không tồn tại là kết quả dự kiến".to_string()),
                 trace_id: info.trace_id.clone(),
                 base_url,
                 checked_at,
@@ -704,12 +704,12 @@ fn classify_paddle_probe_error(
         };
         let summary = match info.category {
             OcrErrorCategory::Unauthorized | OcrErrorCategory::PermissionDenied => {
-                "Paddle Access Token 无效".to_string()
+                "Paddle Access Token không hợp lệ".to_string()
             }
             OcrErrorCategory::RemoteReadTimeout | OcrErrorCategory::ServiceUnavailable => {
-                "Paddle 连通性校验失败".to_string()
+                "Paddle kiểm tra kết nối thất bại".to_string()
             }
-            _ => "Paddle Access Token 校验失败".to_string(),
+            _ => "Paddle Access Token kiểm tra thất bại".to_string(),
         };
         return MineruTokenValidationView {
             ok: false,
@@ -739,9 +739,9 @@ fn classify_paddle_probe_error(
         || lowered.contains("dns")
         || lowered.contains("connection")
     {
-        ("network_error", "Paddle 连通性校验失败", true)
+        ("network_error", "Paddle kiểm tra kết nối thất bại", true)
     } else {
-        ("provider_error", "Paddle Access Token 校验失败", true)
+        ("provider_error", "Paddle Access Token kiểm tra thất bại", true)
     };
 
     MineruTokenValidationView {

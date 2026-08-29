@@ -1,128 +1,128 @@
-# recent-jobs + job-runtime React migration blueprint (Phase 3 core)
+# Bản thi công di chuyển React recent-jobs + job-runtime (cốt lõi Phase 3)
 
-> Direct input for Phase 3 implementation agent. Produced from source‑level survey, used alongside master plan
+> Đầu vào trực tiếp cho agent triển khai Phase 3. Được tạo từ khảo sát mức mã nguồn, sử dụng cùng kế hoạch tổng thể
 > ~/.claude/plans/wondrous-baking-donut.md.
 
-## 0. Current data flow (must read before work)
+## 0. Luồng dữ liệu hiện tại (bắt buộc đọc trước khi làm việc)
 
-Three chains, two timers, three stores:
+Ba chuỗi, hai bộ đếm thời gian, ba kho lưu trữ:
 
-- **Chain A (current job polling 1s)**: jobRuntimeFeature.startPolling → setInterval 1000ms → fetchJob/fetchJobPayload → render‑context writes currentJobStore → ui/presentation.js renderJob → job-status-card.renderSnapshot; also notifyLibraryJobUpdated(document CustomEvent) + requestLibraryRefresh(4s throttle) + secondaryResourceScheduler(three resources events/manifest/stageActions rate‑limited → secondaryResourceStore → renderJobSecondaryPatch).
-- **Chain B (library list)**: refreshScheduler.initialize → loader.load → pagination aggregate → commit → recentJobsStatePort.batch → store-renderer → viewPort.renderList → view.js → <recent-job-card> grid.
-- **Chain C (active card patch 2.5s)**: active‑refresh pulls up to 6 non‑current active jobs → runtimePatches.update → statePort.replaceItem(card‑level patch) → then full silent refetch.
-- **Event bridge (bindings.js)**: library* three document CustomEvents → command bus → command‑handlers(cache invalidation + patch + 300/600/1200ms staggered refresh); openTranslationWorkflow suspends refresh / close resumes.
+- **Chuỗi A (thăm dò job hiện tại 1s)**: jobRuntimeFeature.startPolling → setInterval 1000ms → fetchJob/fetchJobPayload → render‑context ghi currentJobStore → ui/presentation.js renderJob → job-status-card.renderSnapshot; đồng thời notifyLibraryJobUpdated(document CustomEvent) + requestLibraryRefresh(giới hạn 4s) + secondaryResourceScheduler(ba tài nguyên events/manifest/stageActions được giới hạn tốc độ → secondaryResourceStore → renderJobSecondaryPatch).
+- **Chuỗi B (danh sách thư viện)**: refreshScheduler.initialize → loader.load → phân trang tổng hợp → commit → recentJobsStatePort.batch → store-renderer → viewPort.renderList → view.js → lưới <recent-job-card>.
+- **Chuỗi C (vá thẻ đang hoạt động 2.5s)**: active‑refresh kéo tối đa 6 job đang hoạt động không phải hiện tại → runtimePatches.update → statePort.replaceItem(vá cấp thẻ) → sau đó tải lại im lặng toàn bộ.
+- **Cầu sự kiện (bindings.js)**: ba document CustomEvent library* → command bus → command‑handlers(vô hiệu hóa cache + vá + làm mới lệch pha 300/600/1200ms); openTranslationWorkflow tạm dừng làm mới / close tiếp tục.
 
-**Key facts**:
-- recentJobsStatePort / currentJobStore / secondaryResourceStore are already the single source of truth (storeDrivenRendering: true) – **polling/patch/throttle engines remain untouched**, React only replaces viewPort and custom elements.
-- Status card VM is entirely in src/js/job-status/ (pure logic, gate allowed).
-- card-presenter.js / image-loader.js are re‑export facades under features/recent-jobs/ (import from facade is legal).
-- store getSnapshot() deep‑freezes a new clone each time → after notify all item references change, **card subscriptions cannot rely on reference equality** (see §3).
-- Smoke DOM contracts must be mirrored one‑by‑one: .recent-job-item[data-job-id], #job-status-card, #status-ring-label/-value, #status-progress-ring, #job-progress-text, .status-stage-step[data-stage-key][aria-selected], #status-section.hidden, #recent-jobs-list, #recent-jobs-empty.
-- recoverActiveJob(actions.js:84) has no production caller; keep it disconnected.
+**Sự kiện chính**:
+- recentJobsStatePort / currentJobStore / secondaryResourceStore đã là nguồn sự thật duy nhất (storeDrivenRendering: true) – **các engine thăm dò/vá/giới hạn tốc độ giữ nguyên**, React chỉ thay thế viewPort và custom elements.
+- VM của thẻ trạng thái nằm hoàn toàn trong src/js/job-status/ (logic thuần, cho phép gate).
+- card-presenter.js / image-loader.js là facade tái xuất dưới features/recent-jobs/ (import từ facade là hợp lệ).
+- store getSnapshot() deep‑freeze bản sao mới mỗi lần → sau notify tất cả tham chiếu item thay đổi, **subscription của thẻ không thể dựa vào so sánh tham chiếu** (xem §3).
+- Hợp đồng DOM smoke phải được phản ánh từng cái một: .recent-job-item[data-job-id], #job-status-card, #status-ring-label/-value, #status-progress-ring, #job-progress-text, .status-stage-step[data-stage-key][aria-selected], #status-section.hidden, #recent-jobs-list, #recent-jobs-empty.
+- recoverActiveJob(actions.js:84) không có caller sản xuất; giữ ở trạng thái ngắt kết nối.
 
-## 1. Per‑file verdict
+## 1. Phán quyết từng tệp
 
-### features/recent-jobs/(45 files)
-- **Keep as‑is (engine)**: state, pagination, runtime-item, runtime-patches, runtime-value-helpers, loader, commit, runtime, controller, actions, active-refresh, refresh-scheduler, refresh-environment, commands, command-handlers, bindings, library-books-resource, library-refresh-port, navigation-port, job-runtime-port, reader-port, active-job-recovery, created-job-hydration, summary-view-model, loading-state-contract, image-refresh, event-target – composition.js imports and mounts them directly.
-- **Keep (facade)**: card-presenter.js, image-loader.js.
-- **Keep but disable**: store-renderer.js (harmless under React viewPort, delete in Phase 4).
-- **Keep**: workflow-open-port.js (composition injects isWorkflowOpen from workflow store).
-- **Dead (cutover delete)**: view.js, view-port.js, host.js, host-actions.js, render-target.js, view-state-target.js, view-state.js, list-rendering.js, list-events.js, image-hydration.js, card-markup.js, card-template.js, formatting.js, dom-contract.js. ⚠️ controller/runtime/loader/commit/bindings 5 default parameters `viewPort = createRecentJobsViewPort()` will be changed to required at cutover (tests already inject, zero impact).
+### features/recent-jobs/(45 tệp)
+- **Giữ nguyên (engine)**: state, pagination, runtime-item, runtime-patches, runtime-value-helpers, loader, commit, runtime, controller, actions, active-refresh, refresh-scheduler, refresh-environment, commands, command-handlers, bindings, library-books-resource, library-refresh-port, navigation-port, job-runtime-port, reader-port, active-job-recovery, created-job-hydration, summary-view-model, loading-state-contract, image-refresh, event-target – composition.js import và mount trực tiếp.
+- **Giữ (facade)**: card-presenter.js, image-loader.js.
+- **Giữ nhưng vô hiệu hóa**: store-renderer.js (vô hại dưới React viewPort, xóa ở Phase 4).
+- **Giữ**: workflow-open-port.js (composition tiêm isWorkflowOpen từ workflow store).
+- **Chết (xóa khi cutover)**: view.js, view-port.js, host.js, host-actions.js, render-target.js, view-state-target.js, view-state.js, list-rendering.js, list-events.js, image-hydration.js, card-markup.js, card-template.js, formatting.js, dom-contract.js. ⚠️ 5 tham số mặc định của controller/runtime/loader/commit/bindings `viewPort = createRecentJobsViewPort()` sẽ được chuyển thành bắt buộc khi cutover (test đã tiêm sẵn, không ảnh hưởng).
 
-### features/job-runtime/(17 files)
-**Keep all**. Only the callback implementations in mountJobRuntimeFeature payload change (renderJob/renderJobSecondaryPatch/setText/setWorkflowSections… provided by composition React implementations). runtime-reset consumes injected callbacks from app‑shell subdomain already migrated.
+### features/job-runtime/(17 tệp)
+**Giữ tất cả**. Chỉ các callback trong payload mountJobRuntimeFeature thay đổi (renderJob/renderJobSecondaryPatch/setText/setWorkflowSections… do composition React cung cấp). runtime-reset tiêu thụ callback tiêm từ app‑shell subdomain đã di chuyển.
 
-### components/status/(17 files)+ job-status/(VM)
-job-status/ entire directory is pure VM and kept; React imports directly. components/status verdict:
-- job-status-card.js / -template.js / connected-.js / -rendering.js / -progress-renderer.js / -selection.js / -stage-flow.js / -substages.js / -retry.js / -snapshot.js / -presets.js / -visuals.js / -dom-contract.js / task-toolbar.js → **dead**, replaced by StatusCard.jsx family; among them:
-  - rendering.js buildProgressRenderModel(lines 45-164 pure function) **copied** to src/pages/home/features/status/progress-model.js (cannot import due to barrier).
-  - -progress-animation.js → hook useStagedProgressAnimation(imports from job-status/status-card-progress-view-model.js; timers/displayedProgressByStage use useRef).
-  - -animation.js(lottie 194 lines) → imperative island hook useLottieStageAnimation(desiredKey race guard + speedForProgressDelta curve copied wholesale; resolveLottieVendorUrl legal import).
-  - -presets.js STAGE_ANIMATIONS table copied into hook; -visuals.js resolveVisualStageKeyForSnapshot(8 lines) copied.
-  - Hidden areas #job-id/#job-status/#job-stage-detail/#query-job-duration/#job-finished-at and legacy links **still rendered** (job‑summary text and parallel smoke depend on them).
+### components/status/(17 tệp)+ job-status/(VM)
+Toàn bộ thư mục job-status/ là VM thuần và được giữ; React import trực tiếp. Phán quyết components/status:
+- job-status-card.js / -template.js / connected-.js / -rendering.js / -progress-renderer.js / -selection.js / -stage-flow.js / -substages.js / -retry.js / -snapshot.js / -presets.js / -visuals.js / -dom-contract.js / task-toolbar.js → **chết**, được thay thế bởi họ StatusCard.jsx; trong đó:
+  - rendering.js buildProgressRenderModel(dòng 45-164 hàm thuần) **được sao chép** sang src/pages/home/features/status/progress-model.js (không thể import do rào cản).
+  - -progress-animation.js → hook useStagedProgressAnimation(import từ job-status/status-card-progress-view-model.js; timers/displayedProgressByStage dùng useRef).
+  - -animation.js(lottie 194 dòng) → hook đảo mệnh lệnh useLottieStageAnimation(desiredKey race guard + speedForProgressDelta curve được sao chép nguyên bản; resolveLottieVendorUrl import hợp lệ).
+  - Bảng STAGE_ANIMATIONS trong -presets.js được sao chép vào hook; resolveVisualStageKeyForSnapshot(8 dòng) trong -visuals.js được sao chép.
+  - Các vùng ẩn #job-id/#job-status/#job-stage-detail/#query-job-duration/#job-finished-at và liên kết cũ **vẫn được render** (văn bản job‑summary và smoke song song phụ thuộc vào chúng).
 
-### components/recent-jobs/(3 files)
-recent-job-card.js dead → RecentJobCard.jsx; presenter and image-loader **kept** (via facade; module‑level objectURL cache must be shared, React must not recreate it).
+### components/recent-jobs/(3 tệp)
+recent-job-card.js chết → RecentJobCard.jsx; presenter và image-loader **được giữ** (qua facade; cache objectURL cấp module phải được chia sẻ, React không được tạo lại).
 
-### ui/ presentation chain
-presentation.js, status-surfaces-presenter.js, job-status-card-renderer.js, status-card-view-port.js, job-status-summary-presenter.js, elapsed-presenter.js, presentation-view.js, status-ring-fallback-presenter.js → dead at cutover. Pure logic already lives in job-status/ and job/. ⚠️ Do not import ui/status-surfaces-presenter.js from pages (would drag in old DOM write chain).
+### Chuỗi presentation ui/
+presentation.js, status-surfaces-presenter.js, job-status-card-renderer.js, status-card-view-port.js, job-status-summary-presenter.js, elapsed-presenter.js, presentation-view.js, status-ring-fallback-presenter.js → chết khi cutover. Logic thuần đã nằm trong job-status/ và job/. ⚠️ Không import ui/status-surfaces-presenter.js từ pages (sẽ kéo theo chuỗi ghi DOM cũ).
 
-## 2. React component table (src/pages/home/)
+## 2. Bảng thành phần React (src/pages/home/)
 
 ### features/library/
-- **RecentJobsLibrary.jsx**: useStoreSnapshot(recentJobsStore) full snapshot + useStoreSnapshot(libraryViewStore); loadMore → runtime.loadRecentJobs({reset:false}); summary uses buildRecentJobsSummaryViewModel.
-- **RecentJobCard.jsx**: memo(Card, areCardPropsEqual), props = item + onSelect/onDelete/onReader(stable refs); delete confirmation popover elevated to Library‑level confirmingDeleteJobId useState.
-- **useRecentJobCover.js**: loadFirstRecentJobImage + recentJobRawImageUrls(facade); imageCacheVersionOf copied (recent-job-card.js:12-29); token race guard; **do not revoke on unmount**.
-- **useLibraryAutoLoad.js**: scroll passive listener + rAF, 260px/0.35 threshold geometry rewritten (~10 lines).
-- **library-view-store.js**(new): {mode: loading|list|empty|error, message, hasMore, loadMoreLoading}; copy RECENT_JOBS_VIEW_TEXT main view variants.
-- **react-view-port.js**(new): implements old viewPort 10 methods → writes libraryViewStore; renderList ignores items (React reads recentJobsStore directly); replaceCard always true; bindEvents captures handlers to handlersRef; hasView always true.
-- recent-jobs-dialog element shape disabled in main view, dead.
+- **RecentJobsLibrary.jsx**: useStoreSnapshot(recentJobsStore) snapshot đầy đủ + useStoreSnapshot(libraryViewStore); loadMore → runtime.loadRecentJobs({reset:false}); tóm tắt dùng buildRecentJobsSummaryViewModel.
+- **RecentJobCard.jsx**: memo(Card, areCardPropsEqual), props = item + onSelect/onDelete/onReader(ref ổn định); popover xác nhận xóa được nâng lên cấp Library confirmingDeleteJobId useState.
+- **useRecentJobCover.js**: loadFirstRecentJobImage + recentJobRawImageUrls(facade); imageCacheVersionOf được sao chép (recent-job-card.js:12-29); bảo vệ race token; **không thu hồi khi unmount**.
+- **useLibraryAutoLoad.js**: scroll passive listener + rAF, hình học ngưỡng 260px/0.35 được viết lại (~10 dòng).
+- **library-view-store.js**(mới): {mode: loading|list|empty|error, message, hasMore, loadMoreLoading}; sao chép các biến thể RECENT_JOBS_VIEW_TEXT main view.
+- **react-view-port.js**(mới): triển khai 10 phương thức viewPort cũ → ghi libraryViewStore; renderList bỏ qua items (React đọc trực tiếp recentJobsStore); replaceCard luôn true; bindEvents bắt handlers vào handlersRef; hasView luôn true.
+- Element shape recent-jobs-dialog bị vô hiệu hóa trong main view, chết.
 
 ### features/status/
-- **StatusCard.jsx**(id="job-status-card", rendered into #status-section): useStoreSnapshot(statusCardStore) full snapshot; cancel → services.jobRuntime.cancelCurrentJob().
-- **StageFlow.jsx / SubstageFlow.jsx / ProgressBlock.jsx / ResultActions.jsx / StageRetry.jsx**: all driven by job-status/ pure VM; StageRetry dispatches APP_EVENTS.retryStage.
-- **useElapsedTicker.js**: 1s tick + buildElapsedViewModel(job/elapsed-view-model.js), stops at terminal; elapsed not stored in store (would cause constant snapshot change).
-- **useStageSelection.js**: selectedStageKey/manual useState; reset on job change, clear manual on stage advance (selection.js:45-64 semantics).
-- **status-card-store.js**(new)+ statusCardPresenter(~80 lines): renderMain = buildRuntimeStatusCardViewModel + buildJobStatusSummaryViewModel → setSnapshot; renderPatch merges three sources as "recompute VM write store" (semantic convergence point, S9 cross‑check); finishedAtFallback uses currentJobStore.
+- **StatusCard.jsx**(id="job-status-card", render vào #status-section): useStoreSnapshot(statusCardStore) snapshot đầy đủ; cancel → services.jobRuntime.cancelCurrentJob().
+- **StageFlow.jsx / SubstageFlow.jsx / ProgressBlock.jsx / ResultActions.jsx / StageRetry.jsx**: tất cả được điều khiển bởi VM thuần job-status/; StageRetry dispatch APP_EVENTS.retryStage.
+- **useElapsedTicker.js**: tick 1s + buildElapsedViewModel(job/elapsed-view-model.js), dừng ở terminal; elapsed không lưu trong store (sẽ gây thay đổi snapshot liên tục).
+- **useStageSelection.js**: selectedStageKey/manual useState; reset khi đổi job, xóa manual khi stage tiến (ngữ nghĩa selection.js:45-64).
+- **status-card-store.js**(mới)+ statusCardPresenter(~80 dòng): renderMain = buildRuntimeStatusCardViewModel + buildJobStatusSummaryViewModel → setSnapshot; renderPatch gộp ba nguồn thành "tính lại VM ghi store" (điểm hội tụ ngữ nghĩa, kiểm tra chéo S9); finishedAtFallback dùng currentJobStore.
 
-## 3. Subscription design (1s polling does not re‑render the whole grid)
+## 3. Thiết kế subscription (thăm dò 1s không render lại toàn bộ lưới)
 
-1. Grid single subscription: Library component uses full snapshot without selector (re‑rendering grid function itself is cheap).
-2. **Card memo + signature comparison**: cardSignatureOf(item) produces primitive string (imageCacheVersionOf field set ∪ title/display_name/page_count/cover_url/thumbnail_url/stage_detail/runtime_status.detail); only active card signature changes trigger re‑render. **Do not use per‑card store subscription** (zero gain).
-3. Callback stability: onSelect etc. directly reference composition singleton actions, not inline arrow functions.
-4. Selectors must be defined at module top (use‑store getSnapshot useCallback depends on it).
-5. StatusCard takes full snapshot; elapsed driven locally by ticker.
+1. Subscription đơn lưới: Thành phần Library dùng snapshot đầy đủ không selector (render lại hàm lưới rất rẻ).
+2. **Memo thẻ + so sánh chữ ký**: cardSignatureOf(item) tạo chuỗi nguyên thủy (tập trường imageCacheVersionOf ∪ title/display_name/page_count/cover_url/thumbnail_url/stage_detail/runtime_status.detail); chỉ thay đổi chữ ký thẻ đang hoạt động mới kích hoạt render lại. **Không dùng subscription store riêng cho mỗi thẻ** (không có lợi).
+3. Ổn định callback: onSelect v.v. tham chiếu trực tiếp action singleton composition, không dùng arrow function nội tuyến.
+4. Selector phải được định nghĩa ở đầu module (use‑store getSnapshot useCallback phụ thuộc vào điều này).
+5. StatusCard nhận snapshot đầy đủ; elapsed được điều khiển cục bộ bởi ticker.
 
-Store frequencies: recentJobsStore ~1-3/s, currentJobStore 1/s, secondaryResourceStore ~3-5s, statusCardStore 1/s, libraryViewStore sparse.
+Tần suất store: recentJobsStore ~1-3/s, currentJobStore 1/s, secondaryResourceStore ~3-5s, statusCardStore 1/s, libraryViewStore thưa thớt.
 
-## 4. Lifecycle (bootstrap → composition)
+## 4. Vòng đời (bootstrap → composition)
 
-**All timers stay outside React** (already live in kept engines); composition module‑level singleton, entry.jsx creates it before render, decoupled from StrictMode.
+**Tất cả timer nằm ngoài React** (đã tồn tại trong các engine được giữ); composition singleton cấp module, entry.jsx tạo trước khi render, tách biệt khỏi StrictMode.
 
-createHomeComposition() points:
+Các điểm createHomeComposition():
 - statusCardStore + statusCardPresenter;
-- mountJobRuntimeFeature({state, api ports as‑is, renderJob→presenter.renderMain, renderJobSecondaryPatch→presenter.renderPatch, setText/setWorkflowSections/… provided by already migrated app‑shell/upload/workflow/status-detail React features, shellViewPort, libraryEventPort, resetStatePort});
-- createRecentJobsReactViewPort + mountRecentJobsFeature(fetch* as‑is, startPolling/currentJobId from jobRuntimeFeature, readerPort/stageAdapterPort lifted from bootstrap corresponding files, statePort);
-- document listeners: openReaderRequested (lift payloads.js:55-68), retryStage → jobRuntimeFeature.retryStage;
-- startup route: URL ?job_id= starts polling (lift startup-route.js:49-59).
+- mountJobRuntimeFeature({state, api ports giữ nguyên, renderJob→presenter.renderMain, renderJobSecondaryPatch→presenter.renderPatch, setText/setWorkflowSections/… do các feature React app‑shell/upload/workflow/status-detail đã di chuyển cung cấp, shellViewPort, libraryEventPort, resetStatePort});
+- createRecentJobsReactViewPort + mountRecentJobsFeature(fetch* giữ nguyên, startPolling/currentJobId từ jobRuntimeFeature, readerPort/stageAdapterPort nâng từ các tệp bootstrap tương ứng, statePort);
+- Listener document: openReaderRequested (nâng payloads.js:55-68), retryStage → jobRuntimeFeature.retryStage;
+- Route khởi động: URL ?job_id= bắt đầu thăm dò (nâng startup-route.js:49-59).
 
-Dissolved bootstrap files ~20 (startup-route*, job-*-port, half of mount-job-features, main-shell-event-bindings two lines, etc.), cutover delete.
+Giải thể ~20 tệp bootstrap (startup-route*, job-*-port, một nửa mount-job-features, main-shell-event-bindings hai dòng, v.v.), xóa khi cutover.
 
-Order guarantee: composition mounts first (initial load synchronously sent) → React render; useSyncExternalStore first read gets current value.
+Đảm bảo thứ tự: composition mount trước (tải ban đầu gửi đồng bộ) → React render; useSyncExternalStore đọc lần đầu nhận giá trị hiện tại.
 
-## 5. Event contract
+## 5. Hợp đồng sự kiện
 
-- library* three document CustomEvents, command bus, open/close-translation-workflow, status-area-visibility-changed: **all kept as‑is**, React components do not consume directly (all via store), composition bindings.js continues to run.
-- **Pre‑condition**: workflow React features must continue dispatching open/close events, otherwise library refresh hangs permanently (risk 5).
-- StageRetry continues dispatching retryStage; event-name-contracts already scanned .jsx.
-- This step lands src/shared/react/use-app-event.js (for status-detail/workflow consumption) + unit tests.
+- Ba document CustomEvent library*, command bus, open/close-translation-workflow, status-area-visibility-changed: **tất cả giữ nguyên**, thành phần React không tiêu thụ trực tiếp (tất cả qua store), composition bindings.js tiếp tục chạy.
+- **Điều kiện tiên quyết**: feature React workflow phải tiếp tục dispatch sự kiện open/close, nếu không làm mới thư viện bị treo vĩnh viễn (rủi ro 5).
+- StageRetry tiếp tục dispatch retryStage; event-name-contracts đã quét .jsx.
+- Bước này đưa vào src/shared/react/use-app-event.js (cho status-detail/workflow tiêu thụ) + unit test.
 
-## 6. Test mapping
+## 6. Ánh xạ test
 
-- **Zero‑change keep‑alive**: state/pagination/commit/loader/refresh-scheduler/active-refresh/actions/runtime-patches/commands/command-handlers sections in recent-jobs.test.mjs; controller/polling/secondary/render-context in job-runtime.test.mjs; VM sections imported from job-status/ in status-card.test.mjs (~70%); library-* and use-store-hook.
-- **Dead with view**: view/list-rendering/list-events/host/render-target/view-state/store-renderer sections in recent-jobs.test.mjs; components/status shell sections in status-card.test.mjs (buildProgressRenderModel, progress-animation test **migrated** to new pages files, assertions unchanged); ui/ dependent sections in job-runtime.test.mjs.
-- **New Top10**: ① library grid render + smoke contract; ② card interactions (select/delete popover/reader/keyboard); ③ **card render isolation** (replaceItem single card, remaining 23 card render counts unchanged — memo regression anchor); ④ viewPort×store state machine; ⑤ StatusCard contract (stage flow/substage/retry/result actions/data‑status/ring ids); ⑥ stage selection semantics; ⑦ staged animation (fake timer 120ms); ⑧ statusCardPresenter three sources; ⑨ composition integration (initial load, job‑updated patch, workflow suspend); ⑩ useRecentJobCover (cache/race/no revoke).
+- **Giữ nguyên không đổi**: các section state/pagination/commit/loader/refresh-scheduler/active-refresh/actions/runtime-patches/commands/command-handlers trong recent-jobs.test.mjs; controller/polling/secondary/render-context trong job-runtime.test.mjs; các section VM import từ job-status/ trong status-card.test.mjs (~70%); library-* và use-store-hook.
+- **Chết cùng view**: các section view/list-rendering/list-events/host/render-target/view-state/store-renderer trong recent-jobs.test.mjs; các section shell components/status trong status-card.test.mjs (buildProgressRenderModel, test progress-animation **được di chuyển** sang tệp pages mới, assertion không đổi); các section phụ thuộc ui/ trong job-runtime.test.mjs.
+- **Top10 mới**: ① render lưới thư viện + hợp đồng smoke; ② tương tác thẻ (chọn/xóa popover/trình đọc/bàn phím); ③ **cách ly render thẻ** (replaceItem một thẻ, 23 thẻ còn lại không thay đổi số lần render — neo hồi quy memo); ④ máy trạng thái viewPort×store; ⑤ hợp đồng StatusCard (stage flow/substage/retry/result actions/data‑status/ring ids); ⑥ ngữ nghĩa chọn stage; ⑦ animation theo giai đoạn (fake timer 120ms); ⑧ statusCardPresenter ba nguồn; ⑨ tích hợp composition (tải ban đầu, vá job‑updated, workflow suspend); ⑩ useRecentJobCover (cache/race/không thu hồi).
 
-## 7. Build order (npm test green after each step; 12 baselines naturally untouched before cutover)
+## 7. Thứ tự xây dựng (npm test xanh sau mỗi bước; 12 baseline tự nhiên không bị chạm trước cutover)
 
-S1 store+viewPort+composition skeleton → S2 RecentJobCard+cover hook → S3 Library+autoload+search → S4 statusCardStore+presenter+connect to jobRuntime → S5 StatusCard static structure → S6 animation islands (lottie+staged) → S7 interaction loops (select/elapsed/cancel/retry) → S8 full event bridge → S9 dual‑track manual check (watch:js + real backend + mock=parallel) → cutover (switch entry, delete dead files + 5 default params, delete test sections, 4 baselines + full smoke).
+S1 skeleton store+viewPort+composition → S2 RecentJobCard+cover hook → S3 Library+autoload+tìm kiếm → S4 statusCardStore+presenter+kết nối jobRuntime → S5 cấu trúc tĩnh StatusCard → S6 đảo animation (lottie+staged) → S7 vòng tương tác (chọn/elapsed/hủy/retry) → S8 cầu sự kiện đầy đủ → S9 kiểm tra thủ công hai luồng (watch:js + backend thật + mock=song song) → cutover (chuyển entry, xóa tệp chết + 5 tham số mặc định, xóa section test, 4 baseline + smoke đầy đủ).
 
-## 8. Risks and mitigations
+## 8. Rủi ro và biện pháp giảm thiểu
 
-1. **staged animation timing (highest)**: displayedProgressByStage must be useRef; new snapshot decides continue/jump based on shouldAnimateRenderPageProgress; job change resets. Using useState would re‑render on every tick and capture stale closure.
-2. **lottie race**: desiredKey triple‑check kept as‑is; status‑section uses CSS hidden, not unmount (animation instance lives).
-3. **objectURL**: module‑level cache never revoked; React unmount **must not** revoke; invalidation only via invalidateRecentJobImages.
-4. **refresh throttle semantics**: lastRefreshAt write timing is intentional; do not reorder; test keep‑alive is the anchor.
-5. **workflow suspend deadlock**: isWorkflowOpen injected from composition reading workflow store; integration test covers open→close→300ms refresh.
-6. **first‑frame placeholder**: presenter must write store synchronously inside startPolling chain (otherwise empty flash, status‑dialog baseline catches).
-7. **DOM contract**: includes --status-ring-percent, --status-substage-count CSS variables, aria‑selected, data‑stage‑key; dom‑ids constants + contract test asserts each id.
-8. **deep clone floor**: existing cost already borne; do not use items.find inside per‑card selector.
-9. **default param break**: cutover changes 5 spots to required.
-10. **renderPatch convergence**: React whole‑card diff is theoretically equivalent; S9 cross‑check against mock=parallel + failure task dual paths.
+1. **Thời gian animation theo giai đoạn (cao nhất)**: displayedProgressByStage phải dùng useRef; snapshot mới quyết định continue/jump dựa trên shouldAnimateRenderPageProgress; đổi job thì reset. Dùng useState sẽ render lại mỗi tick và bắt closure cũ.
+2. **Race lottie**: desiredKey triple‑check giữ nguyên; status‑section dùng CSS hidden, không unmount (instance animation vẫn sống).
+3. **objectURL**: cache cấp module không bao giờ thu hồi; React unmount **không được** thu hồi; vô hiệu hóa chỉ qua invalidateRecentJobImages.
+4. **Ngữ nghĩa giới hạn tốc độ làm mới**: thời điểm ghi lastRefreshAt là cố ý; không sắp xếp lại; test keep‑alive là neo.
+5. **Deadlock workflow suspend**: isWorkflowOpen được tiêm từ composition đọc workflow store; test tích hợp bao phủ open→close→300ms refresh.
+6. **Placeholder khung hình đầu**: presenter phải ghi store đồng bộ trong chuỗi startPolling (nếu không sẽ flash trống, baseline status‑dialog phát hiện).
+7. **Hợp đồng DOM**: bao gồm biến CSS --status-ring-percent, --status-substage-count, aria‑selected, data‑stage‑key; hằng số dom‑ids + test hợp đồng khẳng định từng id.
+8. **Sàn deep clone**: chi phí hiện tại đã chịu; không dùng items.find trong selector riêng thẻ.
+9. **Phá vỡ tham số mặc định**: cutover thay đổi 5 chỗ thành bắt buộc.
+10. **Hội tụ renderPatch**: Diff toàn thẻ React tương đương về lý thuyết; S9 kiểm tra chéo với mock=song song + hai đường dẫn failure task.
 
-## Key files
-- features/recent-jobs/controller.js(viewPort injection point)
-- features/job-runtime/controller.js(polling engine payload contract)
-- job-status/status-card-runtime-source.js(sole status card VM source)
-- components/status/job-status-card.js(StatusCard.jsx behaviour mirror baseline)
-- src/shared/react/use-store.js(subscription base)
+## Tệp chính
+- features/recent-jobs/controller.js(điểm tiêm viewPort)
+- features/job-runtime/controller.js(hợp đồng payload engine thăm dò)
+- job-status/status-card-runtime-source.js(nguồn VM thẻ trạng thái duy nhất)
+- components/status/job-status-card.js(baseline phản chiếu hành vi StatusCard.jsx)
+- src/shared/react/use-store.js(nền tảng subscription)

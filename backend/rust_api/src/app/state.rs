@@ -208,7 +208,7 @@ mod tests {
         assert!(job
             .error
             .as_deref()
-            .is_some_and(|detail| detail.contains("已不存在")));
+            .is_some_and(|detail| detail.contains("không còn tồn tại")));
         assert_eq!(
             state
                 .db
@@ -262,7 +262,7 @@ mod tests {
         assert!(job
             .error
             .as_deref()
-            .is_some_and(|detail| detail.contains("仍在运行")));
+            .is_some_and(|detail| detail.contains("vẫn đang chạy")));
         assert_eq!(
             state
                 .db
@@ -351,7 +351,7 @@ mod tests {
         assert!(row
             .3
             .as_deref()
-            .is_some_and(|detail| detail.contains("未记录 worker pid")));
+            .is_some_and(|detail| detail.contains("Chưa ghi nhận worker pid")));
         assert!(row
             .4
             .as_deref()

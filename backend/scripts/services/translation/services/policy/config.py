@@ -15,8 +15,8 @@ class TranslationPolicyConfig:
     mode: str
     math_mode: str = "direct_typst"
     enable_title_skip: bool = False
-    # Deprecated compatibility fields. The default translation mainline no longer
-    # uses these flags to reconstruct legacy skip heuristics.
+    # Các trường tương thích lỗi thời. Nhánh chính dịch mặc định không còn
+    # dùng các cờ này để xây dựng lại heuristic skip cũ.
     enable_reference_tail_skip: bool = False
     enable_reference_zone_skip: bool = False
     enable_narrow_body_noise_skip: bool = False

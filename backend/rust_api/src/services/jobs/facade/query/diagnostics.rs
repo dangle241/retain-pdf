@@ -50,9 +50,9 @@ fn build_job_diagnostics_view(
                 job.error
                     .clone()
                     .filter(|value| !value.trim().is_empty())
-                    .unwrap_or_else(|| "任务失败，但暂未识别出明确原因".to_string())
+                    .unwrap_or_else(|| "Nhiệm vụ thất bại, nhưng chưa xác định được nguyên nhân rõ ràng".to_string())
             } else {
-                "任务当前没有失败诊断".to_string()
+                "Nhiệm vụ hiện không có chẩn đoán thất bại".to_string()
             },
             detail: job.error.clone(),
             suggestion: None,

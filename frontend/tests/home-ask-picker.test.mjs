@@ -6,7 +6,7 @@ import {
 } from "../src/pages/home/features/home-ask/document-picker.js";
 
 test("parseAtQuery: phân tích khi con trỏ đứng sau @query", () => {
-  const text = "帮我总结 @halogen";
+  const text = "Giúp tôi tóm tắt @halogen";
   const caret = text.length;
   const parsed = parseAtQuery(text, caret);
   assert.deepEqual(parsed, { start: text.indexOf("@"), query: "halogen" });
@@ -34,10 +34,10 @@ test("filterDocumentOptions: loại mục đã chọn và lọc theo tiêu đề
 
 test("filterDocumentOptions: có thể khớp bộ sưu tập", () => {
   const options = [
-    { kind: "collection", id: "col-1", title: "量子化学", document_count: 4 },
+    { kind: "collection", id: "col-1", title: "Hóa học lượng tử", document_count: 4 },
     { kind: "document", id: "d1", title: "Other paper" },
   ];
-  const filtered = filterDocumentOptions(options, "量子", []);
+  const filtered = filterDocumentOptions(options, "lượng tử", []);
   assert.equal(filtered.length, 1);
   assert.equal(filtered[0].kind, "collection");
   assert.equal(filtered[0].id, "col-1");

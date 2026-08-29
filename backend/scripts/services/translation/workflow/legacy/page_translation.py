@@ -106,7 +106,7 @@ def translate_items_to_path(
             if skip_summary["title_skipped"]:
                 print(f"{label}: skipped {skip_summary['title_skipped']} title items")
             if skip_summary["reference_tail_skipped"]:
-                print(f"{label}: skipped {skip_summary['reference_tail_skipped']} items in the reference tail")
+                print(f"{label}: đã bỏ qua {skip_summary['reference_tail_skipped']} mục ở cuối tài liệu tham khảo")
     elif policy_config.enable_title_skip:
         if skip_summary["title_skipped"]:
             finalize_payload_orchestration_metadata(payload)

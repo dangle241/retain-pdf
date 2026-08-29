@@ -230,10 +230,10 @@ def apply_single_translated_entry(
 
 
 def apply_reconstructed_unit_text(items: list[dict], translated_text: str) -> None:
-    # Ghi thay thế toàn bộ căn hộ để xây dựng lại bị xáo trộn:Đầu ra tái tạo là văn bản hiển thị thành phẩm(Người gọi đã hoàn thành
-    # reasoning Làm sạch rò rỉ và khôi phục phần giữ chỗ),Toàn bộ đơn vị chia sẻ cùng một bản dịch,
-    # Sáu trường dịch có cùng giá trị,group_* VÀ translation_unit_* Luôn đồng bộ một cách tự nhiên。
-    # Không thực hiện cắt rò rỉ liền kề và mixed_literal hợp lại——Những mục tiêu đầu ra dịch từng mục。
+    # Ghi đè toàn bộ đơn vị để tái tạo khi bị xáo trộn: đầu ra tái tạo là văn bản hiển thị thành phẩm
+    # (người gọi đã hoàn thành làm sạch rò rỉ reasoning và khôi phục phần giữ chỗ), toàn bộ đơn vị chia sẻ cùng một bản dịch,
+    # sáu trường dịch có cùng giá trị, group_* và translation_unit_* luôn đồng bộ tự nhiên.
+    # Không thực hiện cắt rò rỉ liền kề và hợp lại mixed_literal—mục tiêu là đầu ra dịch theo từng mục.
     for item in items:
         item["protected_translated_text"] = translated_text
         item["translated_text"] = translated_text

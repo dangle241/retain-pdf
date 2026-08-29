@@ -3,7 +3,7 @@
   "case_id": "quantum_chem_533",
   "source_job_id": "20260514183142-dec42e",
   "source_job_root": "data/jobs/20260514183142-dec42e",
-  "description": "533-page scientific book render benchmark with dense formulas and real translated JSON artifacts.",
+  "description": "Benchmark kết xuất sách khoa học 533 trang với công thức dày đặc và sản phẩm JSON bản dịch thực tế.",
   "page_count": 533,
   "expected_render_mode": "overlay",
   "inputs": {

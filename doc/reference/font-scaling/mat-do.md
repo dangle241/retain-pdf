@@ -1,31 +1,31 @@
-# How Is Density Actually Determined?
+# Mật Độ Thực Tế Được Xác Định Như Thế Nào?
 
-If you imagine a text box as a paper box, then "density" answers one question:
+Nếu bạn hình dung một ô văn bản như một cái hộp giấy, thì "mật độ" trả lời một câu hỏi:
 
-**Given current font size and line spacing, is this translated content loose, just right, or overloaded when stuffed into this box?**
+**Với cỡ chữ và bước dòng hiện tại, nội dung dịch này có mỏng, vừa phải, hay quá tải khi nhồi vào hộp này không?**
 
-This seems intuitive, but implementing in code usually does not look at one metric alone. Because "crowded or not" has at least two meanings:
+Điều này tưởng chừng trực quan, nhưng triển khai trong mã thường không nhìn vào một chỉ số duy nhất. Bởi vì "đông hay không" ít nhất có hai nghĩa:
 
-- Did content itself get longer
-- Does box itself have capacity to hold this content
+- Bản thân nội dung đã dài ra chưa
+- Hộp bản thân có dung lượng chứa nội dung này không
 
-So in current implementation, density is not a single constant but determined jointly by several function groups.
+Nên trong triển khai hiện tại, mật độ không phải một hằng số đơn lẻ mà được xác định chung bởi nhiều nhóm hàm.
 
 ---
 
-## 1. Conclusion First: We Actually Look at Two Densities
+## 1. Kết Luận Đầu: Chúng Ta Thực tế Nhìn Vào Hai Loại Mật Độ
 
-In current implementation, most relevant to "density" is not one function but two lines:
+Trong triển khai hiện tại, phần liên quan nhất đến "mật độ" không phải một hàm mà là hai dòng:
 
-1. **Length density**
-   - Checks whether translated content "expanded" relative to source
-   - Corresponding function: `translation_density_ratio(...)`
+1. **Mật độ chiều dài**
+   - Kiểm tra xem nội dung dịch đã "giãn nở" so với bản gốc chưa
+   - Hàm tương ứng: `translation_density_ratio(...)`
 
-2. **Layout density**
-   - Checks whether content appears too crowded in box at current font size and line spacing
-   - Corresponding function: `layout_density_ratio(...)`
+2. **Mật độ bố cục**
+   - Kiểm tra xem nội dung có quá拥挤 trong hộp ở cỡ chữ và bước dòng hiện tại không
+   - Hàm tương ứng: `layout_density_ratio(...)`
 
-In [fit.py](../../backend/scripts/services/rendering/layout/payload/fit.py), both metrics participate in judgment together:
+Trong [fit.py](../../backend/scripts/services/rendering/layout/payload/fit.py), cả hai chỉ số cùng tham gia phán đoán:
 
 ```python
 length_density_ratio = translation_density_ratio(item, protected_text)
@@ -33,15 +33,15 @@ layout_density = layout_density_ratio(box, protected_text, font_size_pt=font_siz
 is_dense_block = length_density_ratio >= COMPACT_TRIGGER_RATIO or layout_density >= LAYOUT_COMPACT_TRIGGER_RATIO
 ```
 
-In other words, system asks neither only "did translation get longer" nor only "is box nearly full", but both.
+Nói cách khác, hệ thống không hỏi đơn thuần "bản dịch có dài hơn" hay "hộp có gần đầy", mà hỏi cả hai.
 
 ---
 
-## 2. Layer 1: Did Content Expand Noticeably
+## 2. Lớp 1: Nội Has Giãn Ra Đáng Kể Không
 
-Most direct approach: source had few words but translation became very long paragraph; likely harder to lay out.
+Cách trực tiếp nhất: bản gốc chỉ vài từ nhưng bản dịch trở thành đoạn rất dài; khả năng cao khó bố trí hơn.
 
-This layer handled by `translation_density_ratio(...)` in [text_common.py](../../backend/scripts/services/rendering/layout/payload/text_common.py):
+Lớp này do `translation_density_ratio(...)` xử lý trong [text_common.py](../../backend/scripts/services/rendering/layout/payload/text_common.py):
 
 ```python
 def translation_density_ratio(item: dict, protected_text: str) -> float:
@@ -54,64 +54,64 @@ def translation_density_ratio(item: dict, protected_text: str) -> float:
     return zh_chars / source_words
 ```
 
-Function does something very simple:
+Hàm làm một thứ rất đơn giản:
 
-- Count approximate English word count in source: `source_word_count(item)`
-- Count Chinese character count after translation: `translated_zh_char_count(protected_text)`
-- Get ratio via "Chinese chars / source words"
+- Đếm Approximate số từ tiếng Anh trong bản gốc: `source_word_count(item)`
+- Đếm số ký tự tiếng Trung sau khi dịch: `translated_zh_char_count(protected_text)`
+- Lấy tỷ lệ qua "ký tự tiếng Trung / số từ bản gốc"
 
-Its purpose is not "precise layout calculation" but quick judgment:
+Mục đích không phải "tính toán bố trí chính xác" mà là phán đoán nhanh:
 
-**Is this translation visually more prone to crowding than source?**
+**Bản dịch này có dễ拥挤 hơn thị giác so với bản gốc không?**
 
-### Example
+### Ví dụ
 
-Suppose source block:
+Giả sử block bản gốc:
 
-- Source word count: 20
-- Translated Chinese chars: 18
+- Số từ bản gốc: 20
+- Ký tự tiếng Trung đã dịch: 18
 
-Then:
+Thì:
 
-`translation_density_ratio = 18 / 20 = 0.9`
+`ttranslation_density_ratio = 18 / 20 = 0.9`
 
-Indicates reaching tight edge.
+Cho thấy đang ở ranh giới chặt.
 
-If another block:
+Nếu block khác:
 
-- Source word count: 20
-- Translated Chinese chars: 24
+- Số từ bản gốc: 20
+- Ký tự tiếng Trung đã dịch: 24
 
-Then:
+Thì:
 
-`translation_density_ratio = 24 / 20 = 1.2`
+`ttranslation_density_ratio = 24 / 20 = 1.2`
 
-Such block belongs to "noticeable expansion"; typically treated more conservatively afterward.
+Block này thuộc loại "giãn nở đáng kể"; thường được xử lý bảo thủ hơn sau đó.
 
-Current thresholds also in same file:
+Ngưỡng hiện tại cũng nằm trong cùng tệp:
 
 - `COMPACT_TRIGGER_RATIO = 0.9`
 - `HEAVY_COMPACT_RATIO = 1.0`
 
-Plainly:
+Nói nôm na:
 
-- `>= 0.9`: Starting to get tight
-- `>= 1.0`: Already heavy compact block
+- `>= 0.9`: Đang bắt đầu chật
+- `>= 1.0`: Đã là block rất dày đặc
 
 ---
 
-## 3. Layer 2: Will Box Really Be Filled at Current Font Size
+## 3. Lớp 2: Hộp thực sự có đầy không ở Cỡ Chữ Hiện Tại
 
-Previous layer only indicates "did content get longer"; does not look at box.
+Lớp trước chỉ cho biết "nội dung có dài ra"; không nhìn hộp.
 
-Same `ratio = 1.0` two paragraphs:
+Cùng `ratio = 1.0` hai đoạn:
 
-- In 400pt wide body box may be completely fine
-- In 160pt wide caption box may immediately overflow
+- Trong hộp body rộng 400pt có thể hoàn toàn ổn
+- Trong hộp caption rộng 160pt có thể overflow ngay
 
-So second layer must look at "box capacity".
+Nên lớp hai phải nhìn "dung lượng hộp".
 
-This step handled by `layout_density_ratio(...)` in [text_common.py](../../backend/scripts/services/rendering/layout/payload/text_common.py):
+Bước này do `layout_density_ratio(...)` xử lý trong [text_common.py](../../backend/scripts/services/rendering/layout/payload/text_common.py):
 
 ```python
 def layout_density_ratio(
@@ -131,64 +131,64 @@ def layout_density_ratio(
     return occupied_height / height
 ```
 
-Function logic in plain terms:
+Logic hàm theo ngôn ngữ nôm na:
 
-1. Check box width and height
-2. Assume approximate character width at current font size
-3. Derive approximate characters per line
-4. Estimate how many lines translated text needs
-5. Calculate how much height these lines occupy
-6. Divide occupied height by box height
+1. Kiểm tra chiều rộng và chiều cao hộp
+2. Assume chiều rộng ký hiệu xấp xỉ ở cỡ chữ hiện tại
+3. Suy ra khoảng ký hiệu xấp xỉ mỗi dòng
+4. Ước lượng bao nhiêu dòng bản dịch cần
+5. Tính chiếm bao nhiêu chiều cao các dòng đó
+6. Chia chiều cao chiếm dụng cho chiều cao hộp
 
-Result is very intuitive ratio:
+Kết quả là tỷ lệ rất trực quan:
 
-- `< 1.0`: Theoretically still fits
-- `≈ 1.0`: Very tight
-- `> 1.0`: Theoretically already exceeds box
+- `< 1.0`: Về lý thuyết vẫn chứa được
+- `≈ 1.0:rất chật
+- `> 1.0`: Về lý thuyết đã vượt hộp rồi
 
-### Example
+### Ví dụ
 
-Suppose box:
+Giả sử hộp:
 
-- Width: 180pt
-- Height: 90pt
-- Current font: 9pt
-- Current line spacing: 12pt
-- Translated Chinese chars: 72
+- Rộng: 180pt
+- Cao: 90pt
+- Font hiện tại: 9pt
+- Khoảng giãn dòng: 12pt
+- Ký tự dịch: 72
 
-Rough estimate:
+Ước lượng nôm na:
 
-- Single char width approx `9 × 0.92 = 8.28pt`
-- Per line approx `180 / 8.28 ≈ 21.7` chars
-- 72 chars need approx `72 / 21.7 ≈ 3.3` lines
-- Occupied height approx `3.3 × 12 = 39.6pt`
-- Layout density approx `39.6 / 90 = 0.44`
+- Chiều rộng mỗi ký hiệu ≈ `9 × 0.92 = 8.28pt`
+- Mỗi dòng ≈ `180 / 8.28 ≈ 21.7` ký tự
+- 72 ký hiệu cần ≈ `72 / 21.7 ≈ 3.3` dòng
+- Chiếm dụng ≈ `3.3 × 12 = 39.6pt`
+- Mật độ bố cục ≈ `39.6 / 90 = 0.44`
 
-Indicates block actually not crowded.
+Cho thấy block thực sự không đông.
 
-If same content in another box:
+Nếu nội dung tương tự trong hộp khác:
 
-- Width: 110pt
-- Height: 48pt
+- Rộng: 110pt
+- Cao: 48pt
 
-Then:
+Thì:
 
-- Per line approx `110 / 8.28 ≈ 13.3` chars only
-- 72 chars need `72 / 13.3 ≈ 5.4` lines
-- Occupied height approx `5.4 × 12 = 64.8pt`
-- Layout density approx `64.8 / 48 = 1.35`
+- Mỗi dòng ≈ `110 / 8.28 ≈ 13.3` ký tự
+- 72 ký hiệu cần `72 / 13.3 ≈ 5.4` dòng
+- Chiếm dụng ≈ `5.4 × 12 = 64.8pt`
+- Mật độ bố cục ≈ `64.8 / 48 = 1.35`
 
-Typical high-density block; current font definitely too large.
+Block điển hình mật độ cao; font hiện tại chắc chắn quá lớn.
 
 ---
 
-## 4. Layer 3: How Box "Real Capacity" Actually Calculated
+## 4. Lớp 3: Dung Lượng "Thực Sự" của Hộp Được Tính Như Thế Nào
 
-Above `layout_density_ratio(...)` is quick estimate; lightweight; suitable for initial density judgment.
+`layout_density_ratio(...)` ở trên là ước lượng nhanh, nhẹ, phù hợp cho phán đoán mật độ ban đầu.
 
-Calculation closer to "how much content box can actually hold" in [capacity.py](../../backend/scripts/services/rendering/layout/payload/capacity.py).
+Tính toán sát "hộp thực sự chứa được bao nhiêu nội dung" hơn nằm ở [capacity.py](../../backend/scripts/services/rendering/layout/payload/capacity.py).
 
-Core is `box_capacity_units(...)`:
+Cốt lõi là `box_capacity_units(...)`:
 
 ```python
 def box_capacity_units(
@@ -207,25 +207,25 @@ def box_capacity_units(
     return lines * chars_per_line * 0.98
 ```
 
-Does three things:
+Là ba thứ:
 
-1. Derives total lines possible from font size and line spacing
-2. Derives content per line from box width
-3. Multiplies both to get total box capacity
+1. Suy ra tổng số dòng có thể dựa trên cỡ chữ và spacing dòng
+2. Suy ra nội dung mỗi dòng dựa trên rộng hộp
+3. Nhân đôi để ra dung lượng hộp
 
-Critical detail here:
+Chi tiết quan trọng ở đây:
 
 `visual_lines`
 
-In other words, does not fully trust "how many lines box height allows"; references OCR / layout structure visual line count estimate for original block to avoid overly optimistic capacity assumption.
+Nói cách khác, không hoàn toàn tin "chiều cao hộp cho bao nhiêu dòng"; tham chiếu số lượng dòng thị giác từ cấu trúc OCR / layout cho block bản gốc để tránh giả định dung lượng quá lạc quan.
 
 ---
 
-## 5. Layer 4: Content Demand Not Simply Character Counting
+## 5. Lớp 4:demand Nội Không Đơn Giản Là Đếm Ký Hiệu
 
-If capacity calculated, how is "demand" computed?
+Nếu tính dung lượng, làm sao tính "demand"?
 
-Handled by `text_demand_units(...)` in same file:
+Do `text_demand_units(...)` xử lý trong cùng tệp:
 
 ```python
 def text_demand_units(protected_text: str, formula_map: list[dict]) -> float:
@@ -233,71 +233,71 @@ def text_demand_units(protected_text: str, formula_map: list[dict]) -> float:
     return sum(token_units(token, formula_lookup) for token in tokenize_protected_text(protected_text))
 ```
 
-Meaning:
+Ý nghĩa:
 
-- Splits text into tokens first
-- Normal text counts as normal units
-- Formula placeholders counted not as 1 character but closer to real visual cost
+- Tách văn bản thành tokens trước
+- Văn bản bình thường tính là đơn vị bình thường
+- Placeholder công thức không tính là 1 ký hiệu mà sát chi phí thị giác thực tế
 
-Important because looking at character count alone underestimates formula pressure.
+Quan trọng vì chỉ nhìn đếm ký hiệu sẽ đánh giá thấp áp lực công thức.
 
-### Example
+### Ví dụ
 
-Two texts below may have similar character count:
+Hai đoạn dưới đây có thể cùng số ký hiệu:
 
 1. `Phương pháp này cải thiện đáng kể hiệu suất vật liệu.`
-2. `Phương pháp này cải thiện đáng kể hiệu suất vật liệu trong điều kiện [[FORMULA_1]].`
+2. `Phương pháp này cải Thiện đáng kể hiệu suất vật liệu trong điều kiện [[FORMULA_1]].`
 
-But second has higher actual layout pressure due to formula.
+Nhưng đoạn hai có áp lực bố trí thực tế cao hơn nhờ công thức.
 
-System does not treat them as same demand; gives formula higher visual cost via `token_units(...)`.
+Hệ thống không coi chúng bằng nhau demand; gán cost thị giác cao hơn cho công thức qua `token_units(...)`.
 
 ---
 
-## 6. Layer 5: Why Visual Line Count Introduced
+## 6. Lớp 5: Vì Sao Giới thiệu Số Dòng Thị Giác
 
-Easily overlooked problem:
+Vấn đề dễ bỏ qua:
 
-**Sometimes OCR "line count" unreliable.**
+**Đôi khi "số dòng OCR" không đáng tin.**
 
-E.g., paragraph originally 4 lines glued into 1 line by OCR. If looking at raw `lines` only, severely overestimates box available layout space.
+Ví dụ: đoạn Originally 4 dòng bị OCR dính thành 1 dòng. Nếu nhìn raw `lines` đơn thuần, đánh giá quá cao không gian bố trí còn lại trong hộp.
 
-So [measurement.py](../../backend/scripts/services/rendering/layout/typography/measurement.py) has dedicated function set correcting this:
+Nên [measurement.py](../../backend/scripts/services/rendering/layout/typography/measurement.py) có bộ hàm chuyên biệt sửa lỗi này:
 
 - `plain_text_chars_per_line(...)`
 - `_predicted_wrapped_line_count(...)`
 - `visual_line_count(...)`
 - `is_tall_single_line_glue(...)`
 
-Where `visual_line_count(...)` idea:
+Trong đó `visual_line_count(...)` ý tưởng:
 
-- Check OCR reported line count first
-- Estimate "if wrapping normally, should be how many lines" based on text length, box width, single-line character capacity
-- If predicted lines significantly higher than OCR lines, use more conservative line count
+- Kiểm tra số dòng OCR báo trước
+- Ước lượng "nếu wrap bình thường nên là mấy dòng" dựa trên độ dài văn bản, rộng hộp, công lực ký hiệu mỗi dòng
+- Nếu predicted lines cao hơn OCR lines đáng kể, dùng con số bảo thủ hơn
 
-Purpose not calculating font size but preventing density judgment misled by false data.
+Mục đích không tính cỡ chữ mà ngăn phán đoán mật độ bị nhiễu dữ kiện giả.
 
-### Typical Example
+### Điển Hình
 
-Suppose block:
+Giả sử block:
 
-- OCR gave only 1 line
-- But box tall; text length 140 chars
-- Geometrically impossible to fit so much in one line
+- OCR chỉ报 1 dòng
+- Nhưng hộp cao; độ dài văn bản 140 ký
+- Về mặt hình học không thể fits nổi tất cả vào 1 dòng
 
-Then `visual_line_count(...)` concludes:
+Thì `visual_line_count(...)` kết luận:
 
-"This likely not 1-line body but OCR glued multi-line paragraph into one."
+"Chắc không phải một-dòng body mà paragraph đa-dòng bị OCR dính thành 1."
 
-System uses predicted value to correct subsequent capacity judgment. Density calculated this way closer to reality.
+Hệ thống dùng giá trị dự đoán để chỉnh sửa phán đoán dung lượng sau đó. Mật độ tính theo cách này sát thực tế hơn.
 
 ---
 
-## 7. How Density Ultimately Affects Font Size
+## 7. Mật Độ cuối Cùng Ảnh Hưởngถึง Cỡ Chữ Như Thế Nào
 
-These functions do not directly output "final font size"; role more like providing judgment basis for layout engine.
+Các hàm này không trực tiếp xuất ra "cỡ chữ cuối cùng"; vai trò hơn giống cung cấp cơ sở phán đoán cho engine bố trí.
 
-Most direct landing point in `fit_translated_block_metrics(...)` of [fit.py](../../backend/scripts/services/rendering/layout/payload/fit.py):
+Điểm đáp trực tiếp nhất trong `fit_translated_block_metrics(...)` của [fit.py](frontend/screens/backend/scripts/services/rendering/layout/payload/fit.py):
 
 ```python
 capacity = box_capacity_units(box, font_size_pt, leading_em, visual_lines=visual_lines)
@@ -305,122 +305,120 @@ if capacity <= 0 or (demand <= capacity * 0.96 and layout_density < LAYOUT_DENSI
     return font_size_pt, leading_em
 ```
 
-Logic here critical:
+Logic ở đây then chốt:
 
-- If demand not approaching capacity
-- And layout density not too high
+- Nếu demand không sát dung lượng
+- Và mật độ bố cục không quá cao
 
-Then current font size retained.
+Thì giữ lại cỡ chữ hiện tại.
 
-Conversely if:
+Ngược lại nếu:
 
 - `demand > capacity`
-- Or `layout_density` already too high
+- Hoặc `layout_densi` đã quá cao
 
-Then enters font size reduction, line spacing compression flow.
+Thì đi vào luồng thu nhỏ cỡ chữ, nén spacing dòng.
 
-In other words, density does not directly output "9.2pt" or "8.8pt" but decides:
+Nói cách khác, mật độ không trực tiếp xuất ra con số như "9.2pt" hay "8.8pt" mà quyết định:
 
-- Whether to shrink
-- How many steps to shrink
-- Shrink font only or compress line spacing too
+- Có thu không
+- Thu mấy bước
+- Chỉ thu font hay đồng thời compress dòng
 
 ---
 
-## 8. Can Understand as Very Simple Judgment Chain
+## 8. Có Thể Hiểu Như Chuỗi Phán Đoan Rất Đơn Giản
 
-Compressing all functions into plain language yields roughly this chain:
+Nén tất cả hàm vào ngôn ngữ nôm na yields chuỗi xấp xỉ như thế này:
 
-1. **Check if translated content expanded noticeably**
+1. **Kiểm tra bản dịch có giãn ra đáng kể không**
    - `translation_density_ratio(...)`
 
-2. **Check how much height this content occupies in box at current font**
+2. **Xem nội dung chiếm bao nhiêu chiều cao trong hộp ở font hiện tại**
    - `layout_density_ratio(...)`
 
-3. **More rigorously estimate how many unit contents box truly holds**
+3. **Ước nghiêm ngặt hơn hộp thực sự chứa được bao nhiêu unit**
    - `box_capacity_units(...)`
 
-4. **Do not fully trust OCR line count; correct with `visual_line_count(...)`**
+4. **Không hoàn toàn tin số dòng OCR; dùng `visual_line_count(...)` để chỉnh**
 
-5. **Decide whether to shrink font using "demand vs capacity"**
-   - `text_demand_units(...)` vs `box_capacity_units(...)`
+5. **Quyết định thu font bằng "demand so với capacity"**
+   - `text_demand_units(...)` so với `box_capacity_units(...)`
 
 ---
 
-## 9. Complete Example
+## 9. Hoàn Chỉnh Toàn Ví Dụ
 
-Suppose translation block has these conditions:
+Giả sử block dịch có những điều kiện này:
 
-- Box width: 145pt
-- Box height: 62pt
-- Initial font: 9.4pt
-- Line spacing: 0.58em
-- Source words: 18
-- Translated Chinese chars: 22
-- Contains 2 formulas
+- Rộng hộp: 145pt
+- Cao hộp: 62pt
+- Font khởi đầu: 9.4pt
+- Interlinear: 0.58em
+- Số từ bản gốc: 18
+- Ký tự dịch: 22
+- Chứa 2 công thức
 
-System views as:
+Hệ thống xem như:
 
-### Step 1: Did Content Expand
+### Bước 1: Nội Has Giãn Không
 
 `translation_density_ratio = 22 / 18 ≈ 1.22`
 
-Already heavy compact block.
+Đã là block rất chặt.
 
-### Step 2: Will Layout Be Too Crowded at Current Font
+### Bước 2: Bố Cục Có Quá đông ở Font Hiện Không
 
-Estimated by `layout_density_ratio(...)`:
+Ước lượng bở `layout_density_ratio(...)`:
 
-- Box relatively narrow
-- Limited chars per line at 9.4pt
-- Real line-break pressure greater with formulas
+- Hộp khá hẹp
+- Ít ký mỗi dòng ở 9.4pt
+- Áp lực ngắt dòng thực lớn hơn nữa nhờ công thức
 
-Calculated layout density may approach or exceed `1.0`
+Layout density tính ra có thể tiếp cận hoặc vượt `1.0`
 
-### Step 3: Check Capacity and Demand
+### Bước 3: Kiểm tra Công Suẩ và Nhu Cầu
 
-- `box_capacity_units(...)` finds total box capacity small
-- `text_demand_units(...)` raises demand due to formulas
+- `box_capacity_units(...)` find total box capacity nhỏ
+- `text_demand_units(...)` tăng demand nhờ công thức
 
-Conclusion formed:
+Kết thúc hình thành:
 
-**High-density block; current font unsafe.**
+**Block mật độ cao; font hiện tại không an toàn.**
 
-### Step 4: Enter Shrinking
+### Bước 4: Đi vào Thu Nhỏ
 
-`fit_translated_block_metrics(...)` starts trying:
+`fit_translated_block_metrics(...)` bắt đầu thử:
 
-- Reduce font slightly each step
-- If insufficient, compress leading slightly
-- Keep trying until demand no longer significantly exceeds capacity
+- Giảm font chút mỗi bước
+- Nếu không đủ, compress leading chút
+- Tiếp tục thử cho đến quando demand không còn vượt xa capacity
 
-This is complete process of "how density judgment actually affects font size".
+Đây là quy trình hoàn chỉnh của "cách phán đoán mật độ ảnh hưởng đến cỡ chữ thực tế".
 
 ---
 
-## 10. Final Summary
+## 10. Tóm Tắt Cuối Cùng
 
-So-called "box density" essentially not asking:
+Cái gọi là "mật độ hộp" về的本质 không phải hỏi:
 
-"How many characters in this box?"
+"Bao nhiêu ký tự trong hộp này?"
 
-But asking:
+Mà hỏi:
 
-**At current font and line spacing, what gap remains between box usable capacity and real demand of this translated content?**
+**Ở font và spacing dòng hiện tại, gap giữa dung lượng hữu dụng của hộp và demand thực của nội dịch này còn dư bao nhiêu?**
 
-In current implementation, answered jointly by following function groups:
+Trong triển hiện tại, được trả lời chung bởi các nhóm hàm sau:
 
-- Page and original line info correction:
+- Hiệu chỉnh thông tin trang và dòng gốc:
   - [measurement.py](../../backend/scripts/services/rendering/layout/typography/measurement.py)
-- Text length and layout density estimation:
+- Mô phỏng độ dài văn bản và mật độ bố cục:
   - [text_common.py](../../backend/scripts/services/rendering/layout/payload/text_common.py)
-- Capacity and demand calculation:
+- Tính toán capacity và demand:
   - [capacity.py](../../backend/scripts/services/rendering/layout/payload/capacity.py)
-- Final font shrinking decision:
+- Quyết định thu font cuối cùng:
   - [fit.py](../../backend/scripts/services/rendering/layout/payload/fit.py)
 
-If tracing further "why font finally got smaller", answer usually returns to:
+Nếu trace thêm "vì sao font cuối cùng lại nhỏ đi", answer thường quay về:
 
-**Because current block content demand approached or exceeded box capacity at current font.**
-
-</content>
+**Bởi vì demand nội dung block hiện tại đã tiếp cận hoặc vượt capacity hộp ở font hiện tại.**

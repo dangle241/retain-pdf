@@ -5,7 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    // 全量机械迁移后先关 strict，composition 等关键模块再逐步收紧
+    // Tắt strict sau khi nâng cấp toàn bộ, từng siết chặt các module quan trọng như composition sau
     "strict": false,
     "noImplicitAny": false,
     "noEmit": true,

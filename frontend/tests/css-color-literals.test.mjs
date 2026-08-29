@@ -68,7 +68,7 @@ test("Giá trị màu chữ CSS chỉ giảm không tăng (bánh cóc, ngo��
   for (const [file, n] of Object.entries(counts)) {
     const allowed = baseline[file] ?? 0; // tệp mới phải không có màu chữ
     if (n > allowed) {
-      regressions.push(`${file}: ${n} 处(棘轮上限 ${allowed})`);
+      regressions.push(`${file}: ${n} chỗ (giới hạn bánh cóc ${allowed})`);
     }
   }
 

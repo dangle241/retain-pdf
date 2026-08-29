@@ -61,8 +61,8 @@ Quy trình hòa trộn đạo cụ thống nhất: `-modulate 100,90,100` giảm
 
 - Xuất hình: **600×840** trong suốt, nhân vật cao 800 (95% canvas) sát phải sát đáy, dải sương 220px chạm đất
 - Từng là thành viên nhóm scholar, nay theo yêu cầu kiểm tra thực tế phóng to đơn nhân; treo **right-bottom-fg** (dải fg,
-  đè lên trên panel, tránh tà áo chìm vào mép panel), kèm `clickQuote` hai câu ngữ lục "Mặc Tử"
-  (nhấp nhân vật luân phiên: Chí bất cường giả trí bất đạt, ngôn bất tín giả hành bất quả / Hưng thiên hạ chi lợi, trừ thiên hạ chi hại)
+  đè lên trên panel, tránh tà áo chìm vào mép panel),   kèm `clickQuote` hai câu ngữ lục "Mặc Tử"
+  (nhấp nhân vật luân phiên: Người không có chí thì trí chẳng thông, lời không tin thì hành khó thành / Đặt lợi ích thiên hạ lên trên, trừ đi tai hại khắp chốn)
 
 ### 3.4 `scholar.webp` / `lantern-lock.webp` (dự phòng, chưa treo tầng)
 

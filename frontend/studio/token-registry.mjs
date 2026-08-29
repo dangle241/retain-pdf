@@ -92,9 +92,9 @@ export const SELECTOR_TOKEN_MAP = [
 
 /** Kiểm tra độ tương phản WCAG trước khi xuất cặp màu then chốt (tiền cảnh, nền, cấp độ mong muốn) */
 export const CONTRAST_PAIRS = [
-  { fg: "--ink", bg: "--paper", label: "正文/纸面", min: 7 },
-  { fg: "--ink", bg: "--bg", label: "正文/底色", min: 4.5 },
-  { fg: "--muted", bg: "--paper", label: "次要字/纸面", min: 4.5 },
-  { fg: "--btn-primary-fg", bg: "--btn-primary-bg", label: "主按钮字/底", min: 4.5 },
-  { fg: "--danger", bg: "--paper", label: "危险字/纸面", min: 3 },
+  { fg: "--ink", bg: "--paper", label: "Chữ chính/giấy", min: 7 },
+  { fg: "--ink", bg: "--bg", label: "Chữ chính/nền", min: 4.5 },
+  { fg: "--muted", bg: "--paper", label: "Chữ phụ/giấy", min: 4.5 },
+  { fg: "--btn-primary-fg", bg: "--btn-primary-bg", label: "Chữ nút chính/nền", min: 4.5 },
+  { fg: "--danger", bg: "--paper", label: "Chữ nguy hiểm/giấy", min: 3 },
 ];

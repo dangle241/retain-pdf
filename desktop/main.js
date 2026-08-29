@@ -147,7 +147,7 @@ async function startBundledBackend() {
   const apiPort = 41000;
   const simplePort = 42000;
   const aiServicePort = AI_SERVICE_PORT;
-  // Packaged build uses backend/ai_service; development can fall back to the repo copy before prepare runs.
+    // Bản dựng đóng gói dùng backend/ai_service; phát triển có thể quay lại bản sao trong repo trước khi chạy prepare.
   let aiServiceRoot = path.join(backendRoot, "ai_service");
   if (!fs.existsSync(path.join(aiServiceRoot, "retainpdf_ai", "__main__.py"))) {
     const repoAi = path.join(appRoot, "..", "backend", "ai_service");
@@ -217,7 +217,7 @@ async function startBundledBackend() {
       logDesktop(`[desktop] reusing existing backend on port ${apiPort}`);
       updateSplashProgress(52, "Đã phát hiện dịch vụ cục bộ", "Desktop sẽ dùng lại backend hiện tại");
       await waitForPort("127.0.0.1", apiPort, 5000);
-      // Still try to start AI if 41100 is free; the reused Rust API proxies to the local AI service.
+      // Vẫn thử khởi động AI nếu cổng 41100 trống; Rust API được dùng lại proxy tới dịch vụ AI cục bộ.
       const reuseEnv = buildBackendEnv({
         apiPort,
         aiServicePort,
@@ -316,7 +316,7 @@ async function startBundledBackend() {
     dialog.showErrorBox("Rust API worker crashed", detail);
   });
 
-  // retainpdf-ai shares the Rust lifecycle; the frontend passes the LLM key per request.
+  // retainpdf-ai chia sẻ vòng đời Rust; giao diện trước truyền khóa LLM theo từng yêu cầu.
   await startRetainpdfAiService({
     aiServicePort,
     aiServiceRoot,
@@ -391,7 +391,7 @@ async function startRetainpdfAiService({
     await waitForPort("127.0.0.1", aiServicePort, aiReadyTimeoutMs);
     logDesktop(`[desktop] retainpdf-ai ready on port ${aiServicePort}`);
   } catch (error) {
-    // Do not block the main app: translation still works, only AI Q&A returns 502.
+    // Không làm chặn ứng dụng chính: tính năng dịch vẫn hoạt động, chỉ AI hỏi đáp trả về 502.
     logDesktopError(
       `[desktop] retainpdf-ai failed to become ready: ${error && error.message ? error.message : error}`,
     );

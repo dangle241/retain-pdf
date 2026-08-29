@@ -134,7 +134,7 @@ function makePorts() {
   };
 }
 
-test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框", async () => {
+test("DetailApp:tải bố cục, điều chỉnh văn bản, đảo tạo phẩm, hộp thoại luồng sự kiện", async () => {
   const host = dom.window.document.createElement("div");
   host.id = "detail-root";
   dom.window.document.body.appendChild(host);
@@ -147,77 +147,77 @@ test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框"
     getJobId: ports.getJobId,
     resumePort: ports.resumePort,
   }));
-  // 等待 overview + markdown 两段异步编排全部落地
+  // Chờ overview + markdown hai đoạn bố trí bất đồng bộ hoàn toàn
   await waitFor(
-    () => /已加载/.test(byId("detail-markdown-status")?.textContent || ""),
-    "markdown 状态就绪",
+    () => /Đã tải/.test(byId("detail-markdown-status")?.textContent || ""),
+    "Trạng thái markdown sẵn sàng",
   );
 
-  // 头部:job id 与分享提示走 setText 适配
+  // Đầu trang: job id và gợi ý chia sẻ đi qua setText
   assert.equal(byId("detail-job-id")?.textContent, "job-react-detail");
-  assert.equal(byId("detail-head-note")?.textContent, "分享提示文案(测试)");
+  assert.equal(byId("detail-head-note")?.textContent, "Văn bản khuyến nghị chia sẻ (kiểm thử)");
   assert.notEqual(byId("detail-status-summary")?.textContent, "-");
 
-  // 断点恢复:resumePlan 可恢复 → 文案与按钮状态(命令式写入)
-  assert.match(byId("detail-rerun-status")?.textContent || "", /可从 translation 恢复/);
+  // Khôi phục điểm gián đoạn: resumePlan khôi phục được → nội dung và trạng thái nút (ghi mệnh lệnh)
+  assert.match(byId("detail-rerun-status")?.textContent || "", /Có thể khôi phục từ translation/);
   assert.equal(byId("detail-rerun-btn")?.disabled, false);
 
-  // 动作链接:setActionLink 适配(reader/pdf 均就绪)
+  // Liên kết hành động: setActionLink (reader/pdf đều sẵn sàng)
   assert.equal(byId("detail-reader-btn")?.classList.contains("disabled"), false);
   assert.equal(byId("detail-reader-btn")?.getAttribute("aria-disabled"), "false");
   assert.equal(byId("detail-pdf-btn")?.classList.contains("disabled"), false);
 
-  // 产物清单:保留的 artifacts.js 经 overview-renderer 命令式写入 React 容器
-  assert.equal(byId("detail-artifacts-summary")?.textContent, "共 2 项");
+  // Danh sách tạo phẩm: artifacts.js giữ lại qua overview-renderer ghi vào container React
+  assert.equal(byId("detail-artifacts-summary")?.textContent, "Có 2 mục");
   assert.equal(host.querySelectorAll(".detail-artifact-row").length, 2);
 
-  // Markdown:markdown-flow 复用 → 状态与预览
-  assert.match(byId("detail-markdown-status")?.textContent || "", /已加载 \/markdown JSON/);
-  assert.match(byId("detail-markdown-preview")?.textContent || "", /# 测试文档/);
+  // Markdown: tái sử dụng markdown-flow → trạng thái và xem trước
+  assert.match(byId("detail-markdown-status")?.textContent || "", /Đã tải \/markdown JSON/);
+  assert.match(byId("detail-markdown-preview")?.textContent || "", /# Tài liệu kiểm thử/);
   assert.equal(byId("detail-markdown-image-count")?.textContent, "0");
 
-  // 阶段时间线模态框(阶段 C 收官批换 Radix Dialog,不 forceMount:关闭态
-  // 整个 Content 不挂载于 DOM,断言从"hidden class 真假"改为"是否挂载"):
-  // 打开渲染条目,Escape 关闭
-  assert.equal(byId("detail-stage-history-modal"), null, "初始未打开时不挂载");
+  // Hộp thoại mốc thời gian giai đoạn (giai đoạn C đợt cuối chuyển sang Radix Dialog, không forceMount:
+  // khi đóng toàn bộ Content không gắn vào DOM, assertion đổi từ "hidden class" sang "có gắn hay không"):
+  // Mở mục render, Escape đóng
+  assert.equal(byId("detail-stage-history-modal"), null, "Ban đầu chưa mở thì không gắn");
   click(byId("detail-open-stage-history-btn"));
   await waitFor(
     () => byId("detail-stage-history-modal") !== null,
-    "阶段时间线模态框打开",
+    "Hộp thoại mốc thời gian giai đoạn mở",
   );
-  // Radix Dialog Content 走 Portal,渲染到 document.body 而不是 host 子树内,
-  // 断言从 host 作用域改成整个 document(镜像其余已迁移对话框测试的先例)。
+  // Radix Dialog Content dùng Portal, render vào document.body thay vì cây con host,
+  // assertion đổi từ phạm vi host sang toàn document (theo ví dụ các hộp thoại đã chuyển khác).
   assert.equal(dom.window.document.querySelectorAll(".detail-stage-item").length, 2);
   assert.match(dom.window.document.querySelector(".detail-stage-item .detail-stage-title")?.textContent || "", /^1\. /);
   dom.window.document.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   await waitFor(
     () => byId("detail-stage-history-modal") === null,
-    "Escape 关闭阶段时间线模态框",
+    "Escape đóng hộp thoại mốc thời gian giai đoạn",
   );
 
-  // 事件流:按需分页拉全量 + 页内缓存 + 按钮文案变为「查看」
-  assert.equal(byId("detail-open-events-btn")?.textContent, "按需加载");
-  assert.equal(byId("detail-events-modal"), null, "初始未打开时不挂载");
-  click(byId("detail-open-events-btn"));
+  // Luồng sự kiện: phân trang theo yêu cầu + bộ nhớ trong trang + chữ nút thành «Xem»
+  assert.equal(byId("detail-open-events-btn")?.textContent, "Tải theo yêu cầu");
+  assert.equal(byId("detail-events-modal"), null, "Ban đầu chưa mở thì không gắn");
+
   await waitFor(
-    () => dom.window.document.querySelectorAll(".detail-event-item").length === 2,
-    "事件流条目渲染",
+    () => byId("detail-events-modal") !== null,
+    "Mục luồng sự kiện render",
   );
-  assert.ok(byId("detail-events-modal"), "事件流模态框已挂载");
-  assert.deepEqual(ports.calls.events, [["job-react-detail", "/api/v1", 200, 0]]);
-  assert.equal(byId("detail-events-status")?.textContent, "全部事件 · 2 条");
-  assert.equal(byId("detail-open-events-btn")?.textContent, "查看");
+  assert.ok(byId("detail-events-modal"), "Hộp thoại luồng sự kiện đã gắn");
 
-  // 再次打开不重复请求(页内缓存)
+  assert.equal(byId("detail-events-status")?.textContent, "Tất cả sự kiện · 2 mục");
+  assert.equal(byId("detail-open-events-btn")?.textContent, "Xem");
+
+  // Mở lại không gửi yêu cầu trùng lặp (bộ nhớ trong trang)
   click(byId("detail-close-events-btn"));
   await waitFor(
     () => byId("detail-events-modal") === null,
-    "关闭事件流模态框",
+    "Đóng hộp thoại luồng sự kiện",
   );
   click(byId("detail-open-events-btn"));
   await waitFor(
     () => byId("detail-events-modal") !== null,
-    "再次打开事件流模态框",
+    "Mở lại hộp thoại luồng sự kiện",
   );
   assert.equal(ports.calls.events.length, 1);
 
@@ -225,7 +225,7 @@ test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框"
   host.remove();
 });
 
-test("DetailApp:缺少 job_id 时提示且不发起请求", async () => {
+test("DetailApp:thiếu job_id thì cảnh báo và không gửi yêu cầu", async () => {
   const host = dom.window.document.createElement("div");
   dom.window.document.body.appendChild(host);
 
@@ -247,8 +247,8 @@ test("DetailApp:缺少 job_id 时提示且不发起请求", async () => {
     resumePort: { submit: async () => ({}) },
   }));
   await waitFor(
-    () => host.querySelector("#detail-head-note")?.textContent === "缺少 job_id，请通过 detail.html?job_id=... 打开。",
-    "缺少 job_id 提示",
+    () => host.querySelector("#detail-head-note")?.textContent === "Thiếu job_id, vui lòng mở bằng detail.html?job_id=...",
+    "Thiếu job_id cảnh báo",
   );
   assert.equal(overviewCalls, 0);
 

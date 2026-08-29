@@ -51,23 +51,22 @@ AUTHOR_START_RE = re.compile(
 )
 
 TITLE_STYLE_HINT = (
-    "Title rule: translate titles as concise formal headings. Preserve numbering, "
-    "formula placeholders, symbols, and proper nouns; apply the document domain "
-    "guidance and matched terminology when choosing technical wording; do not "
-    "expand into body prose."
+    "Quy tắc tiêu đề: dịch tiêu đề thành các đề mục trang trọng, súc tích. Giữ nguyên số thứ tự, "
+    "giữ chỗ công thức, ký hiệu và danh từ riêng; áp dụng hướng dẫn lĩnh vực tài liệu và thuật ngữ khớp "
+    "khi chọn cách diễn đạt kỹ thuật; không mở rộng thành văn bản thân."
 )
 STYLE_HINTS_BY_ROLE = {
-    "abstract": "This block is an abstract sentence or paragraph. Translate it as compact academic summary prose.",
-    "heading": "This block is a section heading. Translate it as a short academic heading, not as a full sentence.",
+    "abstract": "Khối này là câu hoặc đoạn tóm tắt. Dịch thành văn bản tóm tắt học thuật cô đọng.",
+    "heading": "Khối này là đề mục phần. Dịch thành đề mục học thuật ngắn gọn, không phải câu hoàn chỉnh.",
     "title": TITLE_STYLE_HINT,
-    "figure_caption": "This block is a figure-style caption or note. Keep caption style concise; preserve numbering, labels, and visual references.",
-    "image_caption": "This block is a figure caption. Keep caption style concise; preserve figure numbering/letters and visual references.",
-    "table_caption": "This block is a table caption. Keep caption style concise; preserve table numbering and parameter symbols.",
-    "code_caption": "This block is a code/listing caption. Keep listing identifiers and code names unchanged where appropriate.",
-    "caption": "This block is a caption. Keep it concise and caption-like rather than paragraph-like.",
-    "table_footnote": "This block is a table footnote. Keep it brief and note-like; preserve symbols, superscripts, and markers.",
-    "image_footnote": "This block is an image footnote. Keep it brief and note-like; preserve symbols, superscripts, and markers.",
-    "footnote": "This block is a footnote. Keep it brief and note-like rather than expanding it into body prose.",
+    "figure_caption": "Khối này là chú thích kiểu hình vẽ hoặc ghi chú. Giữ phong cách chú thích cô đọng; bảo toàn số thứ tự, nhãn và tham chiếu trực quan.",
+    "image_caption": "Khối này là chú thích hình ảnh. Giữ phong cách chú thích cô đọng; bảo toàn số thứ tự/chữ cái hình và tham chiếu trực quan.",
+    "table_caption": "Khối này là chú thích bảng. Giữ phong cách chú thích cô đọng; bảo toàn số thứ tự bảng và ký hiệu tham số.",
+    "code_caption": "Khối này là chú thích mã/liệt kê. Giữ nguyên định danh liệt kê và tên mã phù hợp.",
+    "caption": "Khối này là chú thích. Giữ nó cô đọng và mang tính chú thích thay vì mang tính đoạn văn.",
+    "table_footnote": "Khối này là chú thích dưới bảng. Giữ ngắn gọn và mang tính ghi chú; bảo toàn ký hiệu, chữ trên và dấu đánh dấu.",
+    "image_footnote": "Khối này là chú thích dưới hình. Giữ ngắn gọn và mang tính ghi chú; bảo toàn ký hiệu, chữ trên và dấu đánh dấu.",
+    "footnote": "Khối này là chú thích dưới. Giữ ngắn gọn và mang tính ghi chú thay vì mở rộng thành văn bản thân.",
 }
 
 

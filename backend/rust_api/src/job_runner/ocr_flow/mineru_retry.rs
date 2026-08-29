@@ -57,7 +57,7 @@ pub(super) async fn acquire_upload_target_with_retry(
                 ));
                 job.stage = Some("ocr_upload".to_string());
                 job.stage_detail = Some(format!(
-                    "OCR provider 上传地址申请异常，{delay_secs}s 后重试（第 {attempt}/{} 次）",
+                    "OCR provider tải địa chỉ ứng dụng bất thường, {delay_secs}s sau thử lại (lần {attempt}/{})",
                     runtime.poll_retry_limit
                 ));
                 job.updated_at = now_iso();
@@ -69,7 +69,7 @@ pub(super) async fn acquire_upload_target_with_retry(
                     &job.snapshot(),
                     "warn",
                     "retry_scheduled",
-                    "OCR provider 上传地址申请进入重试",
+                    "OCR provider tải địa chỉ ứng dụng vào thử lại",
                     Some(serde_json::json!({
                         "scope": "mineru_apply_upload_url",
                         "attempt": attempt,
@@ -118,7 +118,7 @@ where
                     ));
                     job.stage = Some("mineru_processing".to_string());
                     job.stage_detail =
-                        Some("OCR provider 状态查询连续异常，稍后自动继续拉取".to_string());
+                        Some("OCR provider truy vấn trạng thái liên tục bất thường, sau này tự động tiếp tục lấy".to_string());
                     job.updated_at = now_iso();
                     register_job_retry(job);
                     record_custom_runtime_event_with_resources(
@@ -128,7 +128,7 @@ where
                         &job.snapshot(),
                         "warn",
                         "retry_scheduled",
-                        format!("OCR provider {resource_label} 查询降级为下一轮继续轮询"),
+                        format!("OCR provider {resource_label} truy vấn hạ cấp sang vòng tiếp theo tiếp tục lần lượt"),
                         Some(serde_json::json!({
                             "scope": format!("mineru_{resource_label}_poll"),
                             "attempt": attempt,
@@ -152,7 +152,7 @@ where
                 ));
                 job.stage = Some("mineru_processing".to_string());
                 job.stage_detail = Some(format!(
-                    "OCR provider 状态查询异常，{delay_secs}s 后重试（第 {attempt}/{} 次）",
+                    "OCR provider truy vấn trạng thái bất thường, {delay_secs}s sau thử lại (lần {attempt}/{})",
                     runtime.poll_retry_limit
                 ));
                 job.updated_at = now_iso();
@@ -164,7 +164,7 @@ where
                     &job.snapshot(),
                     "warn",
                     "retry_scheduled",
-                    format!("OCR provider {resource_label} 查询进入重试"),
+                    format!("OCR provider {resource_label} truy vấn vào thử lại"),
                     Some(serde_json::json!({
                         "scope": format!("mineru_{resource_label}_poll"),
                         "attempt": attempt,

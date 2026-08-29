@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-"""Compatibility facade for older placeholder/validation imports.
+"""Façade tương thích cho các import placeholder/validation cũ.
 
-New validation code should import from ``services.translation.llm.result_validator``
-and ``services.translation.llm.validation.*`` directly. This module remains as a
-stable shim for existing tests, tools, and older orchestration paths.
+Mã validation mới nên import trực tiếp từ ``services.translation.llm.result_validator``
+và ``services.translation.llm.validation.*``. Mô-đun này giữ lại như một lớp
+shim ổn định cho các bài kiểm tra, công cụ và đường orchestration cũ.
 """
 
 from services.translation.artifacts import TranslationDiagnosticsCollector

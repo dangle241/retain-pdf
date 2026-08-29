@@ -1,8 +1,8 @@
-# Translation Promptfoo Debugging
+# Gỡ lỗi Promptfoo Dịch
 
-The goal of this framework is not to replay entire books but to condense "why a translation item was not translated / degraded / produced dirty output" into the smallest reproducible, comparable, and automatically regression-testable loop.
+Mục tiêu của framework này không phải phát lại toàn bộ sách mà là thu gọn "tại sao một mục dịch không được dịch / suy giảm / tạo ra đầu ra bẩn" thành vòng lặp nhỏ nhất có thể tái tạo, so sánh được và tự động kiểm thử hồi quy.
 
-The current process is divided into three layers:
+Quy trình hiện tại được chia thành ba lớp:
 
 - Rust API Debug Interface
   - `GET /api/v1/jobs/{job_id}/translation/diagnostics`
@@ -14,9 +14,9 @@ The current process is divided into three layers:
 - Promptfoo Fixture/Eval
   - Files `scan_drift.py`, `capture_case.py`, `run_eval.py`, `promptfooconfig*.yaml` in the current directory
 
-## 1. First Locate Specific Items
+## 1. Đầu tiên định vị mục cụ thể
 
-When the local API is running, you can preview:
+Khi API cục bộ đang chạy, bạn có thể xem trước:
 
 ```bash
 curl -H 'X-API-Key: retain-pdf-desktop' \
@@ -56,7 +56,7 @@ python backend/scripts/devtools/translation_debug_api.py \
   --item-id <item_id>
 ```
 
-## 2. Pre-Scan Strategy Drift Between Saved and Replay
+## 2. Quét sẵn drift chiến lược giữa Saved và Replay
 
 ```bash
 python backend/scripts/devtools/promptfoo/scan_drift.py \
@@ -65,13 +65,13 @@ python backend/scripts/devtools/promptfoo/scan_drift.py \
   --limit 10
 ```
 
-By default, it will:
+Mặc định, nó sẽ:
 
-- Pre-filter by `final_status=kept_origin` on the saved side
-- Replay each candidate item
-- Output items that exhibit strategy drift
+- Lọc trước theo `final_status=kept_origin` ở phía saved
+- Phát lại từng mục ứng viên
+- Xuất các mục có drift chiến lược
 
-Nếu muốn xuất ra tất cả các ứng viên đã replay:
+Nếu muốn xuất tất cả ứng viên đã replay:
 
 ```bash
 python backend/scripts/devtools/promptfoo/scan_drift.py \
@@ -80,7 +80,7 @@ python backend/scripts/devtools/promptfoo/scan_drift.py \
   --all
 ```
 
-## 3. Record Bad Examples as Fixtures
+## 3. Ghi lại ví dụ xấu làm fixture
 
 ```bash
 python backend/scripts/devtools/promptfoo/capture_case.py \
@@ -92,19 +92,19 @@ python backend/scripts/devtools/promptfoo/capture_case.py \
   --required-term 551\ nm
 ```
 
-By default, it will write to:
+Mặc định, nó sẽ ghi vào:
 
 - `backend/scripts/devtools/promptfoo/fixtures/cases.csv`
 - `backend/scripts/devtools/promptfoo/fixtures/cases/<job>--<item>.json`
 
-This case JSON artifact will simultaneously freeze the following information:
+Artifact JSON case này sẽ đồng thời đóng băng thông tin sau:
 
 - Saved item snapshot
 - Current replay result
 - policy_before / policy_after
 - Drift summary
 
-Nếu lần này chỉ muốn ghi lại phía saved, không muốn kích hoạt replay:
+Nếu lần này chỉ muốn ghi phía saved, không muốn kích hoạt replay:
 
 ```bash
 python backend/scripts/devtools/promptfoo/capture_case.py \
@@ -114,20 +114,20 @@ python backend/scripts/devtools/promptfoo/capture_case.py \
   --skip-replay
 ```
 
-Các trường đa giá trị trong CSV sử dụng `||` để phân tách, thuận tiện cho nhiều người chỉnh sửa trực tiếp:
+Các trường đa giá trị trong CSV dùng `||` phân tách, thuận tiện sửa trực tiếp:
 
 - `expected_contains`
 - `required_terms`
 - `forbidden_substrings`
 
-## 4. Run promptfoo
+## 4. Chạy promptfoo
 
-Prerequisites:
+Điều kiện tiên quyết:
 
-- Python directly uses the current repository environment
-- `promptfoo` requires `Node 20.20+` or `22.22+`
+- Python trực tiếp dùng môi trường kho hiện tại
+- `promptfoo` yêu cầu `Node 20.20+` hoặc `22.22+`
 
-`run_eval.py` will prioritize using the `node` from the current shell; if the current version is insufficient but a compatible version is installed in `~/.nvm/versions/node`, it will automatically switch without requiring you to manually `nvm use`.
+`run_eval.py` sẽ ưu tiên dùng `node` từ shell hiện tại; nếu phiên bản hiện tại không đủ nhưng phiên bản tương thích được cài trong `~/.nvm/versions/node`, nó sẽ tự chuyển mà không cần bạn `nvm use` thủ công.
 
 Chỉ đánh giá đầu ra replay hiện tại:
 
@@ -155,34 +155,34 @@ npx promptfoo@latest eval -c backend/scripts/devtools/promptfoo/promptfooconfig.
 
 `run_eval.py` sẽ tự động:
 
-- Check if the fixture is empty
-- Point `PROMPTFOO_PYTHON` to the current Python
-- Inject the fixture path into `PROMPTFOO_TRANSLATION_FIXTURES`
+- Kiểm tra xem fixture có trống không
+- Chỉ định `PROMPTFOO_PYTHON` đến Python hiện tại
+- Tiêm đường dẫn fixture vào `PROMPTFOO_TRANSLATION_FIXTURES`
 
-## Assertion Rules
+## Quy tắc Assertion
 
-The current fixture supports several hard rules by default:
+Fixture hiện tại hỗ trợ một số quy tắc cứng mặc định:
 
-- Minimum output length
-- Whether Chinese must appear
-- Required translation phrases
-- Terms that must be preserved
-- Forbidden dirty output segments
-- Whether the count of `$...$` / `$$...$$` matches the source text
+- Độ dài đầu ra tối thiểu
+- Có phải tiếng Trung bắt buộc xuất hiện
+- Cụm từ dịch bắt buộc
+- Thuật ngữ phải giữ nguyên
+- Phân đoạn đầu ra bẩn bị cấm
+- Số công thức `$...$` / `$$...$$` có khớp văn bản nguồn không
 
-These rules are all located in:
+Tất cả quy tắc này nằm ở:
 
 - `backend/scripts/devtools/promptfoo/assertions.py`
 
 ## GitHub CI
 
-The current repository can directly connect with GitHub Actions to run `current-replay`.
+Kho hiện tại có thể kết nối trực tiếp với GitHub Actions để chạy `current-replay`.
 
-Corresponding workflow:
+Workflow tương ứng:
 
 - `.github/workflows/translation-replay.yml`
 
-Design is divided into two layers:
+Thiết kế chia thành hai lớp:
 
 - First run pure local unit tests
   - `test_promptfoo_case_tools.py`
@@ -191,49 +191,49 @@ Design is divided into two layers:
 - Then run the actual promptfoo current-replay
   - `python backend/scripts/devtools/promptfoo/run_eval.py`
 
-### Why GitHub CI Does Not Depend on `data/jobs/`
+### Tại sao GitHub CI không phụ thuộc `data/jobs/`
 
-After the GitHub runner checks out, it cannot access your local working directory `data/jobs/...` by default, so the current case artifact will additionally freeze:
+Sau khi GitHub runner checkout, mặc định nó không thể truy cập thư mục làm việc cục bộ `data/jobs/...` của bạn, nên artifact case hiện tại sẽ đóng băng thêm:
 
 - Main parameters of the translate spec
 - The entire translated payload of the corresponding page
 
-Thus, even without the job directory on the runner, CI can still directly replay the current replay path from:
+Như vậy, ngay cả khi không có thư mục job trên runner, CI vẫn có thể phát lại trực tiếp từ:
 
 - `backend/scripts/devtools/promptfoo/fixtures/cases/*.json`
 
-### Required GitHub Secrets
+### GitHub Secrets Bắt buộc
 
-Need to configure:
+Cần cấu hình:
 
 - `RETAIN_TRANSLATION_API_KEY`
 
-Purpose:
+Mục đích:
 
 - For the provider current-replay to call the model
 
-PRs from forks cannot access secrets by default, so the workflow will:
+PR từ fork mặc định không thể truy cập secrets, nên workflow sẽ:
 
 - Still run local unit tests
 - Skip current-replay eval that requires secrets
 
 ### Artifacts
 
-The workflow will upload:
+Workflow sẽ upload:
 
 - Current replay promptfoo JSON results
 - Current fixture CSV
 - Case JSON artifacts
 - `~/.promptfoo/logs/*.log`
 
-## Application Boundaries
+## Ranh giới ứng dụng
 
-This toolkit prioritizes solving issues related to "translation strategy / fallback / keep-origin / prompt / abnormal provider output".
+Toolkit này ưu tiên giải quyết các vấn đề liên quan đến "chiến lược dịch / fallback / keep-origin / prompt / đầu ra provider bất thường".
 
-It does not directly address:
+Nó không trực tiếp giải quyết:
 
 - OCR block extraction errors
 - Continuation merging errors
 - Typst layout errors
 
-However, you can use this toolkit to quickly determine: whether the issue occurs "before translation" or "after translation".
+Tuy nhiên, bạn có thể dùng toolkit này để nhanh chóng xác định: vấn đề xảy ra "trước dịch" hay "sau dịch".

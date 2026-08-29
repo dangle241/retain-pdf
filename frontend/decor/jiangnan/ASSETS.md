@@ -65,7 +65,7 @@ Bảng màu bắt buộc lấy từ token chủ đề (trong tài sản cho phé
 ### 3.4 Đề tự (quote) — không phải tài sản hình ảnh
 
 Văn tự dọc do sân khấu render trực tiếp (sửa `quote.text` trong manifest.json là được),
-**không** tạo hình văn tự. Văn án hiện tại: 「Thư tàng vạn quyển / Tâm du thiên tải」.
+**không** tạo hình văn tự. Văn án hiện tại: 「Sách chứa vạn quyển / Tâm du ngàn năm」.
 
 ## 4. Điểm neo bỏ trống (muốn thêm tài sản mới đặt vào đây)
 

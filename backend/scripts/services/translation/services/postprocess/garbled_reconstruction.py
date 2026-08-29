@@ -171,14 +171,14 @@ def _repair_item_translation(item: dict, *, runtime: GarbledReconstructionRuntim
         {
             "role": "system",
             "content": (
-                "You repair corrupted OCR scientific text blocks and translate them into fluent Simplified Chinese.\n"
-                "The input may contain duplicated fragments, broken line wraps, and fake LaTeX formula noise.\n"
-                "Reconstruct the intended meaning conservatively.\n"
-                "Do not mention that the OCR is corrupted.\n"
-                "Return one JSON object with key translated_text only.\n"
-                "Output plain Chinese text only inside translated_text.\n"
-                "Do not emit LaTeX commands like \\\\bf, \\\\mathbf, \\\\mathrm.\n"
-                "If a material or symbol is obvious, keep it in natural scientific notation such as alpha-Al2O3 or α-Al2O3.\n"
+                "Bạn sửa các khối văn bản khoa học OCR bị hỏng và dịch chúng sang tiếng Trung phồn thể lưu loát.\n"
+                "Đầu vào có thể chứa đoạn bị trùng lặp, ngắt dòng bị hỏng và nhiễu công thức LaTeX giả.\n"
+                "Phục hồi ý định một cách thận trọng.\n"
+                "Không đề cập rằng OCR bị hỏng.\n"
+                "Chỉ trả về một đối tượng JSON với khóa translated_text.\n"
+                "Chỉ xuất văn bản tiếng Trung thuần túy bên trong translated_text.\n"
+                "Không xuất lệnh LaTeX như \\bf, \\mathbf, \\mathrm.\n"
+                "Nếu một vật liệu hoặc ký hiệu là hiển nhiên, giữ nó ở ký hiệu khoa học tự nhiên như alpha-Al2O3 hoặc α-Al2O3.\n"
             ),
         },
         {

@@ -3,7 +3,7 @@
 
 // ── 4.1 Xuất bản sản phẩm ──────────────────────────────────────────────────────────
 function ScenePublish({ progress }) {
-  // PDF artifact card flies in and gets a "Published" stamp.
+  // Thẻ tệp PDF bay vào và được đóng dấu "Đã xuất bản".
   const cardP = animate({ from: 0, to: 1, start: 0.05, end: 0.4, ease: Easing.easeOutCubic })(progress);
   const stampP = animate({ from: 0, to: 1, start: 0.5, end: 0.75, ease: Easing.easeOutBack })(progress);
   const checkP = animate({ from: 0, to: 1, start: 0.75, end: 0.9, ease: Easing.easeOutCubic })(progress);
@@ -34,7 +34,7 @@ function ScenePublish({ progress }) {
             }}>Tổng quan về phương pháp dịch tài liệu giữ nguyên bố cục</div>
             <div style={{
               fontFamily: MONO, fontSize: 11, color: FAINT,
-            }}>output_zh.pdf · 12 pages · 3.1 MB</div>
+            }}>output_zh.pdf · 12 trang · 3.1 MB</div>
             <div style={{
               fontFamily: MONO, fontSize: 10, color: '#bbb', marginTop: 6,
             }}>sha256:7f4a…d2e8</div>
@@ -53,7 +53,7 @@ function ScenePublish({ progress }) {
               letterSpacing: '0.05em',
               background: 'rgba(52,199,89,0.06)',
               opacity: stampP,
-            }}>PUBLISHED</div>
+            }}>ĐÃ XUẤT BẢN</div>
           )}
         </div>
       </div>
@@ -68,11 +68,11 @@ function ScenePublish({ progress }) {
         <div style={{
           fontFamily: MONO, fontSize: 10, color: FAINT,
           textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12,
-        }}>artifacts registry</div>
-        <RegistryRow icon="pdf" name="output_zh.pdf" meta="3.1 MB · primary" check={checkP} />
-        <RegistryRow icon="json" name="ocr-result.jsonl" meta="412 blocks" check={checkP - 0.1} />
-        <RegistryRow icon="typ" name="overlay.typ" meta="source" check={checkP - 0.2} />
-        <RegistryRow icon="log" name="run.log" meta="diagnostics" check={checkP - 0.3} />
+        }}>đăng ký hiện vật</div>
+        <RegistryRow icon="pdf" name="output_zh.pdf" meta="3.1 MB · chính" check={checkP} />
+        <RegistryRow icon="json" name="ocr-result.jsonl" meta="412 khối" check={checkP - 0.1} />
+        <RegistryRow icon="typ" name="overlay.typ" meta="nguồn" check={checkP - 0.2} />
+        <RegistryRow icon="log" name="run.log" meta="chẩn đoán" check={checkP - 0.3} />
       </div>
     </div>
   );
@@ -103,16 +103,16 @@ function RegistryRow({ icon, name, meta, check }) {
 
 // ── 4.2 Viết tóm tắt ────────────────────────────────────────────────────────
 function SceneSummary({ progress }) {
-  // A summary card with stats appearing line by line.
+  // Thẻ tóm tắt với số liệu hiện dần từng dòng.
   const stats = [
-    { label: '页数', value: '12', detail: 'pages' },
-    { label: '字数', value: '8,420', detail: 'words translated' },
-    { label: '段落', value: '87', detail: 'paragraphs · cross-flow merged' },
-    { label: '图表', value: '6', detail: 'figures preserved' },
-    { label: '表格', value: '3', detail: 'tables · cell-by-cell' },
-    { label: '乱码修复', value: '14', detail: 'unicode fixes' },
-    { label: '耗时', value: '2 分 47 秒', detail: 'wall-clock' },
-    { label: '体积', value: '28.4 → 3.1 MB', detail: 'compressed 89%' },
+    { label: 'Số trang', value: '12', detail: 'trang' },
+    { label: 'Số từ', value: '8,420', detail: 'từ đã dịch' },
+    { label: 'Số đoạn', value: '87', detail: 'đoạn · hợp nhất luồng chéo' },
+    { label: 'Số hình', value: '6', detail: 'hình được giữ nguyên' },
+    { label: 'Số bảng', value: '3', detail: 'bảng · từng ô' },
+    { label: 'Sửa lỗi mã hóa', value: '14', detail: 'sửa lỗi unicode' },
+    { label: 'Thời gian', value: '2 分 47 秒', detail: 'thời gian thực' },
+    { label: 'Dung lượng', value: '28.4 → 3.1 MB', detail: 'nén 89%' },
   ];
 
   return (
@@ -131,7 +131,7 @@ function SceneSummary({ progress }) {
         <div style={{
           fontFamily: SANS, fontSize: 14, color: FAINT, lineHeight: 1.6,
         }}>
-          已生成保留排版的中文版 PDF。可下载产物、查看运行日志，或导出 Typst 源文件继续编辑。
+          Đã tạo PDF tiếng Trung giữ nguyên bố cục。Có thể tải xuống sản phẩm, xem nhật ký chạy, hoặc xuất tệp nguồn Typst để tiếp tục chỉnh sửa.
         </div>
 
         {/* Sparkle / signature */}
@@ -143,7 +143,7 @@ function SceneSummary({ progress }) {
             width: 6, height: 6, borderRadius: 3, background: '#34c759',
           }} />
           <span style={{ fontFamily: MONO, fontSize: 11, color: FAINT }}>
-            written at <span style={{ color: INK }}>14:32:08</span> · 0 errors · 0 warnings
+            viết lúc <span style={{ color: INK }}>14:32:08</span> · 0 lỗi · 0 cảnh báo
           </span>
         </div>
       </div>
@@ -187,7 +187,7 @@ function SceneSummary({ progress }) {
 
 // ── 4.3 Có thể tải xuống ────────────────────────────────────────────────────────────
 function SceneDownload({ progress }) {
-  // Big download button activates and pulses; PDF preview behind.
+  // Nút tải xuống lớn kích hoạt và nhịp; PDF preview ở phía sau.
   const buttonReveal = animate({ from: 0, to: 1, start: 0.0, end: 0.3, ease: Easing.easeOutBack })(progress);
   const ready = animate({ from: 0, to: 1, start: 0.3, end: 0.55, ease: Easing.easeOutCubic })(progress);
   const click = animate({ from: 0, to: 1, start: 0.6, end: 0.7, ease: Easing.easeInOutCubic })(progress);
@@ -233,7 +233,7 @@ function SceneDownload({ progress }) {
               strokeLinecap="round" strokeLinejoin="round" />
             <path d="M4 17 H18" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          <span>下载 output_zh.pdf</span>
+          <span>Tải xuống output_zh.pdf</span>
           <span style={{
             fontFamily: MONO, fontSize: 12, fontWeight: 400,
             color: '#a8a8ad',
@@ -307,7 +307,7 @@ function SceneDownload({ progress }) {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: SANS, fontSize: 13, fontWeight: 600 }}>
-              已下载 · output_zh.pdf
+              Đã tải xuống · output_zh.pdf
             </div>
             <div style={{ fontFamily: MONO, fontSize: 10, color: '#a8a8ad', marginTop: 2 }}>
               ~/Downloads · 3.1 MB
@@ -315,7 +315,7 @@ function SceneDownload({ progress }) {
           </div>
           <div style={{
             fontFamily: SANS, fontSize: 12, color: '#a8a8ad',
-          }}>打开</div>
+          }}>Mở</div>
         </div>
       )}
     </div>

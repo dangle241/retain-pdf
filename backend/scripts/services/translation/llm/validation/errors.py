@@ -3,7 +3,7 @@ from __future__ import annotations
 
 class SuspiciousKeepOriginError(ValueError):
     def __init__(self, item_id: str, result: dict[str, dict[str, str]]) -> None:
-        super().__init__(f"{item_id}: suspicious keep_origin for long English body text")
+        super().__init__(f"{item_id}: keep_origin đáng ngờ cho đoạn văn bản tiếng Anh dài")
         self.item_id = item_id
         self.result = result
 
@@ -17,7 +17,7 @@ class UnexpectedPlaceholderError(ValueError):
         source_text: str = "",
         translated_text: str = "",
     ) -> None:
-        super().__init__(f"{item_id}: unexpected placeholders in translation: {unexpected}")
+        super().__init__(f"{item_id}: placeholder không mong đợi trong bản dịch: {unexpected}")
         self.item_id = item_id
         self.unexpected = unexpected
         self.source_text = source_text
@@ -35,7 +35,7 @@ class PlaceholderInventoryError(ValueError):
         translated_text: str = "",
     ) -> None:
         super().__init__(
-            f"{item_id}: placeholder inventory mismatch: source={source_sequence} translated={translated_sequence}"
+            f"{item_id}: kiểm kê placeholder không khớp: nguồn={source_sequence} dịch={translated_sequence}"
         )
         self.item_id = item_id
         self.source_sequence = source_sequence
@@ -46,7 +46,7 @@ class PlaceholderInventoryError(ValueError):
 
 class EmptyTranslationError(ValueError):
     def __init__(self, item_id: str) -> None:
-        super().__init__(f"{item_id}: empty translation output")
+        super().__init__(f"{item_id}: đầu ra bản dịch trống")
         self.item_id = item_id
 
 
@@ -58,7 +58,7 @@ class EnglishResidueError(ValueError):
         source_text: str = "",
         translated_text: str = "",
     ) -> None:
-        super().__init__(f"{item_id}: translated output still looks predominantly English")
+        super().__init__(f"{item_id}: đầu ra dịch vẫn trông chủ yếu là tiếng Anh")
         self.item_id = item_id
         self.source_text = source_text
         self.translated_text = translated_text
@@ -72,7 +72,7 @@ class TranslationProtocolError(ValueError):
         source_text: str = "",
         translated_text: str = "",
     ) -> None:
-        super().__init__(f"{item_id}: translated output still contains protocol/json shell")
+        super().__init__(f"{item_id}: đầu ra dịch vẫn chứa vỏ giao thức/json")
         self.item_id = item_id
         self.source_text = source_text
         self.translated_text = translated_text
@@ -86,7 +86,7 @@ class MathDelimiterError(ValueError):
         source_text: str = "",
         translated_text: str = "",
     ) -> None:
-        super().__init__(f"{item_id}: translated output has unbalanced inline math delimiters")
+        super().__init__(f"{item_id}: đầu ra dịch có dấu phân cách toán học nội dòng không cân bằng")
         self.item_id = item_id
         self.source_text = source_text
         self.translated_text = translated_text
@@ -102,7 +102,7 @@ class TruncatedTranslationError(ValueError):
         ratio: float = 0.0,
     ) -> None:
         super().__init__(
-            f"{item_id}: translated output is abnormally short vs source (ratio={ratio:.3f})"
+            f"{item_id}: đầu ra dịch ngắn bất thường so với nguồn (tỷ lệ={ratio:.3f})"
         )
         self.item_id = item_id
         self.source_text = source_text

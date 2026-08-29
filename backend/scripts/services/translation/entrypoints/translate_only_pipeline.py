@@ -46,7 +46,7 @@ from runtime.pipeline.translation_stage import translate_book_pipeline
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Translate from normalized OCR document.v1.json and stop before rendering.",
+        description="Dịch từ OCR đã chuẩn hóa document.v1.json và dừng trước khi kết xuất.",
     )
     parser.add_argument("--spec", type=str, required=True, help="Path to translate stage spec JSON.")
     return parser.parse_args()
@@ -124,7 +124,7 @@ def main() -> None:
     with pipeline_event_writer_scope(event_writer):
         emit_stage_transition(
             stage="startup",
-            message="translate-only worker 已启动",
+            message="translate-only worker đã khởi động",
         )
         print(format_stdout_kv(STDOUT_LABEL_EVENTS_JSONL, event_writer.path))
         api_key = get_api_key(
@@ -134,7 +134,7 @@ def main() -> None:
         emit_stage_transition(
             stage="translating",
             substage="translation_batches",
-            message="开始准备纯翻译阶段",
+            message="Bắt đầu chuẩn bị giai đoạn dịch thuần túy",
         )
         started = time.perf_counter()
         result = translate_book_pipeline(
@@ -188,19 +188,19 @@ def main() -> None:
             artifact_key="translation_diagnostics_json",
             path=diagnostics_path,
             stage="saving",
-            message="translation diagnostics 已发布",
+            message="chẩn đoán dịch thuật đã xuất bản",
         )
         emit_artifact_published(
             artifact_key="translation_debug_index_json",
             path=debug_index_path,
             stage="saving",
-            message="translation debug index 已发布",
+            message="chỉ mục gỡ lỗi dịch thuật đã xuất bản",
         )
         emit_artifact_published(
             artifact_key="translation_review_json",
             path=review_path,
             stage="saving",
-            message="translation review 已发布",
+            message="xem xét dịch thuật đã xuất bản",
         )
 
         blocking_untranslated = blocking_untranslated_items(result.get("translated_pages_map", {}))
@@ -210,11 +210,11 @@ def main() -> None:
                 for item in blocking_untranslated[:8]
             )
             raise RuntimeError(
-                f"translation export gate blocked: unresolved_translation_count={len(blocking_untranslated)} preview={preview}"
+                f                "cổng xuất dịch bị chặn: unresolved_translation_count={len(blocking_untranslated)} preview={preview}"
             )
         if review_summary.get("has_errors"):
             print(
-                "translation review: errors recorded in translation_review.json; export continues because artifacts are diagnostic",
+                "đánh giá dịch: lỗi được ghi trong translation_review.json; xuất tiếp tục vì artifacts mang tính chẩn đoán",
                 flush=True,
             )
         render_prewarm_summary = run_post_translation_render_prewarm(
@@ -287,11 +287,11 @@ def main() -> None:
             artifact_key="pipeline_events_jsonl",
             path=event_writer.path,
             stage="saving",
-            message="统一事件流已写出",
+            message="Đã ghi luồng sự kiện thống nhất",
         )
         emit_stage_transition(
             stage="finished",
-            message="translate-only 阶段完成",
+            message="Giai đoạn translate-only hoàn thành",
         )
 
         print(format_stdout_kv(STDOUT_LABEL_JOB_ROOT, job_dirs.root))

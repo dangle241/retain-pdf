@@ -20,16 +20,16 @@ function createDesktopWindows(app, options = {}) {
   }
 
   /**
-   * Menu bar / system tray icon.
-   * Issue #76: using the 1024² window logo made the macOS menu-bar glyph huge.
-   * Prefer dedicated trayTemplate assets (16 + @2x 32); fall back to a resized logo.
-   * On macOS, template images follow light/dark menu bar automatically.
+   * Thanh(menu)/biểu tượng khay hệ thống.
+   * Vấn đề #76: dùng logo cửa sổ 1024^2 khiến biểu tượng thanh menu macOS bị quá to.
+   * Ưu tiên tài nguyên trayTemplate riêng biệt(16+ @2x 32), giảm xuống logo đã phóng to.
+   * Trên macOS, ảnh chế độ(template) tự động theo sáng/tối thanh menu.
    */
   function resolveTrayIcon() {
     const trayDir = path.join(appRoot, "assets", "tray");
     const templatePath = path.join(trayDir, "trayTemplate.png");
     if (process.platform === "darwin" && fs.existsSync(templatePath)) {
-      // Path must end with "Template.png" so Electron also picks @2x for retina.
+      // Đường dẫn phải kết thúc bằng "Template.png" để Electron cũng chọn @2x cho retina.
       return templatePath;
     }
 
@@ -42,7 +42,7 @@ function createDesktopWindows(app, options = {}) {
       return logoPath;
     }
 
-    // Logical size ~16–18 pt in menu bar / notification area.
+      // Kích thước logic ~16–18 pt trong thanh menu/khu vực thông báo.
     const size = process.platform === "darwin" ? 18 : 16;
     const resized = image.resize({ width: size, height: size, quality: "best" });
     if (process.platform === "darwin") {
@@ -103,7 +103,7 @@ function createDesktopWindows(app, options = {}) {
     }
     const trayIcon = resolveTrayIcon();
     tray = new Tray(trayIcon);
-    // Ensure template mode even if path-based load did not auto-mark it.
+    // Đảm bảo chế độ template ngay cả khi tải theo đường dẫn không tự đánh dấu.
     if (process.platform === "darwin" && trayIcon && typeof trayIcon !== "string") {
       try {
         tray.setImage(trayIcon);
@@ -204,8 +204,8 @@ function createDesktopWindows(app, options = {}) {
       if (!target || target === "about:blank") {
         return { action: "deny" };
       }
-      // Trang nội bộ ứng dụng: mở trong cửa sổ chính, cấm shell.openExternal (tránh việc nhảy ra trình duyệt).
-      // Cũng không được silent deny, nếu không lối vào đối chiếu đọc sẽ "click mà không phản ứng".
+        // Trang nội bộ ứng dụng:mở trong của sổ chính,cấm shell.openExternal(tránh việc nhẩy ra trành duyệt).
+        // Cũng không được silent deny,nếu không lối vào đối chiếu đọc sẽ"click mà không phản ứng".
       try {
         const next = new URL(target);
         let current = null;
@@ -219,7 +219,7 @@ function createDesktopWindows(app, options = {}) {
         const isLocalDev = /^(localhost|127\.0\.0\.1)$/i.test(next.hostname || "");
         if (next.protocol === "file:" || sameOrigin || (isLocalDev && isAppHtml)) {
           logDesktop(`[desktop] in-app navigate (no openExternal): ${target}`);
-          // Điều hướng trong cửa sổ chính，Bảo hành「Đọc độ tương phản」Chờ cho lối vào có sẵn
+          // Điều hướng trong cửa sổ chính - Bảo hành(Đọc độ tương phản) Chờ cho lối vào có sẵn
           if (mainWindow && !mainWindow.isDestroyed()) {
             mainWindow.loadURL(target).catch((err) => {
               logDesktopError(`[desktop] loadURL failed: ${err?.message || err}`);

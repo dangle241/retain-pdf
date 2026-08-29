@@ -20,12 +20,12 @@ from services.translation.llm.shared.provider_runtime import translate_single_it
 from services.translation.llm.shared.provider_runtime import translate_single_item_plain_text_unstructured
 
 
-# Sentence-level fallback runs one LLM request per sentence. Without a
-# circuit breaker, a rate-limit burst or transport outage burns one call per
-# remaining sentence while it silently keeps the English original for each.
-# These knobs bound that: a small incremental sleep between failures, and a
-# hard stop after a few *consecutive* transport-level failures (repeated
-# validation failures do not trip the breaker -- they are expected and cheap).
+# Sentence-level fallback chạy một LLM request mỗi câu. Không có
+# circuit breaker, burst rate-limit hoặc outage vận chuyển sẽ tốn một cuộc gọi mỗi
+# câu còn lại trong khi nó im lặng giữ nguyên bản gốc tiếng Anh cho mỗi câu.
+# Các tham số này giới hạn: một khoảng ngủ nhỏ giữa các lỗi, và một
+# giới hạn cứng sau vài lỗi vận chuyển *liên tiếp* (các lỗi xác thực lặp lại không kích hoạt breaker
+# -- chúng được mong đợi và rẻ).
 SENTENCE_LEVEL_TRANSPORT_FAILURE_LIMIT_ENV = "RETAIN_SENTENCE_LEVEL_TRANSPORT_FAILURE_LIMIT"
 SENTENCE_LEVEL_RETRY_BACKOFF_SECONDS_ENV = "RETAIN_SENTENCE_LEVEL_RETRY_BACKOFF_SECONDS"
 _DEFAULT_TRANSPORT_FAILURE_LIMIT = 3

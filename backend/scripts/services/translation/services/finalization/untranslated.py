@@ -45,7 +45,7 @@ def recover_blocking_untranslated_items(
     api_key: str,
     model: str,
     base_url: str,
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
     max_items: int = DEFAULT_MAX_ITEMS,
     workers: int = DEFAULT_MAX_WORKERS,
     request_chat_content_fn=request_chat_content,
@@ -182,7 +182,7 @@ def _recover_one(
             "page_idx": item.get("page_idx"),
             "route_path": ["block_level", "final_untranslated_recovery"],
             "fallback_to": "final_untranslated_recovery",
-            "degradation_reason": "blocking_untranslated_recovered",
+            "degradation_reason": "đã phục hồi blocking_untranslated",
             "final_status": "translated",
         }
         issues = [
@@ -211,11 +211,11 @@ def _request_final_translation(
         [
             {
                 "role": "system",
-                "content": (
-                    f"Translate the current scientific PDF block into {target_language_name}.\n"
-                    "Preserve every inline LaTeX math expression and placeholder exactly.\n"
-                    "Return only the translated block text. Do not return JSON."
-                ),
+                    "content": (
+                        f"Dịch khối PDF khoa học hiện tại sang {target_language_name}.\n"
+                        "Bảo toàn chính xác mọi biểu thức toán LaTeX nội dòng và placeholder.\n"
+                        "Chỉ trả về văn bản khối đã dịch. Không trả về JSON."
+                    ),
             },
             {"role": "user", "content": source_text},
         ],
