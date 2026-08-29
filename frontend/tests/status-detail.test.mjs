@@ -16,9 +16,9 @@ import { resolveLiveDurations } from "../src/js/job/durations.js";
 import { buildStageHistoryPresentation } from "../src/js/status-detail/history.js";
 import { buildStatusCardSnapshot } from "../src/js/job-status/status-card-snapshot.js";
 import { buildJobStatusViewModel } from "../src/js/job-status/job-status-view-model.js";
-// bootstrap/status-detail-runtime-port.js 已随 cutover 删除;这是它的纯逻辑
-// 拷贝(job-runtime 三个 kept 端口的字面量组合,零 DOM),迁移指向 pages/home
-// 的同名实现(两者函数体完全一致,仅头部注释与相对导入路径不同)。
+// bootstrap/status-detail-runtime-port.js đã bị xóa trong cutover; đây là bản sao logic thuần
+// của nó (tổ hợp các cổng kept của job-runtime, không DOM), di chuyển trỏ đến triển khai cùng tên
+// trong pages/home (cả hai có thân hàm hoàn toàn giống nhau, chỉ khác chú thích đầu tệp và đường dẫn import tương đối).
 import { createStatusDetailRuntimePort } from "../src/pages/home/features/status-detail/status-detail-runtime-port.js";
 import { createTranslationState } from "../src/js/features/status-detail/translation-state.js";
 import { createStatusDetailTranslationDataPort } from "../src/js/features/status-detail/translation-data-port.js";
@@ -127,7 +127,7 @@ test("status detail snapshot runtime stage follows normalized stage snapshot", (
   }, { items: [] });
 
   assert.equal(/render|prewarm|渲染/.test(snapshot.runtime.currentStage), false);
-  assert.match(snapshot.runtime.currentStage, /翻译|第 30\/100 批/);
+  assert.match(snapshot.runtime.currentStage, /Biên dịch|第 30\/100 批/);
 });
 
 test("status detail snapshot does not use legacy user_stage as runtime public stage", () => {
@@ -1119,7 +1119,7 @@ test("job detail event view model does not promote canonical events without disp
   });
 
   assert.equal(viewModel.displayStage, "");
-  assert.equal(viewModel.stageText, "进度 1/3");
+  assert.equal(viewModel.stageText, "Tiến độ 1/3");
   assert.equal(viewModel.lane, "main");
   assert.equal(viewModel.progressCurrent, 1);
   assert.equal(viewModel.progressTotal, 3);
@@ -1191,7 +1191,7 @@ test("job status view model preserves status card snapshot fields", () => {
     progressCurrent: 100,
     progressTotal: 100,
     progressPercent: 100,
-    progressText: "已完成",
+    progressText: "Hoàn thành",
     progressUnit: "percent",
     progressIndeterminate: false,
     substageKey: "done",
@@ -1221,7 +1221,7 @@ test("job status view model preserves status card snapshot fields", () => {
   assert.deepEqual(snapshot, viewModel);
   assert.equal(viewModel.jobId, "job-status-model");
   assert.equal(viewModel.stageKey, "done");
-  assert.equal(viewModel.progressText, "已完成");
+  assert.equal(viewModel.progressText, "Hoàn thành");
   assert.equal(viewModel.errorText, "");
   assert.equal(viewModel.pdfReady, true);
 });
@@ -1282,7 +1282,7 @@ test("job status view model carries manifest actions and retry actions", () => {
       progressCurrent: 100,
       progressTotal: 100,
       progressPercent: 100,
-      progressText: "已完成",
+      progressText: "Hoàn thành",
       progressUnit: "percent",
       progressIndeterminate: false,
       substageKey: "done",
@@ -1297,7 +1297,7 @@ test("job status view model carries manifest actions and retry actions", () => {
   assert.equal(viewModel.stageRetryActions.translate.canRetry, true);
   assert.equal(viewModel.stageRetryActions.translate.stage, "translation");
   assert.equal(viewModel.stageRetryActions.render.canRetry, false);
-  assert.equal(viewModel.stageRetryActions.render.disabledReason, "等待翻译完成");
+  assert.equal(viewModel.stageRetryActions.render.disabledReason, "Đang chờ dịch xong");
 });
 
 test("live duration helpers use explicit timing inputs instead of runtime globals", () => {
@@ -1375,14 +1375,14 @@ test("job status view model accepts explicit finished-at fallback", () => {
     publicErrorText: "",
     finishedAtFallback: "2026-01-01T00:04:00Z",
     stagePresentation: {
-      label: "完成",
-      detail: "翻译 PDF 已生成",
+      label: "Hoàn thành",
+      detail: "PDF dịch đã tạo xong",
       stageKey: "done",
       visualStageKey: "done",
       progressCurrent: 100,
       progressTotal: 100,
       progressPercent: 100,
-      progressText: "已完成",
+      progressText: "Hoàn thành",
       progressUnit: "percent",
       progressIndeterminate: false,
       substageKey: "done",
@@ -1412,19 +1412,19 @@ test("job status view model does not read runtime finished-at fallback implicitl
     stageActions: null,
     publicErrorText: "",
     stagePresentation: {
-      label: "完成",
-      detail: "翻译 PDF 已生成",
+      label: "Hoàn thành",
+      detail: "PDF dịch đã tạo xong",
       stageKey: "done",
       visualStageKey: "done",
       progressCurrent: 100,
       progressTotal: 100,
       progressPercent: 100,
-      progressText: "已完成",
+      progressText: "Hoàn thành",
       progressUnit: "percent",
       progressIndeterminate: false,
       substageKey: "done",
     },
   });
 
-  assert.equal(viewModel.elapsed, "2分 0秒");
+  assert.equal(viewModel.elapsed, "2phút 0giây");
 });

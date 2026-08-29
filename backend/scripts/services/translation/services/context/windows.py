@@ -136,11 +136,11 @@ def annotate_translation_context_windows(
     text_limit: int = DEFAULT_CONTEXT_TEXT_LIMIT,
     mode: str = "needed",
 ) -> int:
-    """Attach reading-order context only where a human translator would look around.
+    """Chỉ đính kèm ngữ cảnh theo thứ tự đọc ở những nơi người dịch thật sẽ nhìn xung quanh.
 
-    The default keeps ordinary complete body paragraphs context-free, reducing
-    prompt size and preventing neighboring text from being translated into the
-    current block. Use mode="all" for the legacy behavior.
+    Mặc định giữ các đoạn văn thân hoàn chỉnh bình thường không có ngữ cảnh,
+    giảm kích thước prompt và ngăn văn bản lân cận bị dịch vào khối hiện tại.
+    Dùng mode="all" cho hành vi cũ.
     """
 
     windows = build_translation_context_windows(page_payloads, neighbors=neighbors, text_limit=text_limit)

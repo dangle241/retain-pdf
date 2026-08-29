@@ -26,7 +26,7 @@ def _build_skip_summary(
         "tail_skipped": reference_tail_skipped,
         "ref_text_skipped": 0,
         "reference_zone_skipped": 0,
-        # Deprecated compatibility field. Narrow-body skip logic is disabled.
+        # Trường tương thích lỗi thời. Logic skip narrow-body đã bị tắt.
         "narrow_body_skipped": 0,
         "metadata_fragment_skipped": 0,
         "shared_literal_code_skipped": 0,

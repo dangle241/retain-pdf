@@ -11,10 +11,11 @@ from services.translation.core.context.models import sanitize_prompt_context_tex
 
 @dataclass(frozen=True)
 class TranslationUnitContext:
-    """Stable context bundle for one translation unit.
+    """Gói ngữ cảnh ổn định cho một đơn vị dịch.
 
-    This is intentionally data-only. Workflow can build it, providers can read
-    from it, but neither side should mutate payload fields through this object.
+    Đối tượng này chỉ chứa dữ liệu. Quy trình có thể xây dựng nó,
+    nhà cung cấp có thể đọc từ nó, nhưng không nên thay đổi trường dữ liệu
+    thông qua đối tượng này.
     """
 
     document: TranslationDocumentContext

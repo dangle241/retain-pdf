@@ -171,7 +171,7 @@ pub(super) async fn maybe_attach_ai_failure_diagnosis(
         &job.snapshot(),
         "info",
         "failure_ai_diagnosed",
-        "AI 辅助诊断已生成",
+        "Chẩn đoán hỗ trợ AI đã được tạo",
         Some(event_payload),
     );
 }

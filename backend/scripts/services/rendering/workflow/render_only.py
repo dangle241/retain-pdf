@@ -111,13 +111,13 @@ def main() -> None:
     with pipeline_event_writer_scope(event_writer):
         emit_stage_transition(
             stage="startup",
-            message="render-only worker 已启动",
+            message="render-only worker đã khởi động",
         )
         print(format_stdout_kv(STDOUT_LABEL_EVENTS_JSONL, event_writer.path))
         emit_stage_transition(
             stage="render_prepare",
             substage="render_prepare",
-            message="开始准备纯渲染阶段",
+            message="Bắt đầu chuẩn bị giai đoạn kết xuất thuần túy",
         )
         started = time.perf_counter()
         result = run_render_stage(
@@ -165,17 +165,17 @@ def main() -> None:
             artifact_key="pipeline_events_jsonl",
             path=event_writer.path,
             stage="saving",
-            message="统一事件流已写出",
+            message="Đã ghi luồng sự kiện thống nhất",
         )
         emit_artifact_published(
             artifact_key="output_pdf",
             path=Path(result["output_pdf_path"]),
             stage="saving",
-            message="render-only 输出 PDF 已发布",
+            message="PDF đầu ra render-only đã xuất bản",
         )
         emit_stage_transition(
             stage="finished",
-            message="render-only 阶段完成",
+            message="Giai đoạn render-only hoàn thành",
         )
 
         print(format_stdout_kv(STDOUT_LABEL_JOB_ROOT, job_dirs.root))

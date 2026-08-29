@@ -199,7 +199,7 @@ test("handleBrowserDeepSeekValidate writes balance through credentials state por
   assert.equal(result.ok, true);
   assert.ok(calls.some((call) => call[0] === "state-reset"));
   assert.ok(calls.some((call) => call[0] === "state-set" && call[1] === 3.25 && call[2] === true));
-  assert.deepEqual(messages.at(-1), ["DeepSeek 可用，余额 CNY 3.25", "valid"]);
+  assert.deepEqual(messages.at(-1), ["DeepSeek có sẵn, số dư CNY 3.25", "valid"]);
 });
 
 test("credentials DOM contract centralizes hidden inputs and browser dialog ids", () => {
@@ -388,9 +388,9 @@ test("browser credential gate reads upload readiness from upload state port", ()
       validateDeepSeekToken: async () => ({ ok: true }),
       queryDeepSeekBalance: async () => ({ ok: true, balance_cny: 100 }),
       onCredentialStateChange() {},
-      // 旧 DOM 直写 viewPort(browser-view-port.js)已随 cutover 删除;这里内联
-      // 复刻其 updateCredentialGate 对 uploadTilePort 的转发语义(镜像旧
-      // view.js#updateCredentialGateView 非 desktopMode 分支),不依赖真实 DOM。
+      // Cũ DOM viết trực tiếp viewPort(browser-view-port.js) đã xóa cùng cutover; nội tuyến ở đây
+      // Tái hiện ngữ nghĩa chuyển tiếp updateCredentialGate tới uploadTilePort (gương cũ
+      // view.js#updateCredentialGateView nhánh non-desktopMode), không phụ thuộc DOM thật.
       viewPort: {
         bindEvents() {},
         updateCredentialGate: ({ show, uploadEnabled, uploadReady }) => {

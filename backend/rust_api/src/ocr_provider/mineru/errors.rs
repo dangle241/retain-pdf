@@ -73,189 +73,189 @@ pub fn map_provider_error_code(
             OcrErrorCategory::Unauthorized,
             Some("A0202"),
             message,
-            Some("检查 Token 是否正确，请检查是否有Bearer前缀 或者更换新 Token"),
+            Some("Kiểm tra Token có chính xác không, xem có tiền tố Bearer hoặc đổi Token mới"),
             trace_id,
         ),
         "A0211" => make_error(
             OcrErrorCategory::CredentialExpired,
             Some("A0211"),
             message,
-            Some("更换新 Token"),
+            Some("Đổi Token mới"),
             trace_id,
         ),
         "-500" => make_error(
             OcrErrorCategory::InvalidRequest,
             Some("-500"),
             message,
-            Some("请确保参数类型及Content-Type正确"),
+            Some("Đảm bảo kiểu tham số và Content-Type chính xác"),
             trace_id,
         ),
         "-10001" => make_error(
             OcrErrorCategory::ServiceUnavailable,
             Some("-10001"),
             message,
-            Some("请稍后再试"),
+            Some("Vui lòng thử lại sau"),
             trace_id,
         ),
         "-10002" => make_error(
             OcrErrorCategory::InvalidRequest,
             Some("-10002"),
             message,
-            Some("检查请求参数格式"),
+            Some("Kiểm tra định dạng tham số yêu cầu"),
             trace_id,
         ),
         "-60001" => make_error(
             OcrErrorCategory::UploadLinkRequestFailed,
             Some("-60001"),
             message,
-            Some("请稍后再试"),
+            Some("Vui lòng thử lại sau"),
             trace_id,
         ),
         "-60002" => make_error(
             OcrErrorCategory::UnsupportedFileFormat,
             Some("-60002"),
             message,
-            Some("检测文件类型失败，请求的文件名及链接中带有正确的后缀名，且文件为 pdf,doc,docx,ppt,pptx,png,jp(e)g 中的一种"),
+            Some("Phát hiện loại tệp thất bại, yêu cầu tên tệp và liên kết có đuôi đúng, tệp thuộc pdf,doc,docx,ppt,pptx,png,jp(e)g"),
             trace_id,
         ),
         "-60003" => make_error(
             OcrErrorCategory::FileReadFailed,
             Some("-60003"),
             message,
-            Some("请检查文件是否损坏并重新上传"),
+            Some("Vui lòng kiểm tra tệp có hỏng không và tải lên lại"),
             trace_id,
         ),
         "-60004" => make_error(
             OcrErrorCategory::EmptyFile,
             Some("-60004"),
             message,
-            Some("请上传有效文件"),
+            Some("Vui lòng tải lên tệp hợp lệ"),
             trace_id,
         ),
         "-60005" => make_error(
             OcrErrorCategory::FileTooLarge,
             Some("-60005"),
             message,
-            Some("检查文件大小，最大支持 200MB"),
+            Some("Kiểm tra kích thước tệp, tối đa hỗ trợ 200MB"),
             trace_id,
         ),
         "-60006" => make_error(
             OcrErrorCategory::TooManyPages,
             Some("-60006"),
             message,
-            Some("请拆分文件后重试"),
+            Some("Vui lòng chia nhỏ tệp và thử lại"),
             trace_id,
         ),
         "-60007" => make_error(
             OcrErrorCategory::ServiceUnavailable,
             Some("-60007"),
             message,
-            Some("请稍后重试或联系技术支持"),
+            Some("Vui lòng thử lại sau hoặc liên hệ hỗ trợ kỹ thuật"),
             trace_id,
         ),
         "-60008" => make_error(
             OcrErrorCategory::RemoteReadTimeout,
             Some("-60008"),
             message,
-            Some("检查 URL 可访问"),
+            Some("Kiểm tra URL có thể truy cập"),
             trace_id,
         ),
         "-60009" => make_error(
             OcrErrorCategory::QueueFull,
             Some("-60009"),
             message,
-            Some("请稍后再试"),
+            Some("Vui lòng thử lại sau"),
             trace_id,
         ),
         "-60010" => make_error(
             OcrErrorCategory::ParseFailed,
             Some("-60010"),
             message,
-            Some("请稍后再试"),
+            Some("Vui lòng thử lại sau"),
             trace_id,
         ),
         "-60011" => make_error(
             OcrErrorCategory::UploadedFileMissing,
             Some("-60011"),
             message,
-            Some("请确保文件已上传"),
+            Some("Đảm bảo tệp đã được tải lên"),
             trace_id,
         ),
         "-60012" => make_error(
             OcrErrorCategory::TaskNotFound,
             Some("-60012"),
             message,
-            Some("请确保task_id有效且未删除"),
+            Some("Đảm bảo task_id hợp lệ và chưa bị xóa"),
             trace_id,
         ),
         "-60013" => make_error(
             OcrErrorCategory::PermissionDenied,
             Some("-60013"),
             message,
-            Some("只能访问自己提交的任务"),
+            Some("Chỉ có thể truy cập tác vụ do mình gửi"),
             trace_id,
         ),
         "-60014" => make_error(
             OcrErrorCategory::OperationNotAllowed,
             Some("-60014"),
             message,
-            Some("运行中的任务暂不支持删除"),
+            Some("Tác vụ đang chạy hiện chưa hỗ trợ xóa"),
             trace_id,
         ),
         "-60015" => make_error(
             OcrErrorCategory::ConversionFailed,
             Some("-60015"),
             message,
-            Some("可以手动转为pdf再上传"),
+            Some("Có thể chuyển sang pdf thủ công rồi tải lên"),
             trace_id,
         ),
         "-60016" => make_error(
             OcrErrorCategory::ConversionFailed,
             Some("-60016"),
             message,
-            Some("文件转换为指定格式失败，可以尝试其他格式导出或重试"),
+            Some("Chuyển đổi tệp sang định dạng yêu cầu thất bại, có thể thử xuất định dạng khác hoặc thử lại"),
             trace_id,
         ),
         "-60017" => make_error(
             OcrErrorCategory::RetryLimitReached,
             Some("-60017"),
             message,
-            Some("等后续模型升级后重试"),
+            Some("Thử lại sau khi nâng cấp mô hình"),
             trace_id,
         ),
         "-60018" => make_error(
             OcrErrorCategory::QuotaExceeded,
             Some("-60018"),
             message,
-            Some("明日再来"),
+            Some("Hãy quay lại vào ngày mai"),
             trace_id,
         ),
         "-60019" => make_error(
             OcrErrorCategory::HtmlQuotaExceeded,
             Some("-60019"),
             message,
-            Some("明日再来"),
+            Some("Hãy quay lại vào ngày mai"),
             trace_id,
         ),
         "-60020" => make_error(
             OcrErrorCategory::FileSplitFailed,
             Some("-60020"),
             message,
-            Some("请稍后重试"),
+            Some("Vui lòng thử lại sau"),
             trace_id,
         ),
         "-60021" => make_error(
             OcrErrorCategory::PageCountReadFailed,
             Some("-60021"),
             message,
-            Some("请稍后重试"),
+            Some("Vui lòng thử lại sau"),
             trace_id,
         ),
         "-60022" => make_error(
             OcrErrorCategory::WebReadFailed,
             Some("-60022"),
             message,
-            Some("可能因网络问题或者限频导致读取失败，请稍后重试"),
+            Some("Có thể do vấn đề mạng hoặc giới hạn tần số dẫn đến lỗi đọc, vui lòng thử lại sau"),
             trace_id,
         ),
         other => make_error(
@@ -289,7 +289,7 @@ pub fn classify_runtime_failure(message: &str, trace_id: Option<&str>) -> OcrPro
             OcrErrorCategory::PollTimeout,
             None,
             provider_message,
-            Some("请检查 MinerU 任务是否长时间卡住，或适当增大轮询超时时间"),
+            Some("Vui lòng kiểm tra tác vụ MinerU có bị kẹt lâu không, hoặc tăng thời gian chờ lần lượt phù hợp"),
             trace_ref,
         );
     }
@@ -298,7 +298,7 @@ pub fn classify_runtime_failure(message: &str, trace_id: Option<&str>) -> OcrPro
             OcrErrorCategory::UploadFailed,
             None,
             provider_message,
-            Some("请检查上传链接是否有效，或重新申请上传 URL 后再试"),
+            Some("Vui lòng kiểm tra liên kết tải lên có hợp lệ không, hoặc yêu cầu lại URL tải lên rồi thử"),
             trace_ref,
         );
     }
@@ -307,7 +307,7 @@ pub fn classify_runtime_failure(message: &str, trace_id: Option<&str>) -> OcrPro
             OcrErrorCategory::InvalidProviderResponse,
             None,
             provider_message,
-            Some("请检查 provider 返回结构是否完整，重点确认 full_zip_url 等关键字段"),
+            Some("Vui lòng kiểm tra cấu trúc trả về của provider có đầy đủ, chủ yếu xác nhận các trường khóa như full_zip_url"),
             trace_ref,
         );
     }
@@ -315,7 +315,7 @@ pub fn classify_runtime_failure(message: &str, trace_id: Option<&str>) -> OcrPro
         OcrErrorCategory::ProviderFailed,
         None,
         provider_message,
-        Some("请结合 provider 原始 message、trace_id 和任务状态继续排查"),
+        Some("Vui lòng kết hợp message gốc provider, trace_id và trạng thái tác vụ để tiếp tục xử lý sự cố"),
         trace_ref,
     )
 }
@@ -328,72 +328,72 @@ mod tests {
     #[test]
     fn maps_readme_codes_60004_to_60022() {
         let cases = [
-            ("-60004", OcrErrorCategory::EmptyFile, "请上传有效文件"),
+            ("-60004", OcrErrorCategory::EmptyFile, "Vui lòng tải lên tệp hợp lệ"),
             (
                 "-60005",
                 OcrErrorCategory::FileTooLarge,
-                "检查文件大小，最大支持 200MB",
+                "Kiểm tra kích thước tệp, tối đa hỗ trợ 200MB",
             ),
-            ("-60006", OcrErrorCategory::TooManyPages, "请拆分文件后重试"),
+            ("-60006", OcrErrorCategory::TooManyPages, "Vui lòng chia nhỏ tệp và thử lại"),
             (
                 "-60007",
                 OcrErrorCategory::ServiceUnavailable,
-                "请稍后重试或联系技术支持",
+                "Vui lòng thử lại sau hoặc liên hệ hỗ trợ kỹ thuật",
             ),
             (
                 "-60008",
                 OcrErrorCategory::RemoteReadTimeout,
-                "检查 URL 可访问",
+                "Kiểm tra URL có thể truy cập",
             ),
-            ("-60009", OcrErrorCategory::QueueFull, "请稍后再试"),
-            ("-60010", OcrErrorCategory::ParseFailed, "请稍后再试"),
+            ("-60009", OcrErrorCategory::QueueFull, "Vui lòng thử lại sau"),
+            ("-60010", OcrErrorCategory::ParseFailed, "Vui lòng thử lại sau"),
             (
                 "-60011",
                 OcrErrorCategory::UploadedFileMissing,
-                "请确保文件已上传",
+                "Đảm bảo tệp đã được tải lên",
             ),
             (
                 "-60012",
                 OcrErrorCategory::TaskNotFound,
-                "请确保task_id有效且未删除",
+                "Đảm bảo task_id hợp lệ và chưa bị xóa",
             ),
             (
                 "-60013",
                 OcrErrorCategory::PermissionDenied,
-                "只能访问自己提交的任务",
+                "Chỉ có thể truy cập tác vụ do mình gửi",
             ),
             (
                 "-60014",
                 OcrErrorCategory::OperationNotAllowed,
-                "运行中的任务暂不支持删除",
+                "Tác vụ đang chạy hiện chưa hỗ trợ xóa",
             ),
             (
                 "-60015",
                 OcrErrorCategory::ConversionFailed,
-                "可以手动转为pdf再上传",
+                "Có thể chuyển sang pdf thủ công rồi tải lên",
             ),
             (
                 "-60016",
                 OcrErrorCategory::ConversionFailed,
-                "文件转换为指定格式失败，可以尝试其他格式导出或重试",
+                "Chuyển đổi tệp sang định dạng yêu cầu thất bại, có thể thử xuất định dạng khác hoặc thử lại",
             ),
             (
                 "-60017",
                 OcrErrorCategory::RetryLimitReached,
-                "等后续模型升级后重试",
+                "Thử lại sau khi nâng cấp mô hình",
             ),
-            ("-60018", OcrErrorCategory::QuotaExceeded, "明日再来"),
-            ("-60019", OcrErrorCategory::HtmlQuotaExceeded, "明日再来"),
-            ("-60020", OcrErrorCategory::FileSplitFailed, "请稍后重试"),
+            ("-60018", OcrErrorCategory::QuotaExceeded, "Hãy quay lại vào ngày mai"),
+            ("-60019", OcrErrorCategory::HtmlQuotaExceeded, "Hãy quay lại vào ngày mai"),
+            ("-60020", OcrErrorCategory::FileSplitFailed, "Vui lòng thử lại sau"),
             (
                 "-60021",
                 OcrErrorCategory::PageCountReadFailed,
-                "请稍后重试",
+                "Vui lòng thử lại sau",
             ),
             (
                 "-60022",
                 OcrErrorCategory::WebReadFailed,
-                "可能因网络问题或者限频导致读取失败，请稍后重试",
+                "Có thể do vấn đề mạng hoặc giới hạn tần số dẫn đến lỗi đọc, vui lòng thử lại sau",
             ),
         ];
         for (code, category, hint) in cases {
@@ -416,11 +416,11 @@ mod tests {
 
     #[test]
     fn extracts_trace_and_message_from_embedded_json() {
-        let text = r#"requests failed: {"code":-60011,"msg":"获取有效文件失败","trace_id":"trace-xyz","data":null}"#;
+        let text = r#"requests failed: {"code":-60011,"msg":"Không thể lấy tệp hợp lệ","trace_id":"trace-xyz","data":null}"#;
         let mapped = classify_runtime_failure(text, None);
         assert_eq!(mapped.provider_code.as_deref(), Some("-60011"));
-        assert_eq!(mapped.provider_message.as_deref(), Some("获取有效文件失败"));
+        assert_eq!(mapped.provider_message.as_deref(), Some("Không thể lấy tệp hợp lệ"));
         assert_eq!(mapped.trace_id.as_deref(), Some("trace-xyz"));
-        assert_eq!(mapped.operator_hint.as_deref(), Some("请确保文件已上传"));
+        assert_eq!(mapped.operator_hint.as_deref(), Some("Đảm bảo tệp đã được tải lên"));
     }
 }

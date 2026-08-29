@@ -82,7 +82,7 @@ def translation_failed_payload_for_validation(
     error_code: str,
     fallback_to: str = "retry_required",
 ) -> dict[str, dict[str, str]]:
-    trace = [{"type": "validation"}]
+    trace = [{"type": "xác_thực"}]
     if error_code:
         trace[0]["code"] = error_code
     return translation_failed_payload(
@@ -90,7 +90,7 @@ def translation_failed_payload_for_validation(
         context=context,
         route_path=route_path,
         degradation_reason=degradation_reason,
-        error_taxonomy="validation",
+        error_taxonomy="xác_thực",
         error_trace=trace,
         fallback_to=fallback_to,
     )
@@ -111,8 +111,8 @@ def translation_failed_payload_for_transport(
         context=context,
         route_path=route_path,
         degradation_reason=degradation_reason,
-        error_taxonomy="transport",
-        error_trace=[{"type": "transport", "code": error_code}],
+        error_taxonomy="vận_chuyển",
+        error_trace=[{"type": "vận_chuyển", "code": error_code}],
         fallback_to=fallback_to,
         dead_letter=dead_letter,
     )

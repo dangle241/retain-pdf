@@ -4,23 +4,23 @@ import json
 import re
 
 REASONING_LEAK_MARKERS = (
-    "保持简洁",
-    "按照规则",
-    "因此输出",
-    "综上，输出",
-    "注意：原文",
-    "译文也应保留",
-    "为保准确",
-    "更简洁",
-    "我选择",
-    "可以译为",
-    "可译为",
+    "Giữ ngắn gọn",
+    "Theo quy tắc",
+    "Do đó xuất",
+    "Tóm lại, xuất",
+    "Lưu ý: bản gốc",
+    "Bản dịch cũng nên giữ",
+    "Để đảm bảo chính xác",
+    "Ngắn gọn hơn",
+    "Tôi chọn",
+    "Có thể dịch là",
+    "Có thể dịch thành",
 )
 REASONING_LEAK_FINAL_PATTERNS = (
-    re.compile(r"(?:综上，输出。?|因此输出：?)\s*(?P<text>.+?)\s*$", re.S),
+    re.compile(r"(?:Tóm lại, xuất。?|Do đó xuất：?)\s*(?P<text>.+?)\s*$", re.S),
     re.compile(r"输出[:：]\s*(?P<text>.+?)\s*$", re.S),
-    re.compile(r"我选择[:：]\s*[\"“](?P<text>[^\"”\n]+)[\"”]", re.S),
-    re.compile(r"我选择[:：]\s*(?P<text>[^\n。]+)", re.S),
+    re.compile(r"Tôi chọn[:：]\s*[\"“](?P<text>[^\"”\n]+)[\"”]", re.S),
+    re.compile(r"Tôi chọn[:：]\s*(?P<text>[^\n。]+)", re.S),
 )
 
 

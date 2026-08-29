@@ -95,8 +95,8 @@ def run_local_command_ocr_to_job_dir(args: SimpleNamespace) -> OcrProviderResult
     emit_stage_progress(
         stage="ocr_processing",
         substage="local_provider",
-        message="正在执行本地 OCR provider",
-        stage_detail="正在执行本地 OCR provider",
+        message="Đang thực thi OCR provider cục bộ",
+        stage_detail="Đang thực thi OCR provider cục bộ",
         provider=provider_name,
     )
     try:
@@ -170,8 +170,8 @@ def run_local_command_ocr_to_job_dir(args: SimpleNamespace) -> OcrProviderResult
     emit_stage_progress(
         stage="ocr_processing",
         substage="local_provider",
-        message="本地 OCR provider 已完成",
-        stage_detail="本地 OCR provider 已完成",
+        message="OCR provider cục bộ đã hoàn thành",
+        stage_detail="OCR provider cục bộ đã hoàn thành",
         provider=provider_name,
         progress_current=validation.get("page_count"),
         progress_total=validation.get("page_count"),

@@ -95,7 +95,7 @@ TRANSLATION_WORKFLOW_SUBPACKAGE_RULES: dict[str, tuple[str, ...]] = {
     ),
 }
 TRANSLATION_WORKFLOW_PRIVATE_IMPORT_EXCEPTIONS: dict[Path, tuple[str, ...]] = {
-    # Compatibility facades intentionally re-export old private names while callers migrate.
+    # Các façade tương thích cố ý tái xuất tên private cũ trong khi người gọi đang di chuyển.
     Path("workflow/stages.py"): (
         "services.translation.workflow.phases.repair._agent_repair_limit_from_env",
     ),

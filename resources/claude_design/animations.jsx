@@ -1,21 +1,20 @@
-
 // animations.jsx
-// Reusable animation starter: Stage, Timeline, Sprite, easing helpers.
-// Usage (in an HTML file that loads React + Babel):
+// Bộ khởi chạy hoạt hình có thể tái sử dụng: Stage, Timeline, Sprite, tiện ích làm dịu.
+// Cách dùng (trong file HTML tải React + Babel):
 //
 //   <Stage width={1280} height={720} duration={10} background="#f6f4ef">
 //     <MyScene />
 //   </Stage>
 //
-// Inside <Stage>, any child can call useTime() to read the current
-// playhead (seconds). Or wrap content in <Sprite start={1} end={4}>...</Sprite>
-// to only render during that window -- children receive a `localTime` and
-// `progress` via the useSprite() hook.
+// Bên trong <Stage>, bất kỳ phần tử con nào cũng có thể gọi useTime() để đọc
+// đầu phát hiện thời lượng hiện tại (bây giở). Hoặc bao gói nội dung trong <Sprite start={1} end={4}>...</Sprite>
+// để chỉ render trong cửa sổ đó -- phần tử con nhận được `localTime` và
+// `progress` thông qua hook useSprite().
 //
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Easing functions (hand-rolled, Popmotion-style) ─────────────────────────
-// All easings take t ∈ [0,1] and return eased t ∈ [0,1] (may overshoot for back/elastic).
+// ── Hàm làm dịu (tự viết, kiểu Popmotion) ─────────────────────────────────
+// Tất cả hàm làm dịu nhận t ∈ [0,1] và trả về t đã làm dịu ∈ [0,1] (có thể vượt quá với back/elastic).
 const Easing = {
   linear: (t) => t,
 
@@ -49,7 +48,7 @@ const Easing = {
   easeOutSine:   (t) => Math.sin((t * Math.PI) / 2),
   easeInOutSine: (t) => -(Math.cos(Math.PI * t) - 1) / 2,
 
-  // Back (overshoot)
+  // Back (vượt mức)
   easeOutBack: (t) => {
     const c1 = 1.70158, c3 = c1 + 1;
     return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
@@ -74,14 +73,14 @@ const Easing = {
   },
 };
 
-// ── Core interpolation helpers ──────────────────────────────────────────────
+// ── Tiện ích nội suy cốt lõi ──────────────────────────────────────────────
 
-// Clamp a value to [min, max]
+// Ép giá trị vào [min, max]
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
 // interpolate([0, 0.5, 1], [0, 100, 50], ease?) -> fn(t)
-// Popmotion-style: linearly maps t across input keyframes to output values,
-// with optional easing per segment (single fn or array of fns).
+// Kiểu Popmotion: ánh xạ tuyến tính t theo khóa đầu vào đến giá trị đầu ra,
+// với tùy chọn làm dịu từng phân đoạn (một hàm hoặc mảng hàm).
 function interpolate(input, output, ease = Easing.linear) {
   return (t) => {
     if (t <= input[0]) return output[0];
@@ -99,8 +98,8 @@ function interpolate(input, output, ease = Easing.linear) {
   };
 }
 
-// animate({from, to, start, end, ease})(t) — simpler single-segment tween.
-// Returns `from` before `start`, `to` after `end`.
+// animate({from, to, start, end, ease})(t) — tween đơn phân đoạn đơn giản hơn.
+// Trả về `from` trước `start`, `to` sau `end`.
 function animate({ from = 0, to = 1, start = 0, end = 1, ease = Easing.easeInOutCubic }) {
   return (t) => {
     if (t <= start) return from;
@@ -110,22 +109,22 @@ function animate({ from = 0, to = 1, start = 0, end = 1, ease = Easing.easeInOut
   };
 }
 
-// ── Timeline context ────────────────────────────────────────────────────────
+// ── Ngữ cảnh timeline ─────────────────────────────────────────────────────
 
 const TimelineContext = React.createContext({ time: 0, duration: 10, playing: false });
 
 const useTime = () => React.useContext(TimelineContext).time;
 const useTimeline = () => React.useContext(TimelineContext);
 
-// ── Sprite ──────────────────────────────────────────────────────────────────
-// Renders children only when the playhead is inside [start, end]. Provides
-// a sub-context with `localTime` (seconds since start) and `progress` (0..1).
+// ── Sprite ────────────────────────────────────────────────────────────────
+// Chỉ render phần tử con khi đầu phát đang nằm trong [start, end]. Cung cấp
+// ngữ cảnh con với `localTime` (giây kể từ lúc bắt đầu) và `progress` (0..1).
 //
 //   <Sprite start={2} end={5}>
 //     {({ localTime, progress }) => <Thing x={progress * 100} />}
 //   </Sprite>
 //
-// Or as a plain wrapper — children can call useSprite() themselves.
+// Hoặc dưới dạng trình bao Plain — phần tử con có thể tự gọi useSprite().
 
 const SpriteContext = React.createContext({ localTime: 0, progress: 0, duration: 0 });
 const useSprite = () => React.useContext(SpriteContext);
@@ -150,9 +149,9 @@ function Sprite({ start = 0, end = Infinity, children, keepMounted = false }) {
   );
 }
 
-// ── Sample sprite components ────────────────────────────────────────────────
+// ── Mẫu thành phần sprite ─────────────────────────────────────────────────
 
-// TextSprite: fades/slides text in on entry, holds, then fades out on exit.
+// TextSprite: fade/trượt văn bản khi vào, giữ nguyên, rồi mờ dần khi ra.
 // Props: text, x, y, size, color, font, entryDur, exitDur, align
 function TextSprite({
   text,
@@ -206,7 +205,7 @@ function TextSprite({
   );
 }
 
-// ImageSprite: scales + fades in; optional Ken Burns drift during hold.
+// ImageSprite: scale + fade vào; tùy chọn hiệu ứng Ken Burns trong giai đoạn giữ.
 function ImageSprite({
   src,
   x = 0, y = 0,
@@ -217,7 +216,7 @@ function ImageSprite({
   kenBurnsScale = 1.08,
   radius = 12,
   fit = 'cover',
-  placeholder = null, // {label: string} for striped placeholder
+  placeholder = null, // {label: string} cho placeholder sọc
 }) {
   const { localTime, duration } = useSprite();
   const exitStart = Math.max(0, duration - exitDur);
@@ -250,7 +249,7 @@ function ImageSprite({
       letterSpacing: '0.04em',
       textTransform: 'uppercase',
     }}>
-      {placeholder.label || 'image'}
+      {placeholder.label || 'hình ảnh'}
     </div>
   ) : (
     <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: fit, display: 'block' }} />
@@ -273,8 +272,8 @@ function ImageSprite({
   );
 }
 
-// RectSprite: simple rectangle that animates position/size/color via props.
-// Useful demo primitive — takes a `render` fn for per-frame customization.
+// RectSprite: hình chữ nhật đơn giản animated vị trí/kích thước/màu qua props.
+// Hữu ích cho demo primitive — nhận fn `render` để tùy chỉnh từng khung hình.
 function RectSprite({
   x = 0, y = 0,
   width = 100, height = 100,
@@ -282,7 +281,7 @@ function RectSprite({
   radius = 8,
   entryDur = 0.4,
   exitDur = 0.3,
-  render, // optional: (ctx) => style overrides
+  render, // tùy chọn: (ctx) => ghi đè style
 }) {
   const spriteCtx = useSprite();
   const { localTime, duration } = spriteCtx;
@@ -346,17 +345,17 @@ function Stage({
   const rafRef = React.useRef(null);
   const lastTsRef = React.useRef(null);
 
-  // Persist playhead
+  // Lưu trữ
   React.useEffect(() => {
     try { localStorage.setItem(persistKey + ':t', String(time)); } catch {}
   }, [time, persistKey]);
 
-  // Auto-scale to fit viewport
+  // Tự động điều chỉnh kích thước để vừa với viewport
   React.useEffect(() => {
     if (!stageRef.current) return;
     const el = stageRef.current;
     const measure = () => {
-      const barH = 44; // playback bar height
+      const barH = 44; // chiều cao THANH PHÁT LẠI
       const s = Math.min(
         el.clientWidth / width,
         (el.clientHeight - barH) / height
@@ -373,7 +372,7 @@ function Stage({
     };
   }, [width, height]);
 
-  // Animation loop
+  // Vòng lặp hoạt hình
   React.useEffect(() => {
     if (!playing) {
       lastTsRef.current = null;
@@ -400,7 +399,7 @@ function Stage({
     };
   }, [playing, duration, loop]);
 
-  // Keyboard: space = play/pause, ← → = seek
+  // Phím tắt: space = play/pause, ← → = seek
   React.useEffect(() => {
     const onKey = (e) => {
       if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
@@ -437,7 +436,7 @@ function Stage({
         fontFamily: 'Inter, system-ui, sans-serif',
       }}
     >
-      {/* Canvas area — vertically centered in remaining space */}
+      {/* Khu vực canvas — căn giữa theo chiều dọc */}
       <div style={{
         flex: 1,
         width: '100%',
@@ -464,7 +463,7 @@ function Stage({
         </div>
       </div>
 
-      {/* Playback bar — stacked below canvas, never overlapping */}
+      {/* Thanh phát lại — xếp bên dưới canvas, không chồng lấn */}
       <PlaybackBar
         time={displayTime}
         actualTime={time}
@@ -479,9 +478,9 @@ function Stage({
   );
 }
 
-// ── Playback bar ────────────────────────────────────────────────────────────
-// Play/pause, return-to-begin, scrub track, time display.
-// Uses fixed-width time fields so layout doesn't thrash.
+// ── Thanh phát lại ───────────────────────────────────────────────────────
+// Play/pause, quay lại đầu, thanh vuốt trượt, hiển thị thời gian.
+// Sử dụng trường thời gian chiều rộng cố định để bố cục không bị giật.
 
 function PlaybackBar({ time, duration, playing, onPlayPause, onReset, onSeek, onHover }) {
   const trackRef = React.useRef(null);
@@ -557,12 +556,12 @@ function PlaybackBar({ time, duration, playing, onPlayPause, onReset, onSeek, on
       userSelect: 'none',
       flexShrink: 0,
     }}>
-      <IconButton onClick={onReset} title="Return to start (0)">
+      <IconButton onClick={onReset} title="Quay lại đầu (0)">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M3 2v10M12 2L5 7l7 5V2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"/>
         </svg>
       </IconButton>
-      <IconButton onClick={onPlayPause} title="Play/pause (space)">
+      <IconButton onClick={onPlayPause} title="Phát/tạm dừng (space)">
         {playing ? (
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <rect x="3" y="2" width="3" height="10" fill="currentColor"/>
@@ -575,7 +574,7 @@ function PlaybackBar({ time, duration, playing, onPlayPause, onReset, onSeek, on
         )}
       </IconButton>
 
-      {/* Current time: fixed width so it doesn't thrash */}
+      {/* Thời gian hiện tại: chiều rộng cố định không bị giật */}
       <div style={{
         fontFamily: mono,
         fontSize: 12,
@@ -586,7 +585,7 @@ function PlaybackBar({ time, duration, playing, onPlayPause, onReset, onSeek, on
         {fmt(time)}
       </div>
 
-      {/* Scrub track */}
+      {/* Thanh vuốt trượt */}
       <div
         ref={trackRef}
         onMouseMove={onTrackMove}
@@ -623,7 +622,7 @@ function PlaybackBar({ time, duration, playing, onPlayPause, onReset, onSeek, on
         }}/>
       </div>
 
-      {/* Duration: fixed width */}
+      {/* Tổng thời lượng: chiều rộng cố định */}
       <div style={{
         fontFamily: mono,
         fontSize: 12,
@@ -670,4 +669,3 @@ Object.assign(window, {
   TextSprite, ImageSprite, RectSprite,
   Stage, PlaybackBar,
 });
-

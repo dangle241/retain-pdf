@@ -12,7 +12,7 @@ test("buildErrorDiagnostic formats copyable frontend diagnostics", () => {
   error.url = "/api/v1/jobs/job-1/pdf";
 
   const diagnostic = buildErrorDiagnostic(error, {
-    operation: "下载译文 PDF",
+    operation: "Tải xuống PDF bản dịch",
     jobId: "job-1",
     now: () => "2026-06-18T12:00:00.000Z",
     details: {
@@ -23,12 +23,12 @@ test("buildErrorDiagnostic formats copyable frontend diagnostics", () => {
   });
 
   assert.equal(diagnostic.kind, "error-diagnostic");
-  assert.equal(diagnostic.summary, "下载译文 PDF失败：backend unavailable");
-  assert.match(diagnostic.diagnostic, /时间: 2026-06-18T12:00:00\.000Z/);
-  assert.match(diagnostic.diagnostic, /前端版本: /);
-  assert.match(diagnostic.diagnostic, /操作: 下载译文 PDF/);
+  assert.equal(diagnostic.summary, "Tải xuống PDF bản dịch thất bại：backend unavailable");
+  assert.match(diagnostic.diagnostic, /Thời gian: 2026-06-18T12:00:00\.000Z/);
+  assert.match(diagnostic.diagnostic, /Phiên bản frontend: /);
+  assert.match(diagnostic.diagnostic, /Thao tác: Tải xuống PDF bản dịch/);
   assert.match(diagnostic.diagnostic, /job_id: job-1/);
-  assert.match(diagnostic.diagnostic, /HTTP 状态码: 503/);
+  assert.match(diagnostic.diagnostic, /Mã trạng thái HTTP: 503/);
   assert.match(diagnostic.diagnostic, /URL: \/api\/v1\/jobs\/job-1\/pdf/);
   assert.match(diagnostic.diagnostic, /workflow: book/);
   assert.doesNotMatch(diagnostic.diagnostic, /should-not-appear/);
@@ -39,7 +39,7 @@ test("messageForErrorBox preserves normal strings and summarizes diagnostics", (
   assert.equal(messageForErrorBox("plain"), "plain");
   assert.equal(messageForErrorBox({
     kind: "error-diagnostic",
-    summary: "上传 PDF 文件失败：HTTP 500",
+    summary: "Tải lên tệp PDF thất bại：HTTP 500",
     diagnostic: "full details",
-  }), "上传 PDF 文件失败：HTTP 500");
+  }), "Tải lên tệp PDF thất bại：HTTP 500");
 });

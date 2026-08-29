@@ -8,43 +8,43 @@ from services.translation.llm.shared.orchestration.segment_plan import segment_s
 
 def segment_translation_system_prompt(domain_guidance: str = "") -> str:
     prompt = (
-        "You are translating fixed text segments extracted from one scientific OCR item.\n"
-        "Each segment is a natural-language span that sits between protected formulas or literal tokens.\n"
-        "Those protected formulas/literals are omitted from the request and will be reinserted automatically by software after translation.\n"
-        "You are NOT translating the whole item as one sentence. You are translating each provided segment independently while respecting the original segment order.\n"
-        "Use concise publication-style Simplified Chinese suitable for scientific writing.\n"
-        "Keep abbreviations, symbols, and standard model names in their normal technical form.\n"
-        "If a segment is only a connector or incomplete phrase, keep it equally short and incomplete in Chinese.\n"
-        "Do not repair truncated grammar by pulling content from neighboring segments.\n"
-        "Do not output any formula placeholders, formula markers, reconstructed full-item text, commentary, markdown, or code fences.\n"
-        'Return only JSON matching {"segments":[{"segment_id":"1","translated_text":"..."}]}.\n'
-        "Hard rules:\n"
-        "- Every requested segment_id must appear exactly once.\n"
-        "- Do not merge, split, omit, renumber, reorder, or invent segments.\n"
-        "- Do not copy hidden formulas back into the output in any form.\n"
-        "- Short connectors such as 'and', 'for', 'with', or 'by considering the possible' must stay terse rather than expanded into full sentences."
+        "Bạn đang dịch các đoạn văn bản cố định được trích xuất từ một mục OCR khoa học.\n"
+        "Mỗi đoạn là một đoạn ngôn ngữ tự nhiên nằm giữa các công thức được bảo vệ hoặc token nguyên văn.\n"
+        "Các công thức/nguyên văn được bảo vệ đó được bỏ khỏi yêu cầu và sẽ được chèn lại tự động bằng phần mềm sau khi dịch.\n"
+        "Bạn KHÔNG dịch toàn bộ mục như một câu. Bạn dịch từng đoạn được cung cấp một cách độc lập trong khi tôn trọng thứ tự đoạn gốc.\n"
+        "Sử dụng tiếng Trung giản thể ngắn gọn theo phong cách xuất bản phù hợp với văn bản khoa học.\n"
+        "Giữ các từ viết tắt, ký hiệu và tên mô hình chuẩn ở dạng kỹ thuật bình thường của chúng.\n"
+        "Nếu một đoạn chỉ là một connector hoặc cụm từ chưa hoàn chỉnh, giữ nó ngắn và chưa hoàn chỉnh như nhau trong tiếng Trung.\n"
+        "Không sửa chữa ngữ pháp bị cắt ngắn bằng cách lấy nội dung từ các đoạn lân cận.\n"
+        "Không xuất ra bất kỳ placeholder công thức, marker công thức, văn bản mục đầy đủ được tái tạo, bình luận, markdown hay code fences nào.\n"
+        'Chỉ trả về JSON khớp với {"segments":[{"segment_id":"1","translated_text":"..."}]}.\n'
+        "Quy tắc cứng:\n"
+        "- Mỗi segment_id được yêu cầu phải xuất hiện chính xác một lần.\n"
+        "- Không gộp, tách, bỏ sót, đổi số, đổi thứ tự hay tạo đoạn giả.\n"
+        "- Không sao chép công thức ẩn lại vào đầu ra dưới bất kỳ hình thức nào.\n"
+        "- Các connector ngắn như 'and', 'for', 'with' hay 'by considering the possible' phải giữ nguyên tính gọn gàng thay vì mở rộng thành câu hoàn chỉnh."
     )
     if domain_guidance.strip():
-        prompt = f"{prompt}\nDocument-specific translation guidance:\n{domain_guidance.strip()}"
+        prompt = f"{prompt}\nHướng dẫn dịch thuật theo tài liệu:\n{domain_guidance.strip()}"
     return prompt
 
 
 def segment_translation_tagged_prompt(domain_guidance: str = "") -> str:
     prompt = (
-        "You are translating fixed text segments extracted from one scientific OCR item.\n"
-        "Each segment is an independent natural-language span between protected formulas or literals.\n"
-        "Protected formulas are omitted and will be reinserted by software after translation.\n"
-        "Translate each segment independently into concise publication-style Simplified Chinese.\n"
-        "Do not merge, split, omit, reorder, or renumber segments.\n"
-        "Do not output formulas, markdown, commentary, code fences, or reconstructed full-item text.\n"
-        "Return one tagged block per segment using this exact format:\n"
+        "Bạn đang dịch các đoạn văn bản cố định được trích xuất từ một mục OCR khoa học.\n"
+        "Mỗi đoạn là một đoạn ngôn ngữ tự nhiên độc lập nằm giữa các công thức được bảo vệ hoặc nguyên văn.\n"
+        "Các công thức được bảo vệ được bỏ qua và sẽ được chèn lại bởi phần mềm sau khi dịch.\n"
+        "Dịch từng đoạn một cách độc lập thành tiếng Trung giản thể ngắn gọn theo phong cách xuất bản.\n"
+        "Không gộp, tách, bỏ sót, đổi thứ tự hay đổi số các đoạn.\n"
+        "Không xuất ra công thức, markdown, bình luận, code fences hay văn bản mục đầy đủ được tái tạo.\n"
+        "Trả về một khối tagged cho mỗi đoạn theo định dạng chính xác này:\n"
         "<<<SEG id=1>>>\n"
-        "translated text\n"
+        "văn bản dịch\n"
         "<<<END>>>\n"
-        "Output one block for every requested segment_id exactly once."
+        "Xuất một khối cho mỗi segment_id được yêu cầu chính xác một lần."
     )
     if domain_guidance.strip():
-        prompt = f"{prompt}\nDocument-specific translation guidance:\n{domain_guidance.strip()}"
+        prompt = f"{prompt}\nHướng dẫn dịch thuật theo tài liệu:\n{domain_guidance.strip()}"
     return prompt
 
 

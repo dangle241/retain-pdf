@@ -32,8 +32,8 @@ def canonicalize_batch_result(batch: list[dict], result: dict[str, dict[str, str
             ):
                 decision = KEEP_ORIGIN_LABEL
                 translated_text = ""
-            # direct_typst 的机械格式规整放在 keep_origin 判定之后:规整会改动
-            # 文本,先做会破坏 translated_text == source_text 的原样检测。
+            # Định dạng direct_typst được trình bày trong keep_origin sau phán xét:
+            # quyết định sẽ thay đổi văn bản; làm điều đó trước sẽ phá hủy thử nghiệm translated_text == source_text nguyên trạng.
             if decision != KEEP_ORIGIN_LABEL and translated_text and is_direct_math_mode(item):
                 translated_text = normalize_direct_typst_translation(translated_text)
         canonical[item_id] = result_entry(decision, translated_text)

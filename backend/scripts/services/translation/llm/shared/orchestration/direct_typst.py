@@ -77,9 +77,9 @@ def translate_direct_typst_plain_text_with_retries(
         context=context,
         transport_tail_retry=not allow_transport_tail_defer,
     )
-    # 定界符修复要求模型重写整段文本,20s 档超时对长块是极限值(实测
-    # NMR 长块修复需要 ~19s,连续 4 次踩超时白烧 80s)。修复调用统一
-    # 用 transport tail 档超时。
+    # Sửa chữa dấu phân cách yêu cầu mô hình viết lại toàn bộ đoạn văn bản,20s Thời gian chờ bánh răng là giới hạn cho các khối dài(Đo thực tế
+    # NMR Nhu cầu phục hồi khối dài ~19s,liên tục 4 Hết thời gian sốt trắng 80s)。Sửa chữa đồng phục cuộc gọi
+    # dùng transport tail Hết thời gian chờ bánh răng。
     repair_timeout_s = max(
         plain_timeout_s,
         int(getattr(context.timeout_policy, "transport_tail_retry_seconds", plain_timeout_s)),
@@ -136,7 +136,7 @@ def translate_direct_typst_plain_text_with_retries(
                     last_error = exc
                     if request_label:
                         print(
-                            f"{request_label}: direct_typst plain-text parse failed attempt {attempt}/{plain_attempts} after {time.perf_counter() - started:.2f}s: {type(exc).__name__}: {exc}",
+                            f"{request_label}: lần thử văn bản thuần direct_typst {attempt}/{plain_attempts} sau {time.perf_counter() - started:.2f}s: {type(exc).__name__}: {exc}",
                             flush=True,
                         )
                     if attempt >= plain_attempts:
@@ -148,7 +148,7 @@ def translate_direct_typst_plain_text_with_retries(
                 last_error = exc
                 if request_label:
                     print(
-                        f"{request_label}: direct_typst transport failure after {time.perf_counter() - started:.2f}s, mark failed: {type(exc).__name__}: {exc}",
+                        f"{request_label}: lỗi vận chuyển direct_typst sau {time.perf_counter() - started:.2f}s, đánh dấu thất bại: {type(exc).__name__}: {exc}",
                         flush=True,
                     )
                 if allow_transport_tail_defer:
@@ -170,7 +170,7 @@ def translate_direct_typst_plain_text_with_retries(
             last_error = exc
             if request_label:
                 print(
-                    f"{request_label}: direct_typst plain-text failed attempt {attempt}/{plain_attempts} after {time.perf_counter() - started:.2f}s: {type(exc).__name__}: {exc}",
+                    f"{request_label}: văn bản thuần direct_typst thất bại lần thử {attempt}/{plain_attempts} sau {time.perf_counter() - started:.2f}s: {type(exc).__name__}: {exc}",
                     flush=True,
                 )
             if attempt < plain_attempts:
@@ -187,7 +187,7 @@ def translate_direct_typst_plain_text_with_retries(
                     )
                     if salvaged is not None:
                         if request_label:
-                            print(f"{request_label}: direct_typst protocol shell salvaged successfully", flush=True)
+                            print(f"{request_label}: vỏ giao thức direct_typst đã cứu thành công", flush=True)
                         return salvaged
                 if is_named_validation_exception(exc, "MathDelimiterError"):
                     try:
@@ -207,12 +207,12 @@ def translate_direct_typst_plain_text_with_retries(
                         )
                         if repaired is not None:
                             if request_label:
-                                print(f"{request_label}: direct_typst math delimiter repaired successfully", flush=True)
+                                print(f"{request_label}: dấu phân cách toán học direct_typst đã sửa thành công", flush=True)
                             return repaired
                     except Exception as repair_exc:
                         if request_label:
                             print(
-                                f"{request_label}: direct_typst math delimiter repair failed attempt {attempt}/{plain_attempts}: {type(repair_exc).__name__}: {repair_exc}",
+                                f"{request_label}: sửa dấu phân cách toán học direct_typst thất bại lần thử {attempt}/{plain_attempts}: {type(repair_exc).__name__}: {repair_exc}",
                                 flush=True,
                             )
                 time.sleep(min(8, 2 * attempt))
@@ -248,4 +248,4 @@ def translate_direct_typst_plain_text_with_retries(
                 error_code="PROTOCOL_SHELL",
             )
         raise last_error
-    raise RuntimeError("Direct Typst plain-text translation failed without an exception.")
+    raise RuntimeError("Dịch văn bản thuần direct_typst thất bại mà không có ngoại lệ.")

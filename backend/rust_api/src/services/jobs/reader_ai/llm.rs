@@ -63,7 +63,7 @@ fn build_messages(request: &ReaderAiChatRequest, chunks: &[RetrievedChunk]) -> V
     messages.push(ChatMessage {
         role: "user".to_string(),
         content: format!(
-            "用户问题：{}\n\n可用文档片段：\n{}",
+            "Câu hỏi người dùng: {}\n\nĐoạn tài liệu khả dụng:\n{}",
             request.message.trim(),
             format_context(chunks)
         ),
@@ -91,10 +91,10 @@ fn history_messages(history: &[ReaderAiHistoryMessageView]) -> Vec<ChatMessage> 
 
 fn reader_system_prompt() -> String {
     [
-        "你是 RetainPDF 的文档阅读助手。",
-        "只能基于提供的文档片段回答，不要编造未给出的事实。",
-        "如果片段不足以回答，直接说明证据不足。",
-        "回答使用用户提问的语言，尽量简洁，并在必要时提到依据来自哪些片段标题。",
+        "Bạn là trợ lý đọc tài liệu của RetainPDF.",
+        "Chỉ có thể trả lời dựa trên đoạn tài liệu được cung cấp, không bịa đặt sự kiện chưa cho.",
+        "Nếu đoạn không đủ để trả lời, hãy nói trực tiếp bằng chứng không đủ.",
+        "Trả lời bằng ngôn ngữ người dùng hỏi, càng ngắn gọn càng tốt, và nếu cần thiết đề cập dựa trên tiêu đề đoạn nào.",
     ]
     .join("\n")
 }

@@ -28,30 +28,30 @@ from services.translation.core.payload import load_translations
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Capture a translation item into promptfoo fixture CSV.")
-    parser.add_argument("--job-root", required=True, help="Absolute job root path or job id under data/jobs.")
-    parser.add_argument("--item-id", required=True, help="Translation item id.")
-    parser.add_argument("--description", required=True, help="Short case label shown in promptfoo.")
-    parser.add_argument("--expected-contains", action="append", default=[], help="Substring that should appear in translated output.")
-    parser.add_argument("--required-term", action="append", default=[], help="Term that must be preserved verbatim.")
-    parser.add_argument("--forbidden-substring", action="append", default=[], help="Substring that must not appear in output.")
-    parser.add_argument("--note", default="", help="Optional free-form note.")
-    parser.add_argument("--min-output-chars", type=int, default=None, help="Minimum output length assertion.")
-    parser.add_argument("--min-cjk-chars", type=int, default=1, help="Minimum CJK chars when require_cjk is enabled.")
-    parser.add_argument("--require-cjk", dest="require_cjk", action="store_true", default=True, help="Require Chinese characters in output.")
-    parser.add_argument("--no-require-cjk", dest="require_cjk", action="store_false", help="Disable CJK assertion for this case.")
-    parser.add_argument("--skip-replay", action="store_true", help="Only capture the saved artifact, do not replay the current translation path.")
-    parser.add_argument("--no-write-artifact", dest="write_artifact", action="store_false", default=True, help="Do not write a JSON case artifact under promptfoo/fixtures.")
+    parser = argparse.ArgumentParser(description="Ghi lại một mục dịch vào CSV fixture promptfoo.")
+    parser.add_argument("--job-root", required=True, help="Đường dẫn job root tuyệt đối hoặc job id dưới data/jobs.")
+    parser.add_argument("--item-id", required=True, help="Id mục dịch.")
+    parser.add_argument("--description", required=True, help="Nhãn case ngắn hiển thị trong promptfoo.")
+    parser.add_argument("--expected-contains", action="append", default=[], help="Chuỗi con phải xuất hiện trong đầu ra dịch.")
+    parser.add_argument("--required-term", action="append", default=[], help="Thuật ngữ phải giữ nguyên nguyên văn.")
+    parser.add_argument("--forbidden-substring", action="append", default=[], help="Chuỗi con không được xuất hiện trong đầu ra.")
+    parser.add_argument("--note", default="",         help="Ghi chú tự do tùy chọn.")
+    parser.add_argument("--min-output-chars", type=int, default=None, help="Assertion độ dài đầu ra tối thiểu.")
+    parser.add_argument("--min-cjk-chars", type=int, default=1, help="Số ký tự CJK tối thiểu khi bật require_cjk.")
+    parser.add_argument("--require-cjk", dest="require_cjk", action="store_true", default=True, help="Yêu cầu ký tự Trung Quốc trong đầu ra.")
+    parser.add_argument("--no-require-cjk", dest="require_cjk", action="store_false", help="Tắt assertion CJK cho case này.")
+    parser.add_argument("--skip-replay", action="store_true",         help="Chỉ ghi lại artifact đã lưu, không phát lại đường dịch hiện tại.")
+    parser.add_argument("--no-write-artifact", dest="write_artifact", action="store_false", default=True,         help="Không ghi artifact JSON case vào promptfoo/fixtures.")
     parser.add_argument(
         "--case-artifact",
         default="",
-        help="Optional case artifact path. Defaults to promptfoo/fixtures/cases/<job>--<item>.json",
+        help="Đường dẫn artifact case tùy chọn. Mặc định promptfoo/fixtures/cases/<job>--<item>.json",
     )
     parser.add_argument(
         "--fixtures",
         type=str,
         default=str((PROMPTFOO_DIR / "fixtures" / "cases.csv").resolve()),
-        help="Fixture CSV path.",
+        help="Đường dẫn CSV fixture.",
     )
     return parser.parse_args()
 

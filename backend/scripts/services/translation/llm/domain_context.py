@@ -126,8 +126,8 @@ def _shared_domain_context_path(preview_text: str, *, model: str) -> Path:
 
 
 def _load_shared_domain_context(preview_text: str, *, model: str) -> dict[str, str] | None:
-    # 按内容寻址的跨任务缓存:同一文档换个任务目录重跑,不必重付
-    # 4-5s 的领域识别调用(原有的 per-job 缓存只在同一任务目录内生效)。
+    # Bộ nhớ đệm tác vụ chéo được giải quyết theo nội dung:Chạy lại cùng một tài liệu với một thư mục nhiệm vụ khác,Không cần thanh toán lại
+    # 4-5s Cuộc gọi nhận dạng tên miền(Bản gốc per-job Bộ nhớ cache chỉ có hiệu lực trong cùng một thư mục tác vụ)。
     path = _shared_domain_context_path(preview_text, model=model)
     try:
         if not path.exists():
@@ -191,7 +191,7 @@ def infer_domain_context_from_preview_text(
     emit_stage_transition(
         stage="domain_inference",
         substage="domain_inference",
-        message="开始识别文档领域",
+        message="Bắt đầu nhận diện lĩnh vực tài liệu",
         progress_current=0,
         progress_total=1,
         payload={
@@ -224,7 +224,7 @@ def infer_domain_context_from_preview_text(
         emit_stage_progress(
             stage="domain_inference",
             substage="domain_inference",
-            message="领域识别超时，使用默认翻译上下文",
+            message="Nhận diện lĩnh vực hết thời gian, dùng ngữ cảnh dịch mặc định",
             progress_current=1,
             progress_total=1,
             elapsed_ms=elapsed_ms,
@@ -248,7 +248,7 @@ def infer_domain_context_from_preview_text(
     emit_stage_progress(
         stage="domain_inference",
         substage="domain_inference",
-        message="文档领域识别完成",
+        message="Nhận diện lĩnh vực tài liệu hoàn tất",
         progress_current=1,
         progress_total=1,
         elapsed_ms=int(round((time.perf_counter() - started) * 1000)),

@@ -110,18 +110,18 @@ class TranslationItemContext:
         if self.preserve_line_structure_for_prompt and self.line_texts:
             payload["text_flow"] = "preserve_lines"
             payload["line_count"] = len(self.line_texts)
-            payload["instruction"] = "保持原文多行结构，译文尽量使用相同换行数量和行序。"
+            payload["instruction"] = "Giữ cấu trúc đa dòng của văn bản gốc, bản dịch cố gắng sử dụng cùng số lần xuống dòng và thứ tự dòng."
         if self.toc_entries:
             payload["structure"] = "table_of_contents"
-            payload["instruction"] = "这是目录页内容。逐行翻译标题，保留章节编号、点线省略号和页码的位置关系，不要合并行。"
+            payload["instruction"] = "Đây là nội dung trang mục lục. Dịch từng dòng tiêu đề, giữ nguyên số chương, dấu chấm bỏ/gạch nối và mối quan hệ vị trí trang, không gộp dòng."
         if self.continuation_group:
             payload["continuation_group"] = self.continuation_group
         context_before = self.context_before_for_prompt()
         context_after = self.context_after_for_prompt()
         if context_before:
-            payload["context_before"] = f"仅供理解，禁止翻译进输出：{context_before}"
+            payload["context_before"] = f"Chỉ để hiểu, cấm dịch vào đầu ra:{context_before}"
         if context_after:
-            payload["context_after"] = f"仅供理解，禁止翻译进输出：{context_after}"
+            payload["context_after"] = f"Chỉ để hiểu, cấm dịch vào đầu ra:{context_after}"
         return payload
 
     def as_classification_record(self, *, rule_label: str = "") -> dict[str, Any]:

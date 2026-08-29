@@ -4,7 +4,7 @@
   "layers": [
     { "type": "image", "slot": "backdrop", "src": "bg.webp", "parallax": 0.02 },
     { "type": "image", "slot": "left-top", "src": "kite.webp", "parallax": 0.05 },
-    { "type": "image", "slot": "right-bottom-fg", "src": "master.webp", "parallax": 0.06, "clickQuote": "志不强者智不达，言不信者行不果。\n\n兴天下之利，除天下之害。" }
+    { "type": "image", "slot": "right-bottom-fg", "src": "master.webp", "parallax": 0.06, "clickQuote": "Người không có chí thì trí chẳng thông, lời không tin thì hành khó thành.\n\nĐặt lợi ích thiên hạ lên trên, trừ đi tai hại khắp chốn." }
   ],
-  "quote": { "slot": "quote", "text": "兼相爱\n交相利" }
+  "quote": { "slot": "quote", "text": "Thương yêu lẫn nhau\nTrao đổi lợi ích lẫn nhau" }
 }

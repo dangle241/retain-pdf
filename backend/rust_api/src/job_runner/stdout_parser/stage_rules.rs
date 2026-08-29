@@ -56,7 +56,7 @@ fn apply_provider_stage_prefix(job: &mut JobSnapshot, rule: ProviderStagePrefixR
     match rule {
         ProviderStagePrefixRule::UploadDone => {
             job.stage = Some(job_stage_str(JobStage::MineruProcessing).to_string());
-            job.stage_detail = Some("文件上传完成，等待 MinerU 处理".to_string());
+            job.stage_detail = Some("Tải tệp lên hoàn tất, đang chờ MinerU xử lý".to_string());
         }
     }
 }

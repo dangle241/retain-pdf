@@ -32,7 +32,7 @@ def run_translation_batch_stage(
     emit_stage_transition(
         stage="translating",
         substage="translation_batches",
-        message="开始批量翻译",
+        message="Bắt đầu dịch hàng loạt",
     )
     batch_summary = translate_pending_units(
         page_payloads=page_payloads,
@@ -94,7 +94,7 @@ def run_translation_batch_stage(
     emit_stage_progress(
         stage="translating",
         substage="translation_batches",
-        message="翻译批次完成",
+        message="Lô dịch hoàn tất",
         progress_current=batch_summary["total_batches"],
         progress_total=batch_summary["total_batches"],
         elapsed_ms=int((time.perf_counter() - translate_started) * 1000),

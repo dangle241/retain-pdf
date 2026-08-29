@@ -99,20 +99,20 @@ test("job status summary view model owns summary fields without DOM writes", () 
     job_id: "job-summary-vm",
     status: "failed",
     failure: {
-      summary: "翻译失败",
+      summary: "Dịch thất bại",
     },
   }, {
-    detail: "正在翻译正文内容",
+    detail: "Đang dịch nội dung chính",
   });
 
   assert.deepEqual(viewModel.fields, {
     jobId: "job-summary-vm",
     jobIdInput: "job-summary-vm",
-    stageDetail: "正在翻译正文内容",
-    statusSummary: "任务已失败，请检查报错提示后重试。",
+    stageDetail: "Đang dịch nội dung chính",
+    statusSummary: "Tác vụ đã thất bại, vui lòng kiểm tra thông báo lỗi và thử lại.",
     finishedAt: "-",
     queryFinishedAt: "-",
   });
-  assert.equal(viewModel.publicErrorText, "翻译失败");
-  assert.equal(viewModel.errorText, "翻译失败");
+  assert.equal(viewModel.publicErrorText, "Dịch thất bại");
+  assert.equal(viewModel.errorText, "Dịch thất bại");
 });

@@ -17,7 +17,7 @@ class AbbreviationEntry:
 def build_abbreviation_guidance(entries: list[AbbreviationEntry]) -> str:
     if not entries:
         return ""
-    lines = ["Abbreviation preferences:"]
+    lines = ["Tùy chọn từ viết tắt:"]
     for entry in entries:
         summary = f"- {entry.source}: strategy={entry.strategy}"
         if entry.target.strip():

@@ -303,7 +303,7 @@ def sanitize_page_specs_for_typst_book_overlay(
         emit_stage_progress(
             stage="rendering",
             substage="render_pages",
-            message=f"正在检查 Typst 兼容性，第 {page_index + 1}/{total_pages} 页",
+            message=f"Đang kiểm tra tương thích Typst，第 {page_index + 1}/{total_pages} trang",
             progress_current=page_index + 1,
             progress_total=total_pages,
             payload={

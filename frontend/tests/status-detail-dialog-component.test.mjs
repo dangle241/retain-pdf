@@ -2,14 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// StatusDetailDialog(Phase 3 dialogs 群,蓝图 §1)组件级测试。覆盖蓝图 §1.4
-// 新增测试清单:4 tab 切换 + hidden 属性契约、overview 首屏占位→刷新两段渲染、
-// StageHistoryList/EventsList 逐条断言(对象数组断言取代 markup 断言)、
-// TranslationDebugTab 过滤/翻页/选中/重放闭环、rerun 成功路径 + startPolling
-// 联调。走真实 mountJobRuntimeFeature 轮询链路(?mock=failed / ?mock=done),
-// 不 mock fetch——所有 status-detail 专属 fetch(diagnostics/resume-plan/
-// translation/*)均走各自模块内建的 isMockMode() 分支(镜像
-// status-card-component.test.mjs 的 makeDom 先例)。
+// Kiểm thử thành phần StatusDetailDialog (nhóm hộp thoại Phase 3, Blueprint §1). Bao phủ danh sách kiểm thử mới §1.4
+// trong blueprint: chuyển đổi 4 tab + hợp đồng thuộc tính hidden, chiếm chỗ màn hình đầu overview → làm mới hai giai đoạn render,
+// xác nhận từng mục StageHistoryList/EventsList (xác nhận mảng đối tượng thay thế xác nhận markup),
+// vòng lặp đóng lọc/phân trang/chọn/phát lại của TranslationDebugTab, đường dẫn thành công rerun + tích hợp startPolling.
+// Đi qua đường dẫn轮询 mountJobRuntimeFeature thực tế (?mock=failed / ?mock=done),
+// không mock fetch — tất cả fetch dành riêng cho status-detail (diagnostics/resume-plan/translation/*) đều đi qua
+// nhánh isMockMode() tích hợp trong từng mô-đun (sao chép tiền lệ makeDom của status-card-component.test.mjs).
 
 function makeDom(search) {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
@@ -24,13 +23,13 @@ function makeDom(search) {
   }
   globalThis.window = dom.window;
   globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
-  // Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
-  // (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
-  // animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
-  // 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。NodeFilter
-  // 是阶段 C(StatusDetailDialog 换 Radix Dialog)新增的需要——Dialog.Content 的
-  // FocusScope 用它做可聚焦元素树遍历(@radix-ui/react-focus-scope 的
-  // getTabbableCandidates),不是 Tabs 需要的。
+  // Radix Presence/Tabs (giới thiệu giai đoạn B) cần cancelAnimationFrame trong jsdom
+  // (dọn dẹp bộ đếm thời gian hoạt ảnh mount của TabsContent) và getComputedStyle (đọc Presence
+  // animation-name để xác định hoạt ảnh thoát đã kết thúc) — jsdom có sẵn trên window,
+  // chỉ chưa được sao chép ra global trần như requestAnimationFrame, nên bổ sung ở đây. NodeFilter
+  // là nhu cầu mới của giai đoạn C (StatusDetailDialog đổi sang Radix Dialog) — Dialog.Content
+  // FocusScope dùng nó để duyệt cây phần tử có thể focus (@radix-ui/react-focus-scope
+  // getTabbableCandidates), không phải Tabs cần.
   globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
   globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -49,7 +48,7 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-  assert.fail(`等待超时：${description}`);
+  assert.fail(`Chờ quá thời gian: ${description}`);
 }
 
 function click(dom, element) {
@@ -121,7 +120,7 @@ async function openStatusDetailDialog(dom, services) {
   return getMockJobId();
 }
 
-test("StatusDetailDialog：4 tab 切换 + hidden 属性契约（常驻挂载不卸载）", async () => {
+test("StatusDetailDialog: chuyển đổi 4 tab + hợp đồng thuộc tính hidden (gắn thường trực không gỡ bỏ)", async () => {
   const dom = makeDom("?mock=failed");
   const { services, root, host } = await bootHomeApp(dom);
   await openStatusDetailDialog(dom, services);
@@ -136,7 +135,7 @@ test("StatusDetailDialog：4 tab 切换 + hidden 属性契约（常驻挂载不�
     assert.ok(byId(dom, id), `契约 id 缺失：#${id}`);
   }
 
-  // 默认打开落在 overview,其余三个面板用 hidden 属性隐藏(不卸载)。
+  // Mặc định mở ở overview, ba panel còn lại dùng thuộc tính hidden để ẩn (không unmount).
   assert.equal(byId(dom, "detail-tab-overview").getAttribute("aria-selected"), "true");
   assert.equal(byId(dom, "detail-panel-overview").hidden, false);
   assert.equal(byId(dom, "detail-panel-failure").hidden, true);
@@ -164,12 +163,12 @@ test("StatusDetailDialog：4 tab 切换 + hidden 属性契约（常驻挂载不�
   host.remove();
 });
 
-test("StatusDetailDialog：overview 首屏占位（同步）→ 刷新两段渲染（异步补齐诊断字段）", async () => {
+test("StatusDetailDialog: chiếm chỗ màn hình đầu overview (đồng bộ) → làm mới hai giai đoạn render (bất đồng bộ bổ sung trường chẩn đoán)", async () => {
   const dom = makeDom("?mock=failed");
   const { services, root, host } = await bootHomeApp(dom);
   await openStatusDetailDialog(dom, services);
 
-  // 打开瞬间(同步链内)job-id 已经来自 currentJobStore 的占位快照,不是空白。
+  // Khi mở ra (trong chuỗi đồng bộ) job-id đã đến từ snapshot giữ chỗ của currentJobStore, không phải trống.
   assert.notEqual(byId(dom, "status-detail-job-id").textContent.trim(), "-");
   assert.notEqual(byId(dom, "status-detail-job-id").textContent.trim(), "");
 
@@ -192,7 +191,7 @@ test("StatusDetailDialog：overview 首屏占位（同步）→ 刷新两段渲�
   host.remove();
 });
 
-test("StatusDetailDialog：StageHistoryList/EventsList 结构化 JSX 逐条渲染", async () => {
+test("StatusDetailDialog: StageHistoryList/EventsList có cấu trúc JSX render từng mục", async () => {
   const dom = makeDom("?mock=failed");
   const { services, root, host } = await bootHomeApp(dom);
   await openStatusDetailDialog(dom, services);
@@ -200,7 +199,7 @@ test("StatusDetailDialog：StageHistoryList/EventsList 结构化 JSX 逐条渲�
   await waitFor(() => byId(dom, "overview-stage-list").querySelectorAll(".stage-history-item").length > 0, "阶段时间线渲染出条目");
   const stageItems = byId(dom, "overview-stage-list").querySelectorAll(".stage-history-item");
   assert.equal(byId(dom, "overview-stage-empty").classList.contains("hidden"), true);
-  // 逐条断言结构(索引/标题/耗时三个子节点都在),取代旧世界的 markup 字符串断言。
+  // Từng dòng assertion cấu trúc (ba nút con: chỉ số/tiêu đề/thời gian đều có), thay thế assertion chuỗi markup của thế giới cũ.
   stageItems.forEach((item, index) => {
     assert.equal(item.querySelector(".stage-history-index").textContent.trim(), `${index + 1}`);
     assert.ok(item.querySelector(".stage-history-title").textContent.trim().length > 0);
@@ -226,7 +225,7 @@ test("StatusDetailDialog：StageHistoryList/EventsList 结构化 JSX 逐条渲�
   host.remove();
 });
 
-test("StatusDetailDialog：失败 tab 重放（rerun）成功 → 关闭对话框 + startPolling 联调", async () => {
+test("StatusDetailDialog: phát lại tab thất bại (rerun) thành công → đóng hộp thoại + tích hợp startPolling", async () => {
   const dom = makeDom("?mock=failed");
   const { services, root, host } = await bootHomeApp(dom);
   const originalJobId = await openStatusDetailDialog(dom, services);
@@ -248,7 +247,7 @@ test("StatusDetailDialog：失败 tab 重放（rerun）成功 → 关闭对话�
   host.remove();
 });
 
-test("StatusDetailDialog：翻译调试 tab —— 摘要/筛选/选中/翻页/重放闭环", async () => {
+test("StatusDetailDialog: tab gỡ lỗi dịch —— tóm tắt/lọc/chọn/chuyển trang/phát lại vòng kín", async () => {
   const dom = makeDom("?mock=done");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockTranslationItems, getMockTranslationSummary } = await import("../src/js/mock/translation.js");
@@ -266,15 +265,15 @@ test("StatusDetailDialog：翻译调试 tab —— 摘要/筛选/选中/翻页/�
   assert.equal(byId(dom, "translation-provider-family").textContent.trim(), summary.provider_family);
 
   await waitFor(() => byId(dom, "translation-items-list").querySelectorAll(".translation-item-card").length === allItems.length, "item 列表渲染完成");
-  // 默认自动选中首条 item。
+  // Mặc định tự động chọn item đầu tiên.
   await waitFor(() => byId(dom, "translation-item-detail").classList.contains("hidden") === false, "首条 item 详情自动加载");
   assert.match(byId(dom, "translation-item-meta").textContent, new RegExp(allItems[0].item_id));
 
-  // 分页契约:mock 数据量小于 limit(20),prev/next 均应 disabled。
+  // Không phân trang: lượng dữ liệu mock nhỏ hơn limit(20), prev/next đều disabled.
   assert.equal(byId(dom, "translation-items-prev").disabled, true);
   assert.equal(byId(dom, "translation-items-next").disabled, true);
 
-  // 筛选:切到 kept_origin,列表收窄为该分类数量。
+  // Lọc: chuyển sang kept_origin, danh sách thu hẹp về số lượng phân loại này.
   const keptOriginItems = allItems.filter((item) => item.final_status === "kept_origin");
   selectOption(dom, byId(dom, "translation-filter-final-status"), "kept_origin");
   click(dom, byId(dom, "translation-filter-apply"));
@@ -283,7 +282,7 @@ test("StatusDetailDialog：翻译调试 tab —— 摘要/筛选/选中/翻页/�
     "筛选 kept_origin 后列表收窄",
   );
 
-  // 选中列表中的一条 item,断言详情面板切换。
+  // Chọn một item trong danh sách, assertion panel chi tiết chuyển.
   const secondCard = byId(dom, "translation-items-list").querySelectorAll(".translation-item-card")[
     keptOriginItems.length > 1 ? 1 : 0
   ];
@@ -291,7 +290,7 @@ test("StatusDetailDialog：翻译调试 tab —— 摘要/筛选/选中/翻页/�
   click(dom, secondCard);
   await waitFor(() => byId(dom, "translation-item-meta").textContent.includes(targetItemId), "点击选中另一条 item 更新详情");
 
-  // 重放当前 item。
+  // Phát lại item hiện tại.
   click(dom, byId(dom, "translation-item-replay"));
   await waitFor(() => byId(dom, "translation-replay-result").classList.contains("hidden") === false, "重放结果渲染");
   assert.match(byId(dom, "translation-replay-status").textContent, /重放完成|重放返回错误/);
@@ -301,7 +300,7 @@ test("StatusDetailDialog：翻译调试 tab —— 摘要/筛选/选中/翻页/�
   host.remove();
 });
 
-test("StatusDetailDialog：数据源独立——status-detail 的 overview 不读 statusCardStore", async () => {
+test("StatusDetailDialog: nguồn dữ liệu độc lập — overview của status-detail không đọc statusCardStore", async () => {
   const dom = makeDom("?mock=failed");
   const { services, root, host } = await bootHomeApp(dom);
   await openStatusDetailDialog(dom, services);
@@ -309,7 +308,7 @@ test("StatusDetailDialog：数据源独立——status-detail 的 overview 不�
 
   const detailSnapshot = services.statusDetail.store.getSnapshot();
   const cardSnapshot = services.statusCard.store.getSnapshot();
-  // 两个 store 是不同的实例(蓝图 §1.0 数据源铁律),各自持有 job 字段。
+  // Hai store là instance khác nhau (luật nguồn dữ liệu Blueprint §1.0), mỗi store giữ trường job.
   assert.notEqual(services.statusDetail.store, services.statusCard.store);
   assert.ok(detailSnapshot.overview.job, "status-detail 自行持有 job 原始数据");
   assert.ok(cardSnapshot.snapshot.job, "statusCardStore 也持有 job(并行读路径,互不依赖)");

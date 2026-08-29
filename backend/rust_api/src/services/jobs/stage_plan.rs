@@ -106,7 +106,7 @@ fn base_stage_plan(
     match stage {
         RetryStageKind::Ocr => JobStagePlan {
             stage,
-            label: "重试 OCR".to_string(),
+            label: "Thử lại OCR".to_string(),
             can_retry: availability.source_retryable_from_request,
             disabled_reason: String::new(),
             will_reuse: vec!["source_pdf".to_string()],
@@ -120,7 +120,7 @@ fn base_stage_plan(
         },
         RetryStageKind::Translation => JobStagePlan {
             stage,
-            label: "重试翻译".to_string(),
+            label: "Thử lại dịch".to_string(),
             can_retry: availability.ocr_available,
             disabled_reason: String::new(),
             will_reuse: vec!["source_pdf".to_string(), "ocr_result".to_string()],
@@ -130,7 +130,7 @@ fn base_stage_plan(
         },
         RetryStageKind::Render => JobStagePlan {
             stage,
-            label: "重新渲染".to_string(),
+            label: "Kết xuất lại".to_string(),
             can_retry: availability.translations_available,
             disabled_reason: String::new(),
             will_reuse: vec![

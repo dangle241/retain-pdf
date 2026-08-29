@@ -206,7 +206,7 @@ test("home state port updates state and dispatches app events", () => {
     const port = createHomeStatePort(localState);
     port.setViewMode("bad-mode");
     assert.equal(port.getSnapshot().viewMode, "library");
-    // 迁移完成:store 是唯一真值,旧 state 对象不再被回写
+    // Di chuyển hoàn tất: store là nguồn chân lý duy nhất, state object cũ không còn được ghi ngược
     assert.equal(localState.homeViewMode, "library");
     assert.equal(events.at(-1).type, APP_EVENTS.homeViewModeChanged);
     assert.deepEqual(events.at(-1).detail, { mode: "library" });
@@ -767,10 +767,10 @@ test("library books resource invalidation helper tolerates missing resources", (
 });
 
 test("recent jobs page commit refreshes active cards without auto-opening jobs", () => {
-  // 旧 DOM 直写 viewPort(createRecentJobsViewPort() 默认值)已随 cutover 删除
-  // (controller/runtime/loader/commit/bindings 5 处默认参数改必传;view.js 等
-  // 视图层随之物理删除)。这里改用最小 stub 直接捕获 renderList 的 items,
-  // 不再模拟 document/fragment——断言意图不变(渲染了哪些 job id)。
+// viewPort ghi trực tiếp DOM cũ (giá trị mặc định createRecentJobsViewPort()) đã bị xóa trong cutover
+// (5 tham số mặc định trong controller/runtime/loader/commit/bindings được chuyển thành bắt buộc; các lớp view như view.js
+// cũng bị xóa về mặt vật lý). Ở đây dùng stub tối thiểu để trực tiếp bắt items của renderList,
+// không mô phỏng document/fragment — ý định xác nhận không đổi (những job id nào được render).
   const rendered = [];
   const recovered = [];
   const refreshCalls = [];
@@ -933,7 +933,7 @@ test("recent jobs page commit can route rendering through the view port", () => 
 });
 
 test("recent jobs page commit appends only collected items while preserving state patches", () => {
-  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub 直接捕获渲染 items。
+  // viewPort ghi trực tiếp DOM cũ đã bị xóa trong cutover, dùng stub tối thiểu để bắt items render.
   const rendered = [];
   const viewPort = {
     renderList: ({ items }) => {
@@ -1016,10 +1016,10 @@ test("recent jobs empty commit owns empty state and search copy", () => {
     viewPort,
   });
 
-  assert.equal(result.message, "没有匹配的书籍");
+  assert.equal(result.message, "Không có sách phù hợp");
   assert.deepEqual(statePort.getSnapshot().items, []);
   assert.equal(statePort.getSnapshot().hasMore, false);
-  assert.equal(emptyText, "没有匹配的书籍");
+  assert.equal(emptyText, "Không có sách phù hợp");
   assert.deepEqual(loadingStates, [["ready"]]);
 });
 
@@ -1197,7 +1197,7 @@ test("recent jobs loader preserves runtime patches that arrive during load-more"
 });
 
 test("recent jobs loader does not append runtime-created cards during load-more rendering", async () => {
-  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub 直接捕获 renderList。
+  // viewPort ghi trực tiếp DOM cũ đã bị xóa trong cutover, dùng stub tối thiểu để bắt renderList.
   const rendered = [];
   const viewPort = {
     hasView: () => true,
@@ -2299,7 +2299,7 @@ test("recent jobs runtime patch rerenders the list when card replacement misses"
         job_id: "job-rerender-miss",
         status: "running",
         stage: "ocr",
-        stage_detail: "OCR 中",
+        stage_detail: "Đang OCR",
         progress: { current: 1, total: 10, percent: 10, unit: "page" },
       },
     ],
@@ -2410,7 +2410,7 @@ test("recent jobs runtime patches keep translation card state over background re
   }, { stageAdapterPort: { adaptJobStageSnapshot } });
 
   assert.equal(stageKeyForRecentJobLabel(merged), "translate");
-  assert.equal(recentJobStageLabel(merged), "翻译中");
+  assert.equal(recentJobStageLabel(merged), "Đang dịch");
   assert.equal(merged.display_stage, "translation");
   assert.equal(merged.lane, "main");
   assert.equal(merged.substage, "translation_batches");
@@ -2499,7 +2499,7 @@ test("recent jobs runtime patches drive active cover overlay from created job to
   let item = statePort.getSnapshot().items[0];
   assert.equal(item.job_id, "job-created-overlay");
   assert.equal(isRecentJobActive(item), true);
-  assert.equal(recentJobStageLabel(item), "OCR 中");
+  assert.equal(recentJobStageLabel(item), "Đang OCR");
   assert.equal(recentJobProgressPercent(item), 10);
 
   patches.update({
@@ -2511,7 +2511,7 @@ test("recent jobs runtime patches drive active cover overlay from created job to
   });
   item = statePort.getSnapshot().items[0];
   assert.equal(isRecentJobActive(item), true);
-  assert.equal(recentJobStageLabel(item), "翻译中");
+  assert.equal(recentJobStageLabel(item), "Đang dịch");
   assert.equal(recentJobProgressPercent(item), 20);
 
   patches.update({
@@ -2524,14 +2524,14 @@ test("recent jobs runtime patches drive active cover overlay from created job to
   assert.equal(item.status, "succeeded");
   assert.equal(item.display_stage, "done");
   assert.equal(isRecentJobActive(item), false);
-  assert.equal(recentJobStageLabel(item), "已完成");
+  assert.equal(recentJobStageLabel(item), "Đã hoàn thành");
   assert.equal(recentJobProgressPercent(item), 100);
   unsubscribe();
   const cardMutations = mutations.filter((entry) => entry.action === "prependItem" || entry.action === "replaceItem");
   assert.deepEqual(cardMutations.map((entry) => [entry.action, entry.items[0]?.active, entry.items[0]?.label, entry.items[0]?.percent]), [
-    ["prependItem", true, "OCR 中", 10],
-    ["replaceItem", true, "翻译中", 20],
-    ["replaceItem", false, "已完成", 100],
+    ["prependItem", true, "Đang OCR", 10],
+    ["replaceItem", true, "Đang dịch", 20],
+    ["replaceItem", false, "Đã hoàn thành", 100],
   ]);
 });
 
@@ -2598,7 +2598,7 @@ test("recent jobs runtime patches do not let queued placeholders downgrade creat
   assert.equal(item.progress.current, 4);
   assert.equal(item.progress.percent, 20);
   assert.equal(isRecentJobActive(item), true);
-  assert.equal(recentJobStageLabel(item), "翻译中");
+  assert.equal(recentJobStageLabel(item), "Đang dịch");
 });
 
 test("recent jobs refresh scheduler can bypass throttle without forcing suspended state", () => {
@@ -2692,7 +2692,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
     stage_detail: "render payload prewarm: ready",
   };
   assert.equal(stageKeyForRecentJobLabel(mergedItem), "render");
-  assert.equal(recentJobStageLabel(mergedItem), "渲染中");
+  assert.equal(recentJobStageLabel(mergedItem), "Đang render");
 	  assert.equal(
 	    recentJobStageLabel({
 	      status: "running",
@@ -2705,7 +2705,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
 	        detail: "正在翻译正文内容",
 	      },
 	    }),
-	    "渲染中",
+	    "Đang render",
 	  );
   assert.equal(
     recentJobStageLabel({
@@ -2714,7 +2714,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
       stage: "render",
       stage_detail: "",
     }),
-    "翻译中",
+    "Đang dịch",
   );
 	  assert.equal(
 	    recentJobStageLabel({
@@ -2725,7 +2725,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
 	        publicStage: "render",
 	      },
 	    }),
-	    "翻译中",
+	    "Đang dịch",
 	  );
 	  assert.equal(
 	    recentJobStageLabel({
@@ -2742,7 +2742,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
 	        source: "legacy-stage",
 	      },
 	    }),
-	    "翻译中",
+	    "Đang dịch",
 	  );
   assert.equal(
     recentJobStageLabel({
@@ -2750,7 +2750,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
       display_stage: "render",
       stage: "rendering",
     }),
-    "渲染中",
+    "Đang render",
   );
   assert.equal(
     recentJobStageLabel({
@@ -2758,7 +2758,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
       display_stage: "done",
       stage: "rendering",
     }),
-    "已完成",
+    "Đã hoàn thành",
   );
   assert.equal(
     stageKeyForRecentJobLabel({
@@ -2790,11 +2790,11 @@ test("recent job stage labels use the shared public stage resolver", () => {
       ],
       output_pdf_ready: true,
     }),
-    "已完成",
+    "Đã hoàn thành",
   );
   assert.equal(
     recentJobStatusLabel("cancelled"),
-    "已取消",
+    "Đã hủy",
   );
 });
 
@@ -3201,5 +3201,5 @@ test("recent jobs runtime merge lets display stage override stale snapshot", () 
   assert.equal(merged.substage, "translation_batches");
   assert.equal(merged.runtime_status.stageKey, "translate");
   assert.equal(merged.runtime_status.publicStage, "translation");
-  assert.equal(recentJobStageLabel(merged), "翻译中");
+  assert.equal(recentJobStageLabel(merged), "Đang dịch");
 });

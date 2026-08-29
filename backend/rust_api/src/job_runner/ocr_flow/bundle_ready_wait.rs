@@ -74,10 +74,10 @@ pub(super) async fn wait_for_mineru_bundle_ready(
                     deps,
                     job,
                     format!(
-                        "OCR provider 已返回 done，bundle 尚未就绪，{delay_secs}s 后重试（第 {attempt}/{} 次）",
+                        "OCR provider đã trả về done, bundle chưa sẵn sàng, thử lại sau {delay_secs}s (lần {attempt}/{})",
                         runtime.bundle_ready_retry_limit
                     ),
-                    "OCR provider bundle 可达性等待进入重试",
+                    "OCR provider bundle chờ khả năng tiếp cận bắt đầu thử lại",
                     BundleRetryEvent {
                         scope: "mineru_bundle_ready_wait",
                         attempt,

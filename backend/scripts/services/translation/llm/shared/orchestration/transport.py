@@ -12,7 +12,7 @@ class DeferredTransportRetry(Exception):
         self.item = item
         self.route_path = list(route_path)
         self.cause = cause
-        super().__init__(f"deferred transport retry for {item.get('item_id', '')}: {type(cause).__name__}: {cause}")
+        super().__init__(f"hoãn thử lại vận chuyển cho {item.get('item_id', '')}: {type(cause).__name__}: {cause}")
 
 
 class DeferredValidationRetry(Exception):
@@ -20,7 +20,7 @@ class DeferredValidationRetry(Exception):
         self.item = item
         self.route_path = list(route_path)
         self.cause = cause
-        super().__init__(f"deferred validation retry for {item.get('item_id', '')}: {type(cause).__name__}: {cause}")
+        super().__init__(f"hoãn thử lại xác thực cho {item.get('item_id', '')}: {type(cause).__name__}: {cause}")
 
 
 def plain_text_timeout_seconds(
@@ -51,12 +51,12 @@ def defer_transport_retry(
             item_id=str(item.get("item_id", "") or ""),
             page_idx=item.get("page_idx"),
             severity="warning",
-            message=f"Deferred transport retry to tail pass: {type(cause).__name__}",
+            message=f"Hoãn thử lại vận chuyển đến lượt cuối: {type(cause).__name__}",
             retryable=True,
         )
     if request_label:
         print(
-            f"{request_label}: transport failure deferred to tail retry queue: {type(cause).__name__}: {cause}",
+            f"{request_label}: lỗi vận chuyển hoãn đến hàng đợi thử lại cuối: {type(cause).__name__}: {cause}",
             flush=True,
         )
     raise DeferredTransportRetry(item=item, route_path=route_path, cause=cause)
@@ -81,7 +81,7 @@ def defer_validation_retry(
         )
     if request_label:
         print(
-            f"{request_label}: validation failure deferred to tail queue: {type(cause).__name__}: {cause}",
+            f"{request_label}: lỗi xác thực hoãn đến hàng đợi cuối: {type(cause).__name__}: {cause}",
             flush=True,
         )
     raise DeferredValidationRetry(item=item, route_path=route_path, cause=cause)
@@ -140,7 +140,7 @@ def mark_transport_result_dead_letter(
             item_id=item_id,
             page_idx=item.get("page_idx"),
             severity="error",
-            message="Transport retry queue exhausted; item moved to DLQ",
+            message="Hàng đợi thử lại vận chuyển đã cạn; mục được chuyển vào DLQ",
             retryable=False,
         )
     return degraded

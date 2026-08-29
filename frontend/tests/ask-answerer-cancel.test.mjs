@@ -2,10 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// 取消语义锁（审计 P0-2/P0-4 回归锁,ask-answerer 侧）：
-// 1. answer() 把 AbortSignal 透传给 ask（askLibraryAi → fetch）——断流是真的
-// 2. aborted 的旧流即便带回 conversation_id,也禁止回写会话粘性
-//    （否则"生成中切会话"会被旧 done 拽回旧会话,下一问落错线程）
+// Khóa ngữ nghĩa hủy (khóa hồi quy audit P0-2/P0-4, phía ask-answerer):
+// 1. answer() chuyển tiếp AbortSignal cho ask (askLibraryAi → fetch) — ngắt stream là thật
+// 2. Stream đã hủy dù mang conversation_id về cũng cấm ghi lại session keo dính
+//    (nếu không "đổi session khi đang sinh" sẽ bị done cũ kéo về session cũ, câu hỏi sau lọt nhầm thread)
 
 const dom = new JSDOM("<!doctype html><body></body>", { url: "http://localhost/" });
 globalThis.document = dom.window.document;
@@ -23,38 +23,38 @@ function makeAnswerer(fakeAsk, jobId) {
   });
 }
 
-test("signal 透传到 ask,正常完成时回写会话粘性", async () => {
+test("signal truyền đến ask, khi hoàn thành bình thường thì ghi lại session keo dính", async () => {
   const seen = {};
   const answerer = makeAnswerer(async (args) => {
     seen.signal = args.signal;
-    return { answer: "答 [1]", citations: [], conversationId: "conv-live" };
+    return { answer: "Trả lời [1]", citations: [], conversationId: "conv-live" };
   }, "job-cancel-a");
 
   const controller = new AbortController();
-  const result = await answerer.answer({ question: "问", signal: controller.signal });
-  assert.equal(seen.signal, controller.signal, "signal 必须透传给 ask");
+  const result = await answerer.answer({ question: "Câu hỏi", signal: controller.signal });
+  assert.equal(seen.signal, controller.signal, "signal phải được truyền đến ask");
   assert.equal(result.conversationId, "conv-live");
-  assert.equal(answerer.getConversationId(), "conv-live", "正常完成回写内存粘性");
+  assert.equal(answerer.getConversationId(), "conv-live", "Hoàn thành bình thường ghi lại session keo dính trong bộ nhớ");
   assert.equal(
     loadStoredConversationId({ jobId: "job-cancel-a" }),
     "conv-live",
-    "正常完成回写 storage 粘性",
+    "Hoàn thành bình thường ghi lại session keo dính trong storage",
   );
 });
 
-test("aborted 的旧流禁止回写会话粘性(P0-4)", async () => {
+test("Luồng cũ bị aborted cấm ghi lại session keo dính (P0-4)", async () => {
   const answerer = makeAnswerer(async () => {
-    // 模拟：abort 发生在流进行中,但 done 仍带回旧会话 id
-    return { answer: "迟到的旧答案", citations: [], conversationId: "conv-stale" };
+    // Giả lập: abort xảy ra khi stream đang chạy, nhưng done vẫn mang session ID cũ
+    return { answer: "Câu trả lời cũ muộn", citations: [], conversationId: "conv-stale" };
   }, "job-cancel-b");
 
   const controller = new AbortController();
   controller.abort();
-  await answerer.answer({ question: "问", signal: controller.signal });
-  assert.notEqual(answerer.getConversationId(), "conv-stale", "aborted 不得改内存粘性");
+  await answerer.answer({ question: "Câu hỏi", signal: controller.signal });
+  assert.notEqual(answerer.getConversationId(), "conv-stale", "aborted không được sửa session keo dính trong bộ nhớ");
   assert.notEqual(
     loadStoredConversationId({ jobId: "job-cancel-b" }),
     "conv-stale",
-    "aborted 不得写 storage 粘性",
+    "aborted không được ghi session keo dính vào storage",
   );
 });

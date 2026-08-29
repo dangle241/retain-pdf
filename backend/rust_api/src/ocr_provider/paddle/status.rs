@@ -12,16 +12,16 @@ fn map_state(raw_state: &str) -> OcrTaskState {
 
 fn stage_and_detail(raw_state: &str, state: &OcrTaskState) -> (&'static str, String) {
     match state {
-        OcrTaskState::Queued => ("ocr_upload", "Paddle 已接收任务，等待排队".to_string()),
-        OcrTaskState::Running => ("ocr_processing", "Paddle 正在解析文件".to_string()),
+        OcrTaskState::Queued => ("ocr_upload", "Paddle đã nhận tác vụ, đang chờ xếp hàng".to_string()),
+        OcrTaskState::Running => ("ocr_processing", "Paddle đang phân tích tệp".to_string()),
         OcrTaskState::Succeeded => (
             "ocr_result_ready",
-            "Paddle 结果已就绪，准备标准化".to_string(),
+            "Kết quả Paddle đã sẵn sàng, chuẩn bị chuẩn hóa".to_string(),
         ),
-        OcrTaskState::Failed => ("failed", "Paddle 处理失败".to_string()),
+        OcrTaskState::Failed => ("failed", "Xử lý Paddle thất bại".to_string()),
         OcrTaskState::WaitingUpload | OcrTaskState::Converting | OcrTaskState::Unknown => (
             "ocr_processing",
-            format!("Paddle 状态: {}", raw_state.trim()),
+            format!("Trạng thái Paddle: {}", raw_state.trim()),
         ),
     }
 }

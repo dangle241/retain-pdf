@@ -1,5 +1,5 @@
 // primitives.jsx
-// Shared primitives for all scenes.
+// Thành phần cơ bản dùng chung cho tất cả cảnh.
 
 const PAGE_W = 360;
 const PAGE_H = 504;     // ~A4-ish
@@ -17,7 +17,7 @@ const APPBG = '#f5f5f7';
 const ACCENT = '#0071e3';
 
 // ── PDFPage ────────────────────────────────────────────────────────────────
-// A realistic-looking academic page. Many flags to control its state.
+// Trang học thuật trông thật. Nhiều cờ để điều khiển trạng thái.
 function PDFPage({
   x = 0, y = 0,
   width = PAGE_W, height = PAGE_H,
@@ -42,7 +42,7 @@ function PDFPage({
   const colX1 = 24;
   const colX2 = 24 + colW + 12;
 
-  // Body lines per column
+  // Dòng nội dung mỗi cột
   const linesPerCol = 18;
   const lineY0 = 122;
   const lineH = 9;
@@ -58,7 +58,7 @@ function PDFPage({
 
     return (
       <g key={`${col}-${idx}`}>
-        {/* background mask (white rect) appears when 'masked' */}
+        {/* mặt nạ nền (hình chữ nhật trắng) xuất hiện khi 'bị che' */}
         {isMasked ? (
           <rect x={cx - 1} y={yy - 6} width={colW + 2} height={lineH} fill="#fff" />
         ) : null}
@@ -90,18 +90,18 @@ function PDFPage({
         {/* Title (1-2 lines centered) */}
         <text x={width / 2} y={48} textAnchor="middle"
           fontFamily={SERIF} fontSize={13} fontWeight={700} fill={INK}>
-          {language === 'zh' ? '保留排版的文档翻译方法综述'
-           : language === 'mixed' ? '保留排版的文档翻译方法综述'
-           : 'Layout-Preserving Document Translation'}
+           {language === 'zh' ? '保留排版的文档翻译方法综述'
+            : language === 'mixed' ? '保留排版的文档翻译方法综述'
+            : 'Phương pháp dịch tài liệu giữ nguyên bố cục'}
         </text>
         <text x={width / 2} y={64} textAnchor="middle"
           fontFamily={SERIF} fontSize={9} fill={FAINT}>
-          {language === 'zh' || language === 'mixed' ? '林知行  ·  陈雨桐  ·  2024' : 'Z. Lin · Y. Chen · 2024'}
+          {language === 'zh' || language === 'mixed' ? '林知行  ·  陈雨桐  ·  2024' : 'T. Nguyen · A. Trần · 2024'}
         </text>
 
         {/* Abstract block — single column above the two columns */}
         <text x={24} y={86} fontFamily={SERIF} fontSize={8} fontWeight={700} fill={INK}>
-          {language === 'zh' || language === 'mixed' ? '摘要' : 'Abstract'}
+          {language === 'zh' || language === 'mixed' ? '摘要' : 'Tóm tắt'}
         </text>
         <TextLine x={24} y={94} width={width - 48} language={language === 'mixed' ? 'zh' : language} seed={9001} />
         <TextLine x={24} y={103} width={width - 48 - 30} language={language === 'mixed' ? 'zh' : language} seed={9002} />
@@ -115,7 +115,7 @@ function PDFPage({
           <g>
             <rect x={colX2} y={lineY0 + 4 * lineH - 6} width={colW} height={lineH * 8 - 4}
               fill="#f2f2f4" stroke={HAIRLINE} />
-            {/* fake plot */}
+            {/* hình nộp bọc */}
             <polyline points={`
               ${colX2 + 8},${lineY0 + 11 * lineH - 12}
               ${colX2 + colW * 0.25},${lineY0 + 9 * lineH - 8}
@@ -127,13 +127,13 @@ function PDFPage({
               x2={colX2 + colW - 8} y2={lineY0 + 11 * lineH - 4}
               stroke={FAINT} strokeWidth="0.4" />
             <text x={colX2 + colW / 2} y={lineY0 + 11 * lineH + 4} textAnchor="middle"
-              fontFamily={SERIF} fontSize={6} fill={FAINT} fontStyle="italic">
-              Fig. 1
+               fontFamily={SERIF} fontSize={6} fill={FAINT} fontStyle="italic">
+              Hình 1
             </text>
           </g>
         )}
 
-        {/* Bounding boxes overlay */}
+        {/* Hộp giới hạn viền */}
         {bboxes.map((b, i) => (
           <rect key={i} x={b.x} y={b.y} width={b.w} height={b.h}
             fill={b.fill || 'none'}
@@ -143,7 +143,7 @@ function PDFPage({
             opacity={b.opacity ?? 1} />
         ))}
 
-        {/* Highlight rows */}
+        {/* Các hàng được làm nổi bật */}
         {highlightLines.map((h, i) => {
           const cx = h.col === 0 ? colX1 : colX2;
           const yy = lineY0 + h.idx * lineH - 6;
@@ -155,7 +155,7 @@ function PDFPage({
           );
         })}
 
-        {/* Scan line */}
+        {/* Đường quét */}
         {scanLineY != null && (
           <g>
             <rect x={0} y={scanLineY * height - 16} width={width} height={32}
@@ -172,7 +172,7 @@ function PDFPage({
           </g>
         )}
 
-        {/* Page number */}
+        {/* Số trang */}
         {showFooter && (
           <text x={width / 2} y={height - 18} textAnchor="middle"
             fontFamily={SERIF} fontSize={7} fill={FAINT}>
@@ -185,10 +185,10 @@ function PDFPage({
   );
 }
 
-// A "text line" rendered as little glyph rectangles — looks like real type
-// from a few feet away. For zh, characters are square; for en, varied widths.
+  // Một "dòng văn bản" render thành hình chữ nhật nhỏ — trông như kiểu chữ thật
+  // từ vài bước chân. Với zh, ký tự vuông; với en, chiều rộng đa dạng.
 function TextLine({ x, y, width, height = 4, language = 'en', seed = 0 }) {
-  // Deterministic pseudo-random using seed
+  // Số ngẫu nhiên xác định dùng seed
   const rand = (n) => {
     const x = Math.sin(seed * 9301 + n * 49297) * 233280;
     return x - Math.floor(x);
@@ -204,12 +204,12 @@ function TextLine({ x, y, width, height = 4, language = 'en', seed = 0 }) {
     } else if (language === 'garbled') {
       w = 3.5 + rand(i) * 1.5;
     } else {
-      // english-ish varied widths
+  // chiều rộng kiểu tiếng Anh
       w = 1.6 + rand(i) * 4.8;
     }
     if (cursor + w > width) break;
     if (language === 'garbled') {
-      // little hatched/broken glyph
+      // ký tự chấm gạch/bị hỏng
       glyphs.push(
         <g key={i}>
           <rect x={x + cursor} y={y - height + 0.5} width={w} height={height} fill="#9b9b9b" />
@@ -229,7 +229,7 @@ function TextLine({ x, y, width, height = 4, language = 'en', seed = 0 }) {
   return <g>{glyphs}</g>;
 }
 
-// ── Cloud icon ─────────────────────────────────────────────────────────────
+// ── Biểu tượng đám mây ─────────────────────────────────────────────────────────────
 function CloudIcon({ size = 60, color = INK }) {
   const s = size / 60;
   return (
@@ -240,7 +240,7 @@ function CloudIcon({ size = 60, color = INK }) {
   );
 }
 
-// ── PDF file icon ─────────────────────────────────────────────────────────
+// ── Biểu tượng tệp PDF ─────────────────────────────────────────────────────────
 function PDFFileIcon({ size = 56, color = INK, label = 'PDF' }) {
   const w = size, h = size * 1.25;
   return (
@@ -254,7 +254,7 @@ function PDFFileIcon({ size = 56, color = INK, label = 'PDF' }) {
   );
 }
 
-// ── Check icon ─────────────────────────────────────────────────────────────
+// ── Biểu tượng kiểm tra ─────────────────────────────────────────────────────────────
 function CheckCircle({ size = 24, color = '#34c759', progress = 1 }) {
   const r = size / 2 - 1;
   const c = size / 2;
@@ -274,7 +274,7 @@ function CheckCircle({ size = 24, color = '#34c759', progress = 1 }) {
   );
 }
 
-// ── Caption (under the page) ──────────────────────────────────────────────
+// ── Chú thích (dưới trang) ──────────────────────────────────────────────
 function Caption({ x, y, label, value, align = 'left', color = INK }) {
   return (
     <div style={{
@@ -290,7 +290,7 @@ function Caption({ x, y, label, value, align = 'left', color = INK }) {
   );
 }
 
-// ── A small label tag/pill ────────────────────────────────────────────────
+// ── Nhãn thẻ/viên thuốc nhỏ ────────────────────────────────────────────────
 function Pill({ x, y, children, color = INK, bg = '#fff', border = HAIRLINE, opacity = 1, font = MONO }) {
   return (
     <div style={{
@@ -309,7 +309,7 @@ function Pill({ x, y, children, color = INK, bg = '#fff', border = HAIRLINE, opa
   );
 }
 
-// ── Connector line (dashed) ────────────────────────────────────────────────
+// ── Đường kết nối (đứt nét) ────────────────────────────────────────────────
 function Connector({ x1, y1, x2, y2, progress = 1, dashed = true, color = ACCENT, width = 1 }) {
   const dx = x2 - x1, dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy);

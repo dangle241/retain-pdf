@@ -2,14 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { messagesToBranchItems } from "../src/js/api/conversations.ts";
 
-test("messagesToBranchItems builds parent tree for siblings", () => {
+test("messagesToBranchItems xây dựng cây cha cho các nhánh anh em", () => {
   const items = messagesToBranchItems([
     {
       message_id: "u1",
       conversation_id: "c1",
       seq: 1,
       role: "user",
-      content: "问",
+      content: "Câu hỏi",
       parent_id: "",
       created_at: "",
     },
@@ -18,7 +18,7 @@ test("messagesToBranchItems builds parent tree for siblings", () => {
       conversation_id: "c1",
       seq: 2,
       role: "assistant",
-      content: "答 A",
+      content: "Trả lời A",
       parent_id: "u1",
       citations_json: '[{"ref":1,"block_id":"p001-b0001"}]',
       created_at: "",
@@ -28,7 +28,7 @@ test("messagesToBranchItems builds parent tree for siblings", () => {
       conversation_id: "c1",
       seq: 3,
       role: "assistant",
-      content: "答 B",
+      content: "Trả lời B",
       parent_id: "u1",
       created_at: "",
     },

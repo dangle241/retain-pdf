@@ -151,13 +151,13 @@ mod tests {
     fn apply_line_does_not_move_translation_back_to_normalizing_on_report_marker() {
         let mut job = build_job();
         job.stage = Some(job_stage_str(JobStage::Translating).to_string());
-        job.stage_detail = Some("OCR 完成，开始翻译".to_string());
+        job.stage_detail = Some("OCR hoàn thành, bắt đầu dịch".to_string());
         apply_line(
             &mut job,
             &format!("{STDOUT_LABEL_NORMALIZATION_REPORT_JSON}: /tmp/document.v1.report.json"),
         );
         assert_eq!(job.stage.as_deref(), Some("translating"));
-        assert_eq!(job.stage_detail.as_deref(), Some("OCR 完成，开始翻译"));
+        assert_eq!(job.stage_detail.as_deref(), Some("OCR hoàn thành, bắt đầu dịch"));
     }
 
     #[test]
@@ -167,7 +167,7 @@ mod tests {
         assert_eq!(job.stage.as_deref(), Some("mineru_processing"));
         assert_eq!(
             job.stage_detail.as_deref(),
-            Some("文件上传完成，等待 MinerU 处理")
+            Some("Tải tệp lên hoàn tất, đang chờ MinerU xử lý")
         );
     }
 
@@ -199,7 +199,7 @@ mod tests {
         assert_eq!(job.stage.as_deref(), Some("queued"));
         assert_eq!(
             job.stage_detail.as_deref(),
-            Some("任务已创建，等待可用执行槽位")
+            Some("Nhiệm vụ đã được tạo, đang chờ khe thực thi khả dụng")
         );
     }
 
@@ -215,7 +215,7 @@ mod tests {
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-            .contains("Token 已过期"));
+            .contains("Token đã hết hạn"));
     }
 
     #[test]
@@ -230,7 +230,7 @@ mod tests {
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-            .contains("Token 无效"));
+            .contains("Token không hợp lệ"));
     }
 
     #[test]
@@ -245,7 +245,7 @@ mod tests {
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-            .contains("Token 已过期"));
+            .contains("Token đã hết hạn"));
     }
 
     #[test]
@@ -260,6 +260,6 @@ mod tests {
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-            .contains("Token 无效"));
+            .contains("Token không hợp lệ"));
     }
 }

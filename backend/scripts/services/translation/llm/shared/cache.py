@@ -83,7 +83,7 @@ def cache_key_for_item(
     domain_guidance: str = "",
     mode: str = "fast",
     target_lang: str = "zh-CN",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
 ) -> str:
     payload = {
         "model": model.strip(),
@@ -91,7 +91,7 @@ def cache_key_for_item(
         "domain_guidance": (domain_guidance or "").strip(),
         "mode": mode.strip() or "fast",
         "target_lang": (target_lang or "zh-CN").strip() or "zh-CN",
-        "target_language_name": (target_language_name or "简体中文").strip() or "简体中文",
+        "target_language_name": (target_language_name or "Tiếng Việt").strip() or "Tiếng Việt",
         "prompt_hash": _prompt_hash(mode=mode),
         "translation_protocol_version": TRANSLATION_PROTOCOL_VERSION,
         "translation_policy_version": TRANSLATION_POLICY_VERSION,
@@ -133,10 +133,10 @@ def _unit_cache_ttl_seconds() -> float:
 
 
 def _prune_expired_cache_entries_once() -> None:
-    # 缓存 key 含提示词指纹和协议版本,提示词一改旧代条目全部成为
-    # 永不命中的孤儿,此前无任何回收机制、无限增长。按 mtime TTL
-    # (默认 90 天,RETAIN_TRANSLATION_UNIT_CACHE_TTL_DAYS=0 关闭)
-    # 每进程最多清扫一次,失败静默——这是缓存卫生,不是正确性。
+    # Nhớ tạm key Dấu vân tay với lời nhắc và phiên bản giao thức,Từ nhắc thay đổi các mục nhập thế hệ cũ tất cả trở thành
+    # Một đứa trẻ mồ côi sẽ không bao giờ chết,Trước đây không có cơ chế tái chế、Tăng trưởng vô hạn。án mtime TTL
+    # (ngầm thừa nhận 90 ngày,RETAIN_TRANSLATION_UNIT_CACHE_TTL_DAYS=0 Đóng)
+    # Làm sạch tối đa một lần cho mỗi quy trình,Im lặng do lỗi——Đây là vệ sinh bộ nhớ cache,Không đúng。
     global _PRUNE_DONE
     with _PRUNE_LOCK:
         if _PRUNE_DONE:
@@ -180,7 +180,7 @@ def load_cached_translation(
     domain_guidance: str = "",
     mode: str = "fast",
     target_lang: str = "zh-CN",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
 ) -> dict[str, str]:
     cache_key = cache_key_for_item(
         item,
@@ -228,7 +228,7 @@ def store_cached_translation(
     domain_guidance: str = "",
     mode: str = "fast",
     target_lang: str = "zh-CN",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
 ) -> None:
     decision = str(translation_result.get("decision", "translate") or "translate").strip() or "translate"
     translated_text = str(translation_result.get("translated_text", "") or "").strip()
@@ -266,7 +266,7 @@ def split_cached_batch(
     domain_guidance: str = "",
     mode: str = "fast",
     target_lang: str = "zh-CN",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
 ) -> tuple[dict[str, dict[str, str]], list[dict]]:
     cached: dict[str, dict[str, str]] = {}
     missing: list[dict] = []
@@ -296,7 +296,7 @@ def store_cached_batch(
     domain_guidance: str = "",
     mode: str = "fast",
     target_lang: str = "zh-CN",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
 ) -> None:
     for item in batch:
         item_id = item.get("item_id", "")

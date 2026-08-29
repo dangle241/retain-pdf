@@ -147,18 +147,18 @@ test("下载菜单:context 缺失时按钮禁用并给出原因", () => {
   }
 });
 
-test("下载菜单:清单可用时按钮点亮并带下载 title", async () => {
+test("Menu tải xuống:khi danh sách sẵn sàng thì nút bật và có download title", async () => {
   const menuHost = documentRef.querySelector('[data-testid="menu-with-context"]');
-  // 注意:页内有两份菜单(顶栏 null-context + 本份),jsdom 的 #id 查询会经
-  // document.getElementById 短路到第一份;改用 [id="..."] 属性选择器限定子树。
-  await waitFor(() => menuHost.querySelector('[id="reader-download-source-btn"]'), "带 context 的菜单挂载");
+  // Lưu ý:trong trang có hai menu(thanh trên null-context + menu này),truy vấn #id của jsdom sẽ
+  // đi qua document.getElementById và lấy ngay cái đầu tiên;dùng [id="..."] để giới hạn cây con.
+  await waitFor(() => menuHost.querySelector('[id="reader-download-source-btn"]'), "Menu có context được gắn");
   const sourceBtn = menuHost.querySelector('[id="reader-download-source-btn"]');
   const sideBtn = menuHost.querySelector('[id="reader-download-sideBySide-btn"]');
   const translatedBtn = menuHost.querySelector('[id="reader-download-translated-btn"]');
   assert.equal(sourceBtn.disabled, false);
-  assert.match(sourceBtn.title, /下载原始 PDF/);
+  assert.match(sourceBtn.title, /Tải xuống PDF gốc/);
   assert.equal(sideBtn.disabled, false);
-  assert.match(sideBtn.title, /下载对照 PDF/);
+  assert.match(sideBtn.title, /Tải xuống PDF đối chiếu/);
   assert.equal(translatedBtn.disabled, false);
-  assert.match(translatedBtn.title, /下载译文 PDF/);
+  assert.match(translatedBtn.title, /Tải xuống PDF bản dịch/);
 });

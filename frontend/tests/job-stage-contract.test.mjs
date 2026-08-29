@@ -205,14 +205,14 @@ test("recent-jobs card label clamps done while the job is still running", async 
   const { stageKeyForRecentJobLabel, recentJobStageLabel } = await import(
     "../src/js/components/recent-jobs/recent-job-card-presenter.js"
   );
-  // running + display_stage="done" should not advance the small card to "已完成".
+  // running + display_stage="done" should not advance the small card to "Đã hoàn thành".
   const runningWithDoneFlag = {
     job_id: "recent-running-done-flag",
     status: "running",
     display_stage: "done",
   };
   assert.equal(stageKeyForRecentJobLabel(runningWithDoneFlag), "render");
-  assert.equal(recentJobStageLabel(runningWithDoneFlag), "渲染中");
+  assert.equal(recentJobStageLabel(runningWithDoneFlag), "Đang render");
 
   // queued + stage_snapshot.publicStage="done" should also be clamped.
   const queuedSnapshotDone = {
@@ -229,16 +229,16 @@ test("recent-jobs card label clamps done while the job is still running", async 
     runtime_status: { publicStage: "done" },
   };
   assert.equal(stageKeyForRecentJobLabel(runtimeStatusDone), "render");
-  assert.equal(recentJobStageLabel(runtimeStatusDone), "渲染中");
+  assert.equal(recentJobStageLabel(runtimeStatusDone), "Đang render");
 
-  // Truly succeeded jobs must still surface as "已完成".
+  // Truly succeeded jobs must still surface as "Đã hoàn thành".
   const succeededDone = {
     job_id: "recent-succeeded-done",
     status: "succeeded",
     display_stage: "done",
   };
   assert.equal(stageKeyForRecentJobLabel(succeededDone), "done");
-  assert.equal(recentJobStageLabel(succeededDone), "已完成");
+  assert.equal(recentJobStageLabel(succeededDone), "Đã hoàn thành");
 });
 
 test("library merge keeps recent-jobs item.display_stage out of done while running", async () => {
@@ -1344,7 +1344,7 @@ test("normalized stage event record does not use substage copy without public st
   });
 
   assert.equal(record.canonicalDisplayStage, "");
-  assert.equal(record.progressText, "进度 1/3");
+  assert.equal(record.progressText, "Tiến độ 1/3");
 });
 
 test("structured public stage ignores internal stage values", () => {

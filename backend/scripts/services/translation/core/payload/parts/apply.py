@@ -230,10 +230,10 @@ def apply_single_translated_entry(
 
 
 def apply_reconstructed_unit_text(items: list[dict], translated_text: str) -> None:
-    # 乱码重建的整单元替换写入:重建输出是成品显示文本(调用方已完成
-    # reasoning 泄漏清洗与占位符还原),整个单元共用同一段译文,
-    # 六个译文字段同值落盘,group_* 与 translation_unit_* 天然保持同步。
-    # 不做邻段泄漏裁剪与 mixed_literal 拼接——那些针对逐项翻译输出。
+    # Ghi đè toàn bộ đơn vị để tái tạo khi bị xáo trộn: đầu ra tái tạo là văn bản hiển thị thành phẩm
+    # (người gọi đã hoàn thành làm sạch rò rỉ reasoning và khôi phục phần giữ chỗ), toàn bộ đơn vị chia sẻ cùng một bản dịch,
+    # sáu trường dịch có cùng giá trị, group_* và translation_unit_* luôn đồng bộ tự nhiên.
+    # Không thực hiện cắt rò rỉ liền kề và hợp lại mixed_literal—mục tiêu là đầu ra dịch theo từng mục.
     for item in items:
         item["protected_translated_text"] = translated_text
         item["translated_text"] = translated_text

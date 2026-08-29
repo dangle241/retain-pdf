@@ -47,7 +47,7 @@ def run_garbled_reconstruction_stage(
         emit_stage_progress(
             stage="garbled_repair",
             substage="garbled_repair",
-            message="乱码候选段修复已跳过",
+            message="Bỏ qua sửa đoạn nhiễu loạn",
             progress_current=0,
             progress_total=0,
             payload={"skipped_by_repair_profile": True, "repair_profile": _repair_profile()},
@@ -59,7 +59,7 @@ def run_garbled_reconstruction_stage(
     emit_stage_transition(
         stage="garbled_repair",
         substage="garbled_repair",
-        message="开始修复乱码候选段",
+        message="Bắt đầu sửa đoạn nhiễu loạn",
         progress_current=0,
         progress_total=len(page_payloads),
     )
@@ -77,7 +77,7 @@ def run_garbled_reconstruction_stage(
         progress_callback=lambda current, total, dirty_pages: emit_stage_progress(
             stage="garbled_repair",
             substage="garbled_repair",
-            message=f"正在修复乱码候选段，第 {current}/{total} 项",
+            message=f"Đang sửa đoạn nhiễu loạn，thứ {current}/{total} mục",
             progress_current=current,
             progress_total=total,
             payload={
@@ -98,7 +98,7 @@ def run_garbled_reconstruction_stage(
     emit_stage_progress(
         stage="garbled_repair",
         substage="garbled_repair",
-        message="乱码候选段修复完成",
+        message="Sửa đoạn nhiễu loạn hoàn tất",
         progress_current=len(page_payloads),
         progress_total=len(page_payloads),
         elapsed_ms=int((time.perf_counter() - reconstruct_started) * 1000),
@@ -201,7 +201,7 @@ def run_agent_repair_stage(
     emit_stage_transition(
         stage="agent_repair",
         substage="agent_repair",
-        message="开始执行翻译结果修复",
+        message="Bắt đầu sửa kết quả dịch",
         progress_current=0,
         progress_total=repair_limit,
         payload={"blocking_untranslated": len(blocking_untranslated)},
@@ -254,7 +254,7 @@ def run_agent_repair_stage(
     emit_stage_progress(
         stage="agent_repair",
         substage="agent_repair",
-        message="翻译结果修复完成",
+        message="Sửa kết quả dịch hoàn tất",
         progress_current=summary["repaired_items"],
         progress_total=summary["candidate_items"],
         elapsed_ms=int((time.perf_counter() - repair_started) * 1000),
@@ -282,7 +282,7 @@ def run_final_untranslated_recovery_stage(
 ) -> dict[str, int]:
     target_language_name = str(
         getattr(translation_context, "target_language_name", "") if translation_context is not None else ""
-    ) or "简体中文"
+    ) or "Tiếng Việt"
     blocking_before = len(blocking_untranslated_items(page_payloads))
     if blocking_before <= 0:
         return {
@@ -296,7 +296,7 @@ def run_final_untranslated_recovery_stage(
     emit_stage_transition(
         stage="final_untranslated_recovery",
         substage="final_untranslated_recovery",
-        message="开始最终未翻译收口",
+        message="Bắt đầu thu gom phần chưa dịch cuối cùng",
         progress_current=0,
         progress_total=blocking_before,
         payload={
@@ -317,7 +317,7 @@ def run_final_untranslated_recovery_stage(
     emit_stage_progress(
         stage="final_untranslated_recovery",
         substage="final_untranslated_recovery",
-        message="最终未翻译收口完成",
+        message="Thu gom phần chưa dịch cuối cùng hoàn tất",
         progress_current=summary["attempted_items"],
         progress_total=blocking_before,
         elapsed_ms=int((time.perf_counter() - started) * 1000),
@@ -377,9 +377,9 @@ def _fast_agent_repair_limit(
 ) -> int:
     del payload_size
     blocking_untranslated_count = max(0, int(blocking_untranslated_count or 0))
-    # fast 档只在存在阻塞级未译条目时才动用 agent 修复:原先的
-    # broad_budget 会在任务完全干净时也按篇幅跑警告级候选,而这类候选
-    # (英文残留为主)修复成功率极低、重验必拒,纯烧钱。quality 档不变。
+    # fast Các tệp chỉ được sử dụng khi có các mục nhập chưa được dịch ở cấp độ chặn agent Sửa chữa:Bản gốc
+    # broad_budget Cũng sẽ chạy các ứng viên cấp độ cảnh báo theo độ dài khi nhiệm vụ hoàn toàn sạch sẽ,và loại ứng cử viên này
+    # (Chủ yếu là dư lượng tiếng Anh)Tỷ lệ sửa chữa thành công rất thấp、Trải nghiệm lại phải bị từ chối,Tiền bị đốt sạch。quality Tệp không thay đổi。
     if blocking_untranslated_count <= 0:
         return 0
     return min(FAST_AGENT_REPAIR_DEFAULT_LIMIT, blocking_untranslated_count)

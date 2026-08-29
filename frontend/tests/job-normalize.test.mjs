@@ -114,15 +114,14 @@ test("normalizeJobPayload exposes canonical stage snapshot", () => {
 
   assert.equal(job.stage_snapshot.stageKey, "translate");
   assert.equal(job.stage_snapshot.publicStage, "translation");
-  assert.equal(job.stage_snapshot.detail, "正在翻译正文内容");
+  assert.equal(job.stage_snapshot.detail, "Đang dịch nội dung chính");
   assert.equal(job.stage_snapshot.progress.current, 30);
   assert.equal(job.stage_snapshot.progress.total, 100);
   assert.equal(job.stage_snapshot.progress.unit, "batch");
 });
 
 test("normalizeJobPayload keeps library identity fields for home-card upsert", () => {
-  // 回归：重试/轮询 notify 前走 normalize；若丢掉 document_id/source_job_id，
-  // 主页卡对不上原书，一直显示「已翻译」不转圈。
+  // Hồi quy: đi qua normalize trước khi retry/polling notify; nếu mất document_id/source_job_id, thẻ trang chủ không khớp được với sách gốc, luôn hiển thị "Đã dịch" mà không quay vòng.
   const job = normalizeJobPayload({
     job_id: "mock-ocr-retry-1",
     source_job_id: "20260520-att-001",
@@ -163,7 +162,7 @@ test("normalizeJobPayload reads new-contract stage_snapshot and projects legacy 
         stage: "translating",
         substage: "translation_batches",
         lane: "main",
-        stage_detail: "正在翻译，第 3/12 批",
+        stage_detail: "Đang dịch, lô 3/12",
         progress: { unit: "batch", current: 3, total: 12, percent: 25.0 },
       },
       background_snapshots: [
@@ -172,7 +171,7 @@ test("normalizeJobPayload reads new-contract stage_snapshot and projects legacy 
           stage: "render_preprocess",
           substage: "render_prewarm",
           lane: "background",
-          stage_detail: "渲染预热完成",
+          stage_detail: "Hoàn thành预热 render",
           progress: { unit: "step", current: 2, total: 3, percent: 66.66 },
         },
       ],
@@ -182,7 +181,7 @@ test("normalizeJobPayload reads new-contract stage_snapshot and projects legacy 
   assert.equal(running.display_stage, "translation");
   assert.equal(running.stage, "translating");
   assert.equal(running.substage, "translation_batches");
-  assert.equal(running.stage_detail, "正在翻译，第 3/12 批");
+  assert.equal(running.stage_detail, "Đang dịch, lô 3/12");
   assert.equal(running.progress.unit, "batch");
   assert.equal(running.progress.current, 3);
   assert.equal(running.progress.total, 12);

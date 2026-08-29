@@ -1,16 +1,16 @@
 // scene-ocr.jsx
-// 4 substeps: upload, cloud OCR, fetch results, standardize.
+// 4 bước con: tải lên, OCR đám mây, tải kết quả, chuẩn hóa.
 
 const PAGE_X = 540;     // center the PDF page in 1440-wide canvas (offset within MainCanvas)
 const PAGE_Y = 56;
 // MainCanvas is 1440 wide × ~580 tall (after chrome)
 
-// ── 1.1 上传 PDF ──────────────────────────────────────────────────────────
+// ── 1.1 Tải lên PDF ────────────────────────────────────────────────────────
 function SceneUpload({ progress, localTime }) {
-  // 0.0–0.2: file appears bottom-left
-  // 0.2–0.5: file flies up into a "drop zone"
-  // 0.5–0.8: progress bar fills
-  // 0.8–1.0: cloud upload check
+  // 0.0–0.2: tệp xuất hiện dưới bên trái
+  // 0.2–0.5: tệp bay lên vào "vùng thả"
+  // 0.5–0.8: thanh tiến trình đầy
+  // 0.8–1.0: kiểm tra tải lên đám mây
 
   const fileFly = animate({ from: 0, to: 1, start: 0.18, end: 0.5, ease: Easing.easeInOutCubic })(progress);
   const barP    = animate({ from: 0, to: 1, start: 0.5, end: 0.85, ease: Easing.easeOutCubic })(progress);
@@ -40,7 +40,7 @@ function SceneUpload({ progress, localTime }) {
             stroke={FAINT} strokeWidth="1.5" strokeLinecap="round" />
         </svg>
         <div style={{ fontFamily: SANS, fontSize: 14, color: FAINT }}>
-          拖拽 PDF 到此处
+          Kéo thả PDF vào đây
         </div>
       </div>
 
@@ -72,7 +72,7 @@ function SceneUpload({ progress, localTime }) {
             display: 'flex', justifyContent: 'space-between',
             fontFamily: MONO, fontSize: 11, color: FAINT, marginBottom: 8,
           }}>
-            <span>uploading…</span>
+            <span>Đang tải lên…</span>
             <span style={{ fontVariantNumeric: 'tabular-nums', color: INK }}>
               {Math.round(barP * 100)}%
             </span>
@@ -87,7 +87,7 @@ function SceneUpload({ progress, localTime }) {
             display: 'flex', justifyContent: 'space-between', marginTop: 8,
             fontFamily: MONO, fontSize: 10, color: '#bbb',
           }}>
-            <span>chunk {Math.min(48, Math.floor(barP * 48))}/48</span>
+            <span>khối {Math.min(48, Math.floor(barP * 48))}/48</span>
             <span>{(barP * 12.4).toFixed(1)} / 12.4 MB</span>
           </div>
         </div>
@@ -102,7 +102,7 @@ function SceneUpload({ progress, localTime }) {
         <div style={{
           marginTop: 10, fontFamily: MONO, fontSize: 11, color: FAINT,
           textAlign: 'center', letterSpacing: '0.04em',
-        }}>OCR ENDPOINT</div>
+        }}>ĐIỂM CUỐI OCR</div>
         {checkP > 0 && (
           <div style={{
             position: 'absolute', right: -8, top: -8,
@@ -126,11 +126,11 @@ function SceneUpload({ progress, localTime }) {
   );
 }
 
-// ── 1.2 云端 OCR ───────────────────────────────────────────────────────────
+// ── 1.2 OCR đám mây ───────────────────────────────────────────────────────
 function SceneCloud({ progress }) {
-  // Page on left being scanned. As scan passes a row, glyphs appear in JSON tray on right.
+  // Trang bên trái đang quét. Khi quét qua một hàng, các ký tự glyph xuất hiện trong khay JSON bên phải.
   const scanY = animate({ from: 0, to: 1, start: 0.05, end: 0.95, ease: Easing.linear })(progress);
-  // Number of OCR rows recognized = function of scan position
+  // Số hàng OCR được nhận dạng = hàm của vị trí quét
   const recognized = Math.floor(scanY * 18);
 
   return (
@@ -161,9 +161,9 @@ function SceneCloud({ progress }) {
               animation: 'pulse 1.4s ease-in-out infinite',
             }} />
           </div>
-          <span>POST /v1/ocr · streaming</span>
+          <span>GỬI /v1/ocr · luồng</span>
           <span style={{ marginLeft: 'auto', color: '#86868b' }}>
-            page 1/12 · {recognized} blocks
+            trang 1/12 · {recognized} khối
           </span>
         </div>
 
@@ -231,24 +231,24 @@ function OCRJsonRow({ idx, fresh }) {
   );
 }
 
-// ── 1.3 下载/整理 OCR 结果 ─────────────────────────────────────────────────
+// ── 1.3 Tải xuống/Sắp xếp kết quả OCR ───────────────────────────────────────
 function SceneFetch({ progress }) {
-  // Lots of JSON snippets stream from a "cloud" icon, fall down, organize into rows.
-  // 0–0.4: streaming particles fall down
-  // 0.4–0.8: they arrange into ordered rows in a "tray"
-  // 0.8–1.0: tray title + count
+  // Nhiều đoạn JSON chảy từ biểu tượng "đám mây", rơi xuống, sắp xếp thành hàng.
+  // 0–0.4: các hạt luồng rơi xuống
+  // 0.4–0.8: chúng sắp thành hàng có thứ tự trong "khay"
+  // 0.8–1.0: tiêu đề khay + số lượng
 
   const drift = animate({ from: 0, to: 1, start: 0, end: 0.5, ease: Easing.easeOutCubic })(progress);
   const settle = animate({ from: 0, to: 1, start: 0.4, end: 0.85, ease: Easing.easeInOutCubic })(progress);
   const titleP = animate({ from: 0, to: 1, start: 0.85, end: 1.0, ease: Easing.easeOutCubic })(progress);
 
-  const blocks = Array.from({ length: 24 }).map((_, i) => {
+  const khối = Array.from({ length: 24 }).map((_, i) => {
     const targetCol = i % 2;
     const targetRow = Math.floor(i / 2);
     const targetX = 480 + targetCol * 220;
     const targetY = 130 + targetRow * 32;
 
-    // origin: random near the top center
+    // gốc: ngẫu nhiên gần trung tâm trên
     const ox = 720 + Math.cos(i * 1.7) * 40;
     const oy = -40 + Math.sin(i * 2.3) * 10;
 
@@ -270,7 +270,7 @@ function SceneFetch({ progress }) {
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      {/* Cloud source at top */}
+      {/* Cloud nguồn at top */}
       <div style={{ position: 'absolute', left: 700, top: 30 }}>
         <CloudIcon size={70} color={INK} />
       </div>
@@ -295,13 +295,13 @@ function SceneFetch({ progress }) {
             ocr-result.jsonl
           </div>
           <div style={{ fontFamily: MONO, fontSize: 10, color: FAINT }}>
-            {Math.floor(settle * 24)}/24 blocks · sorted by reading order
+            {Math.floor(settle * 24)}/24 khối · đã sắp xếp theo thứ tự đọc
           </div>
         </div>
       </div>
 
-      {/* Falling blocks */}
-      {blocks.map((b) => (
+      {/* Falling khối */}
+      {khối.map((b) => (
         <div key={b.idx} style={{
           position: 'absolute',
           left: b.x, top: b.y,
@@ -329,10 +329,10 @@ function SceneFetch({ progress }) {
   );
 }
 
-// ── 1.4 标准化 ─────────────────────────────────────────────────────────────
+// 1.4 Chuẩn hóa
 function SceneStandardize({ progress }) {
-  // Messy boxes → clean grid; coords cleaned up.
-  // Show a "before" set of bboxes (rotated/jittered) → "after" (aligned)
+  // Các hộp lộn xộn → lưới sạch; tọa độ được làm sạch.
+  // Hiển thị tập "trước" các bboxes (xoá/rung) → "sau" (căn chỉnh)
   const cleanup = animate({ from: 0, to: 1, start: 0.2, end: 0.85, ease: Easing.easeInOutCubic })(progress);
 
   const items = Array.from({ length: 8 }).map((_, i) => {
@@ -357,7 +357,7 @@ function SceneStandardize({ progress }) {
     };
   });
 
-  // Schema panel on the right reveals progressively
+  // Bảng lược đồ bên phải hiện dần
   const schemaReveal = clamp((progress - 0.4) / 0.5, 0, 1);
 
   return (
@@ -368,7 +368,7 @@ function SceneStandardize({ progress }) {
           position: 'absolute', left: 460, top: 0,
           fontFamily: MONO, fontSize: 10, color: FAINT,
           letterSpacing: '0.05em', textTransform: 'uppercase',
-        }}>raw bboxes → normalized</div>
+        }}>bbox thô → chuẩn hóa</div>
       </div>
 
       {items.map((it) => (
@@ -408,7 +408,7 @@ function SceneStandardize({ progress }) {
       }}>
         <div style={{ fontFamily: SANS, fontSize: 12, fontWeight: 600, color: FAINT, marginBottom: 12,
           textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          standardized schema
+          lược đồ chuẩn hóa
         </div>
         <div><span style={{ color: '#a44' }}>id</span>:    <span style={{ color: '#0071e3' }}>"p1.b04"</span></div>
         <div><span style={{ color: '#a44' }}>type</span>:  <span style={{ color: '#0071e3' }}>"text"</span></div>
@@ -418,7 +418,7 @@ function SceneStandardize({ progress }) {
         <div><span style={{ color: '#a44' }}>lang</span>:  <span style={{ color: '#0071e3' }}>"en"</span></div>
         <div><span style={{ color: '#a44' }}>text</span>:  <span style={{ color: INK }}>"We propose an…"</span></div>
         <div style={{ marginTop: 12, color: FAINT, fontSize: 10 }}>
-          ✓ 412 blocks normalized · 12 pages · 2 columns
+          ✓ 412 khối đã chuẩn hóa · 12 trang · 2 cột
         </div>
       </div>
     </div>

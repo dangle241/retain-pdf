@@ -7,19 +7,19 @@ import {
   nextReadingStatus,
 } from "../src/js/islands/library-search/view-model.js";
 
-test("highlightSegments 把 [ ] 包裹的命中词拆成高亮分段", () => {
-  assert.deepEqual(highlightSegments("…考察了[光谱]系列中的[交换]反应…"), [
-    { text: "…考察了", hit: false },
-    { text: "光谱", hit: true },
-    { text: "系列中的", hit: false },
-    { text: "交换", hit: true },
-    { text: "反应…", hit: false },
+test("highlightSegments tách từ khóa được bọc bởi [ ] thành các đoạn highlight", () => {
+  assert.deepEqual(highlightSegments("…đã khảo sát [quang phổ] trong chuỗi phản ứng [trao đổi]…"), [
+    { text: "…đã khảo sát ", hit: false },
+    { text: "quang phổ", hit: true },
+    { text: " trong chuỗi phản ứng ", hit: false },
+    { text: "trao đổi", hit: true },
+    { text: "…", hit: false },
   ]);
-  assert.deepEqual(highlightSegments("无命中"), [{ text: "无命中", hit: false }]);
+  assert.deepEqual(highlightSegments("Không có kết quả"), [{ text: "Không có kết quả", hit: false }]);
   assert.deepEqual(highlightSegments(""), []);
 });
 
-test("nextReadingStatus 按 未读→在读→读完 循环", () => {
+test("nextReadingStatus tuần hoàn theo Chưa đọc → Đang đọc → Đã đọc xong", () => {
   assert.equal(nextReadingStatus("unread"), "reading");
   assert.equal(nextReadingStatus("reading"), "done");
   assert.equal(nextReadingStatus("done"), "unread");
@@ -27,14 +27,14 @@ test("nextReadingStatus 按 未读→在读→读完 循环", () => {
   assert.deepEqual(Object.keys(READING_STATUS_META), ["unread", "reading", "done"]);
 });
 
-test("filterDocuments 按标题/文件名/标签匹配并叠加状态过滤", () => {
+test("filterDocuments khớp theo tiêu đề/tên file/tag và chồng lớp lọc trạng thái", () => {
   const documents = [
-    { document_id: "a", title: "光谱分析", source_filename: "spec.pdf", tags: [], reading_status: "reading" },
-    { document_id: "b", title: "Attention", source_filename: "attn.pdf", tags: ["机器学习"], reading_status: "done" },
+    { document_id: "a", title: "Phân tích quang phổ", source_filename: "spec.pdf", tags: [], reading_status: "reading" },
+    { document_id: "b", title: "Attention", source_filename: "attn.pdf", tags: ["Học máy"], reading_status: "done" },
     { document_id: "c", title: "Scaling", source_filename: "scaling.pdf", tags: [], reading_status: "unread" },
   ];
-  assert.deepEqual(filterDocuments(documents, { query: "光谱" }).map((d) => d.document_id), ["a"]);
-  assert.deepEqual(filterDocuments(documents, { query: "机器学习" }).map((d) => d.document_id), ["b"]);
+  assert.deepEqual(filterDocuments(documents, { query: "quang phổ" }).map((d) => d.document_id), ["a"]);
+  assert.deepEqual(filterDocuments(documents, { query: "Học máy" }).map((d) => d.document_id), ["b"]);
   assert.deepEqual(filterDocuments(documents, { query: "pdf" }).map((d) => d.document_id), ["a", "b", "c"]);
   assert.deepEqual(filterDocuments(documents, { query: "pdf", readingStatus: "done" }).map((d) => d.document_id), ["b"]);
   assert.deepEqual(filterDocuments(documents, {}).length, 3);

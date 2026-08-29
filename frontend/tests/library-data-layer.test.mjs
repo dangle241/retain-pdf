@@ -16,49 +16,48 @@ import {
 import { MOCK_JOB_ID } from "../src/js/mock/constants.js";
 import { createRecentJobActions } from "../src/js/features/recent-jobs/actions.js";
 
-// ===== documents:形状与语义(与后端对接说明对齐) =====
+// ===== documents: hình dạng và ngữ nghĩa (căn chỉnh với mô tả tích hợp backend) =====
 
-test("mock 文档列表支持 reading_status 与 tag 过滤", () => {
+test("Danh sách tài liệu mock hỗ trợ lọc theo reading_status và tag", () => {
   const all = getMockDocumentList();
   assert.ok(all.documents.length >= 3);
   for (const doc of all.documents) {
     assert.ok(doc.document_id);
-    // 文档中心模型:active_job_id 可空(馆藏态,只入库未翻译),不再是硬不变量。
+    // Mô hình trung tâm tài liệu: active_job_id có thể null (trạng thái lưu trữ, chỉ nhập kho chưa dịch), không còn là bất biến cứng.
     assert.ok(["unread", "reading", "done"].includes(doc.reading_status));
     assert.ok(Array.isArray(doc.tags));
-    // API 层给每篇文档填三个媒体 URL(镜像后端 with_document_media_urls)。
-    assert.ok(doc.source_pdf_url, "source_pdf_url 让馆藏文档也能读原文");
+    // Tầng API điền ba URL media cho mỗi tài liệu (gương backend with_document_media_urls).
+    assert.ok(doc.source_pdf_url, "source_pdf_url cho phép tài liệu thư viện đọc bản gốc");
     assert.ok(doc.cover_url);
     assert.ok(doc.thumbnail_url);
   }
-  // 既有翻译过的文档、也有馆藏态文档(无 active_job_id)。
-  assert.ok(all.documents.some((doc) => `${doc.active_job_id || ""}`.trim()), "存在已翻译文档");
+  // Có cả tài liệu đã dịch và tài liệu lưu trữ (không có active_job_id).
+  assert.ok(all.documents.some((doc) => `${doc.active_job_id || ""}`.trim()), "Tồn tại tài liệu đã dịch");
   assert.ok(
     all.documents.some((doc) => !`${doc.active_job_id || ""}`.trim()),
-    "存在馆藏态文档(无 active_job_id)",
+    "Tồn tại tài liệu trạng thái thư viện (không có active_job_id)",
   );
   const reading = getMockDocumentList({ readingStatus: "reading" });
   assert.ok(reading.documents.every((doc) => doc.reading_status === "reading"));
-  const tagged = getMockDocumentList({ tag: "化学" });
+  const tagged = getMockDocumentList({ tag: "Hóa học" });
   assert.ok(tagged.documents.length >= 1);
-  assert.ok(tagged.documents.every((doc) => doc.tags.includes("化学")));
+  assert.ok(tagged.documents.every((doc) => doc.tags.includes("Hóa học")));
 });
 
-test("translateMockDocument:给馆藏文档挂 active_job_id 并返回提交视图", () => {
+test("translateMockDocument: gắn active_job_id cho tài liệu thư viện và trả về view submit", () => {
   const before = getMockDocumentList().documents.find((doc) => !`${doc.active_job_id || ""}`.trim());
-  assert.ok(before, "至少一篇馆藏文档");
+  assert.ok(before, "Ít nhất một tài liệu thư viện");
   const submission = translateMockDocument(before.document_id);
   assert.equal(submission.document_id, before.document_id);
-  assert.ok(submission.job_id, "返回 job_id");
+  assert.ok(submission.job_id, "Trả về job_id");
   assert.ok(["queued", "running", "pending"].includes(submission.status));
   const after = getMockDocument(before.document_id);
-  assert.equal(after.active_job_id, submission.job_id, "馆藏文档挂上 active_job_id");
-  // 幂等保护:已在翻译流程中再发起应报错。
-  assert.throws(() => translateMockDocument(before.document_id), /409/);
+  assert.equal(after.active_job_id, submission.job_id, "Tài liệu thư viện được gắn active_job_id");
+  assert.throws(() => translateMockDocument(before.document_id), /409/, "Bảo vệ lũy đẳng: đang trong quy trình dịch, gọi lại phải báo lỗi.");
 });
 
-test("deleteMockDocument:删除后从列表消失,再取抛 404", () => {
-  // 用第二篇馆藏文档(其它 test 不碰它,避免跨用例状态串扰)。
+test("deleteMockDocument: sau khi xóa biến mất khỏi danh sách, lấy lại ném 404", () => {
+  // Dùng tài liệu lưu trữ thứ hai (các test khác không đụng tới, tránh nhiễu trạng thái giữa các test).
   const target = "doc-ref-9b7e04";
   assert.ok(getMockDocumentList({ limit: 999 }).documents.some((doc) => doc.document_id === target));
   const result = deleteMockDocument(target);
@@ -67,71 +66,71 @@ test("deleteMockDocument:删除后从列表消失,再取抛 404", () => {
   assert.equal(
     getMockDocumentList({ limit: 999 }).documents.some((doc) => doc.document_id === target),
     false,
-    "删除后不在列表里",
+    "Sau khi xóa không còn trong danh sách",
   );
   assert.throws(() => getMockDocument(target), /404/);
-  assert.throws(() => deleteMockDocument(target), /404/, "再删一次报 404");
+  assert.throws(() => deleteMockDocument(target), /404/, "Xóa lần nữa báo 404");
 });
 
-test("deleteMockDocument:被收藏引用时报 409", () => {
-  // MOCK_DOCUMENT_ID 有两条 mock 收藏(fav-001/fav-002)→ 删除应被挡下。
+test("deleteMockDocument: báo 409 khi được tham chiếu bởi收藏", () => {
+  // MOCK_DOCUMENT_ID có hai mục收藏 mock (fav-001/fav-002) → xóa sẽ bị chặn.
   assert.throws(() => deleteMockDocument(MOCK_DOCUMENT_ID), /409/);
 });
 
-test("PATCH 文档:reading_status 校验与 tags 整体替换语义", () => {
+test("PATCH tài liệu: kiểm tra reading_status và ngữ nghĩa thay thế toàn bộ tags", () => {
   assert.throws(() => patchMockDocument(MOCK_DOCUMENT_ID, { reading_status: "archived" }), /400/);
-  const updated = patchMockDocument(MOCK_DOCUMENT_ID, { tags: ["新标签"] });
-  assert.deepEqual(updated.tags, ["新标签"]);
+  const updated = patchMockDocument(MOCK_DOCUMENT_ID, { tags: ["Tag mới"] });
+  assert.deepEqual(updated.tags, ["Tag mới"]);
   const cleared = patchMockDocument(MOCK_DOCUMENT_ID, { tags: [] });
-  assert.deepEqual(cleared.tags, [], "传 [] 即清空");
+  assert.deepEqual(cleared.tags, [], "Truyền [] tức là làm trống");
   patchMockDocument(MOCK_DOCUMENT_ID, { reading_status: "done" });
   assert.equal(getMockDocument(MOCK_DOCUMENT_ID).reading_status, "done");
 });
 
-// ===== favorites:必填校验、active_job_id 锚定、排序 =====
+// ===== favorites: kiểm tra trường bắt buộc, neo active_job_id, sắp xếp =====
 
-test("创建收藏:必填字段校验与 job_id 自动锚定 active_job_id", () => {
+test("Tạo收藏: kiểm tra trường bắt buộc và job_id tự động neo vào active_job_id", () => {
   assert.throws(() => createMockFavorite({ document_id: MOCK_DOCUMENT_ID }), /400/);
   const favorite = createMockFavorite({
     document_id: MOCK_DOCUMENT_ID,
     page_idx: 5,
     block_id: "b-test-1",
-    quote_text: "测试引文快照",
+    quote_text: "Ảnh chụp trích dẫn kiểm thử",
   });
-  assert.equal(favorite.job_id, getMockDocument(MOCK_DOCUMENT_ID).active_job_id, "不传 job_id 时锚定文档的 active_job_id");
-  assert.equal(favorite.kind, "sentence", "kind 默认 sentence");
+  assert.equal(favorite.job_id, getMockDocument(MOCK_DOCUMENT_ID).active_job_id, "Khi không truyền job_id thì neo vào active_job_id của tài liệu");
+  assert.equal(favorite.kind, "sentence", "kind mặc định là sentence");
   deleteMockFavorite(favorite.favorite_id);
 });
 
-test("收藏列表:按文档过滤时按页码排序", () => {
+test("Danh sách收藏: sắp xếp theo số trang khi lọc theo tài liệu", () => {
   const byDocument = getMockFavorites({ documentId: MOCK_DOCUMENT_ID });
   const pages = byDocument.favorites.map((item) => item.page_idx);
   assert.deepEqual(pages, [...pages].sort((a, b) => a - b));
   for (const item of byDocument.favorites) {
-    // 锚点四元组齐备,job_id + page + block 即阅读器定位坐标
+    // Bộ tứ điểm neo đầy đủ: job_id + page + block chính là tọa độ định vị trong trình đọc
     assert.ok(item.document_id && item.job_id && item.block_id);
     assert.equal(typeof item.page_idx, "number");
-    assert.ok(item.quote_text, "quote_text 引文快照必存在");
+    assert.ok(item.quote_text, "quote_text ảnh chụp trích dẫn phải tồn tại");
   }
 });
 
-// ===== search:命中形状与高亮包裹 =====
+// ===== search: hình dạng kết quả命中 và gói highlight =====
 
-test("检索命中带锚点四元组,命中词以 [ ] 包裹", () => {
-  const { hits } = getMockSearchHits("光谱");
+test("Kết quả tìm kiếm mang bộ tứ điểm neo, từ khóa được bọc bằng [ ]", () => {
+  const { hits } = getMockSearchHits("quang phổ");
   assert.ok(hits.length > 0);
   for (const hit of hits) {
     assert.ok(hit.document_id && hit.job_id && hit.block_id);
     assert.equal(typeof hit.page_idx, "number");
-    assert.match(hit.source_snippet, /\[光谱\]/);
+    assert.match(hit.source_snippet, /\[quang phổ\]/);
   }
   assert.deepEqual(getMockSearchHits("").hits, []);
 });
 
-// ===== 删除保护:409 呈现为友好文案,绝不自动 force =====
+// =====Bảo vệ xóa: 409 hiển thị thành văn bản thân thiện, tuyệt đối không tự động ép buộc=====
 
-test("删除被收藏引用的 job:呈现收藏数量提示而非自动强删", async () => {
-  assert.ok(countMockFavoritesByJob(MOCK_JOB_ID) > 0, "前置:mock job 存在收藏引用");
+test("Xóa job được tham chiếu bởi收藏: hiển thị提示 số lượng收藏 thay vì tự động ép xóa", async () => {
+  assert.ok(countMockFavoritesByJob(MOCK_JOB_ID) > 0, "Tiền đề: mock job tồn tại tham chiếu收藏");
   const errors = [];
   const deleteCalls = [];
   const actions = createRecentJobActions({
@@ -139,7 +138,7 @@ test("删除被收藏引用的 job:呈现收藏数量提示而非自动强删", 
     navigationPort: { openJob() {}, openReader() {} },
     deleteLibraryBook: async (_prefix, jobId, options = {}) => {
       deleteCalls.push([jobId, options]);
-      const conflict = new Error(`该 job 被 3 条收藏引用(409)`);
+      const conflict = new Error(`Job này được 3收藏 tham chiếu (409)`);
       conflict.status = 409;
       throw conflict;
     },
@@ -148,7 +147,7 @@ test("删除被收藏引用的 job:呈现收藏数量提示而非自动强删", 
     renderRecentJobsError: (message) => errors.push(message),
     statePort: {
       removeJobFamily() {
-        throw new Error("409 时不应继续删除本地条目");
+        throw new Error("Khi 409 không nên tiếp tục xóa mục cục bộ");
       },
       getSnapshot: () => ({ items: [] }),
     },
@@ -156,23 +155,23 @@ test("删除被收藏引用的 job:呈现收藏数量提示而非自动强删", 
 
   await actions.deleteJob(MOCK_JOB_ID);
 
-  assert.equal(deleteCalls.length, 1, "绝不自动 force 重试");
+  assert.equal(deleteCalls.length, 1, "Tuyệt đối không tự động ép retry");
   assert.deepEqual(deleteCalls[0][1], {});
   assert.equal(errors.length, 1);
-  assert.match(errors[0], /该文档有 3 条收藏，请先删除收藏/);
+  assert.match(errors[0], /Tài liệu này có 3收藏, vui lòng xóa收藏 trước/);
 });
 
-test("按 job_id 直查文档:active_job_id 命中 + 历史 run 也解析到同一文档", async () => {
-  // isMockMode 靠 window.location.search 的 ?mock=,置好后再动态 import api 层
+test("Tra cứu tài liệu trực tiếp theo job_id: active_job_id khớp + lịch sử run cũng解析到 cùng tài liệu", async () => {
+  // isMockMode dựa vào ?mock trong window.location.search, thiết lập rồi mới dynamic import tầng api
   globalThis.window = { location: { search: "?mock=succeeded", protocol: "http:", hostname: "127.0.0.1" } };
   const { fetchDocumentByJobId } = await import("../src/js/api/documents.js");
-  // active_job_id 命中
+  // Hit active_job_id
   const active = await fetchDocumentByJobId("/api/v1", MOCK_JOB_ID);
   assert.equal(active?.document_id, MOCK_DOCUMENT_ID);
-  // 历史 run(非 active)——正是 #1 要解决的:反查列表会漏,直查能命中
+  // Lịch sử run (không phải active)——đây chính là vấn đề cần giải quyết ở #1: tra danh sách sẽ漏, tra trực tiếp trúng
   const historical = await fetchDocumentByJobId("/api/v1", "mock-job-20260101-old");
-  assert.equal(historical?.document_id, MOCK_DOCUMENT_ID, "历史 run 解析到所属文档");
-  // 不属于任何文档 → null
+  assert.equal(historical?.document_id, MOCK_DOCUMENT_ID, "Lịch sử run解析到 tài liệu sở hữu");
+  // Không thuộc về tài liệu nào → null
   assert.equal(await fetchDocumentByJobId("/api/v1", "job-nonexistent"), null);
   assert.equal(await fetchDocumentByJobId("/api/v1", ""), null);
 });

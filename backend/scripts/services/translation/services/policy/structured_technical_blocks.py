@@ -51,8 +51,8 @@ def _is_structured_field_block(text: str) -> bool:
         return True
     if len(labels) != 1:
         return False
-    # A single field is only structural when its value is clearly a literal.
-    # Prose such as "Note: This option controls..." must stay normal text.
+    # Một trường đơn chỉ mang tính cấu trúc khi giá trị của nó rõ ràng là literal.
+    # Văn xuôi như "Note: This option controls..." phải giữ nguyên dạng văn bản thông thường.
     return _is_short_literal_value(_single_field_value(text))
 
 
@@ -69,11 +69,11 @@ def structured_technical_style_hint(item: dict) -> str:
     labels = _field_labels(_normalized_text(item))
     label_text = "、".join(labels[:6])
     return (
-        "这是技术文档中的结构化条目"
-        + (f"（字段包括：{label_text}）" if label_text else "")
-        + "。请保持字段名、字段顺序、列表符号、分隔符和换行排版稳定；"
-        "字段值、类型标记、枚举、路径、命令、变量名、文件名、代码片段和尖括号内容应原样保留；"
-        "只翻译字段值中明显属于自然语言说明的部分。不要把结构化字段名随意改写成另一种语言。"
+        "Đây là mục cấu trúc trong tài liệu kỹ thuật"
+        + (f"(trường bao gồm:{label_text}）" if label_text else "")
+        + ". Vui lòng giữ ổn định tên trường, thứ tự trường, ký hiệu danh sách, dấu phân cách và xuống dòng;"
+        "Giá trị trường, ký hiệu kiểu, liệt kê, đường dẫn, lệnh, tên biến, tên tệp, đoạn mã và nội dung trong dấu <> giữ nguyên;"
+        "Chỉ dịch phần giá trị trường rõ ràng là thuyết minh ngôn ngữ tự nhiên. Không đổi tên trường cấu trúc sang ngôn ngữ khác."
     )
 
 

@@ -192,11 +192,11 @@ def _annotate_provider_continuation_context(payload: list[dict]) -> int:
 
 
 def _next_candidate_index(payload: list[dict], start: int) -> int | None:
-    """Return the next eligible item index at or after ``start``.
+    """Trả về chỉ số mục đủ điều kiện tiếp theo tại hoặc sau ``start``.
 
-    Missing intermediate page indices (e.g. page 4 then page 6 in the flat
-    payload) must not abort the scan: pair_join_score still rejects non-adjacent
-    page_idx pairs, while later adjacent pairs remain discoverable.
+    Các chỉ số trang trung gian bị thiếu (ví dụ: trang 4 rồi đến trang 6 trong payload phẳng)
+    không được làm gián đoạn quét: pair_join_score vẫn từ chối các cặp page_idx không liền kề,
+    trong khi các cặp liền kề sau đó vẫn có thể được phát hiện.
     """
     if start >= len(payload):
         return None

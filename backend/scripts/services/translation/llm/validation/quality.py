@@ -27,8 +27,8 @@ from services.translation.core.terms import normalize_glossary_entries
 
 INLINE_MATH_SPAN_RE = re.compile(r"(?<!\\)\$(?:\\.|[^$\\\n])+(?<!\\)\$")
 SOURCE_TERMINAL_RE = re.compile(r"[.!?。！？；;:：)\]）】”’\"']\s*$")
-# EN→ZH technical prose is typically ~0.3–0.5 of source char length. Flag only
-# extreme tail-only / partial outputs so normal dense translations stay clean.
+# Bản dịch EN→ZH kỹ thuật thường có tỷ lệ ~0,3–0,5 so với độ dài nguồn.
+# Chỉ đánh dấu các đầu ra cực ngắn/phần cuối để các bản dịch dày đặc thông thường giữ nguyên.
 TRUNCATION_MIN_SOURCE_CHARS = 200
 TRUNCATION_MAX_RATIO = 0.15
 
@@ -101,7 +101,7 @@ def review_translation_batch(
                     item_id=missing,
                     kind="missing_result",
                     severity="error",
-                    message="Translation result is missing this item_id",
+                    message="Kết quả dịch thiếu item_id này",
                 )
             )
     for extra in sorted(actual_ids - expected_ids):
@@ -111,7 +111,7 @@ def review_translation_batch(
                     item_id=extra,
                     kind="unexpected_result",
                     severity="error",
-                    message="Translation result contains an unexpected item_id",
+                    message="Kết quả dịch chứa item_id không mong đợi",
                 )
             )
     for item in batch:
@@ -148,7 +148,7 @@ def review_translation_item(
                 item_id=item_id,
                 kind="keep_origin_degraded",
                 severity="warning",
-                message="Long body text was kept as origin and should be reviewed",
+                message="Đoạn văn bản tiếng Anh dài được giữ nguyên cần được xem xét",
             )
         )
         return TranslationQualityReport(issues=issues, reviewed_item_count=1)
@@ -177,7 +177,7 @@ def _review_translated_text(
                 item_id=item_id,
                 kind="empty_translation",
                 severity="error",
-                message="Translation output is empty",
+                message="Đầu ra bản dịch trống",
             )
         )
         return issues
@@ -187,7 +187,7 @@ def _review_translated_text(
                 item_id=item_id,
                 kind="math_delimiter_unbalanced",
                 severity="error",
-                message="Translated output has unbalanced inline math delimiters",
+                message="Đầu ra dịch có dấu phân cách toán học nội dòng không cân bằng",
             )
         )
     if looks_like_protocol_shell_output(translated_text):
@@ -196,7 +196,7 @@ def _review_translated_text(
                 item_id=item_id,
                 kind="protocol_shell_output",
                 severity="error",
-                message="Translated output still contains JSON/protocol shell",
+                message="Đầu ra dịch vẫn còn chứa vỏ JSON/giao thức",
             )
         )
     truncation = _truncated_translation_issue(item_id, source_text, translated_text)
@@ -204,16 +204,16 @@ def _review_translated_text(
         issues.append(truncation)
     context_bleed = _context_bleed_leaked_math(item, source_text, translated_text)
     if context_bleed:
-        # 连续段片段按设计就是"无终止标点的不完整句",此检查对它们必然
-        # 高频触发;而 apply 层的 _sanitize_neighbor_continuation_leak 已经
-        # 能确定性修剪泄漏的后文公式。对连续段降级为警告,避免为机械层
-        # 可修复的问题反复重试;独立条目仍保持硬错误。
+        # Các phân đoạn tuần tự được thiết kế để"Câu không đầy đủ mà không có dấu chấm câu chấm dứt",Việc kiểm tra này là không thể tránh khỏi đối với họ
+        # Kích hoạt tần số cao;mà apply Lớp _sanitize_neighbor_continuation_leak đã
+        # Công thức sau để cắt tỉa xác định rò rỉ。Hạ cấp các phân đoạn liên tiếp thành cảnh báo,Tránh các lớp cơ học
+        # Các vấn đề có thể sửa chữa được thử lại nhiều lần;Các mục nhập riêng biệt vẫn giữ lại các lỗi khó。
         issues.append(
             TranslationQualityIssue(
                 item_id=item_id,
                 kind="context_bleed",
                 severity="warning" if _is_continuation_item(item) else "error",
-                message="Translated output appears to include following context not present in current source",
+                message="Đầu ra dịch dường như bao gồm ngữ cảnh sau không có trong nguồn hiện tại",
                 details={"leaked_math": context_bleed[:5]},
             )
         )
@@ -223,7 +223,7 @@ def _review_translated_text(
                 item_id=item_id,
                 kind="english_residue",
                 severity="error",
-                message="Translated output still looks predominantly English",
+                message="Đầu ra dịch vẫn trông chủ yếu là tiếng Anh",
             )
         )
     elif looks_like_mixed_english_residue_output(item, translated_text):
@@ -232,7 +232,7 @@ def _review_translated_text(
                 item_id=item_id,
                 kind="mixed_english_residue",
                 severity="error",
-                message="Translated output still contains long copied English residue spans",
+                message="Đầu ra dịch vẫn chứa các đoạn residue tiếng Anh dài được sao chép",
             )
         )
     elif looks_like_predominantly_english_output(item, translated_text):
@@ -241,7 +241,7 @@ def _review_translated_text(
                 item_id=item_id,
                 kind="english_residue_warning",
                 severity="warning",
-                message="Translated output still contains substantial English residue",
+                message="Đầu ra dịch vẫn chứa lượng lớn residue tiếng Anh",
                 retryable=False,
             )
         )
@@ -269,8 +269,8 @@ def _truncated_translation_issue(
         kind="truncated_translation",
         severity="error",
         message=(
-            f"Translated output is abnormally short vs source "
-            f"(ratio={ratio:.3f}, source_chars={len(source)}, translated_chars={len(translated)})"
+            f"Đầu ra dịch ngắn bất thường so với nguồn "
+            f"(tỷ lệ={ratio:.3f}, ký_tự_nguồn={len(source)}, ký_tự_dịch={len(translated)})"
         ),
         details={
             "ratio": round(ratio, 4),
@@ -320,7 +320,7 @@ def review_placeholders(item_id: str, source_text: str, translated_text: str) ->
                 item_id=item_id,
                 kind="unexpected_placeholder",
                 severity="error",
-                message="Translated output contains placeholders not present in source",
+                message="Đầu ra dịch chứa placeholder không có trong nguồn",
                 details={"unexpected": unexpected},
             )
         )
@@ -345,7 +345,7 @@ def review_placeholders(item_id: str, source_text: str, translated_text: str) ->
                 item_id=item_id,
                 kind="placeholder_order_changed",
                 severity="warning",
-                message="Protected token order changed but inventory is preserved",
+                message="Thứ tự protected token thay đổi nhưng kiểm kê được giữ nguyên",
                 retryable=False,
                 details={
                     "source_sequence": source_sequence,
@@ -376,7 +376,7 @@ def _review_glossary_terms(
                 item_id=item_id,
                 kind="glossary_term_missing",
                 severity="warning",
-                message="Matched glossary term was not reflected in translated output",
+                message="Thuật ngữ glossary đã khớp không được phản ánh trong đầu ra dịch",
                 retryable=False,
                 details={
                     "source": entry.source,

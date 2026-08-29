@@ -100,22 +100,23 @@ def test_promptfoo_provider_suppresses_success_stderr(monkeypatch, capsys) -> No
         "replay_translation_item",
         _fake_replay_translation_item,
     )
-    monkeypatch.setattr(
-        promptfoo_provider,
-        "resolve_job_root",
-        lambda _value: Path("/tmp"),
-    )
+    with tempfile.TemporaryDirectory() as tmp:
+        monkeypatch.setattr(
+            promptfoo_provider,
+            "resolve_job_root",
+            lambda _value: Path(tmp),
+        )
 
-    result = promptfoo_provider.call_api(
-        "",
-        context={"vars": {"job_root": "job-1", "item_id": "p001-b001"}},
-    )
+        result = promptfoo_provider.call_api(
+            "",
+            context={"vars": {"job_root": "job-1", "item_id": "p001-b001"}},
+        )
 
-    captured = capsys.readouterr()
-    assert captured.err == ""
-    assert result["output"] == "这是一条回放翻译。"
-    assert "replay_logs" in result["metadata"]
-    assert "replay cache hit" in result["metadata"]["replay_logs"]
+        captured = capsys.readouterr()
+        assert captured.err == ""
+        assert result["output"] == "这是一条回放翻译。"
+        assert "replay_logs" in result["metadata"]
+        assert "replay cache hit" in result["metadata"]["replay_logs"]
 
 
 def test_promptfoo_provider_replays_from_case_artifact_when_job_root_missing(monkeypatch, capsys) -> None:

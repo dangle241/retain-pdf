@@ -15,7 +15,7 @@ def build_translation_context(
     mode: str = "fast",
     source_lang: str = "auto",
     target_lang: str = "zh-CN",
-    target_language_name: str = "简体中文",
+    target_language_name: str = "Tiếng Việt",
     domain_guidance: str = "",
     rule_guidance: str = "",
     extra_guidance: str = "",
@@ -67,10 +67,10 @@ def build_translation_context_from_policy(
         extra_guidance_parts.append(extra_guidance.strip())
     if str(getattr(policy_config, "math_mode", "placeholder") or "placeholder").strip() == "direct_typst":
         extra_guidance_parts.append(
-            "Math output mode: direct_typst.\n"
-            "When the source contains formulas, output the final translated text directly with inline math preserved "
-            "using `$...$` spans when needed.\n"
-            "Do not emit placeholder tokens, JSON shells, labels, or explanations."
+            "Chế độ xuất toán: direct_typst.\n"
+            "Khi nguồn chứa công thức, hãy xuất trực tiếp bản dịch cuối cùng với toán nội dòng được bảo toàn "
+            "bằng `$...$` khi cần.\n"
+            "Không xuất placeholder, JSON shell, nhãn hay giải thích."
         )
     return build_translation_context(
         mode=policy_config.mode,

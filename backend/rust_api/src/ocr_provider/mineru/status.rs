@@ -14,21 +14,21 @@ fn map_state(raw_state: &str) -> OcrTaskState {
 
 fn stage_and_detail(raw_state: &str, state: &OcrTaskState) -> (&'static str, String) {
     match state {
-        OcrTaskState::WaitingUpload => ("mineru_upload", "等待文件上传到 MinerU".to_string()),
+        OcrTaskState::WaitingUpload => ("mineru_upload", "Đang chờ tải tệp lên MinerU".to_string()),
         OcrTaskState::Queued => (
             "mineru_processing",
-            "MinerU 已接收任务，等待排队".to_string(),
+            "MinerU đã nhận tác vụ, đang chờ xếp hàng".to_string(),
         ),
-        OcrTaskState::Running => ("mineru_processing", "MinerU 正在解析文件".to_string()),
-        OcrTaskState::Converting => ("mineru_processing", "MinerU 正在转换文件".to_string()),
+        OcrTaskState::Running => ("mineru_processing", "MinerU đang phân tích tệp".to_string()),
+        OcrTaskState::Converting => ("mineru_processing", "MinerU đang chuyển đổi tệp".to_string()),
         OcrTaskState::Succeeded => (
             "ocr_result_ready",
-            "MinerU 结果已就绪，准备标准化".to_string(),
+            "Kết quả MinerU đã sẵn sàng, chuẩn bị chuẩn hóa".to_string(),
         ),
-        OcrTaskState::Failed => ("failed", "MinerU 处理失败".to_string()),
+        OcrTaskState::Failed => ("failed", "Xử lý MinerU thất bại".to_string()),
         OcrTaskState::Unknown => (
             "mineru_processing",
-            format!("MinerU 状态: {}", raw_state.trim()),
+            format!("Trạng thái MinerU: {}", raw_state.trim()),
         ),
     }
 }

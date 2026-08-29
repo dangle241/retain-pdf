@@ -24,7 +24,7 @@ def run_initial_continuation_pass(
     emit_stage_progress(
         stage="continuation_review",
         substage="continuation_review",
-        message="初始连续段整理完成",
+        message="Sắp xếp đoạn liên tục ban đầu hoàn tất",
         elapsed_ms=int((time.perf_counter() - stage_started) * 1000),
         payload={"page_count": len(page_payloads)},
     )
@@ -45,7 +45,7 @@ def run_continuation_review(
     emit_stage_transition(
         stage="continuation_review",
         substage="continuation_review",
-        message="开始复核跨栏/跨页连续段",
+        message="Bắt đầu kiểm tra đoạn liên tục qua cột/trang",
         progress_current=0,
         progress_total=len(page_payloads),
     )
@@ -62,7 +62,7 @@ def run_continuation_review(
         progress_callback=lambda current, total: emit_stage_progress(
             stage="continuation_review",
             substage="continuation_review",
-            message=f"正在判断跨栏/跨页连续段，第 {current}/{total} 批",
+            message=f"Đang kiểm tra đoạn liên tục qua cột/trang, lô thứ {current}/{total}",
             progress_current=current,
             progress_total=total,
             payload={"progress_unit": "page"},
@@ -73,7 +73,7 @@ def run_continuation_review(
     emit_stage_progress(
         stage="continuation_review",
         substage="continuation_review",
-        message="跨栏/跨页连续段复核完成",
+        message="Kiểm tra đoạn liên tục qua cột/trang hoàn tất",
         progress_current=len(page_payloads),
         progress_total=len(page_payloads),
         elapsed_ms=int((time.perf_counter() - review_started) * 1000),

@@ -1,128 +1,128 @@
-# recent-jobs + job-runtime 子域 React 迁移施工蓝图(Phase 3 核心)
+# Bản thi công di chuyển React recent-jobs + job-runtime (cốt lõi Phase 3)
 
-> Phase 3 实施 agent 的直接输入。源码级勘察产出,配合总计划
-> ~/.claude/plans/wondrous-baking-donut.md 使用。
+> Đầu vào trực tiếp cho agent triển khai Phase 3. Được tạo từ khảo sát mức mã nguồn, sử dụng cùng kế hoạch tổng thể
+> ~/.claude/plans/wondrous-baking-donut.md.
 
-## 0. 现状数据流(施工前必读)
+## 0. Luồng dữ liệu hiện tại (bắt buộc đọc trước khi làm việc)
 
-三条链路、两套定时器、三个 store:
+Ba chuỗi, hai bộ đếm thời gian, ba kho lưu trữ:
 
-- **链路 A(当前任务轮询 1s)**:jobRuntimeFeature.startPolling → setInterval 1000ms → fetchJob/fetchJobPayload → render-context 写 currentJobStore → ui/presentation.js renderJob → job-status-card.renderSnapshot;同时 notifyLibraryJobUpdated(document CustomEvent)+ requestLibraryRefresh(4s 节流)+ secondaryResourceScheduler(events/manifest/stageActions 三资源限频 → secondaryResourceStore → renderJobSecondaryPatch)。
-- **链路 B(图书馆列表)**:refreshScheduler.initialize → loader.load → pagination 聚合 → commit → recentJobsStatePort.batch → store-renderer → viewPort.renderList → view.js → <recent-job-card> 网格。
-- **链路 C(活跃卡补丁 2.5s)**:active-refresh 拉最多 6 个非当前活跃 job → runtimePatches.update → statePort.replaceItem(卡片级补丁)→ 随后全量静默重拉。
-- **事件桥(bindings.js)**:library* 三个 document CustomEvent → 命令总线 → command-handlers(缓存失效 + 补丁 + 300/600/1200ms 分级刷新);openTranslationWorkflow 挂起刷新 / close 恢复。
+- **Chuỗi A (thăm dò job hiện tại 1s)**: jobRuntimeFeature.startPolling → setInterval 1000ms → fetchJob/fetchJobPayload → render‑context ghi currentJobStore → ui/presentation.js renderJob → job-status-card.renderSnapshot; đồng thời notifyLibraryJobUpdated(document CustomEvent) + requestLibraryRefresh(giới hạn 4s) + secondaryResourceScheduler(ba tài nguyên events/manifest/stageActions được giới hạn tốc độ → secondaryResourceStore → renderJobSecondaryPatch).
+- **Chuỗi B (danh sách thư viện)**: refreshScheduler.initialize → loader.load → phân trang tổng hợp → commit → recentJobsStatePort.batch → store-renderer → viewPort.renderList → view.js → lưới <recent-job-card>.
+- **Chuỗi C (vá thẻ đang hoạt động 2.5s)**: active‑refresh kéo tối đa 6 job đang hoạt động không phải hiện tại → runtimePatches.update → statePort.replaceItem(vá cấp thẻ) → sau đó tải lại im lặng toàn bộ.
+- **Cầu sự kiện (bindings.js)**: ba document CustomEvent library* → command bus → command‑handlers(vô hiệu hóa cache + vá + làm mới lệch pha 300/600/1200ms); openTranslationWorkflow tạm dừng làm mới / close tiếp tục.
 
-**关键事实**:
-- recentJobsStatePort / currentJobStore / secondaryResourceStore 已是唯一真值(storeDrivenRendering: true)——**轮询/补丁/节流引擎一行不动**,React 只换 viewPort 与自定义元素。
-- 状态卡 VM 全在 src/js/job-status/(纯逻辑,门禁允许)。
-- card-presenter.js / image-loader.js 是 features/recent-jobs/ 下的转口 facade(re-export 自 components/recent-jobs/),**从 facade import 合法**。
-- store getSnapshot() 每次深冻结新克隆 → notify 后所有 item 引用全变,**卡片订阅不能靠引用相等**(见 §3)。
-- smoke DOM 契约必须逐一镜像:.recent-job-item[data-job-id]、#job-status-card、#status-ring-label/-value、#status-progress-ring、#job-progress-text、.status-stage-step[data-stage-key][aria-selected]、#status-section.hidden、#recent-jobs-list、#recent-jobs-empty。
-- recoverActiveJob(actions.js:84)无生产调用方,保持不接线。
+**Sự kiện chính**:
+- recentJobsStatePort / currentJobStore / secondaryResourceStore đã là nguồn sự thật duy nhất (storeDrivenRendering: true) – **các engine thăm dò/vá/giới hạn tốc độ giữ nguyên**, React chỉ thay thế viewPort và custom elements.
+- VM của thẻ trạng thái nằm hoàn toàn trong src/js/job-status/ (logic thuần, cho phép gate).
+- card-presenter.js / image-loader.js là facade tái xuất dưới features/recent-jobs/ (import từ facade là hợp lệ).
+- store getSnapshot() deep‑freeze bản sao mới mỗi lần → sau notify tất cả tham chiếu item thay đổi, **subscription của thẻ không thể dựa vào so sánh tham chiếu** (xem §3).
+- Hợp đồng DOM smoke phải được phản ánh từng cái một: .recent-job-item[data-job-id], #job-status-card, #status-ring-label/-value, #status-progress-ring, #job-progress-text, .status-stage-step[data-stage-key][aria-selected], #status-section.hidden, #recent-jobs-list, #recent-jobs-empty.
+- recoverActiveJob(actions.js:84) không có caller sản xuất; giữ ở trạng thái ngắt kết nối.
 
-## 1. 逐文件判决
+## 1. Phán quyết từng tệp
 
-### features/recent-jobs/(45 文件)
-- **保留原样(引擎)**:state、pagination、runtime-item、runtime-patches、runtime-value-helpers、loader、commit、runtime、controller、actions、active-refresh、refresh-scheduler、refresh-environment、commands、command-handlers、bindings、library-books-resource、library-refresh-port、navigation-port、job-runtime-port、reader-port、active-job-recovery、created-job-hydration、summary-view-model、loading-state-contract、image-refresh、event-target——composition.js 直接 import 并 mount。
-- **保留(facade)**:card-presenter.js、image-loader.js。
-- **保留但停用**:store-renderer.js(React viewPort 下无害,Phase 4 删)。
-- **保留**:workflow-open-port.js(composition 注入 isWorkflowOpen 读 workflow store)。
-- **死(cutover 删)**:view.js、view-port.js、host.js、host-actions.js、render-target.js、view-state-target.js、view-state.js、list-rendering.js、list-events.js、image-hydration.js、card-markup.js、card-template.js、formatting.js、dom-contract.js。⚠️ controller/runtime/loader/commit/bindings 5 处默认参数 `viewPort = createRecentJobsViewPort()` 同 commit 改必传(测试均已注入,影响面零)。
+### features/recent-jobs/(45 tệp)
+- **Giữ nguyên (engine)**: state, pagination, runtime-item, runtime-patches, runtime-value-helpers, loader, commit, runtime, controller, actions, active-refresh, refresh-scheduler, refresh-environment, commands, command-handlers, bindings, library-books-resource, library-refresh-port, navigation-port, job-runtime-port, reader-port, active-job-recovery, created-job-hydration, summary-view-model, loading-state-contract, image-refresh, event-target – composition.js import và mount trực tiếp.
+- **Giữ (facade)**: card-presenter.js, image-loader.js.
+- **Giữ nhưng vô hiệu hóa**: store-renderer.js (vô hại dưới React viewPort, xóa ở Phase 4).
+- **Giữ**: workflow-open-port.js (composition tiêm isWorkflowOpen từ workflow store).
+- **Chết (xóa khi cutover)**: view.js, view-port.js, host.js, host-actions.js, render-target.js, view-state-target.js, view-state.js, list-rendering.js, list-events.js, image-hydration.js, card-markup.js, card-template.js, formatting.js, dom-contract.js. ⚠️ 5 tham số mặc định của controller/runtime/loader/commit/bindings `viewPort = createRecentJobsViewPort()` sẽ được chuyển thành bắt buộc khi cutover (test đã tiêm sẵn, không ảnh hưởng).
 
-### features/job-runtime/(17 文件)
-**全部保留**。变的只是 mountJobRuntimeFeature payload 的回调实现(renderJob/renderJobSecondaryPatch/setText/setWorkflowSections… 由 composition 提供 React 实现)。runtime-reset 消费 app-shell 子域先行迁移的注入回调。
+### features/job-runtime/(17 tệp)
+**Giữ tất cả**. Chỉ các callback trong payload mountJobRuntimeFeature thay đổi (renderJob/renderJobSecondaryPatch/setText/setWorkflowSections… do composition React cung cấp). runtime-reset tiêu thụ callback tiêm từ app‑shell subdomain đã di chuyển.
 
-### components/status/(17 文件)+ job-status/(VM)
-job-status/ 全目录纯 VM 保留,React 直接 import。components/status 判决:
-- job-status-card.js / -template.js / connected-.js / -rendering.js / -progress-renderer.js / -selection.js / -stage-flow.js / -substages.js / -retry.js / -snapshot.js / -presets.js / -visuals.js / -dom-contract.js / task-toolbar.js → **死**,由 StatusCard.jsx 家族替代;其中:
-  - rendering.js 的 buildProgressRenderModel(45-164 纯函数)**拷贝**至 src/pages/home/features/status/progress-model.js(禁区无法 import)。
-  - -progress-animation.js → hook useStagedProgressAnimation(内核从 job-status/status-card-progress-view-model.js import;timers/displayedProgressByStage 用 useRef)。
-  - -animation.js(lottie 194 行)→ 命令式孤岛 hook useLottieStageAnimation(desiredKey 竞态防护 + speedForProgressDelta 曲线整体拷贝;resolveLottieVendorUrl 合法 import)。
-  - -presets.js 的 STAGE_ANIMATIONS 表拷贝进 hook;-visuals.js 的 resolveVisualStageKeyForSnapshot(8 行)拷贝。
-  - 隐藏区 #job-id/#job-status/#job-stage-detail/#query-job-duration/#job-finished-at 及 legacy 链接**照样渲染**(job-summary 文本与 parallel smoke 依赖)。
+### components/status/(17 tệp)+ job-status/(VM)
+Toàn bộ thư mục job-status/ là VM thuần và được giữ; React import trực tiếp. Phán quyết components/status:
+- job-status-card.js / -template.js / connected-.js / -rendering.js / -progress-renderer.js / -selection.js / -stage-flow.js / -substages.js / -retry.js / -snapshot.js / -presets.js / -visuals.js / -dom-contract.js / task-toolbar.js → **chết**, được thay thế bởi họ StatusCard.jsx; trong đó:
+  - rendering.js buildProgressRenderModel(dòng 45-164 hàm thuần) **được sao chép** sang src/pages/home/features/status/progress-model.js (không thể import do rào cản).
+  - -progress-animation.js → hook useStagedProgressAnimation(import từ job-status/status-card-progress-view-model.js; timers/displayedProgressByStage dùng useRef).
+  - -animation.js(lottie 194 dòng) → hook đảo mệnh lệnh useLottieStageAnimation(desiredKey race guard + speedForProgressDelta curve được sao chép nguyên bản; resolveLottieVendorUrl import hợp lệ).
+  - Bảng STAGE_ANIMATIONS trong -presets.js được sao chép vào hook; resolveVisualStageKeyForSnapshot(8 dòng) trong -visuals.js được sao chép.
+  - Các vùng ẩn #job-id/#job-status/#job-stage-detail/#query-job-duration/#job-finished-at và liên kết cũ **vẫn được render** (văn bản job‑summary và smoke song song phụ thuộc vào chúng).
 
-### components/recent-jobs/(3 文件)
-recent-job-card.js 死 → RecentJobCard.jsx;presenter 与 image-loader **保留**(经 facade;模块级 objectURL 缓存必须共享,React 内不得另建)。
+### components/recent-jobs/(3 tệp)
+recent-job-card.js chết → RecentJobCard.jsx; presenter và image-loader **được giữ** (qua facade; cache objectURL cấp module phải được chia sẻ, React không được tạo lại).
 
-### ui/ 状态呈现链
-presentation.js、status-surfaces-presenter.js、job-status-card-renderer.js、status-card-view-port.js、job-status-summary-presenter.js、elapsed-presenter.js、presentation-view.js、status-ring-fallback-presenter.js → 死于 cutover。纯逻辑本就在 job-status/ 与 job/。⚠️ 不要从 pages import ui/status-surfaces-presenter.js(拖进旧 DOM 写入链)。
+### Chuỗi presentation ui/
+presentation.js, status-surfaces-presenter.js, job-status-card-renderer.js, status-card-view-port.js, job-status-summary-presenter.js, elapsed-presenter.js, presentation-view.js, status-ring-fallback-presenter.js → chết khi cutover. Logic thuần đã nằm trong job-status/ và job/. ⚠️ Không import ui/status-surfaces-presenter.js từ pages (sẽ kéo theo chuỗi ghi DOM cũ).
 
-## 2. React 组件表(src/pages/home/)
+## 2. Bảng thành phần React (src/pages/home/)
 
 ### features/library/
-- **RecentJobsLibrary.jsx**:useStoreSnapshot(recentJobsStore) 全快照 + useStoreSnapshot(libraryViewStore);loadMore → runtime.loadRecentJobs({reset:false});summary 用 buildRecentJobsSummaryViewModel。
-- **RecentJobCard.jsx**:memo(Card, areCardPropsEqual),props = item + onSelect/onDelete/onReader(稳定引用);删除确认 popover 提升为 Library 级 confirmingDeleteJobId useState。
-- **useRecentJobCover.js**:loadFirstRecentJobImage + recentJobRawImageUrls(facade);imageCacheVersionOf 拷贝(recent-job-card.js:12-29);token 防竞态;**卸载不 revoke**。
-- **useLibraryAutoLoad.js**:滚动 passive listener + rAF,260px/0.35 阈值几何重写(~10 行)。
-- **library-view-store.js**(新):{mode: loading|list|empty|error, message, hasMore, loadMoreLoading};文案拷贝 RECENT_JOBS_VIEW_TEXT 主视图变体。
-- **react-view-port.js**(新):实现旧 viewPort 10 方法 → 写 libraryViewStore;renderList 忽略 items(React 直读 recentJobsStore);replaceCard 恒 true;bindEvents 捕获 handlers 到 handlersRef;hasView 恒 true。
-- recent-jobs-dialog 元素形态在主视图不启用,死。
+- **RecentJobsLibrary.jsx**: useStoreSnapshot(recentJobsStore) snapshot đầy đủ + useStoreSnapshot(libraryViewStore); loadMore → runtime.loadRecentJobs({reset:false}); tóm tắt dùng buildRecentJobsSummaryViewModel.
+- **RecentJobCard.jsx**: memo(Card, areCardPropsEqual), props = item + onSelect/onDelete/onReader(ref ổn định); popover xác nhận xóa được nâng lên cấp Library confirmingDeleteJobId useState.
+- **useRecentJobCover.js**: loadFirstRecentJobImage + recentJobRawImageUrls(facade); imageCacheVersionOf được sao chép (recent-job-card.js:12-29); bảo vệ race token; **không thu hồi khi unmount**.
+- **useLibraryAutoLoad.js**: scroll passive listener + rAF, hình học ngưỡng 260px/0.35 được viết lại (~10 dòng).
+- **library-view-store.js**(mới): {mode: loading|list|empty|error, message, hasMore, loadMoreLoading}; sao chép các biến thể RECENT_JOBS_VIEW_TEXT main view.
+- **react-view-port.js**(mới): triển khai 10 phương thức viewPort cũ → ghi libraryViewStore; renderList bỏ qua items (React đọc trực tiếp recentJobsStore); replaceCard luôn true; bindEvents bắt handlers vào handlersRef; hasView luôn true.
+- Element shape recent-jobs-dialog bị vô hiệu hóa trong main view, chết.
 
 ### features/status/
-- **StatusCard.jsx**(id="job-status-card",渲进 #status-section):useStoreSnapshot(statusCardStore) 整快照;取消 → services.jobRuntime.cancelCurrentJob()。
-- **StageFlow.jsx / SubstageFlow.jsx / ProgressBlock.jsx / ResultActions.jsx / StageRetry.jsx**:全部由 job-status/ 纯 VM 驱动;StageRetry dispatch APP_EVENTS.retryStage。
-- **useElapsedTicker.js**:1s tick + buildElapsedViewModel(job/elapsed-view-model.js),终态即停;elapsed 不进 store(避免快照恒变)。
-- **useStageSelection.js**:selectedStageKey/manual useState;换 job 复位、阶段推进清 manual(selection.js:45-64 语义)。
-- **status-card-store.js**(新)+ statusCardPresenter(~80 行):renderMain = buildRuntimeStatusCardViewModel + buildJobStatusSummaryViewModel → setSnapshot;renderPatch 三 source 统一"重算 VM 写 store"(语义收敛点,S9 对照验证);finishedAtFallback 用 currentJobStore。
+- **StatusCard.jsx**(id="job-status-card", render vào #status-section): useStoreSnapshot(statusCardStore) snapshot đầy đủ; cancel → services.jobRuntime.cancelCurrentJob().
+- **StageFlow.jsx / SubstageFlow.jsx / ProgressBlock.jsx / ResultActions.jsx / StageRetry.jsx**: tất cả được điều khiển bởi VM thuần job-status/; StageRetry dispatch APP_EVENTS.retryStage.
+- **useElapsedTicker.js**: tick 1s + buildElapsedViewModel(job/elapsed-view-model.js), dừng ở terminal; elapsed không lưu trong store (sẽ gây thay đổi snapshot liên tục).
+- **useStageSelection.js**: selectedStageKey/manual useState; reset khi đổi job, xóa manual khi stage tiến (ngữ nghĩa selection.js:45-64).
+- **status-card-store.js**(mới)+ statusCardPresenter(~80 dòng): renderMain = buildRuntimeStatusCardViewModel + buildJobStatusSummaryViewModel → setSnapshot; renderPatch gộp ba nguồn thành "tính lại VM ghi store" (điểm hội tụ ngữ nghĩa, kiểm tra chéo S9); finishedAtFallback dùng currentJobStore.
 
-## 3. 订阅设计(1s 轮询不重渲整格)
+## 3. Thiết kế subscription (thăm dò 1s không render lại toàn bộ lưới)
 
-1. 网格单点订阅:Library 组件无 selector 全快照(重渲 grid 函数本体便宜)。
-2. **卡片 memo + 签名比较**:cardSignatureOf(item) 生成 primitive 串(imageCacheVersionOf 字段集 ∪ title/display_name/page_count/cover_url/thumbnail_url/stage_detail/runtime_status.detail);只有活跃卡签名变才重渲。**不做 per-card store 订阅**(收益零)。
-3. 回调稳定:onSelect 等直接引用 composition 单例 actions,不包内联箭头。
-4. selector 必须模块顶层定义(use-store 的 getSnapshot useCallback 依赖它)。
-5. StatusCard 整快照;elapsed 由 ticker 局部驱动。
+1. Subscription đơn lưới: Thành phần Library dùng snapshot đầy đủ không selector (render lại hàm lưới rất rẻ).
+2. **Memo thẻ + so sánh chữ ký**: cardSignatureOf(item) tạo chuỗi nguyên thủy (tập trường imageCacheVersionOf ∪ title/display_name/page_count/cover_url/thumbnail_url/stage_detail/runtime_status.detail); chỉ thay đổi chữ ký thẻ đang hoạt động mới kích hoạt render lại. **Không dùng subscription store riêng cho mỗi thẻ** (không có lợi).
+3. Ổn định callback: onSelect v.v. tham chiếu trực tiếp action singleton composition, không dùng arrow function nội tuyến.
+4. Selector phải được định nghĩa ở đầu module (use‑store getSnapshot useCallback phụ thuộc vào điều này).
+5. StatusCard nhận snapshot đầy đủ; elapsed được điều khiển cục bộ bởi ticker.
 
-store 频率:recentJobsStore ~1-3 次/s、currentJobStore 1 次/s、secondaryResourceStore 3-5s 级、statusCardStore 1 次/s、libraryViewStore 稀疏。
+Tần suất store: recentJobsStore ~1-3/s, currentJobStore 1/s, secondaryResourceStore ~3-5s, statusCardStore 1/s, libraryViewStore thưa thớt.
 
-## 4. 生命周期(bootstrap → composition)
+## 4. Vòng đời (bootstrap → composition)
 
-**所有定时器留在 React 之外**(已活在保留引擎里);composition 模块级单例,entry.jsx 先建后 render,与 StrictMode 解耦。
+**Tất cả timer nằm ngoài React** (đã tồn tại trong các engine được giữ); composition singleton cấp module, entry.jsx tạo trước khi render, tách biệt khỏi StrictMode.
 
-createHomeComposition() 要点:
+Các điểm createHomeComposition():
 - statusCardStore + statusCardPresenter;
-- mountJobRuntimeFeature({state, api 端口原样, renderJob→presenter.renderMain, renderJobSecondaryPatch→presenter.renderPatch, setText/setWorkflowSections/…由先行迁移的 app-shell/upload/workflow/status-detail React 特性提供, shellViewPort, libraryEventPort, resetStatePort});
-- createRecentJobsReactViewPort + mountRecentJobsFeature(fetch* 原样, startPolling/currentJobId 接 jobRuntimeFeature, readerPort/stageAdapterPort 平移 bootstrap 对应文件实现, statePort);
-- document 监听:openReaderRequested(平移 payloads.js:55-68)、retryStage → jobRuntimeFeature.retryStage;
-- startup 路由:URL ?job_id= 启动轮询(平移 startup-route.js:49-59)。
+- mountJobRuntimeFeature({state, api ports giữ nguyên, renderJob→presenter.renderMain, renderJobSecondaryPatch→presenter.renderPatch, setText/setWorkflowSections/… do các feature React app‑shell/upload/workflow/status-detail đã di chuyển cung cấp, shellViewPort, libraryEventPort, resetStatePort});
+- createRecentJobsReactViewPort + mountRecentJobsFeature(fetch* giữ nguyên, startPolling/currentJobId từ jobRuntimeFeature, readerPort/stageAdapterPort nâng từ các tệp bootstrap tương ứng, statePort);
+- Listener document: openReaderRequested (nâng payloads.js:55-68), retryStage → jobRuntimeFeature.retryStage;
+- Route khởi động: URL ?job_id= bắt đầu thăm dò (nâng startup-route.js:49-59).
 
-溶解的 bootstrap 文件 ~20 个(startup-route*、job-*-port、mount-job-features 半边、main-shell-event-bindings 两行等),cutover 删。
+Giải thể ~20 tệp bootstrap (startup-route*, job-*-port, một nửa mount-job-features, main-shell-event-bindings hai dòng, v.v.), xóa khi cutover.
 
-顺序保证:composition 先 mount(首次 load 同步发)→ React render;useSyncExternalStore 首读拿现值。
+Đảm bảo thứ tự: composition mount trước (tải ban đầu gửi đồng bộ) → React render; useSyncExternalStore đọc lần đầu nhận giá trị hiện tại.
 
-## 5. 事件契约
+## 5. Hợp đồng sự kiện
 
-- library* 三个 document CustomEvent、命令总线、open/close-translation-workflow、status-area-visibility-changed:**全部原样保留**,React 组件不直接消费(全走 store),composition 里的 bindings.js 继续跑。
-- **前置契约**:workflow React 特性必须继续 dispatch open/close 事件,否则库刷新永久挂起(风险 5)。
-- StageRetry 继续 dispatch retryStage;event-name-contracts 已扫 .jsx。
-- 本步落地 src/shared/react/use-app-event.js(供 status-detail/workflow 消费)+ 单测。
+- Ba document CustomEvent library*, command bus, open/close-translation-workflow, status-area-visibility-changed: **tất cả giữ nguyên**, thành phần React không tiêu thụ trực tiếp (tất cả qua store), composition bindings.js tiếp tục chạy.
+- **Điều kiện tiên quyết**: feature React workflow phải tiếp tục dispatch sự kiện open/close, nếu không làm mới thư viện bị treo vĩnh viễn (rủi ro 5).
+- StageRetry tiếp tục dispatch retryStage; event-name-contracts đã quét .jsx.
+- Bước này đưa vào src/shared/react/use-app-event.js (cho status-detail/workflow tiêu thụ) + unit test.
 
-## 6. 测试映射
+## 6. Ánh xạ test
 
-- **零改动保活**:recent-jobs.test.mjs 的 state/pagination/commit/loader/refresh-scheduler/active-refresh/actions/runtime-patches/commands/command-handlers 段;job-runtime.test.mjs 的 controller/polling/secondary/render-context 段;status-card.test.mjs 中 import 自 job-status/ 的 VM 段(约七成);library-* 与 use-store-hook。
-- **随视图死**:recent-jobs.test.mjs 的 view/list-rendering/list-events/host/render-target/view-state/store-renderer 段;status-card.test.mjs 的 components/status 壳段(buildProgressRenderModel、progress-animation 用例**迁移**指向新 pages 文件,断言不变);job-runtime.test.mjs 依赖 ui/ 的段。
-- **新增 Top10**:①库网格渲染+smoke 契约;②卡片交互(select/delete popover/reader/键盘);③**卡片渲染隔离**(replaceItem 单卡,其余 23 卡渲染计数不变——memo 回归锚);④viewPort×store 状态机;⑤StatusCard 契约(stage flow/substage/retry/result actions/data-status/ring ids);⑥阶段选择语义;⑦staged 动画(fake timer 120ms);⑧statusCardPresenter 三 source;⑨composition 集成(首屏 load、job-updated 补丁、workflow 挂起);⑩useRecentJobCover(缓存/竞态/不 revoke)。
+- **Giữ nguyên không đổi**: các section state/pagination/commit/loader/refresh-scheduler/active-refresh/actions/runtime-patches/commands/command-handlers trong recent-jobs.test.mjs; controller/polling/secondary/render-context trong job-runtime.test.mjs; các section VM import từ job-status/ trong status-card.test.mjs (~70%); library-* và use-store-hook.
+- **Chết cùng view**: các section view/list-rendering/list-events/host/render-target/view-state/store-renderer trong recent-jobs.test.mjs; các section shell components/status trong status-card.test.mjs (buildProgressRenderModel, test progress-animation **được di chuyển** sang tệp pages mới, assertion không đổi); các section phụ thuộc ui/ trong job-runtime.test.mjs.
+- **Top10 mới**: ① render lưới thư viện + hợp đồng smoke; ② tương tác thẻ (chọn/xóa popover/trình đọc/bàn phím); ③ **cách ly render thẻ** (replaceItem một thẻ, 23 thẻ còn lại không thay đổi số lần render — neo hồi quy memo); ④ máy trạng thái viewPort×store; ⑤ hợp đồng StatusCard (stage flow/substage/retry/result actions/data‑status/ring ids); ⑥ ngữ nghĩa chọn stage; ⑦ animation theo giai đoạn (fake timer 120ms); ⑧ statusCardPresenter ba nguồn; ⑨ tích hợp composition (tải ban đầu, vá job‑updated, workflow suspend); ⑩ useRecentJobCover (cache/race/không thu hồi).
 
-## 7. 施工顺序(每步 npm test 全绿;cutover 前 12 基线天然不动)
+## 7. Thứ tự xây dựng (npm test xanh sau mỗi bước; 12 baseline tự nhiên không bị chạm trước cutover)
 
-S1 store+viewPort+composition 雏形 → S2 RecentJobCard+cover hook → S3 Library+autoload+搜索 → S4 statusCardStore+presenter+接 jobRuntime → S5 StatusCard 静态结构 → S6 动画孤岛(lottie+staged) → S7 交互闭环(选择/elapsed/cancel/retry) → S8 事件桥全量 → S9 双轨手验(watch:js + 真实后端 + mock=parallel)→ cutover(换入口、删死文件+5 处默认参数、删测试段、4 基线+全套 smoke)。
+S1 skeleton store+viewPort+composition → S2 RecentJobCard+cover hook → S3 Library+autoload+tìm kiếm → S4 statusCardStore+presenter+kết nối jobRuntime → S5 cấu trúc tĩnh StatusCard → S6 đảo animation (lottie+staged) → S7 vòng tương tác (chọn/elapsed/hủy/retry) → S8 cầu sự kiện đầy đủ → S9 kiểm tra thủ công hai luồng (watch:js + backend thật + mock=song song) → cutover (chuyển entry, xóa tệp chết + 5 tham số mặc định, xóa section test, 4 baseline + smoke đầy đủ).
 
-## 8. 风险与缓解
+## 8. Rủi ro và biện pháp giảm thiểu
 
-1. **staged 动画时序(最高)**:displayedProgressByStage 必须 useRef;新快照按 shouldAnimateRenderPageProgress 决定续跑/跳变;换 job reset。误用 useState 会每 tick 重渲+闭包旧值。
-2. **lottie 竞态**:desiredKey 三重检查原样保留;status-section 用 CSS hidden 而非卸载(动画实例存活语义)。
-3. **objectURL**:模块级缓存从不 revoke,React 卸载**不得** revoke;invalidate 只走 invalidateRecentJobImages。
-4. **刷新节流语义**:lastRefreshAt 写入时机是故意行为,禁止重排;测试段保活即锚。
-5. **workflow 挂起死锁**:isWorkflowOpen 由 composition 注入读 workflow store;集成测覆盖 开→关→300ms 刷新。
-6. **首帧 placeholder**:presenter 必须在 startPolling 同步链内写 store(否则闪空卡,status-dialog 基线抓)。
-7. **DOM 契约**:含 --status-ring-percent、--status-substage-count CSS 变量、aria-selected、data-stage-key;dom-ids 常量 + 契约测试逐 id 断言。
-8. **深克隆地板**:现状已担同等成本;不得 per-card selector 里 items.find。
-9. **默认参数断链**:cutover 同 commit 改 5 处必传。
-10. **renderPatch 收敛**:React 整卡 diff 理论等价;S9 以 mock=parallel + 失败任务双路径对照。
+1. **Thời gian animation theo giai đoạn (cao nhất)**: displayedProgressByStage phải dùng useRef; snapshot mới quyết định continue/jump dựa trên shouldAnimateRenderPageProgress; đổi job thì reset. Dùng useState sẽ render lại mỗi tick và bắt closure cũ.
+2. **Race lottie**: desiredKey triple‑check giữ nguyên; status‑section dùng CSS hidden, không unmount (instance animation vẫn sống).
+3. **objectURL**: cache cấp module không bao giờ thu hồi; React unmount **không được** thu hồi; vô hiệu hóa chỉ qua invalidateRecentJobImages.
+4. **Ngữ nghĩa giới hạn tốc độ làm mới**: thời điểm ghi lastRefreshAt là cố ý; không sắp xếp lại; test keep‑alive là neo.
+5. **Deadlock workflow suspend**: isWorkflowOpen được tiêm từ composition đọc workflow store; test tích hợp bao phủ open→close→300ms refresh.
+6. **Placeholder khung hình đầu**: presenter phải ghi store đồng bộ trong chuỗi startPolling (nếu không sẽ flash trống, baseline status‑dialog phát hiện).
+7. **Hợp đồng DOM**: bao gồm biến CSS --status-ring-percent, --status-substage-count, aria‑selected, data‑stage‑key; hằng số dom‑ids + test hợp đồng khẳng định từng id.
+8. **Sàn deep clone**: chi phí hiện tại đã chịu; không dùng items.find trong selector riêng thẻ.
+9. **Phá vỡ tham số mặc định**: cutover thay đổi 5 chỗ thành bắt buộc.
+10. **Hội tụ renderPatch**: Diff toàn thẻ React tương đương về lý thuyết; S9 kiểm tra chéo với mock=song song + hai đường dẫn failure task.
 
-## 关键文件
-- features/recent-jobs/controller.js(viewPort 注入点)
-- features/job-runtime/controller.js(轮询引擎 payload 契约)
-- job-status/status-card-runtime-source.js(状态卡唯一 VM 源)
-- components/status/job-status-card.js(StatusCard.jsx 行为镜像基准)
-- src/shared/react/use-store.js(订阅基座)
+## Tệp chính
+- features/recent-jobs/controller.js(điểm tiêm viewPort)
+- features/job-runtime/controller.js(hợp đồng payload engine thăm dò)
+- job-status/status-card-runtime-source.js(nguồn VM thẻ trạng thái duy nhất)
+- components/status/job-status-card.js(baseline phản chiếu hành vi StatusCard.jsx)
+- src/shared/react/use-store.js(nền tảng subscription)

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 720" fill="none">
-  <!-- branches -->
+  <!-- cành -->
   <g stroke="#2f6f5e" stroke-linecap="round" fill="none">
     <path d="M-8 20 C 42 46 76 90 92 150 C 104 196 110 244 108 298" stroke-width="3.6"/>
     <path d="M90 140 C 124 154 148 182 160 220" stroke-width="2.2"/>
@@ -9,7 +9,7 @@
     <path d="M90 418 C 108 424 122 436 130 454" stroke-width="1.3"/>
   </g>
 
-  <!-- blossom, upper -->
+  <!-- hoa nở, vùng trên -->
   <g transform="translate(166 240) rotate(10)">
     <g stroke="#5a6b5c" stroke-width="1.1" fill="none">
       <circle cx="0" cy="-7" r="7"/>
@@ -36,14 +36,14 @@
     </g>
   </g>
 
-  <!-- half-open blossom on twig tip -->
+  <!-- nửa nụ hoa ở ngọn cành nhỏ -->
   <g transform="translate(150 296)">
     <path d="M-7 3 C -7 -4 -4 -8 0 -8 C 4 -8 7 -4 7 3 C 4 1 -4 1 -7 3 Z" stroke="#5a6b5c" stroke-width="1.1" fill="none"/>
     <path d="M-5 -1 C -3 -4 3 -4 5 -1" stroke="#5a6b5c" stroke-width="0.9" fill="none"/>
     <circle cx="0" cy="-4" r="1" fill="#b85c38"/>
   </g>
 
-  <!-- blossom, lower -->
+  <!-- hoa nở, vùng dưới -->
   <g transform="translate(132 460) rotate(-14) scale(0.85)">
     <g stroke="#5a6b5c" stroke-width="1.1" fill="none">
       <circle cx="0" cy="-7" r="7"/>
@@ -70,7 +70,7 @@
     </g>
   </g>
 
-  <!-- buds with stems -->
+  <!-- lộc non với cuống -->
   <g stroke="#2f6f5e" stroke-width="1" stroke-linecap="round" fill="none">
     <path d="M184 264 C 185 265.5 185 266 184.5 267.5"/>
     <path d="M142 275 C 141.5 273 141 272 140.5 271"/>
@@ -84,7 +84,7 @@
     <circle cx="96" cy="125" r="2.8"/>
   </g>
 
-  <!-- moss dots -->
+  <!-- chấm rêu -->
   <g fill="#2f6f5e" opacity="0.6">
     <circle cx="98" cy="182" r="1.3"/>
     <circle cx="104" cy="330" r="1.2"/>

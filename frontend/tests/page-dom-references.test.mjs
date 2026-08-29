@@ -3,29 +3,27 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-// detail.html / reader.html 现由 esbuild 打包的 dist/{detail,reader}.bundle.js 挂载 React
-// 树(Phase 1 / 2b cutover),但 src/js/job-detail、src/js/reader 下保留的纯逻辑仍以
-// 字符串字面量引用 DOM id/class,esbuild 不做这类校验:id 改名、typo、删掉 CSS 类都只会
-// 在运行时静默失效(dom/query.js 的守卫会吞掉 null)。本测试交叉校验:job-detail / reader
-// 目录下 JS 出现的每个 "detail-*" / "reader-*" 字符串字面量,必须能在对应页面 HTML 的
-// id/class、src/styles 的类定义、src/pages/{detail,reader} 的 JSX(id=.../className=...),
-// 或 JS 自建元素(id="...")中找到归属。
+// detail.html / reader.html hiện được gắn cây React bởi dist/{detail,reader}.bundle.js do esbuild đóng gói
+// (Phase 1 / 2b cutover), nhưng logic thuần còn giữ lại dưới src/js/job-detail, src/js/reader vẫn dùng
+// string literal để tham chiếu DOM id/class, esbuild không thực hiện loại kiểm tra này: đổi tên id, typo, xóa class CSS đều chỉ
+// âm thầm失效 lúc runtime (guard của dom/query.js sẽ nuốt null). Kiểm thử này cross-validate: mỗi string literal "detail-*" / "reader-*" xuất hiện trong JS dưới thư mục job-detail / reader
+// phải tìm thấy归属 trong id/class của HTML trang tương ứng, định nghĩa class trong src/styles, JSX của src/pages/{detail,reader} (id=.../className=...),
+// hoặc phần tử tự xây dựng trong JS (id="...").
 //
-// home 页(index.html / src/pages/home)未纳入本文件:home 没有单一 id 前缀约定(各 feature
-// 域各自命名),用 tests/home-app-component.test.mjs(渲染 HomeApp 断言契约 id)+ 各域
-// *-component.test.mjs(如 recent-jobs-library-component / status-card-component 等,
-// 渲染实际 React 树断言 DOM 契约)覆盖,是比这里的字符串字面量扫描更强的检查——直接渲染
-// 组件断言真实 DOM,而不是扫描源码里的字符串猜测归属。Phase 4 复核确认此判断仍然成立,
-// 不需要把 home 补进本文件。
+// Trang home (index.html / src/pages/home) không được đưa vào file này: home không có quy ước tiền tố id đơn lẻ (các miền feature
+// tự đặt tên), dùng tests/home-app-component.test.mjs (render HomeApp để assert contract id) + các *-component.test.mjs của từng miền
+// (như recent-jobs-library-component / status-card-component v.v., render cây React thực tế để assert DOM contract) để bao phủ, là kiểm tra mạnh hơn so với quét string literal ở đây — trực tiếp render
+// component để assert DOM thật, thay vì quét string trong mã nguồn để đoán归属. Phase 4 rà soát xác nhận判断 này vẫn đúng,
+// không cần bổ sung home vào file này.
 
 const PROJECT_ROOT = process.cwd();
 const STYLES_ROOT = join(PROJECT_ROOT, "src/styles");
 
-// 已确认的历史遗留引用(运行时元素/类确实不存在)。新增条目前必须先人工确认,
-// 并注明原因;一旦引用恢复归属,下方的 hygiene 用例会强制从这里移除。
+// Tham chiếu遗留 đã xác nhận (phần tử/class thực sự không tồn tại lúc runtime). Trước khi thêm mục mới phải xác nhận thủ công,
+// và ghi rõ lý do; một khi tham chiếu khôi phục归属,用例 hygiene bên dưới sẽ bắt buộc loại bỏ khỏi đây.
 const KNOWN_ORPHANS = {
   "src/js/job-detail": Object.freeze([
-    // 模板生成的类,src/styles 中没有对应规则(无样式 div)
+    // Class do template生成, không có quy tắc tương ứng trong src/styles (div không có style)
     "detail-artifact-meta",
   ]),
   "src/js/reader": Object.freeze([]),
@@ -36,17 +34,17 @@ const PAGES = [
     jsDir: "src/js/job-detail",
     prefix: "detail",
     htmlFile: "detail.html",
-    // Phase 1 cutover 后 detail.html 只剩 #detail-root 挂载点,页面骨架
-    // (id/class)改由 React 树渲染:归属校验需要扫描新世界 JSX 的
-    // id="..." 与 className="..."(保留的旧纯逻辑仍按 id 写这些节点)。
+    // Sau Phase 1 cutover, detail.html chỉ còn điểm gắn #detail-root, khung trang
+    // (id/class) do cây React render: kiểm tra归属 cần quét JSX của thế giới mới
+    // id="..." và className="..." (logic thuần cũ còn giữ lại vẫn viết các node này theo id).
     jsxDir: "src/pages/detail",
   },
   {
     jsDir: "src/js/reader",
     prefix: "reader",
     htmlFile: "reader.html",
-    // Phase 2b cutover 后 reader.html 只剩 #reader-root 挂载点,页面骨架
-    // (id/class)改由 React 树渲染(照 detail 先例扫描新世界 JSX)。
+    // Sau Phase 2b cutover, reader.html chỉ còn điểm gắn #reader-root, khung trang
+    // (id/class) do cây React render (theo tiền lệ detail, quét JSX thế giới mới).
     jsxDir: "src/pages/reader",
   },
 ];
@@ -94,7 +92,7 @@ function collectOwnership(htmlText, jsTexts, cssText, jsxTexts = []) {
       classes.add(name);
     }
   }
-  // React 页面骨架:JSX 的 className 等价于旧 HTML 的 class 归属
+  // Khung trang React: className của JSX tương đương với归属 class của HTML cũ
   for (const text of jsxTexts) {
     for (const match of text.matchAll(/className="([^"]+)"/g)) {
       for (const name of match[1].split(/\s+/)) {
@@ -112,7 +110,7 @@ function isOwned(literal, ownership) {
   if (ownership.ids.has(literal) || ownership.classes.has(literal)) {
     return true;
   }
-  // 复合 id 模式,如 showReaderPaneEmpty 用 "reader-pdf" 拼出 "reader-pdf-wrap"
+  // Chế độ id phức hợp, ví dụ showReaderPaneEmpty dùng "reader-pdf" để ghép thành "reader-pdf-wrap"
   const family = `${literal}-`;
   for (const id of ownership.ids) {
     if (id.startsWith(family)) {
@@ -123,7 +121,7 @@ function isOwned(literal, ownership) {
 }
 
 function analyzePage({ jsDir, prefix, htmlFile, jsxDir = "" }) {
-  // TS 迁移后源文件是 .ts/.tsx；仍兼容残留 .js/.jsx
+  // Sau migration TS, file nguồn là .ts/.tsx; vẫn tương thích với .js/.jsx còn sót lại
   const jsFiles = [
     ...walkFiles(join(PROJECT_ROOT, jsDir), ".ts"),
     ...walkFiles(join(PROJECT_ROOT, jsDir), ".js"),
@@ -149,9 +147,9 @@ function analyzePage({ jsDir, prefix, htmlFile, jsxDir = "" }) {
 for (const page of PAGES) {
   const allowlist = new Set(KNOWN_ORPHANS[page.jsDir]);
 
-  test(`${page.jsDir} 的 ${page.prefix}-* 引用在 ${page.htmlFile}/样式/模板中有归属`, () => {
+  test(`Tham chiếu ${page.prefix}-* của ${page.jsDir} có归属 trong ${page.htmlFile}/style/template`, () => {
     const { literals, ownership } = analyzePage(page);
-    assert.ok(literals.size > 0, `未在 ${page.jsDir} 中找到任何 ${page.prefix}-* 字面量,检查扫描逻辑`);
+    assert.ok(literals.size > 0, `Không tìm thấy bất kỳ literal ${page.prefix}-* nào trong ${page.jsDir}, kiểm tra logic quét`);
     const orphans = [];
     for (const [literal, file] of literals) {
       if (!isOwned(literal, ownership) && !allowlist.has(literal)) {
@@ -161,12 +159,12 @@ for (const page of PAGES) {
     assert.deepEqual(
       orphans,
       [],
-      `以下引用在 ${page.htmlFile} 的 id/class、src/styles 类定义、JS 自建元素中均不存在,` +
-        `会在运行时静默失效:\n  ${orphans.join("\n  ")}`,
+      `Các tham chiếu sau không tồn tại trong id/class của ${page.htmlFile}, định nghĩa class của src/styles, hoặc phần tử tự xây dựng trong JS,` +
+        `sẽ âm thầm失效 lúc runtime:\n  ${orphans.join("\n  ")}`,
     );
   });
 
-  test(`${page.jsDir} 的 KNOWN_ORPHANS 清单没有过期条目`, () => {
+  test(`Danh sách KNOWN_ORPHANS của ${page.jsDir} không có mục hết hạn`, () => {
     const { literals, ownership } = analyzePage(page);
     const stale = [];
     for (const literal of allowlist) {
@@ -177,7 +175,7 @@ for (const page of PAGES) {
     assert.deepEqual(
       stale,
       [],
-      `以下 KNOWN_ORPHANS 条目已不再是孤儿(引用被删除或已恢复归属),请从清单移除:${stale.join(", ")}`,
+      `Các mục KNOWN_ORPHANS sau không còn là orphan (tham chiếu đã bị xóa hoặc đã khôi phục归属), vui lòng loại bỏ khỏi danh sách: ${stale.join(", ")}`,
     );
   });
 }

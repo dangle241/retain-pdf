@@ -19,8 +19,8 @@ def _relative_payload_path(translations_dir: Path, translation_path: Path) -> st
     try:
         return translation_path.resolve().relative_to(translations_dir.resolve()).as_posix()
     except ValueError:
-        raise RuntimeError(
-            f"Translation payload path must be under translations_dir: {translation_path}"
+            raise RuntimeError(
+            f"Đường dẫn payload dịch phải nằm trong translations_dir: {translation_path}"
         )
 
 
@@ -99,34 +99,34 @@ def load_translation_manifest_file(manifest_path: Path, *, translations_dir: Pat
 
     schema = str(payload.get("schema", "") or "")
     if schema != TRANSLATION_MANIFEST_SCHEMA:
-        raise RuntimeError(f"Unsupported translation manifest schema: {schema or '<missing>'}")
+        raise RuntimeError(f"Lược đồ manifest dịch không được hỗ trợ: {schema or '<missing>'}")
 
     pages = payload.get("pages")
     if not isinstance(pages, list):
-        raise RuntimeError(f"Invalid translation manifest pages: {manifest_path}")
+        raise RuntimeError(f"Trang manifest dịch không hợp lệ: {manifest_path}")
 
     translation_paths: dict[int, Path] = {}
     for page in pages:
         if not isinstance(page, dict):
-            raise RuntimeError(f"Invalid translation manifest page entry: {manifest_path}")
+            raise RuntimeError(f"Mục trang manifest dịch không hợp lệ: {manifest_path}")
         page_index = int(page.get("page_index"))
         raw_path = str(page.get("path", "") or "").strip()
         if not raw_path:
-            raise RuntimeError(f"Translation manifest page {page_index} is missing path")
+            raise RuntimeError(f"Trang {page_index} của manifest dịch thiếu đường dẫn")
         translation_path = Path(raw_path)
         if translation_path.is_absolute():
             raise RuntimeError(
-                f"Translation manifest page {page_index} uses absolute payload path: {raw_path}"
+                f"Trang {page_index} của manifest dịch dùng đường dẫn payload tuyệt đối: {raw_path}"
             )
         translation_path = base_dir / translation_path
         try:
             translation_path.resolve().relative_to(resolved_base_dir)
         except ValueError as exc:
             raise RuntimeError(
-                f"Translation manifest page {page_index} payload path escapes translations_dir: {raw_path}"
+                f"Đường dẫn payload của trang {page_index} trong manifest dịch thoát khỏi translations_dir: {raw_path}"
             ) from exc
         if page_index in translation_paths:
-            raise RuntimeError(f"Duplicate translation manifest page index: {page_index}")
+            raise RuntimeError(f"Chỉ số trang manifest dịch trùng lặp: {page_index}")
         translation_paths[page_index] = translation_path
     return translation_paths
 

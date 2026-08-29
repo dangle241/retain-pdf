@@ -5,7 +5,7 @@ import re
 
 MODEL_REQUEST_PROMPT_RE = re.compile(
     r"^(?:"
-    r"请\s*(?:提供|输入|给出|粘贴|发送)\s*(?:待翻译的?)?\s*(?:原文|文本|内容|source)(?:[。.!！?？\s]*)|"
+    r"|"
     r"(?:please\s+)?(?:provide|send|enter|paste)\s+(?:the\s+)?(?:source\s+)?(?:text|content)(?:\s+to\s+translate)?(?:[。.!！?？\s]*)"
     r")$",
     re.I,
