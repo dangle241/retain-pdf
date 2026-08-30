@@ -1,5 +1,5 @@
-// BookDetailDialog —— 容器：组合 hooks + shell/tabs。
-// 业务状态见 use-book-detail-*.js；UI 见 shell / tabs / panels。
+// BookDetailDialog: container ghép hook + shell/tab.
+// Trạng thái nghiệp vụ ở use-book-detail-*.js; UI ở shell / tabs / panels.
 
 import { useEffect, useState } from "react";
 import { useHomeServices } from "../../../home-services-context.js";
@@ -27,11 +27,11 @@ import {
 } from "../../../composition/external.js";
 
 function statusOf(item) {
-  if (isLibraryOnlyItem(item)) return { label: "未翻译", tone: "muted" };
+  if (isLibraryOnlyItem(item)) return { label: "Chưa dịch", tone: "muted" };
   if (isRecentJobActive(item)) return { label: recentJobStageLabel(item), tone: "active" };
   const status = `${item.status || ""}`.trim();
-  if (status === "succeeded") return { label: "已完成", tone: "done" };
-  if (status === "failed") return { label: "失败", tone: "failed" };
+  if (status === "succeeded") return { label: "Đã hoàn tất", tone: "done" };
+  if (status === "failed") return { label: "Thất bại", tone: "failed" };
   return { label: recentJobStatusLabel(status), tone: "muted" };
 }
 
@@ -60,12 +60,12 @@ export function BookDetailDialog() {
   const canTranslate = libraryOnly || `${item.status || ""}`.trim() === "failed";
   const isActive = isRecentJobActive(item)
     || ["running", "queued", "pending"].includes(cardStatus);
-  // 封面转圈：书架 live 行 + statusCard 正在跑（重试后 payload 可能仍是旧 succeeded）
+  // Bìa xoay khi dòng live giá sách + statusCard đang chạy; sau thử lại payload có thể vẫn là succeeded cũ.
   const coverProcessing = isActive
     || isLibraryCardProcessing(item)
     || (Boolean(cardJobId) && ["running", "queued", "pending"].includes(cardStatus));
 
-  // 点「翻译整本」/ 网格选中活跃任务：强制翻译 Tab，进度在 bd-job-status-inner
+  // Bấm "Dịch toàn bộ" / chọn tác vụ hoạt động trong lưới: buộc tab Dịch, tiến độ ở bd-job-status-inner.
   const [preferTranslateTab, setPreferTranslateTab] = useState(false);
   useEffect(() => {
     if (!open) {

@@ -23,12 +23,12 @@ test("buildErrorDiagnostic formats copyable frontend diagnostics", () => {
   });
 
   assert.equal(diagnostic.kind, "error-diagnostic");
-  assert.equal(diagnostic.summary, "下载译文 PDF失败：backend unavailable");
-  assert.match(diagnostic.diagnostic, /时间: 2026-06-18T12:00:00\.000Z/);
-  assert.match(diagnostic.diagnostic, /前端版本: /);
-  assert.match(diagnostic.diagnostic, /操作: 下载译文 PDF/);
+  assert.equal(diagnostic.summary, "下载译文 PDF thất bại: backend unavailable");
+  assert.match(diagnostic.diagnostic, /Thời gian: 2026-06-18T12:00:00\.000Z/);
+  assert.match(diagnostic.diagnostic, /Phiên bản frontend: /);
+  assert.match(diagnostic.diagnostic, /Thao tác: 下载译文 PDF/);
   assert.match(diagnostic.diagnostic, /job_id: job-1/);
-  assert.match(diagnostic.diagnostic, /HTTP 状态码: 503/);
+  assert.match(diagnostic.diagnostic, /Mã trạng thái HTTP: 503/);
   assert.match(diagnostic.diagnostic, /URL: \/api\/v1\/jobs\/job-1\/pdf/);
   assert.match(diagnostic.diagnostic, /workflow: book/);
   assert.doesNotMatch(diagnostic.diagnostic, /should-not-appear/);

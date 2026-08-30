@@ -21,12 +21,9 @@ use super::super::test_support::{
 use super::super::to_absolute_url;
 use super::types::*;
 #[cfg(test)]
-use crate::job_failure::classify_job_failure;
+use crate::job_failure::resolve_job_failure;
 #[cfg(test)]
 use crate::models::public_request_payload;
-#[cfg(test)]
-use crate::models::JobFailureInfo;
-
 pub fn build_job_links(job_id: &str, base_url: &str) -> JobLinksView {
     build_job_links_with_workflow(job_id, &WorkflowKind::Book, base_url)
 }
@@ -290,11 +287,7 @@ pub fn job_to_detail(
         _ => None,
     };
     let stage_snapshot = test_stage_snapshot(job, percent);
-    let failure = job
-        .failure
-        .clone()
-        .map(JobFailureInfo::with_formal_fields)
-        .or_else(|| classify_job_failure(job).map(JobFailureInfo::with_formal_fields));
+    let failure = resolve_job_failure(job);
     JobDetailView {
         job_id: job.job_id.clone(),
         workflow: job.workflow.clone(),
@@ -333,9 +326,10 @@ pub fn job_to_detail(
             title: job.job_id.clone(),
             authors: None,
             page_count: None,
-            source_language: Some(job.request_payload.ocr.language.clone())
+            source_language: Some(job.request_payload.translation.source_language.clone())
                 .filter(|value| !value.trim().is_empty()),
-            target_language: None,
+            target_language: Some(job.request_payload.translation.target_language.clone())
+                .filter(|value| !value.trim().is_empty()),
             source_file_name: None,
             cover_url: None,
             file_size_bytes: None,

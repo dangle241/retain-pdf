@@ -187,7 +187,7 @@ function stripCompatibilityReExports(source) {
 }
 
 function isViewBoundaryModule(filePath) {
-  const fileName = filePath.split("/").pop() || "";
+  const fileName = filePath.split(/[\\/]/).pop() || "";
   return /(?:-view-port|view-port)\.(?:js|ts)$/.test(fileName)
     || /^(?:dialog-elements-port|deepseek-view-port|setup-mode-port|presenter-port|translation-view-port)\.(?:js|ts)$/.test(fileName);
 }

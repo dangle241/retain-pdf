@@ -19,13 +19,22 @@ impl PaddleProviderError {
         err: &reqwest::Error,
         trace_id: Option<&str>,
     ) -> Self {
+        Self::request_failed_after_attempts(stage, err, trace_id, 1)
+    }
+
+    pub fn request_failed_after_attempts(
+        stage: &'static str,
+        err: &reqwest::Error,
+        trace_id: Option<&str>,
+        attempts: usize,
+    ) -> Self {
         if let Some(status) = err.status() {
             return Self::http_status(
                 stage,
                 status,
                 &err.to_string(),
                 trace_id,
-                Some("Paddle HTTP 请求返回错误状态"),
+                Some("Paddle HTTP trả về trạng thái lỗi"),
             );
         }
         let category = if err.is_timeout() {
@@ -33,14 +42,30 @@ impl PaddleProviderError {
         } else {
             OcrErrorCategory::ServiceUnavailable
         };
+        let failure_kind = if err.is_connect() && err.is_timeout() {
+            "Paddle connection timeout"
+        } else if err.is_connect() {
+            "Paddle connection failed"
+        } else if err.is_timeout() {
+            "Paddle request timeout"
+        } else if err.is_body() {
+            "Paddle upload body failed"
+        } else {
+            "Paddle request failed"
+        };
+        let detail = format!(
+            "{failure_kind} after {} attempt(s): {}",
+            attempts.max(1),
+            reqwest_error_detail(err)
+        );
         Self::new(
             stage,
             category,
-            err.to_string(),
+            detail.clone(),
             trace_id,
             None,
-            None,
-            Some("请检查 Paddle 服务可达性、网络连通性和超时配置"),
+            Some(detail),
+            Some("Kiểm tra kết nối Paddle, proxy/VPN và cấu hình timeout rồi thử lại"),
         )
     }
 
@@ -91,11 +116,13 @@ impl PaddleProviderError {
         Self::new(
             stage,
             category,
-            detail.unwrap_or("Paddle HTTP 请求失败").to_string(),
+            detail
+                .unwrap_or("Yêu cầu HTTP tới Paddle thất bại")
+                .to_string(),
             resolved_trace_id.as_deref(),
             provider_code,
             provider_message.or(Some(message)),
-            Some("请检查 Paddle API 地址、Token 和服务状态"),
+            Some("Kiểm tra địa chỉ Paddle API, token và trạng thái dịch vụ"),
         )
         .with_http_status(status.as_u16())
     }
@@ -119,11 +146,11 @@ impl PaddleProviderError {
         Self::new(
             stage,
             category,
-            format!("Paddle 返回 errorCode={provider_code}"),
+            format!("Paddle trả về errorCode={provider_code}"),
             trace_id,
             Some(provider_code.to_string()),
             Some(provider_message.trim().to_string()),
-            Some("请结合 Paddle provider_message 和 trace_id 排查"),
+            Some("Kiểm tra provider_message và trace_id do Paddle trả về"),
         )
     }
 
@@ -139,7 +166,7 @@ impl PaddleProviderError {
             trace_id,
             None,
             None,
-            Some("请检查 Paddle 返回结构是否完整，重点确认 data/jobId/resultUrl.jsonUrl"),
+            Some("Kiểm tra phản hồi Paddle có đủ data, jobId và resultUrl.jsonUrl"),
         )
     }
 
@@ -147,11 +174,11 @@ impl PaddleProviderError {
         Self::new(
             "poll",
             OcrErrorCategory::ProviderFailed,
-            "Paddle 任务执行失败".to_string(),
+            "Tác vụ Paddle thực thi thất bại".to_string(),
             trace_id,
             None,
             Some(provider_message.trim().to_string()),
-            Some("请结合 Paddle provider_message、trace_id 和任务状态继续排查"),
+            Some("Kiểm tra provider_message, trace_id và trạng thái tác vụ Paddle"),
         )
     }
 
@@ -167,7 +194,7 @@ impl PaddleProviderError {
             trace_id,
             None,
             None,
-            Some("请检查 Paddle jsonUrl 是否可访问，或稍后重试"),
+            Some("Kiểm tra Paddle jsonUrl có truy cập được không hoặc thử lại sau"),
         )
         .with_http_status_opt(http_status)
     }
@@ -180,7 +207,7 @@ impl PaddleProviderError {
             trace_id,
             None,
             None,
-            Some("请检查 Paddle JSONL 返回内容是否完整且每行均为合法 JSON"),
+            Some("Kiểm tra dữ liệu JSONL của Paddle có đầy đủ và hợp lệ không"),
         )
     }
 
@@ -192,7 +219,7 @@ impl PaddleProviderError {
             None,
             None,
             None,
-            Some("请检查 Paddle 任务是否长时间卡住，或适当增大轮询超时时间"),
+            Some("Kiểm tra tác vụ Paddle có bị treo hoặc tăng thời gian chờ polling"),
         )
     }
 
@@ -202,10 +229,10 @@ impl PaddleProviderError {
 
     pub fn stage_detail(&self) -> String {
         let prefix = match self.stage {
-            "submit" => "Paddle 提交失败",
-            "poll" => "Paddle 轮询失败",
-            "download" => "Paddle 结果下载失败",
-            _ => "Paddle provider 失败",
+            "submit" => "Gửi tác vụ Paddle thất bại",
+            "poll" => "Kiểm tra trạng thái Paddle thất bại",
+            "download" => "Tải kết quả Paddle thất bại",
+            _ => "Nhà cung cấp Paddle thất bại",
         };
         let message = self
             .info
@@ -267,6 +294,19 @@ impl fmt::Display for PaddleProviderError {
 }
 
 impl Error for PaddleProviderError {}
+
+fn reqwest_error_detail(err: &reqwest::Error) -> String {
+    let mut parts = vec![err.to_string()];
+    let mut source = err.source();
+    while let Some(cause) = source {
+        let message = cause.to_string();
+        if !message.trim().is_empty() && !parts.iter().any(|item| item == &message) {
+            parts.push(message);
+        }
+        source = cause.source();
+    }
+    parts.join(": ")
+}
 
 fn sanitize_body_excerpt(text: &str) -> Option<String> {
     let trimmed = text.trim();

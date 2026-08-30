@@ -7,8 +7,8 @@ import {
 } from "../mock/documents.js";
 import { buildApiEndpoint } from "./http.js";
 
-// 必填:document_id、page_idx、block_id、quote_text(引文快照)。
-// job_id 不传时后端锚定文档的 active_job_id——阅读器里收藏推荐不传。
+// Bắt buộc: document_id, page_idx, block_id, quote_text (ảnh chụp trích dẫn).
+// Nếu không gửi job_id, backend neo vào active_job_id của tài liệu; khuyến nghị không gửi khi lưu trong trình đọc.
 export async function createFavorite(apiPrefix, payload = {}) {
   if (isMockMode()) {
     return createMockFavorite(payload);
@@ -23,12 +23,12 @@ export async function createFavorite(apiPrefix, payload = {}) {
   });
   if (!resp.ok) {
     const envelope = await resp.json().catch(() => null);
-    throw new Error(`${envelope?.message || "创建收藏失败，请稍后重试。"}(${resp.status})`);
+    throw new Error(`${envelope?.message || "Không thể tạo mục yêu thích, vui lòng thử lại sau."} (${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
 
-// 传 documentId 时按页码排序;不传 = 全部收藏,按时间倒序
+// Có documentId thì sắp theo số trang; không có = tất cả mục đã lưu, theo thời gian giảm dần.
 export async function fetchFavorites(apiPrefix, { documentId = "" } = {}) {
   if (isMockMode()) {
     return getMockFavorites({ documentId });
@@ -42,7 +42,7 @@ export async function fetchFavorites(apiPrefix, { documentId = "" } = {}) {
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`读取收藏失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Không thể tải mục yêu thích, vui lòng thử lại sau. (${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -50,7 +50,7 @@ export async function fetchFavorites(apiPrefix, { documentId = "" } = {}) {
 export async function deleteFavorite(apiPrefix, favoriteId) {
   const normalized = `${favoriteId || ""}`.trim();
   if (!normalized) {
-    throw new Error("缺少 favorite_id。");
+    throw new Error("Thiếu favorite_id.");
   }
   if (isMockMode()) {
     return deleteMockFavorite(normalized);
@@ -60,7 +60,7 @@ export async function deleteFavorite(apiPrefix, favoriteId) {
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`删除收藏失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Không thể xóa mục yêu thích, vui lòng thử lại sau. (${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }

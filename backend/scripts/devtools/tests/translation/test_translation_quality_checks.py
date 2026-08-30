@@ -179,6 +179,33 @@ def test_quality_allows_normal_length_chinese_translation() -> None:
     assert "truncated_translation" not in {issue.kind for issue in report.issues}
 
 
+def test_quality_accepts_vietnamese_output_for_english_source() -> None:
+    item = _body_item(
+        "p008-b003",
+        (
+            "The proposed method improves translation consistency while preserving equations, "
+            "technical abbreviations, and the original document layout."
+        ),
+    )
+    translated = (
+        "Phương pháp được đề xuất cải thiện tính nhất quán của bản dịch, đồng thời bảo toàn "
+        "các phương trình, chữ viết tắt kỹ thuật và bố cục tài liệu gốc."
+    )
+
+    report = review_translation_item(
+        item,
+        {"decision": "translate", "translated_text": translated},
+        target_language_name="Tiếng Việt",
+    )
+
+    residue_kinds = {
+        "english_residue",
+        "mixed_english_residue",
+        "english_residue_warning",
+    }
+    assert not residue_kinds.intersection(issue.kind for issue in report.issues)
+
+
 def test_long_english_residue_span_skips_data_dense_nmr_segments() -> None:
     from services.translation.llm.validation.english_residue import _has_long_english_residue_span
 

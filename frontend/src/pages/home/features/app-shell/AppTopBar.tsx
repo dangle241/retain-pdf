@@ -1,9 +1,9 @@
-// 顶部导航区——用户要求去掉白色卡片背景:logo 靠最左、"图书馆/合集/收藏/AI"分栏居中,
-// 直接浮在灰底页面上。添加/搜索/设置 三样都下沉到底部一条浮动栏
+// Vùng điều hướng trên bỏ nền thẻ trắng: logo sát trái, các tab "Thư viện/Bộ sưu tập/Đã lưu/AI" ở giữa,
+// nổi trực tiếp trên nền xám. Thêm/tìm kiếm/cài đặt chuyển xuống một thanh nổi ở đáy.
 // (AppBottomBar.jsx)。
 //
-// 居中做法:logo 左、两侧各一条 flex:1 的 spacer 把 tabs 挤到正中。#developer-btn/
-// #open-output-btn 是契约 id(测试引用),保留在 display:none 的隐藏容器里,不占布局。
+// Cách căn giữa: logo bên trái, spacer flex:1 hai bên đẩy tab vào giữa. #developer-btn/
+// #open-output-btn là id hợp đồng dùng trong test; giữ trong container display:none và không chiếm bố cục.
 
 import { LibraryTopTabs } from "../library/page/LibraryTopTabs.jsx";
 
@@ -21,8 +21,8 @@ export function AppTopBar({ activeTab, onTabChange }) {
           <span>RetainPDF</span>
         </a>
         <div className="hero-actions hidden" aria-hidden="true">
-          <button id="developer-btn" type="button" className="secondary hidden" aria-hidden="true">开发者</button>
-          <button id="open-output-btn" type="button" className="secondary hidden">打开输出目录</button>
+          <button id="developer-btn" type="button" className="secondary hidden" aria-hidden="true">Nhà phát triển</button>
+          <button id="open-output-btn" type="button" className="secondary hidden">Mở thư mục đầu ra</button>
         </div>
         <div className="library-topbar-spacer" aria-hidden="true" />
         <LibraryTopTabs active={activeTab} onChange={onTabChange} />

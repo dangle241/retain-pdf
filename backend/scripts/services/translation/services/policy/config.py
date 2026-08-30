@@ -200,6 +200,7 @@ def build_book_translation_policy_config(
     model: str,
     base_url: str,
     output_dir: Path,
+    target_language_name: str = "Tiếng Việt",
     rule_profile_name: str = DEFAULT_RULE_PROFILE_NAME,
     custom_rules_text: str = "",
     enable_domain_inference: bool | None = None,
@@ -219,6 +220,7 @@ def build_book_translation_policy_config(
                 api_key=api_key,
                 model=model,
                 base_url=base_url,
+                target_language_name=target_language_name,
                 preview_text_fallback=preview_text,
                 output_dir=output_dir,
             )

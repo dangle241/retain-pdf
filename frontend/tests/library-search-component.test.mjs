@@ -92,7 +92,7 @@ test("库检索面板:渲染命中高亮与文档行,状态切换调用 PATCH", 
   assert.ok(host.querySelector(".lib-search-panel"), "面板已渲染");
   assert.equal(host.querySelector(".lib-search-snippet mark")?.textContent, "测试");
   assert.equal(host.querySelector(".lib-search-doc-title")?.textContent, "测试文档");
-  assert.equal(host.querySelector(".lib-search-doc-status")?.textContent, "未读");
+  assert.equal(host.querySelector(".lib-search-doc-status")?.textContent, "Chưa đọc");
 
   host.querySelector(".lib-search-doc-status").dispatchEvent(
     new dom.window.MouseEvent("click", { bubbles: true }),
@@ -100,12 +100,12 @@ test("库检索面板:渲染命中高亮与文档行,状态切换调用 PATCH", 
   {
     // 等乐观更新(setState + 重渲)真正把状态文字变成"在读",而不是猜固定毫秒。
     const deadline = Date.now() + 3000;
-    while (host.querySelector(".lib-search-doc-status")?.textContent !== "在读" && Date.now() < deadline) {
+    while (host.querySelector(".lib-search-doc-status")?.textContent !== "Đang đọc" && Date.now() < deadline) {
       await wait(20);
     }
   }
   assert.deepEqual(patchCalls, [["doc-a", { reading_status: "reading" }]]);
-  assert.equal(host.querySelector(".lib-search-doc-status")?.textContent, "在读", "乐观更新生效");
+  assert.equal(host.querySelector(".lib-search-doc-status")?.textContent, "Đang đọc", "乐观更新生效");
 
   app.unmount();
   host.remove();

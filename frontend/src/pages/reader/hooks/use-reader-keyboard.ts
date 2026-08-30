@@ -1,6 +1,6 @@
-// 阅读器键盘快捷键（输入框内不抢键）。
-// j/↓/PageDown 下页 · k/↑/PageUp 上页 · Home/End 首末页
-// +/- 缩放 · 0 重置模式默认缩放 · 1/2/3 原文/译文/对照
+// Phím tắt trình đọc (không chiếm phím khi ở trong ô nhập).
+// j/↓/PageDown trang sau · k/↑/PageUp trang trước · Home/End trang đầu/cuối.
+// +/- thu phóng · 0 đặt lại mức thu phóng mặc định · 1/2/3 bản gốc/bản dịch/đối chiếu.
 
 import { useEffect } from "react";
 import type { ReaderMode } from "./use-reader-session.js";
@@ -65,7 +65,7 @@ export function useReaderKeyboard(api: ReaderKeyboardApi) {
       const key = event.key;
       const lower = key.length === 1 ? key.toLowerCase() : key;
 
-      // 模式
+      // Chế độ
       if (lower === "1") {
         event.preventDefault();
         setMode("source");
@@ -82,7 +82,7 @@ export function useReaderKeyboard(api: ReaderKeyboardApi) {
         return;
       }
 
-      // 缩放
+      // Thu phóng
       if (key === "+" || key === "=") {
         event.preventDefault();
         onZoomChange(stepReaderZoom(userZoom, 1));
@@ -99,7 +99,7 @@ export function useReaderKeyboard(api: ReaderKeyboardApi) {
         return;
       }
 
-      // 翻页
+      // Chuyển trang
       if (numPages <= 0) {
         return;
       }

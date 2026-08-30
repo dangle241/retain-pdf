@@ -1,5 +1,5 @@
-// 详情「翻译」Tab：页码范围 + 发起翻译 + 静默 attachJobProgress。
-// 进度只在 bd-job-status-inner，不打开工作流弹窗。
+// Tab "Dịch" ở chi tiết: phạm vi trang + bắt đầu dịch + attachJobProgress im lặng.
+// Tiến độ chỉ ở bd-job-status-inner, không mở hộp thoại workflow.
 
 import { useEffect, useState } from "react";
 
@@ -8,10 +8,10 @@ import { useEffect, useState } from "react";
  * @param {boolean} options.open
  * @param {string} options.documentId
  * @param {number} options.pageCount
- * @param {object} options.actions library.actions（含 attachJobProgress / translateDocument）
+ * @param {object} options.actions library.actions (gồm attachJobProgress / translateDocument).
  * @param {(key: string, fn: Function, fail: string) => Promise<void>} options.withBusy
  * @param {(msg: string) => void} options.setError
- * @param {() => void} [options.onTranslateStarted] 成功提交后切到翻译 Tab 等
+ * @param {() => void} [options.onTranslateStarted] Sau khi gửi thành công, chuyển sang tab Dịch, v.v.
  */
 export function useBookDetailTranslate({
   open,
@@ -52,23 +52,23 @@ export function useBookDetailTranslate({
         || e < s
         || (pageCount && e > pageCount)
       ) {
-        setError(`页码范围不合法（1–${pageCount || "总页数"}）`);
+        setError(`Phạm vi trang không hợp lệ (1–${pageCount || "tổng số trang"})`);
         return;
       }
       payload.ocr = { page_ranges: `${s}-${e}` };
       payload.translation = { start_page: s, end_page: e };
     }
-    // 先切到翻译 Tab，保证 bd-job-status-inner 在视口内再接进度
+    // Chuyển sang tab Dịch trước để bd-job-status-inner nằm trong viewport rồi mới nối tiến độ.
     onTranslateStarted?.();
     await withBusy(
       "translate",
       async () => {
-        // promoteDocumentToJob：改详情 payload + silent attachJobProgress
-        // 不 openTranslationWorkflow
+        // promoteDocumentToJob: đổi payload chi tiết + attachJobProgress silent.
+        // Không gọi openTranslationWorkflow.
         await actions.translateDocument(documentId, payload);
         onTranslateStarted?.();
       },
-      "发起翻译失败",
+      "Bắt đầu dịch thất bại",
     );
   }
 

@@ -8,11 +8,11 @@ const __dirname = path.dirname(__filename);
 const frontendRoot = path.resolve(__dirname, "..");
 const outdir = path.join(frontendRoot, "dist");
 
-// --watch: esbuild context 增量重建(开发态:sourcemap 开、minify 关)
+// --watch: context esbuild tái dựng tăng dần (chế độ phát triển: bật sourcemap, tắt minify)
 const watchMode = process.argv.includes("--watch");
 
-// 导入路径仍写 .js/.jsx（兼容存量 import），解析时映射到 .ts/.tsx。
-// TypeScript bundler 约定：import "./foo.js" 可对应 foo.ts。
+// Đường dẫn import vẫn dùng .js/.jsx để tương thích import hiện có; khi phân giải sẽ ánh xạ sang .ts/.tsx.
+// Quy ước bundler TypeScript: import "./foo.js" có thể trỏ tới foo.ts.
 function jsToTsResolvePlugin() {
   const map = new Map([
     [".js", [".ts", ".tsx", ".js"]],
@@ -48,7 +48,7 @@ function jsToTsResolvePlugin() {
   };
 }
 
-// 三页 MPA 各自打包的入口表——home/detail/reader 均已切换到 React 新世界
+// Bảng entry đóng gói riêng cho ba trang MPA: home/detail/reader đều đã chuyển sang React.
 const PAGE_BUNDLES = [
   {
     name: "home",
@@ -67,8 +67,8 @@ const PAGE_BUNDLES = [
   },
 ];
 
-// mathjax-full/js/components/version.js 在未定义 PACKAGE_VERSION 时会
-// eval('require') 读 package.json —— 浏览器 ESM 里直接炸，导致全部公式回退。
+// mathjax-full/js/components/version.js sẽ thực hiện thao tác sau khi PACKAGE_VERSION chưa được định nghĩa:
+// eval('require') để đọc package.json; thao tác này lỗi ngay trong ESM của trình duyệt và khiến mọi công thức phải dùng phương án dự phòng.
 function resolveMathJaxPackageVersion() {
   try {
     const pkgPath = path.join(
@@ -110,7 +110,7 @@ function bundleOptions({ entry, outfile }) {
   };
 }
 
-// 只清 JS 产物，保留 dist/css/（build:css 独立写入；整目录 rm 会把主页样式弄没）
+// Chỉ xóa đầu ra JS và giữ dist/css/ (build:css ghi riêng; xóa cả thư mục sẽ làm mất CSS trang chính).
 fs.mkdirSync(outdir, { recursive: true });
 for (const page of PAGE_BUNDLES) {
   try {
@@ -125,7 +125,7 @@ if (watchMode) {
     PAGE_BUNDLES.map((page) => context(bundleOptions(page))),
   );
   await Promise.all(contexts.map((ctx) => ctx.watch()));
-  console.log(`[watch] 监听中:${PAGE_BUNDLES.map((p) => p.name).join(", ")}(Ctrl+C 退出)`);
+  console.log(`[watch] Đang theo dõi: ${PAGE_BUNDLES.map((p) => p.name).join(", ")} (Ctrl+C để thoát)`);
 } else {
   for (const page of PAGE_BUNDLES) {
     await build(bundleOptions(page));

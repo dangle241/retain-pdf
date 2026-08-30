@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// 视觉回归基线:对三个页面的关键状态截图,与 tests/visual/baseline 对比。
-//   node scripts/visual-check.mjs           # 对比,差异超阈值则退出码 1,diff 图写入 tests/visual/output
-//   node scripts/visual-check.mjs --update  # 重建基线(确认视觉改动符合预期后运行)
-// 全程 mock 模式、冻结时钟,不依赖后端。基线在本机生成,仅用于本机对比。
+// Đường cơ sở hồi quy hình ảnh: chụp các trạng thái chính của ba trang và so sánh với tests/visual/baseline.
+//   node scripts/visual-check.mjs           # So sánh; nếu khác biệt vượt ngưỡng thì thoát mã 1 và ghi ảnh diff vào tests/visual/output
+//   node scripts/visual-check.mjs --update  # Tạo lại đường cơ sở (chạy sau khi xác nhận thay đổi hình ảnh đúng mong đợi)
+// Toàn bộ chạy ở chế độ mô phỏng với đồng hồ cố định, không phụ thuộc backend. Đường cơ sở được tạo cục bộ và chỉ dùng để so sánh trên máy này.
 
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -18,7 +18,7 @@ const OUTPUT_DIR = join(FRONTEND_ROOT, "tests/visual/output");
 const PORT = 40151;
 const FIXED_TIME = new Date("2026-06-01T10:00:00+08:00");
 const MOCK_JOB_ID = "mock-job-20260415";
-// 允许的差异像素占比(抗锯齿等噪音)
+// Tỷ lệ pixel khác biệt cho phép (nhiễu khử răng cưa, v.v.)
 const DIFF_RATIO_THRESHOLD = 0.001;
 
 const STATES = [
@@ -42,7 +42,7 @@ const STATES = [
     url: `/reader.html?mock=succeeded`,
     prepare: async (page) => {
       await page.waitForSelector("#reader-boot-loading.hidden", { state: "attached", timeout: 20000 });
-      // 右栏默认展开会触发 PDF 重排缩放,留足时间让缩放落定再截图(否则 PDF 文本亚像素抖动)
+      // Cột phải mở mặc định sẽ làm PDF bố trí và thu phóng lại; chờ đủ lâu để ổn định trước khi chụp (nếu không, chữ PDF sẽ rung ở mức pixel phụ).
       await page.waitForTimeout(1800);
     },
   },
@@ -52,9 +52,9 @@ const STATES = [
     url: `/reader.html?mock=succeeded`,
     prepare: async (page) => {
       await page.waitForSelector("#reader-boot-loading.hidden", { state: "attached", timeout: 20000 });
-      // 三栏骨架:右栏(AI 问答)默认展开,无需再点开
+      // Bố cục ba cột: cột phải (hỏi đáp AI) mở mặc định, không cần bấm mở.
       await page.waitForSelector("#reader-ai-drawer.is-open", { timeout: 10000 });
-      // 等待右栏展开引发的 PDF 重排缩放落定,避免亚像素抖动
+      // Chờ PDF bố trí và thu phóng lại sau khi cột phải mở để tránh rung ở mức pixel phụ.
       await page.waitForTimeout(1800);
     },
   },
@@ -108,9 +108,9 @@ const STATES = [
     url: `/reader.html?mock=succeeded`,
     prepare: async (page) => {
       await page.waitForSelector("#reader-boot-loading.hidden", { state: "attached", timeout: 20000 });
-      // 右栏默认展开,直接提问(不再点击开合按钮)
+      // Cột phải mở mặc định; đặt câu hỏi trực tiếp, không bấm nút đóng/mở nữa.
       await page.waitForSelector("#reader-ai-drawer.is-open", { timeout: 10000 });
-      await page.fill("#reader-ai-input", "共轭如何影响选择性?");
+      await page.fill("#reader-ai-input", "Sự liên hợp ảnh hưởng đến tính chọn lọc như thế nào?");
       await page.click("#reader-ai-submit-btn");
       await page.waitForSelector(".reader-ai-citation-item", { timeout: 10000 });
       await page.waitForTimeout(600);
@@ -132,7 +132,7 @@ const STATES = [
     url: `/index.html?mock=done`,
     prepare: async (page) => {
       await page.waitForTimeout(1500);
-      await page.fill("#library-search-input", "化学");
+      await page.fill("#library-search-input", "Hóa học");
       await page.waitForSelector(".lib-search-panel", { timeout: 8000 });
       await page.waitForTimeout(800);
     },
@@ -178,7 +178,7 @@ try {
     await page.close();
 
     if (consoleErrors.length) {
-      console.error(`✖ ${state.name}: 页面异常 ${consoleErrors[0]}`);
+      console.error(`✖ ${state.name}: lỗi trang ${consoleErrors[0]}`);
       failures += 1;
       continue;
     }
@@ -186,7 +186,7 @@ try {
     const baselinePath = join(BASELINE_DIR, `${state.name}.png`);
     if (update || !existsSync(baselinePath)) {
       writeFileSync(baselinePath, shot);
-      console.log(`● ${state.name}: 基线已${update ? "更新" : "创建"}`);
+      console.log(`● ${state.name}: đường cơ sở đã được ${update ? "cập nhật" : "tạo"}`);
       continue;
     }
 
@@ -194,7 +194,7 @@ try {
     const current = PNG.sync.read(shot);
     if (baseline.width !== current.width || baseline.height !== current.height) {
       writeFileSync(join(OUTPUT_DIR, `${state.name}.current.png`), shot);
-      console.error(`✖ ${state.name}: 尺寸变化 ${baseline.width}x${baseline.height} -> ${current.width}x${current.height}`);
+      console.error(`✖ ${state.name}: kích thước thay đổi ${baseline.width}x${baseline.height} -> ${current.width}x${current.height}`);
       failures += 1;
       continue;
     }
@@ -203,16 +203,16 @@ try {
       threshold: 0.15,
     });
     const ratio = diffPixels / (baseline.width * baseline.height);
-    // 少数以 PDF 画布为主体的状态,pdf.js 文本渲染有 run-to-run 亚像素抗锯齿抖动
-    // (布局本身像素一致,见 diff),放宽阈值以吸收该噪声;其余状态维持严格 0.1%。
+    // Ở một số trạng thái chủ yếu là canvas PDF, kết xuất chữ của pdf.js có dao động khử răng cưa ở mức pixel phụ giữa các lần chạy.
+    // (Bản thân bố cục khớp từng pixel, xem diff); nới ngưỡng để hấp thụ nhiễu này, các trạng thái khác vẫn giữ ngưỡng nghiêm ngặt 0,1%.
     const stateThreshold = state.diffThreshold ?? DIFF_RATIO_THRESHOLD;
     if (ratio > stateThreshold) {
       writeFileSync(join(OUTPUT_DIR, `${state.name}.current.png`), shot);
       writeFileSync(join(OUTPUT_DIR, `${state.name}.diff.png`), PNG.sync.write(diff));
-      console.error(`✖ ${state.name}: 差异 ${(ratio * 100).toFixed(2)}%(${diffPixels}px),diff 见 tests/visual/output/`);
+      console.error(`✖ ${state.name}: khác biệt ${(ratio * 100).toFixed(2)}% (${diffPixels}px), xem ảnh diff tại tests/visual/output/`);
       failures += 1;
     } else {
-      console.log(`✔ ${state.name}: 一致(差异 ${(ratio * 100).toFixed(3)}%)`);
+      console.log(`✔ ${state.name}: khớp (khác biệt ${(ratio * 100).toFixed(3)}%)`);
     }
   }
 } finally {
@@ -221,6 +221,6 @@ try {
 }
 
 if (failures) {
-  console.error(`\n${failures} 个状态与基线不一致。确认改动符合预期后运行: npm run visual:update`);
+  console.error(`\n${failures} trạng thái không khớp baseline. Sau khi xác nhận thay đổi đúng mong đợi, hãy chạy: npm run visual:update`);
   process.exit(1);
 }

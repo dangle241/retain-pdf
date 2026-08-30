@@ -1,7 +1,7 @@
-// 翻译 Tab 进度区：attachJobProgress（library domain）+ StatusCardEmbedded。
+// Vùng tiến độ tab Dịch: attachJobProgress (miền library) + StatusCardEmbedded.
 //
-// 只要有真实 job_id 就挂载 #book-detail-job-status-card；
-// 已完成书用 fallbackItem 补全完成态（见 status/merge-snapshot-with-fallback）。
+// Gắn #book-detail-job-status-card khi có job_id thật;
+// sách hoàn tất dùng fallbackItem bổ sung trạng thái cuối (xem status/merge-snapshot-with-fallback).
 
 import { useEffect } from "react";
 import { useHomeServices } from "../../../../home-services-context.js";
@@ -18,15 +18,15 @@ function resolveJobId(item: LibraryCardItem = {}) {
 }
 
 /**
- * 是否应展示任务进度卡。
- * 只要有真实 job_id 就展示——不要用 library_only 挡掉已完成书
- * （个别投影 library_only 可能不准，但 job_id 在）。
+ * Có nên hiển thị thẻ tiến độ tác vụ hay không.
+ * Hiển thị khi có job_id thật; không dùng library_only chặn sách đã hoàn tất
+ * vì một số projection library_only có thể sai nhưng job_id tồn tại.
  */
 function shouldShowJobProgress(item: LibraryCardItem = {}) {
   const jobId = resolveJobId(item);
   if (!jobId) return false;
-  // 明确馆藏且 job 是合成 id 已在 resolveJobId 过滤
-  // 有真实 job 即展示（succeeded / running / failed / 甚至 status 空）
+  // Tài liệu rõ ràng chỉ trong thư viện với job id tổng hợp đã bị resolveJobId lọc.
+  // Có job thật thì hiển thị, kể cả succeeded / running / failed / status rỗng.
   return true;
 }
 
@@ -56,8 +56,8 @@ export function BookTranslateProgressPanel({
     || cardStatus === "queued"
     || cardStatus === "pending";
 
-  // 静默拉 job：只喂 statusCardStore。
-  // 注意：点「重新 xxx」会切到新 job_id；若 statusCard 已在跑新 job，勿用旧 id 覆盖。
+  // Lấy job im lặng: chỉ cấp statusCardStore.
+  // Lưu ý: bấm "xxx lại" chuyển sang job_id mới; nếu statusCard đang chạy job mới thì không ghi đè bằng id cũ.
   useEffect(() => {
     if (!dialogOpen || !showProgress || !jobId) return undefined;
     if (cardJobId === jobId) return undefined;
@@ -66,11 +66,11 @@ export function BookTranslateProgressPanel({
     }
     actions?.attachJobProgress?.(jobId);
     return undefined;
-    // 刻意不把 actions 放进 deps（services 引用稳定，避免无意义重跑）
+    // Cố ý không đưa actions vào deps vì tham chiếu services ổn định, tránh chạy lại vô nghĩa.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen, showProgress, jobId, cardJobId, cardPollingActive]);
 
-  // 进度主场在详情：仅当主状态区当前可见时才关掉（避免 setVisible 每帧通知死循环）
+  // Tiến độ chính ở chi tiết: chỉ tắt vùng trạng thái chính khi đang thấy, tránh setVisible thông báo mỗi khung thành vòng lặp.
   useEffect(() => {
     if (!dialogOpen || !showProgress) return undefined;
     if (services.statusArea?.isVisible?.()) {
@@ -80,7 +80,7 @@ export function BookTranslateProgressPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen, showProgress]);
 
-  // 未翻译馆藏：空态
+  // Tài liệu thư viện chưa dịch: trạng thái trống.
   if (!showProgress) {
     return (
       <div
@@ -92,10 +92,10 @@ export function BookTranslateProgressPanel({
         data-job-id=""
       >
         <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          翻译流程
+          Quy trình dịch
         </p>
-        {/* 空态只保留"路线图预览"（测试契约锁定），不再渲染假进度条/0%——
-            禁用态的死机器堆在一起是灰上灰观感的主因 */}
+        {/* Trạng thái trống chỉ giữ "xem trước lộ trình" theo hợp đồng test; không kết xuất thanh tiến độ giả/0% nữa;
+            các máy trạng thái tắt xếp chồng là nguyên nhân chính của giao diện xám trên xám. */}
         <div className="pointer-events-none">
           <StageFlow
             id="book-detail-stage-flow"
@@ -105,13 +105,13 @@ export function BookTranslateProgressPanel({
           />
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          尚未开始翻译。选择下方整本或页码范围后发起，进度会实时出现在这里。
+          Chưa bắt đầu dịch. Chọn toàn bộ hoặc phạm vi trang bên dưới để bắt đầu; tiến độ sẽ xuất hiện tại đây theo thời gian thực.
         </p>
       </div>
     );
   }
 
-  // fallback：优先跟 statusCard 正在播的 job（含重试新 id），避免用旧 item 盖回完成态
+  // fallback: ưu tiên job statusCard đang phát, gồm id thử lại mới, tránh mục cũ ghi đè về trạng thái hoàn tất.
   const liveFallback = cardJobId && cardJobId !== jobId
     ? {
         ...item,
@@ -122,9 +122,9 @@ export function BookTranslateProgressPanel({
       }
     : item;
 
-  // 有 job：始终挂载完整 StatusCard。
-  // 父级 Tabs.Content 用 data-[state=inactive]:hidden 藏面板，节点仍在 DOM
-  // （开发者工具可搜 #book-detail-job-status-card）。
+  // Có job: luôn gắn StatusCard đầy đủ.
+  // Tabs.Content cha dùng data-[state=inactive]:hidden để ẩn bảng; nút vẫn trong DOM
+  // (có thể tìm #book-detail-job-status-card trong công cụ phát triển).
   return (
     <div
       id="book-detail-translate-progress"

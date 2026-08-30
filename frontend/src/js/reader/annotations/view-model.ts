@@ -1,14 +1,14 @@
-// 批注编辑器的纯逻辑层:不碰 DOM/React,便于 node 单测
-// 批注即服务端收藏(favorites)归一化后的记录,形状见 tests/reader-annotations-vm.test.mjs
+// Lớp logic thuần của trình sửa chú thích: không chạm DOM/React, thuận tiện cho unit test node.
+// Chú thích là bản ghi mục đã lưu từ máy chủ sau chuẩn hóa; xem hình dạng tại tests/reader-annotations-vm.test.mjs.
 
-// kind 到展示文案的映射:冻结防止展示层意外改写
+// Ánh xạ kind sang nội dung hiển thị: đóng băng để lớp hiển thị không vô tình sửa.
 export const ANNOTATION_KIND_META = Object.freeze({
-  sentence: { label: "句子" },
-  data: { label: "数据" },
-  figure: { label: "图表" },
+  sentence: { label: "Câu" },
+  data: { label: "Dữ liệu" },
+  figure: { label: "Biểu đồ" },
 });
 
-// 先按页码再按创建时间排序:导出与列表展示都依赖这个稳定顺序
+// Sắp theo số trang rồi thời gian tạo; xuất và hiển thị danh sách đều phụ thuộc thứ tự ổn định này.
 export function sortAnnotations(list) {
   if (!Array.isArray(list)) {
     return [];
@@ -18,14 +18,14 @@ export function sortAnnotations(list) {
     if (pageDelta !== 0) {
       return pageDelta;
     }
-    // createdAt 是 ISO 字符串,字典序即时间序
+    // createdAt là chuỗi ISO nên thứ tự từ điển cũng là thứ tự thời gian.
     const left = `${a?.createdAt || ""}`;
     const right = `${b?.createdAt || ""}`;
     return left < right ? -1 : left > right ? 1 : 0;
   });
 }
 
-// 按页分组:展示层按页折叠、导出按页出小节,都复用这一份分组结果
+// Nhóm theo trang: lớp hiển thị thu gọn theo trang và phần xuất tạo mục theo trang cùng dùng kết quả nhóm này.
 export function groupAnnotationsByPage(list) {
   const groups = [];
   for (const annotation of sortAnnotations(list)) {
@@ -40,39 +40,39 @@ export function groupAnnotationsByPage(list) {
   return groups;
 }
 
-// 多行文本转 Markdown 引用块:每一行都要加 "> ",否则换行会跳出引用
+// Đổi văn bản nhiều dòng thành khối trích dẫn Markdown: mỗi dòng cần tiền tố "> ", nếu không xuống dòng sẽ thoát trích dẫn.
 function toQuoteBlockLines(text) {
   return `${text || ""}`.split("\n").map((line) => `> ${line}`);
 }
 
-// 生成导出用 Markdown:纯字符串拼装,方便精确单测与复制/下载复用
+// Tạo Markdown để xuất bằng ghép chuỗi thuần, thuận tiện unit test chính xác và dùng lại cho sao chép/tải xuống.
 export function buildAnnotationsMarkdown({ title = "", annotations = [] } = {}) {
-  const heading = title ? `# ${title} 批注` : "# 批注";
+  const heading = title ? `# Chú thích cho ${title}` : "# Chú thích";
   const groups = groupAnnotationsByPage(annotations);
   if (groups.length === 0) {
-    return `${heading}\n\n(暂无批注)\n`;
+    return `${heading}\n\n(Chưa có chú thích)\n`;
   }
   const lines = [heading, ""];
   for (const group of groups) {
-    // pageIdx 是 0 基,展示给人看要转成 1 基页码
-    lines.push(`## 第 ${group.pageIdx + 1} 页`, "");
+    // pageIdx gốc 0; khi hiển thị cho người dùng phải đổi sang số trang gốc 1.
+    lines.push(`## Trang ${group.pageIdx + 1}`, "");
     for (const annotation of group.items) {
       lines.push(...toQuoteBlockLines(annotation?.quoteText));
       if (annotation?.translatedQuoteText) {
-        // 译文紧贴原文引用块,用 —— 标记这是译文而非原文续行
+        // Bản dịch nằm sát khối trích dẫn nguyên văn; dùng — để đánh dấu đây là bản dịch, không phải dòng tiếp của nguyên văn.
         lines.push(...toQuoteBlockLines(`—— ${annotation.translatedQuoteText}`));
       }
       if (annotation?.note) {
-        lines.push("", `笔记:${annotation.note}`);
+        lines.push("", `Ghi chú: ${annotation.note}`);
       }
-      // 每条批注后留空行,末尾的 "" 也保证整篇以换行结尾
+      // Để một dòng trống sau mỗi chú thích; chuỗi "" cuối cũng bảo đảm toàn bài kết thúc bằng xuống dòng.
       lines.push("");
     }
   }
   return lines.join("\n");
 }
 
-// 提取跳转锚点:阅读器只需要页码 + 块 id 就能定位回原文
+// Trích xuất điểm neo chuyển tới: trình đọc chỉ cần số trang + id khối để định vị lại nguyên văn.
 export function annotationAnchor(annotation) {
   return {
     pageIdx: annotation?.pageIdx,

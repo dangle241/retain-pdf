@@ -46,6 +46,9 @@ pub struct PublicOcrInput {
 pub struct PublicTranslationInput {
     pub mode: String,
     pub math_mode: String,
+    pub source_language: String,
+    pub target_language: String,
+    pub target_language_name: String,
     pub skip_title_translation: bool,
     pub classify_batch_size: i64,
     pub rule_profile_name: String,
@@ -99,6 +102,9 @@ pub fn public_request_payload(spec: &ResolvedJobSpec) -> PublicResolvedJobSpec {
         translation: PublicTranslationInput {
             mode: spec.translation.mode.clone(),
             math_mode: spec.translation.math_mode.clone(),
+            source_language: spec.translation.source_language.clone(),
+            target_language: spec.translation.target_language.clone(),
+            target_language_name: spec.translation.target_language_name.clone(),
             skip_title_translation: spec.translation.skip_title_translation,
             classify_batch_size: spec.translation.classify_batch_size,
             rule_profile_name: spec.translation.rule_profile_name.clone(),

@@ -156,9 +156,9 @@ test("下载菜单:清单可用时按钮点亮并带下载 title", async () => {
   const sideBtn = menuHost.querySelector('[id="reader-download-sideBySide-btn"]');
   const translatedBtn = menuHost.querySelector('[id="reader-download-translated-btn"]');
   assert.equal(sourceBtn.disabled, false);
-  assert.match(sourceBtn.title, /下载原始 PDF/);
+  assert.match(sourceBtn.title, /Tải PDF gốc/);
   assert.equal(sideBtn.disabled, false);
-  assert.match(sideBtn.title, /下载对照 PDF/);
+  assert.match(sideBtn.title, /Tải PDF đối chiếu/);
   assert.equal(translatedBtn.disabled, false);
-  assert.match(translatedBtn.title, /下载译文 PDF/);
+  assert.match(translatedBtn.title, /Tải PDF bản dịch/);
 });

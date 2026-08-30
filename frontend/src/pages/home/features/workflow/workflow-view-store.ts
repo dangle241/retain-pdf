@@ -1,25 +1,25 @@
 import { createStore } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-// workflow 域视图 store + React viewPort。
+// View store + React viewPort của miền workflow.
 //
-// mountWorkflowFeature(纯逻辑控制器,原样复用)的 viewPort 契约在这里落到
-// store,由 WorkflowPanel/HeroUpload/PageRangeDialog 订阅渲染。
+// Hợp đồng viewPort của mountWorkflowFeature (controller logic thuần, tái sử dụng nguyên trạng) được ghi vào
+// store tại đây để WorkflowPanel/HeroUpload/PageRangeDialog đăng ký và render.
 // applyMockUpload/applyWorkflowUpload/setSubmitControls/renderBudgetNote
-// 逐条镜像 features/workflow/view.js 的语义(该文件属旧 DOM 视图,禁 import)。
+// Phản chiếu từng ngữ nghĩa của features/workflow/view.js (file thuộc view DOM cũ, cấm import).
 //
-// 开发者设置对话框(developer-settings-dialog)是 3b 杂项范围:
-// setDeveloperDialog/readDeveloperDialog 先以 store 值往返(不接 DOM 表单),
-// 3b React 化该对话框时替换这两个方法的实现即可,控制器无感。
+// Hộp thoại cài đặt nhà phát triển (developer-settings-dialog) thuộc phạm vi linh tinh 3b:
+// setDeveloperDialog/readDeveloperDialog trước mắt đọc/ghi bằng giá trị store (không nối biểu mẫu DOM),
+// khi chuyển hộp thoại này sang React ở 3b chỉ cần thay triển khai hai phương thức này, controller không bị ảnh hưởng.
 
-/** 开发者设置里可选术语表选项（归一化后） */
+/** Tùy chọn bảng thuật ngữ trong cài đặt nhà phát triển (sau chuẩn hóa). */
 export type WorkflowGlossaryOption = {
   glossaryId: string;
   name: string;
   entryCount: number | null;
 };
 
-/** API 列表原始项（setDeveloperGlossaryOptions 输入） */
+/** Mục gốc trong danh sách API (đầu vào setDeveloperGlossaryOptions). */
 export type WorkflowGlossarySource = {
   glossary_id?: string;
   name?: string;
@@ -35,7 +35,7 @@ export type WorkflowBudgetNote = {
   topUpUrl: string;
 };
 
-/** 开发者对话框持久字段（形状由 controller 写入，消费时按需读） */
+/** Trường bền vững của hộp thoại nhà phát triển (hình dạng do controller ghi, đọc theo nhu cầu khi dùng). */
 export type WorkflowDeveloperDialog = {
   workflow?: string;
   renderSourceJobId?: string;
@@ -72,7 +72,7 @@ export type WorkflowViewActions = {
 
 export type WorkflowViewStore = Store<WorkflowViewState, WorkflowViewActions>;
 
-/** workflow → upload 瓦片端口（upload-view-store.uploadTilePort） */
+/** Port ô workflow → upload (upload-view-store.uploadTilePort). */
 export type WorkflowUploadTilePort = {
   setUploadActionSlotVisible?: (visible?: boolean) => void;
   setUploadTileLocked?: (options?: { locked?: boolean; enabled?: boolean }) => void;
@@ -91,7 +91,7 @@ export function createWorkflowViewStore(): WorkflowViewStore {
   return createStore<WorkflowViewState, WorkflowViewActions>({
     name: "homeWorkflowView",
     initialState: {
-      submitLabel: "直接翻译",
+      submitLabel: "Dịch ngay",
       submitDisabled: true,
       submitBusy: false,
       pageRangeButtonVisible: true,
@@ -145,7 +145,7 @@ export function createWorkflowViewFeature({
     patch({ jobWarningVisible: Boolean(visible) });
   }
 
-  // ---- features/workflow/view.js 镜像 ----
+  // ---- Phản chiếu features/workflow/view.js ----
 
   function setSubmitControls({
     disabled,
@@ -189,10 +189,10 @@ export function createWorkflowViewFeature({
   } = {}) {
     uploadTilePort?.setUploadTileLocked({ locked: true, enabled: false });
     uploadTilePort?.setUploadTileText({
-      label: "Mock 模式",
+      label: "Chế độ mô phỏng",
       labelTitle: "",
-      help: `当前为 mock 模式：${mockScenario || "running"}。不会上传文件，也不会请求真实后端。`,
-      status: "Mock 模式已启用，可直接点击开始翻译。",
+      help: `Hiện đang ở chế độ mô phỏng: ${mockScenario || "running"}. Tệp sẽ không được tải lên và backend thật sẽ không được gọi.`,
+      status: "Chế độ mô phỏng đã bật; có thể bấm bắt đầu dịch ngay.",
       statusVisible: true,
     });
     setSubmitControls({
@@ -218,13 +218,13 @@ export function createWorkflowViewFeature({
   } = {}) {
     uploadTilePort?.setUploadTileLocked({ locked: !needsUpload, enabled: needsUpload });
     uploadTilePort?.setUploadTileText({
-      label: !uploadReady ? (needsUpload ? defaultFileLabel : "复用已有任务产物") : "",
+      label: !uploadReady ? (needsUpload ? defaultFileLabel : "Dùng lại đầu ra của tác vụ hiện có") : "",
       labelTitle: "",
       help: headline,
       status: !needsUpload
         ? (renderSourceJobId
-            ? `当前将复用任务: ${renderSourceJobId}`
-            : "请先在开发者设置里填写 Render 源任务 ID。")
+            ? `Sẽ dùng lại tác vụ: ${renderSourceJobId}`
+            : "Vui lòng nhập ID tác vụ nguồn kết xuất trong cài đặt nhà phát triển.")
         : "",
       statusVisible: !needsUpload ? true : (!uploadReady ? false : null),
     });
@@ -248,7 +248,7 @@ export function createWorkflowViewFeature({
     });
   }
 
-  // ---- 开发者设置对话框(3b 接管点) ----
+  // ---- Hộp thoại cài đặt nhà phát triển (điểm tiếp quản 3b) ----
 
   function setDeveloperDialog(config: WorkflowDeveloperDialog = {}) {
     patch({ developerDialog: { ...config } });

@@ -264,6 +264,9 @@ mod tests {
         assert_eq!(payload["schema_version"], "translate.stage.v1");
         assert_eq!(payload["stage"], "translate");
         assert_eq!(payload["inputs"]["source_json"], "/tmp/document.v1.json");
+        assert_eq!(payload["params"]["source_language"], "en");
+        assert_eq!(payload["params"]["target_language"], "vi");
+        assert_eq!(payload["params"]["target_language_name"], "Tiếng Việt");
         assert_eq!(
             payload["params"]["credential_ref"],
             format!("env:{TRANSLATION_API_KEY_ENV_NAME}")
@@ -413,6 +416,9 @@ mod tests {
             std::fs::read_to_string(spec_path).expect("provider stage spec should be written");
         let payload: serde_json::Value = serde_json::from_str(&spec_json).expect("valid json");
         assert_eq!(payload["schema_version"], "provider.stage.v1");
+        assert_eq!(payload["translation"]["source_language"], "en");
+        assert_eq!(payload["translation"]["target_language"], "vi");
+        assert_eq!(payload["translation"]["target_language_name"], "Tiếng Việt");
         assert_eq!(
             payload["ocr"]["credential_ref"],
             format!(
@@ -471,7 +477,7 @@ mod tests {
         assert_eq!(payload["ocr"]["paddle_model"], "paddleocr-vl");
         assert_eq!(
             payload["ocr"]["options"]["paddle_model"],
-            "PaddleOCR-VL-1.6"
+            "PaddleOCR-VL-1.5"
         );
         assert!(!spec_json.contains("paddle-secret"));
     }
@@ -647,6 +653,9 @@ mod tests {
                 "workers",
                 "mode",
                 "math_mode",
+                "source_language",
+                "target_language",
+                "target_language_name",
                 "skip_title_translation",
                 "classify_batch_size",
                 "rule_profile_name",
@@ -736,6 +745,9 @@ mod tests {
                 "workers",
                 "mode",
                 "math_mode",
+                "source_language",
+                "target_language",
+                "target_language_name",
                 "skip_title_translation",
                 "classify_batch_size",
                 "rule_profile_name",

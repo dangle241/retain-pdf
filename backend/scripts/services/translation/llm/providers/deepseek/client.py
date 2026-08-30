@@ -19,10 +19,10 @@ from services.translation.llm.shared.response_parsing import extract_single_item
 from services.translation.llm.shared.response_parsing import unwrap_translation_shell
 
 
-DEFAULT_BASE_URL = "https://api.deepseek.com/v1"
-DEFAULT_MODEL = "deepseek-v4-flash"
-DEFAULT_API_KEY_ENV = "DEEPSEEK_API_KEY"
-DEFAULT_API_KEY_FILE = "deepseek.env"
+DEFAULT_BASE_URL = "https://api.openai.com/v1"
+DEFAULT_MODEL = "gpt-4.1-mini"
+DEFAULT_API_KEY_ENV = "OPENAI_API_KEY"
+DEFAULT_API_KEY_FILE = "openai.env"
 STREAM_RESPONSES_ENV = "PDF_TRANSLATOR_DEEPSEEK_STREAM"
 HTTP_RETRY_ATTEMPTS = transport.HTTP_RETRY_ATTEMPTS
 DNS_RETRY_MIN_ATTEMPTS = transport.DNS_RETRY_MIN_ATTEMPTS

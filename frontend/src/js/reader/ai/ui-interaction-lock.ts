@@ -1,5 +1,5 @@
-// AI 会话切换 / 分支时的短时隔离：防列表收起后点击穿透到 PDF/链接。
-// 只在 lock 窗口内生效，绝不永久拦截阅读入口或正常导航。
+// Cách ly ngắn khi chuyển/tạo nhánh hội thoại AI để lần bấm không xuyên tới PDF/liên kết sau khi danh sách thu gọn.
+// Chỉ có hiệu lực trong cửa sổ lock, không bao giờ chặn vĩnh viễn entry đọc hoặc điều hướng bình thường.
 
 let lockUntil = 0;
 let shieldCleanup: (() => void) | null = null;
@@ -15,7 +15,7 @@ export function lockReaderAiNavigation(durationMs = 700): void {
   if (until > lockUntil) lockUntil = until;
 }
 
-/** 强制解除隔离（进页/异常时兜底，避免遮罩残留导致点不了） */
+/** Buộc bỏ cách ly khi vào trang/lỗi để tránh lớp phủ còn sót làm không bấm được. */
 export function clearReaderAiNavigationLock(): void {
   lockUntil = 0;
   shieldCleanup?.();
@@ -73,8 +73,8 @@ function removeOverlay(): void {
 }
 
 /**
- * 短时全屏吞指针 + 禁止跳页/开链。
- * 仅用于 AI 会话条切换 / 分支，时长应尽量短。
+ * Trong thời gian ngắn, nuốt pointer toàn màn hình và cấm chuyển trang/mở liên kết.
+ * Chỉ dùng khi chuyển/tạo nhánh ở thanh hội thoại AI; thời lượng nên ngắn nhất có thể.
  */
 export function armReaderAiClickShield(
   durationMs = 700,
@@ -105,7 +105,7 @@ export function armReaderAiClickShield(
       return;
     }
     const target = event.target;
-    // 会话条 / 答案操作条（开新对话按钮）放行，避免 pointerdown 上锁后点不中
+    // Cho phép thanh hội thoại / thanh thao tác câu trả lời (nút mở hội thoại mới) để vẫn bấm được sau khi pointerdown khóa.
     if (
       target instanceof Element
       && target.closest(
@@ -144,9 +144,9 @@ export function armReaderAiClickShield(
 export function shouldIgnoreReaderAiNavEvent(event: Event | null | undefined): boolean {
   if (isReaderAiNavigationLocked()) return true;
   if (!event) return false;
-  // typeof 守卫：node/jsdom 没有全局 MouseEvent，裸 instanceof 会抛
-  // ReferenceError 且在事件 listener 里被静默吞掉（answer-enhance 测试
-  // 曾因此假失败——按钮注入成功但 onJump 永不触发）。
+  // Guard typeof: node/jsdom không có MouseEvent toàn cục; instanceof trực tiếp sẽ ném
+  // ReferenceError và bị listener sự kiện âm thầm nuốt (test answer-enhance
+  // từng thất bại giả vì nút được chèn thành công nhưng onJump không bao giờ chạy).
   if (typeof MouseEvent !== "undefined" && event instanceof MouseEvent && event.isTrusted === false) {
     return true;
   }
@@ -154,8 +154,8 @@ export function shouldIgnoreReaderAiNavEvent(event: Event | null | undefined): b
 }
 
 /**
- * 仅在 AI 导航锁定期拦截 window.open / 链接默认行为。
- * 不永久 ban 同源导航，避免破坏正常打开阅读。
+ * Chỉ chặn window.open / hành vi mặc định của liên kết trong thời gian khóa điều hướng AI.
+ * Không cấm vĩnh viễn điều hướng cùng nguồn để không phá thao tác mở đọc bình thường.
  */
 export function installReaderWindowOpenGuard(): () => void {
   if (typeof window === "undefined" || typeof window.open !== "function") {
@@ -164,12 +164,12 @@ export function installReaderWindowOpenGuard(): () => void {
   if (openGuardInstalled) return () => {};
   openGuardInstalled = true;
 
-  // 进页先清残留遮罩
+  // Khi vào trang, xóa lớp phủ còn sót trước.
   clearReaderAiNavigationLock();
 
   const original = window.open.bind(window);
   window.open = ((url?: string | URL, target?: string, features?: string) => {
-    // 只在锁定期拒绝（会话切换误触）；平时不拦
+    // Chỉ từ chối trong thời gian khóa do bấm nhầm khi chuyển hội thoại; bình thường không chặn.
     if (isReaderAiNavigationLocked()) {
       return null;
     }
@@ -180,7 +180,7 @@ export function installReaderWindowOpenGuard(): () => void {
     if (!isReaderAiNavigationLocked()) return;
     const t = event.target;
     if (!(t instanceof Element)) return;
-    // 会话条自身放行
+    // Cho phép chính thanh hội thoại.
     if (t.closest("[data-reader-ai-sessions]")) return;
     const a = t.closest("a[href]");
     if (a) {

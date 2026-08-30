@@ -1016,10 +1016,10 @@ test("recent jobs empty commit owns empty state and search copy", () => {
     viewPort,
   });
 
-  assert.equal(result.message, "没有匹配的书籍");
+  assert.equal(result.message, "Không có sách phù hợp");
   assert.deepEqual(statePort.getSnapshot().items, []);
   assert.equal(statePort.getSnapshot().hasMore, false);
-  assert.equal(emptyText, "没有匹配的书籍");
+  assert.equal(emptyText, "Không có sách phù hợp");
   assert.deepEqual(loadingStates, [["ready"]]);
 });
 
@@ -1042,7 +1042,7 @@ test("recent jobs empty commit can delegate rendering to view-state owner", () =
     renderEmpty: (...args) => renders.push(args),
   });
 
-  assert.equal(result.message, "暂无最近任务");
+  assert.equal(result.message, "Chưa có tác vụ gần đây");
   assert.deepEqual(statePort.getSnapshot().items, []);
   assert.equal(statePort.getSnapshot().hasMore, false);
   assert.deepEqual(loadingStates, [["ready"]]);
@@ -1443,7 +1443,7 @@ test("recent jobs runtime patches keep newer event progress over older poll snap
       source: "display-state",
       lane: "main",
       substage: "translation_batches",
-      detail: "正在翻译正文内容",
+      detail: "Đang dịch nội dung chính",
       progress: { unit: "batch", current: 8, total: 10, percent: 80 },
     },
   });
@@ -1495,7 +1495,7 @@ test("recent jobs runtime patches keep newer progress while accepting newer subs
       source: "display-state",
       lane: "main",
       substage: "translation_batches",
-      detail: "正在翻译正文内容",
+      detail: "Đang dịch nội dung chính",
       progress: { unit: "batch", current: 8, total: 10, percent: 80 },
     },
   });
@@ -1504,7 +1504,7 @@ test("recent jobs runtime patches keep newer progress while accepting newer subs
     status: "running",
     display_stage: "translation",
     substage: "garbled_repair",
-    stage_detail: "正在修复翻译结果",
+    stage_detail: "Đang sửa kết quả dịch",
     progress: { unit: "batch", current: 5, total: 10, percent: 50 },
     stage_snapshot: {
       stageKey: "translate",
@@ -1512,7 +1512,7 @@ test("recent jobs runtime patches keep newer progress while accepting newer subs
       source: "display-state",
       lane: "main",
       substage: "garbled_repair",
-      detail: "正在修复翻译结果",
+      detail: "Đang sửa kết quả dịch",
       progress: { unit: "batch", current: 5, total: 10, percent: 50 },
     },
   });
@@ -1521,7 +1521,7 @@ test("recent jobs runtime patches keep newer progress while accepting newer subs
   assert.equal(item.progress.current, 8);
   assert.equal(item.progress.percent, 80);
   assert.equal(item.runtime_status.substage, "garbled_repair");
-  assert.equal(item.runtime_status.detail, "正在修复乱码候选段");
+  assert.equal(item.runtime_status.detail, "Đang sửa các đoạn có thể bị lỗi ký tự");
   assert.equal(item.runtime_status.progress.current, 8);
   assert.equal(item.runtime_status.progress.percent, 80);
 });
@@ -2221,7 +2221,7 @@ test("recent job actions use navigation port instead of direct reader callback",
   actions.openJobReader("");
 
   assert.deepEqual(opened, ["job-reader"]);
-  assert.deepEqual(errors, ["该任务缺少 job_id，无法打开对照阅读。"]);
+  assert.deepEqual(errors, ["Tác vụ này thiếu job_id nên không thể mở chế độ đọc đối chiếu."]);
 });
 
 test("recent jobs active refresh skips the current runtime job", async () => {
@@ -2299,7 +2299,7 @@ test("recent jobs runtime patch rerenders the list when card replacement misses"
         job_id: "job-rerender-miss",
         status: "running",
         stage: "ocr",
-        stage_detail: "OCR 中",
+        stage_detail: "Đang OCR",
         progress: { current: 1, total: 10, percent: 10, unit: "page" },
       },
     ],
@@ -2410,7 +2410,7 @@ test("recent jobs runtime patches keep translation card state over background re
   }, { stageAdapterPort: { adaptJobStageSnapshot } });
 
   assert.equal(stageKeyForRecentJobLabel(merged), "translate");
-  assert.equal(recentJobStageLabel(merged), "翻译中");
+  assert.equal(recentJobStageLabel(merged), "Đang dịch");
   assert.equal(merged.display_stage, "translation");
   assert.equal(merged.lane, "main");
   assert.equal(merged.substage, "translation_batches");
@@ -2499,7 +2499,7 @@ test("recent jobs runtime patches drive active cover overlay from created job to
   let item = statePort.getSnapshot().items[0];
   assert.equal(item.job_id, "job-created-overlay");
   assert.equal(isRecentJobActive(item), true);
-  assert.equal(recentJobStageLabel(item), "OCR 中");
+  assert.equal(recentJobStageLabel(item), "Đang OCR");
   assert.equal(recentJobProgressPercent(item), 10);
 
   patches.update({
@@ -2511,7 +2511,7 @@ test("recent jobs runtime patches drive active cover overlay from created job to
   });
   item = statePort.getSnapshot().items[0];
   assert.equal(isRecentJobActive(item), true);
-  assert.equal(recentJobStageLabel(item), "翻译中");
+  assert.equal(recentJobStageLabel(item), "Đang dịch");
   assert.equal(recentJobProgressPercent(item), 20);
 
   patches.update({
@@ -2524,14 +2524,14 @@ test("recent jobs runtime patches drive active cover overlay from created job to
   assert.equal(item.status, "succeeded");
   assert.equal(item.display_stage, "done");
   assert.equal(isRecentJobActive(item), false);
-  assert.equal(recentJobStageLabel(item), "已完成");
+  assert.equal(recentJobStageLabel(item), "Đã hoàn tất");
   assert.equal(recentJobProgressPercent(item), 100);
   unsubscribe();
   const cardMutations = mutations.filter((entry) => entry.action === "prependItem" || entry.action === "replaceItem");
   assert.deepEqual(cardMutations.map((entry) => [entry.action, entry.items[0]?.active, entry.items[0]?.label, entry.items[0]?.percent]), [
-    ["prependItem", true, "OCR 中", 10],
-    ["replaceItem", true, "翻译中", 20],
-    ["replaceItem", false, "已完成", 100],
+    ["prependItem", true, "Đang OCR", 10],
+    ["replaceItem", true, "Đang dịch", 20],
+    ["replaceItem", false, "Đã hoàn tất", 100],
   ]);
 });
 
@@ -2598,7 +2598,7 @@ test("recent jobs runtime patches do not let queued placeholders downgrade creat
   assert.equal(item.progress.current, 4);
   assert.equal(item.progress.percent, 20);
   assert.equal(isRecentJobActive(item), true);
-  assert.equal(recentJobStageLabel(item), "翻译中");
+  assert.equal(recentJobStageLabel(item), "Đang dịch");
 });
 
 test("recent jobs refresh scheduler can bypass throttle without forcing suspended state", () => {
@@ -2692,7 +2692,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
     stage_detail: "render payload prewarm: ready",
   };
   assert.equal(stageKeyForRecentJobLabel(mergedItem), "render");
-  assert.equal(recentJobStageLabel(mergedItem), "渲染中");
+  assert.equal(recentJobStageLabel(mergedItem), "Đang kết xuất");
 	  assert.equal(
 	    recentJobStageLabel({
 	      status: "running",
@@ -2702,10 +2702,10 @@ test("recent job stage labels use the shared public stage resolver", () => {
 	      stage_detail: "render payload prewarm: ready",
 	      runtime_status: {
 	        stageKey: "translate",
-	        detail: "正在翻译正文内容",
+	        detail: "Đang dịch nội dung chính",
 	      },
 	    }),
-	    "渲染中",
+	    "Đang kết xuất",
 	  );
   assert.equal(
     recentJobStageLabel({
@@ -2714,7 +2714,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
       stage: "render",
       stage_detail: "",
     }),
-    "翻译中",
+    "Đang dịch",
   );
 	  assert.equal(
 	    recentJobStageLabel({
@@ -2725,7 +2725,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
 	        publicStage: "render",
 	      },
 	    }),
-	    "翻译中",
+	    "Đang dịch",
 	  );
 	  assert.equal(
 	    recentJobStageLabel({
@@ -2742,7 +2742,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
 	        source: "legacy-stage",
 	      },
 	    }),
-	    "翻译中",
+	    "Đang dịch",
 	  );
   assert.equal(
     recentJobStageLabel({
@@ -2750,7 +2750,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
       display_stage: "render",
       stage: "rendering",
     }),
-    "渲染中",
+    "Đang kết xuất",
   );
   assert.equal(
     recentJobStageLabel({
@@ -2758,7 +2758,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
       display_stage: "done",
       stage: "rendering",
     }),
-    "已完成",
+    "Đã hoàn tất",
   );
   assert.equal(
     stageKeyForRecentJobLabel({
@@ -2790,11 +2790,11 @@ test("recent job stage labels use the shared public stage resolver", () => {
       ],
       output_pdf_ready: true,
     }),
-    "已完成",
+    "Đã hoàn tất",
   );
   assert.equal(
     recentJobStatusLabel("cancelled"),
-    "已取消",
+    "Đã hủy",
   );
 });
 
@@ -2982,14 +2982,14 @@ test("recent jobs runtime merge consumes canonical stage snapshot", () => {
   }, { stageAdapterPort: recentJobsStageAdapterPort });
 
   assert.equal(merged.stage, "translate");
-  assert.equal(merged.stage_detail, "正在翻译正文内容");
+  assert.equal(merged.stage_detail, "Đang dịch nội dung chính");
   assert.deepEqual(merged.runtime_status, {
     stageKey: "translate",
     publicStage: "translation",
     source: "display-stage",
     lane: "main",
     substage: "translation_batches",
-    detail: "正在翻译正文内容",
+    detail: "Đang dịch nội dung chính",
     progress: {
       current: 28,
       total: 5216,
@@ -3051,7 +3051,7 @@ test("recent jobs runtime merge does not promote canonical lane-only internal st
   const merged = mergeLibraryJobItem({
     job_id: "job-recent-lane-only",
     stage: "translate",
-    stage_detail: "正在翻译正文内容",
+    stage_detail: "Đang dịch nội dung chính",
     progress: { current: 20, total: 100, percent: 20, unit: "batch" },
   }, {
     job_id: "job-recent-lane-only",
@@ -3066,7 +3066,7 @@ test("recent jobs runtime merge does not promote canonical lane-only internal st
   assert.equal(merged.stage, "translate");
   assert.equal(merged.lane, undefined);
   assert.equal(merged.substage, undefined);
-  assert.equal(merged.stage_detail, "正在翻译正文内容");
+  assert.equal(merged.stage_detail, "Đang dịch nội dung chính");
   assert.equal(merged.progress.current, 20);
   assert.equal(merged.progress.total, 100);
   assert.equal(merged.progress.unit, "batch");
@@ -3105,7 +3105,7 @@ test("recent jobs runtime snapshot prefers normalized stage snapshot", () => {
       source: "public-stage",
       lane: "main",
       substage: "translation_batches",
-      detail: "正在翻译正文内容",
+      detail: "Đang dịch nội dung chính",
       progress: {
         current: 30,
         total: 100,
@@ -3116,7 +3116,7 @@ test("recent jobs runtime snapshot prefers normalized stage snapshot", () => {
   });
 
   assert.equal(recentSnapshot.stageKey, "translate");
-  assert.equal(recentSnapshot.detail, "正在翻译正文内容");
+  assert.equal(recentSnapshot.detail, "Đang dịch nội dung chính");
   assert.equal(recentSnapshot.progress.current, 30);
 });
 
@@ -3142,7 +3142,7 @@ test("recent jobs runtime merge does not write raw internal stage over normalize
       source: "public-stage",
       lane: "main",
       substage: "translation_batches",
-      detail: "正在翻译正文内容",
+      detail: "Đang dịch nội dung chính",
       progress: {
         current: 30,
         total: 100,
@@ -3156,7 +3156,7 @@ test("recent jobs runtime merge does not write raw internal stage over normalize
   assert.equal(merged.display_stage, "translation");
   assert.equal(merged.lane, "main");
   assert.equal(merged.substage, "translation_batches");
-  assert.equal(merged.stage_detail, "正在翻译正文内容");
+  assert.equal(merged.stage_detail, "Đang dịch nội dung chính");
   assert.equal(merged.runtime_status.stageKey, "translate");
   assert.equal(merged.runtime_status.substage, "translation_batches");
 });
@@ -3174,7 +3174,7 @@ test("recent jobs runtime merge lets display stage override stale snapshot", () 
     display_stage: "translation",
     stage: "render_preprocess",
     substage: "translation_batches",
-    stage_detail: "正在翻译正文内容",
+    stage_detail: "Đang dịch nội dung chính",
     progress: { current: 30, total: 100, percent: 30, unit: "batch" },
     runtime_status: {
       stageKey: "done",
@@ -3201,5 +3201,5 @@ test("recent jobs runtime merge lets display stage override stale snapshot", () 
   assert.equal(merged.substage, "translation_batches");
   assert.equal(merged.runtime_status.stageKey, "translate");
   assert.equal(merged.runtime_status.publicStage, "translation");
-  assert.equal(recentJobStageLabel(merged), "翻译中");
+  assert.equal(recentJobStageLabel(merged), "Đang dịch");
 });

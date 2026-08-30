@@ -16,7 +16,7 @@ from urllib3.util.retry import Retry
 from services.translation.artifacts import get_active_translation_run_diagnostics
 
 
-DEFAULT_BASE_URL = "https://api.deepseek.com/v1"
+DEFAULT_BASE_URL = "https://api.openai.com/v1"
 TRUST_ENV_PROXY_ENV = "PDF_TRANSLATOR_TRUST_ENV_PROXY"
 HTTP_POOL_MAX_ENV = "RETAIN_TRANSLATION_HTTP_POOL_MAX"
 HTTP_POOL_PER_THREAD_ENV = "RETAIN_TRANSLATION_HTTP_POOL_PER_THREAD"

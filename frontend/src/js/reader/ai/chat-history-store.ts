@@ -1,10 +1,10 @@
-// 阅读问答的多会话持久化:按 jobId 存 localStorage,一份文档可有多条对话。
-// 每条会话存两部分:messages(重开阅读器时重渲染气泡)+ history(回传后端的多轮上下文)。
-// 兼容旧版单会话格式({messages, history}):首次读取时自动迁移为一条会话。
+// Lưu bền vững nhiều hội thoại khi đọc: lưu localStorage theo jobId; một tài liệu có thể có nhiều cuộc trò chuyện.
+// Mỗi hội thoại lưu hai phần: messages để kết xuất lại bong bóng khi mở lại trình đọc và history là ngữ cảnh nhiều lượt gửi về backend.
+// Tương thích định dạng một hội thoại cũ ({messages, history}): tự di chuyển thành một hội thoại khi đọc lần đầu.
 //
-// 对外接口分两层:
-//  - 单会话层(向后兼容):load / save / clear 作用于当前 active 会话;
-//  - 多会话层:listSessions / newSession / switchSession / deleteSession / activeSessionId。
+// API bên ngoài chia hai lớp:
+//  - Lớp một hội thoại (tương thích ngược): load / save / clear tác động lên hội thoại active hiện tại;
+//  - Lớp nhiều hội thoại: listSessions / newSession / switchSession / deleteSession / activeSessionId.
 
 import { summarizeSessions, trimSessions } from "./chat-sessions-view-model.js";
 
@@ -40,7 +40,7 @@ export function createReaderAiHistoryStore({
     return `s-${nowMs().toString(36)}-${seq}`;
   }
 
-  // 读出规范化的多会话数据;吞掉解析异常并迁移旧格式。
+  // Đọc dữ liệu nhiều hội thoại đã chuẩn hóa; bỏ qua lỗi phân tích và di chuyển định dạng cũ.
   function readData() {
     const blank = { activeId: "", sessions: [] };
     if (!enabled) {
@@ -56,7 +56,7 @@ export function createReaderAiHistoryStore({
     if (!parsed || typeof parsed !== "object") {
       return blank;
     }
-    // 新格式
+    // Định dạng mới.
     if (Array.isArray(parsed.sessions)) {
       const sessions = parsed.sessions.filter((item) => item && `${item.id || ""}`.trim());
       const activeId = sessions.some((item) => `${item.id}` === `${parsed.activeId}`)
@@ -64,7 +64,7 @@ export function createReaderAiHistoryStore({
         : `${sessions[0]?.id || ""}`;
       return { activeId, sessions };
     }
-    // 旧格式单会话:{messages, history} → 迁移为一条会话
+    // Định dạng cũ một hội thoại: {messages, history} → di chuyển thành một hội thoại.
     if (Array.isArray(parsed.messages) || Array.isArray(parsed.history)) {
       const created = nowMs();
       const session = {
@@ -88,11 +88,11 @@ export function createReaderAiHistoryStore({
         : `${sessions[0]?.id || ""}`;
       storage.setItem(key, JSON.stringify({ v: 2, activeId, sessions }));
     } catch (_err) {
-      // 配额满/隐私模式:静默失败,不影响会话内使用
+      // Hết hạn mức/chế độ riêng tư: thất bại im lặng, không ảnh hưởng việc dùng trong phiên.
     }
   }
 
-  // 取当前 active 会话;没有则就地补一条空会话(save/newSession 前的兜底)。
+  // Lấy hội thoại active hiện tại; nếu không có thì tạo tại chỗ một hội thoại trống làm dự phòng trước save/newSession.
   function ensureActive(data) {
     let active = data.sessions.find((item) => `${item.id}` === `${data.activeId}`);
     if (!active) {
@@ -103,7 +103,7 @@ export function createReaderAiHistoryStore({
     return active;
   }
 
-  // ===== 单会话层(向后兼容) =====
+  // ===== Lớp một hội thoại (tương thích ngược) =====
 
   function load() {
     if (!enabled) {
@@ -123,14 +123,14 @@ export function createReaderAiHistoryStore({
     }
     const data = readData();
     const active = ensureActive(data);
-    // 上限截断:每条会话只保留最近若干轮,避免 localStorage 无限增长
+    // Cắt theo giới hạn: mỗi hội thoại chỉ giữ một số lượt gần nhất để localStorage không tăng vô hạn.
     active.messages = messages.slice(-MAX_TURNS);
     active.history = history.slice(-MAX_TURNS);
     active.updatedAt = nowMs();
     writeData(data);
   }
 
-  // 清空当前会话内容(会话本身保留,标题回退占位)。
+  // Xóa nội dung hội thoại hiện tại nhưng giữ hội thoại; tiêu đề lùi về chỗ giữ chỗ.
   function clear() {
     if (!enabled) {
       return;
@@ -144,7 +144,7 @@ export function createReaderAiHistoryStore({
     writeData(data);
   }
 
-  // ===== 多会话层 =====
+  // ===== Lớp nhiều hội thoại =====
 
   function listSessions() {
     if (!enabled) {
@@ -160,7 +160,7 @@ export function createReaderAiHistoryStore({
     return `${readData().activeId || ""}`;
   }
 
-  // 新建空会话并置为 active,返回新会话 id。
+  // Tạo hội thoại trống, đặt làm active và trả id hội thoại mới.
   function newSession() {
     if (!enabled) {
       return "";
@@ -173,7 +173,7 @@ export function createReaderAiHistoryStore({
     return session.id;
   }
 
-  // 切换 active 会话;id 不存在则忽略。返回该会话的 {messages, history}。
+  // Chuyển hội thoại active; bỏ qua nếu id không tồn tại. Trả {messages, history} của hội thoại.
   function switchSession(id) {
     if (!enabled) {
       return { messages: [], history: [] };
@@ -186,8 +186,8 @@ export function createReaderAiHistoryStore({
     return load();
   }
 
-  // 删除指定会话;删的是 active 时改指向最近更新的一条(全删光则补一条空会话)。
-  // 返回删除后 active 会话的 {messages, history}。
+  // Xóa hội thoại chỉ định; nếu xóa active thì trỏ sang hội thoại cập nhật gần nhất, hoặc tạo hội thoại trống nếu đã xóa hết.
+  // Trả {messages, history} của hội thoại active sau khi xóa.
   function deleteSession(id) {
     if (!enabled) {
       return { messages: [], history: [] };

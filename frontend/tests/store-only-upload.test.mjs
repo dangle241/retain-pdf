@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// 上传弹窗：完成后二选一——直接翻译 / 仅收藏（不自动关窗入库）。
+// 上传弹窗：完成后二选一——Dịch ngay / 仅收藏（不自动关窗入库）。
 
 function makeDom(search = "") {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
@@ -67,22 +67,22 @@ async function bootHomeApp(dom) {
   return { services, root, host };
 }
 
-test("上传弹窗：标题提示 + 就绪后出现直接翻译/仅收藏", async () => {
+test("上传弹窗：标题提示 + 就绪后出现Dịch ngay/仅收藏", async () => {
   const dom = makeDom("?mock=parallel");
   const byId = (id) => dom.window.document.getElementById(id);
   const { services, root, host } = await bootHomeApp(dom);
 
   click(dom, byId("library-add-pdf-btn"));
   await waitFor(() => byId("translation-workflow-dialog") !== null, "添加对话框打开");
-  assert.equal(byId("translation-workflow-title").textContent, "添加 PDF");
-  assert.match(byId("translation-workflow-desc").textContent, /直接翻译|收藏/);
+  assert.equal(byId("translation-workflow-title").textContent, "Thêm PDF");
+  assert.match(byId("translation-workflow-desc").textContent, /Dịch ngay|chỉ lưu|giá sách/);
 
   // 模拟上传完成
   services.uploadViewActions.patch({ ready: true, actionSlotVisible: true });
   await waitFor(() => byId("store-only-btn") && !byId("store-only-btn").classList.contains("hidden"), "仅收藏可见");
   await waitFor(() => byId("upload-ready-hint") && !byId("upload-ready-hint").classList.contains("hidden"), "就绪提示可见");
-  assert.ok(byId("submit-btn"), "直接翻译按钮存在");
-  assert.match(byId("submit-btn").textContent, /直接翻译|提交/);
+  assert.ok(byId("submit-btn"), "Dịch ngay按钮存在");
+  assert.match(byId("submit-btn").textContent, /Dịch ngay|提交/);
 
   // 对话框仍打开（不自动关）
   assert.ok(byId("translation-workflow-dialog"), "就绪后不自动关闭");

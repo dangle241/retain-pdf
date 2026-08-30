@@ -178,14 +178,14 @@ test("StatusDetailDialog：overview 首屏占位（同步）→ 刷新两段渲�
   // 出现在失败 tab 里。
   click(dom, byId(dom, "detail-tab-failure"));
   await waitFor(
-    () => byId(dom, "failure-summary").textContent.trim() === "任务失败，但这是前端 mock 场景。",
+    () => byId(dom, "failure-summary").textContent.trim() === "Tác vụ thất bại, nhưng đây là tình huống mô phỏng ở frontend.",
     "失败诊断第二段渲染补齐",
   );
   assert.equal(byId(dom, "failure-category").textContent.trim(), "mock_render_failure");
   assert.equal(byId(dom, "failure-stage").textContent.trim(), "render");
-  assert.equal(byId(dom, "failure-root-cause").textContent.trim(), "用于 UI 调试的模拟失败。");
-  assert.equal(byId(dom, "failure-suggestion").textContent.trim(), "切换 ?mock=succeeded 查看成功态。");
-  assert.equal(byId(dom, "failure-retryable").textContent.trim(), "是");
+  assert.equal(byId(dom, "failure-root-cause").textContent.trim(), "Lỗi mô phỏng dùng để gỡ lỗi giao diện.");
+  assert.equal(byId(dom, "failure-suggestion").textContent.trim(), "Chuyển sang ?mock=succeeded để xem trạng thái thành công.");
+  assert.equal(byId(dom, "failure-retryable").textContent.trim(), "Có");
 
   root.unmount();
   services.dispose();
@@ -213,8 +213,8 @@ test("StatusDetailDialog：StageHistoryList/EventsList 结构化 JSX 逐条渲�
   // eventsPayload 作为期望值,断言 DOM 与自身数据源一致。
   await waitFor(() => services.statusDetail.store.getSnapshot().overview.eventsPayload?.items?.length > 0, "事件流数据到达 store");
   const expectedEventCount = services.statusDetail.store.getSnapshot().overview.eventsPayload.items.length;
-  await waitFor(() => byId(dom, "events-list").querySelectorAll(".event-item").length === expectedEventCount, "事件流逐条渲染完成");
-  assert.equal(byId(dom, "events-status").textContent.trim(), `最近 ${expectedEventCount} 条`);
+  await waitFor(() => byId(dom, "events-list").querySelectorAll(".event-item").length === expectedEventCount, "事件流逐条Kết xuất hoàn tất");
+  assert.equal(byId(dom, "events-status").textContent.trim(), `${expectedEventCount} mục gần nhất`);
   const eventItems = byId(dom, "events-list").querySelectorAll(".event-item");
   eventItems.forEach((item) => {
     assert.ok(item.querySelector(".event-badge"));
@@ -233,7 +233,7 @@ test("StatusDetailDialog：失败 tab 重放（rerun）成功 → 关闭对话�
 
   click(dom, byId(dom, "detail-tab-failure"));
   await waitFor(() => byId(dom, "failure-rerun-btn").disabled === false, "resumePlan.can_resume=true 驱动按钮可用");
-  assert.match(byId(dom, "failure-rerun-status").textContent, /可从 render 恢复/);
+  assert.match(byId(dom, "failure-rerun-status").textContent, /Có thể tiếp tục từ render/);
 
   click(dom, byId(dom, "failure-rerun-btn"));
   await waitFor(() => byId(dom, "status-detail-dialog") === null, "rerun 成功后对话框关闭");
@@ -265,7 +265,7 @@ test("StatusDetailDialog：翻译调试 tab —— 摘要/筛选/选中/翻页/�
   assert.equal(byId(dom, "translation-count-kept-origin").textContent.trim(), `${summary.status_summary.kept_origin}`);
   assert.equal(byId(dom, "translation-provider-family").textContent.trim(), summary.provider_family);
 
-  await waitFor(() => byId(dom, "translation-items-list").querySelectorAll(".translation-item-card").length === allItems.length, "item 列表渲染完成");
+  await waitFor(() => byId(dom, "translation-items-list").querySelectorAll(".translation-item-card").length === allItems.length, "item 列表Kết xuất hoàn tất");
   // 默认自动选中首条 item。
   await waitFor(() => byId(dom, "translation-item-detail").classList.contains("hidden") === false, "首条 item 详情自动加载");
   assert.match(byId(dom, "translation-item-meta").textContent, new RegExp(allItems[0].item_id));
@@ -294,11 +294,109 @@ test("StatusDetailDialog：翻译调试 tab —— 摘要/筛选/选中/翻页/�
   // 重放当前 item。
   click(dom, byId(dom, "translation-item-replay"));
   await waitFor(() => byId(dom, "translation-replay-result").classList.contains("hidden") === false, "重放结果渲染");
-  assert.match(byId(dom, "translation-replay-status").textContent, /重放完成|重放返回错误/);
+  assert.match(byId(dom, "translation-replay-status").textContent, /Chạy lại hoàn tất|Chạy lại trả về lỗi/);
 
   root.unmount();
   services.dispose();
   host.remove();
+});
+
+test("StatusDetailDialog: nhập file JSON bản dịch và hiển thị kết quả", async () => {
+  const dom = makeDom("?mock=done");
+  const { services, root, host } = await bootHomeApp(dom);
+  const jobId = await openStatusDetailDialog(dom, services);
+  click(dom, byId(dom, "detail-tab-translation"));
+
+  const originalFetch = globalThis.fetch;
+  const submittedRequests = [];
+  globalThis.fetch = async (url, options = {}) => {
+    submittedRequests.push({
+      url: `${url}`,
+      body: options.body ? JSON.parse(`${options.body}`) : null,
+    });
+    if (`${url}`.includes("/translation/manual-export")) {
+      return new Response(JSON.stringify({
+        code: 0,
+        message: "ok",
+        data: {
+          schema: "retainpdf.manual_translation_bundle.v1",
+          result_schema: "retainpdf.manual_translation_result.v1",
+          job_id: jobId,
+          target_language: "Tiếng Việt",
+          batch_index: 0,
+          total_batches: 1,
+          batch_item_count: 1,
+          total_item_count: 1,
+          prompt: "Return JSON only.",
+          items: [{
+            item_id: "p001-b000",
+            page_number: 1,
+            source_text: "Reliable systems",
+            text_to_translate: "Reliable systems",
+            required_tokens: [],
+          }],
+        },
+      }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({
+      code: 0,
+      message: "ok",
+      data: {
+        job_id: jobId,
+        batch_index: 0,
+        imported_count: 31,
+        remaining_count: 0,
+        ready_for_render: true,
+      },
+    }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    click(dom, byId(dom, "manual-translation-download-source"));
+    await waitFor(
+      () => submittedRequests.some((request) => request.url.includes(`/jobs/${jobId}/translation/manual-export?`)),
+      "request manual-export được gửi",
+    );
+
+    const input = dom.window.document.querySelector(".manual-translation-file-input");
+    assert.ok(input, "ô chọn file JSON phải được hiển thị");
+    const file = new dom.window.File([JSON.stringify({
+      schema: "retainpdf.manual_translation_result.v1",
+      job_id: jobId,
+      batch_index: 0,
+      translations: [{ item_id: "p001-b000", translated_text: "Bản dịch" }],
+    })], "translated.json", { type: "application/json" });
+    Object.defineProperty(input, "files", { configurable: true, value: [file] });
+    input.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+
+    await waitFor(
+      () => dom.window.document.querySelector(".manual-translation-import-status.is-success"),
+      "trạng thái nhập JSON thành công",
+    );
+    const submitted = submittedRequests.find((request) => request.url.endsWith(`/jobs/${jobId}/translation/manual-import`));
+    assert.ok(submitted, "request manual-import phải được gửi");
+    assert.equal(submitted.body.schema, "retainpdf.manual_translation_result.v1");
+    assert.equal(submitted.body.job_id, jobId);
+    assert.match(dom.window.document.querySelector(".manual-translation-import-status.is-success").textContent, /Đã nhập 31 đoạn/);
+    assert.ok(byId(dom, "manual-translation-render"), "nút kết xuất phải hiện khi đã dịch đủ");
+    click(dom, byId(dom, "manual-translation-render"));
+    await waitFor(() => byId(dom, "status-detail-dialog") === null, "đóng chi tiết sau khi bắt đầu kết xuất");
+    await waitFor(
+      () => services.features.jobRuntimeFeature.currentJobId().startsWith("mock-render-retry-"),
+      "bắt đầu job mới trực tiếp từ giai đoạn render",
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+    root.unmount();
+    services.dispose();
+    host.remove();
+  }
 });
 
 test("StatusDetailDialog：数据源独立——status-detail 的 overview 不读 statusCardStore", async () => {

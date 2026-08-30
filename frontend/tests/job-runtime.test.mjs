@@ -122,8 +122,8 @@ test("elapsed view model owns runtime duration text", () => {
     now: "2026-06-16T00:02:00Z",
   });
   assert.equal(viewModel.hasSnapshot, true);
-  assert.equal(viewModel.stageElapsedText, "1分 0秒");
-  assert.equal(viewModel.totalElapsedText, "2分 0秒");
+  assert.equal(viewModel.stageElapsedText, "1 phút 0 giây");
+  assert.equal(viewModel.totalElapsedText, "2 phút 0 giây");
 });
 
 test("fetchRecentJobEvents returns the latest event page for long jobs", async () => {

@@ -1,5 +1,5 @@
-// 三栏骨架的左右栏折叠:把手切换 body 上的折叠类,收起该栏(宽度归零),状态持久化。
-// 折叠是纯视觉(不改右栏的 active 抽屉),展开后原内容仍在。
+// Thu gọn cột trái/phải trong bố cục ba cột: tay cầm đổi class thu gọn trên body, đặt chiều rộng cột về 0 và lưu trạng thái.
+// Thu gọn chỉ là hình ảnh, không đổi ngăn active của cột phải; nội dung gốc vẫn còn khi mở lại.
 
 const STORAGE_KEY = "retainpdf-reader-collapse-v1";
 
@@ -26,7 +26,7 @@ export function saveCollapseState(state, storage = globalThis.localStorage || nu
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify({ left: Boolean(state.left), right: Boolean(state.right) }));
   } catch (_err) {
-    // 配额满/隐私模式:静默失败
+    // Hết hạn mức/chế độ riêng tư: thất bại im lặng.
   }
 }
 
@@ -43,7 +43,7 @@ export function createReaderPanelCollapse({
   function apply() {
     body?.classList?.toggle?.("reader-left-collapsed", state.left);
     body?.classList?.toggle?.("reader-right-collapsed", state.right);
-    // aria-expanded 反映"栏是否展开";把手图标随 is-collapsed 翻转(CSS)
+    // aria-expanded phản ánh "cột có mở không"; biểu tượng tay cầm lật theo is-collapsed bằng CSS.
     leftBtn?.setAttribute?.("aria-expanded", state.left ? "false" : "true");
     rightBtn?.setAttribute?.("aria-expanded", state.right ? "false" : "true");
     leftBtn?.classList?.toggle?.("is-collapsed", state.left);
@@ -63,7 +63,7 @@ export function createReaderPanelCollapse({
     apply();
   }
 
-  // 顶栏点开某工具时,右栏若处于折叠态则自动展开亮出内容
+  // Khi mở công cụ từ thanh trên, cột phải tự mở nếu đang thu gọn để lộ nội dung.
   function expandRight() {
     if (state.right) {
       state.right = false;

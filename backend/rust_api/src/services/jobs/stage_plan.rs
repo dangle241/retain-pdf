@@ -76,6 +76,20 @@ pub(crate) fn resume_plan(job: &JobSnapshot) -> JobResumePlan {
             reason: None,
         };
     }
+    if availability.source_retryable_from_request {
+        return JobResumePlan {
+            can_resume: true,
+            from_stage: Some("ocr".to_string()),
+            resume_workflow: Some(resume_workflow_from_source(job)),
+            reuses_artifacts: vec!["original_upload".to_string()],
+            reruns_stages: vec![
+                "ocr".to_string(),
+                "translation".to_string(),
+                "rendering".to_string(),
+            ],
+            reason: None,
+        };
+    }
     JobResumePlan {
         can_resume: false,
         from_stage: None,
@@ -99,6 +113,13 @@ fn has_request_source(job: &JobSnapshot) -> bool {
         || !job.request_payload.source.source_url.trim().is_empty()
 }
 
+fn resume_workflow_from_source(job: &JobSnapshot) -> WorkflowKind {
+    match job.workflow {
+        WorkflowKind::Translate => WorkflowKind::Translate,
+        _ => WorkflowKind::Book,
+    }
+}
+
 fn base_stage_plan(
     stage: RetryStageKind,
     availability: &StageArtifactAvailability,
@@ -106,7 +127,7 @@ fn base_stage_plan(
     match stage {
         RetryStageKind::Ocr => JobStagePlan {
             stage,
-            label: "重试 OCR".to_string(),
+            label: "Thử lại OCR".to_string(),
             can_retry: availability.source_retryable_from_request,
             disabled_reason: String::new(),
             will_reuse: vec!["source_pdf".to_string()],
@@ -120,7 +141,7 @@ fn base_stage_plan(
         },
         RetryStageKind::Translation => JobStagePlan {
             stage,
-            label: "重试翻译".to_string(),
+            label: "Thử lại bản dịch".to_string(),
             can_retry: availability.ocr_available,
             disabled_reason: String::new(),
             will_reuse: vec!["source_pdf".to_string(), "ocr_result".to_string()],
@@ -130,7 +151,7 @@ fn base_stage_plan(
         },
         RetryStageKind::Render => JobStagePlan {
             stage,
-            label: "重新渲染".to_string(),
+            label: "Kết xuất lại".to_string(),
             can_retry: availability.translations_available,
             disabled_reason: String::new(),
             will_reuse: vec![
@@ -151,24 +172,21 @@ fn disabled_reason_for_stage(
 ) -> String {
     match stage {
         RetryStageKind::Ocr if !availability.has_request_source => {
-            "OCR retry currently requires the original upload_id or source_url on the job"
-                .to_string()
+            "Để thử lại OCR, tác vụ phải còn upload_id hoặc source_url ban đầu".to_string()
         }
-        RetryStageKind::Ocr => "source PDF is not available".to_string(),
+        RetryStageKind::Ocr => "Không tìm thấy PDF nguồn".to_string(),
         RetryStageKind::Translation => {
-            "need source_pdf and normalized_document_json to retry translation".to_string()
+            "Cần source_pdf và normalized_document_json để thử dịch lại".to_string()
         }
-        RetryStageKind::Render => {
-            "need source_pdf and translations_dir to retry render".to_string()
-        }
+        RetryStageKind::Render => "Cần source_pdf và translations_dir để kết xuất lại".to_string(),
     }
 }
 
 fn resume_unavailable_reason(availability: &StageArtifactAvailability) -> String {
     if !availability.source_available {
-        "need source_pdf before resuming a job".to_string()
+        "Cần PDF nguồn trước khi tiếp tục tác vụ".to_string()
     } else {
-        "need translations_dir+source_pdf or normalized_document_json+source_pdf".to_string()
+        "Cần bản dịch hoặc dữ liệu OCR hợp lệ để tiếp tục tác vụ".to_string()
     }
 }
 

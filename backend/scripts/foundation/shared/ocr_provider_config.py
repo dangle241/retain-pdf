@@ -8,7 +8,13 @@ from typing import Any
 
 OCR_PROVIDER_CONFIG_ENV = "RETAIN_OCR_PROVIDER_CONFIG"
 PADDLE_DEFAULT_MODEL_ENV = "RETAIN_PADDLE_DEFAULT_MODEL"
-PADDLE_DEFAULT_MODEL_FALLBACK = "PaddleOCR-VL-1.6"
+PADDLE_DEFAULT_MODEL_FALLBACK = "PaddleOCR-VL-1.5"
+PADDLE_MODEL_ALIAS_FALLBACKS = {
+    "paddleocr-vl-1.5": "PaddleOCR-VL-1.5",
+    "paddle-ocr-vl-1.5": "PaddleOCR-VL-1.5",
+    "paddleocr-vl-1.6": "PaddleOCR-VL-1.6",
+    "paddle-ocr-vl-1.6": "PaddleOCR-VL-1.6",
+}
 
 
 def paddle_default_model() -> str:
@@ -23,7 +29,12 @@ def normalize_paddle_model_name(model: str) -> str:
     if not trimmed:
         return paddle_default_model()
     aliases = _paddle_aliases()
-    return aliases.get(trimmed.lower(), trimmed)
+    lowered = trimmed.lower()
+    if lowered in aliases:
+        return aliases[lowered]
+    if lowered in {"paddleocr-vl", "paddle-ocr-vl"}:
+        return paddle_default_model()
+    return PADDLE_MODEL_ALIAS_FALLBACKS.get(lowered, trimmed)
 
 
 def ocr_provider_config() -> dict[str, Any]:
@@ -204,6 +215,7 @@ __all__ = [
     "OCR_PROVIDER_CONFIG_ENV",
     "PADDLE_DEFAULT_MODEL_ENV",
     "PADDLE_DEFAULT_MODEL_FALLBACK",
+    "PADDLE_MODEL_ALIAS_FALLBACKS",
     "configured_command_providers",
     "configured_local_command_providers",
     "configured_remote_command_providers",

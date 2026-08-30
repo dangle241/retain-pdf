@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::job_failure::classify_job_failure;
+use crate::job_failure::resolve_job_failure;
 use crate::models::api::{
     redact_json_value, redact_optional_text, redact_text, sensitive_values, JobEventRecord,
 };
@@ -27,11 +27,7 @@ pub fn redact_job_events(
     items: Vec<JobEventRecord>,
 ) -> Vec<JobEventRecord> {
     let secrets = sensitive_values(&job.request_payload);
-    let resolved_failure = job
-        .failure
-        .clone()
-        .map(JobFailureInfo::with_formal_fields)
-        .or_else(|| classify_job_failure(job).map(JobFailureInfo::with_formal_fields));
+    let resolved_failure = resolve_job_failure(job);
     items
         .into_iter()
         .map(|mut item| {

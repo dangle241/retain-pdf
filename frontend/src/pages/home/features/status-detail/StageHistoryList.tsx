@@ -1,9 +1,9 @@
-// 过程时间线列表:src/js/status-detail/history.js 的 buildStageHistoryPresentation
-// (字符串模板拼接)的 JSX 重写,类名/结构照搬(蓝图 §1.1 判决表:history.js
-// markup 拼接部分不用,改读原始数据数组;逐条断言取代 markup 断言)。
+// Danh sách dòng thời gian quy trình: bản viết lại JSX của buildStageHistoryPresentation trong src/js/status-detail/history.js
+// (nối template chuỗi), giữ nguyên tên lớp/cấu trúc (bảng quyết định thiết kế §1.1: history.js
+// không dùng phần nối markup, chuyển sang đọc mảng dữ liệu gốc; assert từng mục thay cho assert markup).
 //
-// 耗时/时间戳计算复用保留的纯逻辑 job/stage-history.js + status-detail/utils.js
-// (与 detail 页 EventsTimeline.jsx 的先例一致,不重新发明这部分公式)。
+// phần tính thời lượng/dấu thời gian tái sử dụng logic thuần được giữ lại trong job/stage-history.js + status-detail/utils.js
+// (cùng tiền lệ với EventsTimeline.jsx ở trang chi tiết, không tự viết lại các công thức này).
 
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
 import {
@@ -18,7 +18,7 @@ import {
 function StageHistoryItem({ entry, index, job, finishedAtFallback }) {
   const duration = resolveStageHistoryDuration(entry, job, { finishedAtFallback });
   const enterAt = entry?.enter_at ? formatEventTimestamp(entry.enter_at) : "-";
-  const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isJobTerminal(job) ? "-" : "进行中");
+  const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isJobTerminal(job) ? "-" : "Đang thực hiện");
   const display = stageHistoryDisplay(entry);
   const terminalText = entry?.terminal_status ? ` · ${entry.terminal_status}` : "";
   return (
@@ -44,7 +44,7 @@ export function StageHistoryList({ job, finishedAtFallback = "" }) {
   const ids = STATUS_DETAIL_DIALOG_IDS.stageHistory;
   return (
     <>
-      <div id={ids.empty} className={hasItems ? "events-empty hidden" : "events-empty"}>暂无阶段记录</div>
+      <div id={ids.empty} className={hasItems ? "events-empty hidden" : "events-empty"}>Chưa có bản ghi giai đoạn</div>
       <div id={ids.list} className={hasItems ? "stage-history-list" : "stage-history-list hidden"}>
         {history.map((entry, index) => (
           <StageHistoryItem

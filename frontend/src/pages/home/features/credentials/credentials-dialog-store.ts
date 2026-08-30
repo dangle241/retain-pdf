@@ -1,8 +1,8 @@
-// CredentialsDialog 的开合状态实例(用 state/dialog-store.js 通用工厂)。
-// payload 目前未使用(setupMode 走 credentials-view-store 的独立字段,
-// 因为它要驱动标题/保存文案等多处渲染,不只是"开合"这一件事);
-// 保留 payload 通道是为了跟 dialog-store.js 的通用契约保持一致,
-// 未来如需要"带参数打开"可以直接用,不必再改工厂函数。
+// Instance trạng thái đóng/mở CredentialsDialog dùng factory chung state/dialog-store.js.
+// payload hiện chưa dùng; setupMode dùng trường riêng của credentials-view-store
+// vì phải điều khiển nhiều chỗ như tiêu đề/nội dung lưu, không chỉ việc đóng/mở;
+// giữ kênh payload để nhất quán với hợp đồng chung của dialog-store.js,
+// sau này có thể mở kèm tham số trực tiếp mà không sửa factory.
 
 import { createDialogStore } from "../../state/dialog-store.js";
 

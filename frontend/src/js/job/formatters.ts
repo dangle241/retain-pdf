@@ -13,12 +13,12 @@ function formatDurationMs(ms) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   if (hours > 0) {
-    return `${hours}小时 ${minutes}分 ${seconds}秒`;
+    return `${hours} giờ ${minutes} phút ${seconds} giây`;
   }
   if (minutes > 0) {
-    return `${minutes}分 ${seconds}秒`;
+    return `${minutes} phút ${seconds} giây`;
   }
-  return `${seconds}秒`;
+  return `${seconds} giây`;
 }
 
 export function summarizeRuntimeField(value) {
@@ -39,7 +39,7 @@ export function formatEventTimestamp(value) {
   if (Number.isNaN(parsed.getTime())) {
     return rawValue;
   }
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat("vi-VN", {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -63,7 +63,7 @@ export function formatJobFinishedAt(payload) {
     return rawValue;
   }
 
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat("vi-VN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -95,12 +95,12 @@ export function formatJobDuration(payload) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   if (hours > 0) {
-    return `${hours}小时 ${minutes}分 ${seconds}秒`;
+    return `${hours} giờ ${minutes} phút ${seconds} giây`;
   }
   if (minutes > 0) {
-    return `${minutes}分 ${seconds}秒`;
+    return `${minutes} phút ${seconds} giây`;
   }
-  return `${seconds}秒`;
+  return `${seconds} giây`;
 }
 
 export function summarizeInvocationProtocol(payload) {

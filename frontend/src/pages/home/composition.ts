@@ -1,10 +1,10 @@
-// home 页组合根：只做「顺序接线」，不写业务、不堆 import。
+// Gốc composition trang home: chỉ "đấu nối theo thứ tự", không viết nghiệp vụ hay dồn import.
 //
-// 规则：
-//   1. 所有 ../../../js/* 只在 composition/external.ts
-//   2. 各 create* 工厂返回自己的 bag，这里显式赋值，禁止 Object.assign(ctx)
-//   3. features 是唯一可变注册表；晚绑定通过它完成
-//   4. job-runtime / recent-jobs / artifacts 在 composition 阶段一次挂齐
+// Quy tắc:
+//   1. Mọi ../../../js/* chỉ nằm trong composition/external.ts.
+//   2. Mỗi factory create* trả bag riêng; gán rõ tại đây và cấm Object.assign(ctx).
+//   3. features là registry có thể thay đổi duy nhất; binding muộn thực hiện qua nó.
+//   4. job-runtime / recent-jobs / artifacts được gắn đủ một lần ở pha composition.
 
 import {
   loadBrowserStoredConfig,
@@ -62,7 +62,11 @@ export function createHomeComposition({
   fetchGlossaries = fetchGlossariesApi,
   submitUploadRequest = submitUploadRequestHttp,
   loadPersistedDeveloperConfig = () => safeLoad(loadDeveloperStoredConfig, {}),
-  loadPersistedBrowserConfig = () => safeLoad(loadBrowserStoredConfig, {}),
+  loadPersistedBrowserConfig = () => safeLoad(loadBrowserStoredConfig, {
+    ocrProvider: "paddle",
+    paddleToken: "",
+    modelApiKey: "",
+  }),
   validateOcrToken: validateOcrTokenOverride = null,
   validateDeepSeekToken: validateDeepSeekTokenOverride = validateDeepSeekToken,
   queryDeepSeekBalance: queryDeepSeekBalanceOverride = queryDeepSeekBalance,
@@ -81,7 +85,7 @@ export function createHomeComposition({
 }: CreateHomeCompositionOptions = {}): HomeServices {
   const features: HomeFeatures = {};
 
-  // —— 基础 state / view ——
+  // — state / view cơ sở —
   const legacyState = { ...createDeveloperState(), ...createDesktopState() };
   setDeveloperConfig(legacyState, loadPersistedDeveloperConfig());
   setDesktopMode(legacyState, initialDesktopMode);
@@ -93,7 +97,7 @@ export function createHomeComposition({
 
   const textStore = createHomeTextStore();
   const uploadView = createUploadViewFeature();
-  // 下层 view/runtime 工厂的默认参 `= {}` 会让 TS 丢掉无默认字段；运行时入参正确，此处放宽。
+  // Tham số mặc định `= {}` của factory view/runtime lớp dưới làm TS mất trường không mặc định; đầu vào runtime đúng nên nới kiểu tại đây.
   const workflowView = createWorkflowViewFeature({
     uploadTilePort: uploadView.uploadTilePort,
   } as any);
@@ -108,7 +112,7 @@ export function createHomeComposition({
     documentRef,
   } as any);
 
-  // bridge 需要 statusDetail holder（后续 createStatusDomain 写入）
+  // Bridge cần holder statusDetail, được createStatusDomain ghi sau.
   const statusDetailHolder: StatusDetailHolder = { store: null, dialogStore: null };
   const bridge = createBridge({
     textStore,
@@ -120,7 +124,7 @@ export function createHomeComposition({
     statusDetail: statusDetailHolder,
   });
 
-  // —— 各域（返回 bag，显式挂到 features） ——
+  // — Các miền (trả bag và gắn rõ vào features) —
   Object.assign(features, createWorkflowAndUpload({
     features,
     credentialsStatePort,
@@ -188,12 +192,12 @@ export function createHomeComposition({
   });
   features.appActionsFeature = appActionsFeature;
 
-  // 必须先于 recent-jobs 注册 closeTranslationWorkflow 监听：
-  // recent-jobs 的 scheduleRefresh 会同步读 isWorkflowOpen(DOM data-open)；
-  // 若 workflow 的 close() 还没把 data-open 写成 0，刷新会被 isSuspended 吞掉（蓝图风险 5）。
+  // Phải đăng ký listener closeTranslationWorkflow trước recent-jobs:
+  // scheduleRefresh của recent-jobs đọc đồng bộ isWorkflowOpen (DOM data-open);
+  // nếu close() của workflow chưa ghi data-open thành 0, refresh sẽ bị isSuspended nuốt (rủi ro 5 trong bản thiết kế).
   const disposeWorkflowDialogEvents = workflowDialog.bindEvents();
 
-  // job-runtime / recent-jobs / artifacts：一次挂齐
+  // job-runtime / recent-jobs / artifacts: gắn đủ một lần.
   Object.assign(features, createRuntimeFeatures({
     features,
     bridge,

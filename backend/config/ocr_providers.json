@@ -42,10 +42,10 @@
         },
         "paddle_model": {
           "type": "string",
-          "default": "PaddleOCR-VL-1.6",
+          "default": "PaddleOCR-VL-1.5",
           "aliases": {
-            "paddleocr-vl": "PaddleOCR-VL-1.6",
-            "paddle-ocr-vl": "PaddleOCR-VL-1.6",
+            "paddleocr-vl": "PaddleOCR-VL-1.5",
+            "paddle-ocr-vl": "PaddleOCR-VL-1.5",
             "paddleocr-vl-1.6": "PaddleOCR-VL-1.6",
             "paddle-ocr-vl-1.6": "PaddleOCR-VL-1.6",
             "paddleocr-vl-1.5": "PaddleOCR-VL-1.5",
@@ -73,10 +73,10 @@
     }
   },
   "paddle": {
-    "default_model": "PaddleOCR-VL-1.6",
+    "default_model": "PaddleOCR-VL-1.5",
     "model_aliases": {
-      "paddleocr-vl": "PaddleOCR-VL-1.6",
-      "paddle-ocr-vl": "PaddleOCR-VL-1.6",
+      "paddleocr-vl": "PaddleOCR-VL-1.5",
+      "paddle-ocr-vl": "PaddleOCR-VL-1.5",
       "paddleocr-vl-1.6": "PaddleOCR-VL-1.6",
       "paddle-ocr-vl-1.6": "PaddleOCR-VL-1.6",
       "paddleocr-vl-1.5": "PaddleOCR-VL-1.5",

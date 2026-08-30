@@ -11,6 +11,7 @@ window.__FRONT_RUNTIME_CONFIG__ = {
   mineruToken: "",
   paddleToken: "",
   modelApiKey: "",
-  model: "deepseek-v4-flash",
-  baseUrl: "https://api.deepseek.com/v1",
+  // Chỉ là preset ban đầu; người dùng có thể đổi Base URL và model trên giao diện.
+  model: "gpt-4.1-mini",
+  baseUrl: "https://api.openai.com/v1",
 };

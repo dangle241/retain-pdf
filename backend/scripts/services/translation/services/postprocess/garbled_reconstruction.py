@@ -41,6 +41,7 @@ class GarbledReconstructionRuntime:
     base_url: str
     provider_reason: str
     request_chat_content_fn: Callable[..., str]
+    target_language_name: str = "Tiếng Việt"
     normalize_base_url_fn: Callable[[str], str] | None = None
 
     def display_base_url(self) -> str:
@@ -171,12 +172,12 @@ def _repair_item_translation(item: dict, *, runtime: GarbledReconstructionRuntim
         {
             "role": "system",
             "content": (
-                "You repair corrupted OCR scientific text blocks and translate them into fluent Simplified Chinese.\n"
+                f"You repair corrupted OCR scientific text blocks and translate them into fluent {runtime.target_language_name}.\n"
                 "The input may contain duplicated fragments, broken line wraps, and fake LaTeX formula noise.\n"
                 "Reconstruct the intended meaning conservatively.\n"
                 "Do not mention that the OCR is corrupted.\n"
                 "Return one JSON object with key translated_text only.\n"
-                "Output plain Chinese text only inside translated_text.\n"
+                f"Output plain {runtime.target_language_name} text only inside translated_text.\n"
                 "Do not emit LaTeX commands like \\\\bf, \\\\mathbf, \\\\mathrm.\n"
                 "If a material or symbol is obvious, keep it in natural scientific notation such as alpha-Al2O3 or α-Al2O3.\n"
             ),
@@ -214,12 +215,21 @@ def _clean_reconstructed_text(text: str, item: dict) -> tuple[str, bool]:
     return restore_protected_tokens(salvaged, protected_map), salvage_changed
 
 
-def _apply_reconstruction(items: list[dict], translated_text: str) -> None:
+def _apply_reconstruction(
+    items: list[dict],
+    translated_text: str,
+    *,
+    target_language_name: str = "Tiếng Việt",
+) -> None:
     if not translated_text or not items:
         return
     cleaned_text, salvaged = _clean_reconstructed_text(translated_text, items[0])
     # 用清洗后的文本做质量校验:落盘什么就校验什么。
-    validation_issues = _validate_reconstruction(items[0], cleaned_text)
+    validation_issues = _validate_reconstruction(
+        items[0],
+        cleaned_text,
+        target_language_name=target_language_name,
+    )
     if validation_issues:
         for item in items:
             _record_reconstruction_rejected(item, validation_issues)
@@ -249,13 +259,19 @@ def _candidate_key(item: dict) -> str:
     return f"item:{item.get('item_id', '')}"
 
 
-def _validate_reconstruction(item: dict, translated_text: str) -> list:
+def _validate_reconstruction(
+    item: dict,
+    translated_text: str,
+    *,
+    target_language_name: str,
+) -> list:
     review = review_translation_item(
         item,
         {
             "decision": "translate",
             "translated_text": translated_text,
         },
+        target_language_name=target_language_name,
     )
     item_id = str(item.get("item_id", "") or "")
     return [
@@ -331,7 +347,11 @@ def _run_reconstruction_candidates(
                 continue
             if translated_text:
                 target_items = candidates_by_key[key]
-                _apply_reconstruction(target_items, translated_text)
+                _apply_reconstruction(
+                    target_items,
+                    translated_text,
+                    target_language_name=runtime.target_language_name,
+                )
                 reconstructed += 1
                 dirty_pages.update(_collect_dirty_pages(target_items))
             if progress_callback is not None:
@@ -357,7 +377,11 @@ def _run_reconstruction_candidates(
                 continue
             if translated_text:
                 target_items = candidates_by_key[key]
-                _apply_reconstruction(target_items, translated_text)
+                _apply_reconstruction(
+                    target_items,
+                    translated_text,
+                    target_language_name=runtime.target_language_name,
+                )
                 reconstructed += 1
                 dirty_pages.update(_collect_dirty_pages(target_items))
             completed += 1

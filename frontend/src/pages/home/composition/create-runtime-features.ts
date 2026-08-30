@@ -1,5 +1,5 @@
-// job-runtime / recent-jobs / artifact-downloads —— 在 composition 阶段一次挂齐，
-// 不放进 initialize 的 if 懒挂载。
+// job-runtime / recent-jobs / artifact-downloads được gắn đủ một lần ở pha composition,
+// không đặt trong if của initialize để gắn lười.
 
 import {
   API_PREFIX,
@@ -38,7 +38,7 @@ import type {
 } from "./types.js";
 import type { RecentJobsReactViewPort } from "../features/library/types.js";
 
-/** mountJobRuntimeFeature 外壳端口（只声明 composition 实际传入的面） */
+/** Port vỏ mountJobRuntimeFeature, chỉ khai báo bề mặt composition thực sự truyền. */
 type JobRuntimeShellViewPort = {
   closeDialogs: () => void;
   isReaderOpen: () => boolean;
@@ -46,7 +46,7 @@ type JobRuntimeShellViewPort = {
   setCancelDisabled: (disabled: boolean) => void;
 };
 
-/** artifact-downloads viewPort 局部 adapter */
+/** Adapter cục bộ viewPort của artifact-downloads. */
 type ArtifactDownloadsViewPort = {
   bindProtectedLinks: (handler: (event: Event, link: Element) => void) => void;
   isLinkDisabled: (link: Element) => boolean;
@@ -143,7 +143,7 @@ export function createRuntimeFeatures({
     clearPageRanges: () => features.uploadFeature.clearPageRanges(),
     updateJobWarning: bridge.updateJobWarning,
     activateDetailTab: bridge.activateDetailTab,
-    // 主页不再嵌入阅读 iframe；sync/close 保留给 job-runtime 契约，实现为空。
+    // Trang chính không còn nhúng iframe đọc; giữ sync/close cho hợp đồng job-runtime với triển khai rỗng.
     onReaderDialogSync: () => {},
     onReaderDialogClose: () => {},
     uploadStatePort,
@@ -156,7 +156,7 @@ export function createRuntimeFeatures({
     state: jobRuntimeState,
     fetchProtected,
     setText: bridge.setText,
-    // currentJobIdFor(state) 与默认 `() => ""` 形参签名不一致，运行时 port 会把 state 透传。
+    // Chữ ký tham số currentJobIdFor(state) khác mặc định `() => ""`; port runtime sẽ truyền state qua.
     runtimePort: createArtifactDownloadsRuntimePort({
       currentJobId: (state?: unknown) => currentJobIdFor(state),
     }),
@@ -168,7 +168,7 @@ export function createRuntimeFeatures({
   }) as ArtifactDownloadsFeature;
   artifactDownloadsFeature.bindEvents();
 
-  // startPolling/openReader 已由 jobRuntimePort/readerPort/navigationPort 注入；签名仍标必填。
+  // startPolling/openReader đã được jobRuntimePort/readerPort/navigationPort chèn; chữ ký vẫn đánh dấu bắt buộc.
   const recentJobsFeature = mountRecentJobsFeature({
     fetchJobList,
     fetchJobPayload,

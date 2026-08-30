@@ -43,6 +43,7 @@ pub struct MineruRuntimeConfig {
 #[derive(Clone, Debug)]
 pub struct PaddleRuntimeConfig {
     pub default_base_url: String,
+    pub connect_timeout_secs: u64,
     pub request_timeout_secs: u64,
     pub download_timeout_secs: u64,
     pub request_retry_attempts: usize,
@@ -133,12 +134,13 @@ impl PaddleRuntimeConfig {
                 "RUST_API_PADDLE_BASE_URL",
                 "https://paddleocr.aistudio-app.com",
             ),
+            connect_timeout_secs: env_u64("RUST_API_PADDLE_CONNECT_TIMEOUT_SECS", 15),
             request_timeout_secs: env_u64("RUST_API_PADDLE_REQUEST_TIMEOUT_SECS", 120),
             download_timeout_secs: env_u64("RUST_API_PADDLE_DOWNLOAD_TIMEOUT_SECS", 300),
-            request_retry_attempts: env_usize("RUST_API_PADDLE_REQUEST_RETRY_ATTEMPTS", 3),
+            request_retry_attempts: env_usize("RUST_API_PADDLE_REQUEST_RETRY_ATTEMPTS", 5),
             request_retry_base_delay_millis: env_u64(
                 "RUST_API_PADDLE_REQUEST_RETRY_BASE_DELAY_MILLIS",
-                500,
+                1_000,
             ),
             max_input_images: env_u16("RUST_API_PADDLE_MAX_INPUT_IMAGES", 999),
             allow_private_urls: env_bool(ALLOW_PRIVATE_PROVIDER_URLS_ENV, false),

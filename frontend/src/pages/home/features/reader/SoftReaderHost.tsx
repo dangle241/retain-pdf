@@ -1,5 +1,5 @@
-// 主页内全屏阅读层：iframe 载入 reader.html，主页不卸载。
-// 关闭：子页 postMessage → history.back → popstate 卸层。
+// Lớp đọc toàn màn hình trong trang chủ: iframe tải reader.html, trang chủ không unmount.
+// Đóng: trang con postMessage → history.back → popstate gỡ lớp.
 
 import { useEffect, useState } from "react";
 import {
@@ -17,7 +17,7 @@ export function SoftReaderHost() {
     function openUrl(nextUrl: string, nonce = Date.now()) {
       const next = `${nextUrl || ""}`.trim();
       if (!next) return;
-      // 强制换 key 重挂 iframe，避免同 URL 二次打开仍空白
+      // Buộc đổi key để mount lại iframe, tránh lần mở thứ hai cùng URL vẫn bị trống.
       setFrame({ url: next, nonce });
     }
 
@@ -51,7 +51,7 @@ export function SoftReaderHost() {
     window.addEventListener("popstate", onPopState);
     window.addEventListener("message", onMessage);
 
-    // 前进/后退恢复
+    // Khôi phục khi tiến/lùi lịch sử.
     onPopState();
 
     return () => {
@@ -77,16 +77,16 @@ export function SoftReaderHost() {
       className="soft-reader-host"
       role="dialog"
       aria-modal="true"
-      aria-label="阅读器"
+      aria-label="Trình đọc"
       data-soft-reader-url={frame.url}
     >
       <iframe
         id="soft-reader-frame"
         key={`${frame.nonce}:${frame.url}`}
         className="soft-reader-frame"
-        title="阅读器"
+        title="Trình đọc"
         src={frame.url}
-        // 允许同源脚本；阅读器在 iframe 内跑自己的 bundle
+        // Cho phép script cùng origin; trình đọc chạy bundle riêng trong iframe.
       />
     </div>
   );

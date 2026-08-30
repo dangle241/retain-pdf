@@ -1,11 +1,11 @@
-// APP_EVENTS(document CustomEvent)→ React 的适配 hook。
+// Hook chuyển APP_EVENTS (CustomEvent trên document) sang React.
 //
-// 总计划口径:16 个 retainpdf:* 事件原样保留,不趁机改造通信方式;
-// React 组件消费事件时统一走本 hook,不手写 addEventListener 样板。
+// Theo kế hoạch tổng: giữ nguyên 16 sự kiện retainpdf:*, không nhân dịp này thay đổi cách giao tiếp;
+// component React dùng sự kiện qua hook này thống nhất, không tự viết mẫu addEventListener.
 //
-// handler 走 ref:调用方可以传内联箭头函数(每次渲染都是新引用),
-// 订阅本体只随 eventName/target 变化重建,不会因 handler 引用漂移反复解绑/重绑
-// (解绑窗口内丢事件是轮询驱动页面的真实风险)。
+// handler dùng ref: phía gọi có thể truyền arrow function inline (tham chiếu mới mỗi lần render),
+// bản thân đăng ký chỉ tạo lại khi eventName/target thay đổi, không hủy/gắn lại lặp do tham chiếu handler trôi
+// (mất sự kiện trong cửa sổ hủy gắn là rủi ro thật trên trang do polling điều khiển).
 
 import { useEffect, useRef } from "react";
 

@@ -1,6 +1,6 @@
-/* AI 悬浮问答外壳 — Notion 侧栏气质：大留白 / 轻边框 / 软阴影
- * 细节：float-ai-aui|md|citations|composer.css
- * 旧抽屉 AI 皮肤仅在 reader-legacy（ai.css），不在此包。
+/* Vỏ hỏi đáp AI nổi, phong cách thanh bên Notion: khoảng trắng lớn / viền nhẹ / bóng mềm.
+ * Chi tiết: float-ai-aui|md|citations|composer.css.
+ * Giao diện drawer AI cũ chỉ nằm trong reader-legacy (ai.css), không ở bundle này.
  */
 .reader-float-ai {
   max-height: min(92vh, 860px);
@@ -57,7 +57,7 @@
   display: flex;
   flex-direction: column;
 }
-/* 透明吞事件层：不要半透明压暗 */
+/* Lớp trong suốt chặn sự kiện: không làm tối bán trong suốt. */
 .reader-float-ai .aui-branch-pointer-shield {
   position: absolute;
   inset: 0;
@@ -67,7 +67,7 @@
   pointer-events: auto;
 }
 
-/* —— 会话条：安静、像 Notion 顶栏下拉 —— */
+/* —— Thanh hội thoại: yên tĩnh, giống menu thả xuống thanh trên Notion —— */
 .reader-float-ai .aui-session-bar {
   display: flex;
   flex-direction: column;
@@ -238,8 +238,8 @@
   color: var(--ink);
 }
 .reader-float-ai .aui-session-icon-btn.is-danger:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--danger, #c44) 10%, var(--paper));
-  color: var(--danger, #c44);
+  background: color-mix(in srgb, var(--danger) 10%, var(--paper));
+  color: var(--danger);
 }
 .reader-float-ai .aui-session-icon-btn:disabled {
   opacity: 0.35;
@@ -274,8 +274,8 @@
   margin: 0;
   padding: 6px 8px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--danger, #c44) 8%, var(--paper));
-  color: color-mix(in srgb, var(--danger, #c44) 85%, var(--ink));
+  background: color-mix(in srgb, var(--danger) 8%, var(--paper));
+  color: color-mix(in srgb, var(--danger) 85%, var(--ink));
   font-size: 11.5px;
   font-weight: 550;
   line-height: 1.4;
@@ -292,7 +292,7 @@
   line-height: 1.45;
 }
 
-/* 空态 / 源文档禁用 */
+/* Trạng thái rỗng / tài liệu nguồn bị vô hiệu hóa. */
 .reader-float-ai-empty {
   display: grid;
   justify-items: center;

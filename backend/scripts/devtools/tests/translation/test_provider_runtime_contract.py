@@ -14,14 +14,14 @@ from services.translation.llm.shared.provider_runtime import PROVIDER_CAPABILITI
 from services.translation.llm.shared.provider_registry import resolve_active_provider_runtime
 
 
-def test_active_provider_runtime_uses_deepseek_v4_flash_default() -> None:
+def test_active_provider_runtime_uses_openai_compatible_default() -> None:
     runtime = resolve_active_provider_runtime()
 
     assert ACTIVE_PROVIDER == "deepseek"
     assert runtime.provider_id == "deepseek"
-    assert DEFAULT_MODEL == "deepseek-v4-flash"
-    assert runtime.default_model == "deepseek-v4-flash"
-    assert DEFAULT_BASE_URL == "https://api.deepseek.com/v1"
+    assert DEFAULT_MODEL == "gpt-4.1-mini"
+    assert runtime.default_model == "gpt-4.1-mini"
+    assert DEFAULT_BASE_URL == "https://api.openai.com/v1"
 
 
 def test_provider_runtime_declares_translation_capabilities() -> None:

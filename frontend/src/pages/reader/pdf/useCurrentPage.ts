@@ -1,5 +1,5 @@
-// 根据共享滚动壳内阅读焦点线估算当前页（1-based）。
-// 与 measurePageScrollProgress / 滚动锚点使用同一 pickPageAtFocus 规则。
+// Ước tính trang hiện tại (bắt đầu từ 1) theo đường focus đọc trong scroll shell dùng chung.
+// Dùng cùng quy tắc pickPageAtFocus với measurePageScrollProgress / neo cuộn.
 
 import { useEffect, useState } from "react";
 import type { RefObject } from "react";
@@ -16,9 +16,9 @@ export function useCurrentPage(
   scrollRef: RefObject<HTMLElement | null>,
   numPages: number,
   enabled = true,
-  /** 缩放 / 模式导致节点变化时重绑 */
+  /** Gắn lại khi thu phóng / chế độ làm nút thay đổi. */
   observeKey: string | number = "",
-  /** 只看某一栏的页；空则看全部 */
+  /** Chỉ xem trang của một cột; nếu rỗng thì xem tất cả. */
   pane?: ReaderPaneId | null,
 ): number {
   const [currentPage, setCurrentPage] = useState(1);

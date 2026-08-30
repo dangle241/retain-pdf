@@ -6,7 +6,7 @@ use crate::services::job_launcher::start_job_execution;
 use crate::services::jobs::stage_plan::stage_plan;
 
 use super::super::super::creation::create_translation_job;
-use super::super::super::query::load_job_or_404;
+use super::super::super::query::load_supported_job;
 use super::super::JobsFacade;
 use super::rerun::prepare_in_place_render_job;
 use super::stage_retry_overrides::{apply_retry_overrides, apply_retry_overrides_to_resolved_spec};
@@ -19,7 +19,7 @@ impl<'a> JobsFacade<'a> {
         base_url: &str,
         job_id: &str,
     ) -> Result<StageActionsView, AppError> {
-        let job = load_job_or_404(self.command.db, job_id)?;
+        let job = load_supported_job(self.command.db, self.command.control.data_root, job_id)?;
         Ok(build_stage_actions_view(base_url, &job))
     }
 
@@ -36,7 +36,11 @@ impl<'a> JobsFacade<'a> {
             )));
         }
 
-        let source_job = load_job_or_404(self.command.db, source_job_id)?;
+        let source_job = load_supported_job(
+            self.command.db,
+            self.command.control.data_root,
+            source_job_id,
+        )?;
         let plan = stage_plan(&source_job, request.stage.clone());
         if !plan.can_retry {
             return Err(AppError::bad_request(plan.disabled_reason));

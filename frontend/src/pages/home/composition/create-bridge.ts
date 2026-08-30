@@ -1,5 +1,5 @@
-// 3b 回调桥：job-runtime / idle-reset / upload 共用的窄接口。
-// statusDetail 在后续域才创建，通过 holder 惰性读。
+// Bridge callback 3b: giao diện hẹp dùng chung cho job-runtime / idle-reset / upload.
+// statusDetail chỉ được tạo ở miền sau và được đọc lười qua holder.
 
 import { buildJobWarningViewModel } from "./external.js";
 import type { HomeBridge, HomeFeatures, StatusDetailHolder } from "./types.js";

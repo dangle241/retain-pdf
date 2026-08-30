@@ -14,10 +14,10 @@ const FRONTEND_ROOT = path.resolve(__dirname, "..");
 const REPO_ROOT = path.resolve(FRONTEND_ROOT, "..");
 const DEFAULT_API_BASE = "http://127.0.0.1:41000";
 const DEFAULT_EXPECTED_LABELS = [
-  "第 1/4 步 · OCR 解析",
-  "第 2/4 步 · 翻译",
-  "第 3/4 步 · 渲染",
-  "完成",
+  "Bước 1/4 · Phân tích OCR",
+  "Bước 2/4 · Dịch",
+  "Bước 3/4 · Kết xuất",
+  "Hoàn tất",
 ];
 
 function printUsage() {
@@ -32,8 +32,8 @@ Options:
   --ocr-provider <name>      paddle | mineru, default paddle
   --ocr-token <token>        OCR provider token, default from env or backend/scripts/.env
   --model-api-key <key>      Translation API key, default from env or backend/scripts/.env/deepseek.env
-  --model <name>             Default deepseek-v4-flash
-  --base-url <url>           Default https://api.deepseek.com/v1
+  --model <name>             Default gpt-4.1-mini
+  --base-url <url>           Default https://api.openai.com/v1
   --page-ranges <ranges>     Optional page ranges, e.g. 1-3
   --timeout-seconds <n>      Job runtime timeout payload field, default 1800
   --poll-ms <n>              Detail polling interval, default 1000
@@ -49,8 +49,8 @@ function parseArgs(argv) {
   const result = {
     workflow: "book",
     ocrProvider: "paddle",
-    model: "deepseek-v4-flash",
-    baseUrl: "https://api.deepseek.com/v1",
+    model: "gpt-4.1-mini",
+    baseUrl: "https://api.openai.com/v1",
     timeoutSeconds: 1800,
     pollMs: 1000,
     maxWaitMs: 1800_000,

@@ -72,6 +72,21 @@ def test_direct_typst_protocol_shell_is_classified_as_translation_not_render():
     assert payload["failure_code"] == "translation_protocol_shell"
 
 
+def test_insufficient_quota_is_not_classified_as_retryable_rate_limit():
+    try:
+        raise RuntimeError(
+            "429 insufficient_quota: You exceeded your current quota; "
+            "check your plan and billing details"
+        )
+    except RuntimeError as exc:
+        failure = classify_exception(exc, default_stage="translation", provider="translation")
+
+    payload = json.loads(failure.to_json())
+    assert payload["failure_code"] == "quota_exhausted"
+    assert payload["failure_category"] == "billing"
+    assert payload["retryable"] is False
+
+
 def test_rate_limit_errors_are_classified_as_retryable_rate_limit():
     try:
         raise RuntimeError("Paddle OCR rate limited after 3 attempts: too many requests retry-after=60")

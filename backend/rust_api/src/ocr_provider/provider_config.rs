@@ -8,7 +8,7 @@ const OCR_PROVIDER_CONFIG_ENV: &str = "RUST_API_OCR_PROVIDER_CONFIG";
 const OCR_PROVIDER_CONFIG_COMPAT_ENV: &str = "RETAIN_OCR_PROVIDER_CONFIG";
 const PADDLE_DEFAULT_MODEL_ENV: &str = "RUST_API_PADDLE_DEFAULT_MODEL";
 const PADDLE_DEFAULT_MODEL_COMPAT_ENV: &str = "RETAIN_PADDLE_DEFAULT_MODEL";
-const PADDLE_DEFAULT_MODEL_FALLBACK: &str = "PaddleOCR-VL-1.6";
+const PADDLE_DEFAULT_MODEL_FALLBACK: &str = "PaddleOCR-VL-1.5";
 
 pub fn paddle_default_model() -> String {
     env_override(PADDLE_DEFAULT_MODEL_ENV)
@@ -30,7 +30,7 @@ pub fn normalize_paddle_model_name(model: &str) -> String {
         return paddle_default_model();
     }
     let lowered = trimmed.to_ascii_lowercase();
-    paddle_config()
+    if let Some(configured) = paddle_config()
         .get("model_aliases")
         .and_then(Value::as_object)
         .and_then(|aliases| aliases.get(&lowered))
@@ -38,7 +38,15 @@ pub fn normalize_paddle_model_name(model: &str) -> String {
         .map(str::trim)
         .filter(|value| !value.is_empty())
         .map(ToString::to_string)
-        .unwrap_or_else(|| trimmed.to_string())
+    {
+        return configured;
+    }
+    match lowered.as_str() {
+        "paddleocr-vl" | "paddle-ocr-vl" => paddle_default_model(),
+        "paddleocr-vl-1.5" | "paddle-ocr-vl-1.5" => "PaddleOCR-VL-1.5".to_string(),
+        "paddleocr-vl-1.6" | "paddle-ocr-vl-1.6" => "PaddleOCR-VL-1.6".to_string(),
+        _ => trimmed.to_string(),
+    }
 }
 
 pub fn ocr_provider_definitions() -> serde_json::Map<String, Value> {
@@ -216,15 +224,15 @@ mod tests {
 
     #[test]
     fn paddle_default_model_reads_shared_config() {
-        assert_eq!(paddle_default_model(), "PaddleOCR-VL-1.6");
+        assert_eq!(paddle_default_model(), "PaddleOCR-VL-1.5");
     }
 
     #[test]
     fn normalize_paddle_model_name_uses_shared_aliases() {
-        assert_eq!(normalize_paddle_model_name(""), "PaddleOCR-VL-1.6");
+        assert_eq!(normalize_paddle_model_name(""), "PaddleOCR-VL-1.5");
         assert_eq!(
             normalize_paddle_model_name("paddleocr-vl"),
-            "PaddleOCR-VL-1.6"
+            "PaddleOCR-VL-1.5"
         );
         assert_eq!(
             normalize_paddle_model_name("paddleocr-vl-1.5"),

@@ -1,8 +1,8 @@
-// 阅读器「返回主页」
+// Trình đọc "Quay lại trang chủ".
 //
-// 1) 软打开（主页 SoftReaderHost iframe）→ postMessage 父页 history.back，主页不刷新
-// 2) 独立 reader.html 且从主页 assign 进来 → history.back
-// 3) 深链直达 → location.assign(index.html)
+// 1. Mở mềm (iframe SoftReaderHost trên trang chủ) → postMessage để trang cha history.back, không làm mới trang chủ.
+// 2. reader.html độc lập được assign từ trang chủ → history.back.
+// 3. Truy cập trực tiếp bằng deep link → location.assign(index.html).
 
 import { X } from "lucide-react";
 import { peekHomeReturnState } from "../../../../shared/navigation/home-return-state.js";
@@ -26,11 +26,11 @@ function requestSoftHostClose(): boolean {
   }
 }
 
-/** 从阅读页回主页 */
+/** Từ trang đọc quay về trang chủ. */
 export function navigateReaderToHome() {
   if (typeof window === "undefined") return;
 
-  // 软阅读层：让父页卸层，绝不在 iframe 里 assign 主页
+  // Lớp đọc mềm: yêu cầu trang cha gỡ lớp, tuyệt đối không assign trang chủ trong iframe.
   if (requestSoftHostClose()) {
     return;
   }
@@ -65,12 +65,12 @@ export function ReaderCloseHome() {
       id="reader-close-home-btn"
       type="button"
       className="reader-close-home-btn"
-      aria-label="返回主页"
-      title="返回主页"
+      aria-label="Về trang chính"
+      title="Về trang chính"
       onClick={navigateReaderToHome}
     >
       <X className="reader-close-home-icon" size={18} strokeWidth={2.25} aria-hidden />
-      <span className="reader-close-home-label">关闭</span>
+      <span className="reader-close-home-label">Đóng</span>
     </button>
   );
 }

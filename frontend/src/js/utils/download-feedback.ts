@@ -49,22 +49,22 @@ function summarizeProgress(receivedBytes, totalBytes, percent) {
     const totalText = formatTransferSize(totalBytes);
     const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
     return {
-      status: `正在下载 ${safePercent.toFixed(0)}%`,
+      status: `Đang tải xuống ${safePercent.toFixed(0)}%`,
       meta: `${receivedText} / ${totalText}`,
       percent: safePercent,
     };
   }
   return {
-    status: "正在下载...",
-    meta: receivedText ? `已接收 ${receivedText}` : "等待响应...",
+    status: "Đang tải xuống...",
+    meta: receivedText ? `Đã nhận ${receivedText}` : "Đang chờ phản hồi...",
     percent: NaN,
   };
 }
 
 export function showDownloadToast({
-  title = "下载中",
-  status = "正在准备...",
-  meta = "等待响应...",
+  title = "Đang tải xuống",
+  status = "Đang chuẩn bị...",
+  meta = "Đang chờ phản hồi...",
   percent = NaN,
   tone = "progress",
 }: ShowDownloadToastOptions = {}) {
@@ -81,9 +81,9 @@ export function showDownloadToast({
 
 export function showDownloadPreparing(filename = "") {
   showDownloadToast({
-    title: filename ? `下载 ${filename}` : "下载中",
-    status: "正在准备...",
-    meta: "等待响应...",
+    title: filename ? `Tải ${filename}` : "Đang tải xuống",
+    status: "Đang chuẩn bị...",
+    meta: "Đang chờ phản hồi...",
     percent: NaN,
     tone: "progress",
   });
@@ -97,7 +97,7 @@ export function updateDownloadProgress({
 }: UpdateDownloadProgressOptions = {}) {
   const summary = summarizeProgress(receivedBytes, totalBytes, percent);
   showDownloadToast({
-    title: filename ? `下载 ${filename}` : "下载中",
+    title: filename ? `Tải ${filename}` : "Đang tải xuống",
     status: summary.status,
     meta: summary.meta,
     percent: summary.percent,
@@ -109,9 +109,9 @@ export function completeDownloadToast(filename = "") {
   clearHideTimer();
   toastElement()?.setState({
     visible: true,
-    title: filename ? `下载 ${filename}` : "下载完成",
-    status: "已开始保存",
-    meta: "文件已交给浏览器保存",
+    title: filename ? `Tải ${filename}` : "Tải xuống hoàn tất",
+    status: "Đã bắt đầu lưu",
+    meta: "Tệp đã được chuyển cho trình duyệt để lưu",
     percent: 100,
     tone: "success",
   });
@@ -121,13 +121,13 @@ export function completeDownloadToast(filename = "") {
   }, 1500);
 }
 
-export function failDownloadToast(message = "下载失败") {
+export function failDownloadToast(message = "Tải xuống thất bại") {
   clearHideTimer();
   toastElement()?.setState({
     visible: true,
-    title: "下载失败",
+    title: "Tải xuống thất bại",
     status: message,
-    meta: "请稍后重试",
+    meta: "Vui lòng thử lại sau",
     percent: 100,
     tone: "error",
   });

@@ -12,10 +12,8 @@ use super::{FileDownload, MarkdownDownload, QueryJobsDeps};
 const MARKDOWN_IMAGE_LINK_RE: &str =
     r#"!\[([^\]]*)\]\(\s*<?((?:\./)?images/[^)>\n]+)>?(?:[ \t]+(?:"[^"]*"|'[^']*'))?\s*\)"#;
 // HTML: 分单/双引号（regex crate 不支持 backref）
-const HTML_IMAGE_SRC_DQ_RE: &str =
-    r#"(?i)(<img\b[^>]*?\bsrc\s*=\s*")((?:\./)?images/[^"]+)(")"#;
-const HTML_IMAGE_SRC_SQ_RE: &str =
-    r#"(?i)(<img\b[^>]*?\bsrc\s*=\s*')((?:\./)?images/[^']+)(')"#;
+const HTML_IMAGE_SRC_DQ_RE: &str = r#"(?i)(<img\b[^>]*?\bsrc\s*=\s*")((?:\./)?images/[^"]+)(")"#;
+const HTML_IMAGE_SRC_SQ_RE: &str = r#"(?i)(<img\b[^>]*?\bsrc\s*=\s*')((?:\./)?images/[^']+)(')"#;
 
 pub(crate) async fn markdown_download(
     deps: &QueryJobsDeps<'_>,
@@ -172,7 +170,10 @@ fn absolute_markdown_image_url(raw_path: &str, job_id: &str, base_url: &str) -> 
 
 /// 归一化 markdown 图片相对路径 → 相对 images 目录的路径（不含 images/ 前缀）
 fn normalize_markdown_image_rel(raw: &str) -> String {
-    let mut path = raw.trim().trim_matches(|c| c == '<' || c == '>').to_string();
+    let mut path = raw
+        .trim()
+        .trim_matches(|c| c == '<' || c == '>')
+        .to_string();
     // 去掉可选 title：仅当 `path "title"` / `path 'title'` 时截断
     // 文件名本身可含空格（chart a.png），不能见空白就截
     if let Some(idx) = path.find(" \"") {

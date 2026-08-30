@@ -1,9 +1,9 @@
-// 封面中央「处理中」加载层：排队/OCR/翻译/渲染时用，不在角标写过程文案。
+// Lớp loading "Đang xử lý" giữa bìa: dùng khi xếp hàng/OCR/dịch/kết xuất; không ghi tiến trình ở huy hiệu góc.
 
 import { cn } from "@/lib/utils";
 
 type BookCardProcessingOverlayProps = {
-  /** 列表缩略图用更小尺寸 */
+  /** Ảnh thu nhỏ danh sách dùng kích thước nhỏ hơn. */
   compact?: boolean;
   className?: string;
 };

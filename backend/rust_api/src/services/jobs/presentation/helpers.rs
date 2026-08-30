@@ -78,9 +78,10 @@ pub(super) fn build_book_summary(
         title: display_name.to_string(),
         authors: None,
         page_count: upload_page_count.or_else(|| page_count_for_job(db, job, data_root)),
-        source_language: Some(job.request_payload.ocr.language.clone())
+        source_language: Some(job.request_payload.translation.source_language.clone())
             .filter(|value| !value.trim().is_empty()),
-        target_language: None,
+        target_language: Some(job.request_payload.translation.target_language.clone())
+            .filter(|value| !value.trim().is_empty()),
         source_file_name: source_file_name(db, job),
         cover_url: cover_url(job, data_root, base_url),
         file_size_bytes: upload_size,

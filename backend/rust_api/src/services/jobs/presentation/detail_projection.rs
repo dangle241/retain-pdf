@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::db::Db;
-use crate::job_failure::classify_job_failure;
+use crate::job_failure::resolve_job_failure;
 use crate::models::api::{
     build_artifact_links, build_job_actions, build_job_links_with_workflow, public_request_payload,
     ArtifactDisplayItemView, ArtifactLinksView, BookSummaryView, GlossaryUsageSummaryView,
@@ -125,11 +125,7 @@ pub(super) fn build_artifact_projection(
 }
 
 pub(super) fn build_failure_projection(job: &JobSnapshot) -> DetailFailureProjection {
-    let failure = job
-        .failure
-        .clone()
-        .map(JobFailureInfo::with_formal_fields)
-        .or_else(|| classify_job_failure(job).map(JobFailureInfo::with_formal_fields));
+    let failure = resolve_job_failure(job);
     DetailFailureProjection {
         diagnostic: failure.as_ref().map(job_failure_to_legacy_view),
         failure,

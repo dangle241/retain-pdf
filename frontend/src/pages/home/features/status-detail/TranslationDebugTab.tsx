@@ -1,7 +1,7 @@
-// 翻译调试 tab(高级诊断)——组合 Summary/FilterPanel/ItemsPanel/DetailPanel,
-// 外层 status/empty/content 三态切换 JSX 重写
-// status-detail-dialog-translation.js#renderTranslationSummary 的 hidden 分支
-// (蓝图 §1.2 组件表:TranslationDebugTab 家族)。
+// Tab gỡ lỗi bản dịch (chẩn đoán nâng cao): tổ hợp Summary/FilterPanel/ItemsPanel/DetailPanel,
+// bản viết lại JSX của chuyển đổi ba trạng thái status/empty/content ở lớp ngoài từ
+// nhánh hidden trong status-detail-dialog-translation.js#renderTranslationSummary
+// (bảng component thiết kế §1.2: họ TranslationDebugTab).
 
 import { TranslationSummary } from "./TranslationSummary.jsx";
 import { TranslationFilterPanel } from "./TranslationFilterPanel.jsx";
@@ -16,13 +16,13 @@ export function TranslationDebugTab({ translation, controller }) {
   return (
     <section className="status-panel translation-debug-panel">
       <div className="status-panel-head">
-        <h3>翻译调试</h3>
+        <h3>Gỡ lỗi bản dịch</h3>
         <span id={ids.debugStatus} className="status-panel-note">
-          {hidden ? "暂无翻译调试数据" : "按 item 排查为什么没翻译、为什么保留原文"}
+          {hidden ? "Chưa có dữ liệu gỡ lỗi bản dịch" : "Kiểm tra theo từng mục để biết vì sao chưa dịch hoặc giữ nguyên văn"}
         </span>
       </div>
       <div id={ids.debugEmpty} className={hidden ? "events-empty" : "events-empty hidden"}>
-        {translation.emptyMessage || "暂无翻译调试数据"}
+        {translation.emptyMessage || "Chưa có dữ liệu gỡ lỗi bản dịch"}
       </div>
       <div id={ids.debugContent} className={hidden ? "translation-debug-content hidden" : "translation-debug-content"}>
         <TranslationSummary translation={translation} />

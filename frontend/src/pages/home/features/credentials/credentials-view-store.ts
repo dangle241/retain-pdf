@@ -1,13 +1,13 @@
-// CredentialsDialog 的纯视图态(蓝图 §2:setupMode/tab/校验反馈/DeepSeek 充值
-// 提示/保存态)+ 与 features/credentials/browser.js(kept 控制器)对接的
-// store 驱动 viewPort/elementsPort。
+// Trạng thái view thuần của CredentialsDialog (bản thiết kế §2: setupMode/tab/phản hồi kiểm tra/gợi ý nạp DeepSeek
+// /trạng thái lưu) + viewPort/elementsPort dựa trên store nối với features/credentials/browser.js được giữ,
+// được store điều khiển.
 //
-// 旧世界 browser-view-port.js/dialog-elements-port.js/view.js/dialog-sync.js/
-// validation-view.js 全部是 DOM 直写(死,不 import);这里用同名方法签名
-// 重新实现,只是"写"的目的地从 DOM 换成 store,让 CredentialsDialog.jsx 系的
-// 组件订阅渲染。browser.js(state.js/validation.js/deepseek-flow.js/
-// ocr-readiness-flow.js/persistence.js/dialog-values.js 等 kept 逻辑层的编排者)
-// 一行不改地复用。
+// browser-view-port.js/dialog-elements-port.js/view.js/dialog-sync.js/ cũ
+// validation-view.js đều ghi DOM trực tiếp nên không import; tại đây triển khai lại chữ ký cùng tên,
+// chỉ đổi đích "ghi" từ DOM sang store để các thành phần CredentialsDialog.jsx
+// đăng ký và kết xuất. browser.js (bộ điều phối state.js/validation.js/deepseek-flow.js/
+// ocr-readiness-flow.js/persistence.js/dialog-values.js và các lớp logic được giữ)
+// được dùng lại không sửa dòng nào.
 
 import type { DialogStore } from "../../state/dialog-store.js";
 import type {
@@ -32,12 +32,12 @@ export type CredentialGateState = {
 export type CredentialsViewState = {
   setupMode: boolean;
   activeTab: string;
-  /** { [providerId]: { message, tone } } —— OCR token 校验反馈(paddle 等) */
+  /** { [providerId]: { message, tone } }: phản hồi kiểm tra OCR token như paddle. */
   validations: Record<string, CredentialsMessage>;
   deepSeek: CredentialsMessage;
   deepSeekTopUpVisible: boolean;
   dialogStatus: CredentialsMessage;
-  /** 只读态,供 HeroUpload 订阅决定上传瓦片锁定/credential-gate 可见性 */
+  /** Trạng thái chỉ đọc để HeroUpload đăng ký và quyết định khóa ô tải lên/hiển thị credential-gate. */
   credentialGate: CredentialGateState;
 };
 
@@ -79,9 +79,9 @@ export function createCredentialsViewFeature({
       deepSeek: { message: "", tone: "" },
       deepSeekTopUpVisible: false,
       dialogStatus: { message: "", tone: "" },
-      // 只读态,供 3a HeroUpload 订阅决定上传瓦片锁定/credential-gate 可见性
-      // (蓝图 §2.2「upload 按钮锁定态移交 3a」——本域只写这份快照,不直接
-      // 触碰 upload-view-store.js/HeroUpload.jsx)。
+      // Trạng thái chỉ đọc để HeroUpload 3a đăng ký và quyết định khóa ô tải lên/hiển thị credential-gate.
+      // (bản thiết kế §2.2 "chuyển trạng thái khóa nút upload sang 3a"); miền này chỉ ghi snapshot, không trực tiếp
+      // chạm upload-view-store.js/HeroUpload.jsx.
       credentialGate: {
         desktopMode: false,
         show: false,
@@ -124,12 +124,13 @@ export function createCredentialsViewFeature({
     },
   });
 
-  // 对话框内可见字段的非受控 DOM ref 收集点(镜像 upload-view-store.js 的
-  // domRefs 模式)。dialog-values.js/dialog-sync.js(kept)直接读写这些节点的
-  // .value,不走 React 受控 value/onChange——避免两套写入源打架(蓝图风险 1
-  // 的姊妹问题:可见字段虽不是"隐藏 input 桥接"那 4 个,但同样不该双写)。
+  // Điểm thu thập DOM ref không kiểm soát cho trường hiển thị trong hộp thoại, phản chiếu
+  // mẫu domRefs của upload-view-store.js. dialog-values.js/dialog-sync.js được giữ đọc/ghi trực tiếp
+  // .value của các nút, không dùng value/onChange có kiểm soát của React để tránh hai nguồn ghi xung đột (rủi ro 1
+  // trong bản thiết kế: dù trường hiển thị không phải bốn "input ẩn bridge", cũng không nên ghi kép).
   const elementsRef: CredentialsElementsRef = {
     apiKeyInput: null,
+    modelProviderSelect: null,
     modelBaseUrlInput: null,
     modelNameInput: null,
     mathModeSelect: null,
@@ -140,6 +141,7 @@ export function createCredentialsViewFeature({
     return {
       paddleInput: elementsRef.tokenInputs.paddle || null,
       apiKeyInput: elementsRef.apiKeyInput,
+      modelProviderSelect: elementsRef.modelProviderSelect,
       modelBaseUrlInput: elementsRef.modelBaseUrlInput,
       modelNameInput: elementsRef.modelNameInput,
       mathModeSelect: elementsRef.mathModeSelect,
@@ -154,18 +156,18 @@ export function createCredentialsViewFeature({
 
   const elementsPort = {
     elements,
-    // OCR provider 面板可见性由 OcrProviderPanels.jsx 直接订阅
-    // credentialsStatePort(credentials.ocrProvider)渲染;不需要
-    // dialog-sync.js 原本那种命令式二次同步,no-op。
+    // Khả năng hiển thị bảng nhà cung cấp OCR do OcrProviderPanels.jsx đăng ký trực tiếp
+    // credentialsStatePort(credentials.ocrProvider) để kết xuất; không cần
+    // đồng bộ mệnh lệnh lần hai như dialog-sync.js cũ, nên no-op.
     syncOcrProviderControls: () => {},
   };
 
-  // browser.js 在 mountBrowserCredentialsFeature() 内同步调用一次
-  // viewPort.bindEvents(handlers),把 save/validateOcr/validateDeepSeek/
-  // changeProvider/activateCredentialTab/open 等处理函数交给视图层——旧世界
-  // 在这里挂原生 DOM 监听(view.js,死);React 世界没有等价步骤,改成把
-  // handlers 存进 ref,JSX 按钮的 onClick 直接调用
-  // (见 useCredentialsController.js)。
+  // browser.js gọi đồng bộ một lần trong mountBrowserCredentialsFeature()
+  // viewPort.bindEvents(handlers), chuyển save/validateOcr/validateDeepSeek/
+  // changeProvider/activateCredentialTab/open và các hàm xử lý khác cho lớp view; trước đây
+  // gắn listener DOM gốc ở đây bằng view.js cũ; React không có bước tương đương nên lưu
+  // handlers vào ref và onClick của nút JSX gọi trực tiếp
+  // (xem useCredentialsController.js).
   const handlersRef: { current: HandlersBag | null } = { current: null };
 
   const viewPort = {
@@ -192,9 +194,9 @@ export function createCredentialsViewFeature({
     },
     setDialogStatus: (message = "", tone = "") => store.actions.setDialogStatus({ message, tone }),
     setHiddenOcrProvider: () => {
-      // no-op:credentialsStatePort.patchCredentials(default-state-port.js 单例)
-      // 的 mirrorToDom 副作用已经同步写过隐藏 input(见 browser.js 的
-      // changeProvider handler),这里重复写只是同一帧内两次相同赋值。
+      // no-op: credentialsStatePort.patchCredentials (singleton default-state-port.js)
+      // đã ghi đồng bộ input ẩn qua tác dụng phụ mirrorToDom (xem handler
+      // changeProvider trong browser.js); ghi lặp tại đây chỉ là cùng phép gán hai lần trong một khung.
     },
     setOcrValidationMessage: (message = "", tone = "", providerId = "") => store.actions.setValidation({
       providerId,
@@ -202,11 +204,11 @@ export function createCredentialsViewFeature({
       tone,
     }),
     syncOcrProviderControls: () => {
-      // no-op(理由同 elementsPort.syncOcrProviderControls)。
+      // no-op, cùng lý do với elementsPort.syncOcrProviderControls.
     },
     updateCredentialGate: (payload: Partial<CredentialGateState> = {}) => {
       store.actions.setCredentialGate(payload);
-      return true; // browser.js 依赖真值判断继续 refreshSubmitControls()
+      return true; // browser.js dựa vào giá trị truthy để tiếp tục refreshSubmitControls().
     },
   };
 

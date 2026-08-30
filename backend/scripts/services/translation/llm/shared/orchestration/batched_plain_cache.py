@@ -59,7 +59,12 @@ def split_and_validate_cached_batch(
             continue
         try:
             canonical = canonicalize_batch_result([item], {item_id: cached_item_result})
-            validate_batch_result([item], canonical, diagnostics=diagnostics)
+            validate_batch_result(
+                [item],
+                canonical,
+                diagnostics=diagnostics,
+                target_language_name=context.target_language_name,
+            )
             valid_cached.update(canonical)
         except _CACHE_VALIDATION_ERRORS as exc:
             validated_uncached.append(item)

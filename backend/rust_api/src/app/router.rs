@@ -7,11 +7,11 @@ use tower_http::trace::TraceLayer;
 
 use crate::app::AppState;
 use crate::auth;
+use crate::routes::ai_proxy;
+use crate::routes::collections;
 use crate::routes::glossaries;
 use crate::routes::health;
 use crate::routes::jobs;
-use crate::routes::ai_proxy;
-use crate::routes::collections;
 use crate::routes::library;
 use crate::routes::library_data;
 use crate::routes::library_extras;
@@ -81,10 +81,7 @@ pub fn build_app(state: AppState) -> Router {
             "/api/v1/glossaries/:glossary_id/export.csv",
             get(glossaries::export_glossary_csv_route),
         )
-        .route(
-            "/api/v1/documents",
-            get(library_data::list_documents_route),
-        )
+        .route("/api/v1/documents", get(library_data::list_documents_route))
         .route(
             "/api/v1/documents/:document_id",
             get(library_data::get_document_route)
@@ -218,6 +215,15 @@ pub fn build_app(state: AppState) -> Router {
             post(jobs::replay_translation_item_route),
         )
         .route(
+            "/api/v1/jobs/:job_id/translation/manual-export",
+            get(jobs::export_manual_translation),
+        )
+        .route(
+            "/api/v1/jobs/:job_id/translation/manual-import",
+            post(jobs::import_manual_translation)
+                .layer(DefaultBodyLimit::max(5 * 1024 * 1024)),
+        )
+        .route(
             "/api/v1/jobs/:job_id/artifacts",
             get(jobs::get_job_artifacts),
         )
@@ -274,6 +280,10 @@ pub fn build_app(state: AppState) -> Router {
         .route(
             "/api/v1/providers/paddle/validate-token",
             post(providers::validate_paddle_token),
+        )
+        .route(
+            "/api/v1/providers/model/validate-token",
+            post(providers::validate_model_api_key),
         )
         .route(
             "/api/v1/providers/deepseek/validate-token",

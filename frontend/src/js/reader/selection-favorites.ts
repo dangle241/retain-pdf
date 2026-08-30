@@ -171,7 +171,7 @@ export function createReaderSelectionFavorites({
       onRemoveFavorite: removeFavorite,
       onUpdateFavorite: updateFavoriteMetadata,
     });
-    // renderFavorites 只按本地条目切换 is-populated,云端区在其后统一修正
+    // renderFavorites chỉ đổi is-populated theo mục cục bộ; vùng đám mây sửa thống nhất sau đó.
     renderServerSection();
     if (preserveScroll && listEl) {
       listEl.scrollTop = scrollTop;
@@ -179,7 +179,7 @@ export function createReaderSelectionFavorites({
     }
   }
 
-  // ===== 云端收藏区(服务端 favorites,与本地截图摘录分区共存) =====
+  // ===== Vùng mục đã lưu trên đám mây (favorites máy chủ, cùng tồn tại tách biệt với ảnh chụp cục bộ) =====
 
   function ensureServerSectionEl() {
     if (!listEl) {
@@ -207,7 +207,7 @@ export function createReaderSelectionFavorites({
     if (!section) {
       return;
     }
-    // 已同步为 serverFavoriteId 的本地记录不在云端区重复展示
+    // Bản ghi cục bộ đã đồng bộ thành serverFavoriteId không hiển thị lặp trong vùng đám mây.
     const records = dedupeServerFavorites(serverFavorites, store.list());
     renderServerFavorites(section, records, {
       onOpenFavorite: (record) => {
@@ -228,7 +228,7 @@ export function createReaderSelectionFavorites({
     try {
       serverFavorites = await serverFavoritesPort.loadServerFavorites() || [];
     } catch (error) {
-      console.warn("读取服务端收藏失败", error);
+      console.warn("Không thể tải mục đã lưu từ máy chủ", error);
       serverFavorites = [];
     }
     renderServerSection();
@@ -245,7 +245,7 @@ export function createReaderSelectionFavorites({
     renderServerSection();
   }
 
-  // 本地删除即时生效;若该记录已同步到服务端,顺带删除云端收藏(尽力而为)。
+  // Xóa cục bộ có hiệu lực ngay; nếu bản ghi đã đồng bộ lên máy chủ thì cố gắng xóa luôn mục trên đám mây.
   function deleteStoredFavorite(id) {
     if (!id || !store?.save) {
       return;
@@ -257,7 +257,7 @@ export function createReaderSelectionFavorites({
     if (serverFavoriteId && serverFavoritesPort?.removeServerFavorite) {
       void serverFavoritesPort.removeServerFavorite(serverFavoriteId)
         .then(() => refreshServerFavorites())
-        .catch((error) => console.warn("删除服务端收藏失败", error));
+        .catch((error) => console.warn("Không thể xóa mục đã lưu trên máy chủ", error));
     }
   }
 
@@ -526,7 +526,7 @@ export function createReaderSelectionFavorites({
     }
     const sourceRect = item.sourceRect || item.rect || rectFromRelative(item.relativeRect, pageElement);
     centerSelectionInScrollShell(root, pageElement, sourceRect);
-    showSourceLocator(pageElement, sourceRect, "收藏位置");
+    showSourceLocator(pageElement, sourceRect, "Lưu vị trí");
     return pageElement;
   }
 
@@ -577,7 +577,7 @@ export function createReaderSelectionFavorites({
       relativeRect: selection.relativeRect || relativeRect(selection.sourceRect || selection.rect, selection.pageElement),
       anchorRelativeRect: selection.anchorRelativeRect || viewportRelativeRect(selection.anchorRect || selection.rect, root),
       previewUrl: selection.previewUrl || captureSelectionPreview(selection),
-      title: "截图摘录",
+      title: "Trích đoạn ảnh chụp",
       note: selectionSummary(selection),
       pinned: true,
       createdAt: new Date().toISOString(),
@@ -587,15 +587,15 @@ export function createReaderSelectionFavorites({
     setOverlayPreview(selection.overlay, item.previewUrl);
     pinnedSelections.set(selection.id, selection);
     const nextItems = store.add(item);
-    // 选区取文:命中原文 region 时把引文快照同步到服务端收藏(quote 为空则仅本地)
+    // Lấy văn bản vùng chọn: khi khớp region nguyên văn, đồng bộ snapshot trích dẫn tới mục đã lưu máy chủ; nếu quote rỗng thì chỉ lưu cục bộ.
     if (resolveQuote && serverFavoritesPort) {
       const quote = resolveQuote({
         page: selection.page,
         rect: selection.sourceRect || selection.rect,
       });
       if (quote) {
-        // 同步成功后把 favorite_id 回写到本地记录,后续本地删除可级联删云端,
-        // 云端区也据此去重,不重复展示同一条收藏。
+        // Sau khi đồng bộ thành công, ghi favorite_id vào bản ghi cục bộ để lần xóa sau có thể xóa lan tới đám mây,
+        // và vùng đám mây dùng nó để loại trùng, không hiển thị cùng mục hai lần.
         void serverFavoritesPort.syncFavorite(quote).then((favorite) => {
           const favoriteId = `${favorite?.favorite_id || ""}`.trim();
           if (!favoriteId || !store?.save) {
@@ -605,11 +605,11 @@ export function createReaderSelectionFavorites({
             stored.id === item.id ? { ...stored, serverFavoriteId: favoriteId } : stored
           )));
           void refreshServerFavorites();
-        }).catch((error) => console.warn("同步收藏到服务端失败", error));
+        }).catch((error) => console.warn("Không thể đồng bộ mục đã lưu lên máy chủ", error));
       }
     }
     syncDrawer();
-    showSelectionToast(selection.pageElement, selection.rect, "已钉住");
+    showSelectionToast(selection.pageElement, selection.rect, "Đã ghim");
     if (openDrawer) {
       drawerController?.open?.("favorites");
     }
@@ -621,7 +621,7 @@ export function createReaderSelectionFavorites({
       return;
     }
     await copyText(selectionSummary(selection));
-    showSelectionToast(selection.pageElement, selection.rect, "已复制");
+    showSelectionToast(selection.pageElement, selection.rect, "Đã sao chép");
   }
 
   function showSelectionActions() {}
@@ -771,7 +771,7 @@ export function createReaderSelectionFavorites({
       activeSelection = activeSelection || null;
     });
     syncDrawer();
-    // bindEvents 在 regions 加载完成后调用,此时拉取服务端收藏填充云端区
+    // bindEvents được gọi sau khi regions tải xong; lúc đó lấy mục đã lưu máy chủ để điền vùng đám mây.
     void refreshServerFavorites();
   }
 

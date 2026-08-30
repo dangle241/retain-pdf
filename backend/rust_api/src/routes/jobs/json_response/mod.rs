@@ -1,5 +1,6 @@
 mod actions;
 mod diagnostics;
+mod manual_translation;
 mod read;
 mod reader;
 mod translation_debug;
@@ -9,6 +10,9 @@ pub use actions::{
     stage_actions_response,
 };
 pub use diagnostics::{job_diagnostics_response, resume_plan_response};
+pub use manual_translation::{
+    manual_translation_export_response, manual_translation_import_response,
+};
 pub use read::{
     job_artifact_manifest_response, job_artifacts_response, job_detail_response,
     job_events_response, list_jobs_response,

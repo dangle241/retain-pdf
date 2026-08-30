@@ -1,15 +1,15 @@
-// 阶段选择语义 hook(蓝图 §2 features/status/)。
+// Hook ngữ nghĩa chọn giai đoạn (thiết kế §2 features/status/).
 //
-// 语义拷贝自 components/status/job-status-card-selection.js 的
-// createStatusCardSelectionState(该文件属"死,由 StatusCard.jsx 家族替代"
-// 清单,js/components/ 禁止 import——这里重写为 useState 驱动,resolve 逻辑
-// 本身直接调 job-status/stage-flow-model.js 的 resolveSelectedStatusStage,
-// 纯函数原样复用,不拷贝):
-// - 换 job(jobId 变化):selectedStageKey/manualStageSelection 复位;
-// - currentStageKey 推进(轮询命中新阶段):manualStageSelection 复位,除非
-//   用户又手动点了一次(selectStage 会重新置 true 并立即用新的
-//   currentStageKey 校验是否仍可选,不可选则回退跟随当前阶段——
-//   isSelectableStatusStage 语义:只能选"已到达或正在进行"的阶段)。
+// Ngữ nghĩa sao chép từ
+// createStatusCardSelectionState trong components/status/job-status-card-selection.js (file thuộc danh sách "bị loại và được họ StatusCard.jsx thay thế"
+// , cấm import js/components/); tại đây viết lại để useState điều khiển, còn logic resolve
+// gọi trực tiếp resolveSelectedStatusStage trong job-status/stage-flow-model.js,
+// tái sử dụng nguyên trạng hàm thuần, không sao chép):
+// - Đổi tác vụ (jobId thay đổi): đặt lại selectedStageKey/manualStageSelection;
+// - currentStageKey tiến lên (polling nhận giai đoạn mới): đặt lại manualStageSelection, trừ khi
+//   người dùng lại bấm thủ công (selectStage sẽ đặt lại true và lập tức dùng
+//   currentStageKey mới để xác minh còn có thể chọn hay không; nếu không thì quay về theo giai đoạn hiện tại;
+//   ngữ nghĩa isSelectableStatusStage: chỉ có thể chọn giai đoạn "đã tới hoặc đang thực hiện").
 
 import { useCallback, useEffect, useState } from "react";
 import { resolveSelectedStatusStage } from "../../composition/external.js";

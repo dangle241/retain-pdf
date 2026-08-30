@@ -9,7 +9,7 @@ import { resolveSubmitControlState } from "../src/js/features/workflow/submit-co
 
 const workflowNeedsUpload = (workflow) => workflow !== "render";
 const workflowNeedsCredentials = (workflow) => workflow !== "render";
-const workflowSubmitLabel = (workflow) => workflow === "render" ? "开始渲染" : "直接翻译";
+const workflowSubmitLabel = (workflow) => workflow === "render" ? "开始渲染" : "Dịch ngay";
 
 test("resolveSubmitReadiness allows mock submissions without source or credentials", () => {
   const readiness = resolveSubmitReadiness({
@@ -91,7 +91,7 @@ test("resolveSubmitControlState consumes shared submit readiness", () => {
   assert.equal(state.disabled, false);
   assert.equal(state.actionVisible, true);
   assert.equal(state.pageRangeVisible, true);
-  assert.equal(state.label, "直接翻译");
+  assert.equal(state.label, "Dịch ngay");
   assert.equal(state.readiness.ready, true);
 });
 
@@ -112,6 +112,24 @@ test("resolveSubmitControlState disables submit when budget blocks", () => {
   assert.equal(state.disabled, true);
   assert.equal(state.actionVisible, true);
   assert.equal(state.readiness.reason, SUBMIT_BLOCK_REASONS.BUDGET_BLOCKING);
+});
+
+test("resolveSubmitControlState keeps store-only actions visible after upload without credentials", () => {
+  const state = resolveSubmitControlState({
+    workflow: "book",
+    isMock: false,
+    desktopMode: false,
+    uploadId: "upload-1",
+    renderSourceJobId: "",
+    hasBrowserCredentials: false,
+    workflowNeedsUpload,
+    workflowNeedsCredentials,
+    workflowSubmitLabel,
+  });
+
+  assert.equal(state.disabled, true);
+  assert.equal(state.actionVisible, true);
+  assert.equal(state.readiness.reason, SUBMIT_BLOCK_REASONS.MISSING_CREDENTIALS);
 });
 
 test("resolveSubmitControlState preserves render source disabled behavior", () => {

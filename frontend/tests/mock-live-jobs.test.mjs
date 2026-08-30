@@ -62,7 +62,7 @@ test("live mock fromStage=translate starts at translation, not upload/ocr", () =
   assert.equal(at0.status, "running");
   assert.equal(at0.stage, "translating");
   assert.equal(at0.display_stage, "translation");
-  assert.match(`${at0.stage_detail}`, /翻译/);
+  assert.match(`${at0.stage_detail}`, /Đang dịch/);
 
   // 跳过 ocr 后时长更短：约 7s 翻译 + 3s 渲染
   const mid = buildLiveMockJobPayload(jobId, startedAtMs + 8_000);

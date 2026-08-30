@@ -1,4 +1,4 @@
-/* 右侧工具抽屉 chrome（仅 legacy 包；栏宽见 layout-legacy.css） */
+/* Chrome drawer công cụ bên phải (chỉ bundle legacy; chiều rộng cột xem layout-legacy.css). */
 
 .reader-side-drawer {
   position: fixed;
@@ -63,7 +63,7 @@
   line-height: 1;
 }
 
-/* 窄屏：抽屉改底部浮层（栏宽归零 / 左栏隐藏在 reader-page） */
+/* Màn hình hẹp: drawer thành lớp nổi đáy (chiều rộng cột về 0 / cột trái ẩn trong reader-page). */
 @media (max-width: 720px) {
   .reader-side-drawer {
     top: auto;

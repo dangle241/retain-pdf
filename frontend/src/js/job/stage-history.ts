@@ -11,7 +11,7 @@ import type {
 } from "./types.js";
 
 export function summarizeStageName(stage, detail) {
-  const detailText = `${detail || ""}`.trim();
+  const detailText = localizeLegacyStageDetail(detail);
   if (detailText) {
     return detailText;
   }
@@ -21,7 +21,7 @@ export function summarizeStageName(stage, detail) {
     || normalizedStage.includes("submit")
     || normalizedStage.includes("queued")
   ) {
-    return "上传 PDF";
+    return "Tải PDF lên";
   }
   if (
     normalizedStage.includes("ocr_processing")
@@ -32,7 +32,7 @@ export function summarizeStageName(stage, detail) {
     || normalizedStage.includes("normalization")
     || normalizedStage.includes("normaliz")
   ) {
-    return "云端 OCR / 标准化";
+    return "OCR đám mây / Chuẩn hóa";
   }
   if (
     normalizedStage.includes("translation_prepare")
@@ -41,7 +41,7 @@ export function summarizeStageName(stage, detail) {
     || normalizedStage.includes("garbled")
     || normalizedStage.includes("translat")
   ) {
-    return "翻译准备 / 跨栏跨页判断";
+    return "Chuẩn bị dịch / Kiểm tra qua cột và trang";
   }
   if (
     normalizedStage.includes("render")
@@ -49,29 +49,42 @@ export function summarizeStageName(stage, detail) {
     || normalizedStage.includes("compile")
     || normalizedStage.includes("overlay")
   ) {
-    return "渲染 PDF";
+    return "Kết xuất PDF";
   }
   switch (normalizedStage) {
     case "queued":
-      return "排队中";
+      return "Đang xếp hàng";
     case "running":
-      return "处理中";
+      return "Đang xử lý";
     case "translating":
-      return "翻译";
+      return "Dịch";
     case "parsing":
     case "ocr":
-      return "解析 / OCR";
+      return "Phân tích / OCR";
     case "translation_prepare":
-      return "翻译准备";
+      return "Chuẩn bị dịch";
     case "rendering":
-      return "渲染";
+      return "Kết xuất";
     case "succeeded":
-      return "已完成";
+      return "Đã hoàn tất";
     case "failed":
-      return "失败";
+      return "Thất bại";
     default:
       return `${stage || "-"}`.trim() || "-";
   }
+}
+
+function localizeLegacyStageDetail(detail) {
+  const detailText = `${detail || ""}`.trim();
+  const translations = {
+    "任务已创建，等待可用执行槽位": "Đã tạo tác vụ, đang chờ lượt xử lý",
+    "任务排队中，等待可用执行槽位": "Tác vụ đang chờ lượt xử lý",
+    "正在启动 OCR 子任务": "Đang khởi tạo tác vụ OCR con",
+    "OCR 子任务已创建": "Đã tạo tác vụ OCR con",
+    "Paddle 任务已提交，等待解析": "Đã gửi tác vụ Paddle, đang chờ phân tích",
+    "任务失败": "Tác vụ thất bại",
+  };
+  return translations[detailText] || detailText;
 }
 
 function publicStageForHistoryEntry(entry: StageHistoryEntry = {}) {

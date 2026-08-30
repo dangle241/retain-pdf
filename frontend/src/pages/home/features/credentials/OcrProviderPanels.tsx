@@ -1,11 +1,11 @@
-// OCR provider 卡片(对照旧 components/dialogs/browser-credentials-dialog.js
-// 的 ocrProviderPanels 拼接 + features/credentials/validation-view.js 的
-// 校验徽标语义,死文件不 import,这里用 JSX 结构化重写)。
+// Thẻ nhà cung cấp OCR, đối chiếu components/dialogs/browser-credentials-dialog.js cũ
+// với cách ghép ocrProviderPanels + ngữ nghĩa huy hiệu kiểm tra của
+// features/credentials/validation-view.js; không import tệp chết mà viết lại có cấu trúc bằng JSX.
 //
-// 当前 OCR_PROVIDER_DEFINITIONS 只注册了 paddle 一个 provider(config/providers.js),
-// 面板按配置数组渲染,不硬编码 provider id——未来加回 provider 只需扩数组。
-// token 输入是非受控 ref(见 credentials-view-store.js elementsRef),
-// dialog-values.js/dialog-sync.js(kept)直接读写 .value。
+// OCR_PROVIDER_DEFINITIONS hiện chỉ đăng ký một provider paddle (config/providers.js);
+// bảng kết xuất theo mảng cấu hình, không hard-code provider id; sau này chỉ cần mở rộng mảng.
+// Ô token là ref không kiểm soát (xem elementsRef trong credentials-view-store.js);
+// dialog-values.js/dialog-sync.js được giữ đọc/ghi trực tiếp .value.
 
 import {
   credentialTokenInputId,

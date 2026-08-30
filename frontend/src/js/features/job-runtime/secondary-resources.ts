@@ -68,8 +68,8 @@ export function scheduleSecondaryResourceFetches({
           context: renderContextPort.currentFor(jobId),
           source: "events",
         });
-        // events 副资源只喂 StatusCard/Detail；图书馆卡片由主 poll 更新，
-        // 避免 1s 双路 publishJobUpdated 导致网格抖。
+        // Tài nguyên phụ events chỉ cấp cho StatusCard/Detail; thẻ thư viện được poll chính cập nhật,
+        // tránh hai luồng publishJobUpdated mỗi giây làm lưới rung.
       })
       .catch(() => {
         // Event stream is secondary; keep main status usable even if events fail.

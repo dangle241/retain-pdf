@@ -8,8 +8,8 @@ import type {
   UploadSnapshot,
 } from "./types.js";
 
-// 子 store 经全局 Symbol 注册表挂在 state 身份键上(见 features/job-runtime),
-// 这里按约束不 import 该目录,直接经 Symbol.for 读快照
+// Store con được gắn vào khóa định danh state qua registry Symbol toàn cục (xem features/job-runtime),
+// theo ràng buộc không import thư mục đó tại đây mà đọc snapshot trực tiếp qua Symbol.for.
 const CURRENT_JOB_STORE_KEY = Symbol.for("retainpdf.currentJobStore");
 const SECONDARY_RESOURCE_STORE_KEY = Symbol.for("retainpdf.secondaryResourceStore");
 
@@ -20,7 +20,7 @@ function currentJobStoreSnapshot(state: ArtifactRuntimeState | null | undefined)
     ?.() || null;
 }
 
-// 兼容:未挂载 store 的纯快照对象(测试/静态构造)按字段名直读
+// Tương thích: đối tượng snapshot thuần chưa gắn store (test/tạo tĩnh) được đọc trực tiếp theo tên trường.
 function currentJobId(state?: ArtifactRuntimeState | null): string {
   const snapshot = currentJobStoreSnapshot(state);
   if (snapshot) {
@@ -55,7 +55,7 @@ function cachedManifestFor(
 
 function uploadSnapshot(state?: ArtifactRuntimeState | null): UploadSnapshot {
   const snapshot = getUploadState();
-  // 单例为主真值;纯快照对象(测试/静态构造)在单例为空时按字段名直读
+  // Singleton là nguồn sự thật chính; đối tượng snapshot thuần (test/tạo tĩnh) được đọc theo tên trường khi singleton rỗng.
   const source = !snapshot.uploadId && state && ("uploadId" in state || "uploadedFileName" in state) && !(Symbol.for("retainpdf.currentJobStore") in (state || {}))
     ? state
     : snapshot;

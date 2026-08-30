@@ -178,7 +178,7 @@ export function createUploadStatePort(targetState: Partial<UploadState> = {}): U
 
 let defaultUploadStatePort: UploadStatePort | null = null;
 
-// 唯一的默认实例:多个挂载点共享同一份上传状态(取代旧全局 state 的会合点角色)
+// Instance mặc định duy nhất: nhiều điểm gắn dùng chung một trạng thái tải lên (thay vai trò điểm hội tụ của state toàn cục cũ).
 export function getUploadStatePort(): UploadStatePort {
   return getDefaultUploadStatePort();
 }

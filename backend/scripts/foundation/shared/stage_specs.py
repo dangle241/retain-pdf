@@ -165,6 +165,9 @@ class TranslateStageParams:
     workers: int
     mode: str
     math_mode: str
+    source_language: str
+    target_language: str
+    target_language_name: str
     skip_title_translation: bool
     classify_batch_size: int
     rule_profile_name: str
@@ -236,6 +239,11 @@ class TranslateStageSpec:
             workers=int(params_payload.get("workers", 1) or 1),
             mode=str(params_payload.get("mode", "sci") or "sci"),
             math_mode=str(params_payload.get("math_mode", "direct_typst") or "direct_typst"),
+            source_language=str(params_payload.get("source_language", "en") or "en").strip(),
+            target_language=str(params_payload.get("target_language", "vi") or "vi").strip(),
+            target_language_name=str(
+                params_payload.get("target_language_name", "Tiếng Việt") or "Tiếng Việt"
+            ).strip(),
             skip_title_translation=bool(params_payload.get("skip_title_translation", False)),
             classify_batch_size=int(params_payload.get("classify_batch_size", 12) or 12),
             rule_profile_name=str(params_payload.get("rule_profile_name", "general_sci") or "general_sci"),
@@ -409,6 +417,9 @@ class ProviderStageTranslationParams:
     workers: int
     mode: str
     math_mode: str
+    source_language: str
+    target_language: str
+    target_language_name: str
     skip_title_translation: bool
     classify_batch_size: int
     rule_profile_name: str
@@ -490,7 +501,7 @@ class ProviderStageSpec:
             is_ocr=bool(ocr_payload.get("is_ocr", False)),
             disable_formula=bool(ocr_payload.get("disable_formula", False)),
             disable_table=bool(ocr_payload.get("disable_table", False)),
-            language=str(ocr_payload.get("language", "ch") or "ch"),
+            language=str(ocr_payload.get("language", "en") or "en"),
             page_ranges=str(ocr_payload.get("page_ranges", "") or ""),
             data_id=str(ocr_payload.get("data_id", "") or ""),
             no_cache=bool(ocr_payload.get("no_cache", False)),
@@ -512,6 +523,11 @@ class ProviderStageSpec:
             workers=int(translation_payload.get("workers", 1) or 1),
             mode=str(translation_payload.get("mode", "sci") or "sci"),
             math_mode=str(translation_payload.get("math_mode", "direct_typst") or "direct_typst"),
+            source_language=str(translation_payload.get("source_language", "en") or "en").strip(),
+            target_language=str(translation_payload.get("target_language", "vi") or "vi").strip(),
+            target_language_name=str(
+                translation_payload.get("target_language_name", "Tiếng Việt") or "Tiếng Việt"
+            ).strip(),
             skip_title_translation=bool(translation_payload.get("skip_title_translation", False)),
             classify_batch_size=int(translation_payload.get("classify_batch_size", 12) or 12),
             rule_profile_name=str(translation_payload.get("rule_profile_name", "general_sci") or "general_sci"),
@@ -575,6 +591,9 @@ class BookStageTranslationParams:
     workers: int
     mode: str
     math_mode: str
+    source_language: str
+    target_language: str
+    target_language_name: str
     skip_title_translation: bool
     classify_batch_size: int
     rule_profile_name: str
@@ -659,6 +678,11 @@ class BookStageSpec:
             workers=int(translation_payload.get("workers", 1) or 1),
             mode=str(translation_payload.get("mode", "sci") or "sci"),
             math_mode=str(translation_payload.get("math_mode", "direct_typst") or "direct_typst"),
+            source_language=str(translation_payload.get("source_language", "en") or "en").strip(),
+            target_language=str(translation_payload.get("target_language", "vi") or "vi").strip(),
+            target_language_name=str(
+                translation_payload.get("target_language_name", "Tiếng Việt") or "Tiếng Việt"
+            ).strip(),
             skip_title_translation=bool(translation_payload.get("skip_title_translation", False)),
             classify_batch_size=int(translation_payload.get("classify_batch_size", 12) or 12),
             rule_profile_name=str(translation_payload.get("rule_profile_name", "general_sci") or "general_sci"),

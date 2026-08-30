@@ -11,15 +11,21 @@ use super::job_failure_support::{
 
 #[derive(Debug, Clone, Deserialize)]
 pub(super) struct PythonStructuredFailure {
-    #[serde(default, alias = "stage")]
+    #[serde(default)]
     pub(super) failed_stage: Option<String>,
-    #[serde(default, alias = "error_type")]
+    #[serde(default, rename = "stage")]
+    legacy_stage: Option<String>,
+    #[serde(default)]
     pub(super) failure_code: Option<String>,
+    #[serde(default, rename = "error_type")]
+    legacy_error_type: Option<String>,
     #[serde(default)]
     pub(super) failure_category: Option<String>,
     pub(super) summary: Option<String>,
-    #[serde(default, alias = "detail")]
+    #[serde(default)]
     pub(super) root_cause: Option<String>,
+    #[serde(default, rename = "detail")]
+    legacy_detail: Option<String>,
     pub(super) retryable: Option<bool>,
     pub(super) upstream_host: Option<String>,
     pub(super) provider: Option<String>,
@@ -36,6 +42,24 @@ pub(super) struct PythonStructuredFailure {
     pub(super) traceback: Option<String>,
 }
 
+impl PythonStructuredFailure {
+    pub(super) fn resolved_failed_stage(&self) -> Option<String> {
+        non_empty(self.failed_stage.clone()).or_else(|| non_empty(self.legacy_stage.clone()))
+    }
+
+    pub(super) fn resolved_failure_code(&self) -> Option<String> {
+        non_empty(self.failure_code.clone()).or_else(|| non_empty(self.legacy_error_type.clone()))
+    }
+
+    fn resolved_root_cause(&self) -> Option<String> {
+        non_empty(self.root_cause.clone()).or_else(|| non_empty(self.legacy_detail.clone()))
+    }
+}
+
+fn non_empty(value: Option<String>) -> Option<String> {
+    value.filter(|item| !item.trim().is_empty())
+}
+
 pub(super) fn classify_structured_failure(
     structured: Option<&PythonStructuredFailure>,
     diagnostics: Option<&OcrProviderDiagnostics>,
@@ -46,24 +70,17 @@ pub(super) fn classify_structured_failure(
 ) -> Option<JobFailureInfo> {
     let structured = structured?;
     let stage = structured
-        .failed_stage
-        .clone()
-        .filter(|value| !value.trim().is_empty())
+        .resolved_failed_stage()
         .unwrap_or_else(|| failed_stage.to_string());
     let failure_code = structured
-        .failure_code
-        .clone()
-        .filter(|value| !value.trim().is_empty())
+        .resolved_failure_code()
         .unwrap_or_else(|| "python_unhandled_exception".to_string());
     let summary = structured
         .summary
         .clone()
         .filter(|value| !value.trim().is_empty())
-        .unwrap_or_else(|| "任务失败，但暂未识别出明确根因".to_string());
-    let root_cause = structured
-        .root_cause
-        .clone()
-        .filter(|value| !value.trim().is_empty());
+        .unwrap_or_else(|| "Tác vụ thất bại nhưng chưa xác định được nguyên nhân".to_string());
+    let root_cause = structured.resolved_root_cause();
     let provider_code = structured
         .provider_code
         .clone()
@@ -77,7 +94,9 @@ pub(super) fn classify_structured_failure(
         .suggestion
         .clone()
         .filter(|value| !value.trim().is_empty())
-        .or_else(|| Some("查看完整 traceback、原始异常与日志进一步排查".to_string()));
+        .or_else(|| {
+            Some("Xem traceback, ngoại lệ gốc và log đầy đủ để phân tích thêm".to_string())
+        });
     let raw_excerpt = structured
         .raw_excerpt
         .clone()

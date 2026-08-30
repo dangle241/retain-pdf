@@ -1,7 +1,7 @@
-// 阅读入口：把 openReaderRequested / 深链 转成导航。
+// Điểm vào trình đọc: chuyển openReaderRequested / deep link thành điều hướng.
 //
-// 默认走 soft open（navigate-to-reader → SoftReaderHost 全屏层），主页不卸载；
-// 深链 replace 仍硬进 reader.html。
+// Mặc định dùng soft open (navigate-to-reader → lớp toàn màn hình SoftReaderHost), không unmount trang chủ;
+// Deep link có replace vẫn tải trực tiếp reader.html.
 
 import { useEffect } from "react";
 import { useAppEvent } from "../../../../shared/react/use-app-event.js";
@@ -27,8 +27,8 @@ function anchorFromEventDetail(detail: any = {}) {
 }
 
 /**
- * 无 UI：只负责把「打开阅读」事件 / 深链 转成跳转 reader.html。
- * 组件名保留 ReaderDialog，避免 HomeApp / 测试 import 大面积改动。
+ * Không có UI: chỉ chuyển sự kiện "mở trình đọc" / deep link thành điều hướng tới reader.html.
+ * Giữ tên component ReaderDialog để tránh thay đổi hàng loạt import trong HomeApp / kiểm thử.
  */
 export function ReaderDialog() {
   useAppEvent(APP_EVENTS.openReaderRequested, (event) => {
@@ -48,7 +48,7 @@ export function ReaderDialog() {
     navigateToReader(url);
   });
 
-  // 主页深链 ?view=reader&job_id= → 直接进阅读页（replace，避免返回死循环）
+  // Deep link trang chủ ?view=reader&job_id= → vào thẳng trang đọc (replace để tránh vòng lặp khi quay lại).
   useEffect(() => {
     const startupJobId = requestedReaderJobIdFromLocation();
     if (!startupJobId) {

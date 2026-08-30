@@ -74,12 +74,15 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "dns_resolution_failed",
             None,
-            "外部模型服务域名解析失败",
-            Some("容器在当前时刻无法解析上游模型服务域名，任务在翻译阶段中断".to_string()),
+            "Không phân giải được tên miền của dịch vụ bên ngoài",
+            Some("Container không thể phân giải tên miền dịch vụ tại thời điểm chạy".to_string()),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("优先重试一次；若持续失败，请检查 Docker DNS、宿主机网络或代理配置".to_string()),
+            Some(
+                "Hãy thử lại; nếu lỗi tiếp diễn, kiểm tra DNS Docker, mạng máy chủ và proxy"
+                    .to_string(),
+            ),
             select_relevant_log_line(
                 job,
                 error,
@@ -103,12 +106,12 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "upstream_timeout",
             None,
-            "外部服务请求超时",
-            Some("任务调用 OCR 或模型服务时等待过久，超过超时阈值".to_string()),
+            "Yêu cầu tới dịch vụ bên ngoài bị hết thời gian chờ",
+            Some("Dịch vụ OCR hoặc mô hình phản hồi quá chậm và vượt quá thời gian chờ".to_string()),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("可直接重试；若频繁发生，建议降低并发或检查网络稳定性".to_string()),
+            Some("Có thể thử lại ngay; nếu lỗi thường xuyên, hãy giảm số luồng hoặc kiểm tra đường truyền".to_string()),
             select_relevant_log_line(
                 job,
                 error,
@@ -134,14 +137,14 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "process_timeout",
             Some("timeout".to_string()),
-            "Python worker 执行超时",
+            "Tiến trình Python hết thời gian chạy",
             Some(format!(
-                "Python 子进程超过运行时超时阈值后被终止（timeout_seconds={timeout_seconds}）"
+                "Tiến trình Python bị dừng vì vượt quá timeout_seconds={timeout_seconds}"
             )),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("可从断点恢复或重试；若频繁发生，建议降低并发、增大 timeout_seconds，或检查上游网络耗时".to_string()),
+            Some("Hãy tiếp tục từ điểm dừng hoặc thử lại; nếu lỗi lặp lại, giảm số luồng, tăng timeout_seconds hoặc kiểm tra mạng".to_string()),
             select_relevant_log_line(job, error, &["timeout", "timed out", "stderr before timeout"]),
             first_error_excerpt(error, &haystack),
             raw_diagnostic_from_process_result(job)
@@ -160,12 +163,12 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "placeholder_unstable",
             None,
-            "公式占位符校验失败",
-            Some("模型返回的公式占位符数量或顺序与原文不一致，翻译结果未通过保护校验".to_string()),
+            "Kiểm tra placeholder công thức thất bại",
+            Some("Số lượng hoặc thứ tự placeholder công thức do mô hình trả về không khớp bản gốc".to_string()),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("可直接重试；若稳定复现，建议对该块改用更保守的单块翻译/保留原文策略".to_string()),
+            Some("Có thể thử lại; nếu lỗi lặp lại ở cùng đoạn, hãy giữ nguyên đoạn đó hoặc dịch từng đoạn".to_string()),
             select_relevant_log_line(
                 job,
                 error,
@@ -188,16 +191,49 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             "normalization".to_string(),
             "source_pdf_missing",
             None,
-            "源 PDF 缺失",
-            Some("OCR 已完成，但进入标准化阶段时找不到任务工作目录中的源 PDF".to_string()),
+            "Thiếu PDF nguồn",
+            Some("OCR đã hoàn tất nhưng không tìm thấy PDF nguồn khi bắt đầu chuẩn hóa".to_string()),
             false,
             None,
             provider_name(diagnostics),
             Some(
-                "检查桌面端任务目录下的 source/ 是否存在源 PDF，并确认打包环境没有丢失文件复制步骤"
+                "Kiểm tra PDF trong thư mục source/ của tác vụ và bước sao chép file trong bản đóng gói"
                     .to_string(),
             ),
             select_relevant_log_line(job, error, &["source pdf not found"]),
+            first_error_excerpt(error, &haystack),
+            raw_diagnostic.clone(),
+        ));
+    }
+
+    if haystack.contains("insufficient_quota")
+        || haystack.contains("exceeded your current quota")
+        || haystack.contains("check your plan and billing details")
+        || haystack.contains("quota_exhausted")
+    {
+        return Some(build_failure(
+            failed_stage,
+            "quota_exhausted",
+            None,
+            "Đã hết hạn mức API của dịch vụ dịch",
+            Some("Tài khoản API đã hết quota hoặc chưa bật thanh toán cho API".to_string()),
+            false,
+            extract_upstream_host(&haystack),
+            provider_name(diagnostics),
+            Some(
+                "Kiểm tra trang Billing/Usage, nạp thêm credit hoặc dùng API key còn quota"
+                    .to_string(),
+            ),
+            select_relevant_log_line(
+                job,
+                error,
+                &[
+                    "insufficient_quota",
+                    "exceeded your current quota",
+                    "check your plan and billing details",
+                    "quota_exhausted",
+                ],
+            ),
             first_error_excerpt(error, &haystack),
             raw_diagnostic.clone(),
         ));
@@ -212,12 +248,15 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "auth_failed",
             None,
-            "鉴权失败",
-            Some("当前任务使用的 API Key / Token 无效、过期或权限不足".to_string()),
+            "Xác thực thất bại",
+            Some("API key hoặc token không hợp lệ, đã hết hạn hoặc không đủ quyền".to_string()),
             false,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("检查 MinerU Token、模型 API Key 或后端 X-API-Key 配置".to_string()),
+            Some(
+                "Kiểm tra token OCR, API key của mô hình và cấu hình X-API-Key của backend"
+                    .to_string(),
+            ),
             select_relevant_log_line(
                 job,
                 error,
@@ -236,12 +275,12 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "rate_limited",
             None,
-            "上游服务触发限流",
-            Some("短时间内请求过多，上游服务拒绝继续处理".to_string()),
+            "Dịch vụ bên ngoài đang giới hạn tần suất",
+            Some("Có quá nhiều yêu cầu trong thời gian ngắn nên dịch vụ từ chối xử lý".to_string()),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("等待一段时间后重试，或降低 workers / 并发配置".to_string()),
+            Some("Chờ một lúc rồi thử lại hoặc giảm workers và số yêu cầu đồng thời".to_string()),
             select_relevant_log_line(job, error, &["429", "rate limit", "Too Many Requests"]),
             first_error_excerpt(error, &haystack),
             raw_diagnostic.clone(),
@@ -256,13 +295,16 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             "render".to_string(),
             "typst_dependency_download_failed",
             None,
-            "Typst 渲染依赖下载失败",
-            Some("渲染阶段需要的 Typst 包未能成功获取，导致 PDF 编译中断".to_string()),
+            "Không tải được gói phụ thuộc Typst",
+            Some(
+                "Không lấy được gói Typst cần thiết nên quá trình biên dịch PDF bị dừng"
+                    .to_string(),
+            ),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
             Some(
-                "检查桌面包是否已内置 Typst packages，或确认运行环境可访问 packages.typst.org"
+                "Kiểm tra gói Typst được đóng kèm hoặc quyền truy cập packages.typst.org"
                     .to_string(),
             ),
             select_relevant_log_line(
@@ -284,12 +326,15 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "render_failed",
             None,
-            "排版或编译阶段失败",
-            Some("翻译已部分完成，但在排版、渲染或 PDF 编译阶段中断".to_string()),
+            "Dàn trang hoặc biên dịch thất bại",
+            Some(
+                "Bản dịch đã hoàn thành một phần nhưng bị dừng khi dàn trang hoặc biên dịch PDF"
+                    .to_string(),
+            ),
             false,
             None,
             provider_name(diagnostics),
-            Some("检查 typst、字体、公式内容或中间产物目录是否完整".to_string()),
+            Some("Kiểm tra Typst, phông chữ, công thức và các artifact trung gian".to_string()),
             select_relevant_log_line(
                 job,
                 error,
@@ -315,15 +360,15 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "process_exit_failed",
             Some(format!("exit_code_{}", result.return_code)),
-            "Python worker 非零退出",
+            "Tiến trình Python kết thúc với mã lỗi",
             Some(format!(
-                "Python 子进程返回非零退出码 {}，但未匹配到更具体的失败分类",
+                "Tiến trình Python trả về mã lỗi {} nhưng chưa khớp với nhóm lỗi cụ thể",
                 result.return_code
             )),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("查看 raw_exception_message、traceback 和 log_tail；如果已有中间产物，可尝试从断点恢复".to_string()),
+            Some("Xem raw_exception_message, traceback và log_tail; nếu có artifact trung gian, hãy tiếp tục từ điểm dừng".to_string()),
             select_relevant_log_line(job, error, &[]),
             first_error_excerpt(error, &haystack),
             raw_diagnostic_from_process_result(job)
@@ -337,21 +382,39 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
         diagnostics
             .and_then(|diag| diag.last_error.as_ref())
             .and_then(|err| err.provider_code.clone()),
-        "任务失败，但暂未识别出明确根因",
+        "Tác vụ thất bại nhưng chưa xác định được nguyên nhân",
         unknown_root_cause(error, &haystack, raw_diagnostic.as_ref()),
         true,
         extract_upstream_host(&haystack),
         provider_name(diagnostics),
-        Some("查看 log_tail 和完整错误日志进一步排查".to_string()),
+        Some("Xem log_tail và log lỗi đầy đủ để phân tích thêm".to_string()),
         select_relevant_log_line(job, error, &[]),
         first_error_excerpt(error, &haystack),
         raw_diagnostic,
     ))
 }
 
+pub fn resolve_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
+    let classified = classify_job_failure(job).map(JobFailureInfo::with_formal_fields);
+    let has_structured_failure = classified
+        .as_ref()
+        .and_then(|failure| failure.raw_diagnostic.as_ref())
+        .and_then(|diagnostic| diagnostic.structured_error_type.as_deref())
+        .is_some_and(|value| !value.trim().is_empty());
+
+    if has_structured_failure {
+        return classified;
+    }
+
+    job.failure
+        .clone()
+        .map(JobFailureInfo::with_formal_fields)
+        .or(classified)
+}
+
 #[cfg(test)]
 mod tests {
-    use super::classify_job_failure;
+    use super::{classify_job_failure, resolve_job_failure};
     use crate::models::domain::{JobSnapshot, JobStatusKind};
     use crate::models::request::CreateJobInput;
 
@@ -492,6 +555,51 @@ mod tests {
     }
 
     #[test]
+    fn classify_job_failure_preserves_structured_quota_failure() {
+        let mut job = crate::models::JobSnapshot::new(
+            "job-quota-structured".to_string(),
+            CreateJobInput::default(),
+            vec!["python".to_string()],
+        );
+        job.status = crate::models::JobStatusKind::Failed;
+        job.stage = Some("failed".to_string());
+        let mut stale_job = job.clone();
+        stale_job.error = Some("401 Unauthorized".to_string());
+        job.failure = classify_job_failure(&stale_job);
+        job.error = Some(
+            "429 Client Error: Too Many Requests\nstructured failure json: {\"failed_stage\":\"translation\",\"failure_code\":\"quota_exhausted\",\"failure_category\":\"billing\",\"stage\":\"translation\",\"error_type\":\"quota_exhausted\",\"summary\":\"API quota exhausted\",\"detail\":\"You exceeded your current quota\",\"retryable\":false,\"upstream_host\":\"api.openai.com\",\"provider\":\"openai\",\"provider_stage\":\"translation\",\"provider_code\":\"insufficient_quota\",\"suggestion\":\"Check plan and billing details\",\"raw_excerpt\":\"429 insufficient_quota\"}"
+                .to_string(),
+        );
+
+        let failure = resolve_job_failure(&job).expect("failure");
+        assert_eq!(failure.category, "quota_exhausted");
+        assert_eq!(failure.failure_code.as_deref(), Some("quota_exhausted"));
+        assert_eq!(failure.failure_category.as_deref(), Some("billing"));
+        assert_eq!(failure.provider_code.as_deref(), Some("insufficient_quota"));
+        assert!(!failure.retryable);
+    }
+
+    #[test]
+    fn classify_job_failure_maps_unstructured_insufficient_quota_before_rate_limit() {
+        let mut job = crate::models::JobSnapshot::new(
+            "job-quota-unstructured".to_string(),
+            CreateJobInput::default(),
+            vec!["python".to_string()],
+        );
+        job.status = crate::models::JobStatusKind::Failed;
+        job.stage = Some("translation".to_string());
+        job.error = Some(
+            "429 Too Many Requests: insufficient_quota: You exceeded your current quota; check your plan and billing details"
+                .to_string(),
+        );
+
+        let failure = classify_job_failure(&job).expect("failure");
+        assert_eq!(failure.category, "quota_exhausted");
+        assert_eq!(failure.failure_category.as_deref(), Some("billing"));
+        assert!(!failure.retryable);
+    }
+
+    #[test]
     fn classify_job_failure_maps_missing_source_pdf() {
         let mut job = crate::models::JobSnapshot::new(
             "job-missing-source-pdf".to_string(),
@@ -506,7 +614,7 @@ mod tests {
         let failure = classify_job_failure(&job).expect("failure");
         assert_eq!(failure.category, "source_pdf_missing");
         assert_eq!(failure.stage, "normalization");
-        assert_eq!(failure.summary, "源 PDF 缺失");
+        assert_eq!(failure.summary, "Thiếu PDF nguồn");
         assert!(!failure.retryable);
     }
 

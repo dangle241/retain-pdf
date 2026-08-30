@@ -109,10 +109,10 @@ test("frontend progress uses canonical display_stage event contract", () => {
     },
   );
 
-  assert.equal(progressByKey.ocr.progressText, "第 12/34 页");
+  assert.equal(progressByKey.ocr.progressText, "Trang 12/34");
   assert.equal(Math.round(progressByKey.ocr.displayPercent * 100) / 100, 39.71);
-  assert.equal(progressByKey.translate.progressText, "第 4/8 批");
-  assert.equal(progressByKey.render.progressText, "第 5/20 页");
+  assert.equal(progressByKey.translate.progressText, "Đợt 4/8");
+  assert.equal(progressByKey.render.progressText, "Trang 5/20");
 });
 
 test("succeeded job lights up the done tab regardless of stale display_stage", () => {
@@ -168,7 +168,7 @@ test("succeeded job with stage_snapshot=null still resolves to done (new contrac
 
   assert.equal(presentation.stageKey, "done");
   assert.equal(presentation.stageKeyTrusted, true);
-  assert.equal(presentation.label, "完成");
+  assert.equal(presentation.label, "Hoàn tất");
 });
 
 test("running job with display_stage=done does not skip render in the stage flow", () => {
@@ -205,14 +205,14 @@ test("recent-jobs card label clamps done while the job is still running", async 
   const { stageKeyForRecentJobLabel, recentJobStageLabel } = await import(
     "../src/js/components/recent-jobs/recent-job-card-presenter.js"
   );
-  // running + display_stage="done" should not advance the small card to "已完成".
+  // running + display_stage="done" should not advance the small card to "Đã hoàn tất".
   const runningWithDoneFlag = {
     job_id: "recent-running-done-flag",
     status: "running",
     display_stage: "done",
   };
   assert.equal(stageKeyForRecentJobLabel(runningWithDoneFlag), "render");
-  assert.equal(recentJobStageLabel(runningWithDoneFlag), "渲染中");
+  assert.equal(recentJobStageLabel(runningWithDoneFlag), "Đang kết xuất");
 
   // queued + stage_snapshot.publicStage="done" should also be clamped.
   const queuedSnapshotDone = {
@@ -229,16 +229,16 @@ test("recent-jobs card label clamps done while the job is still running", async 
     runtime_status: { publicStage: "done" },
   };
   assert.equal(stageKeyForRecentJobLabel(runtimeStatusDone), "render");
-  assert.equal(recentJobStageLabel(runtimeStatusDone), "渲染中");
+  assert.equal(recentJobStageLabel(runtimeStatusDone), "Đang kết xuất");
 
-  // Truly succeeded jobs must still surface as "已完成".
+  // Truly succeeded jobs must still surface as "Đã hoàn tất".
   const succeededDone = {
     job_id: "recent-succeeded-done",
     status: "succeeded",
     display_stage: "done",
   };
   assert.equal(stageKeyForRecentJobLabel(succeededDone), "done");
-  assert.equal(recentJobStageLabel(succeededDone), "已完成");
+  assert.equal(recentJobStageLabel(succeededDone), "Đã hoàn tất");
 });
 
 test("library merge keeps recent-jobs item.display_stage out of done while running", async () => {
@@ -332,7 +332,7 @@ test("OCR stage progress keeps latest substage and composite percent", () => {
   assert.equal(progressByKey.ocr.substageKey, "ocr_processing");
   assert.equal(progressByKey.ocr.current, 12);
   assert.equal(progressByKey.ocr.total, 20);
-  assert.equal(progressByKey.ocr.progressText, "第 12/20 页");
+  assert.equal(progressByKey.ocr.progressText, "Trang 12/20");
   assert.equal(progressByKey.ocr.displayPercent, 57);
   assert.equal(progressByKey.ocr.bySubstage.ocr_processing.current, 12);
 });
@@ -499,7 +499,7 @@ test("background render events do not advance the main status card", () => {
   const progressByKey = collectStageProgressByKey(job, eventsPayload);
 
   assert.equal(presentation.stageKey, "translate");
-  assert.equal(presentation.progressText, "第 120/900 批");
+  assert.equal(presentation.progressText, "Đợt 120/900");
   assert.equal(progressByKey.render, undefined);
 });
 
@@ -569,14 +569,14 @@ test("job display state separates main translation from background render prewar
 
   assert.equal(displayState.mainStageKey, "translate");
   assert.equal(displayState.mainSubstageKey, "translation_batches");
-  assert.equal(displayState.stagePresentation.progressText, "第 121/900 批");
-  assert.equal(displayState.stageProgressByKey.translate.progressText, "第 121/900 批");
+  assert.equal(displayState.stagePresentation.progressText, "Đợt 121/900");
+  assert.equal(displayState.stageProgressByKey.translate.progressText, "Đợt 121/900");
   assert.equal(displayState.stageProgressByKey.render, undefined);
   assert.equal(displayState.backgroundStages.length, 1);
   assert.equal(displayState.backgroundStages[0].stageKey, "render");
   assert.equal(displayState.backgroundStages[0].substageKey, "render_prewarm");
-  assert.equal(displayState.backgroundStages[0].detail, "正在预热渲染资源");
-  assert.equal(displayState.backgroundStages[0].progressText, "预热 2/3");
+  assert.equal(displayState.backgroundStages[0].detail, "Đang khởi động trước tài nguyên kết xuất");
+  assert.equal(displayState.backgroundStages[0].progressText, "Khởi động trước 2/3");
   assert.equal(displayState.backgroundStages[0].progress.current, 2);
   assert.equal(displayState.backgroundStages[0].progress.total, 3);
   assert.equal(displayState.backgroundStages[0].progress.unit, "step");
@@ -633,7 +633,7 @@ test("latest background render prewarm does not replace translation batch progre
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.progressText, "第 29/5216 批");
+  assert.equal(presentation.progressText, "Đợt 29/5216");
   assert.equal(presentation.progressUnit, "batch");
   assert.notEqual(presentation.visualStageKey, "render_prewarm");
   assert.equal(progressByKey.render, undefined);
@@ -689,7 +689,7 @@ test("same-seq background render prewarm does not replace translation batch prog
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.progressText, "第 30/5216 批");
+  assert.equal(presentation.progressText, "Đợt 30/5216");
   assert.equal(presentation.progressUnit, "batch");
   assert.notEqual(presentation.visualStageKey, "render_prewarm");
   assert.equal(progressByKey.render, undefined);
@@ -742,7 +742,7 @@ test("main render prepare events do not override an explicit translation snapsho
   );
 
   assert.equal(presentation.stageKey, "translate");
-  assert.equal(presentation.progressText, "第 120/900 批");
+  assert.equal(presentation.progressText, "Đợt 120/900");
 });
 
 test("main render page progress does not override an explicit translation stage", () => {
@@ -794,7 +794,7 @@ test("main render page progress does not override an explicit translation stage"
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.progressText, "第 120/900 批");
+  assert.equal(presentation.progressText, "Đợt 120/900");
 });
 
 test("render prewarm without lane does not override an explicit translation snapshot", () => {
@@ -845,7 +845,7 @@ test("render prewarm without lane does not override an explicit translation snap
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.progressText, "第 120/900 批");
+  assert.equal(presentation.progressText, "Đợt 120/900");
 });
 
 test("explicit translation job stage wins over render preprocess internals", () => {
@@ -899,7 +899,7 @@ test("explicit translation job stage wins over render preprocess internals", () 
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.stageKeyTrusted, true);
-  assert.equal(presentation.progressText, "第 240/900 批");
+  assert.equal(presentation.progressText, "Đợt 240/900");
 });
 
 test("render words in message or stage detail do not override display_stage", () => {
@@ -938,8 +938,8 @@ test("render words in message or stage detail do not override display_stage", ()
   );
 
   assert.equal(presentation.stageKey, "translate");
-  assert.equal(presentation.detail, "正在翻译正文内容");
-  assert.equal(presentation.progressText, "第 8/20 批");
+  assert.equal(presentation.detail, "Đang dịch nội dung chính");
+  assert.equal(presentation.progressText, "Đợt 8/20");
 });
 
 test("canonical event contract uses display_stage instead of internal render text", () => {
@@ -1306,7 +1306,7 @@ test("normalized stage event record builds progress text from structured progres
   });
 
   assert.equal(record.progressUnit, "batch");
-  assert.equal(record.progressText, "第 28/5216 批");
+  assert.equal(record.progressText, "Đợt 28/5216");
 });
 
 test("canonical stage event record ignores stage detail for status text", () => {
@@ -1325,8 +1325,8 @@ test("canonical stage event record ignores stage detail for status text", () => 
     },
   });
 
-  assert.equal(record.progressText, "第 28/5216 批");
-  assert.equal(record.stageText, "第 28/5216 批");
+  assert.equal(record.progressText, "Đợt 28/5216");
+  assert.equal(record.stageText, "Đợt 28/5216");
 });
 
 test("normalized stage event record does not use substage copy without public stage", () => {
@@ -1344,7 +1344,7 @@ test("normalized stage event record does not use substage copy without public st
   });
 
   assert.equal(record.canonicalDisplayStage, "");
-  assert.equal(record.progressText, "进度 1/3");
+  assert.equal(record.progressText, "Tiến độ 1/3");
 });
 
 test("structured public stage ignores internal stage values", () => {
@@ -1385,7 +1385,7 @@ test("job public stage and progress can come from normalized stage snapshot", ()
       source: "public-stage",
       lane: "main",
       substage: "translation_batches",
-      detail: "正在翻译正文内容",
+      detail: "Đang dịch nội dung chính",
       progress: {
         current: 30,
         total: 100,
@@ -1419,7 +1419,7 @@ test("canonical job wrapper can still use normalized stage snapshot", () => {
       source: "public-stage",
       lane: "main",
       substage: "translation_batches",
-      detail: "正在翻译正文内容",
+      detail: "Đang dịch nội dung chính",
       progress: {
         current: 30,
         total: 100,
@@ -1545,8 +1545,8 @@ test("translation render prewarm snapshot keeps translation wording", () => {
   );
 
   assert.equal(presentation.stageKey, "translate");
-  assert.equal(presentation.detail, "正在翻译正文内容");
-  assert.equal(presentation.progressText, "第 120/900 批");
+  assert.equal(presentation.detail, "Đang dịch nội dung chính");
+  assert.equal(presentation.progressText, "Đợt 120/900");
 });
 
 test("new job detail contract uses display stage instead of internal stage", () => {
@@ -1559,7 +1559,7 @@ test("new job detail contract uses display stage instead of internal stage", () 
       stage: "render_preprocess",
       substage: "translation_batches",
       lane: "main",
-      stage_detail: "正在翻译第 120/900 批",
+      stage_detail: "正在翻译Đợt 120/900",
       progress: {
         unit: "batch",
         current: 120,
@@ -1585,7 +1585,7 @@ test("new job detail contract uses display stage instead of internal stage", () 
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.progressText, "第 120/900 批");
+  assert.equal(presentation.progressText, "Đợt 120/900");
   assert.equal(presentation.progressUnit, "batch");
 });
 
@@ -1610,8 +1610,8 @@ test("structured stage detail does not infer render substage", () => {
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.detail, "正在翻译正文内容");
-  assert.equal(presentation.progressText, "第 8/20 批");
+  assert.equal(presentation.detail, "Đang dịch nội dung chính");
+  assert.equal(presentation.progressText, "Đợt 8/20");
 });
 
 test("structured event context uses record substage instead of render detail text", () => {
@@ -1652,10 +1652,10 @@ test("structured event context uses record substage instead of render detail tex
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
   assert.notEqual(presentation.visualStageKey, "render_prewarm");
-  assert.equal(presentation.label, "第 2/4 步 · 翻译");
+  assert.equal(presentation.label, "Bước 2/4 · Dịch");
   assert.ok(!presentation.label.includes("预热"));
-  assert.equal(presentation.detail, "正在翻译正文内容");
-  assert.equal(presentation.progressText, "第 9/20 批");
+  assert.equal(presentation.detail, "Đang dịch nội dung chính");
+  assert.equal(presentation.progressText, "Đợt 9/20");
 });
 
 test("canonical payload without display_stage does not infer public stage from internal stage", () => {
@@ -1678,7 +1678,7 @@ test("canonical payload without display_stage does not infer public stage from i
   assert.equal(presentation.stageKey, "running");
   assert.equal(presentation.stageKeyTrusted, false);
   assert.equal(presentation.substageKey, "");
-  assert.equal(presentation.progressText, "第 8/20 批");
+  assert.equal(presentation.progressText, "Đợt 8/20");
 });
 
 test("fallback stage trust only comes from structured display_stage", () => {
@@ -1747,7 +1747,7 @@ test("event presentation ignores legacy user_stage as a public stage", () => {
 
   assert.equal(presentation.stageKey, "running");
   assert.equal(presentation.stageKeyTrusted, false);
-  assert.equal(presentation.progressText, "第 8/20 批");
+  assert.equal(presentation.progressText, "Đợt 8/20");
 });
 
 test("canonical lane-only internal stage does not borrow fallback progress", () => {
@@ -1780,7 +1780,7 @@ test("canonical lane-only internal stage does not borrow fallback progress", () 
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.stageKeyTrusted, true);
-  assert.equal(presentation.progressText, "第 8/20 批");
+  assert.equal(presentation.progressText, "Đợt 8/20");
 });
 
 test("canonical lane-only internal stage does not drive forward stage selection", () => {
@@ -1818,7 +1818,7 @@ test("canonical lane-only internal stage does not drive forward stage selection"
 
   assert.equal(presentation.stageKey, "translate");
   assert.notEqual(presentation.visualStageKey, "render_prewarm");
-  assert.equal(presentation.progressText, "第 8/20 批");
+  assert.equal(presentation.progressText, "Đợt 8/20");
 });
 
 test("canonical lane-only nested payload does not drive forward stage selection", () => {
@@ -1857,7 +1857,7 @@ test("canonical lane-only nested payload does not drive forward stage selection"
 
   assert.equal(presentation.stageKey, "translate");
   assert.notEqual(presentation.visualStageKey, "render_prewarm");
-  assert.equal(presentation.progressText, "第 8/20 批");
+  assert.equal(presentation.progressText, "Đợt 8/20");
 });
 
 test("live stage forward selection prefers display stage over internal stage", () => {
@@ -1907,7 +1907,7 @@ test("live stage forward selection prefers display stage over internal stage", (
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.progressText, "第 9/20 批");
+  assert.equal(presentation.progressText, "Đợt 9/20");
 });
 
 test("structured text-only events do not replace structured progress event", () => {
@@ -1954,7 +1954,7 @@ test("structured text-only events do not replace structured progress event", () 
   );
 
   assert.equal(presentation.stageKey, "translate");
-  assert.equal(presentation.progressText, "第 8/20 批");
+  assert.equal(presentation.progressText, "Đợt 8/20");
 });
 
 test("translation internal substage progress advances beyond batch range", () => {
@@ -2054,7 +2054,7 @@ test("canonical text-only forward event does not advance the main stage", () => 
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.progressText, "第 12/20 批");
+  assert.equal(presentation.progressText, "Đợt 12/20");
 });
 
 test("canonical forward diagnostic without progress does not advance the main stage", () => {
@@ -2103,7 +2103,7 @@ test("canonical forward diagnostic without progress does not advance the main st
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.progressText, "第 12/20 批");
+  assert.equal(presentation.progressText, "Đợt 12/20");
 });
 
 test("public stage engine does not advance OCR from later main stage events", () => {
@@ -2175,7 +2175,7 @@ test("public stage engine does not advance OCR from later main stage events", ()
 
   assert.equal(presentation.stageKey, "ocr");
   assert.equal(presentation.substageKey, "ocr_processing");
-  assert.equal(presentation.progressText, "第 5/20 页");
+  assert.equal(presentation.progressText, "Trang 5/20");
 });
 
 test("public stage engine does not advance render to done from terminal event alone", () => {
@@ -2223,7 +2223,7 @@ test("public stage engine does not advance render to done from terminal event al
 
   assert.equal(presentation.stageKey, "render");
   assert.equal(presentation.substageKey, "render_pages");
-  assert.equal(presentation.progressText, "第 30/100 页");
+  assert.equal(presentation.progressText, "Trang 30/100");
 });
 
 test("public stage engine keeps running payloads without public stage from event promotion", () => {
@@ -2346,7 +2346,7 @@ test("job stage event adapter reads canonical fields from nested payload", () =>
   assert.equal(snapshot.stageKey, "translate");
   assert.equal(snapshot.publicStage, "translation");
   assert.equal(snapshot.substage, "translation_batches");
-  assert.equal(snapshot.detail, "正在翻译正文内容");
+  assert.equal(snapshot.detail, "Đang dịch nội dung chính");
   assert.equal(snapshot.lane, "main");
   assert.equal(snapshot.progress.unit, "batch");
   assert.equal(snapshot.progress.current, 12);
@@ -2413,7 +2413,7 @@ test("fallback presentation uses normalized stage snapshot before raw internal f
       source: "public-stage",
       lane: "main",
       substage: "translation_batches",
-      detail: "正在翻译正文内容",
+      detail: "Đang dịch nội dung chính",
       progress: {
         current: 30,
         total: 100,
@@ -2425,7 +2425,7 @@ test("fallback presentation uses normalized stage snapshot before raw internal f
 
   assert.equal(presentation.stageKey, "translate");
   assert.equal(presentation.substageKey, "translation_batches");
-  assert.equal(presentation.detail, "正在翻译正文内容");
+  assert.equal(presentation.detail, "Đang dịch nội dung chính");
   assert.equal(presentation.progressCurrent, 30);
   assert.equal(presentation.progressTotal, 100);
   assert.equal(presentation.progressUnit, "batch");
