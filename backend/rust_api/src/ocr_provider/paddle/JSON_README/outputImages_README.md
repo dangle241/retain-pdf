@@ -18,7 +18,7 @@ If others are added later key(For example, some kind `crop_*.jpg` / `summary_vis
 - `layout_det_res` is the most direct visual debugging entry: when reproducing a case, download that URL locally to view layout detection overlay. Suggest features: `regression_check.py`, `validate_document_schema.py` scripts output summary with this URL (or write into `reporting.py` generated summary), so operator on normalized document failure automatically opens corresponding page's visual result.
 - Other potential `outputImages`(such as future Layout crop diagram) should also only debug Only log in mode./File system: avoid retaining large numbers of temporary images in the production data pipeline.
 
-### 前端预览/Diagnostics
+### Frontend preview/Diagnostics
 - `layout_det_res` Ideal for “layout QA” visualization panel (e.g., show original image, detection results in debug console) overlay、normalized tree Chained. URL Authorized and large. Treat as clickable optional. Do not auto-fetch in main flow. Prevents frequent frontend triggers in production. CDN Verify.
 - If future need for cropped images or read-only graph visualization, add new `crop_*`, `vis_fit_res` fields in `outputImages` for frontend/reporting use; still enforce README constraint: only QA/diagnostic page read-only.
 

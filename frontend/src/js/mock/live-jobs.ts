@@ -1,5 +1,5 @@
-// 可推进的 mock 翻译任务：提交后随墙钟时间走完阶段。
-// 支持 fromStage：点「重新 OCR/翻译/渲染」时从该阶段起跑，前面阶段视为已完成。
+// 可推进的 mock Translation任务: 提交后随墙钟Time走完Stage.
+// 支持 fromStage: 点"Run OCR Again/Translation/Rendering"时从该Stage起跑, 前面Stage视为Complete.
 
 import type { JobLike } from "../job/types.js";
 
@@ -11,14 +11,14 @@ export type LiveMockJobMeta = {
   title?: string;
   pageCount?: number;
   startedAtMs: number;
-  /** 总时长缩放（1 = 默认约 16s 跑完整条；fromStage 时只跑剩余段） */
+  /** 总时长缩放(1 = 默认约 16s 跑完整entries；fromStage 时只跑剩余段) */
   speed?: number;
   /**
-   * 从哪一阶段开始推进。
-   * - 省略 / upload：整条流水线
-   * - ocr：跳过排队，从 OCR 起
-   * - translate：跳过排队+OCR，从翻译起
-   * - render：只跑渲染
+   * 从哪一Stage开始推进.
+   * - 省略 / upload: 整entries流水线
+   * - ocr: 跳过queued, 从 OCR 起
+   * - translate: 跳过queued+OCR, 从Translation起
+   * - render: 只跑Rendering
    */
   fromStage?: LiveMockFromStage;
 };
@@ -47,7 +47,7 @@ const PHASES: PhaseDef[] = [
     durationMs: 1_500,
     unit: "none",
     total: 1,
-    detail: () => "正在读取文档并排队…",
+    detail: () => "LoadingDocuments并queued...",
   },
   {
     key: "ocr",
@@ -58,7 +58,7 @@ const PHASES: PhaseDef[] = [
     durationMs: 4_000,
     unit: "page",
     total: 12,
-    detail: ({ current, total }) => `正在执行 OCR，第 ${current}/${total} 页`,
+    detail: ({ current, total }) => `正在执行 OCR, Page ${current}/${total} pages`,
   },
   {
     key: "translate",
@@ -69,7 +69,7 @@ const PHASES: PhaseDef[] = [
     durationMs: 7_000,
     unit: "batch",
     total: 40,
-    detail: ({ current, total }) => `正在翻译正文，第 ${current}/${total} 批`,
+    detail: ({ current, total }) => `正在Translation正文, Page ${current}/${total} batches`,
   },
   {
     key: "render",
@@ -80,7 +80,7 @@ const PHASES: PhaseDef[] = [
     durationMs: 3_000,
     unit: "page",
     total: 12,
-    detail: ({ current, total }) => `正在渲染第 ${current}/${total} 页`,
+    detail: ({ current, total }) => `RenderingPage ${current}/${total} pages`,
   },
   {
     key: "done",
@@ -91,7 +91,7 @@ const PHASES: PhaseDef[] = [
     durationMs: 0,
     unit: "none",
     total: 1,
-    detail: () => "处理完成，可以对照阅读",
+    detail: () => "处理Done, 可以Side-by-side Reader",
   },
 ];
 
@@ -102,7 +102,7 @@ function clamp01(value: number) {
   return Math.max(0, Math.min(1, value));
 }
 
-/** API stage 名 → 流水线 from 相位（done 不作为起点） */
+/** API stage 名 → 流水线 from 相位(done 不作为起点) */
 export function normalizeLiveMockFromStage(stage?: string | null): PhaseKey {
   const value = `${stage || ""}`.trim().toLowerCase();
   if (!value || value === "upload" || value === "queued") return "upload";
@@ -125,8 +125,8 @@ function phaseStartIndex(fromStage?: LiveMockFromStage | PhaseKey | string): num
 }
 
 /**
- * 生成时间线：fromStage 之前的相位 duration=0（瞬间完成），
- * 从 fromStage 起按正常时长推进。
+ * 生成Time线: fromStage 之前的相位 duration=0(瞬间Done), 
+ * 从 fromStage 起按正常时长推进.
  */
 function phaseTimeline(speed = 1, fromStage?: LiveMockFromStage | PhaseKey | string) {
   const scale = Number.isFinite(speed) && speed > 0 ? speed : 1;
@@ -167,8 +167,8 @@ export function isLiveMockJobActive(jobId?: string | null, nowMs = Date.now()): 
 }
 
 /**
- * 登记一条可推进任务。返回 job_id。
- * fromStage：重试入口，从 ocr / translate / render 起跑。
+ * 登记一entries可推进任务.返回 job_id.
+ * fromStage: Retry入口, 从 ocr / translate / render 起跑.
  */
 export function registerLiveMockJob(meta: {
   jobId?: string;
@@ -242,9 +242,9 @@ export function buildLiveMockJobPayload(
 
   const detail = phase.detail({ current, total, percent });
   const pageCount = Number(meta.pageCount) || 12;
-  const title = `${meta.title || "Mock 翻译任务"}`.trim() || "Mock 翻译任务";
+  const title = `${meta.title || "Mock Translation任务"}`.trim() || "Mock Translation任务";
 
-  // 历史：fromStage 之前的相位标为已完成；当前及之后按时间
+  // History: fromStage 之前的相位标为Complete；Current及之后按Time
   const history = timeline
     .filter((slot) => slot.skipped || slot.startMs <= elapsed || slot.phase.key === phase.key)
     .map((slot) => {
@@ -288,7 +288,7 @@ export function buildLiveMockJobPayload(
     display_stage: isDone ? "done" : phase.displayStage,
     substage: !isDone && phase.key === "translate" ? "translation_batches" : undefined,
     lane: "main",
-    stage_detail: isDone ? "处理完成，可以对照阅读" : detail,
+    stage_detail: isDone ? "处理Done, 可以Side-by-side Reader" : detail,
     progress: {
       unit: isDone || phase.unit === "none" ? undefined : phase.unit,
       current: isDone ? pageCount : current,
@@ -404,3 +404,8 @@ export function buildLiveMockJobEvents(jobId?: string | null, nowMs = Date.now()
   ];
   return { items };
 }
+
+
+
+
+

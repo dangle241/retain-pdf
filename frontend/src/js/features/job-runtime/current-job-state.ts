@@ -234,7 +234,7 @@ export function createCurrentJobStatePort(
   };
 }
 
-// 选择器读子 store 快照(store 是唯一真值,旧 state 对象只充当身份键)
+// Select器读子 store 快照(store yes唯一真值,旧 state 对象只充当身份键)
 export function currentJobId(state?: unknown) {
   return `${currentJobStoreFor(state as object | null | undefined).getSnapshot().jobId || ""}`.trim();
 }
@@ -287,3 +287,5 @@ export function cacheJobResumePlan(
 ) {
   createCurrentJobStatePort(state as object).cacheResumePlan(jobId, payload);
 }
+
+

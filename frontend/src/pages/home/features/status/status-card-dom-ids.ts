@@ -1,11 +1,11 @@
 import { DOWNLOAD_ACTION_IDS } from "../../composition/external.js";
 
-// 状态卡 DOM 契约 id 拷贝(蓝图 §2 features/status/)。
+// Status卡 DOM 契约 id 拷贝(蓝图 §2 features/status/).
 //
-// 拷贝自 components/status/job-status-card-dom-contract.js(该文件属"死,由
+// 拷贝自 components/status/job-status-card-dom-contract.js(该Files属"死,由
 // StatusCard.jsx 家族替代"清单,js/components/ 禁止 import;
-// DOWNLOAD_ACTION_IDS 来自 contracts/,不在禁区,原样 import)。id 字符串
-// 逐一保留——smoke DOM 契约(蓝图 §0)靠这些 id 断言。
+// DOWNLOAD_ACTION_IDS 来自 contracts/,不在禁区,原样 import).id 字符串
+// 逐一保留——smoke DOM 契约(蓝图 §0)靠这些 id 断言.
 
 export const STATUS_CARD_IDS = Object.freeze({
   cancelButton: "cancel-btn",
@@ -38,3 +38,4 @@ export const STATUS_CARD_ACTION_IDS = Object.freeze({
   sourcePdf: STATUS_CARD_IDS.sourcePdfButton,
   markdownBundle: STATUS_CARD_IDS.markdownBundleButton,
 });
+

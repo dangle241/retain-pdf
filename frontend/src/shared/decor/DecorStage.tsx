@@ -1,13 +1,13 @@
-// 装饰舞台（图片版）：按当前主题的 decorPack 加载 manifest，把装饰层铺到
-// 具名锚点上。功能 UI 永远是 DOM，本组件只渲染纯装饰——整体 aria-hidden、
-// pointer-events: none，不参与交互与无障碍树。
+// 装饰舞台(图片版): 按CurrentTheme的 decorPack 加载 manifest, 把装饰层铺到
+// 具名锚点上.Tools UI 永远yes DOM, books组件只Rendering纯装饰——整体 aria-hidden, 
+// pointer-events: none, 不参与交互与None障碍树.
 //
-// - 无 decorPack 的主题（classic/night 等）：渲染 null，零请求零开销
-// - manifest 加载/校验失败：console.warn 后静默不渲染（装饰绝不阻塞功能）
-// - model 层在本版本一律走 fallback 静态图（three 引擎见路线图第 6 步）
-// - slot 定位真值在 src/styles/core/decor-stage.css
+// - None decorPack 的Theme(classic/night 等): Rendering null, 零请求零开销
+// - manifest 加载/校验Failed: console.warn 后静默不Rendering(装饰绝不阻塞Tools)
+// - model 层在books版books一律走 fallback 静态图(three 引擎见路线图Page 6 step)
+// - slot Locate真值在 src/styles/core/decor-stage.css
 //
-// 契约：./contract.ts · 计划器：./stage-plan.ts · 文档：docs/theme-system/DECOR_PACKS.md
+// 契约: ./contract.ts · 计划器: ./stage-plan.ts · Documents: docs/theme-system/DECOR_PACKS.md
 
 import { useEffect, useRef, useState } from "react";
 import { THEME_CHANGE_EVENT, getTheme, getThemeDefinition } from "../theme/theme.js";
@@ -25,7 +25,7 @@ export function DecorStage() {
   const [pack, setPack] = useState(currentPack);
   const [plan, setPlan] = useState<StagePlan | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
-  // clickQuote 语录气泡：{ slot, lines, index }，点击轮播，5s 自动收起
+  // clickQuote 语录气泡: { slot, lines, index }, 点击轮播, 5s 自动收起
   const [verse, setVerse] = useState<{ slot: string; lines: string[]; index: number } | null>(null);
 
   // 换肤 → 换装饰包
@@ -52,7 +52,7 @@ export function DecorStage() {
     );
   }
 
-  // 加载 manifest → 渲染计划
+  // 加载 manifest → Rendering计划
   useEffect(() => {
     if (!pack) {
       setPlan(null);
@@ -68,13 +68,13 @@ export function DecorStage() {
         if (result.ok) {
           setPlan(result.plan);
         } else {
-          console.warn(`[decor] 装饰包 ${pack} manifest 校验失败:`, result.errors);
+          console.warn(`[decor] 装饰包 ${pack} manifest 校验Failed:`, result.errors);
           setPlan(null);
         }
       })
       .catch((error) => {
         if (!alive) return;
-        console.warn(`[decor] 装饰包 ${pack} 加载失败:`, error);
+        console.warn(`[decor] 装饰包 ${pack} failed to load:`, error);
         setPlan(null);
       });
     return () => {
@@ -82,7 +82,7 @@ export function DecorStage() {
     };
   }, [pack]);
 
-  // 鼠标视差：rAF 节流，只写宿主 CSS 变量，各层用自己的 parallax 系数消费
+  // 鼠标视差: rAF 节流, 只写宿主 CSS 变量, 各层用自己的 parallax 系数消费
   const hasParallax = !!plan?.layers.some((layer) => layer.parallax > 0);
   useEffect(() => {
     if (!hasParallax) return;
@@ -155,3 +155,7 @@ export function DecorStage() {
     </div>
   );
 }
+
+
+
+

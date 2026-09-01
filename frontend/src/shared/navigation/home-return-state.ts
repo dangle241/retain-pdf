@@ -1,10 +1,10 @@
-// 主页 ↔ 阅读器整页跳转时的回程状态（滚动 / tab / 是否可 history.back）。
-// sessionStorage 按标签页隔离，适合「离开前记下，回来再恢复」。
+// 主pages ↔ Reader整pages跳转时的回程Status(滚动 / tab / yesno可 history.back).
+// sessionStorage 按Tagspages隔离, 适合"离开前记下, 回来再resume".
 
 export const HOME_RETURN_STORAGE_KEY = "retainpdf.home.return.v1";
 
 export type HomeReturnState = {
-  /** 本标签页是从主页 navigate 进阅读器的，关闭时应优先 history.back */
+  /** booksTagspagesyes从主pages navigate 进Reader的, Close时应优先 history.back */
   allowBack: boolean;
   activeTab: "library" | "categories" | "favorites" | "ask" | string;
   libraryScrollTop: number;
@@ -45,7 +45,7 @@ function readActiveLibraryTab(): string {
   return "library";
 }
 
-/** 离开主页进阅读器前调用：记下滚动与 tab */
+/** 离开主pages进Reader前调用: 记下滚动与 tab */
 export function captureHomeReturnState(options: { allowBack?: boolean } = {}) {
   if (typeof window === "undefined" || typeof sessionStorage === "undefined") {
     return;
@@ -78,7 +78,7 @@ export function peekHomeReturnState(): HomeReturnState | null {
   }
 }
 
-/** 读出并清除（恢复滚动后调用，避免下次误用） */
+/** 读出并清除(resume滚动后调用, 避免下次误用) */
 export function consumeHomeReturnState(): HomeReturnState | null {
   const state = peekHomeReturnState();
   clearHomeReturnState();
@@ -110,3 +110,7 @@ export function applyHomeReturnScroll(state: HomeReturnState) {
     window.scrollTo(0, state.windowScrollY);
   }
 }
+
+
+
+

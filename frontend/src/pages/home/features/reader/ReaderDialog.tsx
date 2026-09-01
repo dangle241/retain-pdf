@@ -1,7 +1,7 @@
-// 阅读入口：把 openReaderRequested / 深链 转成导航。
+// 阅读入口: 把 openReaderRequested / 深链 转成导航.
 //
-// 默认走 soft open（navigate-to-reader → SoftReaderHost 全屏层），主页不卸载；
-// 深链 replace 仍硬进 reader.html。
+// 默认走 soft open(navigate-to-reader → SoftReaderHost 全屏层), 主pages不卸载；
+// 深链 replace 仍硬进 reader.html.
 
 import { useEffect } from "react";
 import { useAppEvent } from "../../../../shared/react/use-app-event.js";
@@ -27,8 +27,8 @@ function anchorFromEventDetail(detail: any = {}) {
 }
 
 /**
- * 无 UI：只负责把「打开阅读」事件 / 深链 转成跳转 reader.html。
- * 组件名保留 ReaderDialog，避免 HomeApp / 测试 import 大面积改动。
+ * None UI: 只负责把"打开阅读"Events / 深链 转成跳转 reader.html.
+ * 组件名保留 ReaderDialog, 避免 HomeApp / 测试 import 大面积改动.
  */
 export function ReaderDialog() {
   useAppEvent(APP_EVENTS.openReaderRequested, (event) => {
@@ -48,7 +48,7 @@ export function ReaderDialog() {
     navigateToReader(url);
   });
 
-  // 主页深链 ?view=reader&job_id= → 直接进阅读页（replace，避免返回死循环）
+  // 主pages深链 ?view=reader&job_id= → 直接进阅读pages(replace, 避免返回死循环)
   useEffect(() => {
     const startupJobId = requestedReaderJobIdFromLocation();
     if (!startupJobId) {
@@ -60,3 +60,7 @@ export function ReaderDialog() {
 
   return null;
 }
+
+
+
+

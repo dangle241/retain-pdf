@@ -16,7 +16,7 @@ export function createStatusDetailTranslationTabCoordinator({
 
   function renderSelectionPlaceholder(selection) {
     renderItemDetail({
-      emptyText: selection?.selectedItemId ? "请选择左侧 item" : "没有可查看的 item",
+      emptyText: selection?.selectedItemId ? "Select an item on the left" : "No item is ready to view",
     });
     renderReplay();
   }
@@ -55,7 +55,7 @@ export function createStatusDetailTranslationTabCoordinator({
     const jobId = dataPort.jobId();
     if (!jobId) {
       dataPort.reset("");
-      renderEmpty("请先选择任务");
+      renderEmpty("Select a job first");
       return;
     }
     dataPort.syncJob();
@@ -63,7 +63,7 @@ export function createStatusDetailTranslationTabCoordinator({
       renderCurrent();
       return;
     }
-    renderEmpty("正在读取翻译调试数据...");
+    renderEmpty("Loading translation debug data...");
     try {
       const selection = await dataPort.loadSummaryAndItems({ selectFirst: true });
       renderSummary();
@@ -115,7 +115,7 @@ export function createStatusDetailTranslationTabCoordinator({
     }
     setReplayLoading?.({
       hasResult: false,
-      status: "重放中...",
+      status: "Replaying...",
     });
     await dataPort.replaySelectedItem();
     renderReplay();
@@ -131,3 +131,6 @@ export function createStatusDetailTranslationTabCoordinator({
     renderCurrent,
   };
 }
+
+
+

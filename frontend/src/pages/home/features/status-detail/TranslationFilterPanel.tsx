@@ -1,16 +1,16 @@
-// 翻译调试:状态筛选 + 检索输入(受控草稿态,点击"刷新"或回车才提交
+// Translation调试:StatusFilter + Search输入(受控草稿态,点击"刷新"或回车才提交
 // applyTranslationFilter——镜像旧世界 readTranslationFilterQuery 只在提交时
-// 读一次表单值的语义,不是每个按键都请求)。
+// 读一次表单值的语义,不yes每个按键都请求).
 
 import { useState } from "react";
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
 
 const FINAL_STATUS_OPTIONS = [
-  { value: "", label: "全部" },
-  { value: "translated", label: "已翻译" },
-  { value: "partially_translated", label: "部分翻译" },
-  { value: "kept_origin", label: "保留原文" },
-  { value: "failed", label: "失败" },
+  { value: "", label: "All" },
+  { value: "translated", label: "Translated" },
+  { value: "partially_translated", label: "Partially translated" },
+  { value: "kept_origin", label: "Source retained" },
+  { value: "failed", label: "Failed" },
 ];
 
 export function TranslationFilterPanel({ query, onApply }) {
@@ -26,7 +26,7 @@ export function TranslationFilterPanel({ query, onApply }) {
     <section className="translation-filter-panel">
       <div className="translation-filter-row">
         <label className="translation-filter-field">
-          <span className="label">状态</span>
+          <span className="label">Status</span>
           <select
             id={ids.filterFinalStatus}
             value={finalStatus}
@@ -38,11 +38,11 @@ export function TranslationFilterPanel({ query, onApply }) {
           </select>
         </label>
         <label className="translation-filter-field translation-filter-search">
-          <span className="label">检索</span>
+          <span className="label">Search</span>
           <input
             id={ids.filterQuery}
             type="search"
-            placeholder="输入 item_id、路由、原文片段"
+            placeholder="输入 item_id, 路由, Source片段"
             value={q}
             onChange={(event) => setQ(event.target.value)}
             onKeyDown={(event) => {
@@ -58,3 +58,6 @@ export function TranslationFilterPanel({ query, onApply }) {
     </section>
   );
 }
+
+
+

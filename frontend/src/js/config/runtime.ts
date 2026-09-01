@@ -96,7 +96,7 @@ export function isMockMode() {
   return !!mockScenario();
 }
 
-/** 模块快照为空时再读一次 window（runtime-config.local.js 晚注入等边缘情况）。 */
+/** 模块快照为空时再读一次 window(runtime-config.local.js 晚注入等边缘情况). */
 function liveRuntimeString(key: string): string {
   if (typeof window === "undefined") {
     return "";
@@ -133,8 +133,8 @@ export function defaultOcrProvider() {
 }
 
 export function defaultModelApiKey() {
-  // 两把钥匙之一：下游 LLM（DeepSeek 等）的 Bearer key，随 ask 请求 body.llm_api_key 上传。
-  // 勿与 xApiKey（Rust/AI 服务 X-API-Key）混淆。
+  // 两把钥匙之一: 下游 LLM(DeepSeek 等)的 Bearer key, 随 ask 请求 body.llm_api_key Upload.
+  // 勿与 xApiKey(Rust/AI 服务 X-API-Key)混淆.
   const fromModule = typeof runtimeConfig.modelApiKey === "string" ? runtimeConfig.modelApiKey.trim() : "";
   return fromModule || liveRuntimeString("modelApiKey");
 }
@@ -157,3 +157,4 @@ export function setRuntimeConfig(nextConfig = {}) {
     ...nextConfig,
   };
 }
+

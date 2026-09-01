@@ -22,10 +22,10 @@ function preferNonEmpty(primary = "", fallback = "") {
 }
 
 /**
- * 读取用户凭据：
- * - 浏览器：localStorage
- * - 桌面：desktop snapshot 与 localStorage shadow 合并（非空优先）
- *   避免「刚保存进 shadow / state，但 snapshot 仍是空 Key」导致 AI 门禁误锁。
+ * 读取用户credentials: 
+ * - 浏览器: localStorage
+ * - 桌面: desktop snapshot 与 localStorage shadow 合并(非空优先)
+ *   避免"刚Save进 shadow / state, 但 snapshot 仍yes空 Key"导致 AI 门禁误锁.
  */
 export function loadBrowserStoredConfig() {
   const fromStorage = normalizeBrowserStoredConfig(readBrowserStoredConfig());
@@ -70,3 +70,7 @@ export async function savePersistedDeveloperStoredConfig(payload = {}) {
   saveDeveloperStoredConfig(nextDeveloperConfig);
   return savePersistedDeveloperConfig(nextDeveloperConfig);
 }
+
+
+
+

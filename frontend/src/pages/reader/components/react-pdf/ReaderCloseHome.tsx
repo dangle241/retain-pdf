@@ -1,7 +1,7 @@
-// 阅读器「返回主页」
+// Reader"返回主pages"
 //
-// 1) 软打开（主页 SoftReaderHost iframe）→ postMessage 父页 history.back，主页不刷新
-// 2) 独立 reader.html 且从主页 assign 进来 → history.back
+// 1) 软打开(主pages SoftReaderHost iframe)→ postMessage 父pages history.back, 主pages不刷新
+// 2) 独立 reader.html 且从主pages assign 进来 → history.back
 // 3) 深链直达 → location.assign(index.html)
 
 import { X } from "lucide-react";
@@ -26,11 +26,11 @@ function requestSoftHostClose(): boolean {
   }
 }
 
-/** 从阅读页回主页 */
+/** 从阅读pages回主pages */
 export function navigateReaderToHome() {
   if (typeof window === "undefined") return;
 
-  // 软阅读层：让父页卸层，绝不在 iframe 里 assign 主页
+  // 软阅读层: 让父pages卸层, 绝不在 iframe 里 assign 主pages
   if (requestSoftHostClose()) {
     return;
   }
@@ -65,12 +65,15 @@ export function ReaderCloseHome() {
       id="reader-close-home-btn"
       type="button"
       className="reader-close-home-btn"
-      aria-label="返回主页"
-      title="返回主页"
+      aria-label="返回主pages"
+      title="返回主pages"
       onClick={navigateReaderToHome}
     >
       <X className="reader-close-home-icon" size={18} strokeWidth={2.25} aria-hidden />
-      <span className="reader-close-home-label">关闭</span>
+      <span className="reader-close-home-label">Close</span>
     </button>
   );
 }
+
+
+

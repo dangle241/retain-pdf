@@ -1,5 +1,5 @@
-// composition 层公共类型。HomeServices / HomeFeatures 表面 API 不用 any；
-// 深层 payload 用 unknown；store/port 复用已有模块类型。
+// composition 层公totalType.HomeServices / HomeFeatures 表面 API 不用 any；
+// 深层 payload 用 unknown；store/port 复用已有模块Type.
 
 import type {
   Store,
@@ -22,8 +22,8 @@ import type {
 } from "../features/library/types.js";
 
 /**
- * 通用 app-framework store。
- * 用 Store 默认参（未建模 snapshot/actions），避免把消费方推成 never/unknown。
+ * 通用 app-framework store.
+ * 用 Store 默认参(未建模 snapshot/actions), 避免把消费方推成 never/unknown.
  */
 export type AppStore = Store;
 
@@ -121,7 +121,7 @@ export type AppShellFeature = {
   initializeIdleView: () => void;
 };
 
-/** 装配期逐步填满的 features 注册表 */
+/** 装配期逐step填满的 features 注册表 */
 export type HomeFeatures = {
   workflowFeature?: WorkflowFeature;
   uploadFeature?: UploadFeature;
@@ -159,7 +159,7 @@ export type HomeStores = {
 
 // ── Domain bags ───────────────────────────────────────────────────────
 
-/** 事件处理函数表（viewPort.bindEvents 写入 handlersRef） */
+/** Events处理函数表(viewPort.bindEvents 写入 handlersRef) */
 export type HandlersBag = {
   [key: string]: ((...args: unknown[]) => unknown) | undefined | null;
 };
@@ -226,7 +226,7 @@ export type LibraryActions = RecentJobActions & {
   openSourceReader: LibraryController["openSourceReader"];
   translateDocument: LibraryController["translateDocument"];
   deleteDocument: LibraryController["deleteDocument"];
-  /** 选择集可能是 unknown[]（view state），参数放宽 */
+  /** Select集可能yes unknown[](view state), 参数放宽 */
   deleteDocuments: (
     documentIds?: Array<string | null | undefined | unknown>,
   ) => Promise<DeleteDocumentsResult>;
@@ -247,7 +247,7 @@ export type HomeBookDetail = {
   dialogStore: DialogStore<LibraryCardItem | null>;
 };
 
-/** 分类/合集控制器（createCollectionsController 返回面） */
+/** Category/Collection控制器(createCollectionsController 返回面) */
 export type CollectionRecord = {
   collection_id?: string;
   name?: string;
@@ -342,7 +342,7 @@ export type HomeStatusDetail = {
   controller: StatusDetailController;
 };
 
-/** 主页阅读入口：跳转独立 reader.html（不再维护 dialogStore / iframe）。 */
+/** 主pages阅读入口: 跳转独立 reader.html(不再维护 dialogStore / iframe). */
 export type HomeReader = {
   openReader: (jobId: string, anchor?: unknown) => unknown;
 };
@@ -421,7 +421,7 @@ export type HomeServices = {
   statusCard: HomeStatusCard;
   statusDetail: HomeStatusDetail;
   reader: HomeReader;
-  /** text-store 的 selector 帮助函数（配合 useStoreSnapshot） */
+  /** text-store 的 selector 帮助函数(配合 useStoreSnapshot) */
   textOf: (snapshot: unknown, id: string, fallback?: unknown) => unknown;
   uploadDomRefs: UploadDomRefs;
   uploadViewActions: UploadViewActions;
@@ -525,3 +525,7 @@ export type {
   TranslateDocumentPayload,
   UpdateDocumentPayload,
 };
+
+
+
+

@@ -1,26 +1,26 @@
-// lottie 阶段动画 hook——命令式孤岛(蓝图 §2 features/status/,风险 §8.2)。
+// lottie Stage动画 hook——命令式孤岛(蓝图 §2 features/status/,风险 §8.2).
 //
 // 拷贝自 components/status/job-status-card-animation.js 的
-// createStatusStageAnimationController(该文件属"死,由 StatusCard.jsx 家族
+// createStatusStageAnimationController(该Files属"死,由 StatusCard.jsx 家族
 // 替代"清单,js/components/ 禁止 import;STAGE_ANIMATIONS 表拷贝自
 // job-status-card-presets.js;resolveVisualStageKeyForSnapshot 拷贝自
-// job-status-card-visuals.js;resolveLottieVendorUrl 是 runtime/ 纯工具,
-// 合法直接 import)。
+// job-status-card-visuals.js;resolveLottieVendorUrl yes runtime/ 纯Tools,
+// 合法直接 import).
 //
-// 铁律(风险 §8.2):desiredKey 三重检查原样保留——lottie-web 是通过动态
-// <script> 标签异步加载的,加载期间用户可能连续切换阶段(甚至连续切换 job),
-// 三次核对 stageAnimationDesiredKey 是为了保证"加载完成时仍是当前想要展示的
-// 阶段"才真正 loadAnimation,否则会出现"网络慢时旧阶段动画在新阶段渲染完成
-// 后才姗姗来迟地把新动画覆盖掉"的竞态闪烁。
+// 铁律(风险 §8.2):desiredKey 三重检查原样保留——lottie-web yes通过动态
+// <script> Tags异step加载的,加载期间用户可能连续切换Stage(甚至连续切换 job),
+// 三次核对 stageAnimationDesiredKey yes为了保证"加载Done时仍yesCurrent想要展示的
+// Stage"才真正 loadAnimation,no则会出现"网络慢时旧Stage动画在新StageRendering complete
+// 后才姗姗来迟地把新动画覆盖掉"的竞态闪烁.
 //
-// React 化的方式:lottie 实例本身是纯命令式(容器 DOM ref),但"是否显示动画
-// 容器 / 是否 translate 态"两个视觉标记原样上抛为 hook 返回值,由
-// StatusCard.jsx 以声明式 className/dataset 渲染(不必要的命令式 DOM 写)。
+// React 化的方式:lottie 实例books身yes纯命令式(容器 DOM ref),但"yesnoDisplay动画
+// 容器 / yesno translate 态"两个视觉标记原样上抛为 hook 返回值,由
+// StatusCard.jsx 以声明式 className/dataset Rendering(不必要的命令式 DOM 写).
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { resolveLottieVendorUrl } from "../../composition/external.js";
 
-// 用站点根路径，避免详情弹窗 / 子路径下相对 ./src 解析失败导致动画空盒
+// 用站点根路径, 避免详情弹窗 / 子路径下相对 ./src parseFailed导致动画空盒
 const TRANSLATION_ANIMATION_PATH = "/src/assets/animations/deepseek_lottie.json";
 const OCR_ANIMATION_PATH = "/src/assets/animations/ocr_Lottie.json";
 const UPLOAD_ANIMATION_PATH = "/src/assets/animations/pdf_upload_Lottie.json";
@@ -159,8 +159,8 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
     }
     loadLottieWeb()
       .then((lottie) => {
-        // 三重 desiredKey 核对(风险 §8.2,原样保留):异步加载期间用户可能
-        // 连续切换阶段,任何一次检查失败都说明这次加载结果已经过期。
+        // 三重 desiredKey 核对(风险 §8.2,原样保留):异step加载期间用户可能
+        // 连续切换Stage,任何一次检查Failed都说明这次加载结果已经过期.
         if (stageAnimationDesiredKeyRef.current !== stageKey) {
           return;
         }
@@ -207,8 +207,8 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
 
   useEffect(() => clearStageAnimation, []);
 
-  // syncProgressSpeed 是副作用(读写 ref + 调 lottie 实例的 setSpeed),必须
-  // 在 effect 里跑,不能在渲染期间直接调用(渲染函数体必须是纯函数)。
+  // syncProgressSpeed yes副作用(读写 ref + 调 lottie 实例的 setSpeed),必须
+  // 在 effect 里跑,不能在Rendering期间直接调用(Rendering函数体必须yes纯函数).
   const { stageKey = "", current = NaN, total = NaN, progressUnit = "" } = progressSample || {} as ProgressSample;
   useEffect(() => {
     const normalizedStageKey = `${stageKey || ""}`.trim();
@@ -241,3 +241,6 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
     visualStageKey: normalized,
   };
 }
+
+
+

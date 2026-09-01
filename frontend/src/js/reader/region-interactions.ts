@@ -203,9 +203,9 @@ async function handleTranslatedRegionDoubleClick(event) {
     const payload = await fetchReaderRegionPayload(region);
     const formatted = formatReaderRegionMarkdownPayload(payload);
     await copyTextToClipboard(formatted.translated || formatted.primaryText);
-    showReaderRegionToast(readerRegionBinding?.translatedController, region.translated, "已复制");
+    showReaderRegionToast(readerRegionBinding?.translatedController, region.translated, "Copied");
   } catch {
-    showReaderRegionToast(readerRegionBinding?.translatedController, region.translated, "复制失败");
+    showReaderRegionToast(readerRegionBinding?.translatedController, region.translated, "Copy Failed");
     // Keep text selection behavior unaffected if copy is unavailable.
   }
 }
@@ -216,15 +216,15 @@ async function showReaderRegionMarkdown(event, region) {
   showReaderRegionPair(region);
   const binding = readerRegionBinding;
   if (!binding?.jobId || !binding?.fetchTranslationItem || !region?.itemId) {
-    renderReaderMarkdownPopover(event, region, { message: "缺少 item_id，无法读取文本" });
+    renderReaderMarkdownPopover(event, region, { message: "缺少 item_id, Cannot读取文books" });
     return;
   }
-  const popover = renderReaderMarkdownPopover(event, region, { message: "正在读取..." });
+  const popover = renderReaderMarkdownPopover(event, region, { message: "Loading..." });
   try {
     const payload = await fetchReaderRegionPayload(region);
     renderReaderMarkdownPayload(popover, payload);
   } catch (error) {
-    popover.querySelector(".reader-region-markdown-body").textContent = error?.message || "读取失败";
+    popover.querySelector(".reader-region-markdown-body").textContent = error?.message || "Read failed";
   }
 }
 
@@ -294,11 +294,11 @@ export function bindReaderRegionHover({
   scheduleRegionOverlayRender();
 }
 
-// ===== 锚点定位与选区取文(收藏/搜索命中/批注共用的前置能力) =====
+// ===== 锚点Locate与selection取文(Favorite/搜索命中/annotationstotal用的前置能力) =====
 
-// 块 ID 在两套产物里补零位数不同:regions 的 itemId 是 3 位(p001-b002),
-// 服务端 FTS/收藏/引用的 block_id 是 4 位(p001-b0002)。统一归一成
-// "p<页>-b<块>" 的纯数字键再比较,否则跨系统锚点永远匹配不上。
+// 块 ID 在两套产物里补零位数不同:regions 的 itemId yes 3 位(p001-b002),
+// 服务端 FTS/Favorite/引用的 block_id yes 4 位(p001-b0002).统一归一成
+// "p<pages>-b<块>" 的纯数字键再比较,no则跨系统锚点永远匹配不上.
 const BLOCK_KEY_RE = /^p0*(\d+)-b0*(\d+)$/i;
 
 export function normalizeBlockKey(blockId) {
@@ -306,8 +306,8 @@ export function normalizeBlockKey(blockId) {
   return match ? `p${Number(match[1])}-b${Number(match[2])}` : `${blockId || ""}`.trim();
 }
 
-// 按 (pageIdx, blockId) 锚点滚动到原位并短暂高亮命中区域。
-// blockId ↔ region.itemId(补零位数不敏感);找不到区域时回退为整页定位。
+// 按 (pageIdx, blockId) 锚点滚动到原位并短暂高亮命中区域.
+// blockId ↔ region.itemId(补零位数不敏感);找不到区域时回退为整pagesLocate.
 export function jumpToReaderAnchor(anchor: PageAnchor = {}) {
   const binding = readerRegionBinding;
   const blockKey = normalizeBlockKey(anchor?.blockId);
@@ -337,8 +337,8 @@ export function jumpToReaderAnchor(anchor: PageAnchor = {}) {
   return true;
 }
 
-// 从原文页选区矩形提取引文:命中与选区相交的 region,拼出 quote 文本与主 block。
-// 选区 rect 为相对页面元素的像素坐标(selection-favorites 的坐标系)。
+// 从Sourcepagesselection矩形提取引文:命中与selection相交的 region,拼出 quote 文books与主 block.
+// selection rect 为相对Pages元素的像素坐标(selection-favorites 的坐标系).
 export function resolveSelectionQuote({ page = 0, rect = null }: {
   page?: number;
   rect?: PixelRect | null;
@@ -391,3 +391,7 @@ export function resolveSelectionQuote({ page = 0, rect = null }: {
     translatedQuoteText: regions.map((region) => region.translated.text).filter(Boolean).join("\n"),
   };
 }
+
+
+
+

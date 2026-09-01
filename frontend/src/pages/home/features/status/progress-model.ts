@@ -1,8 +1,8 @@
 // buildProgressRenderModel 拷贝自 components/status/job-status-card-rendering.js
-// 第 45-164 行(蓝图 §1 components/status/ 判决,该文件整体死于 cutover——
-// js/components/ 是防回弹门禁禁区,只能拷贝纯函数,不能 import)。
+// Page 45-164 行(蓝图 §1 components/status/ 判决,该Files整体死于 cutover——
+// js/components/ yes防回弹门禁禁区,只能拷贝纯函数,不能 import).
 // 逐字保留,不做任何行为改写;ProgressBlock.jsx / useStagedProgressAnimation.js
-// 共用本文件。
+// total用booksFiles.
 
 /** useStagedProgressAnimation / buildProgressOptions 输出 → ProgressBlock 输入 */
 export type ProgressRenderModelInput = {
@@ -95,7 +95,7 @@ export function buildProgressRenderModel({
 
   if (Number.isFinite(numericDisplayPercent)) {
     const safePercent = capRunningRenderPercent(numericDisplayPercent, normalizedStageKey, status);
-    const text = progressText || `进度 ${safePercent.toFixed(0)}%`;
+    const text = progressText || `Progress ${safePercent.toFixed(0)}%`;
     return {
       visible: true,
       percent: safePercent,
@@ -113,7 +113,7 @@ export function buildProgressRenderModel({
       normalizedStageKey,
       status,
     );
-    const text = progressText || `进度 ${safePercent.toFixed(0)}%`;
+    const text = progressText || `Progress ${safePercent.toFixed(0)}%`;
     return {
       visible: true,
       percent: safePercent,
@@ -147,7 +147,7 @@ export function buildProgressRenderModel({
       normalizedStageKey,
       status,
     );
-    const text = progressText || `进度 ${safePercent.toFixed(0)}%`;
+    const text = progressText || `Progress ${safePercent.toFixed(0)}%`;
     return {
       visible: true,
       percent: safePercent,
@@ -167,3 +167,7 @@ export function buildProgressRenderModel({
     legacyIndeterminate: false,
   };
 }
+
+
+
+

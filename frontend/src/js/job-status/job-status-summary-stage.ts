@@ -63,8 +63,8 @@ function userStageFor(payload) {
   if (payload.status === "succeeded" && isJobTerminal(payload)) {
     return {
       key: "done",
-      label: "完成",
-      detail: "翻译 PDF 已生成",
+      label: "Done",
+      detail: "Translation PDF has been generated",
       step: USER_STAGE_TOTAL,
       total: USER_STAGE_TOTAL,
     };
@@ -72,8 +72,8 @@ function userStageFor(payload) {
   if (payload.status === "failed") {
     return {
       key: "failed",
-      label: "失败",
-      detail: "任务失败，请查看详情",
+      label: "Failed",
+      detail: "The job failed. View details.",
       step: null,
       total: USER_STAGE_TOTAL,
     };
@@ -81,8 +81,8 @@ function userStageFor(payload) {
   if (payload.status === "canceled") {
     return {
       key: "canceled",
-      label: "已取消",
-      detail: "任务已取消",
+      label: "Canceled",
+      detail: "The job was canceled",
       step: null,
       total: USER_STAGE_TOTAL,
     };
@@ -94,8 +94,8 @@ function userStageFor(payload) {
   ) {
     return {
       key: "queued",
-      label: "排队中",
-      detail: detailForPayload(payload, "等待可用执行槽位"),
+      label: "Queued",
+      detail: detailForPayload(payload, "Waiting for an available execution slot"),
       step: null,
       total: USER_STAGE_TOTAL,
     };
@@ -113,16 +113,16 @@ function userStageFor(payload) {
   if (payload.status === "running") {
     return {
       key: "running",
-      label: "处理中",
-      detail: detailForPayload(payload, "正在处理任务"),
+      label: "Processing",
+      detail: detailForPayload(payload, "Processing job"),
       step: null,
       total: USER_STAGE_TOTAL,
     };
   }
   return {
     key: "idle",
-    label: "等待中",
-    detail: "等待任务开始",
+    label: "Waiting",
+    detail: "Waiting for the job to start",
     step: null,
     total: USER_STAGE_TOTAL,
   };
@@ -133,7 +133,7 @@ function userStageLabel(payload) {
   if (stage.step && stage.total && !isJobTerminal(payload)) {
     const subtype = stageSubtypeOf(payload);
     const subtypeLabel = substageLabel(subtype) || stage.label;
-    return `第 ${stage.step}/${stage.total} 步 · ${subtypeLabel}`;
+    return `Page ${stage.step}/${stage.total} step · ${subtypeLabel}`;
   }
   return stage.label;
 }
@@ -150,3 +150,5 @@ export {
   userStageFor,
   userStageLabel,
 };
+
+

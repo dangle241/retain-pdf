@@ -1,4 +1,4 @@
-// AI 回答 DOM 增强：注入 [n] 可点引用、精简脚注、鉴权图片 blob 化。
+// AI 回答 DOM 增强: 注入 [n] 可点引用, 精简脚注, 鉴权图片 blob 化.
 
 import { fetchProtected } from "../../api/http.js";
 import { resolveResourceUrl } from "../../job/artifacts.js";
@@ -24,17 +24,17 @@ export function isAgenticCitation(citation: unknown): citation is AiCitationLike
     && `${(citation as AiCitationLike).block_id || ""}`.trim() !== "";
 }
 
-/** 从 citation 解析 0 基 page_idx；缺省时尝试 block_id 里的 p00N。 */
+/** 从 citation parse 0 基 page_idx；缺省时尝试 block_id 里的 p00N. */
 export function resolveCitationPageIdx(citation: AiCitationLike | null | undefined): number | null {
   if (!citation || typeof citation !== "object") return null;
-  // page_idx 全链 0 基（Python Citation/新 ask 链路）
+  // page_idx 全链 0 基(Python Citation/新 ask 链路)
   const rawIdx = citation.page_idx;
   if (rawIdx !== undefined && rawIdx !== null && `${rawIdx}`.trim() !== "") {
     const n = Number(rawIdx);
     if (Number.isFinite(n) && n >= 0) return Math.floor(n);
   }
-  // page 字段系统内全部 1 基（旧 /reader/ai/chat 链路、Python _public_anchor）
-  // ——此前被当 0 基直用，只带 page 的数据会差一页（审计 B4 latent off-by-one）
+  // page 字段系统内All 1 基(旧 /reader/ai/chat 链路, Python _public_anchor)
+  // ——此前被当 0 基直用, 只带 page 的Data会差一pages(审计 B4 latent off-by-one)
   const rawPage = citation.page;
   if (rawPage !== undefined && rawPage !== null && `${rawPage}`.trim() !== "") {
     const n = Number(rawPage);
@@ -49,7 +49,7 @@ export function resolveCitationPageIdx(citation: AiCitationLike | null | undefin
   return null;
 }
 
-/** 阅读器 1 基页码 */
+/** Reader 1 基pages码 */
 export function resolveCitationPageNumber(citation: AiCitationLike | null | undefined): number | null {
   const idx = resolveCitationPageIdx(citation);
   if (idx === null) return null;
@@ -59,10 +59,10 @@ export function resolveCitationPageNumber(citation: AiCitationLike | null | unde
 export function clipSnippet(text = "", maxLength = 72): string {
   const normalized = `${text}`.replace(/\s+/g, " ").trim();
   if (normalized.length <= maxLength) return normalized;
-  return `${normalized.slice(0, maxLength).trim()}…`;
+  return `${normalized.slice(0, maxLength).trim()}...`;
 }
 
-/** 只保留回答正文出现的 [n]，避免「甩 10 条长列表」。 */
+/** 只保留回答正文出现的 [n], 避免"甩 10 entries长List". */
 export function pickCitationsForAnswer(
   answerText: string,
   citations: AiCitationLike[],
@@ -93,7 +93,7 @@ export function pickCitationsForAnswer(
     return orderedRefs.slice(0, max).map((ref) => byRef.get(ref)!);
   }
 
-  // 正文未标 [n] 时只留少量高质量锚点（按页去重）
+  // 正文未标 [n] 时只留少量高质量锚点(按pages去重)
   const fallback: AiCitationLike[] = [];
   const pages = new Set<number>();
   for (const c of agentic) {
@@ -128,10 +128,10 @@ export function buildMarkdownImageApiUrl(jobId: string, relativePath: string): s
 }
 
 /**
- * 把 markdown 生成的 <a href> 改成无导航 span。
- * 桌面端 Electron setWindowOpenHandler → shell.openExternal：
- * 任何 target=_blank / window.open / 真实 <a> 点击都会弹出系统浏览器。
- * 分支 remount 时幽灵点击因此被体感成「重新打开新标签」。
+ * 把 markdown 生成的 <a href> 改成None导航 span.
+ * 桌面端 Electron setWindowOpenHandler → shell.openExternal: 
+ * 任何 target=_blank / window.open / 真实 <a> 点击都会弹出系统浏览器.
+ * branch remount 时幽灵点击因此被体感成"重新打开新Tags".
  */
 export function neutralizeMarkdownAnchors(
   container: ParentNode,
@@ -151,7 +151,7 @@ export function neutralizeMarkdownAnchors(
     const href = `${a.getAttribute("href") || ""}`.trim();
     const span = documentRef.createElement("span");
     span.className = `aui-md-extlink${a.className ? ` ${a.className}` : ""}`.trim();
-    // 保留子节点（链接里可能有 strong/code）
+    // 保留子节点(链接里可能有 strong/code)
     while (a.firstChild) {
       span.appendChild(a.firstChild);
     }
@@ -167,20 +167,20 @@ export function neutralizeMarkdownAnchors(
       span.dataset.href = href;
       span.setAttribute("role", "link");
       span.tabIndex = 0;
-      span.title = `打开链接：${href}`;
+      span.title = `Open link: ${href}`;
       const tryOpen = (event: Event) => {
         event.preventDefault();
         event.stopPropagation();
         if (shouldIgnoreReaderAiNavEvent(event)) return;
         if (isReaderAiNavigationLocked()) return;
         if (event instanceof MouseEvent) {
-          // 仅主按钮、有实际点击次数的可信点击
+          // 仅主按钮, 有实际点击次数的可信点击
           if (event.button !== 0) return;
           if (event.detail === 0) return;
         }
         if (onOpen?.(href, event as MouseEvent) === true) return;
-        // 默认：不自动 openExternal。需要用户明确手势时由 onOpen 处理。
-        // 这里只做 no-op，避免任何「点分支却弹出浏览器」。
+        // 默认: 不自动 openExternal.required用户明确手势时由 onOpen 处理.
+        // 这里只做 no-op, 避免任何"点branch却弹出浏览器".
       };
       span.addEventListener("click", tryOpen);
       span.addEventListener("auxclick", (event) => {
@@ -193,13 +193,13 @@ export function neutralizeMarkdownAnchors(
         tryOpen(event);
       });
     } else {
-      // 锚点/空链：纯文本
+      // 锚点/空链: 纯文books
       span.removeAttribute("role");
     }
     a.replaceWith(span);
   }
 
-  // 双保险：若仍有残留 a[href]（动态插入），捕获阶段一律拦截导航
+  // 双保险: 若仍有残留 a[href](动态插入), 捕获Stage一律拦截导航
   const host = container as Element;
   if (host instanceof Element && !host.dataset.auiLinkGuard) {
     host.dataset.auiLinkGuard = "1";
@@ -218,7 +218,7 @@ export function neutralizeMarkdownAnchors(
   }
 }
 
-/** 把正文里的 [n] 换成可点击按钮（跳过 code/pre）。 */
+/** 把正文里的 [n] 换成可点击按钮(跳过 code/pre). */
 export function injectCitationMarkers(
   container: ParentNode,
   citationByRef: Map<string, AiCitationLike>,
@@ -226,14 +226,14 @@ export function injectCitationMarkers(
   documentRef: Document = globalThis.document,
 ): void {
   if (!citationByRef.size || !container) return;
-  // 先清旧标记，避免重复 inject 叠多层监听
+  // 先清旧标记, 避免重复 inject 叠多层监听
   (container as Element).querySelectorAll?.("button.reader-ai-citation-ref").forEach((btn) => {
     const parent = btn.parentNode;
     if (!parent) return;
     parent.replaceChild(documentRef.createTextNode(btn.textContent || ""), btn);
     parent.normalize?.();
   });
-  // 0x4 = SHOW_TEXT；避免依赖 NodeFilter 全局（jsdom/部分环境未挂）
+  // 0x4 = SHOW_TEXT；避免依赖 NodeFilter 全局(jsdom/部m环境未挂)
   const walker = documentRef.createTreeWalker?.(container as Node, 0x4) || null;
   const textNodes: Text[] = [];
   if (walker) {
@@ -260,13 +260,13 @@ export function injectCitationMarkers(
         button.textContent = part;
         const pageNo = resolveCitationPageNumber(citation);
         button.title = pageNo
-          ? `跳到第 ${pageNo} 页 · ${clipSnippet(citation.snippet || "", 60)}`
-          : clipSnippet(citation.snippet || "相关片段", 60);
+          ? `Jump toPage ${pageNo} pages · ${clipSnippet(citation.snippet || "", 60)}`
+          : clipSnippet(citation.snippet || "Relevant snippet", 60);
         if (pageNo != null) button.dataset.page = `${pageNo}`;
         button.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
-          // 分支/切会话 remount 期间的幽灵点击不跳页
+          // branch/切会话 remount 期间的幽灵点击不jump to page
           if (shouldIgnoreReaderAiNavEvent(event)) return;
           onJump?.(citation);
         });
@@ -279,7 +279,7 @@ export function injectCitationMarkers(
   }
 }
 
-/** 回收容器内已 hydrate 的 blob URL（重渲染/卸载前调用，防泄漏——审计 P1-5）。 */
+/** 回收容器内已 hydrate 的 blob URL(重Rendering/卸载前调用, 防泄漏——审计 P1-5). */
 export function revokeHydratedImageUrls(container: ParentNode | null | undefined): void {
   if (!container) return;
   const images = [...((container as Element).querySelectorAll?.("img.is-hydrated") || [])];
@@ -295,7 +295,7 @@ export function revokeHydratedImageUrls(container: ParentNode | null | undefined
   }
 }
 
-/** 受保护 API 图片 → blob（回答正文里的 md 图）。 */
+/** 受保护 API 图片 → blob(回答正文里的 md 图). */
 export async function hydrateProtectedImages(
   container: ParentNode,
   { fetchImpl = fetchProtected }: { fetchImpl?: typeof fetchProtected } = {},
@@ -315,7 +315,7 @@ export async function hydrateProtectedImages(
       const response = await fetchImpl(url);
       if (!response?.ok) throw new Error(`HTTP ${response?.status || 0}`);
       const objectUrl = URL.createObjectURL(await response.blob());
-      // 同一 img 重复 hydrate（引用/内容变化触发重渲染）时回收旧 blob
+      // 同一 img 重复 hydrate(引用/内容变化触发重Rendering)时回收旧 blob
       const previous = el.src || "";
       if (previous.startsWith("blob:")) {
         try {
@@ -328,14 +328,14 @@ export async function hydrateProtectedImages(
       el.classList.add("is-hydrated");
     } catch {
       el.classList.add("is-missing");
-      el.alt = el.alt || "图片暂不可用";
+      el.alt = el.alt || "Image is not ready";
     }
   }));
 }
 
 /**
- * 精简引用脚注：紧凑 chip，不默认铺大图缩略图。
- * 仅展示 pick 后的条目（通常是正文 [n]）。
+ * 精简引用脚注: 紧凑 chip, 不默认铺大图缩略图.
+ * 仅展示 pick 后的entries目(通常yes正文 [n]).
  */
 export function renderCitationFooter(
   host: HTMLElement,
@@ -358,11 +358,11 @@ export function renderCitationFooter(
 
   const footer = documentRef.createElement("div");
   footer.className = "reader-ai-citations";
-  footer.setAttribute("aria-label", "引用来源");
+  footer.setAttribute("aria-label", "Citation sources");
 
   const head = documentRef.createElement("div");
   head.className = "reader-ai-citations-head";
-  head.textContent = "来源";
+  head.textContent = "Sources";
   footer.appendChild(head);
 
   const list = documentRef.createElement("div");
@@ -375,7 +375,7 @@ export function renderCitationFooter(
     row.type = "button";
     row.className = "reader-ai-citation-item";
     if (pageNo != null) row.dataset.page = `${pageNo}`;
-    row.title = pageNo != null ? `跳到第 ${pageNo} 页` : "定位来源";
+    row.title = pageNo != null ? `Jump toPage ${pageNo} pages` : "LocateSources";
     row.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -393,7 +393,7 @@ export function renderCitationFooter(
 
     const copy = documentRef.createElement("span");
     copy.className = "reader-ai-citation-copy";
-    copy.textContent = clipSnippet(citation.snippet || "相关片段", 64);
+    copy.textContent = clipSnippet(citation.snippet || "Relevant snippet", 64);
 
     row.append(refEl, meta, copy);
     list.appendChild(row);
@@ -402,3 +402,7 @@ export function renderCitationFooter(
   footer.appendChild(list);
   host.appendChild(footer);
 }
+
+
+
+

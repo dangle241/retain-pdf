@@ -1,6 +1,6 @@
-// 详情弹窗：payload + 书架 live 行合并。
-// 与 status/merge-snapshot-with-fallback 共用 isPollingBootstrapPlaceholder，
-// 避免 startPolling 首帧把已完成书盖成「排队中」。
+// 详情弹窗: payload + 书架 live 行合并.
+// 与 status/merge-snapshot-with-fallback total用 isPollingBootstrapPlaceholder, 
+// 避免 startPolling 首帧把Complete书盖成"Queued".
 
 import { useMemo } from "react";
 import { useStoreSnapshot } from "../../../../../shared/react/use-store.js";
@@ -42,3 +42,5 @@ export function useBookDetailLiveItem(services: any, payloadItem: any = {}) {
     return live;
   }, [payloadItem, recentJobs]);
 }
+
+

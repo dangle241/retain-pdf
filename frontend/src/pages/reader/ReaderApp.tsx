@@ -1,4 +1,4 @@
-// 阅读器编排根：默认 react-pdf 引擎；?engine=legacy 回退命令式 boot。
+// Reader编排根: 默认 react-pdf 引擎；?engine=legacy 回退命令式 boot.
 
 import { useMemo, useState } from "react";
 import { ReaderBootLoading } from "./legacy/components/ReaderBootLoading.jsx";
@@ -56,3 +56,5 @@ export function ReaderApp() {
   }
   return <ReaderAppReactPdf />;
 }
+
+

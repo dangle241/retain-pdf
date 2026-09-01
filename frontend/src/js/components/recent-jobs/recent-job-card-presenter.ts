@@ -9,16 +9,16 @@ import { escapeAttribute, truncateDisplayName } from "../../utils/html-formattin
 export function recentJobStatusLabel(status) {
   switch (`${status || ""}`.trim()) {
     case "queued":
-      return "排队中";
+      return "Queued";
     case "running":
-      return "进行中";
+      return "In progress";
     case "succeeded":
-      return "已完成";
+      return "Complete";
     case "failed":
-      return "失败";
+      return "Failed";
     case "canceled":
     case "cancelled":
-      return "已取消";
+      return "Canceled";
     default:
       return status || "-";
   }
@@ -69,21 +69,21 @@ export function stageKeyForRecentJobLabel(item: any = {}) {
 export function recentJobStageLabel(item) {
   switch (stageKeyForRecentJobLabel(item)) {
     case "ocr":
-      return "OCR 中";
+      return "OCR running";
     case "translate":
-      return "翻译中";
+      return "Translating";
     case "render":
-      return "渲染中";
+      return "Rendering";
     case "done":
-      return "已完成";
+      return "Complete";
     case "queued":
-      return "排队中";
+      return "Queued";
     case "failed":
-      return "失败";
+      return "Failed";
     case "canceled":
-      return "已取消";
+      return "Canceled";
     default:
-      return `${item?.status || ""}`.trim() === "queued" ? "排队中" : "处理中";
+      return `${item?.status || ""}`.trim() === "queued" ? "Queued" : "Processing";
   }
 }
 
@@ -135,3 +135,5 @@ export function buildReaderUrl(item) {
   const jobId = `${item?.job_id || ""}`.trim();
   return jobId ? `./reader.html?job_id=${encodeURIComponent(jobId)}` : "#";
 }
+
+

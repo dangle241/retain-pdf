@@ -150,7 +150,7 @@ export function mountWorkflowFeature({
   defaultPaddleToken,
   defaultOcrProvider,
   defaultModelApiKey,
-  defaultFileLabel = "选择 PDF",
+  defaultFileLabel = "Select PDF",
   normalizeWorkflow,
   normalizeMathMode,
   constants,
@@ -394,11 +394,11 @@ export function mountWorkflowFeature({
     });
   }
 
-  // 馆藏文档"翻译整本/选定页码"(F5)复用主流程的凭据组装:从当前已配置的
-  // 凭据(credentialsStatePort,与对话框是否打开无关——readSubmitValues 读的是
-  // 凭据 state 而非弹窗 DOM)拼出 ocr(PaddleOCR)+ translation(DeepSeek)。
-  // 不含 source——后端会从文档已存的 upload 注入 upload_id。pageRanges 缺省
-  // 空串=整本。
+  // LibraryDocuments"Translation整books/选定pages码"(F5)复用主Workflow的credentials组装:从Current已配置的
+  // credentials(credentialsStatePort,与对话框yesno打开None关——readSubmitValues 读的yes
+  // credentials state 而非弹窗 DOM)拼出 ocr(PaddleOCR)+ translation(DeepSeek).
+  // 不含 source——后端会从Documents已存的 upload 注入 upload_id.pageRanges 缺省
+  // 空串=整books.
   function buildTranslateJobConfig(pageRanges = "") {
     const developerConfig = developerConfigWithDefaults();
     const submitValues = currentWorkflowSubmitValues();
@@ -456,3 +456,8 @@ export function mountWorkflowFeature({
     workflowNeedsUpload,
   };
 }
+
+
+
+
+

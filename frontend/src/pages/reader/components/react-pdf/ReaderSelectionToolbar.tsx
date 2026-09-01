@@ -1,4 +1,4 @@
-// 选文浮条：添加批注（新阅读器专用）
+// 选文浮entries: 添加annotations(新Reader专用)
 
 import { StickyNote, X } from "lucide-react";
 import type { ReaderTextSelection } from "../../hooks/use-reader-text-selection.js";
@@ -12,7 +12,7 @@ export type ReaderSelectionToolbarProps = {
 function clipQuote(text: string, max = 42) {
   const t = `${text || ""}`.replace(/\s+/g, " ").trim();
   if (t.length <= max) return t;
-  return `${t.slice(0, max).trim()}…`;
+  return `${t.slice(0, max).trim()}...`;
 }
 
 export function ReaderSelectionToolbar({
@@ -29,14 +29,14 @@ export function ReaderSelectionToolbar({
   const midX = selection.rect.left + selection.rect.width / 2;
   const left = Math.min(Math.max(16, midX), vw - 16);
 
-  // 优先选区上方；空间不够则翻到下方
+  // 优先selection上方；空间不够则翻到下方
   const preferAbove = selection.rect.top > 72;
   const top = preferAbove
     ? Math.max(12, selection.rect.top - 8)
     : Math.min(vh - 12, selection.rect.top + selection.rect.height + 8);
   const place = preferAbove ? "above" : "below";
 
-  const paneLabel = selection.pane === "translated" ? "译文" : "原文";
+  const paneLabel = selection.pane === "translated" ? "Translation" : "Source";
   const quote = clipQuote(selection.quote);
 
   return (
@@ -44,7 +44,7 @@ export function ReaderSelectionToolbar({
       className={`reader-sel-pop reader-sel-pop--${place}`}
       style={{ left, top }}
       role="toolbar"
-      aria-label="选区操作"
+      aria-label="selectionAction"
     >
       <div className="reader-sel-pop-card">
         <div className="reader-sel-pop-quote" title={selection.quote}>
@@ -53,7 +53,7 @@ export function ReaderSelectionToolbar({
         </div>
 
         <div className="reader-sel-pop-meta">
-          <span className="reader-sel-pop-chip">第 {selection.page} 页</span>
+          <span className="reader-sel-pop-chip">Page {selection.page} pages</span>
           <span className={`reader-sel-pop-chip reader-sel-pop-chip--${selection.pane}`}>
             {paneLabel}
           </span>
@@ -66,14 +66,14 @@ export function ReaderSelectionToolbar({
             onClick={() => onAddNote(selection)}
           >
             <StickyNote size={15} strokeWidth={2.25} aria-hidden />
-            <span>添加批注</span>
+            <span>添加annotations</span>
           </button>
           <button
             type="button"
             className="reader-sel-pop-btn reader-sel-pop-btn--ghost"
             onClick={onDismiss}
-            aria-label="取消选区"
-            title="取消"
+            aria-label="Cancelselection"
+            title="Cancel"
           >
             <X size={15} strokeWidth={2.5} aria-hidden />
           </button>
@@ -83,3 +83,7 @@ export function ReaderSelectionToolbar({
     </div>
   );
 }
+
+
+
+

@@ -1,17 +1,17 @@
-// 图书馆网格滚动自动加载(蓝图 §2 features/library/)。
+// LibraryGrid滚动自动加载(蓝图 §2 features/library/).
 //
 // 几何判定重写自 host-actions.js 的 shouldAutoLoadRecentJobs(260px / 0.35
-// 阈值,不 import——旧文件属"死(cutover 删)"清单,按蓝图口径原地重写这
-// ~10 行而不是复用)。触发口有两个,都汇到同一个 check():
+// 阈值,不 import——旧Files属"死(cutover 删)"清单,按蓝图口径原地重写这
+// ~10 行而不yes复用).触发口有两个,都汇到同一个 check():
 // 1. 滚动容器的 passive scroll 监听(用户手动划到底);
-// 2. refresh-scheduler.js 在每次分页提交后调用的 scheduleAutoLoadIfNeeded →
+// 2. refresh-scheduler.js 在每次mpages提交后调用的 scheduleAutoLoadIfNeeded →
 //    viewPort.scheduleAutoLoadCheck({isSuspended})——通过
 //    react-view-port.js 的 registerAutoLoadChecker 接进来(内容变化后如果
-//    还没填满一屏,需要接着自动加载下一页)。
+//    还没填满一屏,required接着自动加载下一pages).
 //
 // loadMore 调用统一走 viewPort.handlersRef.current.onLoadMore(bindings.js
-// 绑定的是 () => runtime.loadRecentJobs({reset:false})),不直接调
-// runtime——保持与"更多"按钮同一条口径,避免出现两条平行的加载入口。
+// 绑定的yes () => runtime.loadRecentJobs({reset:false})),不直接调
+// runtime——保持与"More"按钮同一entries口径,避免出现两entries平行的加载入口.
 
 import { useCallback, useEffect } from "react";
 
@@ -56,3 +56,7 @@ export function useLibraryAutoLoad({ scrollBodyRef, hasMore, loadMoreLoading, vi
     return () => scrollBody.removeEventListener("scroll", onScroll);
   }, [scrollBodyRef, viewPort, check]);
 }
+
+
+
+

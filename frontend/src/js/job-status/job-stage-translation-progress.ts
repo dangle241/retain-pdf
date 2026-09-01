@@ -125,7 +125,7 @@ function progressTextForRecord(
     return substageDetail(substageKey) || progressRecord.progressText || "";
   }
   if (substageKey === "translation_batches" && ratio >= 1) {
-    return "翻译批次完成";
+    return "Translation BatchesDone";
   }
   return progressRecord.progressText || substageDetail(substageKey) || "";
 }
@@ -165,3 +165,4 @@ export function compositeTranslationProgressFromRecord(
     indeterminate: false,
   };
 }
+

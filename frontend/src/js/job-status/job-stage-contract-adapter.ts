@@ -69,7 +69,7 @@ function detailFromPayload(
     return canonicalDetailFromPayload(payload, stageKey);
   }
   const summarized = summarizeStageDetail(payload);
-  if (summarized && summarized !== "等待任务开始") {
+  if (summarized && summarized !== "Waiting for the job to start") {
     return summarized;
   }
   return firstNonEmpty(payload.stage_detail, payload.payload?.stage_detail, stageKey);
@@ -137,3 +137,4 @@ export function adaptJobEventStageSnapshot(event: StageEvent = {}): AdaptedStage
     source: displayStage ? "event-contract" : canonicalContract ? "event-contract-empty-stage" : "event-legacy",
   };
 }
+

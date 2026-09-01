@@ -2,9 +2,9 @@
 
 ## Runtime Location
 
-当前 Rust API 使用 SQLitedefault location is `DATA_ROOT/db/jobs.db`Local dev paths: `src/` edit → `npm run dev` → `http://localhost:3000`
+The Rust API currently uses SQLite. Default location is `DATA_ROOT/db/jobs.db`. Local development paths: edit `src/` → run `npm run dev` → access `http://localhost:3000`
 
-- `data/db/jobs.db`：SQLite Database, default no commit.
+- `data/db/jobs.db`:SQLite Database, default no commit.
 - `data/jobs/**`Job execution directory and intermediate artifacts, not committed by default.
 - `data/uploads/**`Uploaded files, not committed by default.
 - `data/downloads/**`Downloaded artifacts, not submitted by default.
@@ -15,7 +15,7 @@ See storage structure in Runtime storage structure.
 
 Database access centralized at `backend/rust_api/src/db.rs` and its submodules:
 
-- `src/db.rs`：`Db` facadeExternally available job、artifact、event、glossary Wait for persistence capability.
+- `src/db.rs`:`Db` facadeExternally available job、artifact、event、glossary Wait for persistence capability.
 - `src/db/schema.rs`Create table.schema Check and compatibility initialization.
 - `src/db/rows.rs`Database row to internal model decode。
 

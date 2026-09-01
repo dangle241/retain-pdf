@@ -1,4 +1,4 @@
-// 阅读器工具开合：单一 active、互斥（对齐 legacy drawer-store）
+// ReaderTools开合: 单一 active, 互斥(对齐 legacy drawer-store)
 
 import { useCallback, useState } from "react";
 import type { ReaderToolId } from "../tools/registry.js";
@@ -36,3 +36,5 @@ export function useReaderTools(): ReaderToolsApi {
 
   return { active, open, close, toggle, isOpen };
 }
+
+

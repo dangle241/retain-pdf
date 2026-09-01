@@ -1,5 +1,5 @@
-// 主题皮肤运行时 API
-// 注册表：./registry.ts · 文档：docs/theme-system/
+// Theme皮肤运行时 API
+// 注册表: ./registry.ts · Documents: docs/theme-system/
 
 import {
   DEFAULT_THEME_ID,
@@ -56,7 +56,7 @@ export function getTheme(): ThemeId {
   return getStoredTheme();
 }
 
-/** 写入 storage + <html data-theme>，并广播事件 */
+/** 写入 storage + <html data-theme>, 并广播Events */
 export function setTheme(theme: ThemeId) {
   const next = isThemeId(theme) ? theme : DEFAULT_THEME_ID;
   try {
@@ -66,7 +66,7 @@ export function setTheme(theme: ThemeId) {
   }
   if (typeof document !== "undefined") {
     document.documentElement.dataset.theme = next;
-    // 深色皮肤可给 body 一个 class，方便个别组件写 .theme-dark 特例
+    // Dark皮肤可给 body 一个 class, 方便个别组件写 .theme-dark 特例
     const def = getThemeDefinition(next);
     document.documentElement.dataset.themeGroup = def?.group || "light";
     document.documentElement.classList.toggle("theme-dark", def?.group === "dark");
@@ -83,7 +83,9 @@ export function setTheme(theme: ThemeId) {
   return next;
 }
 
-/** 入口最顶部调用，减少换肤 FOUC */
+/** 入口最顶部调用, 减少换肤 FOUC */
 export function bootTheme() {
   return setTheme(getStoredTheme());
 }
+
+

@@ -108,7 +108,7 @@ export function useReaderReactController(): ReaderReactController {
   );
 
   const goToPage = useCallback((page: number) => {
-    // 取已加载栏的最大页数；未知时传 0，由 clampPageNumber 放行目标页
+    // 取已加载栏的最大Pages；Unknown时传 0, 由 clampPageNumber 放行目标pages
     const total = Math.max(
       Number(panes.hudNumPages) || 0,
       Number(panes.primaryNumPages) || 0,
@@ -118,7 +118,7 @@ export function useReaderReactController(): ReaderReactController {
     goToPageWithTotal(page, total);
   }, [goToPageWithTotal, panes.hudNumPages, panes.primaryNumPages, panes.numPagesByPane]);
 
-  // 收藏 / 搜索回跳：URL ?page_idx= → 页码（0 基 → 1 基）
+  // Favorite / 搜索回跳: URL ?page_idx= → pages码(0 基 → 1 基)
   useUrlAnchorJump({
     enabled: !session.boot.loading && !session.boot.failed && session.assetsReady,
     numPages: panes.hudNumPages || 0,
@@ -158,7 +158,7 @@ export function useReaderReactController(): ReaderReactController {
   }, [notes, clearSelection]);
 
   const jumpToNote = useCallback((note: ReaderNote) => {
-    // 若批注在译文/原文栏，尽量切到对应单栏或对照
+    // 若annotations在Translation/Source栏, 尽量切到对应单栏或Side-by-side
     if (note.pane === "translated" && session.mode === "source") {
       beginModeSwitch();
       session.setMode("compare");
@@ -216,3 +216,7 @@ export function useReaderReactController(): ReaderReactController {
     documentTitle: session.title || "",
   };
 }
+
+
+
+

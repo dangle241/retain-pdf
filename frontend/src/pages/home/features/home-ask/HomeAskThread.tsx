@@ -1,4 +1,4 @@
-// 主页 AI 消息列表：轻量 markdown 预览 + 引用跳阅读器
+// 主pages AI 消息List: 轻量 markdown 预览 + 引用跳Reader
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, FlaskConical, ListTree, Loader2, Sparkles } from "lucide-react";
@@ -23,23 +23,23 @@ export const HOME_ASK_SUGGESTIONS: Array<{
   icon: typeof BookOpen;
 }> = [
   {
-    prompt: "最近入库的文献里，有哪些值得优先阅读的主题？",
-    label: "浏览馆藏主题",
+    prompt: "最近Added的文献里, 有哪些值得优先阅读的Theme?",
+    label: "浏览LibraryTheme",
     icon: BookOpen,
   },
   {
-    prompt: "帮我对比不同文献对同一问题的主要结论。",
-    label: "跨文献对比结论",
+    prompt: "Compare the main conclusions from different papers for the same question.",
+    label: "Compare conclusions across papers",
     icon: ListTree,
   },
   {
-    prompt: "有哪些常用的方法或实验设计？",
-    label: "梳理方法模型",
+    prompt: "What methods or experimental designs are commonly used?",
+    label: "Outline methods and models",
     icon: FlaskConical,
   },
   {
-    prompt: "用几句话总结图书馆里一篇核心论文。",
-    label: "快速总结一篇",
+    prompt: "Summarize one core paper in the library in a few sentences.",
+    label: "Quickly summarize a paper",
     icon: Sparkles,
   },
 ];
@@ -158,7 +158,7 @@ export function HomeAskThread({ messages, isRunning = false }: HomeAskThreadProp
     bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [messages, isRunning]);
 
-  // 空态由 HomeAskView 的 hero 区渲染（Notion：问候 + 居中输入 + 建议）
+  // 空态由 HomeAskView 的 hero 区Rendering(Notion: 问候 + 居中输入 + Suggestion)
   if (empty) {
     return null;
   }
@@ -188,7 +188,7 @@ export function HomeAskThread({ messages, isRunning = false }: HomeAskThreadProp
             {streaming && !m.progress && !hasBody ? (
               <div className="home-ask-thinking" role="status">
                 <Loader2 className="home-ask-spin" size={13} strokeWidth={2.4} aria-hidden />
-                <span>思考中…</span>
+                <span>Thinking...</span>
               </div>
             ) : null}
             {hasBody || m.status === "error" ? (
@@ -203,3 +203,7 @@ export function HomeAskThread({ messages, isRunning = false }: HomeAskThreadProp
     </div>
   );
 }
+
+
+
+

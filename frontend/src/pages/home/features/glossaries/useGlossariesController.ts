@@ -1,18 +1,18 @@
 // GlossariesDialog 家族(GlossariesDialog/GlossaryList/GlossaryEditor/
 // GlossaryImportPanel)的唯一装配面(镜像 useCredentialsController.js)——把
 // composition.js 的 glossaries 域(services.glossaries:{feature, view,
-// dialogStore})折成一个 hook。
+// dialogStore})折成一个 hook.
 //
-// 打开触发:SettingsHubDialog"词表"tab 的 #glossary-btn 直接调
+// 打开触发:SettingsHubDialog"Glossary"tab 的 #glossary-btn 直接调
 // services.glossaries.dialogStore.open()(蓝图 §0.4 占位调用点,composition
-// 就位后即生效),不经 APP_EVENTS——本 hook 用一个 open 状态迁移 effect 把
+// 就位后即生效),不经 APP_EVENTS——books hook 用一个 open Status迁移 effect 把
 // "对话框被打开"这件事接回 controller.js 的 open()(内部会 openDialog() +
-// reloadGlossaries()),语义等价旧世界"点击词表按钮 → open()"的单一入口,
-// 不需要改 SettingsHubDialog.jsx 的既有占位调用。
+// reloadGlossaries()),语义等价旧世界"点击Glossary按钮 → open()"的单一入口,
+// 不required改 SettingsHubDialog.jsx 的既有占位调用.
 //
 // APP_EVENTS.refreshGlossaries(蓝图 §0.6)用 useAppEvent 消费,调用
 // handlers.reload(controller.js bindEvents 捕获的 reload 处理函数,内部已带
-// try/catch → setStatus 错误提示)。
+// try/catch → setStatus 错误提示).
 
 import { useEffect, useRef } from "react";
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
@@ -37,8 +37,8 @@ export function useGlossariesController() {
   useEffect(() => {
     if (open && !wasOpenRef.current) {
       // controller.js 的 open() = openDialog()(dialogStore.open() 幂等) +
-      // "正在读取术语表..." 状态 + reloadGlossaries() + 清空/错误状态,一次性
-      // 复用,不在这里重新拼一遍等价逻辑。
+      // "Loading glossary..." Status + reloadGlossaries() + 清空/错误Status,一次性
+      // 复用,不在这里重新拼一遍等价逻辑.
       void feature?.open?.();
     }
     wasOpenRef.current = open;
@@ -53,3 +53,6 @@ export function useGlossariesController() {
     handlers,
   };
 }
+
+
+

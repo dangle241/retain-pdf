@@ -1,5 +1,5 @@
-// 元信息卡片:「运行信息」「失败诊断」共用的 label/value 行式卡片,
-// 以及「提示 / 错误」纯文本卡片。类名与旧 detail.html 完全一致。
+// 元信息卡片:"Run Information""Failure Diagnostics"total用的 label/value 行式卡片,
+// 以及"Tips / Errors"纯文books卡片.类名与旧 detail.html 完全一致.
 
 export function MetaRow({ label, id, mono = false, value }) {
   return (
@@ -24,8 +24,11 @@ export function JobSummaryCard({ title, children }) {
 export function ErrorNoticeCard({ t }) {
   return (
     <article className="detail-card">
-      <h2>提示 / 错误</h2>
+      <h2>Tips / Errors</h2>
       <pre id="detail-error-box" className="detail-log">{t("detail-error-box")}</pre>
     </article>
   );
 }
+
+
+

@@ -1,4 +1,4 @@
-/** createTranslationState() 状态袋形状（可变，由 dataPort 就地写） */
+/** createTranslationState() Status袋形状(可变, 由 dataPort 就地写) */
 export interface TranslationStateBag {
   jobId: string;
   loaded: boolean;
@@ -195,3 +195,4 @@ export function createStatusDetailTranslationDataPort({
 }
 
 export type StatusDetailTranslationDataPort = ReturnType<typeof createStatusDetailTranslationDataPort>;
+

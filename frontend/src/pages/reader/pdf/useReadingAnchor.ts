@@ -1,5 +1,5 @@
-// 模式切换 / 跳页时的阅读锚点锁定与恢复。
-// 关键规则：切换前锁定 progress，恢复期间禁止 scroll 写回锚点，且绝不 re-measure。
+// 模式切换 / jump to page时的阅读锚点锁定与resume.
+// 关键规则: 切换前锁定 progress, resume期间禁止 scroll 写回锚点, 且绝不 re-measure.
 
 import { useCallback, useEffect, useRef } from "react";
 import type { RefObject } from "react";
@@ -45,11 +45,11 @@ export function useReadingAnchor(
 } {
   const { primaryPane, mode, enabled = true } = options;
 
-  /** 用户真实阅读锚点（仅用户滚动 / 跳转 / 恢复完成后更新） */
+  /** 用户真实阅读锚点(仅用户滚动 / 跳转 / resumeDone后Updates) */
   const anchorRef = useRef<PageScrollProgress>({ page: 1, fraction: 0 });
-  /** 本次恢复锁定的锚点（不被中间 scroll 事件污染） */
+  /** books次resume锁定的锚点(不被中间 scroll Events污染) */
   const pendingRestoreRef = useRef<PageScrollProgress | null>(null);
-  /** 恢复中：禁止 scroll 写回 anchor */
+  /** resume中: 禁止 scroll 写回 anchor */
   const restoringRef = useRef(false);
   const prevModeRef = useRef(mode);
   const cancelRestoreRef = useRef<(() => void) | null>(null);
@@ -69,20 +69,20 @@ export function useReadingAnchor(
   }, []);
 
   const finishRestore = useCallback((locked: PageScrollProgress) => {
-    // 恢复完成：锚点钉回锁定值，再允许滚动更新
+    // resumeDone: 锚点钉回锁定值, 再允许滚动Updates
     anchorRef.current = cloneProgress(locked);
     pendingRestoreRef.current = null;
     if (unfreezeTimerRef.current != null) {
       clearTimeout(unfreezeTimerRef.current);
     }
-    // 稍后再解冻，避免最后一次程序化 scroll 事件写脏锚点
+    // 稍后再解冻, 避免最后一次程序化 scroll Events写脏锚点
     unfreezeTimerRef.current = setTimeout(() => {
       unfreezeTimerRef.current = null;
       restoringRef.current = false;
     }, UNFREEZE_DELAY_MS);
   }, []);
 
-  // 仅用户滚动时更新锚点；恢复期间一律忽略
+  // 仅用户滚动时Updates锚点；resume期间一律忽略
   useEffect(() => {
     if (!enabled) {
       return;
@@ -128,7 +128,7 @@ export function useReadingAnchor(
     };
   }, [enabled, mode, primaryPane, shellRef]);
 
-  // 模式切换后：只用 pending 锁定锚点恢复，绝不重新 measure
+  // 模式切换后: 只用 pending 锁定锚点resume, 绝不重新 measure
   useEffect(() => {
     if (prevModeRef.current === mode) {
       return;
@@ -146,7 +146,7 @@ export function useReadingAnchor(
       ? cloneProgress(pendingRestoreRef.current)
       : cloneProgress(anchorRef.current);
 
-    // 再次确保冻结（应对严格模式下 effect 重跑）
+    // 再次确保冻结(应对严格模式下 effect rerun)
     restoringRef.current = true;
     pendingRestoreRef.current = locked;
     anchorRef.current = locked;
@@ -158,7 +158,7 @@ export function useReadingAnchor(
       {
         behavior: "auto",
         pane: primaryPane,
-        // 等页宽/行高同步后再钉；同一 locked 幂等，不会越滚越远
+        // 等pages宽/行高sync后再钉；同一 locked 幂等, 不会越滚越远
         delaysMs: MODE_RESTORE_DELAYS_MS,
         onDone: () => finishRestore(locked),
       },
@@ -197,9 +197,9 @@ export function useReadingAnchor(
   }, [shellRef]);
 
   const beginModeSwitch = useCallback((): PageScrollProgress => {
-    // 1) 先冻结，防止 setMode 后布局钳位 scrollTop 触发的 scroll 写脏锚点
+    // 1) 先冻结, 防止 setMode 后布局钳位 scrollTop 触发的 scroll 写脏锚点
     restoringRef.current = true;
-    // 2) 在布局变化前锁定当前位置
+    // 2) 在布局变化前锁定Current位置
     const measured = measurePageScrollProgress(
       shellRef.current,
       primaryPaneRef.current,
@@ -266,3 +266,7 @@ export function useReadingAnchor(
     repinIfRestoring,
   };
 }
+
+
+
+

@@ -74,10 +74,10 @@ export function mountJobRuntimeFeature({
   const normalizeJobPayload = jobPresentationPort?.normalizeJobPayload || ((value) => value || {});
   const isTerminalStatus = jobPresentationPort?.isTerminalStatus || ((status) => status === "failed" || status === "canceled");
   const isJobTerminal = jobPresentationPort?.isJobTerminal || ((value: any = {}) => isTerminalStatus(value?.status || value));
-  // 当前轮询会话是否向图书馆广播进度补丁。
-  // silent：不全量刷库，但 status/stage 变化仍同步（封面转圈 / 完成「已翻译」）。
+  // Current轮询会话yesno向Library广播Progress补丁.
+  // silent: 不全量刷库, 但 status/stage 变化仍sync(封面转圈 / Done"Translated").
   let sessionPublishLibrary = true;
-  /** silent 下上次已推到书架的 status|stage，用于跳过同态重复 notify */
+  /** silent 下上次已推到书架的 status|stage, 用于跳过同态重复 notify */
   let lastLibraryPublishKey = "";
 
   function libraryPublishKeyOf(job: any = {}) {
@@ -109,12 +109,12 @@ export function mountJobRuntimeFeature({
       manifestPayload: cachedManifest,
       stageActionsPayload: cachedStageActions,
     });
-    // 进度主场：statusCardStore（主卡 / 详情嵌入卡共用）
+    // Progress主场: statusCardStore(主卡 / 详情嵌入卡total用)
     renderJob(renderContext);
     const job = normalizeJobPayload(payload);
     const terminal = isJobTerminal(job);
     const publishKey = libraryPublishKeyOf(job);
-    // 全量 publish：每次 poll；silent：仅 status/stage 变化或终态（封面转圈要靠 status=running）
+    // 全量 publish: 每次 poll；silent: 仅 status/stage 变化或终态(封面转圈要靠 status=running)
     if (sessionPublishLibrary || terminal || publishKey !== lastLibraryPublishKey) {
       lastLibraryPublishKey = publishKey;
       notifyLibraryJobUpdated(job, { port: libraryEventPort });
@@ -142,7 +142,7 @@ export function mountJobRuntimeFeature({
    *   publishLibrary?: boolean,
    *   showWorkflow?: boolean,
    * }} [options]
-   * - silent: 详情 Tab 等嵌入进度；不抬主工作流区、不广播 create、运行中不刷库
+   * - silent: 详情 Tab 等嵌入Progress；不抬主工作流区, 不广播 create, 运行中不刷库
    * - publishLibrary / showWorkflow: 默认跟随 !silent
    */
   function startPolling(
@@ -151,7 +151,7 @@ export function mountJobRuntimeFeature({
       silent?: boolean;
       publishLibrary?: boolean;
       showWorkflow?: boolean;
-      /** 首帧 payload（重试时带 fromStage 结果，避免先闪「排队」） */
+      /** 首帧 payload(Retry时带 fromStage 结果, 避免先闪"queued") */
       seedPayload?: Record<string, unknown> | null;
     } = {},
   ) {
@@ -172,7 +172,7 @@ export function mountJobRuntimeFeature({
       ? {
           ...seed,
           job_id: jobId,
-          // 重试首帧强制 running，避免仍显示「已翻译」不转圈
+          // Retry首帧强制 running, 避免仍Display"Translated"不转圈
           status: seed.status && seed.status !== "succeeded"
             ? seed.status
             : "running",
@@ -187,18 +187,18 @@ export function mountJobRuntimeFeature({
           display_stage: "ocr",
           lane: "main",
           current_stage: "queued",
-          stage_detail: "正在读取任务状态...",
+          stage_detail: "Loading job status...",
           created_at: startedAt,
           started_at: startedAt,
         };
     if (showWorkflow) {
       setWorkflowSections(placeholderJob);
     }
-    // 始终写 statusCardStore，供主卡 / 详情嵌入卡共用 snapshot
+    // 始终写 statusCardStore, 供主卡 / 详情嵌入卡total用 snapshot
     renderJob(renderContextPort.applySnapshot({
       payload: placeholderJob,
     }));
-    // 书架：全量模式照旧；silent 也要立刻推一帧 running，封面才能转圈
+    // 书架: 全量模式照旧；silent 也要立刻推一帧 running, 封面才能转圈
     const normalizedPlaceholder = normalizeJobPayload(placeholderJob);
     if (publishLibrary) {
       libraryEventPort?.publishJobCreated?.(normalizedPlaceholder);
@@ -237,7 +237,7 @@ export function mountJobRuntimeFeature({
   async function cancelCurrentJob() {
     const jobId = currentJobPort.jobId();
     if (!jobId) {
-      setText("error-box", "当前没有可取消的任务");
+      setText("error-box", "There is no current job to cancel");
       return;
     }
     shellViewPort.setCancelDisabled(true);
@@ -251,7 +251,7 @@ export function mountJobRuntimeFeature({
 
   async function retryStage(stage, options: { jobId?: string } = {}) {
     const normalizedStage = `${stage || ""}`.trim();
-    // 优先事件带的 jobId → 当前轮询 → 上次 snapshot（详情卡上点重试时可能尚未 currentJobId）
+    // 优先Events带的 jobId → Current轮询 → 上次 snapshot(详情卡上点Retry时可能尚未 currentJobId)
     const jobId = `${
       options.jobId
       || currentJobPort.jobId()
@@ -259,12 +259,12 @@ export function mountJobRuntimeFeature({
       || ""
     }`.trim();
     if (!jobId || !normalizedStage) {
-      setText("error-box", "当前没有可重新执行的阶段");
+      setText("error-box", "There is no current stage to run again");
       return;
     }
     try {
       setText("error-box", "-");
-      // statusCard snapshot 顶层无 document_id；身份在 job / raw_response 里
+      // statusCard snapshot 顶层None document_id；身份在 job / raw_response 里
       const prevSnapshot = (currentJobPort.snapshot?.() || {}) as Record<string, unknown>;
       const prevJob = (
         (prevSnapshot.job && typeof prevSnapshot.job === "object" ? prevSnapshot.job : null)
@@ -294,7 +294,7 @@ export function mountJobRuntimeFeature({
       const result = await retryJobStage(jobId, apiPrefix, normalizedStage, bookMeta);
       const nextJobId = `${result?.job_id || jobId}`.trim();
       if (nextJobId) {
-        // 进度字段用 result；书目元数据优先 bookMeta（避免 Mock 重试标题盖掉书名）
+        // Progress字段用 result；书目元Data优先 bookMeta(避免 Mock RetryTitle盖掉书名)
         const seed = normalizeJobPayload({
           ...result,
           job_id: nextJobId,
@@ -308,7 +308,7 @@ export function mountJobRuntimeFeature({
           library_only: false,
           active_job_id: nextJobId,
         });
-        // 详情 Tab 内重试：silent + 首帧用 fromStage 结果；必须带 document_id/source_job_id
+        // 详情 Tab 内Retry: silent + 首帧用 fromStage 结果；必须带 document_id/source_job_id
         startPolling(nextJobId, {
           silent: true,
           showWorkflow: false,
@@ -324,7 +324,7 @@ export function mountJobRuntimeFeature({
             status: seed.status && seed.status !== "succeeded" ? seed.status : "running",
           },
         });
-        // startPolling 已 notify 一帧 running，此处不必重复
+        // startPolling 已 notify 一帧 running, 此处不必重复
       } else {
         await fetchJob(jobId);
       }
@@ -343,3 +343,8 @@ export function mountJobRuntimeFeature({
     stopPolling: () => pollingPort.stop(),
   };
 }
+
+
+
+
+

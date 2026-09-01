@@ -3,7 +3,7 @@
 > 
 > 
 > 
-> [PaddleOCR 开源项目 GitHub 地址](https://github.com/PaddlePaddle/PaddleOCR/tree/release/3.3)Service main file**Based on this open-source project PaddleOCR-VL Model building**。
+> [PaddleOCR open-source project GitHub address](https://github.com/PaddlePaddle/PaddleOCR/tree/release/3.3). Service main file **based on this open-source project: PaddleOCR-VL model building**.
 > 
 > **Release Notes**: PaddleOCR currently corresponds to the official website **PaddleX version 3.4.0**, **PaddlePaddle version 3.2.1**.
 > 
@@ -12,11 +12,11 @@
 
 2026year1Month29Day, we arePaddleOCR-VLreleased on the basis of**PaddleOCR-VL-1.5**。PaddleOCR-VL-1.5Not only94.5%Accuracy significantly refreshed on evaluation set.OmniDocBench v1.5Shape-aware bounding box positioning supported.PaddleOCR-VL-1.5 Excels in real-world scenarios: scanning, skewing, bending, screen capture, complex lighting. Adds seal recognition and text detection/recognition. Key metrics lead.
 
-### **Key metrics:**
+### Key metrics:
 
 ![](https://paddle-model-ecology.bj.bcebos.com/paddlex/demo_image/paddleocr-vl-1.5_metrics.png)
 
-Image shows diagram. PaddleOCR-VL-1.5 Overall Process and New Capabilities:
+Image shows diagram. PaddleOCR-VL-1.5 overall process and new capabilities:
 
 ![](https://paddle-model-ecology.bj.bcebos.com/paddlex/demo_image/PaddleOCR-VL-1.5.png)
 
@@ -123,7 +123,7 @@ Perform layout analysis.
 
 ## 4. Request Parameter Description
 
-| 名称 | 参数 | 类型 | 含义 | Required? |
+| Name | Parameter | Type | Description | Required? |
 | --- | --- | --- | --- | --- |
 | `Input file` | `file` | `string` | Server-accessible image file or PDF file URL or Base64-encoded content of above file types. Default for PDF files exceeding 100 pages: only first 100 pages processed. Remove page limit: add the following config to production config file:
 

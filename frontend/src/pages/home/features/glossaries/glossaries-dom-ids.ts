@@ -1,9 +1,9 @@
-// GlossariesDialog 的 id/选择器契约(蓝图 §3 + §0.1)。
+// GlossariesDialog 的 id/Select器契约(蓝图 §3 + §0.1).
 //
 // 拷贝自 src/js/components/dialogs/glossary-manager-dialog-dom-contract.js
-// (旧自定义元素视图层,architecture-boundaries 门禁禁止 src/pages/** 直接
-// import js/components/**)——同一手法已在 credentials-dom-ids.js 用过一次。
-// 字面量必须与旧契约逐一对齐:视觉基线与门禁按这些 id 精确定位,不得改名。
+// (旧自定义元素View层,architecture-boundaries 门禁禁止 src/pages/** 直接
+// import js/components/**)——同一手法已在 credentials-dom-ids.js 用过一次.
+// 字面量必须与旧契约逐一对齐:视觉基线与门禁按这些 id 精确Locate,不得改名.
 
 export const GLOSSARY_DOM_IDS = Object.freeze({
   triggerButton: "glossary-btn",
@@ -29,12 +29,16 @@ export const GLOSSARY_DOM_IDS = Object.freeze({
 
 export const ENTRY_LEVEL_OPTIONS = [
   ["preserve", "保留"],
-  ["canonical", "固定译法"],
+  ["canonical", "Fixed translation"],
   ["preferred", "偏好译法"],
 ];
 
 export const MATCH_MODE_OPTIONS = [
-  ["case_insensitive", "忽略大小写"],
+  ["case_insensitive", "忽略Size写"],
   ["exact", "精确"],
   ["regex", "正则"],
 ];
+
+
+
+

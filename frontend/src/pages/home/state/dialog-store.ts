@@ -1,13 +1,13 @@
-// 通用对话框开合状态工厂(蓝图 §0.3)——CredentialsDialog/GlossariesDialog/
-// AppUpdate 详情/SettingsHubDialog 等常驻挂载的原生 <dialog> 共用同一套语义。
+// 通用对话框开合Status工厂(蓝图 §0.3)——CredentialsDialog/GlossariesDialog/
+// AppUpdate 详情/SettingsHubDialog 等常驻挂载的原生 <dialog> total用同一套语义.
 //
 // 参照 src/pages/reader/legacy/state/drawer-store.js 的模式(open/subscribe 契约),
-// 但对话框不是"多选一互斥"而是"单个开合 + 可选负载"(setupMode、初始 tab 等),
-// 所以状态形状是 { open, payload } 而不是 drawer 的单一 active 字符串。
+// 但对话框不yes"Select一互斥"而yes"单个开合 + 可选负载"(setupMode, 初始 tab 等),
+// 所以Status形状yes { open, payload } 而不yes drawer 的单一 active 字符串.
 //
-// getState() 返回的对象引用只在 open()/close() 调用时才更新(不是每次读取都
-// 新建),可以直接喂 useSyncExternalStore 而不会触发无限重渲染
-//（不存在 app-framework/store.js 的 getSnapshot 克隆雷点)。
+// getState() 返回的对象引用只在 open()/close() 调用时才Updates(不yes每次读取都
+// 新建),可以直接喂 useSyncExternalStore 而不会触发None限重Rendering
+//(不存在 app-framework/store.js 的 getSnapshot 克隆雷点).
 
 export type DialogState<T = unknown> = {
   open: boolean;
@@ -53,3 +53,7 @@ export function createDialogStore<T = unknown>(initialPayload: T | null = null):
     },
   };
 }
+
+
+
+

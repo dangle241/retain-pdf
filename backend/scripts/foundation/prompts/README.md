@@ -1,12 +1,12 @@
 # Prompt file
 
-Editable prompt texts for main pipeline.
+Editable prompt texts for the main pipeline.
 
 - `translation_system.txt`
-  For translation requests. system prompt。
+  System prompt used for translation requests.
 - `translation_task.txt`
-  concatenated into the translation user payload Task description.
+  Task description concatenated into the translation user payload.
 - `classification_system.txt`
-  `precise` Full-page classification mode system prompt。
+  System prompt for `precise` full-page classification mode.
 
-To adjust model behavior, edit here; do not hardcode prompts. Python。
+To adjust model behavior, edit here; do not hardcode prompts in Python.

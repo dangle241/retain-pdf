@@ -6,9 +6,9 @@ const MODES: {
   label: string;
   Icon: typeof FileText;
 }[] = [
-  { id: "source", label: "原文", Icon: FileText },
-  { id: "translated", label: "译文", Icon: Languages },
-  { id: "compare", label: "对照阅读", Icon: Columns2 },
+  { id: "source", label: "Source", Icon: FileText },
+  { id: "translated", label: "Translation", Icon: Languages },
+  { id: "compare", label: "Side-by-side Reader", Icon: Columns2 },
 ];
 
 export type ReaderModeTabsProps = {
@@ -52,3 +52,4 @@ export function ReaderModeTabs({
     </header>
   );
 }
+

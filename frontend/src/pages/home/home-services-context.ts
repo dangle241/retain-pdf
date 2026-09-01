@@ -1,6 +1,6 @@
-// 组合根下发通道:单个页级 Context(总计划「状态策略」第 3 条)。
+// 组合根下发通道:单个pages级 Context(总计划"Status策略"Page 3 entries).
 // entry.jsx 先建 composition,再经 <HomeServicesProvider> 灌给组件树;
-// 不做 per-feature Context。
+// 不做 per-feature Context.
 
 import { createContext, useContext } from "react";
 import type { HomeServices } from "./composition/types.js";
@@ -15,3 +15,6 @@ export function useHomeServices(): HomeServices {
   }
   return services;
 }
+
+
+

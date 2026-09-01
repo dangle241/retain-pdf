@@ -32,8 +32,8 @@ export function formatReaderRegionMarkdownPayload(payload) {
   const source = firstText(payload?.source?.text, payload?.source_text, item.source_text, item.text, item.raw_text);
   return {
     title: firstText(payload?.item_id, item.item_id, "translation item"),
-    primaryLabel: markdown ? "Markdown" : (translated ? "译文" : "原文"),
-    primaryText: markdown || translated || source || "该区域暂无可显示文本",
+    primaryLabel: markdown ? "Markdown" : (translated ? "Translation" : "Source"),
+    primaryText: markdown || translated || source || "该区域No 可Display文books",
     source,
     translated,
   };
@@ -48,7 +48,7 @@ function renderReaderTextBlock(label, text) {
     <section class="reader-region-markdown-section">
       <div class="reader-region-markdown-label-row">
         <span class="reader-region-markdown-label">${escapeHtml(label)}</span>
-        <button type="button" class="reader-region-copy-btn" data-copy-text="${escapeHtml(normalized)}">复制</button>
+        <button type="button" class="reader-region-copy-btn" data-copy-text="${escapeHtml(normalized)}">Copy</button>
       </div>
       <pre>${escapeHtml(normalized)}</pre>
     </section>
@@ -63,14 +63,14 @@ async function copyReaderRegionText(button) {
   try {
     await copyTextToClipboard(text);
     const previous = button.textContent;
-    button.textContent = "已复制";
+    button.textContent = "Copied";
     window.setTimeout(() => {
-      button.textContent = previous || "复制";
+      button.textContent = previous || "Copy";
     }, 900);
   } catch {
-    button.textContent = "复制失败";
+    button.textContent = "Copy Failed";
     window.setTimeout(() => {
-      button.textContent = "复制";
+      button.textContent = "Copy";
     }, 900);
   }
 }
@@ -90,10 +90,10 @@ export function renderReaderMarkdownPopover(event, region, state) {
   popover.className = "reader-region-markdown-popover";
   popover.innerHTML = `
     <div class="reader-region-markdown-head">
-      <span>${escapeHtml(region?.itemId || "区域文本")}</span>
-      <button type="button" class="reader-region-markdown-close" aria-label="关闭">×</button>
+      <span>${escapeHtml(region?.itemId || "Region text")}</span>
+      <button type="button" class="reader-region-markdown-close" aria-label="Close">×</button>
     </div>
-    <div class="reader-region-markdown-body">${escapeHtml(state?.message || "正在读取...")}</div>
+    <div class="reader-region-markdown-body">${escapeHtml(state?.message || "Loading...")}</div>
   `;
   document.body.appendChild(popover);
   positionReaderMarkdownPopover(popover, event);
@@ -118,7 +118,10 @@ export function renderReaderMarkdownPayload(popover, payload) {
   const formatted = formatReaderRegionMarkdownPayload(payload);
   popover.querySelector(".reader-region-markdown-body").innerHTML = `
     ${renderReaderTextBlock(formatted.primaryLabel, formatted.primaryText)}
-    ${formatted.source && formatted.primaryText !== formatted.source ? renderReaderTextBlock("原文", formatted.source) : ""}
+    ${formatted.source && formatted.primaryText !== formatted.source ? renderReaderTextBlock("Source", formatted.source) : ""}
   `;
   return formatted;
 }
+
+
+

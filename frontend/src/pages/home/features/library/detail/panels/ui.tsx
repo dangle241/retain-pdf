@@ -1,4 +1,4 @@
-// 详情弹窗 panel 共用小工具（样式 / 图标），无业务。
+// 详情弹窗 panel total用小Tools(样式 / 图标), None业务.
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button.jsx";
@@ -64,3 +64,6 @@ export function IconLayers(props) {
     </svg>
   );
 }
+
+
+

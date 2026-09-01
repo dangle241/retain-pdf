@@ -65,7 +65,7 @@ export async function loadPdfDocument({
     return null;
   }
   const pdfjsLib = await loadPdfjs();
-  // mock:// 资源只有 fetchProtected 会拦截,直接交给 pdfjs 会走 XHR 而失败
+  // mock:// 资源只有 fetchProtected 会拦截,直接交给 pdfjs 会走 XHR 而Failed
   if (url.startsWith("mock://") && typeof fetchProtected === "function") {
     const response = await fetchProtected(url);
     const data = new Uint8Array(await response.arrayBuffer());
@@ -78,3 +78,4 @@ export async function loadPdfDocument({
   }
   return pdfjsLib.getDocument(buildPdfDocumentOptions({ url, configPort })).promise;
 }
+

@@ -1,16 +1,16 @@
-// 文档中心网格的分页数据源(计划 F2)。返回形状与
+// Documents中心Grid的mPages据源(计划 F2).返回形状与
 // recent-jobs/pagination.js#collectRecentJobsPage 对齐
 // ({ collected, hasMore, latestInvocationSummary, nextOffset }),这样
-// recent-jobs 的 loader.js/commit.js/store 引擎可以一行不改地消费它。
+// recent-jobs 的 loader.js/commit.js/store 引擎可以一行不改地消费它.
 //
-// 每篇文档产出一张卡:先拉一页 /documents,收集该页 active_job_id,批量向
-// library/books?job_ids= 取这些 job 的实时活态,再按 job_id 合并
-// (shapeDocumentCardItem)。馆藏文档(无 active_job_id)拿合成 job_id 穿过引擎。
+// 每documents产出一张卡:先拉一pages /documents,收集该pages active_job_id,Batch向
+// library/books?job_ids= 取这些 job 的Live活态,再按 job_id 合并
+// (shapeDocumentCardItem).LibraryDocuments(None active_job_id)拿合成 job_id 穿过引擎.
 //
-// 搜索:/documents 目前没有服务端文本搜索(仅 reading_status/tag/collection 过滤),
-// 这里 query 走**客户端标题/文件名过滤**;有 query 时一次多拉一批再过滤、并关掉
-// 继续分页。文档级服务端全文/标题搜索是后端待补项(见 memory
-// f2-document-centric-grid-design)。
+// 搜索:/documents 目前没有服务端文books搜索(仅 reading_status/tag/collection 过滤),
+// 这里 query 走**客户端Title/Files名过滤**;有 query 时一次多拉一batches再过滤, 并关掉
+// 继续mpages.Documents级服务端全文/Title搜索yes后端待补items(见 memory
+// f2-document-centric-grid-design).
 
 import { shapeDocumentsWithBooks } from "./shape-documents-with-books.js";
 
@@ -42,8 +42,8 @@ export async function collectDocumentLibraryPage({
   const documents = Array.isArray(payload?.documents) ? payload.documents : [];
   const total = Number.isFinite(Number(payload?.total)) ? Number(payload.total) : documents.length;
 
-  // 文档 → 卡片的映射走统一编排(shapeDocumentsWithBooks);去重/搜索过滤这些
-  // 分页数据源自己的关切留在下面。
+  // Documents → 卡片的映射走统一编排(shapeDocumentsWithBooks);去重/搜索过滤这些
+  // mPages据源自己的关切留在下面.
   const shaped = await shapeDocumentsWithBooks(documents, { fetchLibraryBookList, apiPrefix });
 
   const collected = [];
@@ -74,3 +74,7 @@ export async function collectDocumentLibraryPage({
     nextOffset,
   };
 }
+
+
+
+

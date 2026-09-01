@@ -1,4 +1,4 @@
-// 本地持久化批注（localStorage）。不接旧 favorites API。
+// books地持久化annotations(localStorage).不接旧 favorites API.
 
 import {
   notesStorageKey,
@@ -51,3 +51,6 @@ export function saveNotes(doc: ReaderNotesDocKey, list: ReaderNote[]): void {
     console.warn("[reader-notes] persist failed", error);
   }
 }
+
+
+

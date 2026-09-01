@@ -1,13 +1,13 @@
-// 主页顶部"图书馆 / 合集 / 收藏 / AI 问答"分栏(裸 Tabs 原语,不经 src/components/ui/tabs.jsx
-// 默认皮肤——同 StatusDetailDialog/SettingsHubDialog 的既有选择,用项目自有
-// class,不接 shadcn 默认视觉)。
+// 主pages顶部"Library / Collection / Favorite / AI Q&A"m栏(裸 Tabs 原语,不经 src/components/ui/tabs.jsx
+// 默认皮肤——同 StatusDetailDialog/SettingsHubDialog 的既有Select,用items目自有
+// class,不接 shadcn 默认视觉).
 //
-// 图标化:每个 tab 前置语义图标 + 短文字(纯图标伤 wayfinding)。
-// 激活 tab 是纯页面级 UI 态(HomeApp useState),不持久化——刷新回到图书馆。
+// 图标化:每个 tab 前置语义图标 + 短文字(纯图标伤 wayfinding).
+// 激活 tab yes纯Pages级 UI 态(HomeApp useState),不持久化——刷新回到Library.
 
 import { Tabs as TabsPrimitive } from "radix-ui";
 
-// 图书馆:书脊排列在书架上
+// Library:书脊排列在书架上
 function IconLibrary() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -18,7 +18,7 @@ function IconLibrary() {
     </svg>
   );
 }
-// 合集:多层叠书
+// Collection:多层叠书
 function IconLayers() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -28,7 +28,7 @@ function IconLayers() {
     </svg>
   );
 }
-// 收藏:书签(段落级摘录/笔记,与合集=文档分组区分)
+// Favorite:书签(Paragraph级Excerpt/Note,与Collection=Documentsm组区m)
 function IconBookmark() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -36,7 +36,7 @@ function IconBookmark() {
     </svg>
   );
 }
-// AI 问答:星芒
+// AI Q&A:星芒
 function IconSparkles() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -46,13 +46,13 @@ function IconSparkles() {
   );
 }
 
-// key 保持 "categories"(契约 id library-top-tab-categories / 测试引用不变)。
-// "favorites" / "ask" 为后续入口。
+// key 保持 "categories"(契约 id library-top-tab-categories / 测试引用不变).
+// "favorites" / "ask" 为后续入口.
 const TABS = [
-  { key: "library", label: "图书馆", Icon: IconLibrary },
-  { key: "categories", label: "合集", Icon: IconLayers },
-  { key: "favorites", label: "收藏", Icon: IconBookmark },
-  { key: "ask", label: "AI 问答", Icon: IconSparkles },
+  { key: "library", label: "Library", Icon: IconLibrary },
+  { key: "categories", label: "Collection", Icon: IconLayers },
+  { key: "favorites", label: "Favorite", Icon: IconBookmark },
+  { key: "ask", label: "AI Q&A", Icon: IconSparkles },
 ];
 
 export function LibraryTopTabs({ active, onChange }) {
@@ -62,7 +62,7 @@ export function LibraryTopTabs({ active, onChange }) {
       value={active}
       onValueChange={onChange}
     >
-      <TabsPrimitive.List className="library-top-tabs" aria-label="图书馆视图">
+      <TabsPrimitive.List className="library-top-tabs" aria-label="LibraryView">
         {TABS.map((tab) => (
           <TabsPrimitive.Trigger
             key={tab.key}
@@ -72,7 +72,7 @@ export function LibraryTopTabs({ active, onChange }) {
           >
             <tab.Icon />
             <span>{tab.label}</span>
-            {/* 装饰钩子：默认无样式零渲染，皮肤可在 CSS 里给 tab 贴图换装 */}
+            {/* 装饰钩子: 默认None样式零Rendering, 皮肤可在 CSS 里给 tab 贴图换装 */}
             <span className="library-top-tab-ornament" aria-hidden="true" />
           </TabsPrimitive.Trigger>
         ))}
@@ -80,3 +80,7 @@ export function LibraryTopTabs({ active, onChange }) {
     </TabsPrimitive.Root>
   );
 }
+
+
+
+

@@ -1,6 +1,6 @@
 export function createRecentJobsRuntimePort({
   openJob,
-  /** 冷启动恢复活跃任务：默认 silent，不抬工作流区 */
+  /** 冷Startresume活跃任务: 默认 silent, 不抬工作流区 */
   recoverJob,
   currentJobId = () => "",
 }: any = {}) {
@@ -28,3 +28,5 @@ export function createRecentJobsRuntimePort({
     },
   };
 }
+
+

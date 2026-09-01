@@ -47,10 +47,10 @@ export async function fetchMockProtected(url) {
   const raw = `${url || ""}`.trim();
   // job/artifacts.js#resolveJobMarkdownBundleAction (镜像真实后端行为)会给
   // markdown bundle 追加 ?include_job_dir=true 查询串,source_pdf 等其它
-  // action 理论上也可能带查询串——mock 响应表只关心资源路径本身,统一按
-  // "?" 之前的部分匹配,避免真实 URL 契约(job/actions.js#appendResourceQuery)
-  // 变化时 mock 模式下载 404(artifact-downloads 域的下载按钮在
-  // ?mock=succeeded 下实测触发过此 404,详见 dialogs 蓝图 §7 验收记录)。
+  // action 理论上也可能带查询串——mock 响应表只关心资源路径books身,统一按
+  // "?" 之前的部m匹配,避免真实 URL 契约(job/actions.js#appendResourceQuery)
+  // 变化时 mock 模式Download 404(artifact-downloads 域的下载按钮在
+  // ?mock=succeeded 下实测触发过此 404,详见 dialogs 蓝图 §7 验收记录).
   const normalized = raw.split("?")[0];
   if (normalized === "mock://translated.pdf") {
     return new Response(mockPdfBytes("Translated PDF"), {
@@ -68,8 +68,8 @@ export async function fetchMockProtected(url) {
       },
     });
   }
-  // 文档级源 PDF(馆藏文档 source_pdf_url,见 mock/documents.js):让"只读原文"
-  // 阅读器在 ?mock= 下也能真的挂出一栏源文档。
+  // Documents级Source PDF(LibraryDocuments source_pdf_url,见 mock/documents.js):让"只Read Source"
+  // Reader在 ?mock= 下也能真的挂出一栏源Documents.
   if (normalized === "mock://document-source.pdf") {
     return new Response(mockPdfBytes("Library Document"), {
       status: 200,
@@ -78,7 +78,7 @@ export async function fetchMockProtected(url) {
       },
     });
   }
-  // 文档封面/缩略图：1×1 PNG，避免 mock 下 cover 404 空封面
+  // Documents封面/缩略图: 1×1 PNG, 避免 mock 下 cover 404 空封面
   if (
     normalized === "mock://document-cover.png"
     || normalized === "mock://document-thumb.png"
@@ -137,3 +137,6 @@ export async function fetchMockProtected(url) {
   }
   return new Response("mock resource not found", { status: 404 });
 }
+
+
+

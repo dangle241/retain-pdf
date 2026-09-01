@@ -8,7 +8,7 @@ import {
 import { unwrapEnvelope } from "../job/core.js";
 import { fetchMockProtected, submitMockJob, submitMockUpload } from "../mock/index.js";
 
-/** HTTP 请求失败时挂载 status/url 的宽松错误类型 */
+/** HTTP 请求Failed时挂载 status/url 的宽松错误Type */
 export interface HttpError extends Error {
   status?: number;
   url?: string;
@@ -78,10 +78,10 @@ export async function submitJson(url, payload) {
     const contentType = resp.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
       const errorPayload = await resp.json();
-      throw new Error(`提交失败: ${resp.status} ${errorPayload.message || JSON.stringify(errorPayload)}${requestContext}`);
+      throw new Error(`Submit failed: ${resp.status} ${errorPayload.message || JSON.stringify(errorPayload)}${requestContext}`);
     }
     const text = await resp.text();
-    throw new Error(`提交失败: ${resp.status} ${text}${requestContext}`);
+    throw new Error(`Submit failed: ${resp.status} ${text}${requestContext}`);
   }
   if (resp.status === 204) {
     return { ok: true };
@@ -132,14 +132,14 @@ export function submitUploadRequest(url, form, onProgress) {
       const message = typeof xhr.response === "object" && xhr.response
         ? (xhr.response.message || JSON.stringify(xhr.response))
         : (xhr.responseText || "");
-      const error = new Error(`提交失败: ${xhr.status} ${message}`) as HttpError;
+      const error = new Error(`Submit failed: ${xhr.status} ${message}`) as HttpError;
       error.status = xhr.status;
       error.url = url;
       reject(error);
     });
 
     xhr.addEventListener("error", () => {
-      const error = new Error(`提交失败: 网络错误。当前 API Base 为 ${apiBase()}，上传地址为 ${url}。请确认本地服务已经启动。`) as HttpError;
+      const error = new Error(`Submit failed: network error. Current API Base is ${apiBase()}, upload URL is ${url}.make sure the local service is started.`) as HttpError;
       error.url = url;
       reject(error);
     });
@@ -158,3 +158,6 @@ export async function fetchProtected(url, options: RequestInit = {}) {
     headers,
   });
 }
+
+
+

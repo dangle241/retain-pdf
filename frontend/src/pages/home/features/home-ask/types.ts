@@ -1,6 +1,6 @@
-// 主页 AI 问答 Tab 的轻量类型（不绑阅读器 job）
+// 主pages AI Q&A Tab 的轻量Type(不绑Reader job)
 
-/** @ 文档 */
+/** @ Documents */
 export type HomeAskDocScope = {
   kind: "document";
   id: string;
@@ -9,7 +9,7 @@ export type HomeAskDocScope = {
   source_filename?: string;
 };
 
-/** @ 合集（发送时展开为合集内文档列表，软限定检索） */
+/** @ Collection(Send时展开为Collection内DocumentsList, 软限定Search) */
 export type HomeAskCollectionScope = {
   kind: "collection";
   id: string;
@@ -45,3 +45,7 @@ export type HomeAskMessage = {
 export function scopeKey(s: HomeAskScope): string {
   return `${s.kind}:${s.id}`;
 }
+
+
+
+

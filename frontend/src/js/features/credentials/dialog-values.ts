@@ -56,7 +56,7 @@ export function readCredentialDialogValues({
 export function buildBrowserCredentialConfig({
   values,
   currentOcrProvider,
-  // defaultModelApiKey 保留参数兼容调用方，但不再静默写入设置（密钥只认对话框/用户输入）
+  // defaultModelApiKey 保留参数兼容调用方, 但不再静默写入Settings(key只认对话框/用户输入)
   defaultModelApiKey: _defaultModelApiKey,
 }: BuildBrowserCredentialConfigOptions) {
   return {
@@ -83,3 +83,5 @@ export function ocrTokenFromDialogValues(
 ) {
   return values.paddleToken;
 }
+
+

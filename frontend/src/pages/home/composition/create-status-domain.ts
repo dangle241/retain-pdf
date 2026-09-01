@@ -1,4 +1,4 @@
-// statusCard / statusDetail / artifact-download busy。
+// statusCard / statusDetail / artifact-download busy.
 
 import {
   API_PREFIX,
@@ -81,8 +81,8 @@ export function createStatusDomain({
     dialogStore: statusDetailDialogStore,
   });
 
-  // 阅读已改为跳转独立 reader.html，主页不再挂 iframe 对话框；
-  // isReaderOpen 恒为 false，job-runtime 的 sync/close 钩子成为 no-op。
+  // 阅读已改为跳转独立 reader.html, 主pages不再挂 iframe 对话框；
+  // isReaderOpen 恒为 false, job-runtime 的 sync/close 钩子成为 no-op.
   const jobRuntimeShellViewPort = {
     closeDialogs: () => statusDetailDialogStore.close(),
     isReaderOpen: () => false,
@@ -122,3 +122,5 @@ export function createStatusDomain({
     artifactDownloadsViewPort,
   };
 }
+
+

@@ -6,29 +6,29 @@ import {
 } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-// 状态卡 store + presenter(蓝图 §2 features/status/,§4 生命周期)。
+// Status卡 store + presenter(蓝图 §2 features/status/,§4 生命周期).
 //
 // 唯一 VM 源:job-status/status-card-runtime-source.js 的
 // buildRuntimeStatusCardSnapshot——直接镜像 components/status/
-// connected-job-status-card.js 的 createRuntimeStatusCardSource 语义:无论
-// renderMain(主轮询命中)还是 renderPatch(events/manifest/stageActions 三路
+// connected-job-status-card.js 的 createRuntimeStatusCardSource 语义:None论
+// renderMain(主轮询命中)还yes renderPatch(events/manifest/stageActions 三路
 // 二级补丁中的任意一路),统一从 currentJobStore + secondaryResourceStore 两个
 // canonical store **重新整体计算**一份快照写回 statusCardStore(蓝图风险 10:
-// "renderPatch 收敛"——不按 source 分支做局部补丁,规避三份局部更新逻辑各自
-// 漂移的风险)。
+// "renderPatch 收敛"——不按 source branch做局部补丁,规避三份局部Updates逻辑各自
+// 漂移的风险).
 //
-// 风险 6(首帧 placeholder):jobRuntimeFeature.startPolling() 的同步链里
+// 风险 6(首帧 placeholder):jobRuntimeFeature.startPolling() 的sync链里
 // renderJob() 会在 await 网络请求之前先落一次 placeholder 快照
-// (render-context.js 的 applyJobRuntimeSnapshot 同步写 currentJobStore),
-// renderMain 在此刻被同步调用,本 store 因此在 React 首次渲染前就已有数据,
-// 不会闪空卡。
+// (render-context.js 的 applyJobRuntimeSnapshot sync写 currentJobStore),
+// renderMain 在此刻被sync调用,books store 因此在 React 首次Rendering前就已有Data,
+// 不会闪空卡.
 //
-// elapsed 故意不进本 store(蓝图 §3.5):resolveLiveDurations 每秒都变,若随
-// 主快照一起写 store,statusCardStore 的 useStoreSnapshot 会被拖着每秒重渲
-// 整卡;真正的秒表由 useElapsedTicker.js 独立驱动(读 snapshot.job 的
-// started_at/finished_at,不读本 store 的任何"已计算好的" elapsed 字段)。
+// elapsed 故意不进books store(蓝图 §3.5):resolveLiveDurations 每s都变,若随
+// 主快照一起写 store,statusCardStore 的 useStoreSnapshot 会被拖着每s重渲
+// 整卡;真正的s表由 useElapsedTicker.js 独立驱动(读 snapshot.job 的
+// started_at/finished_at,不读books store 的任何"已计算好的" elapsed 字段).
 
-/** 阶段重试按钮（normalizeStageRetryActions 输出） */
+/** StageRetry按钮(normalizeStageRetryActions 输出) */
 export type StatusCardStageRetryAction = {
   stage: string;
   label: string;
@@ -37,7 +37,7 @@ export type StatusCardStageRetryAction = {
   danger: boolean;
 };
 
-/** 阶段进度分片（stageProgressByKey / selectedProgress） */
+/** StageProgressm片(stageProgressByKey / selectedProgress) */
 export type StatusCardStageProgress = {
   current?: number;
   total?: number;
@@ -55,7 +55,7 @@ export type StatusCardStageProgress = {
   [key: string]: unknown;
 };
 
-/** job 原始载荷（API 形状宽，状态卡只读子集 + 透传） */
+/** job 原始载荷(API 形状宽, Status卡只读子集 + 透传) */
 export type StatusCardJobRecord = {
   job_id?: string;
   status?: string;
@@ -91,8 +91,8 @@ export type StatusCardSummary = {
 };
 
 /**
- * statusCardStore.snapshot 的完整形状。
- * 字段来自 EMPTY 默认值 + buildJobStatusViewModel + summary 合并。
+ * statusCardStore.snapshot 的完整形状.
+ * 字段来自 EMPTY 默认值 + buildJobStatusViewModel + summary 合并.
  */
 export type StatusCardSnapshot = {
   jobId: string;
@@ -128,7 +128,7 @@ export type StatusCardSnapshot = {
   backgroundStages: unknown[];
   job: StatusCardJobRecord | null;
   summary: StatusCardSummary | null;
-  /** runtime VM 可能附带的阶段呈现（merge 时透传） */
+  /** runtime VM 可能附带的Stage呈现(merge 时透传) */
   stagePresentation?: Record<string, unknown> | null;
   elapsed?: string;
 };
@@ -169,14 +169,14 @@ export type StatusCardPresenterDeps = {
   statusCardStore: StatusCardStore;
 };
 
-// 拷贝自 components/status/job-status-card-snapshot.js 的零参默认值(该文件
-// 属"死,由 StatusCard.jsx 家族替代"清单,不可 import——js/components/ 是
-// 防回弹门禁的显式禁区)。只用于 currentJob 尚不存在时的占位快照。
+// 拷贝自 components/status/job-status-card-snapshot.js 的零参默认值(该Files
+// 属"死,由 StatusCard.jsx 家族替代"清单,不可 import——js/components/ yes
+// 防回弹门禁的显式禁区).只用于 currentJob 尚不存在时的占位快照.
 const EMPTY_STATUS_CARD_SNAPSHOT: StatusCardSnapshot = Object.freeze({
   jobId: "",
   status: "",
-  label: "等待中",
-  value: "准备中",
+  label: "Waiting",
+  value: "Preparing",
   detail: "",
   stageKey: "",
   progressCurrent: NaN,
@@ -258,8 +258,8 @@ export function createStatusCardPresenter({
 
   return {
     // renderJob(renderContext) / renderJobSecondaryPatch({context,source}) 两个回调
-    // 签名不同,但都只需要"重算一次"——参数本身不使用,数据永远从两个 canonical
-    // store 读(controller.js 在调用这两个回调之前已经同步写完 store)。
+    // 签名不同,但都只required"重算一次"——参数books身不使用,Data永远从两个 canonical
+    // store 读(controller.js 在调用这两个回调之前已经sync写完 store).
     renderMain: recompute,
     renderPatch: recompute,
     recompute,
@@ -267,3 +267,7 @@ export function createStatusCardPresenter({
 }
 
 export { EMPTY_STATUS_CARD_SNAPSHOT };
+
+
+
+

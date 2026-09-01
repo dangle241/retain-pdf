@@ -1,9 +1,9 @@
-// 封面中央「处理中」加载层：排队/OCR/翻译/渲染时用，不在角标写过程文案。
+// 封面中央"Processing"加载层: queued/OCR/Translation/Rendering时用, 不在角标写过程文案.
 
 import { cn } from "@/lib/utils";
 
 type BookCardProcessingOverlayProps = {
-  /** 列表缩略图用更小尺寸 */
+  /** List缩略图用更小尺寸 */
   compact?: boolean;
   className?: string;
 };
@@ -46,3 +46,6 @@ export function BookCardProcessingOverlay({
     </div>
   );
 }
+
+
+

@@ -1,4 +1,4 @@
-// 主流程 StatusCard 展示：status-card-shell + hero（DOM 契约 id 保留）。
+// 主Workflow StatusCard 展示: status-card-shell + hero(DOM 契约 id 保留).
 
 import { StageFlow } from "./StageFlow.jsx";
 import { SubstageFlow } from "./SubstageFlow.jsx";
@@ -74,12 +74,12 @@ export function StatusCardMain({
                 id={ids.cancelButton}
                 type="button"
                 className="status-action-btn status-head-btn status-head-cancel"
-                aria-label="取消任务"
-                title="取消任务"
+                aria-label="Cancel任务"
+                title="Cancel任务"
                 disabled={!snapshot.cancelEnabled || cancelDisabled}
                 onClick={() => cancelCurrentJob?.()}
               >
-                <span>取消</span>
+                <span>Cancel</span>
               </button>
               <div className="status-head-center">
                 <div id={ids.ringLabel} className="status-ring-label">{ringLabel}</div>
@@ -91,8 +91,8 @@ export function StatusCardMain({
                 id={ids.detailButton}
                 type="button"
                 className="status-action-btn status-head-btn status-head-detail"
-                aria-label="任务详情"
-                title="任务详情"
+                aria-label="Job Details"
+                title="Job Details"
                 onClick={openDetail}
               >
                 <span>详情</span>
@@ -117,7 +117,7 @@ export function StatusCardMain({
                 <div
                   id="status-stage-animation"
                   className={`status-stage-animation${lottie.hasStageAnimation ? "" : " hidden"}`}
-                  aria-label="任务阶段动画"
+                  aria-label="任务Stage动画"
                 >
                   <div
                     id="status-stage-lottie"
@@ -171,3 +171,6 @@ export function StatusCardMain({
     </StatusCardIdsContext.Provider>
   );
 }
+
+
+

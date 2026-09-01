@@ -20,7 +20,7 @@ export function syncCredentialDialogFields({
     paddleInput.value = credentials.paddleToken || "";
   }
   if (apiKeyInput) {
-    // 只展示设置里已存的 Key，不从 runtime 回填（避免「设置空白却仍能问答」）
+    // 只展示Settings里已存的 Key, 不从 runtime 回填(避免"Settings空白却仍能问答")
     void defaultModelApiKey;
     apiKeyInput.value = `${credentials.modelApiKey || ""}`.trim();
   }
@@ -35,3 +35,5 @@ export function syncCredentialDialogFields({
   }
   elementsPort.syncOcrProviderControls(normalizeOcrProvider(credentials.ocrProvider));
 }
+
+

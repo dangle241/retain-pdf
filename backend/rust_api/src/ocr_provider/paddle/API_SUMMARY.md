@@ -1,10 +1,10 @@
 # Paddle OCR API Summary
 
-这份文档只回答一个问题：
+This document answers one question:
 
-**Currently integrated Paddle OCR Asynchronous APIActual protocol unknown.**
+**Currently integrated Paddle OCR Asynchronous API — actual protocol details.**
 
-不是讲 `document.v1`, nor rendering/translation, only covers provider transport Layer.
+Does not cover `document.v1`, rendering, or translation — only the provider transport layer.
 
 Related materials:
 
@@ -168,7 +168,7 @@ Corresponding implementation:
 
 ## 5. Error caliber.
 
-当前 transport The layer mainly handles these error types:
+The transport layer currently handles these error types:
 
 - HTTP status error
 - provider returns `errorCode != 0`

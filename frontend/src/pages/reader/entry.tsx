@@ -1,6 +1,6 @@
-// reader 页 React 入口。默认 react-pdf 引擎（ReaderAppReactPdf）；
-// ?engine=legacy 回退命令式 js/reader 挂载（use-reader-boot）。
-// 打包产物 dist/reader.bundle.js（scripts/build-js-bundle.mjs）。
+// reader pages React 入口.默认 react-pdf 引擎(ReaderAppReactPdf)；
+// ?engine=legacy 回退命令式 js/reader 挂载(use-reader-boot).
+// 打包产物 dist/reader.bundle.js(scripts/build-js-bundle.mjs).
 
 import { createRoot } from "react-dom/client";
 import { bootTheme } from "../../shared/theme/theme.js";
@@ -15,9 +15,9 @@ bootTheme();
 clearReaderAiNavigationLock();
 installReaderWindowOpenGuard();
 
-// 渲染前同步 body class:CSS 的 :has()/body-class 驱动规则(reader-page.css)依赖它们。
-// 主页已改为跳转独立 reader.html，不再用 iframe 嵌入。
-// 若仍有旧书签/测试以 iframe 打开，保留 embedded class 兼容。
+// Rendering前sync body class:CSS 的 :has()/body-class 驱动规则(reader-page.css)依赖它们.
+// 主pages已改为跳转独立 reader.html, 不再用 iframe 嵌入.
+// 若仍有旧书签/测试以 iframe 打开, 保留 embedded class 兼容.
 function syncReaderBodyClasses(body = document.body) {
   body.classList.add("reader-body", "reader-mode-compare");
   if (globalThis.window && window.self !== window.top) {
@@ -26,8 +26,8 @@ function syncReaderBodyClasses(body = document.body) {
 }
 
 // 过渡期兜底:探针验证时 reader.html 只换 <script> 入口,旧静态骨架仍在 body 里,
-// 先清掉再挂 React 树,避免两套 DOM(重复 id/固定层)叠加。
-// cutover(2b)后 body 只剩脚本与 #reader-root,此步退化为空操作。
+// 先清掉再挂 React 树,避免两套 DOM(重复 id/固定层)叠加.
+// cutover(2b)后 body 只剩脚books与 #reader-root,此step退化为空Action.
 function purgeLegacyMarkup(body = document.body) {
   Array.from(body.children).forEach((element) => {
     if (element.tagName !== "SCRIPT" && element.id !== "reader-root") {
@@ -55,9 +55,9 @@ function resolveReaderEngine(search = globalThis.location?.search || "") {
 }
 
 /**
- * Legacy 抽屉/选区/AI 样式已拆到 dist/css/reader-legacy.css。
- * 默认 react-pdf 不加载；仅 ?engine=legacy 时注入。
- * 相对路径对齐 reader.html 里已有的 reader.css link（保留同目录）。
+ * Legacy 抽屉/selection/AI 样式已拆到 dist/css/reader-legacy.css.
+ * 默认 react-pdf 不加载；仅 ?engine=legacy 时注入.
+ * 相对路径对齐 reader.html 里已有的 reader.css link(保留同目录).
  */
 function ensureLegacyReaderCss() {
   if (typeof document === "undefined") {
@@ -71,7 +71,7 @@ function ensureLegacyReaderCss() {
   ) as HTMLLinkElement | null;
   let href = "./dist/css/reader-legacy.css";
   if (main?.getAttribute("href")) {
-    // ./dist/css/reader.css?v=abc → ./dist/css/reader-legacy.css（去掉主包 hash，避免错绑）
+    // ./dist/css/reader.css?v=abc → ./dist/css/reader-legacy.css(去掉主包 hash, 避免错绑)
     href = main
       .getAttribute("href")!
       .replace(/reader\.css(\?v=[^"']*)?$/i, "reader-legacy.css");
@@ -89,3 +89,7 @@ if (resolveReaderEngine() === "legacy") {
   ensureLegacyReaderCss();
 }
 createRoot(resolveReaderRoot()).render(<ReaderApp />);
+
+
+
+

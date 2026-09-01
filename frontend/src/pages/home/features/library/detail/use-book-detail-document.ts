@@ -1,4 +1,4 @@
-// 详情：拉 document 全文、标题/标签编辑、阅读状态、合集、删除。
+// 详情: 拉 document 全文, Title/TagsEdit, Reading status, Collection, Delete.
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -61,7 +61,7 @@ export function useBookDetailDocument({
     setReadingStatus(item.reading_status || "unread");
     setTitleText(item.title || item.display_name || "");
     setTags(initialTags);
-    setTagsText(initialTags.join("、"));
+    setTagsText(initialTags.join(", "));
     fetchDocument(API_PREFIX, documentId)
       .then((full) => {
         if (cancelled) return;
@@ -76,7 +76,7 @@ export function useBookDetailDocument({
         setTitleText(detail.title || detail.source_filename || "");
         const fullTags = Array.isArray(detail.tags) ? detail.tags : [];
         setTags(fullTags);
-        setTagsText(fullTags.join("、"));
+        setTagsText(fullTags.join(", "));
       })
       .catch(() => {});
     if (collectionsCtl) {
@@ -134,19 +134,19 @@ export function useBookDetailDocument({
     await withBusy(
       "reading",
       () => actions.updateDocument(documentId, { reading_status: value }),
-      "更新阅读状态失败",
+      "UpdatesReading statusFailed",
     ).catch(() => setReadingStatus(previous));
   }
 
   function startEdit() {
     setTitleText(doc?.title || item.title || item.display_name || "");
-    setTagsText((tags || []).join("、"));
+    setTagsText((tags || []).join(", "));
     setEditing(true);
   }
 
   async function handleSaveEdit() {
     const nextTags = tagsText
-      .split(/[，,、\s]+/)
+      .split(/[, ,, \s]+/)
       .map((t) => t.trim())
       .filter(Boolean);
     const nextTitle = titleText.trim();
@@ -161,7 +161,7 @@ export function useBookDetailDocument({
         setTags(nextTags);
         setEditing(false);
       },
-      "保存失败",
+      "SaveFailed",
     );
   }
 
@@ -176,7 +176,7 @@ export function useBookDetailDocument({
         await actions.deleteDocument(documentId);
         onClose?.();
       },
-      "删除失败",
+      "DeleteFailed",
     );
   }
 
@@ -194,7 +194,7 @@ export function useBookDetailDocument({
       );
       collectionsReload?.actions.bump();
     } catch (err) {
-      setError(err?.message || "更新合集失败");
+      setError(err?.message || "UpdatesCollectionFailed");
     } finally {
       setCollectionsBusy("");
     }
@@ -229,3 +229,6 @@ export function useBookDetailDocument({
     setEditing,
   };
 }
+
+
+

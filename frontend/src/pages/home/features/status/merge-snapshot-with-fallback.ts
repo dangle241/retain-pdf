@@ -1,12 +1,12 @@
-// statusCard 快照 + 书架 live item 合并。
+// statusCard 快照 + 书架 live item 合并.
 //
-// 问题：attachJobProgress → startPolling 首帧会推 placeholder
-// （status=queued, stage_detail=正在读取…），已完成书会被盖成排队。
-// 本函数把书架 item 的终态/进度补回 snapshot，详情与主流程共用一处。
+// Question: attachJobProgress → startPolling 首帧会推 placeholder
+// (status=queued, stage_detail=Loading...), Complete书会被盖成queued.
+// books函数把书架 item 的终态/Progress补回 snapshot, 详情与主Workflowtotal用一处.
 
 import type { StatusCardJobRecord, StatusCardSnapshot } from "./status-card-store.js";
 
-/** 书架 live 行（library item）上与进度合并相关的字段 */
+/** 书架 live 行(library item)上与Progress合并相关的字段 */
 export type StatusCardFallbackItem = {
   job_id?: string;
   status?: string;
@@ -53,8 +53,8 @@ export function mergeSnapshotWithFallback(
     !snapStatus
     || snapStatus === "queued"
     || !snapJob
-    || `${snapshot?.detail || ""}`.includes("正在读取")
-    || `${snapshot?.value || ""}`.includes("准备");
+    || `${snapshot?.detail || ""}`.includes("Loading")
+    || `${snapshot?.value || ""}`.includes("Preparing");
 
   const progress = fallbackItem.progress && typeof fallbackItem.progress === "object"
     ? fallbackItem.progress
@@ -73,7 +73,7 @@ export function mergeSnapshotWithFallback(
           job_id: itemJob,
           status: "succeeded",
           stage: "finished",
-          stage_detail: (fallbackItem.stage_detail as string) || "任务完成",
+          stage_detail: (fallbackItem.stage_detail as string) || "任务Done",
           progress: {
             percent: 100,
             current: itemCurrent || 100,
@@ -90,15 +90,15 @@ export function mergeSnapshotWithFallback(
       jobId: itemJob,
       status: "succeeded",
       stageKey: "done",
-      label: "完成",
-      value: "翻译 PDF 已生成",
-      detail: `${fallbackItem.stage_detail || "任务完成"}`.trim(),
+      label: "Done",
+      value: "Translation PDF has been generated",
+      detail: `${fallbackItem.stage_detail || "任务Done"}`.trim(),
       displayPercent: 100,
       progressPercent: 100,
       progressCurrent: Number.isFinite(itemCurrent) ? itemCurrent : 100,
       progressTotal: Number.isFinite(itemTotal) && itemTotal > 0 ? itemTotal : 100,
-      progressFallbackText: "完成",
-      progressText: "渲染完成",
+      progressFallbackText: "Done",
+      progressText: "Rendering complete",
       progressUnit: "percent",
       progressIndeterminate: false,
       visualStageKey: "done",
@@ -114,8 +114,8 @@ export function mergeSnapshotWithFallback(
       ...snapshot!,
       jobId: itemJob,
       status: "failed",
-      label: "失败",
-      value: "任务失败",
+      label: "Failed",
+      value: "任务Failed",
       detail: `${fallbackItem.stage_detail || ""}`.trim(),
       cancelEnabled: false,
     };
@@ -127,7 +127,7 @@ export function mergeSnapshotWithFallback(
       jobId: itemJob,
       status: itemStatus,
       stageKey: snapshot?.stageKey || "ocr",
-      label: snapshot?.label || (itemStatus === "queued" ? "排队中" : "处理中"),
+      label: snapshot?.label || (itemStatus === "queued" ? "Queued" : "Processing"),
       detail: `${fallbackItem.stage_detail || snapshot?.detail || ""}`.trim(),
       displayPercent: Number.isFinite(itemPercent) ? itemPercent : snapshot?.displayPercent ?? null,
       progressPercent: Number.isFinite(itemPercent) ? itemPercent : (snapshot?.progressPercent ?? NaN),
@@ -139,9 +139,13 @@ export function mergeSnapshotWithFallback(
   return snapshot;
 }
 
-/** 书架 live 行是否为 startPolling 首帧占位（Dialog 层与 snapshot 层共用） */
+/** 书架 live 行yesno为 startPolling 首帧占位(Dialog 层与 snapshot 层total用) */
 export function isPollingBootstrapPlaceholder(item: StatusCardFallbackItem = {}): boolean {
   const status = `${item.status || ""}`.trim();
   const detail = `${item.stage_detail || item.detail || ""}`;
-  return status === "queued" && detail.includes("正在读取任务状态");
+  return status === "queued" && detail.includes("Loading任务Status");
 }
+
+
+
+

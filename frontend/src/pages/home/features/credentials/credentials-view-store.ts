@@ -1,13 +1,13 @@
-// CredentialsDialog 的纯视图态(蓝图 §2:setupMode/tab/校验反馈/DeepSeek 充值
-// 提示/保存态)+ 与 features/credentials/browser.js(kept 控制器)对接的
-// store 驱动 viewPort/elementsPort。
+// CredentialsDialog 的纯View态(蓝图 §2:setupMode/tab/校验反馈/DeepSeek 充值
+// 提示/Save态)+ 与 features/credentials/browser.js(kept 控制器)对接的
+// store 驱动 viewPort/elementsPort.
 //
 // 旧世界 browser-view-port.js/dialog-elements-port.js/view.js/dialog-sync.js/
-// validation-view.js 全部是 DOM 直写(死,不 import);这里用同名方法签名
-// 重新实现,只是"写"的目的地从 DOM 换成 store,让 CredentialsDialog.jsx 系的
-// 组件订阅渲染。browser.js(state.js/validation.js/deepseek-flow.js/
+// validation-view.js Allyes DOM 直写(死,不 import);这里用同名方法签名
+// 重新实现,只yes"写"的目的地从 DOM 换成 store,让 CredentialsDialog.jsx 系的
+// 组件订阅Rendering.browser.js(state.js/validation.js/deepseek-flow.js/
 // ocr-readiness-flow.js/persistence.js/dialog-values.js 等 kept 逻辑层的编排者)
-// 一行不改地复用。
+// 一行不改地复用.
 
 import type { DialogStore } from "../../state/dialog-store.js";
 import type {
@@ -37,7 +37,7 @@ export type CredentialsViewState = {
   deepSeek: CredentialsMessage;
   deepSeekTopUpVisible: boolean;
   dialogStatus: CredentialsMessage;
-  /** 只读态,供 HeroUpload 订阅决定上传瓦片锁定/credential-gate 可见性 */
+  /** 只读态,供 HeroUpload 订阅决定Upload瓦片锁定/credential-gate 可见性 */
   credentialGate: CredentialGateState;
 };
 
@@ -79,9 +79,9 @@ export function createCredentialsViewFeature({
       deepSeek: { message: "", tone: "" },
       deepSeekTopUpVisible: false,
       dialogStatus: { message: "", tone: "" },
-      // 只读态,供 3a HeroUpload 订阅决定上传瓦片锁定/credential-gate 可见性
-      // (蓝图 §2.2「upload 按钮锁定态移交 3a」——本域只写这份快照,不直接
-      // 触碰 upload-view-store.js/HeroUpload.jsx)。
+      // 只读态,供 3a HeroUpload 订阅决定Upload瓦片锁定/credential-gate 可见性
+      // (蓝图 §2.2"upload 按钮锁定态移交 3a"——books域只写这份快照,不直接
+      // 触碰 upload-view-store.js/HeroUpload.jsx).
       credentialGate: {
         desktopMode: false,
         show: false,
@@ -125,9 +125,9 @@ export function createCredentialsViewFeature({
   });
 
   // 对话框内可见字段的非受控 DOM ref 收集点(镜像 upload-view-store.js 的
-  // domRefs 模式)。dialog-values.js/dialog-sync.js(kept)直接读写这些节点的
+  // domRefs 模式).dialog-values.js/dialog-sync.js(kept)直接读写这些节点的
   // .value,不走 React 受控 value/onChange——避免两套写入源打架(蓝图风险 1
-  // 的姊妹问题:可见字段虽不是"隐藏 input 桥接"那 4 个,但同样不该双写)。
+  // 的姊妹Question:可见字段虽不yes"隐藏 input 桥接"那 4 个,但同样不该双写).
   const elementsRef: CredentialsElementsRef = {
     apiKeyInput: null,
     modelBaseUrlInput: null,
@@ -155,17 +155,17 @@ export function createCredentialsViewFeature({
   const elementsPort = {
     elements,
     // OCR provider 面板可见性由 OcrProviderPanels.jsx 直接订阅
-    // credentialsStatePort(credentials.ocrProvider)渲染;不需要
-    // dialog-sync.js 原本那种命令式二次同步,no-op。
+    // credentialsStatePort(credentials.ocrProvider)Rendering;不required
+    // dialog-sync.js 原books那种命令式二次sync,no-op.
     syncOcrProviderControls: () => {},
   };
 
-  // browser.js 在 mountBrowserCredentialsFeature() 内同步调用一次
+  // browser.js 在 mountBrowserCredentialsFeature() 内sync调用一次
   // viewPort.bindEvents(handlers),把 save/validateOcr/validateDeepSeek/
-  // changeProvider/activateCredentialTab/open 等处理函数交给视图层——旧世界
-  // 在这里挂原生 DOM 监听(view.js,死);React 世界没有等价步骤,改成把
+  // changeProvider/activateCredentialTab/open 等处理函数交给View层——旧世界
+  // 在这里挂原生 DOM 监听(view.js,死);React 世界没有等价step骤,改成把
   // handlers 存进 ref,JSX 按钮的 onClick 直接调用
-  // (见 useCredentialsController.js)。
+  // (见 useCredentialsController.js).
   const handlersRef: { current: HandlersBag | null } = { current: null };
 
   const viewPort = {
@@ -193,8 +193,8 @@ export function createCredentialsViewFeature({
     setDialogStatus: (message = "", tone = "") => store.actions.setDialogStatus({ message, tone }),
     setHiddenOcrProvider: () => {
       // no-op:credentialsStatePort.patchCredentials(default-state-port.js 单例)
-      // 的 mirrorToDom 副作用已经同步写过隐藏 input(见 browser.js 的
-      // changeProvider handler),这里重复写只是同一帧内两次相同赋值。
+      // 的 mirrorToDom 副作用已经sync写过隐藏 input(见 browser.js 的
+      // changeProvider handler),这里重复写只yes同一帧内两次相同赋值.
     },
     setOcrValidationMessage: (message = "", tone = "", providerId = "") => store.actions.setValidation({
       providerId,
@@ -202,7 +202,7 @@ export function createCredentialsViewFeature({
       tone,
     }),
     syncOcrProviderControls: () => {
-      // no-op(理由同 elementsPort.syncOcrProviderControls)。
+      // no-op(理由同 elementsPort.syncOcrProviderControls).
     },
     updateCredentialGate: (payload: Partial<CredentialGateState> = {}) => {
       store.actions.setCredentialGate(payload);
@@ -219,3 +219,7 @@ export function createCredentialsViewFeature({
     viewPort,
   };
 }
+
+
+
+

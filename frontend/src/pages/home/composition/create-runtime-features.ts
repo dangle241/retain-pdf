@@ -1,5 +1,5 @@
-// job-runtime / recent-jobs / artifact-downloads —— 在 composition 阶段一次挂齐，
-// 不放进 initialize 的 if 懒挂载。
+// job-runtime / recent-jobs / artifact-downloads —— 在 composition Stage一次挂齐, 
+// 不放进 initialize 的 if 懒挂载.
 
 import {
   API_PREFIX,
@@ -38,7 +38,7 @@ import type {
 } from "./types.js";
 import type { RecentJobsReactViewPort } from "../features/library/types.js";
 
-/** mountJobRuntimeFeature 外壳端口（只声明 composition 实际传入的面） */
+/** mountJobRuntimeFeature 外壳端口(只声明 composition 实际传入的面) */
 type JobRuntimeShellViewPort = {
   closeDialogs: () => void;
   isReaderOpen: () => boolean;
@@ -143,7 +143,7 @@ export function createRuntimeFeatures({
     clearPageRanges: () => features.uploadFeature.clearPageRanges(),
     updateJobWarning: bridge.updateJobWarning,
     activateDetailTab: bridge.activateDetailTab,
-    // 主页不再嵌入阅读 iframe；sync/close 保留给 job-runtime 契约，实现为空。
+    // 主pages不再嵌入阅读 iframe；sync/close 保留给 job-runtime 契约, 实现为空.
     onReaderDialogSync: () => {},
     onReaderDialogClose: () => {},
     uploadStatePort,
@@ -156,7 +156,7 @@ export function createRuntimeFeatures({
     state: jobRuntimeState,
     fetchProtected,
     setText: bridge.setText,
-    // currentJobIdFor(state) 与默认 `() => ""` 形参签名不一致，运行时 port 会把 state 透传。
+    // currentJobIdFor(state) 与默认 `() => ""` 形参签名不一致, 运行时 port 会把 state 透传.
     runtimePort: createArtifactDownloadsRuntimePort({
       currentJobId: (state?: unknown) => currentJobIdFor(state),
     }),
@@ -168,7 +168,7 @@ export function createRuntimeFeatures({
   }) as ArtifactDownloadsFeature;
   artifactDownloadsFeature.bindEvents();
 
-  // startPolling/openReader 已由 jobRuntimePort/readerPort/navigationPort 注入；签名仍标必填。
+  // startPolling/openReader 已由 jobRuntimePort/readerPort/navigationPort 注入；签名仍标必填.
   const recentJobsFeature = mountRecentJobsFeature({
     fetchJobList,
     fetchJobPayload,
@@ -190,3 +190,5 @@ export function createRuntimeFeatures({
 
   return { jobRuntimeFeature, recentJobsFeature, artifactDownloadsFeature };
 }
+
+

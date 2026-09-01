@@ -19,7 +19,7 @@ export function normalizeStageRetryActions(stageActionsPayload = null) {
     }
     actions[stageKey] = {
       stage: item.stage === "translation" ? "translation" : stageKey,
-      label: item.label || (stageKey === "render" ? "重新渲染" : "重新执行"),
+      label: item.label || (stageKey === "render" ? "Render Again" : "Run Again"),
       canRetry: item.can_retry === true,
       disabledReason: item.disabled_reason || item.reason || "",
       danger: item.danger === true,
@@ -27,3 +27,5 @@ export function normalizeStageRetryActions(stageActionsPayload = null) {
   });
   return actions;
 }
+
+

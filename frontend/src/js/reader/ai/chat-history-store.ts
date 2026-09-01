@@ -1,10 +1,10 @@
-// 阅读问答的多会话持久化:按 jobId 存 localStorage,一份文档可有多条对话。
-// 每条会话存两部分:messages(重开阅读器时重渲染气泡)+ history(回传后端的多轮上下文)。
-// 兼容旧版单会话格式({messages, history}):首次读取时自动迁移为一条会话。
+// 阅读问答的多会话持久化:按 jobId 存 localStorage,一份Documents可有多entries对话.
+// 每entries会话存两部m:messages(重开Reader时重Rendering气泡)+ history(回传后端的多轮上下文).
+// 兼容旧版单会话格式({messages, history}):首次读取时自动迁移为一entries会话.
 //
-// 对外接口分两层:
-//  - 单会话层(向后兼容):load / save / clear 作用于当前 active 会话;
-//  - 多会话层:listSessions / newSession / switchSession / deleteSession / activeSessionId。
+// 对外接口m两层:
+//  - 单会话层(向后兼容):load / save / clear 作用于Current active 会话;
+//  - 多会话层:listSessions / newSession / switchSession / deleteSession / activeSessionId.
 
 import { summarizeSessions, trimSessions } from "./chat-sessions-view-model.js";
 
@@ -40,7 +40,7 @@ export function createReaderAiHistoryStore({
     return `s-${nowMs().toString(36)}-${seq}`;
   }
 
-  // 读出规范化的多会话数据;吞掉解析异常并迁移旧格式。
+  // 读出规范化的多会话Data;吞掉parse异常并迁移旧格式.
   function readData() {
     const blank = { activeId: "", sessions: [] };
     if (!enabled) {
@@ -64,7 +64,7 @@ export function createReaderAiHistoryStore({
         : `${sessions[0]?.id || ""}`;
       return { activeId, sessions };
     }
-    // 旧格式单会话:{messages, history} → 迁移为一条会话
+    // 旧格式单会话:{messages, history} → 迁移为一entries会话
     if (Array.isArray(parsed.messages) || Array.isArray(parsed.history)) {
       const created = nowMs();
       const session = {
@@ -88,11 +88,11 @@ export function createReaderAiHistoryStore({
         : `${sessions[0]?.id || ""}`;
       storage.setItem(key, JSON.stringify({ v: 2, activeId, sessions }));
     } catch (_err) {
-      // 配额满/隐私模式:静默失败,不影响会话内使用
+      // 配额满/隐私模式:静默Failed,不影响会话内使用
     }
   }
 
-  // 取当前 active 会话;没有则就地补一条空会话(save/newSession 前的兜底)。
+  // 取Current active 会话;没有则就地补一entries空会话(save/newSession 前的兜底).
   function ensureActive(data) {
     let active = data.sessions.find((item) => `${item.id}` === `${data.activeId}`);
     if (!active) {
@@ -123,14 +123,14 @@ export function createReaderAiHistoryStore({
     }
     const data = readData();
     const active = ensureActive(data);
-    // 上限截断:每条会话只保留最近若干轮,避免 localStorage 无限增长
+    // 上限截断:每entries会话只保留最近若干轮,避免 localStorage None限增长
     active.messages = messages.slice(-MAX_TURNS);
     active.history = history.slice(-MAX_TURNS);
     active.updatedAt = nowMs();
     writeData(data);
   }
 
-  // 清空当前会话内容(会话本身保留,标题回退占位)。
+  // 清空Current会话内容(会话books身保留,Title回退占位).
   function clear() {
     if (!enabled) {
       return;
@@ -160,7 +160,7 @@ export function createReaderAiHistoryStore({
     return `${readData().activeId || ""}`;
   }
 
-  // 新建空会话并置为 active,返回新会话 id。
+  // 新建空会话并置为 active,返回新会话 id.
   function newSession() {
     if (!enabled) {
       return "";
@@ -173,7 +173,7 @@ export function createReaderAiHistoryStore({
     return session.id;
   }
 
-  // 切换 active 会话;id 不存在则忽略。返回该会话的 {messages, history}。
+  // 切换 active 会话;id 不存在则忽略.返回该会话的 {messages, history}.
   function switchSession(id) {
     if (!enabled) {
       return { messages: [], history: [] };
@@ -186,8 +186,8 @@ export function createReaderAiHistoryStore({
     return load();
   }
 
-  // 删除指定会话;删的是 active 时改指向最近更新的一条(全删光则补一条空会话)。
-  // 返回删除后 active 会话的 {messages, history}。
+  // Delete指定会话;删的yes active 时改指向Recently updated的一entries(全删光则补一entries空会话).
+  // 返回Delete后 active 会话的 {messages, history}.
   function deleteSession(id) {
     if (!enabled) {
       return { messages: [], history: [] };
@@ -220,3 +220,6 @@ export function createReaderAiHistoryStore({
     deleteSession,
   };
 }
+
+
+

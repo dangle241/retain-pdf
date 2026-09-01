@@ -1,7 +1,7 @@
 # inputImage description
 
 ## Structure and alignment relationships
-- `json_full.json` Top-level contains `layoutParsingResults`、`preprocessedImages` 和 `dataInfo` Three main blocks. In this example `layoutParsingResults` Paginated array. Each item contains: `prunedResult`、`markdown`、`outputImages` and `inputImage` and other fields,`inputImage` 里的 URL such as `…/input_img_{页号}.jpg`and `preprocessedImages` 里 `preprocessed_img_{页号}.jpg` Keep strict one-to-one correspondence (both arrays have same length).  
+- `json_full.json` top-level contains three main blocks: `layoutParsingResults`, `preprocessedImages`, and `dataInfo`. In this example, `layoutParsingResults` is a paginated array. Each item contains: `prunedResult`, `markdown`, `outputImages`, and `inputImage` and other fields. The `inputImage` URLs are in the format `…/input_img_{page_number}.jpg` and `preprocessedImages` in the format `preprocessed_img_{page_number}.jpg`. Keep strict one-to-one correspondence (both arrays have the same length).  
 - `dataInfo.pages` is a per-page list. `width` and `height` used to ensure backend parsed coordinates map back to `inputImage`/`preprocessedImages` canvas sizes. That is: `layoutParsingResults[i]`, `preprocessedImages[i]`, `dataInfo.pages[i]` represent same source page; `inputImage` is input to layout parser.
 
 ## inputImage Role throughout chain.

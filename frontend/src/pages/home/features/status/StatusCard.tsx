@@ -1,8 +1,8 @@
-// StatusCard 入口：主流程 / 书籍详情两套展示拆成独立文件。
+// StatusCard 入口: 主Workflow / Book Details两套展示拆成独立Files.
 //
-// - StatusCardMain：工作流弹窗 #job-status-card（DOM 契约 / smoke）
-// - StatusCardEmbedded：详情 #book-detail-job-status-card（bd-job-status-* 固定高度）
-// - useStatusCardModel：共享 store → display / lottie / progress
+// - StatusCardMain: 工作流弹窗 #job-status-card(DOM 契约 / smoke)
+// - StatusCardEmbedded: 详情 #book-detail-job-status-card(bd-job-status-* 固定高度)
+// - useStatusCardModel: total享 store → display / lottie / progress
 
 import { StatusCardMain } from "./StatusCardMain.jsx";
 import { StatusCardEmbedded } from "./StatusCardEmbedded.jsx";
@@ -54,3 +54,5 @@ export { StatusCardMain } from "./StatusCardMain.jsx";
 export { StatusCardEmbedded } from "./StatusCardEmbedded.jsx";
 export { useStatusCardModel } from "./use-status-card-model.js";
 export { mergeSnapshotWithFallback, isPollingBootstrapPlaceholder } from "./merge-snapshot-with-fallback.js";
+
+

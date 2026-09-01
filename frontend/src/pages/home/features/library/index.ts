@@ -1,14 +1,14 @@
-// library 域对外入口 —— 页面/composition 只从这里 import，勿深挖子路径（测试除外）。
+// library 域对外入口 —— Pages/composition 只从这里 import, 勿深挖子路径(测试除外).
 //
 // 目录:
-//   shell/      通用壳（BookCard、BookListRow）
-//   actions/    卡片操作工厂（read / translate）
-//   display/    展示辅助（封面、徽标）
-//   page/       书架页编排（网格、工具条、viewPort）
-//   categories/ 合集 tab
-//   favorites/  收藏 tab（摘录/笔记）
-//   detail/     书籍详情（shell 壳 + Dialog 容器）
-//   domain/     领域 controller
+//   shell/      通用壳(BookCard, BookListRow)
+//   actions/    卡片Action工厂(read / translate)
+//   display/    展示辅助(封面, 徽标)
+//   page/       书架pages编排(Grid, Toolsentries, viewPort)
+//   categories/ Collection tab
+//   favorites/  Favorite tab(Excerpt/Note)
+//   detail/     Book Details(shell 壳 + Dialog 容器)
+//   domain/     Domain controller
 
 export { BookCard, BookCardActionButton, cardSignatureOf } from "./shell/BookCard.jsx";
 export { BookListRow } from "./shell/BookListRow.jsx";
@@ -78,3 +78,7 @@ export type {
   TranslateDocumentPayload,
   UpdateDocumentPayload,
 } from "./types.js";
+
+
+
+

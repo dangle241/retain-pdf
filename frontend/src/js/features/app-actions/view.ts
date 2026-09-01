@@ -27,5 +27,6 @@ export function resetMissingUploadState({
 }: ResetMissingUploadStateOptions = {}) {
   uploadStatePort?.reset?.({ includePageRange: false });
   resetUploadedFile?.();
-  setText("error-box", "当前上传文件已失效，请重新上传 PDF 后再提交。");
+  setText("error-box", "The current upload has expired. Upload the PDF again before submitting.");
 }
+

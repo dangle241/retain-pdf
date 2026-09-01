@@ -1,5 +1,5 @@
-// pages/detail 对 src/js/* 的唯一出口。
-// DetailApp / components 禁止直接 import ../../js/**；缺符号只改本文件。
+// pages/detail 对 src/js/* 的唯一出口.
+// DetailApp / components 禁止直接 import ../../js/**；缺符号只改booksFiles.
 
 // —— job ——
 export { normalizeJobPayload } from "../../js/job/normalize.js";
@@ -36,3 +36,5 @@ export {
   showDownloadPreparing,
   updateDownloadProgress,
 } from "../../js/utils/download-feedback.js";
+
+

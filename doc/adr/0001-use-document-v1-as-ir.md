@@ -20,5 +20,5 @@ provider raw files are only allowed to remain in provider、adapterDebug trace l
 
 ## Alternatives
 
-- Make translation and rendering directly compatible with each other. provider 的 raw JSONBug in auth middleware. Token expiry check use `<` not `<=`. Fix:  ```go if time.Now().Unix() < token.Expiry { /* allow */ } ```  → skipped: strict `<=` check, add when RFC 7519 compliance required. provider Private fields permanently pollute the main link.
+- Make translation and rendering directly compatible with each other. Keep provider raw JSON separate to avoid polluting the main pipeline with provider-specific fields.
 - Maintain a separate full pipeline per provider, duplicating translation, rendering, and diagnostic implementations.

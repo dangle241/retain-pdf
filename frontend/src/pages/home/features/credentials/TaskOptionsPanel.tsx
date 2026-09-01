@@ -1,7 +1,7 @@
-// 任务选项 tab(对照旧 components/dialogs/browser-credentials-dialog.js 的
-// "task" 面板——公式模式下拉;模型地址/模型名不在旧模板里渲染但
+// 任务选items tab(Side-by-side旧 components/dialogs/browser-credentials-dialog.js 的
+// "task" 面板——Formula Mode下拉;模型地址/模型名不在旧模板里Rendering但
 // dialog-values.js/dialog-sync.js(kept)仍会读写对应字段,这里补上对应的
-// 非受控 ref 容器,保持字段契约完整,不改变可见布局)。
+// 非受控 ref 容器,保持字段契约完整,不改变可见布局).
 
 import { useCredentialsController } from "./useCredentialsController.js";
 import { CREDENTIAL_DOM_IDS } from "./credentials-dom-ids.js";
@@ -21,15 +21,15 @@ export function TaskOptionsPanel({ hidden = false } = {}) {
       <div className="credential-card-grid credential-card-grid-compact">
         <section className="credential-card">
           <div className="credential-card-head">
-            <h3>任务选项</h3>
+            <h3>任务选items</h3>
           </div>
           <label>
             <span className="developer-label">
-              <span>公式模式</span>
+              <span>Formula Mode</span>
             </span>
             <select
               id={BROWSER_IDS.mathMode}
-              aria-label="公式模式"
+              aria-label="Formula Mode"
               defaultValue="direct_typst"
               ref={(node) => { elementsRef.mathModeSelect = node || null; }}
             >
@@ -38,7 +38,7 @@ export function TaskOptionsPanel({ hidden = false } = {}) {
             </select>
           </label>
           {/* 模型地址/模型名不在旧模板可见布局里,但 dialog-values.js/
-              dialog-sync.js 仍读写这两个字段——保留隐藏字段契约,不新增可见 UI。 */}
+              dialog-sync.js 仍读写这两个字段——保留隐藏字段契约,不新增可见 UI. */}
           <input
             id={BROWSER_IDS.modelBaseUrl}
             name="model_base_url"
@@ -58,3 +58,6 @@ export function TaskOptionsPanel({ hidden = false } = {}) {
     </section>
   );
 }
+
+
+

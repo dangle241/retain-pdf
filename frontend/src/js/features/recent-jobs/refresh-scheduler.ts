@@ -48,7 +48,7 @@ export function createRecentJobsRefreshScheduler({
     query = `${nextQuery || ""}`.trim();
     environment.clearTimeout(searchTimer);
     searchTimer = environment.setTimeout(() => {
-      // silent + soft reset：保留旧列表到新结果到达，避免敲搜索整格闪空/LOADING
+      // silent + soft reset: 保留旧List到新结果到达, 避免敲搜索整格闪空/LOADING
       void loadRecentJobs({ reset: true, silent: true, query });
     }, LIBRARY_SEARCH_DEBOUNCE_MS);
   }
@@ -82,3 +82,5 @@ export function createRecentJobsRefreshScheduler({
     updateSearch,
   };
 }
+
+

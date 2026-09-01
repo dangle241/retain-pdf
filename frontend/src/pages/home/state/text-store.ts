@@ -1,12 +1,12 @@
-// home 页文本注册表(id → 文案)store。
+// home pages文books注册表(id → 文案)store.
 //
-// 旧世界 ui/text.js 的 setText(id, value) 是全局 DOM 写入口;React 世界改为
-// 写入本 store,由订阅了对应 id 的组件自行渲染。3a 阶段只有 error-box
+// 旧世界 ui/text.js 的 setText(id, value) yes全局 DOM 写入口;React 世界改为
+// 写入books store,由订阅了对应 id 的组件自行Rendering.3a Stage只有 error-box
 // (inline-error-box)消费;status-detail/job-runtime 等 3b 域的 id 先落在
-// store 里等占位组件接管——setText 回调接口因此对 3b 保持稳定。
+// store 里等占位组件接管——setText 回调接口因此对 3b 保持稳定.
 //
-// 特例口径(镜像 ui/text.js):"error-box" 的 value 允许是 error-diagnostic
-// 对象,展示层用 messageForErrorBox 提取摘要;这里原样存储,由组件解读。
+// 特例口径(镜像 ui/text.js):"error-box" 的 value 允许yes error-diagnostic
+// 对象,展示层用 messageForErrorBox 提取Summary;这里原样存储,由组件解读.
 
 import { createStore, type Store } from "../../../js/app-framework/store.js";
 
@@ -19,8 +19,8 @@ export type ErrorDiagnosticText = {
 };
 
 /**
- * 文本槽位值：普通字符串、error-box 诊断对象，或其它展示载荷。
- * 用 unknown 收口，避免 any；ErrorDiagnosticText 供展示层窄化。
+ * 文books槽位值: 普通字符串, error-box 诊断对象, 或其它展示载荷.
+ * 用 unknown 收口, 避免 any；ErrorDiagnosticText 供展示层窄化.
  */
 export type HomeTextValue = unknown;
 
@@ -80,3 +80,6 @@ export function createHomeTextStore() {
     textOf,
   };
 }
+
+
+

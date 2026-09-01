@@ -1,11 +1,11 @@
-// 右栏：合集成员切换。
+// 右栏: Collection成员切换.
 
 import { cn } from "@/lib/utils";
 
 /**
  * @param {object} props
  * @param {Array<{ collection_id: string, name: string, member: boolean }>} props.collections
- * @param {string} props.collectionsBusy 当前 busy 的 collection_id
+ * @param {string} props.collectionsBusy Current busy 的 collection_id
  * @param {(collectionId: string, nextMember: boolean) => void} props.onToggle
  */
 export function CollectionsPanel({ collections, collectionsBusy, onToggle }) {
@@ -13,7 +13,7 @@ export function CollectionsPanel({ collections, collectionsBusy, onToggle }) {
 
   return (
     <div className="space-y-1.5 border-t border-border/30 pt-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">合集</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Collection</p>
       <div className="flex flex-wrap gap-2">
         {collections.map((c) => (
           <button
@@ -36,3 +36,5 @@ export function CollectionsPanel({ collections, collectionsBusy, onToggle }) {
     </div>
   );
 }
+
+

@@ -1,4 +1,4 @@
-// 组装 HomeServices 对外 bag（HomeApp / useHomeServices 消费）。
+// 组装 HomeServices 对外 bag(HomeApp / useHomeServices 消费).
 
 import type {
   HomeBridge,
@@ -72,7 +72,7 @@ export function buildHomeServices({
       recentJobsStore: library.recentJobsStatePort.store,
       actions: {
         ...library.recentJobActions,
-        // 网格选任务 → 详情翻译 Tab（永不弹 #translation-workflow-dialog）
+        // Grid选任务 → 详情Translation Tab(永不弹 #translation-workflow-dialog)
         selectJob: (jobId: string) => {
           library.libraryController.selectJobForDetail(jobId, {
             findItem: (id) => {
@@ -130,3 +130,5 @@ export function buildHomeServices({
     workflowDialog: views.workflowDialog,
   };
 }
+
+

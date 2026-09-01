@@ -17,19 +17,19 @@ export function summarizeResumePlan(plan) {
     return "";
   }
   if (!plan.can_resume) {
-    return plan.reason || "当前任务暂不可从断点恢复。";
+    return plan.reason || "The current job cannot resume from a checkpoint.";
   }
   const fromStage = firstNonEmptyText(plan.from_stage, plan.resume_from, "checkpoint");
   const workflow = firstNonEmptyText(plan.resume_workflow, plan.workflow);
-  const reruns = Array.isArray(plan.reruns_stages) ? plan.reruns_stages.join("、") : "";
-  const bits = [`可从 ${fromStage} 恢复`];
+  const reruns = Array.isArray(plan.reruns_stages) ? plan.reruns_stages.join(", ") : "";
+  const bits = [`Can resume from ${fromStage} resume`];
   if (workflow) {
     bits.push(`workflow=${workflow}`);
   }
   if (reruns) {
-    bits.push(`重跑 ${reruns}`);
+    bits.push(`rerun ${reruns}`);
   }
-  return bits.join("，");
+  return bits.join(", ");
 }
 
 export function syncRerunAction({
@@ -44,8 +44,8 @@ export function syncRerunAction({
   viewPort.setRerunAction({
     enabled,
     status: statusText || (enabled
-      ? summarizeResumePlan(resumePlan) || "后端支持从当前任务产物创建恢复任务。"
-      : summarizeResumePlan(resumePlan) || "当前任务暂不可从断点恢复。"),
+      ? summarizeResumePlan(resumePlan) || "The backend can create a resumed job from current job artifacts."
+      : summarizeResumePlan(resumePlan) || "The current job cannot resume from a checkpoint."),
   });
   return actions.rerun || "";
 }
@@ -60,7 +60,7 @@ export async function rerunCurrentJob({
 }: any = {}) {
   const actionUrl = syncRerunAction({
     ...rerunContext,
-    statusText: "正在提交恢复任务...",
+    statusText: "Submitting resumed job...",
     viewPort,
     resolveActions,
   });
@@ -68,7 +68,7 @@ export async function rerunCurrentJob({
   if (!actionUrl) {
     syncRerunAction({
       ...rerunContext,
-      statusText: "当前任务暂不可从断点恢复。",
+      statusText: "The current job cannot resume from a checkpoint.",
       viewPort,
       resolveActions,
     });
@@ -80,14 +80,14 @@ export async function rerunCurrentJob({
     if (!nextJobId) {
       syncRerunAction({
         ...rerunContext,
-        statusText: "恢复任务已提交，但响应中没有 job_id。",
+        statusText: "Resume job submitted, but the response did not include job_id.",
         viewPort,
         resolveActions,
       });
       return;
     }
     viewPort.closeDialog();
-    setText?.("error-box", `已创建恢复任务 ${nextJobId}，开始轮询。`);
+    setText?.("error-box", `Created resumed job ${nextJobId}, starting polling.`);
     startPolling?.(nextJobId);
   } catch (error) {
     syncRerunAction({
@@ -98,3 +98,6 @@ export async function rerunCurrentJob({
     });
   }
 }
+
+
+

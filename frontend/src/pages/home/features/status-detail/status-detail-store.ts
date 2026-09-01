@@ -1,20 +1,20 @@
 import { createStore } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-// StatusDetailDialog 的读面 store(蓝图 §1 "新 store"清单)。
+// StatusDetailDialog 的读面 store(蓝图 §1 "新 store"清单).
 //
-// 两个并行段(数据源铁律,蓝图 §1.0 + §0 全局发现):
+// 两个并行段(Data源铁律,蓝图 §1.0 + §0 全局found):
 // - overview 段:headline/runtime/failure/rerun/job/eventsPayload——job/
-//   eventsPayload 是原始数据(不是预拼好的 markup),StageHistoryList/
-//   EventsList 直接从这两个字段用纯函数计算结构化数组(见对应组件文件)。
-// - translation 段:createTranslationState() 状态袋的浅拷贝 + 少量 UI 态
+//   eventsPayload yes原始Data(不yes预拼好的 markup),StageHistoryList/
+//   EventsList 直接从这两个字段用纯函数计算结构化数组(见对应组件Files).
+// - translation 段:createTranslationState() Status袋的浅拷贝 + 少量 UI 态
 //   (itemsLoading/itemDetailLoading/replayLoading/emptyMessage/errorText),
-//   随 translation-data-port.js(kept)每次读写后同步。
+//   随 translation-data-port.js(kept)每次读写后sync.
 //
-// 本 store 与 features/status/status-card-store.js 的 statusCardStore 是两条
+// books store 与 features/status/status-card-store.js 的 statusCardStore yes两entries
 // 平行读路径,不合并——status-detail 自己 fetch(events/diagnostics/
-// resumePlan),写入频率远低于状态卡的 1s 轮询,合并会污染 StatusCard 的高频
-// 订阅快照(蓝图 §1.0 明确铁律)。
+// resumePlan),写入频率远低于Status卡的 1s 轮询,合并会污染 StatusCard 的高频
+// 订阅快照(蓝图 §1.0 明确铁律).
 
 export type StatusDetailHeadline = {
   iconMarkup: string;
@@ -49,16 +49,16 @@ export type StatusDetailRerun = {
   status: string;
 };
 
-/** 原始 job 载荷（StageHistoryList 等直接消费；API 形状宽） */
+/** 原始 job 载荷(StageHistoryList 等直接消费；API 形状宽) */
 export type StatusDetailJobPayload = Record<string, unknown>;
 
-/** 原始 events 载荷（EventsList 直接消费） */
+/** 原始 events 载荷(EventsList 直接消费) */
 export type StatusDetailEventsPayload = {
   items?: unknown[];
   [key: string]: unknown;
 };
 
-/** overview 段：buildStatusDetailSnapshot + job/events 原始载荷 */
+/** overview 段: buildStatusDetailSnapshot + job/events 原始载荷 */
 export type StatusDetailOverview = {
   headline: StatusDetailHeadline;
   runtime: StatusDetailRuntime;
@@ -77,8 +77,8 @@ export type StatusDetailTranslationQuery = {
 };
 
 /**
- * 翻译诊断 summary（嵌套 summary 口袋 + 顶层扩展字段）。
- * TranslationSummary 读 summary.summary.{status_summary,counts,provider_*}。
+ * Translation诊断 summary(嵌套 summary 口袋 + 顶层扩展字段).
+ * TranslationSummary 读 summary.summary.{status_summary,counts,provider_*}.
  */
 export type StatusDetailTranslationSummaryInner = {
   status_summary?: Record<string, unknown>;
@@ -94,7 +94,7 @@ export type StatusDetailTranslationSummary = {
   [key: string]: unknown;
 } | null;
 
-/** Item 列表行（TranslationItemsPanel） */
+/** Item List行(TranslationItemsPanel) */
 export type StatusDetailTranslationListItem = {
   item_id?: string;
   block_type?: string;
@@ -104,7 +104,7 @@ export type StatusDetailTranslationListItem = {
   [key: string]: unknown;
 };
 
-/** 选中 item 详情（TranslationItemDetailPanel） */
+/** 选中 item 详情(TranslationItemDetailPanel) */
 export type StatusDetailTranslationSelectedItem = {
   item_id?: string;
   item?: StatusDetailTranslationListItem | null;
@@ -124,7 +124,7 @@ export type StatusDetailTranslationReplay = {
   [key: string]: unknown;
 } | null;
 
-/** translation 段：createTranslationState 镜像 + UI loading/error */
+/** translation 段: createTranslationState 镜像 + UI loading/error */
 export type StatusDetailTranslation = {
   jobId: string;
   loaded: boolean;
@@ -242,3 +242,7 @@ export function createStatusDetailStore(): StatusDetailStore {
 }
 
 export { EMPTY_OVERVIEW, EMPTY_TRANSLATION };
+
+
+
+

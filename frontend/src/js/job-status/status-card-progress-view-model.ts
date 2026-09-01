@@ -1,4 +1,4 @@
-/** 状态卡 snapshot 中与进度展示相关的字段 */
+/** Status卡 snapshot 中与Progress展示相关的字段 */
 export interface StatusCardProgressSnapshot {
   status?: string;
   progressPercent?: number | null;
@@ -6,7 +6,7 @@ export interface StatusCardProgressSnapshot {
   [key: string]: unknown;
 }
 
-/** selectedProgress / previous 进度分片（stageProgressByKey 项） */
+/** selectedProgress / previous Progressm片(stageProgressByKey items) */
 export interface StatusCardSelectedProgress {
   current?: number | null;
   total?: number | null;
@@ -145,7 +145,7 @@ export function buildStatusCardProgressPresentation({
   const percent = cappedPercentOrNull(rawPercent, selected, status);
   const progressText = displayedCurrent === null || displayedCurrent >= Number(selectedProgress?.current)
     ? selectedProgress?.progressText || ""
-    : `第 ${displayedCurrent}/${total} 页`;
+    : `Page ${displayedCurrent}/${total} pages`;
   return {
     current,
     total,
@@ -160,3 +160,6 @@ export function buildStatusCardProgressPresentation({
     visible: displayedCurrent !== null || (["ocr", "translate", "render", "done"].includes(stageKey) && hasSelectedProgress),
   };
 }
+
+
+

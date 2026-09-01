@@ -1,4 +1,4 @@
-// 底栏：页码（可点跳转）+ 缩放 +/- / 模式默认重置。
+// 底栏: pages码(可点跳转)+ 缩放 +/- / 模式默认重置.
 
 import { useEffect, useState } from "react";
 import {
@@ -18,7 +18,7 @@ export type ReaderZoomHudProps = {
   currentPage: number;
   numPages: number;
   onGoToPage?: (page: number) => void;
-  /** 点百分比时重置到该模式默认缩放 */
+  /** 点百m比时重置到该模式默认缩放 */
   mode?: ReaderZoomMode | string;
 };
 
@@ -30,12 +30,12 @@ export function ReaderZoomHud({
   onGoToPage,
   mode = "compare",
 }: ReaderZoomHudProps) {
-  // zoom 本身就是「占阅读区全宽的比例」：0.5→50%，1→100%
+  // zoom books身就yes"占阅读区全宽的比例": 0.5→50%, 1→100%
   const percent = zoomToDisplayPercent(userZoom);
   const canZoomOut = userZoom > READER_ZOOM_MIN + 0.001;
   const canZoomIn = userZoom < READER_ZOOM_MAX - 0.001;
   const resetZoom = defaultZoomForMode(mode);
-  const resetLabel = "50%（半屏，对照铺满）";
+  const resetLabel = "50%(半屏, Side-by-side铺满)";
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(`${currentPage}`);
@@ -57,7 +57,7 @@ export function ReaderZoomHud({
 
   return (
     <div className="reader-react-hud" data-reader-hud="true">
-      <div className="reader-react-hud-group" aria-label="页码">
+      <div className="reader-react-hud-group" aria-label="pages码">
         {editing ? (
           <form
             className="reader-react-hud-page-form"
@@ -71,7 +71,7 @@ export function ReaderZoomHud({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              aria-label="跳转到页码"
+              aria-label="跳转到pages码"
               value={draft}
               autoFocus
               onChange={(event) => setDraft(event.target.value.replace(/[^\d]/g, ""))}
@@ -90,8 +90,8 @@ export function ReaderZoomHud({
           <button
             type="button"
             className="reader-react-hud-page reader-react-hud-page-btn"
-            aria-label={numPages > 0 ? `跳转页码，当前第 ${currentPage} 页，共 ${numPages} 页` : "页码"}
-            title={numPages > 0 ? "点击输入页码跳转" : undefined}
+            aria-label={numPages > 0 ? `跳转pages码, CurrentPage ${currentPage} pages, total ${numPages} pages` : "pages码"}
+            title={numPages > 0 ? "点击输入pages码跳转" : undefined}
             disabled={!onGoToPage || numPages <= 0}
             onClick={() => {
               if (!onGoToPage || numPages <= 0) return;
@@ -140,3 +140,7 @@ export function ReaderZoomHud({
     </div>
   );
 }
+
+
+
+

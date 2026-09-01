@@ -1,4 +1,4 @@
-// 在 PDF 文本层上监听选区，给出浮条位置与创建批注所需字段。
+// 在 PDF 文books层上监听selection, 给出浮entries位置与Createdannotations所需字段.
 
 import { useCallback, useEffect, useState } from "react";
 import type { RefObject } from "react";
@@ -8,7 +8,7 @@ export type ReaderTextSelection = {
   quote: string;
   page: number;
   pane: ReaderNotePane;
-  /** 视口坐标，用于浮条定位 */
+  /** 视口坐标, 用于浮entriesLocate */
   rect: { left: number; top: number; width: number; height: number };
 };
 
@@ -50,7 +50,7 @@ export function useReaderTextSelection(
         return;
       }
 
-      // 找最近的页节点
+      // 找最近的pages节点
       let node: Node | null = range.commonAncestorContainer;
       if (node.nodeType === Node.TEXT_NODE) {
         node = node.parentElement;
@@ -87,7 +87,7 @@ export function useReaderTextSelection(
     };
 
     const onMouseUp = () => {
-      // 等浏览器完成选区
+      // 等浏览器Doneselection
       window.setTimeout(readSelection, 0);
     };
     const onKeyUp = (event: KeyboardEvent) => {
@@ -96,7 +96,7 @@ export function useReaderTextSelection(
       }
     };
     const onScroll = () => {
-      // 滚动后选区屏幕坐标失效，清浮条（保留浏览器选区）
+      // 滚动后selection屏幕坐标失效, 清浮entries(保留浏览器selection)
       setSelection((prev) => (prev ? null : prev));
     };
 
@@ -113,3 +113,7 @@ export function useReaderTextSelection(
 
   return { selection, clearSelection };
 }
+
+
+
+

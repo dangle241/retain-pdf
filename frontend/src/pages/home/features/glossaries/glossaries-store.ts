@@ -1,18 +1,18 @@
-// GlossariesDialog 的纯视图态 + 与 features/glossaries/controller.js(kept
+// GlossariesDialog 的纯View态 + 与 features/glossaries/controller.js(kept
 // 控制器)对接的 store 驱动 viewPort(蓝图 §3,镜像
-// credentials-view-store.js 的写法)。
+// credentials-view-store.js 的写法).
 //
-// 旧世界 glossary-view-port.js/view.js 全部是 DOM 直写(死,不 import);这里
-// 用同名方法签名重新实现,只是"写"的目的地从 DOM 换成 store,让
-// GlossariesDialog.jsx 系的组件订阅渲染。controller.js(reload/select/save/
-// delete/export/applyImport 等编排逻辑)一行不改地复用。
+// 旧世界 glossary-view-port.js/view.js Allyes DOM 直写(死,不 import);这里
+// 用同名方法签名重新实现,只yes"写"的目的地从 DOM 换成 store,让
+// GlossariesDialog.jsx 系的组件订阅Rendering.controller.js(reload/select/save/
+// delete/export/applyImport 等编排逻辑)一行不改地复用.
 
 import type { DialogStore } from "../../state/dialog-store.js";
 import type { HandlersBag } from "../../composition/types.js";
 import { createStore } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-/** 列表项（API 列表摘要） */
+/** Listitems(API ListSummary) */
 export type GlossaryListItem = {
   glossary_id?: string;
   name?: string;
@@ -22,7 +22,7 @@ export type GlossaryListItem = {
   [key: string]: unknown;
 };
 
-/** 编辑器行（受控表格） */
+/** Edit器行(受控表格) */
 export type GlossaryEntryRow = {
   source: string;
   target: string;
@@ -36,7 +36,7 @@ export type GlossaryDraft = {
   entries: GlossaryEntryRow[];
 };
 
-/** save() 读取的编辑器 payload（含 preserve 语义） */
+/** save() 读取的Edit器 payload(含 preserve 语义) */
 export type GlossaryEditorPayload = {
   name: string;
   entries: Array<{
@@ -99,10 +99,10 @@ function normalizeEntryForRow(entry: Partial<GlossaryEntryRow> = {}): GlossaryEn
 }
 
 // 抄自 src/js/features/glossaries/view.js:155-184
-// (readGlossaryEditorPayload)——尤其第 165 行的 preserve 语义必须原样保留:
-// level==="preserve" 且用户没有手填译文时,target 用 source 回填(“保留原词”
-// 语义,不是“译文缺失”);level 不是 preserve 时留空则视为“漏填译文”,计入
-// skippedMissingTarget,由 controller.js 的 save() 拦截并提示错误。
+// (readGlossaryEditorPayload)——尤其Page 165 行的 preserve 语义必须原样保留:
+// level==="preserve" 且用户没有手填Translation时,target 用 source 回填(“保留原词”
+// 语义,不yes“Translation缺失”);level 不yes preserve 时留空则视为“漏填Translation”,计入
+// skippedMissingTarget,由 controller.js 的 save() 拦截并提示错误.
 function readEditorPayloadFromDraft(draft: GlossaryDraft): GlossaryEditorPayload {
   const entries: GlossaryEditorPayload["entries"] = [];
   const skippedMissingTarget: string[] = [];
@@ -128,7 +128,7 @@ function readEditorPayloadFromDraft(draft: GlossaryDraft): GlossaryEditorPayload
     });
   }
   return {
-    name: `${draft.name || ""}`.trim() || "未命名术语表",
+    name: `${draft.name || ""}`.trim() || "Untitled glossary",
     entries,
     skippedMissingTarget,
   };
@@ -196,11 +196,11 @@ export function createGlossariesViewFeature({
     },
   });
 
-  // controller.js 在装配时同步调用一次 feature.bindEvents()(见
+  // controller.js 在装配时sync调用一次 feature.bindEvents()(见
   // composition.js)捕获 open/close/reload/selectGlossary/createNew/addRow/
   // save/deleteCurrent/exportCurrent/showImport/hideImport/applyImport 等
-  // 处理函数——React 世界没有旧 view.js 那种全局 DOM 监听步骤,JSX 按钮的
-  // onClick 直接从这里取用(见 useGlossariesController.js)。
+  // 处理函数——React 世界没有旧 view.js 那种全局 DOM 监听step骤,JSX 按钮的
+  // onClick 直接从这里取用(见 useGlossariesController.js).
   const handlersRef: { current: HandlersBag | null } = { current: null };
 
   const viewPort = {
@@ -225,3 +225,7 @@ export function createGlossariesViewFeature({
     handlersRef,
   };
 }
+
+
+
+

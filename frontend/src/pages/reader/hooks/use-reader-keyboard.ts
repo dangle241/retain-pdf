@@ -1,6 +1,6 @@
-// 阅读器键盘快捷键（输入框内不抢键）。
-// j/↓/PageDown 下页 · k/↑/PageUp 上页 · Home/End 首末页
-// +/- 缩放 · 0 重置模式默认缩放 · 1/2/3 原文/译文/对照
+// Reader键盘快捷键(输入框内不抢键).
+// j/↓/PageDown 下pages · k/↑/PageUp 上pages · Home/End 首末pages
+// +/- 缩放 · 0 重置模式默认缩放 · 1/2/3 Source/Translation/Side-by-side
 
 import { useEffect } from "react";
 import type { ReaderMode } from "./use-reader-session.js";
@@ -99,7 +99,7 @@ export function useReaderKeyboard(api: ReaderKeyboardApi) {
         return;
       }
 
-      // 翻页
+      // 翻pages
       if (numPages <= 0) {
         return;
       }
@@ -138,3 +138,6 @@ export function useReaderKeyboard(api: ReaderKeyboardApi) {
     goToPage,
   ]);
 }
+
+
+

@@ -1,4 +1,4 @@
-// React-pdf 阅读器视图：逻辑在 useReaderReactController；工具为悬浮窗（对齐 legacy 四件套）。
+// React-pdf ReaderView: 逻辑在 useReaderReactController；Tools为悬浮窗(对齐 legacy 四件套).
 
 import { useCallback } from "react";
 import { useReaderReactController } from "./hooks/use-reader-react-controller.js";
@@ -26,17 +26,17 @@ export function ReaderAppReactPdf() {
     tools.close();
   }, [tools]);
 
-  // citation.page_idx 0 基；兼容 page / block_id(p00N)；阅读器页码 1 基
+  // citation.page_idx 0 基；兼容 page / block_id(p00N)；Readerpages码 1 基
   const jumpCitation = useCallback((citation: {
     page_idx?: number;
     page?: number;
     block_id?: string;
   } | number) => {
-    // 分支/切会话锁定期：绝不跳 PDF（体感像整页刷新+跳转）
+    // branch/切会话锁定期: 绝不跳 PDF(体感像整pages刷新+跳转)
     if (isReaderAiNavigationLocked()) return;
     let page1: number | null = null;
     if (typeof citation === "number") {
-      // 约定：直接传数字时为 0 基 idx
+      // 约定: 直接传数字时为 0 基 idx
       if (Number.isFinite(citation) && citation >= 0) {
         page1 = Math.floor(citation) + 1;
       }
@@ -44,7 +44,7 @@ export function ReaderAppReactPdf() {
       const raw = citation.page_idx ?? citation.page;
       if (raw !== undefined && raw !== null && `${raw}`.trim() !== "" && Number.isFinite(Number(raw))) {
         const n = Number(raw);
-        // page_idx 常为 0 基；若像 1..N 且 block 也像 1 基则仍按 0 基 +1（与 FTS 一致）
+        // page_idx 常为 0 基；若像 1..N 且 block 也像 1 基则仍按 0 基 +1(与 FTS 一致)
         page1 = Math.floor(n) + 1;
       } else {
         const m = `${citation.block_id || ""}`.match(/(?:^|[^0-9])p0*([1-9]\d*)(?:-|_|\b)/i);
@@ -64,7 +64,7 @@ export function ReaderAppReactPdf() {
         percent={boot.percent}
       />
 
-      {/* 整页阅读器：右上角关闭 → 回主页（替代旧 iframe 宿主关闭钮） */}
+      {/* 整pagesReader: 右上角Close → 回主pages(替代旧 iframe 宿主Close钮) */}
       <ReaderCloseHome />
 
       <ReaderModeTabs
@@ -160,3 +160,6 @@ export function ReaderAppReactPdf() {
     </div>
   );
 }
+
+
+

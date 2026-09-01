@@ -1,5 +1,5 @@
-// 根据共享滚动壳内阅读焦点线估算当前页（1-based）。
-// 与 measurePageScrollProgress / 滚动锚点使用同一 pickPageAtFocus 规则。
+// 根据total享滚动壳内阅读焦点线估算Current page(1-based).
+// 与 measurePageScrollProgress / 滚动锚点使用同一 pickPageAtFocus 规则.
 
 import { useEffect, useState } from "react";
 import type { RefObject } from "react";
@@ -18,7 +18,7 @@ export function useCurrentPage(
   enabled = true,
   /** 缩放 / 模式导致节点变化时重绑 */
   observeKey: string | number = "",
-  /** 只看某一栏的页；空则看全部 */
+  /** 只看某一栏的pages；空则看All */
   pane?: ReaderPaneId | null,
 ): number {
   const [currentPage, setCurrentPage] = useState(1);
@@ -90,3 +90,6 @@ export function useCurrentPage(
 
   return currentPage;
 }
+
+
+

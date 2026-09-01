@@ -1,21 +1,21 @@
-// AI 气泡正文的命令式渲染层:从旧 src/js/reader/ai/chat.js 原样搬运语义——
-// 流式 Markdown 节流渲染(~90ms)、[n] 引用按钮就地注入、引用脚注列表、
-// 字符打字机动画、tool 事件文案。React 只渲染气泡骨架(article/label/body),
-// 正文内容(Markdown DOM/引用按钮)不进虚拟 DOM,全部经 message view 句柄写入。
+// AI 气泡正文的命令式Rendering层:从旧 src/js/reader/ai/chat.js 原样搬运语义——
+// 流式 Markdown 节流Rendering(~90ms), [n] 引用按钮就地注入, 引用脚注List, 
+// 字符打字机动画, tool Events文案.React 只Rendering气泡骨架(article/label/body),
+// 正文内容(Markdown DOM/引用按钮)不进虚拟 DOM,All经 message view 句柄写入.
 //
 // message view 句柄:{ root, body } 指向 React 已提交的气泡元素
-// (root=article,body=.reader-ai-message-body-el),由组件 ref 回调填充。
+// (root=article,body=.reader-ai-message-body-el),由组件 ref 回调填充.
 
 import { renderAiMarkdownFragment } from "../../../../js/reader/markdown-render.js";
 import type { PageAnchor } from "../../../../js/reader/types.js";
 
-// agentic 工具事件的语义化文案(/api/v1/ai/ask 的 tool 事件)
-// 整本问答前端会过滤 list_documents；文案也避免「图书馆」感
+// agentic ToolsEvents的语义化文案(/api/v1/ai/ask 的 tool Events)
+// 整books问答前端会过滤 list_documents；文案也避免"Library"感
 const TOOL_EVENT_LABELS: Record<string, string> = {
-  list_documents: "确认文档信息",
-  read_blocks: "阅读相关段落",
-  search_favorites: "查找收藏",
-  search_fulltext: "检索文档内容",
+  list_documents: "确认Documents信息",
+  read_blocks: "阅读相关Paragraph",
+  search_favorites: "查找Favorite",
+  search_fulltext: "SearchDocuments内容",
 };
 
 const PROGRESS_CLASS = "reader-ai-message-progress";
@@ -60,7 +60,7 @@ export interface RenderRichAnswerOptions {
 }
 
 function nowMs() {
-  // Date.now() 在部分受限环境不可用,退化为 0(节流退化为每次都渲染,仍正确)
+  // Date.now() 在部m受限环境不Ready,退化为 0(节流退化为每次都Rendering,仍正确)
   try {
     return Date.now();
   } catch (_err) {
@@ -100,21 +100,21 @@ export function formatCitations(citations = []) {
   if (!Array.isArray(citations) || !citations.length) {
     return "";
   }
-  return `\n\n引用：\n${citations
+  return `\n\n引用: \n${citations
     .slice(0, 4)
-    .map((item, index) => `${index + 1}. ${item.title || "相关片段"}${item.page ? ` · 第 ${item.page} 页` : ""}${item.snippet ? `：${item.snippet}` : ""}`)
+    .map((item, index) => `${index + 1}. ${item.title || "Relevant snippet"}${item.page ? ` · Page ${item.page} pages` : ""}${item.snippet ? `: ${item.snippet}` : ""}`)
     .join("\n")}`;
 }
 
 export function describeToolEvent(event: AiToolEvent = {}) {
   const tool = `${event?.tool || ""}`.trim();
-  // 整本问答不展示「浏览图书馆」类进度
+  // 整books问答不展示"浏览Library"类Progress
   if (tool === "list_documents") {
     return "";
   }
   const label = TOOL_EVENT_LABELS[tool] || tool;
-  const action = label ? `正在${label}…` : "正在检索文档…";
-  // 不再强调「第 n 轮」，更像普通聊天进度
+  const action = label ? `正在${label}...` : "Searching documents...";
+  // 不再强调"Page n 轮", 更像普通聊天Progress
   return action;
 }
 
@@ -129,7 +129,7 @@ export function setMessageProgress(view, on) {
   view?.root?.classList?.toggle?.(PROGRESS_CLASS, Boolean(on));
 }
 
-// 字符打字机动画(非流式回答且无 agentic 引用时保留的旧观感)
+// 字符打字机动画(非流式回答且None agentic 引用时保留的旧观感)
 export function streamMessageText(view, text = "", citations = [], { chunkSize = 3, intervalMs = 12 }: StreamMessageOptions = {}) {
   if (!view?.body) {
     return Promise.resolve();
@@ -158,7 +158,7 @@ function clipSnippet(text = "", maxLength = 120) {
   if (normalized.length <= maxLength) {
     return normalized;
   }
-  return `${normalized.slice(0, maxLength).trim()}…`;
+  return `${normalized.slice(0, maxLength).trim()}...`;
 }
 
 function createCitationButton(documentRef, { className, text, citation, jumpToCitation }) {
@@ -172,9 +172,9 @@ function createCitationButton(documentRef, { className, text, citation, jumpToCi
   return button;
 }
 
-// 遍历容器内的文本节点,把 [n] 标记就地替换为可点击引用按钮。
-// 与 Markdown 渲染解耦:无论正文是 marked 产出的 DOM 还是纯文本回退,都能加引用。
-// 跳过 code/pre 内的文本(代码里的 [n] 不是引用)。
+// 遍历容器内的文books节点,把 [n] 标记就地替换为可点击引用按钮.
+// 与 Markdown Rendering解耦:None论正文yes marked 产出的 DOM 还yes纯文books回退,都能加引用.
+// 跳过 code/pre 内的文books(代码里的 [n] 不yes引用).
 function injectCitationButtons(container, citationByRef, documentRef, jumpToCitation) {
   if (!citationByRef.size || !container?.querySelectorAll) {
     return;
@@ -219,8 +219,8 @@ function injectCitationButtons(container, citationByRef, documentRef, jumpToCita
   }
 }
 
-// 把答案文本渲染进气泡:优先 Markdown(浏览器),marked 不可用时回退纯文本节点。
-// 随后注入 [n] 引用按钮与引用脚注列表。全程 best-effort,任何一步失败都降级。
+// 把Answer文booksRendering进气泡:优先 Markdown(浏览器),marked 不Ready时回退纯文books节点.
+// 随后注入 [n] 引用按钮与引用脚注List.全程 best-effort,任何一stepFailed都降级.
 export async function renderRichAnswer(view, text = "", citations = [], { jumpToCitation = null }: RenderRichAnswerOptions = {}) {
   const body = view?.body;
   if (!body) {
@@ -234,10 +234,10 @@ export async function renderRichAnswer(view, text = "", citations = [], { jumpTo
     }
   }
 
-  // 非 agentic 引用(本地 Markdown 检索的标题式引用)作为尾部"引用："文本块保留
+  // 非 agentic 引用(books地 Markdown Search的Title式引用)作为尾部"引用: "文books块保留
   const plainCitationText = citationByRef.size ? "" : formatCitations(citations);
 
-  // 1) 正文:Markdown → fragment,失败则纯文本
+  // 1) 正文:Markdown → fragment,Failed则纯文books
   let rendered = false;
   if (typeof body.replaceChildren === "function" && documentRef.createElement) {
     try {
@@ -258,7 +258,7 @@ export async function renderRichAnswer(view, text = "", citations = [], { jumpTo
   // 2) [n] 引用按钮就地注入(解耦 marked)
   injectCitationButtons(body, citationByRef, documentRef, jumpToCitation);
 
-  // 3) 引用脚注列表(挂在气泡 article 上,与正文平级)
+  // 3) 引用脚注List(挂在气泡 article 上,与正文平级)
   const messageEl = view.root;
   if (!citationByRef.size || typeof messageEl?.appendChild !== "function") {
     return;
@@ -268,20 +268,20 @@ export async function renderRichAnswer(view, text = "", citations = [], { jumpTo
   footer.className = "reader-ai-citations";
   for (const citation of citationByRef.values()) {
     const pageIdx = Number(citation.page_idx);
-    const pageLabel = Number.isFinite(pageIdx) && pageIdx >= 0 ? ` · 第 ${pageIdx + 1} 页` : "";
+    const pageLabel = Number.isFinite(pageIdx) && pageIdx >= 0 ? ` · Page ${pageIdx + 1} pages` : "";
     footer.appendChild(createCitationButton(documentRef, {
       citation,
       className: "reader-ai-citation-item",
       jumpToCitation,
-      text: `[${citation.ref}] ${clipSnippet(citation.snippet || "相关片段")}${pageLabel}`,
+      text: `[${citation.ref}] ${clipSnippet(citation.snippet || "Relevant snippet")}${pageLabel}`,
     }));
   }
   messageEl.appendChild(footer);
 }
 
-// 流式期间的 Markdown 增量渲染:按时间节流(~90ms),避免逐 token 重解析卡顿。
-// 返回 { push(fullText), stop() }:push 排入最新累积文本,stop 取消挂起的节流渲染
-// (finalize 前调用,避免晚触发覆盖引用按钮)。
+// 流式期间的 Markdown 增量Rendering:按Time节流(~90ms),避免逐 token 重parse卡顿.
+// 返回 { push(fullText), stop() }:push 排入最新累积文books,stop Cancel挂起的节流Rendering
+// (finalize 前调用,避免晚触发覆盖引用按钮).
 export function createStreamingMarkdownRenderer(view, throttleMs = 90) {
   let latest = "";
   let rendering = false;
@@ -298,7 +298,7 @@ export function createStreamingMarkdownRenderer(view, throttleMs = 90) {
     dirty = false;
     lastAt = nowMs();
     const text = latest;
-    // 流式期间只渲染正文 Markdown,引用按钮/脚注留到 finalize
+    // 流式期间只Rendering正文 Markdown,引用按钮/脚注留到 finalize
     await renderRichAnswer(view, text, [], {});
     rendering = false;
     if (dirty) {
@@ -331,3 +331,7 @@ export function createStreamingMarkdownRenderer(view, throttleMs = 90) {
     },
   };
 }
+
+
+
+

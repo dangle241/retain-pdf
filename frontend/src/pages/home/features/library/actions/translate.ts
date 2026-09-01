@@ -1,7 +1,7 @@
-// BookCard「翻译」动作 —— 独立模块，改翻译入口只动本文件。
+// BookCard"Translation"动作 —— 独立模块, 改Translation入口只动booksFiles.
 //
-// 默认不上卡片；由调用方显式 concat。
-// 展示条件：馆藏未翻译 或 job 失败，且有 document_id + onTranslate。
+// 默认不上卡片；由调用方显式 concat.
+// 展示entries件: LibraryNot translated 或 job Failed, 且有 document_id + onTranslate.
 
 import type { BookCardAction, BookCardActionHandlers, LibraryCardItem } from "../types.js";
 import { isLibraryOnlyItem } from "../../../composition/external.js";
@@ -29,7 +29,7 @@ export function buildTranslateBookCardAction(
 
   return [{
     id: BOOK_CARD_ACTION_TRANSLATE,
-    label: "翻译",
+    label: "Translation",
     icon: "languages",
     className: "book-card-action book-card-action-translate",
     onClick: (_event, current) => {
@@ -37,3 +37,7 @@ export function buildTranslateBookCardAction(
     },
   }];
 }
+
+
+
+

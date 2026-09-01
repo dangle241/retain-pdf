@@ -38,7 +38,7 @@ Model config fields optional:
 - provider: optional, default deepseek, supports deepseek / openai.
 - model: optional; DeepSeek default is deepseek-chat.
 - `api_key`: Optional; frontend value takes precedence. Backend does not write. job snapshot、events or return body.
-- `base_url`: Optional,DeepSeek 默认 `https://api.deepseek.com/v1`。
+- `base_url`: Optional,DeepSeek default is `https://api.deepseek.com/v1`.
 
 ## Response
 
@@ -67,7 +67,7 @@ Model config fields optional:
 
 Version 1 process:
 
-1. 根据 `job_id` Prioritize reading local structured translation artifacts.`jobs/{job_id}/translated/translation-manifest.json` and the pages it references payload。
+1. Based on `job_id`, prioritize reading local structured translation artifacts from `jobs/{job_id}/translated/translation-manifest.json` and the referenced page payloads.
 2. From each page payload, extract page_idx/page_number, title, role, and render_markdown/translated_text to generate page-aware chunks.
 3. If structured translation output missing or empty, then fallback Go to Published Markdown：`jobs/{job_id}/md/full.md`, split by headings and paragraphs chunk。
 4. Select retrieval strategy based on user query:

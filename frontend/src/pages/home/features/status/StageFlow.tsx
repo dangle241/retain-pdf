@@ -1,9 +1,9 @@
-// 阶段流程条(蓝图 §2 features/status/;镜像 job-status-card-stage-flow.js
+// StageWorkflowentries(蓝图 §2 features/status/;镜像 job-status-card-stage-flow.js
 // 的 syncStageFlow 语义,DOM 契约逐 id/class 保留——smoke 依赖
-// .status-stage-step[data-stage-key][aria-selected])。
+// .status-stage-step[data-stage-key][aria-selected]).
 //
-// 重试操作不放在阶段 pill 上（拥挤、易顶歪布局），由 StatusCardEmbedded
-// 在进度文案行右侧按「当前选中阶段」单独渲染。
+// RetryAction不放在Stage pill 上(拥挤, 易顶歪布局), 由 StatusCardEmbedded
+// 在Progress文案行右侧按"Current选中Stage"单独Rendering.
 
 import { useStatusCardIds } from "./status-card-ids-context.js";
 import {
@@ -13,7 +13,7 @@ import {
   statusStageIndex,
 } from "../../composition/external.js";
 
-/** @deprecated 重试已迁出 StageFlow；保留类型以免旧 import 断裂 */
+/** @deprecated Retry已迁出 StageFlow；保留Type以免旧 import 断裂 */
 export type StageFlowRetryAction = {
   label: string;
   enabled: boolean;
@@ -27,7 +27,7 @@ type StageFlowProps = {
   onSelectStage?: (stageKey: string) => void;
   /** 覆盖上下文 id；默认走 StatusCardIdsContext */
   id?: string;
-  /** @deprecated 忽略；重试由外层进度区渲染 */
+  /** @deprecated 忽略；Retry由外层Progress区Rendering */
   stageRetries?: Partial<Record<string, StageFlowRetryAction | null | undefined>>;
 };
 
@@ -44,7 +44,7 @@ export function StageFlow({
   const activeIndex = statusStageIndex(normalized);
 
   return (
-    <div id={flowId || undefined} className="status-stage-flow" role="tablist" aria-label="任务流程">
+    <div id={flowId || undefined} className="status-stage-flow" role="tablist" aria-label="任务Workflow">
       {STATUS_STAGE_FLOW.map((stageKey) => {
         const stepIndex = statusStageIndex(stageKey);
         const isDone = activeIndex >= 0 && stepIndex >= 0 && stepIndex < activeIndex;
@@ -78,3 +78,7 @@ export function StageFlow({
     </div>
   );
 }
+
+
+
+

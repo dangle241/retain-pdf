@@ -1,7 +1,7 @@
-// 主页「收藏」tab：跨书摘录/笔记列表。
+// 主pages"Favorite"tab: 跨书Excerpt/NoteList.
 //
-// 与「合集」区分：合集 = 文档分组；收藏 = 阅读器里标的句子/图表/笔记。
-// 首版：拉全量 favorites → 空态 / 列表；点一项带锚点打开阅读器。
+// 与"Collection"区m: Collection = Documentsm组；Favorite = Reader里标的Sentence/Figure/Note.
+// 首版: 拉全量 favorites → 空态 / List；点一items带锚点打开Reader.
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -28,16 +28,16 @@ type FavoriteItem = {
 
 function kindLabel(kind: string) {
   const k = `${kind || ""}`.trim();
-  if (k === "figure") return "图表";
-  if (k === "data") return "数据";
-  if (k === "sentence") return "摘录";
-  return k || "摘录";
+  if (k === "figure") return "Figure";
+  if (k === "data") return "Data";
+  if (k === "sentence") return "Excerpt";
+  return k || "Excerpt";
 }
 
 function formatPage(pageIdx: unknown) {
   const n = Number(pageIdx);
   if (!Number.isFinite(n) || n < 0) return "";
-  return `第 ${n + 1} 页`;
+  return `Page ${n + 1} pages`;
 }
 
 function openFavoriteInReader(item: FavoriteItem): boolean {
@@ -77,7 +77,7 @@ export function FavoritesView() {
         setItems(list);
       })
       .catch((err: { message?: string }) => {
-        setError(err?.message || "读取收藏失败，请稍后重试。");
+        setError(err?.message || "Failed to load favorites. Please retry later.");
         setItems([]);
       })
       .finally(() => setLoading(false));
@@ -88,19 +88,19 @@ export function FavoritesView() {
   }, [reload]);
 
   return (
-    <section id="favorites-view" className="library-view favorites-view" aria-label="收藏">
+    <section id="favorites-view" className="library-view favorites-view" aria-label="Favorite">
       <div className="favorites-head">
-        <h2 className="favorites-title">我的收藏</h2>
-        <p className="favorites-subtitle">阅读时选中文字即可收藏，在这里统一回看</p>
+        <h2 className="favorites-title">My Favorites</h2>
+        <p className="favorites-subtitle">Select text while reading to save favorites, then review them here.</p>
       </div>
 
       {loading ? (
-        <div className="events-empty" id="favorites-loading">正在加载收藏…</div>
+        <div className="events-empty" id="favorites-loading">Loading favorites...</div>
       ) : error ? (
         <div className="events-empty" id="favorites-error" role="alert">
           <p>{error}</p>
           <button type="button" className="app-button favorites-retry-btn" onClick={() => reload()}>
-            重试
+            Retry
           </button>
         </div>
       ) : items.length === 0 ? (
@@ -108,15 +108,15 @@ export function FavoritesView() {
           id="favorites-empty"
           className="favorites-empty"
           instrument="flask"
-          title="还没有收藏"
-          hint="打开一本书，选中段落或图表后点「收藏」，之后就能在这里快速跳回原文。"
+          title="No favorites yet"
+          hint="打开一books书, 选中Paragraph或Figure后点"Favorite", 之后就能在这里快速跳回Source."
         >
           <button
             type="button"
             className="app-button empty-state-action"
             onClick={() => services.workflowDialog.requestOpenUpload()}
           >
-            上传 PDF
+            Upload PDF
           </button>
         </EmptyState>
       ) : (
@@ -135,7 +135,7 @@ export function FavoritesView() {
                   data-favorite-id={id}
                   onClick={() => {
                     if (!openFavoriteInReader(item)) {
-                      toast.error("无法打开：缺少关联书籍信息");
+                      toast.error("Cannot打开: 缺少关联书籍信息");
                     }
                   }}
                 >
@@ -143,7 +143,7 @@ export function FavoritesView() {
                     <span className="favorites-card-kind">{kind}</span>
                     {page ? <span className="favorites-card-page">{page}</span> : null}
                   </div>
-                  <p className="favorites-card-quote">{quote || "（无摘录文本）"}</p>
+                  <p className="favorites-card-quote">{quote || "(NoneExcerpt文books)"}</p>
                   {note ? <p className="favorites-card-note">{note}</p> : null}
                 </button>
               </li>
@@ -154,3 +154,8 @@ export function FavoritesView() {
     </section>
   );
 }
+
+
+
+
+

@@ -1,4 +1,4 @@
-// 统一空状态：科学仪器图标 + 标题 + 说明
+// 统一空Status: 科学仪器图标 + Title + 说明
 
 import type { ReactNode } from "react";
 import { InstrumentIcon, type InstrumentName } from "./InstrumentIcon.jsx";
@@ -31,3 +31,4 @@ export function EmptyState({
     </div>
   );
 }
+

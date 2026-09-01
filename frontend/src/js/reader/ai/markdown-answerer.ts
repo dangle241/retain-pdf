@@ -21,7 +21,7 @@ function tokenize(text = "") {
 
 function splitMarkdownSections(markdown = "") {
   const sections = [];
-  let currentTitle = "文档开头";
+  let currentTitle = "Document start";
   let current = [];
   for (const line of `${markdown}`.split(/\r?\n/)) {
     const heading = line.match(/^(#{1,4})\s+(.+?)\s*$/);
@@ -61,13 +61,13 @@ function excerpt(text = "", maxLength = 420) {
 
 function buildAnswer(question, sections) {
   if (!sections.length) {
-    return "我没有在当前 Markdown 里找到足够相关的片段。可以换一个更具体的问题，或确认这个任务已经生成 Markdown。";
+    return "I could not find enough relevant snippets in the current Markdown. Try a more specific question, or make sure this job has generated Markdown.";
   }
   const lines = [
-    "我先基于当前 Markdown 找到这些相关片段：",
-    ...sections.map((section, index) => `${index + 1}. ${section.title}：${excerpt(section.text)}`),
+    "I found these relevant snippets from the current Markdown first: ",
+    ...sections.map((section, index) => `${index + 1}. ${section.title}: ${excerpt(section.text)}`),
     "",
-    `问题：${question}`,
+    `Question: ${question}`,
   ];
   return lines.join("\n");
 }
@@ -91,9 +91,9 @@ export function createReaderMarkdownAnswerer({
   async function answer({ jobId = "", question = "", scope = "document", context = null }: any = {}) {
     const source = await ensureLoaded(jobId);
     if (!source) {
-      throw new Error("当前任务还没有可用于问答的 Markdown。");
+      throw new Error("The current job does not yet have Markdown ready for Q&A.");
     }
-    const tokens = tokenize(`${question} ${context?.page ? `第 ${context.page} 页` : ""}`);
+    const tokens = tokenize(`${question} ${context?.page ? `Page ${context.page} pages` : ""}`);
     const sections = splitMarkdownSections(source)
       .map((section) => ({
         ...section,
@@ -114,3 +114,7 @@ export function createReaderMarkdownAnswerer({
     ensureLoaded,
   };
 }
+
+
+
+

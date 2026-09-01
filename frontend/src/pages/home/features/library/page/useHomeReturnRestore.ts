@@ -1,6 +1,6 @@
-// 从阅读器返回主页后：恢复 tab 滚动位置。
-// - bfcache（pageshow.persisted）：DOM 完好，清掉 pending 即可
-// - 普通 reload：列表有数据后再 apply scroll（避免高度为 0 时写 scrollTop 无效）
+// 从Reader返回主pages后: resume tab 滚动位置.
+// - bfcache(pageshow.persisted): DOM 完好, 清掉 pending 即可
+// - 普通 reload: List有Data后再 apply scroll(避免高度为 0 时写 scrollTop None效)
 
 import { useEffect, useRef } from "react";
 import {
@@ -26,12 +26,12 @@ export function readInitialLibraryTabFromReturn(): string {
 }
 
 /**
- * @param ready 图书馆列表已有内容（或合集/收藏视图已挂载）时再恢复滚动
+ * @param ready LibraryList已有内容(或Collection/FavoriteView已挂载)时再resume滚动
  */
 export function useHomeReturnRestore(ready: boolean) {
   const restoredRef = useRef(false);
 
-  // bfcache：整页从缓存唤起，滚动本来就在，丢掉 pending 避免二次跳动
+  // bfcache: 整pages从缓存唤起, 滚动books来就在, 丢掉 pending 避免二次跳动
   useEffect(() => {
     function onPageShow(event: PageTransitionEvent) {
       if (event.persisted) {
@@ -51,7 +51,7 @@ export function useHomeReturnRestore(ready: boolean) {
       restoredRef.current = true;
       return;
     }
-    // 无有效滚动也清掉，避免脏数据
+    // None有效滚动也清掉, 避免脏Data
     if (
       state.libraryScrollTop <= 0
       && state.panelScrollTop <= 0
@@ -66,14 +66,18 @@ export function useHomeReturnRestore(ready: boolean) {
     state = consumeHomeReturnState();
     if (!state) return;
 
-    // 双 rAF：等布局 / 图片占位后再设 scrollTop
+    // 双 rAF: 等布局 / 图片占位后再设 scrollTop
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         applyHomeReturnScroll(state!);
-        // 列表异步增高时再补一次
+        // List异step增高时再补一次
         window.setTimeout(() => applyHomeReturnScroll(state!), 80);
         window.setTimeout(() => applyHomeReturnScroll(state!), 320);
       });
     });
   }, [ready]);
 }
+
+
+
+

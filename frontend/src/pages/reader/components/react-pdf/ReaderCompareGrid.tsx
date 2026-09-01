@@ -12,9 +12,9 @@ export type ReaderCompareGridProps = {
   shellEl: HTMLElement | null;
   userZoom: number;
   compareMode: boolean;
-  /** 阅读区全宽（shell），用于 zoom% 相对整屏计算 */
+  /** 阅读区全宽(shell), 用于 zoom% 相对整屏计算 */
   shellWidth: number;
-  /** @deprecated 保留兼容，页宽不再用半栏 */
+  /** @deprecated 保留兼容, pages宽不再用半栏 */
   compareColWidth?: number;
   rowHeights?: PageRowHeights;
   mountSource: boolean;
@@ -76,8 +76,8 @@ export function ReaderCompareGrid(props: ReaderCompareGridProps): JSX.Element {
             onMetrics={onMetrics}
             emptyLabel={
               sourceOnly
-                ? "源文件不可用：该文档没有可读取的源 PDF。"
-                : "暂无原文 PDF"
+                ? "源Files不Ready: 该Documents没有可读取的Source PDF."
+                : "No Source PDF"
             }
             onNumPagesChange={onNumPagesChange}
           />
@@ -93,7 +93,7 @@ export function ReaderCompareGrid(props: ReaderCompareGridProps): JSX.Element {
             pageWidthOverride={shellWidth}
             rowHeights={compareMode ? rowHeights : undefined}
             onMetrics={onMetrics}
-            emptyLabel="暂无译文 PDF"
+            emptyLabel="No Translation PDF"
             onNumPagesChange={onNumPagesChange}
           />
         ) : null}
@@ -101,3 +101,7 @@ export function ReaderCompareGrid(props: ReaderCompareGridProps): JSX.Element {
     </div>
   );
 }
+
+
+
+

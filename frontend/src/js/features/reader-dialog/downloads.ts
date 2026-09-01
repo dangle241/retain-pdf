@@ -15,9 +15,9 @@ export function summarizeDownloadProgress(receivedBytes, totalBytes, percent) {
   if (Number.isFinite(totalBytes) && totalBytes > 0) {
     const totalText = formatTransferSize(totalBytes);
     const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
-    return `正在下载 ${receivedText} / ${totalText} (${safePercent.toFixed(0)}%)`;
+    return `Downloading ${receivedText} / ${totalText} (${safePercent.toFixed(0)}%)`;
   }
-  return receivedText ? `正在下载 ${receivedText}` : "正在下载...";
+  return receivedText ? `Downloading ${receivedText}` : "Downloading...";
 }
 
 export async function downloadProtectedResource(
@@ -34,14 +34,14 @@ export async function downloadProtectedResource(
     return;
   }
   if (typeof onBusy === "function") {
-    onBusy(true, "下载中...");
+    onBusy(true, "Downloading...");
   }
   try {
     showDownloadPreparing(suggestedName);
     const resp = await fetchProtected(url);
     if (!resp.ok) {
       const text = await resp.text();
-      const error: any = new Error(`下载失败: ${resp.status} ${text || "unknown error"}`);
+      const error: any = new Error(`Download failed: ${resp.status} ${text || "unknown error"}`);
       error.status = resp.status;
       error.url = url;
       throw error;
@@ -59,10 +59,10 @@ export async function downloadProtectedResource(
           onBusy(
             true,
             done
-              ? "已完成"
+              ? "Complete"
               : Number.isFinite(percent)
                 ? `${Math.max(0, Math.min(100, Number(percent) || 0)).toFixed(0)}%`
-                : "下载中...",
+                : "Downloading...",
           );
         }
         if (done) {
@@ -78,3 +78,4 @@ export async function downloadProtectedResource(
     }
   }
 }
+

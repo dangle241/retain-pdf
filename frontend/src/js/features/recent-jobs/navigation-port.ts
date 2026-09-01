@@ -8,7 +8,7 @@ export function createRecentJobsNavigationPort({
   doc = document,
   jobRuntimePort = createRecentJobsRuntimePort({ currentJobId }),
   readerPort = createRecentJobsReaderPort(),
-  /** 图书馆网格默认 false：进度在书籍详情 Tab，不弹旧工作流窗 */
+  /** LibraryGrid默认 false: Progress在Book Details Tab, 不弹旧工作流窗 */
   openWorkflowOnSelect = false,
 }: any = {}) {
   function openWorkflow() {
@@ -46,7 +46,7 @@ export function createRecentJobsNavigationPort({
       if (!normalizedJobId) {
         return false;
       }
-      // 优先 recoverJob（silent poll）；兼容旧 port 仅有 openJob
+      // 优先 recoverJob(silent poll)；兼容旧 port 仅有 openJob
       if (typeof jobRuntimePort.recoverJob === "function") {
         return jobRuntimePort.recoverJob(normalizedJobId) !== false;
       }
@@ -54,3 +54,5 @@ export function createRecentJobsNavigationPort({
     },
   };
 }
+
+

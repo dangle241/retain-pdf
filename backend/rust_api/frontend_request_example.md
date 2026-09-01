@@ -142,7 +142,7 @@ Recommended request body:
     "batch_size": 1,
     "glossary_id": "glossary-20260411-abc123",
     "glossary_entries": [
-      {"source": "band gap", "target": "带隙", "note": "materials"}
+      {"source": "band gap", "target": "band gap", "note": "materials"}
     ]
   },
   "render": {

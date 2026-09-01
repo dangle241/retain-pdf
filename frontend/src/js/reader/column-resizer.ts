@@ -1,5 +1,5 @@
-// 三栏骨架的左右栏拖拽调宽:分隔条 pointer 拖动实时改 CSS 变量,松手持久化。
-// 纯宽度计算(clampColumnWidth)与持久化(load/save)抽出便于单测;DOM 拖拽为薄封装。
+// 三栏骨架的左右栏拖拽调宽:separatedentries pointer 拖动Live改 CSS 变量,松手持久化.
+// 纯宽度计算(clampColumnWidth)与持久化(load/save)抽出便于单测;DOM 拖拽为薄封装.
 
 export const READER_COLUMN_LIMITS = {
   left: { min: 180, max: 460, default: 248 },
@@ -8,7 +8,7 @@ export const READER_COLUMN_LIMITS = {
 
 const STORAGE_KEY = "retainpdf-reader-cols-v1";
 
-// 夹取到 [min, max] 的整数像素;非法输入回退到 default。
+// 夹取到 [min, max] 的整数像素;非法输入回退到 default.
 export function clampColumnWidth(px, { min, max, default: fallback }) {
   const value = Number(px);
   if (!Number.isFinite(value)) {
@@ -46,7 +46,7 @@ export function saveColumnWidths(widths, storage = globalThis.localStorage || nu
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify({ left: widths.left, right: widths.right }));
   } catch (_err) {
-    // 配额满/隐私模式:静默失败
+    // 配额满/隐私模式:静默Failed
   }
 }
 
@@ -125,7 +125,7 @@ export function createReaderColumnResizer({
       event.preventDefault?.();
     });
 
-    // 双击分隔条:恢复该栏默认宽度
+    // 双击separatedentries:resume该栏默认宽度
     handle.addEventListener("dblclick", () => {
       if (side === "left") {
         applyLeft(READER_COLUMN_LIMITS.left.default);
@@ -146,3 +146,6 @@ export function createReaderColumnResizer({
 
   return { bindEvents, applyLeft, applyRight, widths: () => ({ ...widths }) };
 }
+
+
+

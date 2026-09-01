@@ -9,18 +9,18 @@ import { resolveReaderSourcePdf } from "../resource-resolver.js";
 export const READER_DOWNLOAD_ACTIONS = Object.freeze({
   source: {
     fallbackSuffix: "source",
-    label: "原始 PDF",
-    operation: "下载原始 PDF",
+    label: "Source PDF",
+    operation: "Download source PDF",
   },
   sideBySide: {
     fallbackSuffix: "side-by-side",
-    label: "对照 PDF",
-    operation: "下载对照 PDF",
+    label: "Side-by-side PDF",
+    operation: "Download side-by-side PDF",
   },
   translated: {
     fallbackSuffix: "translated",
-    label: "译文 PDF",
-    operation: "下载译文 PDF",
+    label: "Translation PDF",
+    operation: "Download translated PDF",
   },
 });
 
@@ -72,13 +72,16 @@ export function resolveReaderDownloadName(action, { jobId, jobPayload, manifestP
 
 export function disabledReason(action, urls) {
   if (action === "sideBySide" && (!urls.source || !urls.translated)) {
-    return "对照 PDF 需要原始 PDF 和译文 PDF 都可用";
+    return "Side-by-side PDF requires both source and translated PDFs to be ready";
   }
   if (!urls.source && (action === "source" || action === "sideBySide")) {
-    return "原始 PDF 尚未生成或清单不可用";
+    return "Source PDF has not been generated or the manifest is not ready";
   }
   if (!urls.translated && (action === "translated" || action === "sideBySide")) {
-    return "译文 PDF 尚未生成或清单不可用";
+    return "Translated PDF has not been generated or the manifest is not ready";
   }
-  return "下载地址暂不可用";
+  return "Download URL is not ready";
 }
+
+
+

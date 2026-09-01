@@ -1,5 +1,5 @@
-// BookCard 操作按钮工厂聚合。
-// 每种功能一个文件；本文件只组合，不写 onClick 业务细节。
+// BookCard Action按钮工厂聚合.
+// 每种Tools一个Files；booksFiles只组合, 不写 onClick 业务细节.
 
 import { buildReadBookCardAction } from "./read.js";
 import { buildTranslateBookCardAction } from "./translate.js";
@@ -11,7 +11,7 @@ export {
   buildTranslateBookCardAction,
 } from "./translate.js";
 
-/** 默认：只有快速阅读。 */
+/** 默认: 只有快速阅读. */
 export function buildDefaultBookCardActions(
   item: LibraryCardItem = {},
   handlers: BookCardActionHandlers = {},
@@ -19,7 +19,7 @@ export function buildDefaultBookCardActions(
   return buildReadBookCardAction(item, handlers);
 }
 
-/** 阅读 +（有条件时）翻译。 */
+/** 阅读 +(有entries件时)Translation. */
 export function buildShelfBookCardActions(
   item: LibraryCardItem = {},
   handlers: BookCardActionHandlers = {},
@@ -39,3 +39,6 @@ export function bookCardActionsSignature(actions: BookCardAction[] | null | unde
     )
     .join(";");
 }
+
+
+
