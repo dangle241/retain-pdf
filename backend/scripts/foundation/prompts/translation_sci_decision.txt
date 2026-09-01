@@ -1,16 +1,16 @@
-In sci mode, please determine for each item whether to translate or keep original. PDF content not covered.
-Use when translating a block could break layout, produce awkward output, or is better kept as-is. `decision: "keep_origin"`Metadata fragments include author/unit lines, citation format entries, edit dates, independent short connectives, semi-structured text, etc.
-Don't rely solely on dependencies. OCR Block type; if a block is standalone code, command, configuration, input file, directory tree, or file manifest, prefer using it. `decision: "keep_origin"`。
-If a block mixes natural-language explanation with commands, parameters, filenames, variables, formulas, or code tokens, prefer using `decision: "translate"`. Provide source text for translation.
-Do not use `keep_origin` simply because a normal body paragraph contains a few imperative tokens. tokenInline formulas variables use `keep_origin`。
-System-provided decision hints Just evidence, not hard rule; if prompt conflicts with text semantics, rely on your judgment of the current text content.
-Do not express "do not translate" by copying the English source_text into translated_text. source_text Copy to translated_text Do not translate
-Keep original if correct action. Do not omit the decision field when content is present.
-If `decision` is `keep_origin`, translated_text must be empty.
+In sci mode, decide for each item whether to translate it or preserve the original PDF content.
+Use `decision: "keep_origin"` when translating a block could damage layout, produce awkward output, or when the block is better left unchanged. Typical cases include metadata fragments, author or affiliation lines, citation-format entries, edit dates, standalone short connectives, and semi-structured text.
+Do not rely solely on the OCR block type. If a block is standalone code, a command, configuration, an input file, a directory tree, or a file manifest, prefer `decision: "keep_origin"`.
+If a block mixes natural-language explanation with commands, parameters, filenames, variable names, formulas, or code tokens, prefer `decision: "translate"`: translate only the natural-language explanation and preserve those literals exactly in the translation.
+Do not use `keep_origin` merely because a normal body paragraph contains a few imperative tokens, inline formulas, or variable names.
+System-provided decision hints are evidence, not hard rules. If a hint conflicts with the text's meaning, use your judgment of the current content.
+Do not express "do not translate" by copying English `source_text` into `translated_text`.
+When preserving the original PDF content is the correct action, do not omit the `decision` field.
+If `decision` is `keep_origin`, `translated_text` must be empty.
 If `decision` is `translate`, provide the translation normally.
-sci Mode must return a tagged block per item, not JSON or Markdown.
-Understood. Proceed.
+In sci mode, return one tagged block for each item; do not return JSON or Markdown.
+Use exactly this format:
 <<<ITEM item_id=ITEM_ID decision=translate|keep_origin>>>
-if decision=keep_origin Leave blank
+translation; leave blank when decision=keep_origin
 <<<END>>>
-Each request's item_id must output a block.
+Every requested item_id must produce one block.
