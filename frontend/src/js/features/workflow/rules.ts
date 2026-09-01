@@ -66,7 +66,7 @@ export function workflowHeadline(workflow, constants) {
     case constants.WORKFLOW_RENDER:
       return "The current workflow reuses existing job artifacts to regenerate the PDF.";
     default:
-      return "Select PDF 后, 可Translate directly或仅Favorite到书架.";
+      return "Select a PDF, then Translate directly or just Favorite to bookshelf.";
   }
 }
 

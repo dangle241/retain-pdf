@@ -200,7 +200,7 @@ export function ReaderAnnotationsPanel({ ports }) {
             </div>
           )
           : groups.length === 0
-            ? <p className="reader-annotations-empty">No annotations,框选Source即可Created</p>
+            ? <p className="reader-annotations-empty">No annotations. Select source text to create one.</p>
             : groups.map((group) => (
               <section key={group.pageIdx} className="reader-annotations-group">
                 <h4 className="reader-annotations-group-title">Page {group.pageIdx + 1} pages</h4>

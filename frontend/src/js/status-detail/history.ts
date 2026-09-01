@@ -34,7 +34,7 @@ export function buildStageHistoryPresentation(job, durationOptions = {}) {
   }).join("");
   return {
     markup,
-    emptyText: "No Stage记录",
+    emptyText: "No stage records",
     hasItems: history.length > 0,
   };
 }

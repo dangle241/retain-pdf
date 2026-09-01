@@ -8,9 +8,9 @@ import { memo } from "react";
 export const ErrorDiagnostics = memo(function ErrorDiagnostics() {
   return (
     <article className="detail-card detail-card-wide">
-      <h2>Failed调试上下文</h2>
+      <h2>Failure Debug Context</h2>
       <div id="detail-failure-debug-context" className="detail-debug-context">
-        <div className="detail-empty">No 结构化Failed上下文</div>
+        <div className="detail-empty">No structured failure context</div>
       </div>
     </article>
   );

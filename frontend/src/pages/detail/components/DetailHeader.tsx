@@ -31,7 +31,7 @@ export function DetailHeader({ t, links, onProtectedDownload }) {
       <div className="detail-hero-top">
         <div>
           <h1>Job Details</h1>
-          <p id="detail-head-note">{t("detail-head-note", "通过 `detail.html?job_id=...` 可直接shareCurrentJob Details.")}</p>
+          <p id="detail-head-note">{t("detail-head-note", "Use `detail.html?job_id=...` to directly share current job details.")}</p>
         </div>
         <div className="detail-actions">
           <ActionLink id="detail-reader-btn" link={links["detail-reader-btn"]}>Side-by-side Reader</ActionLink>
@@ -58,8 +58,8 @@ export function DetailHeader({ t, links, onProtectedDownload }) {
           </ActionLink>
         </div>
       </div>
-      <div className="detail-task-actions" aria-label="任务Action">
-        <button id="detail-rerun-btn" type="button" className="detail-trigger-btn" disabled>断点resume/重新运行</button>
+      <div className="detail-task-actions" aria-label="Task actions">
+        <button id="detail-rerun-btn" type="button" className="detail-trigger-btn" disabled>Resume from breakpoint / Re-run</button>
         <span id="detail-rerun-status" className="detail-inline-note">{t("detail-rerun-status", "The current job cannot be resumed.")}</span>
       </div>
       <div className="detail-meta-list">

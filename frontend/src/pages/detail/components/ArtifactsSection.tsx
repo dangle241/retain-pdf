@@ -28,7 +28,7 @@ const MarkdownImageIsland = memo(function MarkdownImageIsland() {
   return (
     <>
       <div id="detail-markdown-image-grid" className="detail-markdown-image-grid hidden"></div>
-      <div id="detail-markdown-image-empty" className="detail-empty">No  Markdown 图片引用</div>
+      <div id="detail-markdown-image-empty" className="detail-empty">No Markdown image references</div>
     </>
   );
 });
@@ -37,7 +37,7 @@ export function MarkdownCard({ t }) {
   return (
     <article className="detail-card">
       <div className="detail-trigger-head">
-        <h2>Markdown 预览</h2>
+        <h2>Markdown Preview</h2>
         <span id="detail-markdown-status" className="detail-inline-note">{t("detail-markdown-status", "Not requested")}</span>
       </div>
       <div className="detail-meta-list">
