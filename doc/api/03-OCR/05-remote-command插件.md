@@ -1,14 +1,14 @@
-# remote_command 插件
+# remote_command plugin
 
-`remote_command` 用于接入新的远程 OCR 服务，但不把第三方 submit / poll / download 状态机写进 Rust 主流程。
+remote_command connects to new remote OCR services, but without writing submit/poll/download state machines into the Rust main flow.
 
-## 设计原则
+## Design principles
 
-- 后端只负责启动插件命令、传入 source、options、credential 和 artifact 路径。
-- 插件命令负责远程 API 的提交、轮询、下载、重试。
-- 主 workflow 只消费源 PDF 和 `document.v1.json`。
+- Backend only responsible for starting plugin commands and passing source, options, credentials, and artifact paths.
+- Plugin commands handle remote operations. API Submit, poll, download, retry.
+- Main workflow only consumes source PDF and document.v1.json.
 
-## 配置示例
+## Configuration Example
 
 ```json
 {
@@ -36,29 +36,29 @@
 }
 ```
 
-## 凭据
+## Credentials
 
-配置型 command provider 的凭据可来自：
+Configuration command provider Credentials can come from:
 
 - `ocr.options.credential`
 - `ocr.options.token`
 - `ocr.options.api_key`
-- provider config 里的 `credential.env`
+- provider config credential.env
 
-worker 会把解析后的密钥写入：
+worker Writes parsed key to:
 
 ```text
 RETAIN_OCR_CREDENTIAL
 ```
 
-如果配置了 `credential.env`，插件也可以读取自己的环境变量。
+If configured `credential.env`Plugins can also read their own environment variables.
 
-## URL 输入契约
+## URL Input Contract
 
-当任务使用 `source.file_url` 时：
+When task source.file_url is used:
 
-- `RETAIN_OCR_SOURCE_URL` 会包含原始 URL。
-- `RETAIN_OCR_SOURCE_PDF` 可能为空。
-- 插件必须把最终源 PDF 写入 `RETAIN_OCR_SOURCE_DIR`。
+- `RETAIN_OCR_SOURCE_URL` Contains original URL。
+- `RETAIN_OCR_SOURCE_PDF` May be empty.
+- Plugin must write the final source PDF to RETAIN_OCR_SOURCE_DIR.
 
-如果插件没有落 source PDF，任务会失败，因为翻译和渲染后续必须使用本地 source artifact。
+If the plugin does not land. source PDFTask will fail because subsequent translation and rendering must use local. source artifact。

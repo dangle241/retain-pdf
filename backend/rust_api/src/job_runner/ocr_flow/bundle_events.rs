@@ -51,7 +51,7 @@ pub(super) fn record_bundle_retry_degraded(
 ) {
     mark_ocr_result_ready(
         job,
-        "OCR provider bundle 探测连续异常，改为直接下载并按下载重试策略兜底".to_string(),
+        "OCR provider bundle Detect consecutive anomalies; switch to direct download and fallback to download retry policy.".to_string(),
     );
     register_job_retry(job);
     let mut payload = bundle_retry_payload(&event);
@@ -69,7 +69,7 @@ pub(super) fn record_bundle_retry_degraded(
         &job.snapshot(),
         "warn",
         "retry_degraded",
-        "OCR provider bundle 可达性探测降级为直接下载",
+        "OCR provider bundle Reachability probe degraded to direct download.",
         Some(payload),
     );
 }

@@ -1,11 +1,11 @@
-// APP_EVENTS(document CustomEvent)→ React 的适配 hook。
+// APP_EVENTS(document CustomEvent)→ React Adaptation hook。
 //
-// 总计划口径:16 个 retainpdf:* 事件原样保留,不趁机改造通信方式;
-// React 组件消费事件时统一走本 hook,不手写 addEventListener 样板。
+// Total plan scope: 16 retainpdf:* Preserve events as-is, refrain from refactoring communication methods opportunistically.
+// React Route component event consumption through this. hook,Do not write manually. addEventListener Boilerplate.
 //
-// handler 走 ref:调用方可以传内联箭头函数(每次渲染都是新引用),
-// 订阅本体只随 eventName/target 变化重建,不会因 handler 引用漂移反复解绑/重绑
-// (解绑窗口内丢事件是轮询驱动页面的真实风险)。
+// handler via ref: Callers can pass inline arrow functions (new reference on every render),
+// Subscription body only rebuilds with eventName/target Rebuild on change.,Won't due to handler Fix reference drift causing repeated unbinding./Rebind
+// (Event loss during unbinding window is a real risk for polling-driven pages.)。
 
 import { useEffect, useRef } from "react";
 

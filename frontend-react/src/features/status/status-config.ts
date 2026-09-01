@@ -19,13 +19,13 @@ export const translationSubstages: Array<{ key: SubstageKey; label: string }> = 
 
 export const statusCopy = {
   actions: {
-    cancel: '取消',
-    home: '主页',
-    detail: '详情',
-    reader: '对照阅读',
-    downloadPdf: '下载 PDF',
+cancel: 'Cancel',
+home: 'Home',
+detail: 'Details',
+reader: 'Side-by-side reading',
+downloadPdf: 'Download PDF',
   },
   progress: {
-    fallback: '处理中',
+fallback: 'Processing',
   },
 }

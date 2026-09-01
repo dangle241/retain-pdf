@@ -109,16 +109,16 @@ class TranslationDirectTypstFastPathTests(unittest.TestCase):
             "metadata": {"structure_role": "body"},
             "math_mode": "direct_typst",
             "translation_unit_protected_source_text": (
-                "综上，本文系统综述了DFT计算在光催化领域中的广泛应用，并为未来开发高效稳定催化剂提供参考。"
+                "In summary, this paper systematically reviewsDFTComputational methods are widely used in photocatalysis and provide a reference for future development of efficient and stable catalysts."
             ),
             "protected_source_text": (
-                "综上，本文系统综述了DFT计算在光催化领域中的广泛应用，并为未来开发高效稳定催化剂提供参考。"
+"In summary, this paper systematically reviews the widespread application of DFT calculations in photocatalysis and provides a reference for the future development of efficient and stable catalysts."
             ),
         }
 
         protocol_exc = module.TranslationProtocolError(
             "p036-b015",
-            translated_text='{"translations":[{"item_id":"p036-b015","translated_text":"综上，本文系统综述了DFT计算在光催化领域中的广泛应用。"}]}',
+            translated_text='{"translations":[{"item_id":"p036-b015","translated_text":"In summary, this paper systematically reviewsDFTwide application in the field of photocatalysis."}]}',
         )
         with mock.patch.object(
             module,
@@ -179,12 +179,12 @@ class TranslationDirectTypstFastPathTests(unittest.TestCase):
         ), mock.patch.object(
             short_retry_module.provider_runtime,
             "request_chat_content",
-            return_value="我们只需要对角化矩阵 $ F' $",
+            return_value="We only need to diagonalize the matrix. $ F' $",
         ):
             result = _translate_direct_typst_for_test(module, item, context=context)
 
         payload = result["p020-b012"]
-        self.assertEqual(payload["translated_text"], "我们只需要对角化矩阵 $ F' $")
+self.assertEqual(payload["translated_text"], "We only need to diagonalize the matrix $ F' $")
         self.assertEqual(payload["final_status"], "translated")
         self.assertEqual(
             payload["translation_diagnostics"]["degradation_reason"],
@@ -219,7 +219,7 @@ class TranslationDirectTypstFastPathTests(unittest.TestCase):
             return {
                 chunk_item["item_id"]: {
                     "decision": "translate",
-                    "translated_text": f"已翻译:{text[:24]}",
+"translated_text": f"Translated:{text[:24]}",
                     "final_status": "translated",
                 }
             }
@@ -314,7 +314,7 @@ class TranslationDirectTypstFastPathTests(unittest.TestCase):
         sentence_payload = {
             "p001-b002": {
                 "decision": "translate",
-                "translated_text": "这是第一句。 第二句保留原文。",
+                "translated_text": "This is first sentence. Second sentence kept original.",
                 "final_status": "partially_translated",
             }
         }
@@ -426,7 +426,7 @@ class TranslationDirectTypstFastPathTests(unittest.TestCase):
         sentence_payload = {
             item["item_id"]: {
                 "decision": "translate",
-                "translated_text": "传统上下文并行将序列维度进行划分。",
+                "translated_text": "Traditional context parallelism partitions the sequence dimension.",
                 "final_status": "partially_translated",
                 "translation_diagnostics": {
                     "route_path": ["block_level", "sentence_level"],
@@ -452,7 +452,7 @@ class TranslationDirectTypstFastPathTests(unittest.TestCase):
         payload = result[item["item_id"]]
         self.assertEqual(payload["decision"], "translate")
         self.assertEqual(payload["final_status"], "partially_translated")
-        self.assertIn("传统上下文并行", payload["translated_text"])
+        self.assertIn("Legacy Context Parallel", payload["translated_text"])
 
     def test_direct_typst_validation_failure_does_not_enter_tagged_placeholder_retry(self):
         module = _load_module(
@@ -507,7 +507,7 @@ def test_long_text_split_partially_accepts_when_one_chunk_fails() -> None:
     )
 
     sentence = "This is a long body sentence describing the experimental protocol in detail. "
-    source = sentence * 70  # ~5500 字符,切成多块
+source = sentence * 70  # ~5500 characters,Split into chunks.
     item = {
         "item_id": "p001-b001",
         "protected_source_text": source,
@@ -522,7 +522,7 @@ def test_long_text_split_partially_accepts_when_one_chunk_fails() -> None:
         calls["n"] += 1
         if calls["n"] == 2:
             raise RuntimeError("transient failure")
-        return {chunk_item["item_id"]: {"decision": "translate", "translated_text": f"译文块{calls['n']}"}}
+        return {chunk_item["item_id"]: {"decision": "translate", "translated_text": f"translation block{calls['n']}"}}
 
     result = translate_direct_typst_long_text_chunks(
         item,
@@ -537,11 +537,11 @@ def test_long_text_split_partially_accepts_when_one_chunk_fails() -> None:
     assert result is not None
     payload = result["p001-b001"]
     diag = payload["translation_diagnostics"]
-    # 单块失败不再作废整条:失败块保留原文,其余块保留译文
+    # Single block failure no longer invalidates entire record.:Preserve original text for failed blocks.,Retain translations for remaining blocks
     assert diag["final_status"] == "partially_translated"
     assert diag["degradation_reason"] == "direct_typst_long_text_split_partial"
     assert diag["degraded_chunk_count"] == 1
-    assert "译文块1" in payload["translated_text"]
+assert "Translation chunk 1" in payload["translated_text"]
     assert sentence.strip() in payload["translated_text"]
 
 

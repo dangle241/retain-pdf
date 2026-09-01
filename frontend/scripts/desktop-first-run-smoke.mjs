@@ -136,7 +136,7 @@ const [{ saveDesktopConfig }, { state }] = await Promise.all([
 
 let caughtMessage = "";
 try {
-  // 当前签名: saveDesktopConfig(browserConfig, afterSave)
+  // Current signature: saveDesktopConfig(browserConfig, afterSave)
   await saveDesktopConfig(
     {
       ocrProvider: "paddle",
@@ -164,7 +164,7 @@ if (ensureElement("browser-credentials-dialog").open !== false) {
   throw new Error("expected setup dialog to close after first-run save");
 }
 
-if (!caughtMessage.includes("首次配置已保存")) {
+if (!caughtMessage.includes("Initial configuration saved.")) {
   throw new Error(`expected saved-first-run connectivity error, got: ${caughtMessage || "<empty>"}`);
 }
 

@@ -1,54 +1,54 @@
-# Document Schema 说明
+Document Schema description
 
-`scripts/services/document_schema/` 定义统一中间文档结构。
+`scripts/services/document_schema/` Define unified intermediate document structure.
 
-当前正式使用的是：
+Currently in production:
 
-- schema 名称：`normalized_document_v1`
-- schema 版本：`1.1`
-- 默认文件名：`document.v1.json`
-- 默认报告文件名：`document.v1.report.json`
-- 机器可读 schema：`document.v1.schema.json`
-- Python 校验器：`validator.py`
+- schema Name:`normalized_document_v1`
+- schema Version:`1.1`
+- Default filename:`document.v1.json`
+- Default report filename:`document.v1.report.json`
+- Machine-readable schema：`document.v1.schema.json`
+- Python Validator:`validator.py`
 
-这份 JSON 现在已经是翻译/渲染主链路的标准 OCR 输入。
+This JSON is the standardized OCR input for translation/main rendering pipeline.
 
-## 阶段边界
+## Stage boundary
 
-`document_schema` 这一层只负责 OCR / Normalize 阶段的交接，不向下游承担翻译或渲染职责。
+`document_schema` This layer only handles OCR / Normalize Phase handoff: no translation or rendering responsibilities to downstream.
 
-正式输入和输出固定为：
+Formal input and output fixed as:
 
-- 输入：
-  provider 原始 OCR payload、provider raw 文件目录、源 PDF 的必要上下文
-- 输出：
-  `document.v1.json` 和 `document.v1.report.json`
+Input:
+Provider raw OCR payload, provider raw file directories, source PDF required context.
+Output:
+`document.v1.json` and `document.v1.report.json`.
 
-明确不负责的事情：
+Not responsible for:
 
-- 不负责翻译策略、术语控制和翻译产物落盘
-- 不负责排版覆盖、Typst 编译和最终 PDF 输出
-- 不负责在下游阶段继续暴露 provider 私有字段作为主契约
+- Understood.
+Not responsible for layout overlay, Typst compilation, and final PDF output.
+- Not expose downstream stages provider Private fields as primary contract
 
-稳定交接点：
+Stable handoff point:
 
-- OCR 阶段到此结束时，下游应只依赖 `document.v1.json`
-- `document.v1.report.json` 只服务于校验、排错和兼容性摘要，不是翻译/渲染主输入
-- provider raw trace 保留用于回溯，但禁止变成 translation / rendering 主逻辑依赖
+- OCR Stage end: downstream depends only on. `document.v1.json`
+- `document.v1.report.json` Used only for validation, troubleshooting, and compatibility summaries; not for translation/Main Render Input
+- provider raw trace Keep for rollback, but do not convert. translation / rendering Main logic depends on external service.
 
-## 字段分层规范
+## Field hierarchy specification
 
-`document.v1` 里的字段，不应再被当成“一锅粥”。当前约定分成三层：
+`document.v1` Fields herein no longer a hodgepodge. Current convention: three layers.
 
-1. 核心结构层
-2. 通用 trace 层
-3. provider raw trace 层
+1. Core Structure Layer
+General trace layer
+Provider raw trace layer
 
-### 1. 核心结构层
+### 1. Core structural layer
 
-这层是翻译、渲染、策略代码可以直接依赖的稳定字段。
+This layer provides stable fields that translation, rendering, and strategy code can directly depend on.
 
-顶层：
+Top level:
 
 - `schema`
 - `schema_version`
@@ -61,7 +61,7 @@
 - `derived`
 - `markers`
 
-页面级：
+Page-level:
 
 - `page`
 - `page_index`
@@ -70,7 +70,7 @@
 - `unit`
 - `blocks`
 
-块级：
+Block-level:
 
 - `block_id`
 - `page_index`
@@ -93,33 +93,33 @@
 - `derived`
 - `continuation_hint`
 
-原则：
+Principle:
 
-- 下游主逻辑优先只读这层
-- 新 provider 接入时，第一目标是把原始 JSON 先稳定映射到这层
-- 新主链路优先消费 `geometry/content/layout_role/semantic_role/structure_role/policy/provenance`
-- 旧 `type/sub_type/bbox/text/lines/segments` 当前仍保留作兼容层，不再继续扩语义
-- 默认翻译链不应再从 `type/sub_type/tags/derived/source.raw_*` 反推正文
-- `policy.translate` 是正文是否进入翻译链的正式入口
+- Downstream main logic read-only layer first.
+When integrating new provider, primary goal is to preserve original JSON and stabilize mapping to this layer first.
+- Prioritize new primary link consumption. `geometry/content/layout_role/semantic_role/structure_role/policy/provenance`
+- old `type/sub_type/bbox/text/lines/segments` Kept as compatibility layer. No further semantic expansion.
+- Default translation chain should no longer start from `type/sub_type/tags/derived/source.raw_*` Reverse engineer body text
+- `policy.translate` Formal entry point for main text entering translation chain.
 
-`content` 内部的排版流字段：
+`content` Internal layout flow fields:
 
-- `content.text`：块级文本，保留 provider 给出的必要换行
-- `content.line_texts`：块内行文本列表，来自 provider 显式换行或 adapter 构造的稳定行记录
-- `content.text_flow`：下游排版契约，目前取值为 `flow` 或 `preserve_lines`
+- `content.text`Block text retain. provider Remove unnecessary newline.
+- `content.line_texts`Fetch lines from block. Parse text. List items. provider Explicit line break or adapter Constructed Stability Record
+`content.text_flow` downstream formatting contract: current value `flow` or `preserve_lines`.
 
-`text_flow` 的职责边界：
+`text_flow` responsibility boundary of:
 
-- `flow` 表示普通正文，翻译和渲染可以按自然段流式处理，不应强制保留 OCR 视觉换行
-- `preserve_lines` 表示块内行结构有语义价值，例如目录、编号列表、项目列表、结构化短行块
-- `preserve_lines` 的判定必须在 normalize / adapter 层完成，渲染层只消费该契约，不应再用正则重新猜列表结构
-- Paddle 等 provider 如果只给出 `block_label=text`，但 `block_content` 已经有稳定显式换行，adapter 应把这些换行升级为 `line_texts + text_flow`，而不是把 provider 私有字段暴露给下游
+- `flow` Represents normal body text; translation and rendering may be streamed by natural paragraphs, and should not be forcibly preserved. OCR Visual line break
+- `preserve_lines` Block line structure semantically meaningful: table of contents, numbered lists, bullet lists, structured short-line blocks.
+- `preserve_lines` The determination must be at normalize / adapter Layer complete. Rendering layer consumes only contract. No regex re-guessing list structure.
+- Paddle etc. provider If only given `block_label=text`Code redundant. Remove. `block_content` Stable explicit line breaks already exist.adapter Upgrade these line breaks to `line_texts + text_flow`, rather than exposing the provider's private fields to downstream consumers. provider expose private fields to downstream
 
-### 2. 通用 trace 层
+General trace layer
 
-这层不是主链路硬依赖，但多个 provider 都建议尽量往这套字段靠。
+This layer is not a hard dependency on the main path, but multiple... provider It is recommended to align with this set of fields.
 
-当前已经出现并可继续沿用的字段包括：
+Existing fields available for continued use include:
 
 - `content_is_rich`
 - `content_format`
@@ -132,85 +132,85 @@
 - `markdown_match_found`
 - `markdown_match_count`
 
-原则：
+Principle:
 
-- 这层主要服务于排错、调优、后续增强功能
-- 可以被策略代码谨慎读取
-- 不应替代 `type/sub_type/tags/derived`
+- This layer mainly serves troubleshooting, tuning, and future enhancements.
+- May be read cautiously by policy code.
+- Should not replace `type/sub_type/tags/derived`
 
-### 3. Provider Raw Trace 层
+Provider raw trace layer
 
-这层只用于回溯和排错，禁止下游业务逻辑直接依赖。
+This layer is for tracing and debugging only. Downstream business logic must not directly depend on it.
 
-包括但不限于：
+Including but not limited to:
 
 - `source.raw_*`
 - `metadata.raw_*`
 - `layout_det_*`
-- provider 原始 id/path/score/label
-- Paddle 的 `model_settings`
-- Paddle 的 `layout_det_res`
-- Paddle 的原始 `markdown.images`
-- 其他 provider 的原始检测字段
+- provider Original id/path/score/label
+Paddle's `model_settings`.
+Paddle's `layout_det_res`.
+Paddle's raw `markdown.images`.
+Other provider original detection fields.
 
-原则：
+Principle:
 
-- 这层可以保留得很全
-- 但不应被当成统一语义入口
-- 如果某个字段未来被多个 provider 稳定提供，再考虑提升到“通用 trace 层”
+- This layer can be fully retained.
+- But should not be treated as the unified semantic entry point.
+- If a field is later used by multiple provider Provide stable service, then consider upgrading to "General". trace Layer
 
-### 下游读取原则
+### Downstream read principles
 
-推荐顺序：
+Recommended order:
 
-1. 先读核心结构层
-2. 必要时再读通用 trace 层
-3. 只有排错或 provider 研究脚本才读 raw trace 层
+1. Read core structure layer first.
+Read general trace layer when necessary.
+Only troubleshoot or research provider raw trace layer.
 
-也就是说：
+That is:
 
-- 翻译/渲染主链路优先使用 `geometry/content/layout_role/semantic_role/structure_role/policy/provenance`
-- 如果需要增强判断，可谨慎读取 `content_format` 这类通用 trace
-- 不要直接基于 `layout_det_score`、`source.raw_type`、`metadata.raw_*` 写主逻辑
+Translation/main rendering pipeline prefers `geometry/content/layout_role/semantic_role/structure_role/policy/provenance`.
+- Read cautiously if enhanced judgment needed. `content_format` Generic trace
+- Do not base directly on `layout_det_score`、`source.raw_type`、`metadata.raw_*` Missing context. Provide requirements, language, and existing code.
 
-## 设计目标
+## Design Goals
 
-- 把上游 OCR provider 的原始结构隔离在 adapter 层
-- 给翻译、渲染、策略、API 一个稳定的中间层契约
-- 不过度设计，不把 OCR 很难稳定判断的语义强行塞进主类型系统
+Isolate upstream OCR provider original structure in adapter layer.
+- Translation, Rendering, StrategyAPI Stable middleware contract
+- Avoid over-engineering; do not OCR Semantics hard to stably determine are forced into the main type system.
 
-## 当前链路
+## Current chain
 
-主链路约定：
+Main chain agreement
 
-1. 上游 provider 先输出自己的原始结果
-2. adapter 把原始结果转成 `normalized_document_v1`
-3. `services/translation` 和 `services/rendering` 只围绕这份统一结构工作
+1. Upstream provider Output your own raw result first.
+2. adapter convert the raw result to `normalized_document_v1`
+`services/translation` and `services/rendering` work only around this unified structure.
 
-以当前 provider 实现为例：
+Use current provider Implementation example:
 
-- 原始 OCR：`ocr/unpacked/layout.json`
-- 统一中间层：`ocr/normalized/document.v1.json`
-- 归一化报告：`ocr/normalized/document.v1.report.json`
-- 阶段 spec：`specs/normalize.spec.json`（`normalize.stage.v1`）
+Raw OCR: `ocr/unpacked/layout.json`.
+- Unified Middleware Layer:`ocr/normalized/document.v1.json`
+- Normalization Report:`ocr/normalized/document.v1.report.json`
+Stage spec: `specs/normalize.spec.json` (`normalize.stage.v1`).
 
-注意：
+Note:
 
-- raw `layout.json` 保留给 adapter、调试和回溯
-- 翻译/渲染主链路优先消费 `document.v1.json`
-- `document.v1.report.json` 用于查 adapter 探测、默认值补齐和 schema 校验摘要
-- Rust 主工作流调用的 normalize worker 现在要求 `--spec <job_root/specs/normalize.spec.json>`
-- 如果只是本地手动验证 schema / adapter，应该走 `scripts/entrypoints/validate_document_schema.py`
+Raw `layout.json` reserved for adapter, debugging, and traceback.
+Translation/main rendering pipeline consumes `document.v1.json` first.
+`document.v1.report.json` for querying adapter detection, default value population, and schema validation summary.
+Rust main workflow normalize worker now requires `--spec <job_root/specs/normalize.spec.json>`.
+- If only local manual verification. schema / adapter, should go through `scripts/entrypoints/validate_document_schema.py`
 
-## Adapter 约定
+Adapter conventions
 
-provider 原始 OCR 不应直接进入翻译/渲染主线。
+Provider raw OCR does not go directly to translation/render mainline.
 
-统一入口在：
+Unified entry at:
 
 - `services/document_schema/adapters.py`
 
-当前 adapter 接口：
+Current adapter interface:
 
 - `detect_ocr_provider(payload)`
 - `adapt_payload_to_document_v1(...)`
@@ -219,215 +219,215 @@ provider 原始 OCR 不应直接进入翻译/渲染主线。
 - `adapt_path_to_document_v1_with_report(...)`
 - `register_ocr_adapter(...)`
 
-共享约定入口：
+Shared Conventions:
 
 - `services/document_schema/providers.py`
-  稳定 OCR provider 标识常量，adapter、fixture registry、回归脚本优先共用这一层
+  Stable OCR provider Identifier constants,adapter、fixture registryregression scripts prioritize sharing this layer
 - `services/pipeline_shared/`
-  主线共享的 `pipeline_summary.json`、stdout 标签、JSON IO 和 source-json 选择规则
+Shared main branch: `pipeline_summary.json`, stdout labels, JSON IO, and source-json selection rules.
 - `services/mineru/contracts.py`
-  仅保留 MinerU provider 私有原始文件名、目录名约定
+  Keep only MinerU provider Private original file name and directory name conventions
 
-当前正式 provider adapter 有：
+Current official provider adapters:
 
 - `mineru -> document.v1`
 - `mineru_content_list_v2 -> document.v1`
 - `generic_flat_ocr -> document.v1`
 - `paddle -> document.v1`
 
-## Provider Adapter 分层
+## Provider Adapter Layering
 
-现在的 adapter 分成两层：
+Current adapter Divide into two layers:
 
-1. 通用骨架
-2. provider 装配层
+1. Common skeleton
+2. provider Assembly layer
 
-通用骨架位于：
+Generic skeleton located at:
 
 - `services/document_schema/provider_adapters/common/`
 
-当前包含：
+Currently contains:
 
 - `document_builder.py`
-  负责统一拼装顶层 `document.v1`
+  Unified top-level assembly. `document.v1`
 - `page_builder.py`
-  负责统一拼装 page record
+  Responsible for unified assembly. page record
 - `block_builder.py`
-  负责统一拼装 block record
+Responsible for unified assembly of block records.
 - `normalize.py`
-  负责 `bbox/polygon/segments/lines` 等通用归一化 helper
+Responsible for general normalization helpers like `bbox/polygon/segments/lines`.
 - `relations.py`
-  提供“按前一个锚点推断当前块语义”的页内关系骨架
+  Provides intra-page relation skeleton inferring current block semantics from previous anchor.
 - `specs.py`
-  定义 provider 内部先落到的中间 block/page spec
+  Definition provider Internally, first lands to the intermediate. block/page spec
 
-原则：
+Principle:
 
-- `common/` 不直接读取某个 OCR provider 的原始字段名
-- `common/` 只接收已经被 provider 解析好的中间 spec
-- 这样未来接新的 OCR，只需要自己把原始 JSON 先转成 spec，再交给通用 builder
+- `common/` Do not read a specific OCR provider original field name
+- `common/` Only accept already provider Parsed intermediate. spec
+- Enables future integration with new systems. OCR, only need to convert the raw JSON convert to specthen pass to general. builder
 
-provider 装配层位于：
+provider Assembly layer:
 
 - `services/document_schema/provider_adapters/`
 
-其中：
+Among them:
 
 - `paddle/`
-  采用目录化拆分，负责把 Paddle 原始 `layoutParsingResults` 解析成通用 spec
-  当前又细分为 reader、relations、page trace、rich-content trace。
-  现在 reader 层内部再通过 page/block context 收敛接口，不再散传 markdown/layout trace 参数。
+Use directory-based splitting; responsible for translating Paddle raw `layoutParsingResults` to generic spec.
+  Currently subdivided into reader、relations、page trace、rich-content trace。
+  now reader Pass through within layer. page/block context Consolidate interfaces. Stop scattered passing. markdown/layout trace Parameters.
 - `mineru_content_list_v2_adapter.py`
-  已经接入通用 builder，但还没有像 Paddle 一样完全目录化
+  General integration complete. builderbut not yet like Paddle Same directory structure
 - `generic_flat_ocr_adapter.py`
-  目前仍是最薄的一层 passthrough adapter
+  Still the thinnest layer. passthrough adapter
 - `mineru`
-  主线仍在 `services/mineru/document_v1.py`，当前不在这轮通用化范围内
+  Main branch still active `services/mineru/document_v1.py`Not in current generalization round.
 
-也就是说，后续扩展 OCR provider 时，优先目标不是继续堆“大 adapter 文件”，而是：
+That is, future extensions. OCR provider When, the priority is not to continue piling up 'big' adapter file content
 
-1. provider 原始 JSON -> provider 内部 spec
+Provider raw JSON -> provider internal spec.
 2. spec -> `common` builder
-3. adapter 注册到 `adapters.py`
-4. fixture 接入回归
+3. adapter Register to `adapters.py`
+4. fixture Integration Regression
 
-Paddle 当前 rich-content trace 也已经继续拆分成三层：
+Paddle current rich-content trace split into three layers:
 
-- 内容画像：`content_profile.py`
-- 资源引用：`asset_links.py`
-- markdown 轻匹配：`markdown_match.py`
+- Content Profile`content_profile.py`
+- References:`asset_links.py`
+- markdown Fuzzy match:`markdown_match.py`
 
-`rich_content.py` 只保留聚合入口，不再承载具体解析细节。
+`rich_content.py` Keep only aggregation entry; remove specific parsing details.
 
-注意：
+Note:
 
-- Paddle 的 `content_format / asset_* / markdown_match_*` 当前归入“通用 trace 层”
-- Paddle 的 `layout_det_* / model_settings / markdown.images` 当前归入“provider raw trace 层”
+Paddle's `content_format / asset_* / markdown_match_*` currently categorized under general trace layer.
+Paddle's `layout_det_* / model_settings / markdown.images` currently categorized under provider raw trace layer.
 
-新 provider 可以参考：
+New provider reference:
 
 - `services/document_schema/provider_adapters/provider_adapter_template.py`
 - `services/document_schema/provider_adapters/paddle/`
 
-后续新增 OCR provider 时，正确做法是：
+Future additions OCR provider When, the correct approach is:
 
-1. 新增一个 provider adapter
-2. 把原始 JSON 转成 `normalized_document_v1`
-3. 在 adapter 输出后立刻做 schema 校验
-4. 下游继续只消费 `document.v1.json`
+1. Add a new provider adapter
+Convert raw JSON to `normalized_document_v1`.
+Immediately after adapter output, run schema validation.
+4. Downstream continue only consume. `document.v1.json`
 
-推荐接入顺序：
+Recommended integration order:
 
-1. 先明确字段落位规则
-   也就是先决定哪些进入 `content/layout_role/semantic_role/structure_role/policy`，哪些只留在 `tags/derived`，哪些只留在 `metadata/source`。
-2. 准备最小 raw fixture
-   放到 `scripts/devtools/tests/document_schema/fixtures/`。
-3. 写并注册 adapter
-   优先复用 `providers.py` 里的共享 provider 常量，不要在 adapter、fixture、回归入口里各写一份裸字符串。
-   如果原始结构比较复杂，优先按 `payload_reader / block_labels / relations / content_extract / trace` 这种职责拆分，而不是继续堆单文件。
-4. 把 fixture 登记到 `fixtures/registry.py`
-5. 跑 `regression_check.py`
-   让 detector、adapt、validation、extractor smoke 一次过。
+1. First clarify field placement rules.
+First decide which fields go to `content/layout_role/semantic_role/structure_role/policy`, which stay in `tags/derived`, and which in `metadata/source`.
+Prepare minimal raw fixture.
+Place in `scripts/devtools/tests/document_schema/fixtures/`.
+3. Write and register adapter
+   Prioritize reusing `providers.py` Sharing provider Constants, do not use. adapter、fixture...raw strings in adapters, fixtures, or regression entries.
+   If original structure complex, prioritize by `payload_reader / block_labels / relations / content_extract / trace` This kind of responsibility splitting, rather than continuing to pile up single files.
+Register fixture to `fixtures/registry.py`.
+Run `regression_check.py`.
+   let detector、adapt、validation、extractor smoke pass in one go.
 
-## 检查入口
+## Check entry point
 
-长期检查入口：
+Long-term check entry:
 
 - `scripts/entrypoints/validate_document_schema.py`
 - `scripts/devtools/tests/document_schema/regression_check.py`
 
-现在支持两种用法：
+Now supports two usage modes:
 
-1. 直接校验已经生成好的 `document.v1.json`
-2. 对 raw OCR JSON 执行 `adapter -> defaults -> validation`，并输出 report
+1. Directly validate already generated. `document.v1.json`
+Run `adapter -> defaults -> validation` on raw OCR JSON and output report.
 
-示例：
+Example:
 
 ```bash
 python scripts/entrypoints/validate_document_schema.py output/.../ocr/normalized/document.v1.json
 python scripts/entrypoints/validate_document_schema.py output/.../ocr/unpacked/layout.json --adapt --document-id demo --write-report /tmp/document-schema-report.json
 ```
 
-report 里当前会包含：
+report Currently includes:
 
-- 输入路径
-- adapter/provider 探测结果
-- 默认值补齐统计
-- schema 校验摘要
+- Enter path
+- adapter/provider Detection Results
+- Default value completion statistics
+Schema validation summary.
 
-`validate_document_schema.py --write-report` 当前约定：
+`validate_document_schema.py --write-report` Current convention:
 
-- `mode = "adapt"` 时：
+- `mode = "adapt"` Time:
   - `input_path`
   - `normalization`
   - `normalization_summary`
   - `validation`
-- `mode = "validate"` 时：
+When `mode = "validate"`:
   - `input_path`
   - `validation`
 
-也就是说：
+That is:
 
-- 完整 adapter / defaults / detection 细节看 `normalization`
-- 稳定轻量摘要优先看 `normalization_summary`
-- 顶层校验结果看 `validation`
+- No source text provided. Send the Chinese .md content to translate. adapter / defaults / detection details see `normalization`
+- Stable lightweight summary first. `normalization_summary`
+- View top-level validation results. `validation`
 
-统一消费入口：
+Unified consumption entry:
 
 - `services/document_schema/reporting.py`
 - `load_normalization_report(path)`
 - `build_normalization_summary(report)`
 
-约定：
+Conventions:
 
-- Python 侧如果只是想展示 provider / detected provider / pages observed / blocks observed / defaulted field counts / validation 摘要，优先走这两个 helper
-- 不要在 `mineru/summary.py`、排错脚本或后续 API 层里各自重新手写 `report['defaults']['pages_seen']` 这类读取
-- 需要完整原始 report 时，再直接使用 report dict，本身不阻止保留原始字段
+- Python If the side just wants to display provider / detected provider / pages observed / blocks observed / defaulted field counts / validation Summary, prioritize these two. helper
+Do not rewrite each layer individually in `mineru/summary.py`, debug script, or follow-up API with `report['defaults']['pages_seen']` etc.
+- needs complete original report Then use directly. report dictItself does not prevent retaining original fields.
 
-回归 smoke 检查：
+Regression smoke Check:
 
 ```bash
 python scripts/devtools/tests/document_schema/regression_check.py
 python scripts/devtools/tests/document_schema/regression_check.py --write-report /tmp/document-schema-regression.json
 ```
 
-这个回归脚本现在不是简单打印日志，而是会硬校验：
+This regression script now performs hard validation instead of simple logging:
 
-- adapter 注册表里必须包含当前正式 provider
-- 当前 `document.v1.json` 必须能通过 schema 校验
-- raw layout / `content_list_v2.json` / generic fixture / paddle fixture 都必须能被自动探测、适配并再次通过 schema 校验
-- 显式指定 provider 的路径也必须可用，防止“自动探测能过，显式调用反而退化”
-- Paddle 这类 provider 还要额外做语义断言，至少锁死：
+- adapter The registry must contain the current official version. provider
+Current `document.v1.json` must pass schema validation.
+Raw layout / `content_list_v2.json` / generic fixture / paddle fixture must all be auto-detected, adapted, and pass schema validation.
+- Explicitly specify provider The path must also be usable, to prevent automatic detection passing while explicit invocation degrades.
+Providers like Paddle need additional semantic assertions; at least lock down:
   - `header/footer`
   - `image_caption/table_caption`
   - `table_footnote`
   - `display_formula -> formula segment`
 
-建议：
+Suggestion:
 
-- 新 provider 至少补一条“provider 语义断言”
-- 不要只看 `pages / blocks`，否则分类回归很容易漏掉
+Add at least one provider semantic assertion; don't only check `pages / blocks`, otherwise classification regression easily missed.
+- Don't only look. `pages / blocks`otherwise classification regression is easily missed.
 
-## 默认值补齐规则
+## Default value fill rules.
 
-adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补齐稳定默认值。
+adapter current version produced `document.v1.json` Before main flow, uniformly apply stable defaults.
 
-### 硬字段
+### Hard field
 
-这些字段不能自动猜，缺失时应该视为结构错误：
+These fields cannot be auto-guessed; missing fields are structural errors:
 
-- 文档级：
+- Document-level:
   - `schema`
   - `schema_version`
   - `document_id`
   - `source`
   - `pages`
-- 页面级：
+Page-level:
   - `width`
   - `height`
   - `unit`
   - `blocks`
-- block 级：
+- block Level:
   - `block_id`
   - `geometry`
   - `content`
@@ -437,19 +437,19 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
   - `policy`
   - `provenance`
 
-### 软字段
+### Soft Fields
 
-这些字段允许默认值收口层补默认值：
+These fields allow the default value convergence layer to fill default values:
 
-- 文档级：
+Document-level:
   - `derived -> {}`
   - `markers -> {}`
   - `page_count -> len(pages)`
-- 页面级：
-  - `page_index -> 当前页序号`
-- block 级：
-  - `page_index -> 当前页序号`
-  - `order -> 当前块顺序`
+Page-level:
+  - `page_index -> Current page number`
+Block-level:
+`page_index -> current page index`.
+  - `order -> Current block order`
   - `reading_order -> order`
   - `geometry -> {bbox:[0,0,0,0]}`
   - `content -> {kind:\"unknown\", text:\"\"}`
@@ -464,35 +464,35 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
   - `metadata -> {}`
   - `source -> {}`
 
-原则：
+Principle:
 
-- 默认值收口层只补“稳定默认值明确”的字段
-- 默认值收口层只补空缺槽位；正式语义口径仍由 `contract_v1.py` 收口
-- 真正的结构错误仍然交给 validator 拦截
+- Default value consolidation layer only populates fields with clearly defined stable defaults.
+Default value consolidation layer only fills vacant slots; official semantic definition still gated by `contract_v1.py`.
+- Real structural errors still handed over to validator Block
 
-## 顶层结构
+## Top-level structure
 
-顶层字段：
+Top-level fields:
 
 - `schema: str`
-  固定为 `normalized_document_v1`
+  Fixed to `normalized_document_v1`
 - `schema_version: str`
-  当前最新版本为 `1.1`
-  validator 只接受当前版本 `1.1`
+  The current latest version is `1.1`
+  validator Accept current version only. `1.1`
 - `document_id: str`
-  文档标识，通常对应 job 或输入文档
+  Document identifier, usually corresponds to job Or enter document
 - `source: dict`
-  顶层来源信息，记录 provider 和原始文件
+  Record top-level source information. provider and original file
 - `page_count: int`
-  页数
+  Page Count
 - `pages: list[dict]`
-  页面列表
+Page list.
 - `derived: dict`
-  文档级派生说明或后处理备注
+  Document-level derivation notes or post-processing remarks
 - `markers: dict`
-  文档级稳定标记，例如参考文献起点
+  Document-level stable marker, e.g., reference start point.
 
-示例：
+Example:
 
 ```json
 {
@@ -507,106 +507,106 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
 }
 ```
 
-## 页面结构
+## Page Structure
 
-每个页面对象当前包含：
+Each page object currently contains:
 
 - `page_index: int`
-  从 `0` 开始
+Starts from `0`.
 - `width: number`
-  页面宽度
+  Page width
 - `height: number`
-  页面高度
+  Page height
 - `unit: str`
-  当前使用 `pt`
+  In use `pt`
 - `blocks: list[dict]`
-  页面块列表
+  Page Blocks
 
-约束：
+Constraints:
 
-- `pages[i].page_index` 应与数组顺序一致
-- `blocks` 内的块顺序由 `order` 明确指定
+- `pages[i].page_index` Match array order.
+- `blocks` Order of inner blocks determined by `order` Specify explicitly
 
-## Block 结构
+## Block Structure
 
-每个 block 当前包含：
+Each block currently contains:
 
 - `block_id: str`
-  稳定块 id，例如 `p001-b0000`
+Stable block ID, e.g., `p001-b0000`.
 - `page_index: int`
-  所在页
+  Current page
 - `order: int`
-  页内顺序
+  In-page order
 - `reading_order: int`
-  规范化后的阅读顺序
+  Normalized Reading Order
 - `geometry: dict`
-  稳定几何字段，当前至少包含 `bbox`
+  Stable geometry field, currently contains at least `bbox`
 - `content: dict`
-  稳定内容字段，当前至少包含 `kind` 和 `text`
+Stable content fields, currently at least `kind` and `text`.
 - `layout_role: str`
-  显式版面角色
+  Explicit layout role
 - `semantic_role: str`
-  显式语义角色
+  Explicit semantic roles
 - `structure_role: str`
-  显式正文结构角色
+  Explicit body structure role
 - `policy: dict`
-  显式执行策略，当前至少包含 `translate`
+  Explicit execution policy, currently includes at least `translate`
 - `provenance: dict`
-  provider 原始标签和回溯信息
+  provider Original Tags and Traceback Information
 - `type: str`
-  兼容主类型
+  Main type compatible
 - `sub_type: str`
-  兼容子类型
+  Compatible Subtypes
 - `bbox: [x0, y0, x1, y1]`
-  兼容块级边界框
+  Compatible with block-level bounding boxes.
 - `text: str`
-  块的归一化纯文本
+  Normalized Plain Text for Blocks
 - `lines: list[dict]`
-  行级结构
+  Row-level structure
 - `segments: list[dict]`
-  span/segment 扁平结构
+  span/segment Flat structure
 - `tags: list[str]`
-  轻量派生标记
+  Lightweight Derived Tag
 - `derived: dict`
-  更强的派生语义结论
+  stronger derived semantic conclusions
 - `continuation_hint: dict`
-  provider 或上游结构层给出的段落连续性提示
+  provider Or upstream structural layer paragraph continuity hint.
 - `metadata: dict`
-  调试/映射元数据
+Debug/mapping metadata.
 - `source: dict`
-  provider 原始来源信息
+  provider Original source information
 
-## `continuation_hint` 约定
+`continuation_hint` conventions
 
-`continuation_hint` 是 block 级稳定字段，用来承接 OCR provider 或后续结构层给出的“这些块本来属于同一段”的提示。
+`continuation_hint` is a block-level stable field to accept hints from OCR provider or structural layer that these blocks belong to same paragraph.
 
-当前字段：
+Current field:
 
 - `source`
-  目前保留 `"" | "provider"`
+  Retained `"" | "provider"`
 - `group_id`
-  同一连续组的稳定 id
+  Same consecutive group stability. id
 - `role`
   `"" | "single" | "head" | "middle" | "tail"`
 - `scope`
   `"" | "intra_page" | "cross_page"`
 - `reading_order`
-  provider 给出的组内阅读顺序；未知时为 `-1`
+  provider Reading order within the given group; when unknown. `-1`
 - `confidence`
   `0.0 ~ 1.0`
 
-当前行为约束：
+Current behavior constraints:
 
-- `document.v1` 只负责把提示稳定落盘，不在 schema 层硬编码某个 provider 的私有字段
-- translation 主线当前优先消费 `source="provider"` 且 `scope="intra_page"` 的提示
-- `cross_page` 提示只在 translation 层满足相邻页、顺序明确、layout zone 边界安全、文本长度足够等受控条件时消费；schema 层只负责定义和保存契约
-- 新 OCR provider 如果也能稳定产出连续组信息，应优先写入这个字段，而不是把私有 raw 字段直接暴露给下游
+- `document.v1` Only responsible for reliably writing the prompt to disk, not in schema Layer hardcodes something. provider Private fields
+Translation current branch consumes `source="provider"` and `scope="intra_page"` hints first.
+- `cross_page` hints are only translation Layers satisfy adjacent pages, order clear.layout zone Consume under controlled conditions such as boundary security and sufficient text length;schema Layer only defines and persists contracts.
+If new OCR provider can stably produce continuation group info, write this field preferentially, not expose private raw fields downstream.
 
-## `type / sub_type` 约定
+`type / sub_type` conventions
 
-`type / sub_type` 只承载稳定结构，不强行塞入 OCR 很难稳定判断的高层语义。
+`type / sub_type` Only stable structures; no forced insertion. OCR High-level semantics hard to reliably determine.
 
-当前主类型：
+Current primary type:
 
 - `text`
 - `formula`
@@ -615,7 +615,7 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
 - `code`
 - `unknown`
 
-当前已使用的 `sub_type` 示例：
+Used `sub_type` examples:
 
 - `title`
 - `body`
@@ -629,54 +629,54 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
 - `table_body`
 - `code_block`
 
-规则：
+Rule:
 
-- 能稳定映射的结构，优先进入 `type / sub_type`
-- 不稳定的高层语义，不要直接扩主类型系统
-- 先问“这是结构，还是语义判断”
-- 先问“跨 provider 是否大概率都能稳定落下来”
+- Prioritize stable-mapping structures. `type / sub_type`
+- Unstable high-level semantics. Do not expand main type system directly.
+- First ask: "Is this structural or semantic judgment?"
+- First ask "across provider Are they all highly likely to land stably?
 
-示例：
+Example:
 
-- 正文段落：
+- Body paragraph:
   - `type = "text"`
   - `sub_type = "body"`
-- 页眉：
+- Header:
   - `type = "text"`
   - `sub_type = "header"`
-- 行间公式：
+- display formula:
   - `type = "formula"`
   - `sub_type = "display_formula"`
-- 代码块：
+- Code block:
   - `type = "code"`
   - `sub_type = "code_block"`
-- OCR 无法稳定细分，但能确认是文字：
+- OCR Cannot stably segment, but can confirm it is text:
   - `type = "text"`
-  - `sub_type = "metadata"` 或 `body`
+`sub_type = "metadata"` or `body`.
 
-反例：
+Counterexample:
 
-- 不要把 `caption` 直接塞进 `type`
-- 不要把 `reference_entry` 直接塞进 `sub_type`
-- 不要因为单个 provider 有特殊字段，就扩一套新的主类型
+Do not directly insert `caption` into `type`.
+Do not directly put `reference_entry` into `sub_type`.
+- Don't add dependency for single use. provider If special fields exist, add a new primary type.
 
-接 provider 时可以按下面这个判断：
+connect provider Judge according to the following:
 
-- `text/header/footer/page_number/footnote` 这类版面结构稳定，进 `type / sub_type`
-- `formula/display_formula`、`image/figure`、`table/table_body`、`code/code_block` 这类块级结构稳定，进 `type / sub_type`
-- `image_caption/table_caption/table_footnote/reference_entry/reference_heading` 这类更像“语义标签”，优先进 `tags`
-- 如果本地规则或后续 LLM 已经对某块做出更强结论，再写进 `derived.role`
-- `author/date/affiliation/doi` 这类 OCR 经常分不稳、provider 差异又大的内容，默认不要扩成新的稳定 `sub_type`
+- `text/header/footer/page_number/footnote` such layout structures are stable, enter `type / sub_type`
+- `formula/display_formula`、`image/figure`、`table/table_body`、`code/code_block` This type of block-level structure is stable, proceed. `type / sub_type`
+- `image_caption/table_caption/table_footnote/reference_entry/reference_heading` This type is more like "semantic tags"; prioritize. `tags`
+- If local rules or subsequent LLM Stronger conclusion reached for a section; now write it in. `derived.role`
+Fields like `author/date/affiliation/doi` are often unstable across OCR providers; do not default create new stable `sub_type` entries.
 
-## `tags / markers / derived` 分层
+`tags / markers / derived` layering
 
-这是当前 schema 最重要的设计约定。
+This is current. schema Most important design convention.
 
 ### `tags`
 
-`tags` 是块级轻量标记。
+`tags` Block-level lightweight markup.
 
-适合放：
+Suitable for:
 
 - `caption`
 - `image_caption`
@@ -687,31 +687,31 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
 - `reference_entry`
 - `reference_zone`
 
-特点：
+Features:
 
-- 轻量
-- 可并列
-- 适合规则快速消费
+- lightweight
+- Side-by-side.
+- Rapid rule consumption
 
-适合放进 `tags` 的例子：
+Fit into `tags` examples:
 
-- 一个块同时是 `caption`，并且还能细分成 `image_caption`
-- 一个块已经进入参考文献区，可额外打 `reference_zone`
+- Block is both `caption`and can be further subdivided into `image_caption`
+- Reference block already in. Extra label redundant. Remove. `reference_zone`
 
-不适合放进 `tags` 的例子：
+Examples not suitable for `tags`:
 
-- 正文 / 页眉 / 页脚这类稳定结构
-- provider 的临时调试字段
+- Body text / Header / Footer and other stable components.
+- provider Temporary debug field
 
 ### `markers`
 
-`markers` 是文档级稳定标记。
+`markers` Document-level stable marker.
 
-当前已经使用：
+In use:
 
 - `reference_start`
 
-示例：
+Example:
 
 ```json
 {
@@ -723,82 +723,82 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
 }
 ```
 
-适合放进 `markers` 的例子：
+Examples suitable for markers:
 
-- 文档级的 `reference_start`
+- Document-level. `reference_start`
 
-不适合放进 `markers` 的例子：
+Examples not suitable for markers:
 
-- 单个 block 的语义
-- 只对某一页临时有意义的调试信息
+- Single block semantics
+- Debug info temporarily relevant only to a specific page.
 
 ### `derived`
 
-`derived` 是更强的派生语义结论。
+`derived` This is a stronger derived semantic conclusion.
 
-块级 `derived` 当前结构：
+Block-level `derived` Current structure:
 
 - `role: str`
 - `by: str`
 - `confidence: float`
 
-例如：
+For example:
 
 - `role = "caption"`
 - `role = "reference_heading"`
 - `role = "reference_entry"`
 
-`derived` 的意义：
+`derived` Meaning:
 
-- 允许 provider 规则写入
-- 允许本地规则写入
-- 后续也允许 LLM 写入
+- Allow provider rule writes
+- Allow local rule writes.
+- Also allow later LLM writes
 
-也就是说，`derived` 是后续继续进化语义层的主要入口。
+In other words,`derived` Main entry point for subsequent semantic layer evolution.
 
-适合放进 `derived` 的例子：
+Examples suitable for derived:
 
 - `role = "caption"`
 - `role = "reference_heading"`
 - `role = "reference_entry"`
-- `role = "algorithm"`，但前提是这个结论来自本地规则或更高层判定，而不是硬把 provider 原字段抄进主契约
+- `role = "algorithm"`but only if this conclusion is based on local rules or higher-level judgments, rather than forcibly provider Copy original fields into main contract.
 
-不适合放进 `derived` 的例子：
+Examples not suitable for derived:
 
-- 原始 provider 的 `raw_type`
-- 可以直接稳定落进 `type / sub_type` 的结构
-- 只对某个本地脚本有意义的临时标记
+- The provider's original raw_type
+- Can be directly and stably applied. `type / sub_type` Structure
+- Temporary marker meaningful only to a specific local script.
 
-一个实用判断：
+Practical judgment:
 
-- 如果下游逻辑希望“快速筛一批块”，优先考虑 `tags`
-- 如果下游逻辑希望“把这块当成某种明确语义对象处理”，优先考虑 `derived.role`
-- 如果这是布局基础事实，不要放 `tags/derived`，直接落到 `type / sub_type`
+- If downstream logic wants to quickly filter a batch of blocks, prioritize. `tags`
+- If downstream logic expects to handle this as an explicit semantic object, prioritize `derived.role`
+- If this is the layout ground truth, do not include. `tags/derived`Drop directly `type / sub_type`
 
-## `metadata` 与 `source` 的边界
+## Boundary between metadata and source
 
 ### `metadata`
 
-`metadata` 放本地映射、调试和结构追踪信息。
+`metadata` Place local mapping, debugging, and structure tracing information.
 
-当前已使用示例：
+Currently used examples:
 
 - `raw_index`
 - `raw_angle`
 - `raw_sub_type`
 - `parent_block_id`
 
-特点：
+Features:
 
-- 偏本地实现
-- 偏调试/追踪
-- 不建议上层强绑定太多业务逻辑
+- Prefer local implementation.
+- Debug-oriented/tracking
+- Unnecessary business logic coupling at upper layers.
 
 ### `source`
 
-`source` 放 provider 来源信息。
+source holds provider source information.
 
-当前已使用示例：
+Currently used examples:
 
 - `provider`
 - `raw_page_index`
@@ -808,20 +808,20 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
 - `raw_bbox`
 - `raw_text_excerpt`
 
-特点：
+Features:
 
-- 保留原始映射
-- 便于回溯 provider 输出
-- 不应成为翻译/渲染主逻辑的长期依赖
+- Preserve original mapping.
+- Traceability provider output
+- Should not become translation/Main rendering logic long-term dependencies
 
-## 行和段结构
+## Line and paragraph structure
 
-`lines[*]` 当前字段：
+`lines[*]` Current field:
 
 - `bbox`
 - `spans`
 
-`lines[*].spans[*]` 当前字段：
+lines[*].spans[*] current fields:
 
 - `type`
 - `raw_type`
@@ -829,7 +829,7 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
 - `bbox`
 - `score`
 
-`segments[*]` 当前字段：
+segments[*] current fields:
 
 - `type`
 - `raw_type`
@@ -837,96 +837,96 @@ adapter 产出的当前版 `document.v1.json` 在进入主线前，会统一补�
 - `bbox`
 - `score`
 
-约定：
+Convention:
 
-- `segments` 是块内扁平序列，便于翻译和公式保护
-- `lines` 保留行级结构，便于排版与局部分析
-- 行内公式不作为 block 主类型，保留在 `segments/spans` 中
+- `segments` Flat inline sequence inside block; aids translation and formula protection.
+- `lines` Preserve line-level structure for formatting and local analysis.
+- Inline formulas not supported. Block primary type retained. In segments/spans
 
-## 稳定契约与非稳定字段
+## Stable contract, unstable fields
 
-当前建议视为稳定契约的字段：
+Current proposal fields considered stable contract:
 
-- 顶层：`schema`, `schema_version`, `document_id`, `page_count`, `pages`, `markers`
-- 页面：`page_index`, `width`, `height`, `unit`, `blocks`
+- Top-level: schema, schema_version, document_id, page_count, pages, markers
+- page:`page_index`, `width`, `height`, `unit`, `blocks`
 - block：`block_id`, `page_index`, `order`, `type`, `sub_type`, `bbox`, `text`, `lines`, `segments`, `tags`, `derived`, `continuation_hint`, `metadata`, `source`
 - `derived.role/by/confidence`
 
-当前不建议外部强绑定的部分：
+Currently not recommended for external strong binding:
 
-- `metadata` 内部细节
-- `source.raw_*` 的具体字段集合
-- 某些 provider 专属 `tags`
+- `metadata` Internals
+- `source.raw_*` specific field set
+- Some provider-specific tags
 
-换句话说：
+In other words:
 
-- 上层业务应优先依赖 `type / sub_type / tags / derived / markers`
-- 不要把 provider 原始字段重新当成主契约
+- Upper services depend first on `type / sub_type / tags / derived / markers`
+- Do not revert provider original fields to primary contract.
 
-## 版本演进原则
+## Version evolution principles
 
-`v1` 当前已经可用，但还不是“一次定终身”的终极版本。
+`v1` Currently available, but not yet the final once-and-for-all version.
 
-后续演进原则：
+Subsequent evolution principles:
 
-- 小改动尽量追加字段，不轻易改语义
-- 如果要破坏现有稳定契约，升级到 `v2`
-- provider 适配器负责把上游变化吸收掉，不把变化直接泄漏到主链路
+- Minor changes: append fields; avoid semantic changes.
+- If breaking existing stable contract, upgrade to `v2`
+- provider Adapter absorbs upstream changes; does not leak directly to main path.
 
-### 当前结论
+### Current conclusion
 
-现阶段不建议启动 `document.v2`。
+Not recommended to start at this stage. `document.v2`。
 
-原因：
+Reason:
 
-- 当前主线刚完成 `raw -> adapter -> defaults -> validator -> document.v1` 的收口，首要目标是把 `v1` 打磨稳定
-- 现有新增需求大多还属于 adapter 扩展、`tags/derived/markers` 语义沉淀和回归覆盖增强，还没有到必须破坏契约的程度
-- 如果过早开 `v2`，会把 provider 接入、翻译主线、渲染主线和历史任务兼容同时拉进来，收益不如先把 `v1` 做稳
+- The main storyline has just been completed. `raw -> adapter -> defaults -> validator -> document.v1` closing, primary goal is to `v1` Polish stability.
+- Most existing new requirements still fall under adapter Extensions,`tags/derived/markers` Semantic accumulation and regression coverage enhancement; not yet at the point of breaking the contract.
+- If opened too early `v2`, will provider Bringing in integration, translation mainline, rendering mainline, and historical task compatibility simultaneously yields less benefit than first... `v1` Steady
 
-### 只有满足这些条件，才考虑开 `v2`
+### Only consider opening if these conditions are met. `v2`
 
-至少满足其中一类：
+Satisfy at least one category:
 
-1. `v1` 的稳定字段定义必须被整体替换。
-   例如：
-   - `type / sub_type` 体系需要大改
-   - `lines / segments` 的基本组织方式需要改变
-   - `tags / derived / markers` 的职责边界需要整体重划
+1. `v1` Stable field definitions must be replaced in their entirety.
+For example:
+   - `type / sub_type` System overhaul required.
+   - `lines / segments` The basic organizational approach needs to change.
+   - `tags / derived / markers` Responsibility boundaries need overall redrawing.
 
-2. 出现跨 provider 的长期共性需求，但无法用“加字段”兼容表达。
-   例如：
-   - 多个 OCR provider 都稳定产出某类结构，而 `v1` 无法无损承载
-   - 现有字段语义已经逼得下游持续写兼容分支
+2. Cross-origin error. provider Long-term common requirements, but cannot be expressed compatibly via "adding fields."
+For example:
+   - Multiple OCR provider all consistently produce a certain type of structure, and `v1` Lossless transfer not possible.
+   - Existing field semantics force downstream to continuously write compatibility branches.
 
-3. 历史兼容成本开始明显高于升级成本。
-   例如：
-   - 默认值收口层越来越像“半重写”
-   - validator 和主链路需要长期维护两套相互冲突的假设
+3. Legacy compatibility costs now clearly exceed upgrade costs.
+For example:
+   - Default value consolidation layer increasingly resembles a "half-rewrite."
+   - validator And the mainline requires maintaining two conflicting sets of assumptions long-term.
 
-### 在此之前的默认策略
+### Default strategy before this
 
-- 优先扩 adapter，不扩主链路契约
-- 优先补 `tags / derived / markers` 语义，不轻易改 `type / sub_type`
-- 优先追加 machine-readable schema 和回归样本，不先升级版本号
+- Expand first adapterdo not extend the main link contract.
+- Prioritize supplementing `tags / derived / markers` semantics, do not change easily `type / sub_type`
+- Prioritize adding machine-readable schema and regression samples, do not upgrade version number first.
 
-## 当前最重要的实现原则
+## Current top implementation principle
 
-- 主链路优先围绕 `document.v1.json`
-- adapter 层负责 `raw -> normalized`
-- 业务层优先消费：
+- Main link prioritize around `document.v1.json`
+- adapter Layer Responsibility `raw -> normalized`
+- Business layer consume first.
   - `type / sub_type`
   - `tags`
   - `derived`
   - `markers`
 
-不要再把 MinerU 的原始 JSON 结构当成翻译/渲染主契约。
+Do not use MinerU's original JSON structure as the translation/render main contract.
 
-## 协作规矩
+## Collaboration rules
 
-这一层是 OCR 和下游模块之间最重要的协议边界。
+This layer is OCR Most important protocol boundary with downstream modules.
 
-- `document.v1.json` 是 translation / rendering 可以直接依赖的正式契约
-- `document.v1.report.json` 用于校验、排错和兼容摘要，不是下游主输入
-- 新增字段时，优先补到核心结构层或通用 trace 层，不要让下游长期依赖 raw trace
-- 如果修改 `document.v1` 结构、字段语义或默认文件名，必须同时更新 adapter、README、fixture、schema 校验和下游兼容测试
-- translation / rendering 负责人如果需要更多语义，应先在这里定义清楚，再进入各自模块实现，不能直接绕开这一层读取 provider 私有字段
+- document.v1.json is the translation/rendering formal contract for direct dependency.
+- `document.v1.report.json` Validation, debugging, compatibility summary — not downstream primary input.
+- Add new fields to core structure or common first. trace Layer: do not let downstream have long-term dependencies. raw trace
+- If modified `document.v1` Structure, field semantics, or default filename must be updated simultaneously. adapter、README、fixture、schema Checksum and downstream compatibility test
+- translation / rendering If the responsible party needs more semantics, define them here first, then implement in respective modules; do not bypass this layer to read directly. provider Private fields

@@ -32,7 +32,7 @@ pub(super) async fn download_and_unpack_after_success(
     ocr_provider_diagnostics_mut(job).artifacts.full_zip_url = Some(full_zip_url.to_string());
     mark_ocr_result_ready(
         job,
-        "OCR provider 结果已就绪，正在下载原始 bundle".to_string(),
+        "OCR provider Result ready, downloading original. bundle".to_string(),
     );
     save_ocr_job(deps, job, parent_job_id).await?;
     let runtime = deps.mineru_runtime();
@@ -55,7 +55,7 @@ pub(super) async fn download_and_unpack_after_success(
         ));
         mark_ocr_result_ready(
             job,
-            "OCR provider bundle 可达性探测未稳定，通过真实下载继续兜底".to_string(),
+            "OCR provider bundle Reachability probe unstable; fallback to actual download.".to_string(),
         );
         save_ocr_job(deps, job, parent_job_id).await?;
     }

@@ -62,9 +62,9 @@ test("live mock fromStage=translate starts at translation, not upload/ocr", () =
   assert.equal(at0.status, "running");
   assert.equal(at0.stage, "translating");
   assert.equal(at0.display_stage, "translation");
-  assert.match(`${at0.stage_detail}`, /翻译/);
+assert.match(`{at0.stage_detail}, /translation/);
 
-  // 跳过 ocr 后时长更短：约 7s 翻译 + 3s 渲染
+// Skip ocr Shorter duration: approx 7s translation + 3s rendering
   const mid = buildLiveMockJobPayload(jobId, startedAtMs + 8_000);
   assert.equal(mid.stage, "rendering");
   const done = buildLiveMockJobPayload(jobId, startedAtMs + 12_000);
@@ -98,7 +98,7 @@ test("live mock fromStage=ocr starts at ocr_processing (skips queue)", () => {
 test("translateMockDocument wires live payload via getMockJobPayload", () => {
   resetLiveMockJobs();
   const targetId = "doc-ref-6a1f2c";
-  // 其它测试可能写过 active_job_id，先清掉
+  // Other tests may have written active_job_idClear first
   const doc = getMockDocument(targetId);
   doc.active_job_id = null;
 
@@ -109,7 +109,7 @@ test("translateMockDocument wires live payload via getMockJobPayload", () => {
 
   const early = getMockJobPayload(result.job_id);
   assert.equal(early.job_id, result.job_id);
-  assert.notEqual(early.status, "succeeded", "刚提交不应立刻 succeeded");
+assert.notEqual(early.status, "succeeded", "Just submitted should not immediately succeeded");
   assert.ok(
     ["queued", "ocr_processing", "translating"].includes(`${early.stage}`),
     `early stage=${early.stage}`,
@@ -117,16 +117,16 @@ test("translateMockDocument wires live payload via getMockJobPayload", () => {
 
   assert.throws(
     () => translateMockDocument(targetId),
-    /409|翻译流程中/,
+/409|translation in progress/,
   );
 
-  // 终态后允许再提交
+  // Allow resubmission after final state.
   const metaStarted = Date.now() - 60_000;
   resetLiveMockJobs();
   doc.active_job_id = null;
   const again = translateMockDocument(targetId);
-  // 把 startedAt 拨到过去：通过重新 register 同 id 不太方便，用 isLiveMockJobActive 假时间
-  // 这里只断言第二次在 cleared state 成功
+// Rewind startedAt: via re-register same id inconvenient, use isLiveMockJobActive fake time
+// Assert only second time here. cleared state succeeded
   assert.ok(again.job_id);
   assert.ok(getMockDocumentList().documents.some((d) => d.document_id === targetId));
 });

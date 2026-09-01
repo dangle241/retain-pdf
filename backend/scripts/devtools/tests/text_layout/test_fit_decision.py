@@ -12,7 +12,7 @@ from services.rendering.layout.fit_decision import plan_chinese_body_fit
 
 
 def test_formula_heavy_text_limits_chinese_body_shrink() -> None:
-    text = "__FORMULA_1__ 与 __FORMULA_2__ 决定 __FORMULA_3__ 的变化。"
+text = "__FORMULA_1__ and __FORMULA_2__ determine the change of __FORMULA_3__."
     formula_map = [
         {"placeholder": "__FORMULA_1__", "formula_text": r"g^{IJ}(R_x)"},
         {"placeholder": "__FORMULA_2__", "formula_text": r"h^{IJ}(R_x)"},
@@ -34,7 +34,7 @@ def test_formula_heavy_text_limits_chinese_body_shrink() -> None:
 
 
 def test_plain_chinese_height_pressure_can_shrink_safely() -> None:
-    text = "这是一个较长的中文正文段落，需要根据宽度估算换行，并在高度不足时只做轻微字号调整。"
+    text = "Text wrap calculate width. Adjust font size slightly if height insufficient."
 
     decision = plan_chinese_body_fit(
         bbox_width_pt=120.0,
@@ -52,7 +52,7 @@ def test_plain_chinese_height_pressure_can_shrink_safely() -> None:
 
 
 def test_underfill_growth_is_gradual() -> None:
-    text = "这是较短的正文。"
+    text = "This is shorter body text."
 
     low_fill = plan_chinese_body_fit(
         bbox_width_pt=180.0,
@@ -82,7 +82,7 @@ def test_formula_ratio_reduces_underfill_growth() -> None:
     plain = plan_chinese_body_fit(
         bbox_width_pt=180.0,
         bbox_height_pt=90.0,
-        text="这是较短的正文。",
+text="This is relatively short body text.",
         formula_map=[],
         font_size_pt=10.0,
         leading_em=0.6,
@@ -91,7 +91,7 @@ def test_formula_ratio_reduces_underfill_growth() -> None:
     formula = plan_chinese_body_fit(
         bbox_width_pt=180.0,
         bbox_height_pt=90.0,
-        text="__FORMULA_1__ 决定 __FORMULA_2__。",
+text="__FORMULA_1__ determines __FORMULA_2__.",
         formula_map=[
             {"placeholder": "__FORMULA_1__", "formula_text": r"g^{IJ}(R_x)"},
             {"placeholder": "__FORMULA_2__", "formula_text": r"h^{IJ}(R_x)"},
@@ -105,7 +105,7 @@ def test_formula_ratio_reduces_underfill_growth() -> None:
 
 
 def test_many_simple_inline_formulas_do_not_shrink_aggressively() -> None:
-    text = "__FORMULA_1__、__FORMULA_2__、__FORMULA_3__ 与 __FORMULA_4__ 描述了势能面。"
+text = "__FORMULA_1__, __FORMULA_2__, __FORMULA_3__ and __FORMULA_4__ describe the potential energy surface."
     formula_map = [
         {"placeholder": "__FORMULA_1__", "formula_text": r"x_1"},
         {"placeholder": "__FORMULA_2__", "formula_text": r"x_2"},
@@ -130,7 +130,7 @@ def test_complex_formula_count_reduces_estimate_trust_more_than_simple_count() -
     simple = plan_chinese_body_fit(
         bbox_width_pt=180.0,
         bbox_height_pt=90.0,
-        text="__FORMULA_1__ 决定 __FORMULA_2__。",
+text="__FORMULA_1__ determines __FORMULA_2__.",
         formula_map=[
             {"placeholder": "__FORMULA_1__", "formula_text": r"x_1"},
             {"placeholder": "__FORMULA_2__", "formula_text": r"x_2"},
@@ -142,7 +142,7 @@ def test_complex_formula_count_reduces_estimate_trust_more_than_simple_count() -
     complex_formula = plan_chinese_body_fit(
         bbox_width_pt=180.0,
         bbox_height_pt=90.0,
-        text="__FORMULA_1__ 决定 __FORMULA_2__。",
+text="__FORMULA_1__ determines __FORMULA_2__.",
         formula_map=[
             {"placeholder": "__FORMULA_1__", "formula_text": r"\\frac{\\partial E}{\\partial R}"},
             {"placeholder": "__FORMULA_2__", "formula_text": r"\\sqrt{\\delta\\mathbf{R}^{IJ}}"},

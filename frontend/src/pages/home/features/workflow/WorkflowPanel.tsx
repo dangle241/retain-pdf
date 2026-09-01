@@ -1,11 +1,11 @@
-// 工作流面板(翻译工作流卡片,对照 partials/main-content.html 的
-// .translation-workflow-card 区块逐 id 镜像)。
+// Workflow panel(Translate workflow card, refer to partials/main-content.html
+// .translation-workflow-card block mirrored by id).
 //
-// - #job-warning:workflow 视图 store(updateJobWarning 桥回调写入)
-// - #job-form:提交流程属 app-actions 域(3b),onSubmit 走 bridge.submitForm
-//   (3a 为 preventDefault 占位;隐藏凭据 input 由 credentials 域的
-//   HiddenCredentialInputs 接管,渲染唯一一份,不重复制造 DOM id)
-// - 上传瓦片/动作组/行内错误盒分别由 upload 域组件与 InlineErrorBox 落位
+// - #job-warning: workflow view store(updateJobWarning Bridge callback write)
+// - #job-form: Submit process belongs to app-actions domain(3b), onSubmit uses bridge.submitForm
+//   (3a is preventDefault placeholder; hidden credential input is handled by credentials domain
+//   HiddenCredentialInputs Take over,Render single instance.,Avoid reinventing the wheel. DOM id)
+// - Upload tiles/Action group/Inline error boxes are composed of upload Domain component and InlineErrorBox Placement
 
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
 import { useHomeServices } from "../../home-services-context.js";
@@ -20,7 +20,7 @@ export function WorkflowPanel() {
   return (
     <section className="translation-workflow-card">
       <div id="job-warning" className={`job-warning${workflow.jobWarningVisible ? "" : " hidden"}`}>
-        检测到上一个任务仍在处理中。建议先等待当前任务结束，再提交新的 PDF。
+        Previous task still processing. Wait for completion before submitting new. PDF。
       </div>
 
       <form

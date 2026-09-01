@@ -1,28 +1,28 @@
 # resources
 
-这个目录用于放仓库级资源，避免把 logo、动画、示例文件和本地运行时继续散落到 `backend/`、`frontend/`、`desktop/` 等源码目录里。
+This directory is for repository-level resources, to avoid putting logoAnimation files, sample files, local runtime files scattered `backend/`、`frontend/`、`desktop/` Wait in source directory.
 
-## 分类
+## Classification
 
-- `brand/`：logo、二维码、品牌图、发布展示图。
-- `animations/`：动效素材、演示动画、加载动画源文件。
-- `samples/`：示例 PDF、测试输入文件、可公开的小样本。
-- `runtime/`：本地运行时或平台二进制的归档入口。正式迁移前不要直接移动 `backend/python`、`backend/typst-win32` 这类路径，必须同步更新打包脚本。
-- `misc/`：暂时无法归类的资源。定期清理，避免长期堆积。
+- `brand/`：logoQR code, brand image, release showcase image.
+- `animations/`Motion assets, demo animations, loading animation source files.
+- `samples/`Example PDFTest input files public small samples.
+- `runtime/`Archive entry for local runtime or platform binaries. Do not move directly before formal migration. `backend/python`、`backend/typst-win32` Such paths require synchronous updates to the packaging script.
+- `misc/`Resources temporarily unclassifiable. Clean periodically to avoid long-term accumulation.
 
-## 不建议放这里
+## Not recommended here.
 
-- 源码：继续放在 `backend/`、`frontend/`、`desktop/`。
-- 任务数据：继续放在 `data/jobs`、`data/uploads`、`data/downloads`。
-- 密钥文件：不要放入仓库。
-- 大体积构建产物：优先忽略或放到发布制品，不要提交。
+- Source code: keep here `backend/`、`frontend/`、`desktop/`。
+- Task data: continue placing `data/jobs`、`data/uploads`、`data/downloads`。
+- Key file: do not commit to repository.
+- Large build artifacts: prefer ignore or place in release artifacts; do not commit.
 
-## backend 整理建议
+## backend Cleanup suggestions
 
-`backend/` 里真正可疑的不是源码，而是本地运行时和构建产物：
+`backend/` The real suspect isn't source code—it's local runtime and build artifacts:
 
-- `backend/rust_api/target/` 是 Rust 构建产物，可以删除后重新编译。
-- `backend/python/` 是 Windows 桌面端 Python runtime，当前被打包脚本引用，迁移前要改 `desktop/scripts/prepare-app.mjs`。
-- `backend/typst-win32/` 是 Windows Typst runtime，迁移前也要同步桌面端打包逻辑。
+- `backend/rust_api/target/` contains Rust Build artifacts that can be deleted and recompiled.
+- `backend/python/` is Windows desktop Python runtime. Currently referenced by packaging script. Must change before migration. `desktop/scripts/prepare-app.mjs`.
+- `backend/typst-win32/` is Windows Typst runtime. Synchronize desktop packaging logic before migration.
 
-因此短期只新增 `resources/` 入口，不直接搬 `backend/scripts` 或 `backend/rust_api`。
+Therefore, only add new items in the short term to `resources/` entry; do not move directly to `backend/scripts` or `backend/rust_api`.

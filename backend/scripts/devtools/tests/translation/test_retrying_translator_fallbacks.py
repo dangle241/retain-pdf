@@ -159,7 +159,7 @@ class RetryingTranslatorFallbacksTests(unittest.TestCase):
 
         def fake_raw(*args, **kwargs):
             calls.append("raw")
-            return {item["item_id"]: result_entry("translate", "这段英文正文已经通过原始纯文本回退成功翻译。")}
+            return {item["item_id"]: result_entry("translate", "This English body text has been successfully translated via raw plaintext fallback.")}
 
         original_plain = fallbacks.translate_single_item_plain_text
         original_raw = fallbacks.translate_single_item_plain_text_unstructured
@@ -177,7 +177,7 @@ class RetryingTranslatorFallbacksTests(unittest.TestCase):
             fallbacks.translate_single_item_plain_text_unstructured = original_raw
 
         self.assertEqual(calls[-1], "raw")
-        self.assertEqual(result[item["item_id"]]["translated_text"], "这段英文正文已经通过原始纯文本回退成功翻译。")
+        self.assertEqual(result[item["item_id"]]["translated_text"], "Translation succeeded. Revert complete.")
 
     def test_sentence_fallback_chunks_long_group_when_no_sentence_split_exists(self):
         load_retrying_translator()
@@ -195,7 +195,7 @@ class RetryingTranslatorFallbacksTests(unittest.TestCase):
         def fake_plain(*args, **kwargs):
             sentence_item = args[0]
             seen.append(sentence_item["translation_unit_protected_source_text"])
-            return {item["item_id"]: result_entry("translate", "已翻译片段")}
+            return {item["item_id"]: result_entry("translate", "Translated fragment")}
 
         result = sentence_level_fallback(
             item,
@@ -238,7 +238,7 @@ class RetryingTranslatorFallbacksTests(unittest.TestCase):
             seen["count"] += 1
             if seen["count"] == 1:
                 raise fallbacks.EnglishResidueError(item["item_id"])
-            return {item["item_id"]: result_entry("translate", "或许更具信息量的是查看该研究。")}
+            return {item["item_id"]: result_entry("translate", "Perhaps more informative: view the study.")}
 
         def fake_raw(sentence_item, *args, **kwargs):
             return {

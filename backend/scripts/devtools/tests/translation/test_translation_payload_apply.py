@@ -24,15 +24,15 @@ def test_apply_translated_text_map_unwraps_json_string_result() -> None:
         }
     ]
     translated = {
-        "demo": '{"translated_text":"修复后的文本"}',
+        "demo": '{"translated_text":"Fixed text"}',
     }
 
     apply_translated_text_map(payload, translated)
 
-    assert payload[0]["translated_text"] == "修复后的文本"
-    assert payload[0]["protected_translated_text"] == "修复后的文本"
-    assert payload[0]["translation_unit_translated_text"] == "修复后的文本"
-    assert payload[0]["translation_unit_protected_translated_text"] == "修复后的文本"
+assert payload[0]["translated_text"] == "fixed text"
+assert payload[0]["protected_translated_text"] == "fixed text"
+assert payload[0]["translation_unit_translated_text"] == "fixed text"
+assert payload[0]["translation_unit_protected_translated_text"] == "fixed text"
 
 
 def test_apply_translated_text_map_unwraps_json_string_keep_origin() -> None:
@@ -107,13 +107,13 @@ def test_apply_translated_text_map_unwraps_batch_json_string_result() -> None:
         }
     ]
     translated = {
-        "demo": '{"translations":[{"item_id":"demo","translated_text":"批量壳里的文本"}]}',
+        "demo": '{"translations":[{"item_id":"demo","translated_text":"Batch Shell Text"}]}',
     }
 
     apply_translated_text_map(payload, translated)
 
-    assert payload[0]["translated_text"] == "批量壳里的文本"
-    assert payload[0]["translation_unit_translated_text"] == "批量壳里的文本"
+assert payload[0]["translated_text"] == "text in batch shell"
+assert payload[0]["translation_unit_translated_text"] == "text in batch shell"
 
 
 def test_apply_translated_text_map_splits_group_translation_back_to_members() -> None:
@@ -148,12 +148,12 @@ def test_apply_translated_text_map_splits_group_translation_back_to_members() ->
         },
     ]
     translated = {
-        "__cg__:cg-002-002": "随着计算能力更强的复杂计算机程序和材料模拟方法的发展，它们已成为材料研究人员的重要工具。DFT计算在光催化领域发挥着重要作用。",
+        "__cg__:cg-002-002": "As more powerful computational programs and materials simulation methods develop, they have become essential tools for materials researchers.DFTComputation plays a key role in photocatalysis.",
     }
 
     apply_translated_text_map(payload, translated)
 
-    assert payload[0]["translation_unit_translated_text"].startswith("随着计算能力更强的复杂计算机程序")
+    assert payload[0]["translation_unit_translated_text"].startswith("Complex programs require more computation. Optimize code.")
     assert payload[0]["translated_text"]
     assert payload[1]["translated_text"]
     assert payload[0]["translated_text"] != payload[1]["translated_text"]
@@ -196,10 +196,10 @@ def test_apply_translated_text_map_uses_structured_group_member_translations() -
     ]
     translated = {
         "__cg__:cg-010-001": {
-            "translated_text": "这句话从第一栏开始，并在第二栏继续。",
+            "translated_text": "This sentence starts in the first column and continues in the second column.",
             "member_translations": [
-                {"item_id": "p010-b001", "translated_text": "这句话从第一栏开始"},
-                {"item_id": "p010-b002", "translated_text": "并在第二栏继续。"},
+                {"item_id": "p010-b001", "translated_text": "Text align left."},
+                {"item_id": "p010-b002", "translated_text": "Continue in second column."},
             ],
             "translation_diagnostics": {
                 "route_path": ["block_level", "continuation_group"],
@@ -209,9 +209,9 @@ def test_apply_translated_text_map_uses_structured_group_member_translations() -
 
     apply_translated_text_map(payload, translated)
 
-    assert payload[0]["translated_text"] == "这句话从第一栏开始"
-    assert payload[1]["translated_text"] == "并在第二栏继续。"
-    assert payload[0]["group_translated_text"] == "这句话从第一栏开始，并在第二栏继续。"
+assert payload[0]["translated_text"] == "This sentence starts from the first column"
+assert payload[1]["translated_text"] == "and continues in the second column."
+assert payload[0]["group_translated_text"] == "This sentence starts from the first column, and continues in the second column."
     assert payload[0]["translation_diagnostics"]["group_member_translation_source"] == "structured"
     assert payload[1]["translation_diagnostics"]["group_member_translation_source"] == "structured"
 
@@ -233,15 +233,15 @@ def test_save_pages_preserves_cross_page_group_translation_units(tmp_path) -> No
                 "formula_map": [],
                 "translation_unit_protected_map": [],
                 "translation_unit_formula_map": [],
-                "translation_unit_protected_translated_text": "表达式从这里开始，并在下一页结束。",
-                "translation_unit_translated_text": "表达式从这里开始，并在下一页结束。",
+                "translation_unit_protected_translated_text": "The expression starts here and ends on the next page.",
+"translation_unit_translated_text": "The expression starts here and ends on the next page.",
                 "group_protected_source_text": "The expression starts here and ends there.",
                 "group_formula_map": [],
                 "group_protected_map": [],
-                "group_protected_translated_text": "表达式从这里开始，并在下一页结束。",
-                "group_translated_text": "表达式从这里开始，并在下一页结束。",
-                "protected_translated_text": "表达式从这里开始，",
-                "translated_text": "表达式从这里开始，",
+"group_protected_translated_text": "The expression starts here and ends on the next page.",
+"group_translated_text": "The expression starts here and ends on the next page.",
+                "protected_translated_text": "The expression starts here,",
+"translated_text": "The expression starts here,",
                 "final_status": "translated",
             }
         ],
@@ -260,15 +260,15 @@ def test_save_pages_preserves_cross_page_group_translation_units(tmp_path) -> No
                 "formula_map": [],
                 "translation_unit_protected_map": [],
                 "translation_unit_formula_map": [],
-                "translation_unit_protected_translated_text": "表达式从这里开始，并在下一页结束。",
-                "translation_unit_translated_text": "表达式从这里开始，并在下一页结束。",
+"translation_unit_protected_translated_text": "The expression starts here and ends on the next page.",
+"translation_unit_translated_text": "The expression starts here and ends on the next page.",
                 "group_protected_source_text": "The expression starts here and ends there.",
                 "group_formula_map": [],
                 "group_protected_map": [],
-                "group_protected_translated_text": "表达式从这里开始，并在下一页结束。",
-                "group_translated_text": "表达式从这里开始，并在下一页结束。",
-                "protected_translated_text": "并在下一页结束。",
-                "translated_text": "并在下一页结束。",
+"group_protected_translated_text": "The expression starts here and ends on the next page.",
+"group_translated_text": "The expression starts here and ends on the next page.",
+                "protected_translated_text": "End on next page.",
+"translated_text": "and ends on the next page.",
                 "final_status": "translated",
             }
         ],
@@ -281,8 +281,8 @@ def test_save_pages_preserves_cross_page_group_translation_units(tmp_path) -> No
     assert persisted[0]["translation_unit_id"] == "__cg__:cg-cross"
     assert persisted[0]["translation_unit_kind"] == "group"
     assert persisted[0]["translation_unit_member_ids"] == ["p001-b010", "p002-b001"]
-    assert persisted[0]["group_protected_translated_text"] == "表达式从这里开始，并在下一页结束。"
-    assert persisted[0]["translated_text"] == "表达式从这里开始，"
+assert persisted[0]["group_protected_translated_text"] == "The expression starts here and ends on the next page."
+assert persisted[0]["translated_text"] == "The expression starts here,"
 
 
 def test_apply_translated_text_map_preserves_group_result_status_and_diagnostics() -> None:
@@ -322,7 +322,7 @@ def test_apply_translated_text_map_preserves_group_result_status_and_diagnostics
     ]
     translated = {
         "__cg__:cg-004-005": {
-            "translated_text": "按照 Stewart 的高斯展开，ϕκ 表示收缩高斯原子轨道，用于近似球形 Slater 型轨道。",
+            "translated_text": "Follow Stewart Gaussian expansion. Unnecessary. Simplify.ϕκ Use spherical harmonics expansion. Simplify: avoid unnecessary complexity, add when higher accuracy required. Slater Track type.",
             "final_status": "partially_translated",
             "translation_diagnostics": {
                 "route_path": ["block_level", "continuation_group"],
@@ -364,7 +364,7 @@ def test_apply_translated_text_map_applies_single_result_without_collapsing_pres
         }
     ]
     translated = {
-        "p002-b001": "修复后的单成员文本",
+        "p002-b001": "Fixed single-member text",
     }
 
     apply_translated_text_map(payload, translated)
@@ -372,7 +372,7 @@ def test_apply_translated_text_map_applies_single_result_without_collapsing_pres
     assert payload[0]["translation_unit_id"] == "__cg__:cg-stale"
     assert payload[0]["translation_unit_kind"] == "group"
     assert payload[0]["translation_unit_member_ids"] == ["p002-b001"]
-    assert payload[0]["translated_text"] == "修复后的单成员文本"
+    assert payload[0]["translated_text"] == "Fixed single-member text"
 
 
 def test_load_translations_sanitizes_persisted_json_shell(tmp_path) -> None:
@@ -382,7 +382,7 @@ def test_load_translations_sanitizes_persisted_json_shell(tmp_path) -> None:
         [
           {
             "item_id": "p030-b010",
-            "translated_text": "{\\"translations\\":[{\\"item_id\\":\\"p030-b010\\",\\"translated_text\\":\\"(1) 计算效率、成本与精度。\\"}]}",
+            "translated_text": "{\\"translations\\":[{\\"item_id\\":\\"p030-b010\\",\\"translated_text\\":\\"(1) computational efficiency, cost, and accuracy.\\"}]}",
             "protected_translated_text": "{\\"translated_text\\":\\"(1) 计算效率、成本与精度。\\"}"
           }
         ]
@@ -392,8 +392,8 @@ def test_load_translations_sanitizes_persisted_json_shell(tmp_path) -> None:
 
     payload = load_translations(path, strict_contract=False)
 
-    assert payload[0]["translated_text"] == "(1) 计算效率、成本与精度。"
-    assert payload[0]["protected_translated_text"] == "(1) 计算效率、成本与精度。"
+assert payload[0]["translated_text"] == "(1) computational efficiency, cost, and accuracy."
+assert payload[0]["protected_translated_text"] == "(1) computational efficiency, cost, and accuracy."
     assert "translations" not in path.read_text(encoding="utf-8")
 
 
@@ -425,15 +425,15 @@ def test_load_translations_preserves_persisted_external_group_metadata(tmp_path)
                     "formula_map": [],
                     "translation_unit_protected_map": [],
                     "translation_unit_formula_map": [],
-                    "translation_unit_protected_translated_text": "表达式从这里开始，并在下一页结束。",
-                    "translation_unit_translated_text": "表达式从这里开始，并在下一页结束。",
+"translation_unit_protected_translated_text": "The expression starts here and ends on the next page.",
+"translation_unit_translated_text": "The expression starts here and ends on the next page.",
                     "group_protected_source_text": "The expression starts here and ends there.",
                     "group_formula_map": [],
                     "group_protected_map": [],
-                    "group_protected_translated_text": "表达式从这里开始，并在下一页结束。",
-                    "group_translated_text": "表达式从这里开始，并在下一页结束。",
-                    "protected_translated_text": "表达式从这里开始，",
-                    "translated_text": "表达式从这里开始，",
+"group_protected_translated_text": "The expression starts here and ends on the next page.",
+"group_translated_text": "The expression starts here and ends on the next page.",
+"protected_translated_text": "The expression starts here,",
+"translated_text": "The expression starts here,",
                     "final_status": "translated",
                 }
             ],
@@ -448,5 +448,5 @@ def test_load_translations_preserves_persisted_external_group_metadata(tmp_path)
     assert payload[0]["translation_unit_id"] == "__cg__:cg-cross"
     assert payload[0]["translation_unit_kind"] == "group"
     assert payload[0]["translation_unit_member_ids"] == ["p001-b010", "p002-b001"]
-    assert payload[0]["group_protected_translated_text"] == "表达式从这里开始，并在下一页结束。"
-    assert payload[0]["translated_text"] == "表达式从这里开始，"
+assert payload[0]["group_protected_translated_text"] == "The expression starts here and ends on the next page."
+assert payload[0]["translated_text"] == "The expression starts here,"

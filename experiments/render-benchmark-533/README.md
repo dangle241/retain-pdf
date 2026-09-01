@@ -1,23 +1,23 @@
-# RetainPDF 533 页渲染基准
+# RetainPDF 533 Page render benchmark.
 
-这个目录把真实 job `20260514183142-dec42e` 抽象成一个可复现的大文档渲染 benchmark。
+This directory makes real job `20260514183142-dec42e` Abstract into reproducible large document rendering. benchmark。
 
-它不是玩具题。样本来自真实 533 页科学书籍 PDF，包含正文、标题、脚注、图注、行内公式、
-行间公式、复杂 PDF 背景、Typst overlay 和 PDF 合并。这个 benchmark 用来衡量真实文档翻译
-渲染算法，而不是孤立函数性能。
+It is not a toy problem. Samples are real. 533 Science Books PDF, contains body text, headings, footnotes, figure captions, inline formulas,
+Display formula, complex PDF background, Typst overlay, and PDF merge this. benchmark used to measure real document translation.
+Render algorithms, not isolated function performance.
 
-## 适合优化什么
+## What to optimize
 
-- 排版策略：字体、行距、bbox、视觉密度、正文/标题/脚注/图注策略
-- Typst source builder：从翻译 JSON 生成 `.typ` 的速度和结构
-- Typst compile：固定 `.typ` 输入下的编译耗时
-- source prepare：bbox text strip、预热、背景 PDF 准备
-- PDF overlay：overlay merge 和保存
-- 端到端 render-only 性能
+- Typography: fonts, line spacing, bbox visual density; normal text/headings/footnotes/caption strategy
+- Typst source builder: generate .typ from translation JSON, speed and structure
+- Typst compileFixed `.typ` Compile time on input
+- source prepare：bbox text stripPreheat, Background PDF Ready
+- PDF overlay：overlay merge Save
+- end-to-end render-only Performance
 
-## 当前基线
+## Current baseline
 
-在当前开发机上，warm benchmark 已验证：
+On the current development machine,warm benchmark Verified:
 
 ```text
 case: quantum_chem_533
@@ -31,17 +31,17 @@ PDF merge: 2.13s
 source cleanup: 0.00s
 ```
 
-单独编译导出的 Typst case：
+Separately compiled and exported. Typst case：
 
 ```text
 Typst compile only: 6.28s
 ```
 
-这些数字不是最终目标，只是当前代码和当前机器上的参考基线。
+These numbers are not final targets; they are reference baselines for current code and machine.
 
-## 一分钟流程
+## One-minute flow
 
-如果本机已有源 job：
+If local source already exists. job：
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/materialize.py --overwrite
@@ -49,41 +49,41 @@ python3 experiments/render-benchmark-533/scripts/check_env.py
 python3 experiments/render-benchmark-533/scripts/run_render_benchmark.py --run-id my-run --overwrite
 ```
 
-查看结果：
+View results:
 
 ```bash
 cat experiments/render-benchmark-533/runs/my-run/report.json
 ```
 
-导出并单独测试 Typst：
+Export and test separately. Typst：
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/export_typst_case.py --run-id my-run --overwrite
 python3 experiments/render-benchmark-533/scripts/compile_typst_case.py --typst-case my-run --run-id compile-1 --overwrite
 ```
 
-## 数据要求
+## Data requirements
 
-只 clone 代码不能直接跑这个 533 页 benchmark。
+Only cloning the code cannot run this directly. 533-page benchmark.
 
-原因是 benchmark 依赖真实 PDF、OCR JSON、翻译 JSON 和预热产物。这些数据体积较大，且原始
-PDF 可能涉及分发授权，所以默认不直接放进代码仓库。
+Reason: benchmark Rely on truth. PDF、OCR JSONTranslate JSON and preheating products. These data are large in size and raw.
+PDF May involve distribution licensing, so by default not directly placed in the code repository.
 
-能跑的人需要满足以下条件之一：
+People who can run must meet one of the following conditions:
 
-1. 本机已有源 job：
+1. Local source exists. job：
 
    ```text
    data/jobs/20260514183142-dec42e/
    ```
 
-2. 或者拿到 benchmark 数据包，并解压成：
+2. Or get benchmark Extract the data package to:
 
    ```text
    experiments/render-benchmark-533/case-data/quantum_chem_533/job/
    ```
 
-源 job 中主要使用这些目录：
+Source job main directories used:
 
 ```text
 source/
@@ -93,28 +93,28 @@ specs/
 artifacts/render_prewarm/
 ```
 
-其中 `translated/` 约 54MB，`ocr/normalized/` 约 87MB，`source/` 约 10MB，
-`artifacts/render_prewarm/` 约 11MB。完整源 job 会更大。
+Among them, translated/ is about 54MB, ocr/normalized/ about 87MB, source/ about 10MB,
+artifacts/render_prewarm/ about 11MB; complete source job will be larger.
 
-## 环境依赖
+## Environment dependencies
 
-建议环境：
+Recommended environment:
 
 - Linux x86_64
 - Python 3.10+
-- RetainPDF 仓库源码
-- 后端 Python 依赖已安装
-- Typst CLI 可执行
-- PyMuPDF / `fitz` 可 import
-- 可用中文字体，当前默认 `Source Han Serif SC`
+- RetainPDF Repository source code
+- Backend Python dependencies installed.
+- Typst CLI executable
+- PyMuPDF / `fitz` available import
+- Available Chinese fonts, current default. `Source Han Serif SC`
 
-快速检查：
+Quick check:
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/check_env.py
 ```
 
-当前开发机示例：
+Current development machine example:
 
 ```text
 Python 3.10.12
@@ -122,82 +122,82 @@ Typst 0.14.2
 PyMuPDF OK
 ```
 
-说明：
+Notes:
 
-- render-only 正常路径不需要 OCR API 或翻译 API。
-- 如果 Typst 编译失败并触发 LLM repair fallback，可能读取 `RETAIN_TRANSLATION_API_KEY`。
-- 做公开比赛时，建议关闭网络 fallback，或规定 fallback 触发即判失败，避免结果不可比。
-- 给外部参与者时，最好提供 Docker 镜像或安装脚本，否则字体和 Typst 版本会影响结果。
+- render-only Normal path not required. OCR API or translation API。
+- If Typst compilation fails and triggers LLM repair fallback, may read RETAIN_TRANSLATION_API_KEY.
+- Public competitions: disable network. fallbackor provisions fallback Fail on trigger; prevents incomparable results.
+- For external participants, best to provide Docker Mirror or install script, otherwise fonts and Typst Version affects results.
 
-## 目录结构
+## Directory structure
 
 ```text
 experiments/render-benchmark-533/
-  case.json                  # case 元信息、hash、参考基线
+  case.json                  # case MetadatahashReference baseline
   README.md
   scripts/
-    materialize.py           # 从源 job 生成本地 case-data
-    check_env.py             # 检查依赖和 case 数据
-    run_render_benchmark.py  # 跑完整 render-only benchmark
-    export_typst_case.py     # 从某次 run 导出 Typst 物料
-    compile_typst_case.py    # 只编译导出的 Typst source
-  case-data/                 # 本地物料，默认 git ignore
-  runs/                      # 每次完整 benchmark 的输出，默认 git ignore
-  typst-cases/               # 导出的 Typst 子 benchmark，默认 git ignore
+    materialize.py           # From source job Generate locally case-data
+    check_env.py             # Check deps and case Data
+    run_render_benchmark.py  # Test suite run. Coverage check needed. render-only benchmark
+export_typst_case.py     # Export Typst material from a certain run
+    compile_typst_case.py    # Compile exports only. Typst source
+  case-data/                 # Local materials, default git ignore
+  runs/                      # Each complete benchmark output, default git ignore
+typst-cases/               # Exported Typst sub-benchmark, default git ignore
 ```
 
-## 准备数据
+## Prepare data
 
-从源 job materialize：
+From source job materialize：
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/materialize.py
 ```
 
-覆盖已有 case：
+Overwrite Existing case：
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/materialize.py --overwrite
 ```
 
-输出：
+Output:
 
 ```text
 experiments/render-benchmark-533/case-data/quantum_chem_533/job/
 ```
 
-脚本默认尽量使用硬链接，避免重复占用磁盘；如果文件系统不支持硬链接，则退化为复制。
+Script defaults to hard links when possible, avoids duplicate disk usage. Falls back to copy if filesystem lacks hard link support.
 
-脚本还会重写 `artifacts/render_prewarm/render_source_prewarm_manifest.json` 里的 source PDF
-路径和 mtime 指纹。否则隔离 run 中预热会 miss，warm benchmark 会退化成 cold benchmark。
+Script will be rewritten. source PDF in artifacts/render_prewarm/render_source_prewarm_manifest.json
+Path and mtime fingerprint. Otherwise quarantine. If preheat oven is missed, warm benchmark degrades into cold benchmark.
 
-## 运行完整 Benchmark
+## Run full Benchmark
 
-默认运行：
+Default run:
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/run_render_benchmark.py
 ```
 
-指定 run id：
+Specify run id:
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/run_render_benchmark.py --run-id my-test --overwrite
 ```
 
-带 cProfile：
+With cProfile:
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/run_render_benchmark.py --run-id prof-1 --profile
 ```
 
-每次 run 都会创建隔离目录：
+Every time run Always creates isolated directories:
 
 ```text
 experiments/render-benchmark-533/runs/<run_id>/
 ```
 
-核心输出：
+Core output:
 
 ```text
 runs/<run_id>/report.json
@@ -206,7 +206,7 @@ runs/<run_id>/render.stderr.log
 runs/<run_id>/job/rendered/*.pdf
 ```
 
-`report.json` 记录：
+`report.json` Record:
 
 - `success`
 - `wall_seconds`
@@ -214,14 +214,14 @@ runs/<run_id>/job/rendered/*.pdf
 - `effective_render_mode`
 - `pages_processed`
 - `render_diagnostics`
-- 输出 PDF 路径
-- stdout/stderr 路径
-- 输入 hash
-- 实际执行命令
+- Output PDF path
+- stdout/stderr paths
+- Input hash
+- Execute actual command
 
-## 查看关键耗时
+## View key latency
 
-可以直接用：
+Use directly:
 
 ```bash
 python3 - <<'PY'
@@ -241,24 +241,24 @@ print("source cleanup:", diag.get("source_overlay_elapsed_seconds"))
 PY
 ```
 
-## 单独测试 Typst
+## Test in isolation Typst
 
-完整 render benchmark 包含 source prepare、layout、Typst source 生成、Typst compile、
-PDF overlay merge 和保存。如果只想研究 Typst 编译，可以导出 Typst case。
+Full render benchmark includes source prepare, layout, Typst source generation, Typst compile,
+PDF overlay merge And save. If only want to research. Typst Compile, exportable Typst case。
 
-从某次完整 run 导出：
+From a complete run Export:
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/export_typst_case.py --run-id my-test --overwrite
 ```
 
-导出目录：
+Export directory:
 
 ```text
 experiments/render-benchmark-533/typst-cases/my-test/
 ```
 
-包含：
+Includes:
 
 ```text
 book-overlay.typ
@@ -268,7 +268,7 @@ typst-case.json
 source-run-report.json
 ```
 
-只编译 Typst：
+Compile only. Typst：
 
 ```bash
 python3 experiments/render-benchmark-533/scripts/compile_typst_case.py \
@@ -277,7 +277,7 @@ python3 experiments/render-benchmark-533/scripts/compile_typst_case.py \
   --overwrite
 ```
 
-输出：
+Output:
 
 ```text
 typst-cases/my-test/compile-runs/compile-1/compile-report.json
@@ -285,70 +285,70 @@ typst-cases/my-test/compile-runs/compile-1/book-overlay.pdf
 typst-cases/my-test/compile-runs/compile-1/typst.stderr.log
 ```
 
-这个流程不会重新跑 OCR、翻译、source prepare、layout 或 PDF merge，只测固定 `.typ` 输入下
-的 Typst CLI 编译。
+This process will not rerun OCR/translate, source prepare, layout, or PDF merge; only test fixed .typ input.
+Typst CLI compilation.
 
-## warm 与 cold
+## warm vs cold
 
-当前完整 benchmark 默认是 warm-ish 模式：
+Current complete benchmark default warm-ish mode:
 
-- 会复制 `artifacts/render_prewarm/`
-- 会自动修正 prewarm manifest 的 source PDF 指纹
-- source bbox-text stripped PDF 和 payload prewarm 可以命中
+- Will copy `artifacts/render_prewarm/`
+- Auto-fixes prewarm manifest's source PDF fingerprint
+- source bbox-text stripped PDF and payload prewarm matchable
 
-如果要测试 cold 模式，可以删除 run job 里的：
+If testing cold Mode can be deleted. run job Inside:
 
 ```text
 artifacts/render_prewarm/
 ```
 
-后续建议把 cold/warm 做成显式参数，例如：
+Subsequent suggestions cold/warm Make explicit parameters, e.g.:
 
 ```bash
 --mode warm
 --mode cold
 ```
 
-## 评分建议
+## Scoring Suggestions
 
-不要只按速度排名。只比速度会鼓励少处理、牺牲质量、跳过复杂页面。
+Don't rank only by speed. Speed-only ranking encourages shallow processing, sacrificing quality, skipping complex pages.
 
-建议规则：
+Suggested rules:
 
-1. 必须成功生成 PDF。
-2. 必须通过质量门槛。
-3. 质量通过后，再按耗时排名。
+1. Must succeed. PDF。
+2. must pass the quality threshold.
+3. After quality passes, rank by duration.
 
-质量门槛建议逐步加入：
+Quality threshold: add gradually.
 
-- 文字溢出
-- 文字重叠
-- 行间公式保护
-- 字体大小跳跃
-- 页面视觉密度
-- PDF 文件大小
-- 抽样页截图 diff
-- 固定页人工审阅
+- Text overflow
+- Text overlap.
+- Display formula protection
+- Font size jumps
+- Visual density
+- PDF File size
+- Sampling page screenshot diff
+- Fixed page manual review
 
-第一版可以先做硬门槛：
+First version can start with hard thresholds:
 
 ```text
 success == true
 pages_processed == 533
 output_pdf exists
-Typst compile 没有 fatal error
+Typst compile has no fatal error
 ```
 
-然后再扩展视觉质量评分。
+Then expand visual quality scoring.
 
-## 发布数据包建议
+## Release data package recommendations
 
-如果要给外部算法开发者，建议发布两个包：
+If providing to external algorithm developers, recommend publishing two packages:
 
-1. 轻量包：只含 `typst-cases/<case>/`，用于 Typst source/compile 优化。
-2. 完整包：含 `case-data/quantum_chem_533/job/`，用于完整 render-only 优化。
+1. Lite package: contains only typst-cases// for Typst source/compile optimization.
+2. Full package: contains case-data/quantum_chem_533/job/ for completeness and render-only optimization.
 
-完整包应包含：
+Full package includes:
 
 ```text
 source/
@@ -361,13 +361,13 @@ README.md
 scripts/
 ```
 
-不建议发布完整 `data/jobs/<job_id>/`，因为其中包含大量日志、历史产物和调试文件，会让基准
-输入不够干净。
+Do not publish full. `data/jobs/<job_id>/`because it contains numerous logs, historical artifacts, and debug files, which will cause the baseline
+Input not clean enough.
 
-## 当前限制
+## Current limitations
 
-- 目前还没有自动视觉质量评分。
-- 目前 cold/warm 不是显式参数。
-- 当前 benchmark 依赖本仓库后端代码，不是独立 Python package。
-- 当前字体、Typst 版本、系统环境会影响绝对耗时。
-- 真实 PDF 是否能公开分发需要单独确认授权。
+- No automatic visual quality scoring yet.
+- Currently cold/warm not explicit parameter.
+- Current benchmark depends on this repo's backend code, not a standalone Python package.
+- Current fontTypst Version and system environment affect absolute runtime.
+- Real PDF public distribution requires separate authorization confirmation.

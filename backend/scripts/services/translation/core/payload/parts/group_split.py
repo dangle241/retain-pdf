@@ -7,7 +7,7 @@ INLINE_MATH_SPAN_RE = re.compile(r"(?<!\\)\$(?:\\.|[^$\\\n])+(?<!\\)\$")
 MATH_AWARE_TOKEN_RE = re.compile(
     rf"(<[futnvc]\d+-[0-9a-z]{{3}}/>|\[\[FORMULA_\d+]]|\s+|{INLINE_MATH_SPAN_RE.pattern}|[A-Za-z0-9_\-./]+|[\u4e00-\u9fff]|.)"
 )
-SPLIT_PUNCTUATION = "。！？；，、,.!?;:)]}）】」』"
+SPLIT_PUNCTUATION = ".!?;，、,.!?;:)]}）】」』"
 
 
 def math_spans(text: str) -> list[str]:

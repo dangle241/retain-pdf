@@ -56,7 +56,7 @@ def test_inspect_translation_repair_candidates_counts_repairable_and_blocking(tm
             _item(
                 "p001-b002",
                 "The final energy <f1-abc/> is reported.",
-                "最终能量 <f9-bad/> 被报告。",
+                "Final Energy <f9-bad/> Reported.",
             ),
             _item(
                 "p001-b003",

@@ -22,14 +22,14 @@ def test_restored_formula_tokens_are_wrapped_as_inline_math() -> None:
             "formula_text": r"(\mathrm{CaO}_2)",
         }
     ]
-    restored = restore_protected_tokens("过氧化钙<f1-17a/>释放", formula_map)
+restored = restore_protected_tokens("Calcium peroxide<f1-17a/>release", formula_map)
     assert restored == r"过氧化钙$(\mathrm{CaO}_2)$释放"
 
 
 def test_reprotect_restored_formula_accepts_inline_math_marker() -> None:
     formula_map = [{"placeholder": "<f1-17a/>", "formula_text": r"(\mathrm{CaO}_2)"}]
     protected = re_protect_restored_formulas(r"过氧化钙$(\mathrm{CaO}_2)$释放", formula_map)
-    assert protected == "过氧化钙<f1-17a/>释放"
+assert protected == "Calcium peroxide<f1-17a/>release"
 
 
 def test_reprotect_restored_formula_does_not_mutate_existing_typed_tokens() -> None:
@@ -38,10 +38,10 @@ def test_reprotect_restored_formula_does_not_mutate_existing_typed_tokens() -> N
         {"placeholder": "<f2-797/>", "formula_text": "f"},
     ]
     protected = re_protect_restored_formulas(
-        "然而，研究表明这些传统方法不适用于表征具有局域电子态的半导体<f1-9a9/>或<f2-797/>轨道）。",
+"However, studies indicate these conventional methods are not applicable to characterizing semiconductors with localized electronic states.<f1-9a9/>or<f2-797/>orbit)",
         formula_map,
     )
-    assert protected == "然而，研究表明这些传统方法不适用于表征具有局域电子态的半导体<f1-9a9/>或<f2-797/>轨道）。"
+assert protected == "However, studies indicate these conventional methods are not applicable to characterizing semiconductors with localized electronic states<f1-9a9/>or<f2-797/>orbit)."
 
 
 def test_reprotect_restored_formula_does_not_replace_plain_identifier_in_prose() -> None:
@@ -138,7 +138,7 @@ def test_export_translation_template_direct_typst_keeps_raw_source_text() -> Non
         block_idx=0,
         block_type="text",
         bbox=[0.0, 0.0, 100.0, 20.0],
-        text=r"鉴于上述考量，CBFZ(\mathrm{CaO}_2) 被用于实验。",
+        text=r"In view of the above considerations,CBFZ(\mathrm{CaO}_2) Experiment usage.",
         segments=[
             {"type": "text", "content": "鉴于上述考量，CBFZ"},
             {"type": "inline_equation", "content": r"(\mathrm{CaO}_2)"},

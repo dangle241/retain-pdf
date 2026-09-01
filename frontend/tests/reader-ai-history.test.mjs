@@ -12,7 +12,7 @@ function memoryStorage() {
   };
 }
 
-test("聊天记录持久化:按 jobId 存取、截断、清空", () => {
+test("Chat history persistence: access by jobId, truncation, clear", () => {
   const storage = memoryStorage();
   const store = createReaderAiHistoryStore({ jobId: "job-1", storage });
   assert.equal(store.enabled, true);
@@ -21,17 +21,17 @@ test("聊天记录持久化:按 jobId 存取、截断、清空", () => {
   store.save({
     messages: [
       { role: "user", text: "问题" },
-      { role: "assistant", text: "**回答** [1]", citations: [{ ref: 1, block_id: "b-1" }] },
+{ role: "assistant", text: "**Answer** [1]", citations: [{ ref: 1, block_id: "b-1" }] },
     ],
     history: [{ role: "user", content: "问题" }, { role: "assistant", content: "回答" }],
   });
   const loaded = store.load();
   assert.equal(loaded.messages.length, 2);
-  assert.equal(loaded.messages[1].text, "**回答** [1]");
+assert.equal(loaded.messages[1].text, "**Answer** [1]");
   assert.equal(loaded.messages[1].citations[0].block_id, "b-1");
   assert.equal(loaded.history.length, 2);
 
-  // 不同 jobId 隔离
+// Different jobId isolation
   const other = createReaderAiHistoryStore({ jobId: "job-2", storage });
   assert.deepEqual(other.load(), { messages: [], history: [] });
 
@@ -39,7 +39,7 @@ test("聊天记录持久化:按 jobId 存取、截断、清空", () => {
   assert.deepEqual(store.load(), { messages: [], history: [] });
 });
 
-test("无 jobId 或无 storage 时禁用,静默不抛", () => {
+test("Disabled when no jobId or no storage, silently no throw", () => {
   const noJob = createReaderAiHistoryStore({ jobId: "", storage: memoryStorage() });
   assert.equal(noJob.enabled, false);
   assert.deepEqual(noJob.load(), { messages: [], history: [] });
@@ -50,12 +50,12 @@ test("无 jobId 或无 storage 时禁用,静默不抛", () => {
   assert.doesNotThrow(() => noStorage.save({ messages: [] }));
 });
 
-test("截断:超过上限只保留最近若干轮", () => {
+test("Truncation: keep only recent rounds when exceeding limit", () => {
   const storage = memoryStorage();
   const store = createReaderAiHistoryStore({ jobId: "job-big", storage });
   const messages = Array.from({ length: 100 }, (_, i) => ({ role: "user", text: `q${i}` }));
   store.save({ messages, history: [] });
   const loaded = store.load();
   assert.ok(loaded.messages.length <= 40);
-  assert.equal(loaded.messages.at(-1).text, "q99", "保留最近的");
+assert.equal(loaded.messages.at(-1).text, "q99", "Keep the most recent");
 });

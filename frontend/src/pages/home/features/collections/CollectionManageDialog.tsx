@@ -1,21 +1,21 @@
-// 新建/管理合集对话框(shadcn 改造后新增的第 10 个对话框,和其余 9 个同一套
-// 路:DialogPrimitive.Root/Portal/Overlay/Content + desktop-dialog/
+// Create/Manage collection dialog(shadcn Newly added after refactoring 10 dialog,and rest 9 Same set
+// path:DialogPrimitive.Root/Portal/Overlay/Content + desktop-dialog/
 // desktop-shell + useDialogReturnFocus)。
 //
-// 交互借鉴参考项目 PDF_MD_lib 的 FolderManageModal(名称输入 + 从书库勾选),
-// 简化成单栏勾选(不做手动排序——本次不做拖拽/排序,见调研计划「不做的事」)。
+// Interaction reference project PDF_MD_lib FolderManageModal(Name input + Select from library),
+// Simplify to single-column checkboxes(No manual sortingâNo drag support this time/Sorting, See research plan "Exclusions").
 //
-// dialogStore.payload = 正在编辑的 CollectionRecord,或 null(新建模式)。
-// open() 由 CategoriesView.jsx 调用。这个对话框和 CategoriesView 是 HomeApp.jsx
-// 下的兄弟节点(不是父子),保存/删除成功后没法直接 prop 回调回去——靠
-// services.collections.reloadSignal(一个只有 version 字段的极简 store)桥接,
-// 这里 bump 一次,CategoriesView 订阅到变化就重新拉取列表。
+// dialogStore.payload = Editing CollectionRecord, or null(New Mode).
+// open() called by CategoriesView.jsx. This dialog and CategoriesView are HomeApp.jsx
+// Sibling nodes below(Not parent-child), Save/Cannot proceed directly after successful deletion. prop Callback.
+// services.collections.reloadSignal(Only one version Field minimalism store) bridge,
+// Bump once here, CategoriesView refetch list upon change subscription.
 
 import { useEffect, useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size 在未注解源文件里被推断为必填;unstyled 路径运行时不用 size。
+// Button.size inferred as required in unannotated source; unstyled path does not use size at runtime.
 const Button = ButtonBase as any;
 import { useHomeServices } from "../../home-services-context.js";
 import { useDialogState } from "../../state/use-dialog-state.js";
@@ -47,7 +47,7 @@ export function CollectionManageDialog() {
     let cancelled = false;
     setError("");
     setName(editing?.name || "");
-    // 已有书目数据时 soft 重拉（切编辑目标），不整表 loading 闪空
+    // When bibliographic data exists soft Re-pull (switch edit target). Don't rebuild the table. loading Sky Flash
     setLoading((prev) => (allDocuments.length === 0 ? true : prev));
     const documentsPromise = controller.listAllDocuments();
     const memberIdsPromise = editing
@@ -66,7 +66,7 @@ export function CollectionManageDialog() {
         if (cancelled) {
           return;
         }
-        setError(err?.message || "加载书目失败，请稍后重试。");
+        setError(err?.message || "Failed to load book list. Please try again later.");
       })
       .finally(() => {
         if (cancelled) {
@@ -74,9 +74,9 @@ export function CollectionManageDialog() {
         }
         setLoading(false);
       });
-    // 关闭后快速为另一个合集重新打开(比如先编辑"化学"再编辑"机器学习"),
-    // 两次 fetch 谁先 resolve 不确定——没有这个守卫的话,后关闭的那次请求
-    // 如果晚到,会把已经在显示"机器学习"的表单覆盖回"化学"的书目数据。
+// Reopen quickly for another collection after closing(Edit first "Chemistry" Edit again "Machine Learning"),
+    // Twice fetch Who first resolve Uncertain——Without this guard,Last closed request
+// If late, will display already visible "Machine Learning" form overlay back with "Chemistry" bibliographic data.
     return () => {
       cancelled = true;
     };
@@ -98,7 +98,7 @@ export function CollectionManageDialog() {
   async function handleSave() {
     const trimmed = name.trim();
     if (!trimmed) {
-      setError("请输入合集名称。");
+      setError("Enter collection name.");
       return;
     }
     setSaving(true);
@@ -124,7 +124,7 @@ export function CollectionManageDialog() {
       reloadSignal.actions.bump();
       dialogStore.close();
     } catch (err) {
-      setError(err?.message || (isCreate ? "新建合集失败，请稍后重试。" : "保存失败，请稍后重试。"));
+      setError(err?.message || (isCreate ? "Failed to create collection. Try again later." : "Save failed. Try again later."));
     } finally {
       setSaving(false);
     }
@@ -142,7 +142,7 @@ export function CollectionManageDialog() {
       reloadSignal.actions.bump();
       dialogStore.close();
     } catch (err) {
-      setError(err?.message || "删除合集失败，请稍后重试。");
+      setError(err?.message || "Failed to delete collection. Please try again later.");
       setSaving(false);
     }
   }
@@ -159,30 +159,30 @@ export function CollectionManageDialog() {
           <div className="desktop-shell">
             <div className="desktop-head">
               <DialogPrimitive.Title asChild>
-                <h2>{isCreate ? "新建合集" : "管理合集"}</h2>
+                <h2>{isCreate ? "New Collection" : "管理合集"}</h2>
               </DialogPrimitive.Title>
               <DialogPrimitive.Close asChild>
-                <button id="collection-manage-close-btn" type="button" className="dialog-close-btn" aria-label="关闭">×</button>
+<button id="collection-manage-close-btn" type="button" className="dialog-close-btn" aria-label="Close">Ã</button>
               </DialogPrimitive.Close>
             </div>
             <div className="desktop-body collection-manage-body">
               <label className="collection-name-field">
-                <span>名称</span>
+<span>Name</span>
                 <input
                   id="collection-name-input"
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="例如：化学"
+                  placeholder="e.g. Chemistry"
                   autoFocus
                 />
               </label>
               <div className="collection-doc-picker">
-                <p className="muted">从书库勾选加入这个合集的书</p>
+                <p className="muted">Select books from library to add to this collection.</p>
                 {loading ? (
-                  <div className="collection-doc-list-empty">正在加载书目…</div>
+                  <div className="collection-doc-list-empty">Loading bibliography…</div>
                 ) : allDocuments.length === 0 ? (
-                  <div className="collection-doc-list-empty">书库还没有书</div>
+                  <div className="collection-doc-list-empty">No books in library</div>
                 ) : (
                   <ul className="collection-doc-list">
                     {allDocuments.map((doc) => (
@@ -210,7 +210,7 @@ export function CollectionManageDialog() {
                   disabled={saving}
                   onClick={handleDelete}
                 >
-                  {confirmingDelete ? "确认删除？" : "删除合集"}
+                  {confirmingDelete ? "Confirm deletion?" : "Delete Collection"}
                 </Button>
               ) : <span />}
               <Button
@@ -219,7 +219,7 @@ export function CollectionManageDialog() {
                 disabled={saving || loading}
                 onClick={handleSave}
               >
-                {saving ? "保存中…" : "保存"}
+                {saving ? "Saving...…" : "保存"}
               </Button>
             </div>
           </div>

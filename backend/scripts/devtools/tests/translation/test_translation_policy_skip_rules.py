@@ -178,7 +178,7 @@ def test_apply_translation_policies_skips_title_when_config_enabled() -> None:
 
 
 def test_apply_cjk_source_keep_origin_skips_cjk_body_text() -> None:
-    cjk_text = "综上，本文系统综述了DFT计算在光催化领域中的广泛应用，并为未来开发高效稳定催化剂提供参考。"
+cjk_text = "In summary, this paper systematically reviews DFTwide application in the field of photocatalysis, and provides reference for the future development of efficient and stable catalysts."
     payload = [_translation_item(item_id="p036-b015", page_idx=35, block_idx=15, source_text=cjk_text)]
 
     skipped = apply_cjk_source_keep_origin(payload)
@@ -193,7 +193,7 @@ def test_apply_cjk_source_keep_origin_skips_cjk_body_text() -> None:
 
 
 def test_apply_translation_policies_does_not_skip_cjk_body_text_by_default() -> None:
-    cjk_text = "综上，本文系统综述了DFT计算在光催化领域中的广泛应用，并为未来开发高效稳定催化剂提供参考。"
+cjk_text = "In summary, this paper systematically reviews the wide application of DFT calculations in the field of photocatalysis, and provides a reference for the future development of efficient and stable catalysts."
     payload = [_translation_item(item_id="p001-b000", block_idx=0, source_text=cjk_text)]
 
     _apply_default_policy(payload)

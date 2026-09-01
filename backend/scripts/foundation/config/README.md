@@ -1,32 +1,32 @@
-# Config 分层说明
+# Config Layer description
 
-`scripts/foundation/config` 用来集中管理配置，避免共享层继续承载所有职责。
+`scripts/foundation/config` Centralizes configuration management, preventing the shared layer from continuing to bear all responsibilities.
 
-## 拆分结果
+## Split results
 
 - `paths.py`
-  只放路径相关配置，例如 `ROOT_DIR`、`DATA_DIR`、`OUTPUT_DIR`、`SOURCE_PDF`。
+  Only include path-related configuration, e.g. `ROOT_DIR`、`DATA_DIR`、`OUTPUT_DIR`、`SOURCE_PDF`。
 - `fonts.py`
-  只放字体与字号相关配置，例如默认字体路径、默认字号、Typst 默认字体族。
+  Only include font and font size settings, e.g., default font path, default font size.Typst Default font family.
 - `runtime.py`
-  只放运行时默认项，例如默认页码、默认输出名、PDF 压缩 DPI。
+Only include runtime defaults, e.g., default page number, default output name, PDF compression DPI.
 - `layout.py`
-  只放版式调参相关配置，以及 `apply_layout_tuning(...)`。
+  Only include layout tuning-related configurations, and `apply_layout_tuning(...)`。
 
-## 兼容策略
+## Compatibility strategy
 
-当前仍保留 `scripts/foundation/shared/config.py` 作为兼容 facade。
+Currently retained `scripts/foundation/shared/config.py` Compatibility facade。
 
-历史代码里常见的旧写法是：
+Common legacy patterns:
 
 ```python
 from foundation.config.paths import OUTPUT_DIR
 from foundation.config.layout import apply_layout_tuning
 ```
 
-后续如果要逐步去耦合，可以再把各模块的 import 迁移到更明确的来源：
+If later you want to gradually decouple, you can then further each module's import Migrate to clearer sources:
 
-- 路径相关优先用 `foundation.config.paths`
-- 字体相关优先用 `foundation.config.fonts`
-- 版式调参优先用 `foundation.config.layout`
-- 运行默认值优先用 `foundation.config.runtime`
+- Prefer path-related `foundation.config.paths`
+- Use font-related first. `foundation.config.fonts`
+- Prioritize layout parameter tuning. `foundation.config.layout`
+- Use runtime defaults first. `foundation.config.runtime`

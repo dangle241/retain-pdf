@@ -111,7 +111,7 @@ def test_group_translation_split_keeps_inline_math_atomic() -> None:
         {"protected_source_text": "prev part"},
         {"protected_source_text": "next part"},
     ]
-    translated = "激发谱的每个模式 i 可由其色散关系 $\\omega^i(\\mathbf{Q})$、寿命 $\\tau_{\\mathrm{SW}}^i$ 和强度 I_0 表征。"
+translated = "Each mode i of the excitation spectrum is derivable from its dispersion relation. $\\omega^i(\\mathbf{Q})$, lifetime $\\tau_{\\mathrm{SW}}^i$ and intensity I_0 representation."
     chunks = _split_group_protected_translation(translated, items)
 
     assert len(chunks) == 2

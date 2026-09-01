@@ -100,7 +100,7 @@ def _write_fake_job(job_root: Path) -> list[dict]:
         _strict_item(
             "p001-b002",
             "The final energy <f2-def/> is reported.",
-            "最终能量 <f9-bad/> 被报告。",
+"The final energy <f9-bad/> is reported.",
             block_idx=2,
         ),
     ]
@@ -189,7 +189,7 @@ def test_repair_runner_preview_uses_injected_llm_without_mutation() -> None:
         captured["kwargs"] = kwargs
         return json.dumps(
             {
-                "repaired_text": "自洽场循环保留 <f1-abc/>。",
+"repaired_text": "Self-consistent field loop retains <f1-abc/>.",
                 "applied_issue_kinds": ["english_residue", "glossary_term_missing"],
                 "confidence": 0.88,
                 "needs_manual_review": False,
@@ -215,6 +215,6 @@ def test_repair_runner_preview_uses_injected_llm_without_mutation() -> None:
     assert after == before
     assert preview["schema"] == TRANSLATION_REPAIR_PREVIEW_SCHEMA
     assert preview["preview_item_count"] == 1
-    assert preview["items"][0]["repair_result"]["repaired_text"] == "自洽场循环保留 <f1-abc/>。"
+assert preview["items"][0]["repair_result"]["repaired_text"] == "Self-consistent field loop retains <f1-abc/>."
     assert captured["kwargs"]["model"] == "demo-model"
     assert captured["kwargs"]["base_url"] == "https://example.com/v1"

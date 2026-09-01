@@ -91,7 +91,7 @@ def overlay_pages_via_page_fallback(
             emit_render_page_progress(
                 current=overlay_page_idx + 1,
                 total=total_pages,
-                message=f"正在渲染第 {overlay_page_idx + 1}/{total_pages} 页",
+message=f"Rendering page {overlay_page_idx + 1}/{total_pages}",
                 payload={"page_index": page_idx, "render_stage": "page_overlay_pikepdf"},
             )
             page_diag = {
@@ -128,7 +128,7 @@ def overlay_pages_via_page_fallback(
         emit_render_page_progress(
             current=overlay_page_idx + 1,
             total=total_pages,
-            message=f"正在渲染第 {overlay_page_idx + 1}/{total_pages} 页",
+message=f"Rendering page {overlay_page_idx + 1}/{total_pages}",
             payload={"page_index": page_idx, "render_stage": "book_overlay"},
         )
         page = doc[page_idx]

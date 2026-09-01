@@ -67,13 +67,13 @@ export function useLibraryController() {
 
     setDownloadingBookId(bookId)
     feedback.setLoadError(undefined)
-    feedback.setToastText('正在下载...')
+feedback.setToastText('Downloading...')
     downloadLibraryResource(downloadTarget, `${book?.title || bookId}.pdf`)
       .then(() => {
-        feedback.setToastText('已开始下载')
+        feedback.setToastText('Download started')
       })
       .catch((error: unknown) => {
-        feedback.setLoadError(error instanceof Error ? error.message : '下载 PDF 失败')
+feedback.setLoadError(error instanceof Error ? error.message : 'Download PDF failed')
       })
       .finally(() => {
         setDownloadingBookId((current) => current === bookId ? undefined : current)
@@ -91,13 +91,13 @@ export function useLibraryController() {
     const fallbackFileName = artifact.fileName || `${book.id}-${artifact.key}`
     setDownloadingBookId(book.id)
     feedback.setLoadError(undefined)
-    feedback.setToastText(`正在下载 ${artifact.label}...`)
+feedback.setToastText(Downloading ${artifact.label}...)
     downloadLibraryResource(artifact.downloadUrl, fallbackFileName)
       .then(() => {
-        feedback.setToastText(`已开始下载 ${artifact.label}`)
+feedback.setToastText(Started downloading ${artifact.label})
       })
       .catch((error: unknown) => {
-        feedback.setLoadError(error instanceof Error ? error.message : '下载文件失败')
+        feedback.setLoadError(error instanceof Error ? error.message : 'Download failed.')
       })
       .finally(() => {
         setDownloadingBookId((current) => current === book.id ? undefined : current)
@@ -118,10 +118,10 @@ export function useLibraryController() {
         libraryData.removeBookFromLibrary(bookId)
         setDetailOpen(false)
         setReaderOpen(false)
-        feedback.setToastText('已删除')
+feedback.setToastText('Deleted')
       })
       .catch((error: unknown) => {
-        const message = error instanceof Error ? error.message : '删除失败'
+const message = error instanceof Error ? error.message : 'Delete failed'
 
         if (message.includes('409') && window.confirm(libraryCopy.detail.forceDeleteConfirm)) {
           return deleteLibraryBook(bookId, { force: true })
@@ -129,10 +129,10 @@ export function useLibraryController() {
               libraryData.removeBookFromLibrary(bookId)
               setDetailOpen(false)
               setReaderOpen(false)
-              feedback.setToastText('已删除')
+feedback.setToastText('Deleted')
             })
             .catch((forceError: unknown) => {
-              feedback.setLoadError(forceError instanceof Error ? forceError.message : '强制删除失败')
+              feedback.setLoadError(forceError instanceof Error ? forceError.message : 'Force delete failed.')
             })
         }
 
@@ -173,10 +173,10 @@ export function useLibraryController() {
         setReaderOpen(false)
         setSelectedBookIds(new Set())
         setSelectionMode(false)
-        feedback.setToastText('已删除')
+feedback.setToastText('Deleted')
       })
       .catch((error: unknown) => {
-        feedback.setLoadError(error instanceof Error ? error.message : '批量删除失败')
+        feedback.setLoadError(error instanceof Error ? error.message : 'Batch delete failed.')
       })
       .finally(() => {
         setDeletingBookId((current) => current === 'batch' ? undefined : current)

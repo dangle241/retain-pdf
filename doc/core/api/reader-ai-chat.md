@@ -1,6 +1,6 @@
 # Reader AI Chat API
 
-RetainPDF 后端提供一个最小但可扩展的阅读问答接口。前端不传模型密钥；后端只读取服务端环境变量。
+RetainPDF Backend provides a minimal but extensible reading Q&A interface. Frontend does not pass model keys; backend reads only server-side environment variables.
 
 ## Endpoint
 
@@ -10,7 +10,7 @@ RetainPDF 后端提供一个最小但可扩展的阅读问答接口。前端不�
 
 ```json
 {
-  "message": "这篇文章的核心贡献是什么？",
+  "message": "What is the core contribution of this article?",
   "scope": "document",
   "provider": "deepseek",
   "model": "deepseek-chat",
@@ -25,20 +25,20 @@ RetainPDF 后端提供一个最小但可扩展的阅读问答接口。前端不�
     "mode": "compare"
   },
   "history": [
-    { "role": "user", "content": "先总结一下" },
+    { "role": "user", "content": "Summarize first" },
     { "role": "assistant", "content": "..." }
   ]
 }
 ```
 
-当前第一版只支持 `scope=document`。`context` 和 `history` 可选；`context.page` / `selection.page` 会作为检索加权线索。
+Current first version supports only scope=document. context and history are optional. context.page / selection.page are used as weighted retrieval clues.
 
-模型配置字段可选：
+Model config fields optional:
 
-- `provider`: 可选，默认 `deepseek`，支持 `deepseek` / `openai`。
-- `model`: 可选，DeepSeek 默认 `deepseek-chat`。
-- `api_key`: 可选，前端直接传入时优先使用。后端不会写入 job snapshot、events 或返回体。
-- `base_url`: 可选，DeepSeek 默认 `https://api.deepseek.com/v1`。
+- provider: optional, default deepseek, supports deepseek / openai.
+- model: optional; DeepSeek default is deepseek-chat.
+- `api_key`: Optional; frontend value takes precedence. Backend does not write. job snapshot、events or return body.
+- `base_url`: Optional,DeepSeek 默认 `https://api.deepseek.com/v1`。
 
 ## Response
 
@@ -47,7 +47,7 @@ RetainPDF 后端提供一个最小但可扩展的阅读问答接口。前端不�
   "code": 0,
   "message": "ok",
   "data": {
-    "answer": "这篇文章主要提出了...",
+    "answer": "This article mainly proposes...",
     "citations": [
       {
         "title": "Introduction",
@@ -65,22 +65,22 @@ RetainPDF 后端提供一个最小但可扩展的阅读问答接口。前端不�
 
 ## Backend Behavior
 
-第一版流程：
+Version 1 process:
 
-1. 根据 `job_id` 优先读取本地结构化翻译产物：`jobs/{job_id}/translated/translation-manifest.json` 以及它引用的逐页 payload。
-2. 从逐页 payload 提取 `page_idx/page_number`、标题角色和 `render_markdown/translated_text` 生成 page-aware chunks。
-3. 如果结构化翻译产物不存在或为空，再 fallback 到已发布 Markdown：`jobs/{job_id}/md/full.md`，按标题和段落切 chunk。
-4. 根据用户问题选择检索策略：
-   - 普通问题：轻量关键词检索，取 top 8 chunk。
-   - 泛总结问题：从 Abstract / Introduction / Methods / Results / Discussion / Conclusion 等章节优先取代表 chunk，并对全文做均匀采样，避免只命中第一页。
-5. 将 chunk、用户问题和有限历史发送给阅读问答模型。
-6. 返回模型答案和后端检索到的引用片段。
+1. 根据 `job_id` Prioritize reading local structured translation artifacts.`jobs/{job_id}/translated/translation-manifest.json` and the pages it references payload。
+2. From each page payload, extract page_idx/page_number, title, role, and render_markdown/translated_text to generate page-aware chunks.
+3. If structured translation output missing or empty, then fallback Go to Published Markdown：`jobs/{job_id}/md/full.md`, split by headings and paragraphs chunk。
+4. Select retrieval strategy based on user query:
+   - General: lightweight keyword retrieval, fetch. top 8 chunk。
+   - General summary issue: from Abstract / Introduction / Methods / Results / Discussion / Conclusion Priority representatives for chapters, etc. chunkand uniformly sample the full text to avoid hitting only the first page.
+5. Send chunks, user question, and limited history to the reading QA model.
+6. Return model answer and backend-retrieved reference snippets.
 
-注意：优先使用 `translation-manifest.json` 时，`citations[].page` 来自逐页 payload 的 `page_number` 或 `page_idx + 1`。只有 fallback 到 `full.md` 时，页码才需要从 Markdown 文本中尝试推导，无法推导则为 `null`。
+Note: When using translation-manifest.json, citations[].page should come from page_number or page_idx + 1 of each page payload. When falling back to full.md, page numbers may be inferred from Markdown text; if not possible, use null.
 
 ## Configuration
 
-前端可以在请求体直接传 `api_key`。如果请求体没有传，后端再读取服务端环境变量：
+Frontend can pass directly in request body. `api_key`Request body missing. Fallback to server env vars.
 
 ```bash
 RETAINPDF_AI_PROVIDER=deepseek
@@ -88,25 +88,25 @@ RETAINPDF_AI_MODEL=deepseek-chat
 DEEPSEEK_API_KEY=...
 ```
 
-可选：
+Optional:
 
 ```bash
 RETAINPDF_AI_BASE_URL=https://api.deepseek.com/v1
 RETAINPDF_AI_API_KEY=...
 ```
 
-优先级：
+Priority:
 
-1. 请求体里的 `provider/model/api_key/base_url`
-2. 服务端环境变量 `RETAINPDF_AI_PROVIDER/RETAINPDF_AI_MODEL/RETAINPDF_AI_API_KEY/RETAINPDF_AI_BASE_URL`
-3. provider 默认值
+1. In the request body `provider/model/api_key/base_url`
+2. Server environment variables `RETAINPDF_AI_PROVIDER/RETAINPDF_AI_MODEL/RETAINPDF_AI_API_KEY/RETAINPDF_AI_BASE_URL`
+3. Provider defaults
 
-默认 provider 是 `deepseek`，也支持 `openai`。`RETAINPDF_AI_API_KEY` 是通用环境变量覆盖项；不设置时，`deepseek` 读取 `DEEPSEEK_API_KEY`，`openai` 读取 `OPENAI_API_KEY`。
+Default provider is deepseek, also supports openai. RETAINPDF_AI_API_KEY is a general override; if unset, deepseek reads DEEPSEEK_API_KEY, openai reads OPENAI_API_KEY.
 
 ## Error Codes
 
-- `404`: job 不存在，或 Markdown 不存在/不可读。
-- `409`: 任务还未完成，Markdown 未 ready。
-- `429`: 模型服务限流。
-- `502`: 模型服务失败或返回无效响应。
-- `500`: 后端内部错误，例如 AI provider 未配置。
+- 404: job does not exist, Markdown missing/unreadable.
+- 409: task not yet completed, Markdown not ready.
+- `429`: Model service rate limiting.
+- `502`: Model service failed or returned invalid response.
+- 500: backend internal error, e.g., AI provider not configured.

@@ -28,8 +28,8 @@ def _item(item_id: str, text: str, **overrides):
 
 
 def test_default_profile_uses_single_item_requests() -> None:
-    # 多条目 tagged 批处理已退役(输出协议是不可消除的失败面,模型会
-    # 损坏 <<<END>>> 闭合标签导致整批作废),默认全部单条请求。
+    # Multiple items tagged Batch processing deprecated.(Output protocol is an irreducible failure surface,Model will
+    # Corrupted <<<END>>> Closing tag invalidates entire batch.),All requests single by default.
     context = build_translation_control_context()
     assert (
         _effective_translation_batch_size(
@@ -156,8 +156,8 @@ def test_deepseek_builds_single_item_batches_for_stability() -> None:
 
     assert effective_batch_size == 1
     assert immediate == []
-    # 批处理退役后每个条目独立成批,单条 plain-text 请求没有输出协议,
-    # 不存在条目丢失的可能。
+    # Each entry independently batched after batch retirement.,Single plain-text Request has no output protocol,
+    # Entry loss impossible.
     assert [[item["item_id"] for item in batch] for batch in batches] == [
         ["plain-0"],
         ["plain-1"],
@@ -169,7 +169,7 @@ def test_deepseek_builds_single_item_batches_for_stability() -> None:
         ["group"],
         ["placeholder-heavy"],
     ]
-    # 所有批都是单条,不存在会走多条目 tagged 协议的 batched_fast 批
+# All batches are single-item. Non-existence triggers multi-item path. tagged Protocol batched_fast batch
     assert all(len(batch) == 1 for batch in batches)
     assert all(not batch[0].get("_batched_plain_candidate") for batch in batches[1:])
 

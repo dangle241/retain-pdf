@@ -1,4 +1,4 @@
-// AI 问答悬浮窗：assistant-ui 线程 + 会话窗口 + 分支开窗
+// AI Q&A floating window:assistant-ui Thread + Session window + Branch windowing
 
 import { useCallback, useState } from "react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
@@ -17,7 +17,7 @@ export type ReaderAiPanelProps = {
   jobId: string;
   sourceOnly: boolean;
   onClose: () => void;
-  /** page_idx 为 0 基；由阅读器 goToPage(page_idx+1) */
+/** page_idx is 0-based; reader uses goToPage(page_idx+1) */
   onJumpCitation: (citation: AiCitationLike) => void;
 };
 
@@ -57,13 +57,13 @@ export function ReaderAiPanel({
     const ok = await branchFromAnswer(assistantId);
     if (ok) {
       setBranchNotice(
-        "已保存新对话（fork-n-原名）：复制了到此答案的上文，原对话不变。顶部列表可切换。",
+        "New conversation saved (fork-n-Original): Copied from above. Conversation unchanged. Top list toggles.",
       );
       window.setTimeout(() => setBranchNotice(""), 6000);
     }
   }, [branchFromAnswer]);
 
-  // 分支/切会话锁定期内不跳 PDF，避免误触引用
+// Branch/Skip navigation during session lockout. PDF avoid accidental reference trigger
   const safeJumpCitation = useCallback((citation: AiCitationLike) => {
     if (isReaderAiNavigationLocked()) return;
     onJumpCitation(citation);
@@ -73,11 +73,11 @@ export function ReaderAiPanel({
     <ReaderFloatShell
       id="reader-ai-panel"
       open={open}
-      title="AI 问答"
-      subtitle="基于当前文档"
+title="AI Q&A"
+      subtitle="Based on current document"
       titleIcon={<Sparkles size={14} strokeWidth={2.1} aria-hidden />}
       storageKey="retainpdf.reader.ai-float.pos.v1"
-      ariaLabel="阅读问答"
+ariaLabel="Reading Q&A"
       width={400}
       className={`reader-float-ai${sessionBusy ? " is-session-busy" : ""}`}
       onClose={onClose}
@@ -85,8 +85,8 @@ export function ReaderAiPanel({
       {sourceOnly || !jobId ? (
         <div className="reader-float-ai-empty">
           <Sparkles size={22} strokeWidth={1.75} aria-hidden />
-          <p>源文档只读模式不提供 AI 问答</p>
-          <span>请从任务入口打开阅读器后再试</span>
+<p>Not available in source document read-only mode. AI Q&A</p>
+          <span>Open the reader from the task entry and try again.</span>
         </div>
       ) : (
         <div className="reader-float-ai-body">

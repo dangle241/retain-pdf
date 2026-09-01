@@ -71,7 +71,7 @@ test("pageWidthFromShell: same zoom → same width regardless of mode concept", 
   assert.equal(at100, fitContentWidth(shell));
   // 50% width roughly half of 100% (padding makes not exact 2x but close)
   assert.ok(at100 > at50 * 1.5);
-  // 对照半栏宽约等于 50% 页宽 + 少量 pad 误差范围内
+// Side-by-side half pane width roughly 50% page width + small padding within tolerance
   const halfPane = comparePaneWidth(shell);
   assert.ok(Math.abs(at50 - fitContentWidth(halfPane)) < 30);
 });

@@ -279,7 +279,7 @@ def test_load_translations_rejects_payload_missing_strict_contract_fields(tmp_pa
             [
                 {
                     "item_id": "p001-b001",
-                    "translated_text": "译文",
+"translated_text": "Translation",
                 }
             ],
             ensure_ascii=False,

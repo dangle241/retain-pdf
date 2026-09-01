@@ -187,7 +187,7 @@ class RetryingTranslatorFormulaRoutesTests(unittest.TestCase):
             return {
                 item["item_id"]: result_entry(
                     "translate",
-                    "功函数 <f1-6a9/>，也缩写为 <f2-ef6/>，可定义为提取一个电子所需的最小能量。",
+                    "work function <f1-6a9/>also abbreviated as <f2-ef6/>can be defined as the minimum energy required to extract one electron.",
                 )
             }
 
@@ -236,7 +236,7 @@ class RetryingTranslatorFormulaRoutesTests(unittest.TestCase):
             return {
                 item["item_id"]: result_entry(
                     "translate",
-                    "对于扩散过程，转移矩阵 <f1-a11/> 与边缘概率 <f2-b22/> 一起描述状态演化。",
+                    "For diffusion process, transition matrix <f1-a11/> and marginal probability <f2-b22/> State evolution description.",
                 )
             }
 

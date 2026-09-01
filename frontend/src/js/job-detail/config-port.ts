@@ -29,8 +29,8 @@ export function createJobDetailConfigPort({
 
   function detailShareNote() {
     return isMock()
-      ? "当前为 mock 明细页，可直接分享当前链接。"
-      : "当前详情页可直接通过 URL 分享给其他人。";
+? "Currently a mock detail page, you can share the current link directly."
+: "The current detail page can be shared with others directly via URL.";
   }
 
   return Object.freeze({

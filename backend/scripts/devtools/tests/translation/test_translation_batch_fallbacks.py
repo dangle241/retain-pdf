@@ -41,7 +41,7 @@ def test_single_batched_plain_candidate_uses_single_item_path_instead_of_tail_qu
         return {
             item["item_id"]: {
                 "decision": "translate",
-                "translated_text": "正文已翻译",
+                "translated_text": "body text translated",
                 "final_status": "translated",
             }
         }
@@ -60,7 +60,7 @@ def test_single_batched_plain_candidate_uses_single_item_path_instead_of_tail_qu
         translate_batch_once_fn=lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("must not batch")),
     )
 
-    assert result["a"]["translated_text"] == "正文已翻译"
+assert result["a"]["translated_text"] == "body text translated"
     assert calls == ["a"]
     assert len(context.translation_tail_queue) == 0
 
@@ -88,7 +88,7 @@ def test_failed_batched_plain_request_is_queued_instead_of_retried_inline() -> N
         return {
             "b": {
                 "decision": "translate",
-                "translated_text": "第二段已翻译",
+                "translated_text": "Second paragraph translated",
                 "final_status": "translated",
             }
         }
@@ -136,7 +136,7 @@ def test_validation_failure_from_single_fallback_is_queued_instead_of_retried_in
         return {
             "b": {
                 "decision": "translate",
-                "translated_text": "第二段已翻译",
+"translated_text": "second paragraph translated",
                 "final_status": "translated",
             }
         }
@@ -158,7 +158,7 @@ def test_validation_failure_from_single_fallback_is_queued_instead_of_retried_in
     assert result == {
         "b": {
             "decision": "translate",
-            "translated_text": "第二段已翻译",
+"translated_text": "second paragraph translated",
             "final_status": "translated",
         }
     }
@@ -185,7 +185,7 @@ def test_batched_plain_fallback_queues_uncached_items_for_tail_retry_by_default(
         return {
             item["item_id"]: {
                 "decision": "translate",
-                "translated_text": f"已翻译 {item['item_id']}",
+"translated_text": f"translated {item['item_id']}",
                 "final_status": "translated",
             }
         }
@@ -227,7 +227,7 @@ def test_batched_plain_fallback_can_retry_uncached_items_inline_for_compatibilit
         return {
             item["item_id"]: {
                 "decision": "translate",
-                "translated_text": f"已翻译 {item['item_id']}",
+"translated_text": f"translated {item['item_id']}",
                 "final_status": "translated",
             }
         }

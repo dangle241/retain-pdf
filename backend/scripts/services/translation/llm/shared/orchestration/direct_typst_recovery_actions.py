@@ -119,8 +119,8 @@ def try_math_delimiter_repair(
             diagnostics=diagnostics,
             route_path=route_path,
             output_mode_path=["plain_text"],
-            # 修复调用要求模型重写整段,统一用 transport tail 档超时,
-            # 避免长块修复反复踩 20s 超时。
+            # Fix call requiring model to rewrite entire paragraph,Use uniformly. transport tail File timeout,
+            # Avoid repeated timeouts for long block fixes 20s Timeout. Check network. Retry.
             timeout_s=max(
                 plain_text_timeout_seconds(item, context=context, transport_tail_retry=not allow_transport_tail_defer),
                 int(getattr(context.timeout_policy, "transport_tail_retry_seconds", 0)),

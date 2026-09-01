@@ -1,5 +1,5 @@
-// AI 问答 UI：会话栏 + 消息线程 + 输入区。
-// 气泡正文仍是命令式孤岛（answer-view 句柄），结构 id 与测试契约保持不变。
+// AI Q&A UISession Bar + Message thread + Input area.
+// Tooltip body remains imperative silo.answer-view Handle), structure id Keep test contract unchanged.
 
 import { memo, useEffect } from "react";
 import { Loader2, Plus, Send, Trash2 } from "lucide-react";
@@ -7,9 +7,9 @@ import { useReaderAiChat } from "../ai/use-reader-ai-chat.js";
 import type { AiMessageEntry } from "../ai/answer-view.js";
 
 const SUGGESTIONS = [
-  "这篇文献的主要结论是什么？",
-  "作者用了什么方法或模型？",
-  "有哪些关键结果或数据？",
+  "What are the main conclusions of this paper?",
+  "What methods or models did the author use?",
+  "What are the key results or data?",
 ];
 
 const AiMessage = memo(function AiMessage({ entry }: { entry: AiMessageEntry }) {
@@ -19,7 +19,7 @@ const AiMessage = memo(function AiMessage({ entry }: { entry: AiMessageEntry }) 
       ref={entry.view.attachRoot}
     >
       <span className="reader-ai-message-role">{entry.title}</span>
-      {/* body 为 div:Markdown 会产出块级元素,不能塞进 <p> */}
+      {/* body 为 div:Markdown Renders block-level element.,Cannot fit <p> */}
       <div
         className="reader-ai-message-body-el"
         data-reader-ai-message-body="1"
@@ -56,7 +56,7 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
           <select
             id="reader-ai-session-select"
             className="reader-ai-session-select"
-            aria-label="切换历史对话"
+            aria-label="History"
             value={chat.activeSessionId}
             disabled={chat.sessions.length <= 1 || busy}
             onChange={(event) => {
@@ -68,7 +68,7 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
           >
             {chat.sessions.map((session) => (
               <option key={session.id} value={session.id}>
-                {session.messageCount ? session.title : `${session.title}（空）`}
+{session.messageCount ? session.title : `${session.title} (empty)`}
               </option>
             ))}
           </select>
@@ -76,29 +76,29 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
             id="reader-ai-new-btn"
             type="button"
             className="reader-ai-session-btn"
-            title="新建对话"
-            aria-label="新建对话"
+            title="New Chat"
+aria-label="New Chat"
             disabled={busy}
             onClick={() => void chat.newConversation()}
           >
             <Plus size={14} strokeWidth={2.4} aria-hidden />
-            <span>新对话</span>
+<span>New Chat</span>
           </button>
           <button
             id="reader-ai-delete-btn"
             type="button"
             className="reader-ai-session-btn reader-ai-session-btn-danger"
-            title="删除当前对话"
-            aria-label="删除当前对话"
+            title="Delete conversation"
+aria-label="Delete current conversation"
             disabled={onlyEmptySession || busy}
             onClick={() => void chat.deleteConversation()}
           >
             <Trash2 size={14} strokeWidth={2.2} aria-hidden />
-            <span>删除</span>
+<span>Delete</span>
           </button>
         </div>
       ) : (
-        // 契约 id 仍挂在 DOM，供测试/自动化定位（视觉上折叠）
+// Contract id still hanging for DOMTest only/Auto-locate (visually collapsed)
         <div className="reader-ai-sessions is-collapsed" data-reader-ai-sessions="" hidden>
           <select
             id="reader-ai-session-select"
@@ -112,17 +112,17 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
               <option key={session.id} value={session.id}>{session.title}</option>
             ))}
           </select>
-          <button id="reader-ai-new-btn" type="button" className="reader-ai-session-btn" onClick={() => void chat.newConversation()}>新对话</button>
-          <button id="reader-ai-delete-btn" type="button" className="reader-ai-session-btn reader-ai-session-btn-danger" disabled={onlyEmptySession} onClick={() => void chat.deleteConversation()}>删除</button>
+<button id="reader-ai-new-btn" type="button" className="reader-ai-session-btn" onClick={() => void chat.newConversation()}>New Chat</button>
+<button id="reader-ai-delete-btn" type="button" className="reader-ai-session-btn reader-ai-session-btn-danger" disabled={onlyEmptySession} onClick={() => void chat.deleteConversation()}>Delete</button>
         </div>
       )}
 
       <div id="reader-ai-thread" className="reader-ai-thread" aria-live="polite" ref={chat.threadRef}>
         {chat.messages.length === 0 ? (
           <div className="reader-float-ai-thread-hint" data-reader-ai-empty-hint="">
-            <p>针对当前整份文档提问</p>
-            <span>答案会尽量引用文中段落，可点击跳转</span>
-            <div className="reader-float-ai-suggestions" role="group" aria-label="推荐问题">
+            <p>Ask about entire document</p>
+            <span>Answers cite passages; click to jump.</span>
+<div className="reader-float-ai-suggestions" role="group" aria-label="Suggested Questions">
               {SUGGESTIONS.map((text) => (
                 <button
                   key={text}
@@ -152,8 +152,8 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
       >
         <textarea
           id="reader-ai-input"
-          placeholder={disabled ? "暂不可用" : "输入问题，Enter 发送 · Shift+Enter 换行"}
-          aria-label="输入问题"
+          placeholder={disabled ? "Temporarily unavailable" : "Input is uncontrolledEnter 发送 · Shift+Enter Newline"}
+          aria-label="input file examples. The supporting information also shows the use of"
           rows={2}
           value={chat.input}
           disabled={disabled}
@@ -175,23 +175,23 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
             {busy ? (
               <Loader2 className="reader-ai-status-spin" size={13} strokeWidth={2.4} aria-hidden />
             ) : null}
-            <span>{chat.composer.text || (ready ? "可以提问" : "")}</span>
+            <span>{chat.composer.text || (ready ? "Ask." : "")}</span>
           </span>
           <button
             id="reader-ai-submit-btn"
             type="submit"
             disabled={!canSend}
-            aria-label={busy ? "生成中" : "发送"}
+            aria-label={busy ? "generating" : "发送"}
           >
             {busy ? (
               <>
                 <Loader2 className="reader-ai-status-spin" size={14} strokeWidth={2.4} aria-hidden />
-                <span>生成中</span>
+<span>Generating</span>
               </>
             ) : (
               <>
                 <Send size={14} strokeWidth={2.4} aria-hidden />
-                <span>发送</span>
+<span>Send</span>
               </>
             )}
           </button>

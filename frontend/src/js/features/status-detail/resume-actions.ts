@@ -17,17 +17,17 @@ export function summarizeResumePlan(plan) {
     return "";
   }
   if (!plan.can_resume) {
-    return plan.reason || "当前任务暂不可从断点恢复。";
+    return plan.reason || "Current task cannot resume from breakpoint.";
   }
   const fromStage = firstNonEmptyText(plan.from_stage, plan.resume_from, "checkpoint");
   const workflow = firstNonEmptyText(plan.resume_workflow, plan.workflow);
   const reruns = Array.isArray(plan.reruns_stages) ? plan.reruns_stages.join("、") : "";
-  const bits = [`可从 ${fromStage} 恢复`];
+const bits = [`Recoverable from ${fromStage}`];
   if (workflow) {
     bits.push(`workflow=${workflow}`);
   }
   if (reruns) {
-    bits.push(`重跑 ${reruns}`);
+    bits.push(`re-run ${reruns}`);
   }
   return bits.join("，");
 }
@@ -44,8 +44,8 @@ export function syncRerunAction({
   viewPort.setRerunAction({
     enabled,
     status: statusText || (enabled
-      ? summarizeResumePlan(resumePlan) || "后端支持从当前任务产物创建恢复任务。"
-      : summarizeResumePlan(resumePlan) || "当前任务暂不可从断点恢复。"),
+      ? summarizeResumePlan(resumePlan) || "Backend: create recovery task from current task artifacts."
+: summarizeResumePlan(resumePlan) || "Current task cannot be recovered from breakpoint."),
   });
   return actions.rerun || "";
 }
@@ -60,7 +60,7 @@ export async function rerunCurrentJob({
 }: any = {}) {
   const actionUrl = syncRerunAction({
     ...rerunContext,
-    statusText: "正在提交恢复任务...",
+    statusText: "Submitting restore task...",
     viewPort,
     resolveActions,
   });
@@ -68,7 +68,7 @@ export async function rerunCurrentJob({
   if (!actionUrl) {
     syncRerunAction({
       ...rerunContext,
-      statusText: "当前任务暂不可从断点恢复。",
+      statusText: "Cannot resume current task from breakpoint.",
       viewPort,
       resolveActions,
     });
@@ -80,14 +80,14 @@ export async function rerunCurrentJob({
     if (!nextJobId) {
       syncRerunAction({
         ...rerunContext,
-        statusText: "恢复任务已提交，但响应中没有 job_id。",
+        statusText: "Restore task submitted, but not in response. job_id。",
         viewPort,
         resolveActions,
       });
       return;
     }
     viewPort.closeDialog();
-    setText?.("error-box", `已创建恢复任务 ${nextJobId}，开始轮询。`);
+setText?.("error-box", `Recovery task ${nextJobId} created, starting polling.`);
     startPolling?.(nextJobId);
   } catch (error) {
     syncRerunAction({

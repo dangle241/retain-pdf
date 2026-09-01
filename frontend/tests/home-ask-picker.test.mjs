@@ -5,23 +5,23 @@ import {
   parseAtQuery,
 } from "../src/pages/home/features/home-ask/document-picker.js";
 
-test("parseAtQuery: 光标在 @query 后时解析", () => {
-  const text = "帮我总结 @halogen";
+test("parseAtQuery: Cursor at @query Deferred parsing", () => {
+const text = "Summarize this for me @halogen";
   const caret = text.length;
   const parsed = parseAtQuery(text, caret);
   assert.deepEqual(parsed, { start: text.indexOf("@"), query: "halogen" });
 });
 
-test("parseAtQuery: 普通文本不触发", () => {
+test("parseAtQuery: Normal text does not trigger.", () => {
   assert.equal(parseAtQuery("hello world", 5), null);
   assert.equal(parseAtQuery("email@x.com", 11), null);
 });
 
-test("parseAtQuery: 行首 @ 可解析", () => {
+test("parseAtQuery: Start of Line @ Parsable", () => {
   assert.deepEqual(parseAtQuery("@doc", 4), { start: 0, query: "doc" });
 });
 
-test("filterDocumentOptions: 排除已选并按标题过滤", () => {
+test("filterDocumentOptions: Exclude selected & filter by title", () => {
   const options = [
     { kind: "document", id: "a", title: "Alpha paper" },
     { kind: "document", id: "b", title: "Beta notes" },
@@ -32,12 +32,12 @@ test("filterDocumentOptions: 排除已选并按标题过滤", () => {
   assert.equal(filtered[0].id, "b");
 });
 
-test("filterDocumentOptions: 可匹配合集", () => {
+test("filterDocumentOptions: Matchable Collection", () => {
   const options = [
     { kind: "collection", id: "col-1", title: "量子化学", document_count: 4 },
     { kind: "document", id: "d1", title: "Other paper" },
   ];
-  const filtered = filterDocumentOptions(options, "量子", []);
+const filtered = filterDocumentOptions(options, "Quantum", []);
   assert.equal(filtered.length, 1);
   assert.equal(filtered[0].kind, "collection");
   assert.equal(filtered[0].id, "col-1");

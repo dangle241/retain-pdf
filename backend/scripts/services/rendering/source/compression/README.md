@@ -1,17 +1,17 @@
 # rendering/source/compression
 
-## 负责什么
+## Responsibilities
 
-PDF 压缩层。这里负责图片压缩、Ghostscript 压缩和压缩前分析。
+PDF Compression layer. Handles image compression.Ghostscript Compress and analyze before compressing.
 
-## 对外入口
+## Public entry point
 
 - `image_pipeline.py`
 - `ghostscript.py`
 - `analysis.py`
 
-## 不该做什么
+## What not to do
 
-- 不改变页面内容。
-- 不做 redaction。
-- 不参与 OCR/翻译/排版决策。
+- Do not change page content.
+- Do not do redaction.
+- Do not participate in OCR/translation/layout decisions.

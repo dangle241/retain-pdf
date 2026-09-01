@@ -122,8 +122,8 @@ test("elapsed view model owns runtime duration text", () => {
     now: "2026-06-16T00:02:00Z",
   });
   assert.equal(viewModel.hasSnapshot, true);
-  assert.equal(viewModel.stageElapsedText, "1分 0秒");
-  assert.equal(viewModel.totalElapsedText, "2分 0秒");
+assert.equal(viewModel.stageElapsedText, "1 min 0 sec");
+assert.equal(viewModel.totalElapsedText, "2 min 0 sec");
 });
 
 test("fetchRecentJobEvents returns the latest event page for long jobs", async () => {
@@ -396,7 +396,7 @@ test("current job state port is backed by framework store without legacy mirror"
   assert.equal(snapshot.finishedAt, "2026-01-02T00:01:00Z");
   assert.equal(snapshot.diagnostics.summary, "ok");
   assert.equal(snapshot.resumePlan.can_resume, true);
-  // 迁移完成:store 是唯一真值,旧 state 对象不再被回写
+// Migration complete: store is the single source of truth, old state object is no longer written back
   assert.equal(state.currentJobId, "");
   assert.equal(state.currentJobSnapshot, null);
 });
@@ -748,7 +748,7 @@ test("secondary resource scheduler port owns controller scheduling dependencies"
   assert.equal(patches.some((patch) => patch.source === "stageActions"), true);
   assert.equal(patches.find((patch) => patch.source === "events").context.events.items.at(-1).progress.current, 4);
   assert.equal(patches.find((patch) => patch.source === "manifest").context.manifest.requestedJobId, jobId);
-  // events 副资源不再推图书馆（由主 poll 负责），避免双路 publish 抖网格
+  // events Sub-resources no longer push to library (by main poll responsible), to avoid dual‑path publish Shake grid
   assert.deepEqual(libraryUpdates, []);
   assert.equal(portCalls.some((call) => call[0] === "cache" && call[1] === "events"), true);
   assert.equal(portCalls.some((call) => call[0] === "currentFor" && call[1] === jobId), true);
@@ -865,7 +865,7 @@ test("runtime polling state port is backed by framework store without legacy mir
     startedAt: "2026-06-16T00:00:00Z",
   });
   assert.equal(port.getSnapshot().jobId, "job-port");
-  // 迁移完成:store 是唯一真值,旧 state 对象不再被回写
+// Migration complete: store is the single source of truth, old state object is no longer written back
   assert.equal(state.currentJobId, "");
 
   assert.equal(port.beginPoll(), 1);
@@ -1336,14 +1336,14 @@ test("job runtime startPolling({ silent: true }) skips library create and workfl
 
   feature.startPolling("job-silent", { silent: true });
 
-  assert.deepEqual(libraryCreated, [], "silent 不 publishJobCreated");
-  assert.deepEqual(workflowCalls, [], "silent 不 setWorkflowSections");
-  // silent：status/stage 变化仍会 notify（封面转圈），但不整页 refresh
+assert.deepEqual(libraryCreated, [], "silent does not publishJobCreated");
+assert.deepEqual(workflowCalls, [], "silent does not setWorkflowSections");
+  // silent：status/stage Changes persist notifySpinner visible. Page not refresh. refresh
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.ok(libraryUpdated.length >= 1, "silent 首帧/阶段变化应 notify 书架以驱动封面 loading");
+assert.ok(libraryUpdated.length >= 1, "silent first frame/stage change should notify bookshelf to drive cover loading");
   assert.ok(
     libraryUpdated.every((job) => job.job_id === "job-silent"),
-    "silent notify 仅当前 job",
+"silent notify only current job",
   );
 });
 
@@ -1462,7 +1462,7 @@ test("secondary event refresh uses patch renderer instead of full job render", a
   assert.equal(patches.find((patch) => patch.source === "manifest").context.manifest.artifacts.length, 0);
   assert.equal(patches.find((patch) => patch.source === "stageActions").context.stageActions.actions.length, 0);
   assert.deepEqual(currentJobStateModule.currentJobSnapshot(runtimeState), job);
-  // events 副资源不再推图书馆
+  // events Sub-resources no longer push to library.
   assert.deepEqual(libraryUpdates, []);
 });
 

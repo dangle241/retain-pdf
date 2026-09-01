@@ -52,13 +52,13 @@ export async function fetchDocumentList(
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`读取文档库失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Failed to read document library, please try again later.(${resp.status})`);
   }
   return unwrapEnvelope<MockDocumentListResult>(await resp.json());
 }
 
-// 按任意 job_id(含历史 run)直查其所属文档,后端负责解析——前端不再扫列表反查。
-// 返回该文档记录或 null(job 不属于任何文档时)。
+// Directly query the document of any job_id (including historical runs); backend handles parsing. Frontend no longer scans list for reverse lookup.
+// Return the document record or null(job When not part of any document)。
 export async function fetchDocumentByJobId(
   apiPrefix: string,
   jobId: string,
@@ -76,7 +76,7 @@ export async function fetchDocumentByJobId(
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`按 job 查文档失败，请稍后重试。(${resp.status})`);
+throw new Error(Failed to fetch docs by job. Please try again later. (${resp.status}));
   }
   const payload = unwrapEnvelope<MockDocumentListResult>(await resp.json()) || {
     documents: [],
@@ -94,7 +94,7 @@ export async function fetchDocument(
 ): Promise<DocumentRecord> {
   const normalized = `${documentId || ""}`.trim();
   if (!normalized) {
-    throw new Error("缺少 document_id。");
+throw new Error("Missing document_id.");
   }
   if (isMockMode()) {
     return getMockDocument(normalized);
@@ -103,12 +103,12 @@ export async function fetchDocument(
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`读取文档详情失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Failed to read document details, please try again later.(${resp.status})`);
   }
   return unwrapEnvelope<DocumentRecord>(await resp.json());
 }
 
-// body 支持 { title?, reading_status?, tags? };tags 是整体替换语义(传 [] 即清空)
+// body supports { title?, reading_status?, tags? }; tags use global replace semantics (pass [] to clear now)
 export async function patchDocument(
   apiPrefix: string,
   documentId: string,
@@ -116,7 +116,7 @@ export async function patchDocument(
 ): Promise<DocumentRecord> {
   const normalized = `${documentId || ""}`.trim();
   if (!normalized) {
-    throw new Error("缺少 document_id。");
+throw new Error("Missing document_id.");
   }
   if (isMockMode()) {
     return patchMockDocument(normalized, payload);
@@ -131,17 +131,17 @@ export async function patchDocument(
   });
   if (!resp.ok) {
     const envelope = await resp.json().catch(() => null);
-    throw new Error(`${envelope?.message || "更新文档失败，请稍后重试。"}(${resp.status})`);
+    throw new Error(`${envelope?.message || "Update failed. Try again later."}(${resp.status})`);
   }
   return unwrapEnvelope<DocumentRecord>(await resp.json());
 }
 
-// 文档级删除:删掉 document + 名下所有 job/upload/文件(后端 DELETE /documents/:id)。
-// 被收藏引用时后端返回 409(force 可覆盖运行中的 job,不覆盖收藏保护)。
+// Document-level deletion: delete document and all associated jobs/uploads/files (backend DELETE /documents/:id).
+// Backend returns when referenced by favorites 409(force Overwrite running job,Do not override favorite protection)。
 export async function deleteDocument(apiPrefix, documentId, { force = false } = {}) {
   const normalized = `${documentId || ""}`.trim();
   if (!normalized) {
-    throw new Error("缺少 document_id。");
+throw new Error("Missing document_id.");
   }
   if (isMockMode()) {
     return deleteMockDocument(normalized);
@@ -153,16 +153,16 @@ export async function deleteDocument(apiPrefix, documentId, { force = false } = 
   );
   if (!resp.ok) {
     const envelope = await resp.json().catch(() => null);
-    const error = new Error(`${envelope?.message || "删除文档失败，请稍后重试。"}(${resp.status})`) as Error & { status?: number };
+    const error = new Error(`${envelope?.message || "Failed to delete document. Please try again later."}(${resp.status})`) as Error & { status?: number };
     error.status = resp.status;
     throw error;
   }
   return unwrapEnvelope(await resp.json());
 }
 
-// 对馆藏文档发起"以后再翻":复用文档已存的 upload 起 book 翻译 job。
-// 后端 translate_document 会注入该文档的 upload_id 并把 workflow 归一到 book/translate,
-// 前端只需带一个最小 CreateJobInput(workflow 缺省即 book)。返回 JobSubmissionView。
+// Initiate on collection documents 「Translate later」: reuse existing docs' upload to start a book translation job.
+// Backend translate_document injects this document's upload_id and workflow normalizes to book/translate,
+// Frontend only needs one minimum CreateJobInput(workflow Default is book)Return JobSubmissionView。
 export async function translateDocument(
   apiPrefix: string,
   documentId: string,
@@ -170,7 +170,7 @@ export async function translateDocument(
 ): Promise<JobSubmissionView> {
   const normalized = `${documentId || ""}`.trim();
   if (!normalized) {
-    throw new Error("缺少 document_id。");
+throw new Error("Missing document_id.");
   }
   if (isMockMode()) {
     return translateMockDocument(normalized);
@@ -188,7 +188,7 @@ export async function translateDocument(
   );
   if (!resp.ok) {
     const envelope = await resp.json().catch(() => null);
-    throw new Error(`${envelope?.message || "发起翻译失败，请稍后重试。"}(${resp.status})`);
+    throw new Error(`${envelope?.message || "Translation failed. Retry later."}(${resp.status})`);
   }
   return unwrapEnvelope<JobSubmissionView>(await resp.json());
 }

@@ -38,7 +38,7 @@ fn debug_list_falls_back_to_manifest_when_index_missing() {
                 "block_type": "text",
                 "classification_label": "body",
                 "source_text": "Source paragraph with math $E=mc^2$",
-                "translated_text": "中文段落，含公式 $E=mc^2$",
+                "translated_text": "Please provide the specific Chinese UI text and formulas to translate. $E=mc^2$",
                 "translation_diagnostics": {
                     "route_path": ["direct_typst", "single_item"],
                     "fallback_to": "sentence_level",
@@ -121,7 +121,7 @@ fn debug_item_view_reads_item_from_manifest_payload() {
                 "block_idx": 14,
                 "block_type": "text",
                 "source_text": "English body paragraph sk-secret",
-                "translated_text": "中文正文段落",
+                "translated_text": "Body text",
                 "api_key": "sk-secret",
                 "translation_diagnostics": {
                     "message": "contains sk-secret"
@@ -152,7 +152,7 @@ fn debug_item_view_reads_item_from_manifest_payload() {
     assert_eq!(view.page_idx, 2);
     assert_eq!(view.page_number, 3);
     assert_eq!(view.page_path, "page-3.json");
-    assert_eq!(view.item["translated_text"], "中文正文段落");
+assert_eq!(view.item["translated_text"], "Chinese body paragraph");
     assert_eq!(view.item["api_key"], "");
     assert_eq!(
         view.item["source_text"],

@@ -1,11 +1,11 @@
-/* 书籍详情弹窗 + 内嵌进度卡（从 library-shell 拆出）
- * 前缀：.book-detail-* / .bd-job-status-* / #book-detail-job-status-card
- * 书架卡徽标 .book-card-*、mock banner 仍在 library-shell.css
+/* Book detail popup + Embedded progress card (extracted from library-shell)
+ * Prefix:.book-detail-* / .bd-job-status-* / #book-detail-job-status-card
+ * Bookshelf card logo .book-card-*、mock banner Still present library-shell.css
  */
 
-/* ========== 书籍详情右栏 Tabs + 内嵌完整 StatusCard ========== */
+/* ========== Book details right column Tabs + Embed Complete StatusCard ========== */
 
-/* 裸 tab 组：去掉灰壳容器（原 border+bg 让头部像个输入框），激活态才有实底药丸 */
+/* Bare tab Group: remove gray shell container (original border+bg header input-like style activate state solid pill â skipped: hover effect, add when needed */
 .book-detail-right-tabs-list {
   display: inline-flex;
   max-width: calc(100% - 4px);
@@ -60,12 +60,12 @@
   background: var(--ink) !important;
 }
 
-/* 翻译 Tab 宿主 */
+/* Translation Tab host */
 .book-detail-translate-workspace {
   min-width: 0;
 }
 
-/* 空态 StageFlow = 路线图预览：描边药丸代替禁用灰底（避免灰上灰的 disabled 感） */
+/* Empty state StageFlow = Roadmap preview: outlined pill instead of disabled gray background (avoid gray-on-gray disabled feel) disabled Sense) */
 .book-translate-progress[data-state="idle"] .status-stage-step {
   background: transparent;
   border: 1px dashed color-mix(in srgb, var(--muted) 45%, var(--line));
@@ -81,8 +81,8 @@
 }
 
 /*
- * #book-detail-job-status-card 内部布局（bd-job-status-*）
- * 与主流程 .status-card-shell / .status-progress-hero 完全隔离，高度固定不抖。
+ * #book-detail-job-status-card Internal Layoutbd-job-status-*）
+ * Sync with main process .status-card-shell / .status-progress-hero Fully isolated, fixed height, no jitter.
  */
 #book-detail-job-status-card.bd-job-status-card,
 .bd-job-status-card {
@@ -104,7 +104,7 @@
   gap: 12px;
   padding: 14px;
   box-sizing: border-box;
-  /* head + flow + main(进度条+重试) + error */
+/* head + flow + main(progress bar+retry) + error */
   min-height: 248px;
 }
 
@@ -166,7 +166,7 @@
   flex: 0 0 auto;
 }
 
-/* 主区：进度文案 + 进度条（重试改到 StageFlow 阶段左侧） */
+/* Main area: progress text + Progress bar (retry moved to StageFlow Left side of stage. */
 .bd-job-status-main {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -191,7 +191,7 @@
   overflow: hidden;
 }
 
-/* 标题行：左文案 + 右「重新 xxx」 */
+/* Title row: left text + right "Retry xxx" */
 .bd-job-status-value-row {
   display: flex;
   align-items: center;
@@ -211,7 +211,7 @@
   white-space: nowrap;
 }
 
-/* 进度区动作：轮廓小按钮，不抢主进度 */
+/* Progress area action: small outline button, doesn't compete with main progress. */
 .bd-job-status-retry-action {
   appearance: none;
   flex: 0 0 auto;
@@ -306,7 +306,7 @@
   display: none;
 }
 
-/* 详情内嵌 StageFlow：四枚 pill 一行，干净无重试 */
+/* Detail embedded StageFlowfour pill Single line. Clean. No retry. */
 #book-detail-job-status-card .status-stage-flow,
 .bd-job-status-card .status-stage-flow {
   width: 100%;

@@ -16,7 +16,7 @@ export async function mountReaderPdfPair({
     mountViewer({
       key: "reader-pdf",
       itemOrUrl: sourcePdf,
-      label: "原始 PDF",
+label: "Original PDF",
       emptyId: "reader-pdf-empty",
       fetchProtected,
     }).finally(() => {
@@ -25,7 +25,7 @@ export async function mountReaderPdfPair({
     mountViewer({
       key: "reader-translated-pdf",
       itemOrUrl: translatedPdfUrl,
-      label: "译文 PDF",
+label: "Translated PDF",
       emptyId: "reader-translation-empty",
       fetchProtected,
     }).finally(() => {

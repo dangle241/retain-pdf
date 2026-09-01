@@ -1,4 +1,4 @@
-// 详情：拉 document 全文、标题/标签编辑、阅读状态、合集、删除。
+// Details: fetch document Full text, title/Tag editing, read status, collections, deletion.
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -134,7 +134,7 @@ export function useBookDetailDocument({
     await withBusy(
       "reading",
       () => actions.updateDocument(documentId, { reading_status: value }),
-      "更新阅读状态失败",
+      "Failed to update read status",
     ).catch(() => setReadingStatus(previous));
   }
 
@@ -161,7 +161,7 @@ export function useBookDetailDocument({
         setTags(nextTags);
         setEditing(false);
       },
-      "保存失败",
+      "Save failed",
     );
   }
 
@@ -176,7 +176,7 @@ export function useBookDetailDocument({
         await actions.deleteDocument(documentId);
         onClose?.();
       },
-      "删除失败",
+"Delete failed",
     );
   }
 
@@ -194,7 +194,7 @@ export function useBookDetailDocument({
       );
       collectionsReload?.actions.bump();
     } catch (err) {
-      setError(err?.message || "更新合集失败");
+      setError(err?.message || "Failed to update collection.");
     } finally {
       setCollectionsBusy("");
     }

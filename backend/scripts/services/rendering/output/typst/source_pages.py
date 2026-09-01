@@ -88,7 +88,7 @@ def build_book_overlay_source_lines(
         emit_render_page_progress(
             current=page_index + 1,
             total=page_count,
-            message=f"正在生成整本 Typst overlay，第 {page_index + 1}/{page_count} 页",
+message=f"Generating full Typst overlay, page {page_index + 1}/{page_count}",
             payload={"render_stage": "whole_book_overlay_source_build", "page_index": page_index},
         )
     return lines
@@ -120,7 +120,7 @@ def build_book_background_source_lines(
         emit_render_page_progress(
             current=page_index + 1,
             total=page_count,
-            message=f"正在生成整本 Typst 背景渲染，第 {page_index + 1}/{page_count} 页",
+message=f"Generating full Typst background render, page {page_index + 1}/{page_count}",
             payload={"render_stage": "whole_book_background_source_build", "page_index": source_page_idx},
         )
     return lines

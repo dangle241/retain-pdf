@@ -3,9 +3,9 @@
     box-sizing: border-box;
   }
 
-  /* apple-design skill:减弱动效不等于零动效——用户开了"减弱动态效果"时,
-     整站过渡/动画统一收到几乎瞬时,不做逐组件适配(此前项目里完全没有这条,
-     是真实缺口)。 */
+/* apple-design skill: Reduced animation != no animation â when user enables "Reduce motion",
+     Site-wide transition/All animations received almost instantly.,Skip per-component adaptation. Use CSS variables for theming. ponytail: per-component overrides only when design system breaks.(Not in previous project.,
+     Real gap)。 */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -20,7 +20,7 @@
     overflow-x: hidden;
   }
 
-  /* 深色皮肤：系统控件（滚动条、表单）跟深色方案 */
+  /* Dark skin: system controls (scrollbars, forms) follow dark theme */
   html.theme-dark,
   html[data-theme-group="dark"] {
     color-scheme: dark;
@@ -32,7 +32,7 @@
     overflow-x: hidden;
     font-family: var(--font-sans);
     color: var(--ink);
-    /* 实底交给 html + ambient-surface；body 透明以免盖住纹理 */
+    /* Solid background html + ambient-surface；body transparent to avoid covering texture */
     background: transparent;
   }
 
@@ -57,7 +57,7 @@
 }
 
 
-/* 跨页无障碍：屏幕阅读器专用（home/reader/dialog 共用 className="sr-only"） */
+/* Screen reader only styling. Use `@media screen and (prefers-reduced-motion: reduce)` for accessibility. Consider `aria-label` for clarity. Shared className="sr-only" in home/reader/dialog) */
 .sr-only {
   position: absolute;
   width: 1px;

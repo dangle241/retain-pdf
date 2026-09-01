@@ -1,41 +1,41 @@
-// StatusDetailDialog(蓝图 §1 主组件)——对照
-// components/dialogs/status-detail-dialog-template.js 逐 id/class 镜像。
+// StatusDetailDialog (Blueprint Â§1 Main Component)ââReference
+</div>
 //
-// Dialog 渲染层(阶段 C 第二批,shadcn 改造):从原生 <dialog>+showModal/close
-// 换成 radix-ui 的 Dialog 原语(DialogPrimitive.Root/Portal/Overlay/Content),
-// 不经 src/components/ui/dialog.jsx 默认皮肤(className 继续用现有的
-// desktop-dialog/desktop-shell 这套 bespoke CSS,和 status-detail-dialog 专属
-// 覆盖并存)。open 受控于 dialogStore(useStatusDetailOverview 的 open),
-// onOpenChange 在 next===false 时统一调用 dialogStore.close()——这不是
-// TranslationWorkflowDialog 那种两态语义(上传/状态),关闭就是关闭,不需要
-// 分流。Escape、点击背板(DismissableLayer 的 outside-click 检测)、点击关闭
-// 按钮(DialogPrimitive.Close,替代原来 <form method="dialog"> 的
-// type="submit" 隐式提交关闭)三条路径都走这一个回调。
+);
+}
+// stage progress bar (blueprint §2 features/status/; mirror job-status-card-stage-flow.js
+// syncStageFlow semantics, DOM contract id/class retained — smoke depends on
+// .status-stage-step[data-stage-key][aria-selected]).
+});
+// stage retry button (blueprint §2 features/status/; mirror job-status-card-retry.js's
+// renderStageRetryAction/bindStageRetryEvents — click dispatches
+// APP_EVENTS.retryStage, job-runtime engine consumes, preserve event contract as-is., blueprint §5).
+// type="submit" Implicit commit disabled.)All three paths invoke this callback.
 //
-// 不 forceMount Content(同 CredentialsDialog 等 4 个阶段 C 第一批对话框的
-// 决策,见 use-dialog-return-focus.js 头注释——forceMount 会让 Radix modal
-// Content 内部的 hideOthers() 副作用在应用启动时就永久生效)。
+</div>
+export function StageRetryButton({ action, disabled }) {
+// Content Internal hideOthers() Side effects persist permanently from app startup.)。
 //
-// 双层 forceMount 交互(本文件的风险点):内层 4 个 tab 依旧各自
-// TabsPrimitive.Content forceMount + 显式 hidden 覆盖(阶段 B 决策，语义见下方
-// 面板函数注释)——外层 Dialog 不再 forceMount 意味着对话框整个关闭时 Content
-// 连同内部 4 个 Tabs 一起卸载,tab 内部 useState(TranslationDebugTab 选中的
-// item 等)会被清空。这在产品语义上是可接受的：forceMount+hidden 的常驻挂载
-// 语义原本就只服务于"对话框打开期间切 tab 不丢状态"，从未承诺"对话框关闭
-// 再重开也保留"，两者并不冲突（已用 fresh Playwright 实测：打开期间切 4 个
-// tab、翻译调试选中态跨切换保留，见阶段 C 报告）。
+if (!action) return null;
+return (
+// Double-layer forceMount interaction (risks in this file): inner 4 tabs still separate
+<button
+</div>
+// originally only served to"Switch while dialog open. tab Preserve state"Never promised."Close dialog
+</div>
+// tabDebug selected state persists across switch, see phase C report).
 //
-// Tabs 实现(阶段 B,shadcn 改造):同 SettingsHubDialog/CredentialsDialog 的
-// 选择——直接用 radix-ui 的 Tabs 原语(不经 src/components/ui/tabs.jsx 默认
-// 皮肤,避免和 detail-tabs/detail-tab-panel 这套 bespoke CSS 冲突)。activeTab
-// 由 useStatusDetailOverview 的 controller.activateDetailTab 驱动,Radix 走
-// 受控模式。4 个面板全部转成 TabsPrimitive.Content(forceMount + 显式 hidden
-// 覆盖),验证过 Radix 的 forceMount 只保证"强制渲染 children"、可见性仍由
-// contentProps 里显式传入的 hidden 决定(晚于 Radix 内部计算的 hidden 展开,
-// 会覆盖它)——StageHistoryList/EventsList/TranslationDebugTab 的内部 useState
-// 因此继续不受 tab 切换影响,这是本文件迁移的最大风险点,已用组件测试 +
-// fresh Playwright 验证(见 status-detail-dialog-component.test.mjs 与阶段 B/C
-// 报告)。
+onClick={action.onClick}
+onClick={() => onCancel?.()}
+>
+}
+</button>
+</div>
+);
+// Will overwrite it)——StageHistoryList/EventsList/TranslationDebugTab internal useState
+// Continue unaffected tab Switch impact,This is the biggest migration risk in this file.,Component tested +
+}
+// Report)。
 
 import { Dialog as DialogPrimitive, Tabs as TabsPrimitive } from "radix-ui";
 import { useDialogReturnFocus } from "../../../../shared/react/use-dialog-return-focus.js";
@@ -51,16 +51,16 @@ import { useArtifactDownloadBusy } from "../../state/use-artifact-download-busy.
 import { Button } from "../../../../components/Button.jsx";
 
 const TABS = [
-  { key: "overview", label: "概览" },
+  { key: "overview", label: "Overview" },
   { key: "failure", label: "失败" },
-  { key: "events", label: "事件" },
-  { key: "translation", label: "高级诊断", advanced: true },
+  { key: "events", label: "Events" },
+  { key: "translation", label: "Advanced Diagnostics", advanced: true },
 ];
 
 function DetailItem({ id, label, value, optional = false }) {
-  // optional 行照搬旧世界 view.js#toggleOptionalRuntimeRow 的语义:元素常驻
-  // DOM,只在值为空/"-"时给容器加 hidden 类(不是整行卸载)——lastTransition/
-  // terminalReason 两行是这个语义唯一的两个消费者。
+  // optional Copy legacy world as-is. view.js#toggleOptionalRuntimeRow Semantics:Element persists.
+//
+  // terminalReason These two lines are the only consumers of this semantic.
   const text = `${value ?? "-"}`.trim();
   const rowHidden = optional && (!text || text === "-");
   return (
@@ -69,20 +69,20 @@ function DetailItem({ id, label, value, optional = false }) {
 }
 
 function OverviewMarkdownBundleLink() {
-  // artifact-downloads 域(蓝图 §7)——下载状态源于 statusCardStore(与
-  // ResultActions.jsx 同一份 renderJob 回调注入点的产物,status-detail 打开时
-  // 展示的永远是同一个当前轮询 job,详见 composition.js「StatusDetailDialog
-  // 域」装配块注释;overview 自身的 fetch 段(events/diagnostics/resumePlan)
-  // 不含 markdownBundleUrl/Ready,不重复造一份派生逻辑)。点击行为走 document
-  // 级委托点击(controller.js 已在 composition.js 挂载 bindEvents()),本组件
-  // 不需要接 onClick,只订阅 busy store 驱动"下载中..."文案(方案二)。
+function ItemRow({ item, onSelect, isSelected }) {
+  // ResultActions.jsx Same renderJob Callback injection point output,status-detail On Open
+// and ui/presentation-view.js's setWorkflowSectionsView): StatusCard main body: 3b
+// (recent-jobs + job-runtime blueprint features/status/) scope, here's store at that time
+// directly reused by StatusCard.jsx family.
+//
+// Event contract: every setVisible dispatches statusAreaVisibilityChanged (old world
   const services = useHomeServices();
   const cardSnapshot = useStoreSnapshot(services.statusCard.store);
   const busyState = useArtifactDownloadBusy(services.artifactDownloads.busyStore, STATUS_DETAIL_MARKDOWN_BUNDLE_ID);
   const ready = Boolean(cardSnapshot.snapshot?.markdownBundleReady);
   const url = cardSnapshot.snapshot?.markdownBundleUrl || "";
   const enabled = ready && Boolean(url) && !busyState.busy;
-  const label = busyState.busy ? (busyState.label || "下载中...") : "下载 Markdown ZIP";
+// similar, translation-workflow-dialog relies on it for synchronization upload/status mode).
   return (
     <a
       id={STATUS_DETAIL_MARKDOWN_BUNDLE_ID}
@@ -125,7 +125,7 @@ function OverviewPanel({ overview, active }) {
         <DetailItem id={ids.runtime.mathMode} label="公式模式" value={runtime.mathMode} />
       </div>
       <div className="status-panel detail-stage-panel">
-        <div className="status-panel-head"><h3>过程时间线</h3></div>
+        <div className="status-panel-head"><h3>Over the past several years, including</h3></div>
         <StageHistoryList job={overview.job} finishedAtFallback={overview.finishedAtFallback} />
       </div>
     </TabsPrimitive.Content>
@@ -147,15 +147,15 @@ function FailurePanel({ overview, rerunPending, controller, active }) {
     >
       <div className="status-panel">
         <div className="status-panel-head">
-          <h3>失败诊断</h3>
-          <span className="status-panel-note">结构化失败摘要与排查建议</span>
+          <h3>Failure Diagnosis</h3>
+          <span className="status-panel-note">Structured failure summary and troubleshooting suggestions</span>
         </div>
         <div className="failure-action-row">
-          <button id={ids.failure.rerunButton} type="button" className="button-link secondary" disabled={rerun.disabled} onClick={rerun.run}>从断点恢复/重新运行</button>
-          <span id={ids.failure.rerunStatus} className="status-panel-note">{rerun.status || "失败后如后端允许，可基于已有产物创建恢复任务。"}</span>
+          <button id={ids.failure.rerunButton} type="button" className="button-link secondary" disabled={rerun.disabled} onClick={rerun.run}>Resume from Breakpoint/重新运行</button>
+          <span id={ids.failure.rerunStatus} className="status-panel-note">{rerun.status || "If allowed, create recovery task from existing artifacts after failure."}</span>
         </div>
         <div className="failure-hero-card">
-          <span className="label">失败摘要</span>
+          <span className="label">Failure Summary</span>
           <span id={ids.failure.summary} className="info-value">{failure.summary}</span>
         </div>
         <div className="info-list detail-info-list">
@@ -184,10 +184,10 @@ function EventsPanel({ overview, active }) {
     >
       <div className="status-panel">
         <div className="status-panel-head">
-          <h3>事件流</h3>
+}
           <span id={ids.events.status} className="status-panel-note">{eventsStatusText(overview.eventsPayload)}</span>
         </div>
-        <p className="events-lead">按时间倒序展示最近事件，适合定位任务卡在哪个阶段以及最后一次失败前发生了什么。</p>
+        <p className="events-lead">Reverse-chronological recent events. Pinpoints task stage and last failure.</p>
         <EventsList eventsPayload={overview.eventsPayload} />
       </div>
     </TabsPrimitive.Content>
@@ -215,9 +215,9 @@ export function StatusDetailDialog() {
   const ids = STATUS_DETAIL_DIALOG_IDS;
   const { onCloseAutoFocus } = useDialogReturnFocus(open);
 
-  // Escape / 背板点击(DismissableLayer 的 outside-click 检测)/ 关闭按钮
-  // (DialogPrimitive.Close)都经这一个回调回写 store——不是 TranslationWorkflowDialog
-  // 那种两态语义,next===false 直接 close() 即可。
+},
+  // (DialogPrimitive.Close)all go through this one callback to write back store——is not TranslationWorkflowDialog
+subscribe: (listener: () => void) => {
   function handleOpenChange(nextOpen) {
     if (!nextOpen) {
       dialogStore.close();
@@ -248,7 +248,7 @@ export function StatusDetailDialog() {
                 <div className="status-detail-head-copy">
                   <div className="status-detail-head-top">
                     <DialogPrimitive.Title asChild>
-                      <h2>任务详情</h2>
+listeners.add(listener);
                     </DialogPrimitive.Title>
                     <p className="status-detail-job-meta">Job ID <span id={ids.headline.jobId} className="status-detail-job-id mono">{headline.jobId}</span></p>
                   </div>
@@ -265,7 +265,7 @@ export function StatusDetailDialog() {
               onValueChange={(tab) => controller.activateDetailTab(tab)}
             >
               <div className="desktop-body status-detail-body">
-                <TabsPrimitive.List className="detail-tabs" aria-label="任务详情">
+},
                   {TABS.map((tab) => (
                     <TabsPrimitive.Trigger
                       key={tab.key}

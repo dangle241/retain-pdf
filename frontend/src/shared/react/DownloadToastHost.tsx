@@ -1,26 +1,26 @@
-// 下载进度 toast 宿主(阶段 B:shadcn 改造,消灭 3 份逐字节相同的
-// DownloadToastHost.jsx 复制粘贴——home/reader/detail 三份旧文件已删除,
-// 全部改用这一份共享实现)。
+// Download progress toast host (Phase B: shadcn refactor, eliminate 3 byte-for-byte identical
+// DownloadToastHost.jsx Copy and Paste——home/reader/detail 3 old files deleted.,
+// Switch all to this shared implementation)。
 //
-// 接口契约不变:src/js/utils/download-feedback.js 的私有实现细节是
+// API contract unchanged:src/js/utils/download-feedback.js private implementation details are
 // `document.querySelector("download-toast").setState(state)/.hide()`——
-// 该文件本身不在本次改造范围内,也没有任何其他调用方直接依赖 DOM 结构,只经由
+// This file is out of scope for this refactor, no other callers depend on it directly. DOM structure via only
 // showDownloadToast/showDownloadPreparing/updateDownloadProgress/
-// completeDownloadToast/failDownloadToast 这几个导出函数间接消费,因此这里
-// 继续渲染一个 `<download-toast>` 占位元素并挂 setState/hide 方法(与旧 3
-// 份文件同样的 ref 手法),消费方零改动。
+// completeDownloadToast/failDownloadToast these exported functions are indirectly consumed by,So here
+// Continue to render a `<download-toast>` placeholder element and mount setState/hide methods (Vs Old 3
+// Same file. ref Technique),Zero consumer changes.
 //
-// 内部渲染改用 Sonner(src/components/ui/sonner.jsx 的 <Toaster/>):
-// setState/hide 不再手动 querySelector 改 DOM 文本,而是调用
+// Switch to internal rendering Sonner (src/components/ui/sonner.jsx <Toaster/>):
+// setState/hide no longer manual querySelector to change DOM text, but calls
 // toast.custom(..., { id: TOAST_ID, duration: Infinity }) / toast.dismiss(...)。
-// 卡片内部结构/id(#download-toast-title 等)/class(download-toast-card 等)
-// 原样保留(tests/artifact-downloads-react.test.mjs 按 id 断言 toast 标题文本,
-// 视觉上也复用原有 CSS,不接受 Sonner 默认皮肤)——只是外层的固定定位/层级/
-// 入场动画交给 Sonner 的 <Toaster/> 负责(src/styles/components.utilities.css
-// 里 download-toast 外壳的 fixed 定位规则已随之退役,理由见该文件注释)。
-// Sonner 对 toast.custom() 渲染的内容默认不套用它自己的卡片皮肤
-// (data-styled 由 toast.jsx 存在与否决定,见 node_modules/sonner 源码),
-// 所以两套视觉不会打架。
+// Card inner structure/id(#download-toast-title etc.)/class(download-toast-card etc.)
+// Keep as-is (tests/artifact-downloads-react.test.mjs asserts toast title by id,
+// UI reuse existing components. Simplify: avoid duplication, enhance maintainability. CSS, rejected Sonner default skin) â Outer layer fixed positioning only/z-index/
+// Entry animation handoff to Sonner <Toaster/> (src/styles/components.utilities.css
+// where download-toast shell fixed positioning rules are retired, reason see comments in that file).
+// Sonner toast.custom() rendered content does not apply its own card skin by default
+// (data-styled determined by toast.jsx presence, see node_modules/sonner source code),
+// Two visual sets don't conflict.
 
 import { useCallback } from "react";
 import { toast } from "sonner";
@@ -37,9 +37,9 @@ declare module "react" {
 const TOAST_ID = "download-toast";
 
 function DownloadToastCard({
-  title = "下载中",
-  status = "正在准备...",
-  meta = "等待响应...",
+title = "Downloading",
+status = "Preparing...",
+meta = "Waiting for response...",
   percent = NaN,
   tone = "progress",
 }) {
@@ -63,9 +63,9 @@ function DownloadToastCard({
 function applyToastState(state: any = {}) {
   const {
     visible = false,
-    title = "下载中",
-    status = "正在准备...",
-    meta = "等待响应...",
+title = "Downloading",
+status = "Preparing...",
+meta = "Waiting for response...",
     percent = NaN,
     tone = "progress",
   } = state;
@@ -91,7 +91,7 @@ export function DownloadToastHost() {
   return (
     <>
       <Toaster position="bottom-right" />
-      {/* download-feedback.js 的查询占位,不参与渲染(Sonner 负责实际可见 UI)。 */}
+      {/* download-feedback.js Query placeholder,Not rendered.(Sonner handles actual visibility UI)。 */}
       <download-toast style={{ display: "none" }} aria-hidden="true" ref={attach} />
     </>
   );

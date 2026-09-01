@@ -52,7 +52,7 @@ export function resolveTranslationBudgetState({
   const balance = Number(balanceCny);
   const hasBalance = balanceChecked && Number.isFinite(balance);
   const blocking = hasBalance && balance < estimatedCost;
-  const balanceLabel = hasBalance ? `余额 ¥${money(balance)}` : "余额未检测";
+const balanceLabel = hasBalance ? `Balance Â¥${money(balance)}` : "Balance not detected";
   return {
     visible: true,
     blocking,
@@ -61,7 +61,7 @@ export function resolveTranslationBudgetState({
     balanceCny: hasBalance ? balance : null,
     balanceChecked,
     tone: blocking ? "error" : hasBalance ? "valid" : "",
-    message: `预计 ¥${money(estimatedCost)} · ${pageCount} 页 · ${balanceLabel}`,
+message: `estimated Â¥${money(estimatedCost)} Â· ${pageCount} pages Â· ${balanceLabel}`,
     topUpUrl: DEEPSEEK_TOP_UP_URL,
   };
 }

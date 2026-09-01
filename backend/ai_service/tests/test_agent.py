@@ -18,7 +18,7 @@ def _search_tool(hits):
 
     return Tool(
         name="search_fulltext",
-        description="搜索",
+        description="Search",
         parameters={"type": "object", "properties": {"query": {"type": "string"}}},
         handler=handler,
     )
@@ -30,14 +30,14 @@ HITS = [
         "job_id": "job-1",
         "page_idx": 3,
         "block_id": "p004-b0002",
-        "translated_snippet": "反应速率显著提高",
+        "translated_snippet": "Reaction rate significantly increased.",
     },
     {
         "document_id": "doc-a",
         "job_id": "job-1",
         "page_idx": 7,
         "block_id": "p008-b0001",
-        "translated_snippet": "选择性来自共轭效应",
+        "translated_snippet": "Selectivity from conjugation effect.",
     },
 ]
 
@@ -54,7 +54,7 @@ def test_agent_runs_tools_then_answers_with_cited_anchors():
     registry = ToolRegistry([_search_tool(HITS)])
     script = iter(
         [
-            {"content": "", "tool_calls": [_tool_call("search_fulltext", {"query": "选择性"})]},
+            {"content": "", "tool_calls": [_tool_call("search_fulltext", {"query": "selectivity"})]},
             {"content": "选择性来自共轭效应 [2]。", "tool_calls": []},
         ]
     )
@@ -65,11 +65,11 @@ def test_agent_runs_tools_then_answers_with_cited_anchors():
         return next(script)
 
     agent = RetrievalAgent(registry, fake_chat, max_tool_rounds=4)
-    result = agent.ask("为什么有选择性?")
+    result = agent.ask("Selective why? Feature flag toggle. Remove flag.?")
 
     assert result.rounds == 2
-    assert result.answer == "选择性来自共轭效应 [2]。"
-    # 只返回被引用的锚点,且编号写进了给模型看的工具结果
+assert result.answer == "Selectivity comes from the conjugation effect [2]."
+    # Return only referenced anchors,ID written to model-visible tool result.
     assert [citation.ref for citation in result.citations] == [2]
     assert result.citations[0].block_id == "p008-b0001"
     payload = json.loads(seen_tool_messages[0]["content"])
@@ -80,7 +80,7 @@ def test_agent_runs_tools_then_answers_with_cited_anchors():
 
 
 def test_agent_forces_document_id_into_search_tools():
-    """整本问答:即便模型没传 document_id,agent 也要强制注入。"""
+    """Entire Book Q&A:even if model not passed document_id,agent Also force inject."""
     seen_args = []
 
     def capture(arguments):
@@ -91,7 +91,7 @@ def test_agent_forces_document_id_into_search_tools():
         [
             Tool(
                 name="search_fulltext",
-                description="搜索",
+description="Search",
                 parameters={"type": "object", "properties": {"query": {"type": "string"}}},
                 handler=capture,
             )
@@ -100,12 +100,12 @@ def test_agent_forces_document_id_into_search_tools():
     script = iter(
         [
             {"content": "", "tool_calls": [_tool_call("search_fulltext", {"query": "选择性"})]},
-            {"content": "答案 [1]。", "tool_calls": []},
+            {"content": "Answer [1]。", "tool_calls": []},
         ]
     )
     agent = RetrievalAgent(registry, lambda m, t: next(script), max_tool_rounds=4)
-    result = agent.ask("为什么?", document_id="doc-a", job_id="job-1")
-    assert seen_args[0]["query"] == "选择性"
+    result = agent.ask("Why?", document_id="doc-a", job_id="job-1")
+    assert seen_args[0]["query"] == "Selective"
     assert seen_args[0]["document_id"] == "doc-a"
     assert result.tool_trace[0]["arguments"]["document_id"] == "doc-a"
 
@@ -114,12 +114,12 @@ def test_agent_falls_back_to_all_citations_when_answer_has_no_markers():
     registry = ToolRegistry([_search_tool(HITS)])
     script = iter(
         [
-            {"content": "", "tool_calls": [_tool_call("search_fulltext", {"query": "速率"})]},
-            {"content": "速率提高且有选择性。", "tool_calls": []},
+            {"content": "", "tool_calls": [_tool_call("search_fulltext", {"query": "rate"})]},
+            {"content": "Faster and selective.", "tool_calls": []},
         ]
     )
     agent = RetrievalAgent(registry, lambda m, t: next(script), max_tool_rounds=4)
-    result = agent.ask("结论?")
+    result = agent.ask("Conclusion?")
     assert [citation.ref for citation in result.citations] == [1, 2]
 
 
@@ -134,25 +134,25 @@ def test_agent_forces_final_answer_when_rounds_exhausted():
                 "content": "",
                 "tool_calls": [_tool_call("search_fulltext", {"query": f"q{calls['n']}"})],
             }
-        # 收尾调用不给工具
+        # Final call omits tools.
         assert messages[-1]["role"] == "user"
-        return {"content": "基于已有证据的最终回答 [1]。", "tool_calls": []}
+        return {"content": "Final answer based on existing evidence. [1]。", "tool_calls": []}
 
     agent = RetrievalAgent(registry, looping_chat, max_tool_rounds=3)
-    result = agent.ask("一直想搜的问题")
+    result = agent.ask("Search history persists. Browser stores queries. Clear history or use incognito.")
     assert result.rounds == 3
-    assert "最终回答" in result.answer
+    assert "final answer" in result.answer
     assert len(result.tool_trace) == 3
 
 
 def test_friendly_llm_error_maps_status_codes():
-    """审计 C1:402/429/401 必须译成用户可行动的中文,且截断上游详情。"""
+"""Audit C1:402/429/401 must be translated into user-actionable Chinese,Truncate upstream details."""
     from retainpdf_ai.agent import _friendly_llm_error
 
-    assert "余额不足" in str(_friendly_llm_error(402))
-    assert "限流" in str(_friendly_llm_error(429))
-    assert "Key 无效" in str(_friendly_llm_error(401))
-    assert "上游故障" in str(_friendly_llm_error(503))
+assert "Insufficient balance" in str(_friendly_llm_error(402))
+assert "rate limiting" in str(_friendly_llm_error(429))
+    assert "Key Invalid" in str(_friendly_llm_error(401))
+    assert "Upstream failure." in str(_friendly_llm_error(503))
     long_detail = "x" * 500
     msg = str(_friendly_llm_error(402, long_detail))
     assert len(msg) < 300
@@ -160,12 +160,12 @@ def test_friendly_llm_error_maps_status_codes():
 
 
 def test_rounds_exhausted_final_call_uses_request_level_chat_fn():
-    """审计 A1 回归锁:env 不配 key(启动期 chat=_missing_key 形态)、按请求传
-    chat_fn 时,轮数耗尽的收尾轮必须继续用请求级 chat_fn,而不是 self._chat。"""
+"""Audit A1 Regression lock:env not configured key(Startup chat=_missing_key Form)pass chat_fn per request
+chat_fn when,Rounds exhausted: final round must still use request-level. chat_fn,instead of self._chat."""
     registry = ToolRegistry([_search_tool(HITS)])
 
     def startup_chat_missing_key(_messages, _tools):
-        raise RuntimeError("缺少 LLM API Key")
+raise RuntimeError("Missing LLM API Key")
 
     calls = {"n": 0}
 
@@ -176,12 +176,12 @@ def test_rounds_exhausted_final_call_uses_request_level_chat_fn():
                 "content": "",
                 "tool_calls": [_tool_call("search_fulltext", {"query": f"q{calls['n']}"})],
             }
-        return {"content": "请求级 key 的收尾回答 [1]。", "tool_calls": []}
+        return {"content": "Request-level key final answer [1]。", "tool_calls": []}
 
     agent = RetrievalAgent(registry, startup_chat_missing_key, max_tool_rounds=2)
-    result = agent.ask("一直想搜的问题", chat_fn=request_chat)
+result = agent.ask("the question I've always wanted to search for", chat_fn=request_chat)
     assert result.rounds == 2
-    assert "收尾回答" in result.answer
+    assert "final answer" in result.answer
 
 
 def test_unknown_tool_and_handler_error_feed_back_to_model():
@@ -207,7 +207,7 @@ def test_unknown_tool_and_handler_error_feed_back_to_model():
                     _tool_call("missing", {}, "c2"),
                 ],
             },
-            {"content": "工具都失败了,无法回答。", "tool_calls": []},
+            {"content": "All tools failed.,Cannot answer.", "tool_calls": []},
         ]
     )
     captured = []
@@ -218,7 +218,7 @@ def test_unknown_tool_and_handler_error_feed_back_to_model():
 
     agent = RetrievalAgent(registry, fake_chat, max_tool_rounds=3)
     result = agent.ask("q")
-    assert result.answer.startswith("工具都失败了")
+assert result.answer.startswith("all tools failed")
     errors = [json.loads(m["content"]) for m in captured]
     assert any("backend down" in str(e.get("error")) for e in errors)
     assert any("unknown tool" in str(e.get("error")) for e in errors)
@@ -243,34 +243,34 @@ def _tool_chunk():
 
 
 def test_streaming_tool_turn_preamble_not_emitted_as_answer_delta():
-    """审计 A3 回归锁:工具轮的 content 前言不得泄漏为 answer_delta。"""
+"""Audit A3 regression lock:Tool Wheel's content Preface must not be leaked. answer_delta."""
     from retainpdf_ai.agent import assemble_streaming_message
 
     deltas = []
     message = assemble_streaming_message(
-        _sse([_content_chunk("让我先"), _content_chunk("搜索一下…"), _tool_chunk()]),
+        _sse([_content_chunk("Let me first"), _content_chunk("Search…"), _tool_chunk()]),
         on_delta=deltas.append,
     )
-    assert deltas == [], f"工具轮前言泄漏: {deltas}"
+    assert deltas == [], f"Tool wheel preamble leak: {deltas}"
     assert message["tool_calls"][0]["function"]["name"] == "search_fulltext"
-    # content 仍保留在 message 里(回给模型的上下文完整)
-    assert "搜索一下" in message["content"]
+    # content Remains in message in(Context sent to model complete.)
+assert "search a bit" in message["content"]
 
 
 def test_streaming_pure_answer_still_streams_and_short_answer_flushes():
     from retainpdf_ai.agent import assemble_streaming_message
 
-    # 长答案:攒满 64 字符定性后转直通
-    long_piece = "答" * 64
+    # Long answer.:Full 64 Convert to pass-through after character classification.
+    long_piece = "answer" * 64
     deltas = []
     assemble_streaming_message(
-        _sse([_content_chunk(long_piece), _content_chunk("尾巴")]),
+        _sse([_content_chunk(long_piece), _content_chunk("Tail")]),
         on_delta=deltas.append,
     )
-    assert "".join(deltas) == long_piece + "尾巴"
-    assert len(deltas) == 2, "定性后应逐 piece 直通"
+assert "".join(deltas) == long_piece + "tail"
+    assert len(deltas) == 2, "After classification, proceed step by step. piece Direct"
 
-    # 短答案:不足阈值,流结束一次性补发
+    # Short answer:Below threshold,Resend all at stream end.
     deltas2 = []
-    assemble_streaming_message(_sse([_content_chunk("短答案")]), on_delta=deltas2.append)
-    assert "".join(deltas2) == "短答案"
+    assemble_streaming_message(_sse([_content_chunk("Short answer")]), on_delta=deltas2.append)
+assert "".join(deltas2) == "Short answer"

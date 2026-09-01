@@ -1,23 +1,23 @@
-# 前端请求示例
+# Frontend request example
 
-这份文档面向前端接入，给出最常用的调用顺序、请求头、请求体和示例代码。
+For frontend integration. Common call order, request headers, request body, sample code.
 
-配合主文档使用：
+Use with main document:
 
-- [RetainPDF 后端 API 总入口](/home/wxyhgk/tmp/Code/doc/core/api/index.md)
+- [RetainPDF Backend API Main Entry](/home/wxyhgk/tmp/Code/doc/core/api/index.md)
 - [Rust API README](/home/wxyhgk/tmp/Code/backend/rust_api/README.md)
 - [CURRENT_API_MAP](/home/wxyhgk/tmp/Code/backend/rust_api/CURRENT_API_MAP.md)
 
-文档约定：
+Document conventions:
 
-- 这份文档是前端接入示例，不是协议规范源头；正式口径以 `doc/core/api/index.md` 为准
-- 前端请求示例统一以分组后的正式请求结构为准
-- 旧版扁平字段已经移除，不再接受
-- 前端只需要关心接口契约，不需要依赖 Rust 内部模块名
+- This document is a frontend integration example, not the protocol specification source; the official wording shall be based on `doc/core/api/index.md` as the authoritative source.
+- Frontend request examples must uniformly follow the formal request structure after grouping.
+- Legacy flat fields removed, no longer accepted.
+- Frontend only cares about interface contracts, not dependencies. Rust Internal Module Name
 
-## 1. 你必须准备的 5 个值
+## 1. Required preparations 5 value
 
-调用 Rust API 时，前端至少要准备下面这些值：
+When calling the Rust API, the frontend should at least prepare the following values:
 
 1. `X-API-Key`
 2. `mineru_token`
@@ -25,32 +25,32 @@
 4. `api_key`
 5. `model`
 
-含义：
+Meaning:
 
-- `X-API-Key`：你自己的 Rust 后端访问 key
-- `mineru_token`：MinerU 的 API Key
-- `base_url`：模型服务的 OpenAI 兼容 URL
-- `api_key`：模型服务的 API Key
-- `model`：模型名字
+- `X-API-Key`your own Rust Backend Access key
+- `mineru_token`ï¼MinerU's API Key
+- `base_url`Model Services OpenAI Compatible URL
+- `api_key`ï¼model service API Key
+- `model`DeepSeek
 
-可选但建议前端同步支持的字段：
+Optional but recommended fields for frontend sync support:
 
-- `translation.math_mode`：公式翻译模式
-  - `direct_typst`：默认模式，直接让模型输出正文 + `$...$` 数学
-  - `placeholder`：兼容旧公式保护链的保守模式
+- `translation.math_mode`: formula translation mode
+  - `direct_typst`Default mode: output main text directly. + `$...$` Math
+  - `placeholder`: Conservative mode for legacy formula protection chain
 
-## 2. 调用顺序
+## 2. Call Order
 
-前端推荐顺序：
+Frontend recommended order:
 
-1. 上传 PDF
-2. 用上传返回的 `upload_id` 创建任务
-3. 轮询任务状态
-4. 成功后下载 PDF / Markdown / Bundle
+1. Upload PDF
+2. Use the upload return value. `upload_id` Create task
+3. Poll task status
+4. Download on success PDF / Markdown / Bundle
 
-## 3. 上传 PDF
+## 3. Upload PDF
 
-请求：
+Request:
 
 ```http
 POST /api/v1/uploads
@@ -58,7 +58,7 @@ X-API-Key: your-rust-api-key
 Content-Type: multipart/form-data
 ```
 
-前端示例：
+Frontend example:
 
 ```ts
 async function uploadPdf(file: File, backendKey: string, developerMode = false) {
@@ -82,7 +82,7 @@ async function uploadPdf(file: File, backendKey: string, developerMode = false) 
 }
 ```
 
-成功后会得到：
+On success, you get:
 
 ```json
 {
@@ -94,14 +94,14 @@ async function uploadPdf(file: File, backendKey: string, developerMode = false) 
 }
 ```
 
-上传限制说明：
+Upload limits: max 100 MB per file. Max 5 files per request.
 
-- 当前后端默认不额外限制 PDF 大小和页数
-- 如果部署方配置了 `RUST_API_UPLOAD_MAX_BYTES` / `RUST_API_UPLOAD_MAX_PAGES`，以前端实际收到的服务端报错为准
+- Backend defaults no extra limits. PDF Size and page count
+- If the deployer has configured `RUST_API_UPLOAD_MAX_BYTES` / `RUST_API_UPLOAD_MAX_PAGES`Always rely on the actual server error received by the frontend.
 
-## 4. 创建任务
+## 4. Create task
 
-请求：
+Requestï¼
 
 ```http
 POST /api/v1/jobs
@@ -109,18 +109,18 @@ X-API-Key: your-rust-api-key
 Content-Type: application/json
 ```
 
-说明：
+Noteï¼
 
-- 这里的 `workflow: "book"` 才是当前完整主链路的正式协议值
-- OCR provider 选择看 `ocr.provider`，而不是看 `workflow`
-- 如果你只想跑 OCR-only，请走 `POST /api/v1/ocr/jobs`，不要向 `/api/v1/jobs` 传 `workflow="ocr"`
-- 本地人工一次性调试时可以使用 legacy wrapper `run_provider_case.py`；生产 API 主链由 Rust job_runner 编排
-- 如果输入已经是 OCR JSON + PDF，优先使用 `run_document_flow.py`
-- 如果只想跑 OCR-only，优先使用 `run_provider_ocr.py`
+- Here `workflow: "book"` is the official protocol value for the current complete main link.
+- OCR provider selection depends on `ocr.provider`, not `workflow`
+- If you just want to run OCR-only, please use POST /api/v1/ocr/jobs (incomplete). Provide full Chinese text. Use /api/v1/jobs with workflow="ocr".
+- For local manual one-time debugging, use legacy wrapper run_provider_case.py; Production API main chain consists of Rust job_runner orchestration.
+- If the input is already OCR JSON + PDFpreferentially use `run_document_flow.py`
+- If you only want to run OCR-only, prefer using run_provider_ocr.py
 
-### 4.1 DeepSeek 示例
+### 4.1 DeepSeek Example
 
-推荐请求体：
+Recommended request body:
 
 ```json
 {
@@ -151,7 +151,7 @@ Content-Type: application/json
 }
 ```
 
-### 4.2 OpenAI 兼容接口示例
+### 4.2 OpenAI Compatibility API example
 
 ```json
 {
@@ -180,7 +180,7 @@ Content-Type: application/json
 }
 ```
 
-前端示例：
+Frontend example:
 
 ```ts
 type CreateJobPayload = {
@@ -234,9 +234,9 @@ async function createJob(payload: CreateJobPayload, backendKey: string) {
 }
 ```
 
-### 4.3 当前强制校验
+### 4.3 Force validation
 
-`POST /api/v1/jobs` 目前会强制校验：
+`POST /api/v1/jobs` Currently enforces validation:
 
 - `source.upload_id`
 - `ocr.mineru_token`
@@ -244,46 +244,46 @@ async function createJob(payload: CreateJobPayload, backendKey: string) {
 - `translation.api_key`
 - `translation.model`
 
-另外：
+Additionally:
 
-- `base_url` 必须以 `http://` 或 `https://` 开头
+- base_url Must start with http:// or https://
 
-`translation.math_mode` 当前约定：
+`translation.math_mode` current convention:
 
-- 不传时默认 `direct_typst`
-- 前端若要开放实验开关，建议文案直接写成“公式直出实验模式”
-- `direct_typst` 只影响翻译阶段的公式处理链路，不改变渲染接口调用方式
+- Default when omitted. `direct_typst`
+- If the frontend provides an experimental toggle, the suggested copy is "Direct Formula Output Experimental Mode".
+- `direct_typst` Affects only translation-phase formula processing chain; rendering interface call method unchanged.
 
-### 4.4 术语表怎么传
+### 4.4 Pass glossary as JSON map. Key: source term. Value: target term. Load at init.
 
-推荐做法：
+Recommended:
 
-- 前端维护“命名术语表”列表时，先调用 `POST /api/v1/glossaries` 保存，任务里只传 `translation.glossary_id`
-- 如果只是单次任务临时术语，直接传 `translation.glossary_entries`
-- 如果用户上传的是 Excel，前端先解析成 JSON；后端不直接解析 Excel
-- 如果前端手里只有 CSV 文本，可以先调用 `POST /api/v1/glossaries/parse-csv` 转成标准条目
+- When the frontend maintains the "Naming Glossary" list, first call `POST /api/v1/glossaries` Save; pass only in task. `translation.glossary_id`
+- For one-off temporary terminology, pass directly. `translation.glossary_entries`
+- If the user uploads ExcelFrontend first parses into JSONBackend does not parse directly. Excel
+- Incomplete source. Please provide the full Chinese text to translate. CSV Text, call first. `POST /api/v1/glossaries/parse-csv` Convert to standard entry.
 
-合并规则：
+Merge rules:
 
-- 命名术语表是基础层
-- 任务内 `glossary_entries` 是覆盖层
-- 相同 `source` 以任务内条目为准
+- Naming glossary is the foundation layer.
+- Within Task `glossary_entries` It is an overlay.
+- Same `source` The entries within the task shall prevail.
 
-当前行为边界：
+Current behavioral boundaries:
 
-- 术语表 v1 只参与提示词注入和结果统计
-- 不做翻译完成后的强制文本替换
+- Glossary v1 Only participate in prompt injection and result statistics.
+- No action.
 
-## 5. 轮询任务状态
+## 5. Poll task status
 
-请求：
+Request:
 
 ```http
 GET /api/v1/jobs/{job_id}
 X-API-Key: your-rust-api-key
 ```
 
-前端示例：
+Frontend example:
 
 ```ts
 async function getJob(jobId: string, backendKey: string) {
@@ -314,38 +314,38 @@ async function pollJobUntilDone(jobId: string, backendKey: string) {
 }
 ```
 
-最近任务列表接口同样会返回协议聚合：
+Recent task list API also returns protocol aggregation:
 
 - `items[].invocation`
 - `invocation_summary.stage_spec_count`
 - `invocation_summary.unknown_count`
 
-注意：
+Note:
 
-- 不要用 `progress.percent >= 90` 判断完成
-- 必须用 `status` 判断是否结束
-- `queued` 表示任务已创建，但可能还在等待执行槽位
-- 任务详情里的 `invocation` 可直接用于展示当前任务使用的 stage spec 协议
+- Don't use `progress.percent >= 90` Judgment complete
+- Required `status` Check if complete
+- `queued` Task created; may be pending execution slot.
+- In the task details `invocation` directly usable for current task display. stage spec protocol
   - `invocation.input_protocol`
   - `invocation.stage_spec_schema_version`
 
-## 6. 下载结果
+## 6. Download result
 
-常用接口：
+Common APIs:
 
 - PDF：`GET /api/v1/jobs/{job_id}/pdf`
 - Markdown(JSON)：`GET /api/v1/jobs/{job_id}/markdown`
 - Markdown(raw)：`GET /api/v1/jobs/{job_id}/markdown?raw=true`
 - Bundle(zip)：`GET /api/v1/jobs/{job_id}/download`
 
-更推荐前端先取任务详情或产物详情，再使用服务端返回的 `actions`：
+Prefer frontend to fetch task or artifact details first, then use the server-returned. `actions`：
 
 - `actions.download_pdf.url`
 - `actions.open_markdown.url`
 - `actions.open_markdown_raw.url`
 - `actions.download_bundle.url`
 
-## 7. 完整前端示例
+## 7. Complete frontend example
 
 ```ts
 async function runPdfTranslateFlow(file: File, config: {
@@ -397,23 +397,23 @@ async function runPdfTranslateFlow(file: File, config: {
 }
 ```
 
-## 8. 前端变量命名建议
+## 8. Use camelCase. Match DOM/API conventions. Be descriptive, not verbose. Avoid abbreviations unless universal (e.g., `id`, `url`). Prefix booleans with `is/has/can`. Group related state in objects. No Hungarian notation.
 
-建议前端内部把变量分清楚，不要混：
+Suggest frontend internals distinguish variables clearly; do not mix:
 
-- `backendKey`：Rust API 的 `X-API-Key`
-- `mineruToken`：MinerU 的 key
-- `modelBaseUrl`：模型服务 URL
-- `modelApiKey`：模型服务 key
-- `model`：模型名
-- `mathMode`：公式翻译模式，默认 `direct_typst`
+- `backendKey`: Rust API's `X-API-Key`
+- `mineruToken`: MinerU key
+- `modelBaseUrl`Model Service URL
+- `modelApiKey`: model service key
+- `model`DeepSeek
+- `mathMode`Formula translation mode, default `direct_typst`
 
-## 9. `math_mode` 什么时候该开
+## 9. `math_mode` When to enable
 
-当前默认推荐就是 `direct_typst`。前端如果要暴露开关，可以把它放进高级选项，但不要再把 `placeholder` 当默认值。
+Default recommended `direct_typst`If the frontend needs to expose a toggle, put it in advanced options, but do not put... `placeholder` Set as default.
 
-- 普通任务：不传，或显式传 `direct_typst`
-- 只有在你要回退旧公式保护链时，才传 `placeholder`
-- 如果后续前端要做开关，推荐直接传字符串，不要自己在前端推断文档是否“公式很多”
+- Normal task: omit or pass explicitly. `direct_typst`
+- Only pass when rolling back old formula protection chain. `placeholder`
+- If the frontend later needs a switch, recommend passing a string directly; do not infer on the frontend whether the document has "many formulas".
 
-这样后面接多服务商时不会乱。
+This prevents confusion when integrating multiple service providers later.

@@ -3,25 +3,25 @@ import assert from "node:assert/strict";
 import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-// TSX/JSX 主题盲颜色棘轮门禁——css-color-literals 的姊妹篇,补上它的盲区:
-// className 里的 bg-white/text-black 等 Tailwind 工具类、任意值 [rgba(...)]、
-// 内联 style 字面色,CSS 棘轮(只扫 src/styles)全都看不见,night/装饰主题下
-// 这些颜色不跟随换肤(图书馆改版曾因此积累 30+ 处)。
+// TSX/JSX theme-blind color ratchet gateâsister piece to css-color-literals, filling its blind spots:
+// Tailwind utility classes like bg-white/text-black in className, arbitrary values [rgba(...)],
+// inline style literal colors; CSS ratchet (scanning only src/styles) misses these under night/decorative themes
+// These colors do not follow theme changes (accumulated 30+ instances during library redesign).
 //
-// 规则同款:每文件命中数只许 ≤ baseline,新文件必须为 0;
-// 收敛后 UPDATE_TSX_COLOR_BASELINE=1 npm test 拧紧。
-// 语义替代:bg-paper/bg-ink/bg-scrim 等(@theme 映射见 core/tailwind-theme.css)。
+// Same rule: hits per file must be â¤ baseline, new files must be 0;
+// After convergence, tighten with UPDATE_TSX_COLOR_BASELINE=1 npm test.
+// Semantic alternatives: bg-paper/bg-ink/bg-scrim etc.(@theme mapping in core/tailwind-theme.css).
 
 const PROJECT_ROOT = process.cwd();
 const SCAN_ROOTS = ["src/pages", "src/components", "src/shared", "src/lib"]
   .map((p) => join(PROJECT_ROOT, p));
-// 皮肤真值(预览色块数据)所在地,豁免
+// Location of skin truth values (preview color block data), exempt
 const EXEMPT = [join(PROJECT_ROOT, "src/shared/theme")];
 const BASELINE_PATH = join(PROJECT_ROOT, "tests/helpers/tsx-color-literals-baseline.json");
 
-// 1) 主题盲工具类:white/black 系(含 /alpha 变体与 hover: 等前缀后的形式)
+// 1) Theme-blind utility classes: white/black series (including /alpha variants and forms after hover: prefixes)
 const UTILITY_RE = /\b(?:bg|text|border|ring|from|to|via|fill|stroke|divide|outline|decoration|caret|accent)-(?:white|black)(?:\/\d+)?\b/g;
-// 2) 字面色:rgba()/rgb()/hsl()/6+ 位 hex(任意值类、内联 style、常量都算)
+// 2) Literal colors: rgba()/rgb()/hsl()/6+ digit hex (includes arbitrary value classes, inline styles, constants)
 const LITERAL_RE = /\brgba?\(|\bhsla?\(|#[0-9a-fA-F]{6}\b/g;
 
 function walk(dir, out = []) {
@@ -44,7 +44,7 @@ function walk(dir, out = []) {
 }
 
 function stripComments(source) {
-  // 保守剥离:块注释 + 整行 // 注释(不动行尾 //,避免误伤 URL)
+// Conservative stripping: block comments + full-line // comments (leave trailing // to avoid breaking URLs)
   return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 }
 
@@ -66,7 +66,7 @@ function currentCounts() {
   return counts;
 }
 
-test("TSX 主题盲颜色只减不增(棘轮)", () => {
+test("TSX theme-blind colors only decrease (ratchet)", () => {
   const counts = currentCounts();
 
   if (process.env.UPDATE_TSX_COLOR_BASELINE === "1") {
@@ -78,27 +78,27 @@ test("TSX 主题盲颜色只减不增(棘轮)", () => {
   const regressions = [];
   for (const [file, n] of Object.entries(counts)) {
     const allowed = baseline[file] ?? 0;
-    if (n > allowed) regressions.push(`${file}: ${n} 处(棘轮上限 ${allowed})`);
+if (n > allowed) regressions.push(`${file}: ${n} instances (ratchet limit ${allowed})`);
   }
   assert.deepEqual(
     regressions,
     [],
-    `以下文件新增了主题盲颜色(bg-white/rgba(...)等),请改用语义类 bg-paper/bg-ink/bg-scrim 或 var(--…):\n  ${regressions.join("\n  ")}\n收敛后 UPDATE_TSX_COLOR_BASELINE=1 npm test 拧紧棘轮。`,
+`The following files added theme-blind colors (bg-white/rgba(...) etc.), please use semantic classes bg-paper/bg-ink/bg-scrim or var(--...):\n  ${regressions.join("\n  ")}\nAfter convergence, tighten ratchet with UPDATE_TSX_COLOR_BASELINE=1 npm test.`,
   );
 });
 
-test("TSX 棘轮 baseline 没有虚高", () => {
+test("TSX ratchet baseline is not inflated", () => {
   if (process.env.UPDATE_TSX_COLOR_BASELINE === "1") return;
   const counts = currentCounts();
   const baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf8"));
   const stale = [];
   for (const [file, allowed] of Object.entries(baseline)) {
     const n = counts[file] ?? 0;
-    if (n < allowed) stale.push(`${file}: 实际 ${n} < baseline ${allowed}`);
+if (n < allowed) stale.push(`${file}: actual ${n} < baseline ${allowed}`);
   }
   assert.deepEqual(
     stale,
     [],
-    `收敛成果未固化,运行 UPDATE_TSX_COLOR_BASELINE=1 npm test:\n  ${stale.join("\n  ")}`,
+`Convergence results not solidified, run UPDATE_TSX_COLOR_BASELINE=1 npm test:\n  ${stale.join("\n  ")}`,
   );
 });

@@ -1,156 +1,156 @@
-# Paddle block_label 首版映射表
+# Paddle block_label Create mapping table. Simplify: Use dictionary, add when complexity grows.
 
-这份文档基于 [json_full.json](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/json_full.json) 的 `layoutParsingResults[*].prunedResult.parsing_res_list[*].block_label` 实际枚举结果整理，目标是给后续 `Paddle -> document.v1` adapter 提供第一版稳定映射。
+This document is based on [json_full.json](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/json_full.json)'s `layoutParsingResults[*].prunedResult.parsing_res_list[*].block_label` actual enumeration results collated for follow-up. `Paddle -> document.v1` adapter provide first stable mapping.
 
-## 1. 当前样本中观察到的 block_label
+## 1. Observed in current sample block_label
 
-从当前三页样本里枚举到的 label 如下：
+Enumerated from current 3-page sample. label Below:
 
-| block_label | 次数 | 说明 |
+| block_label | Count | Description |
 | --- | ---: | --- |
-| `text` | 25 | 普通正文段落 |
-| `paragraph_title` | 12 | 段落标题/小节标题 |
-| `header` | 6 | 页眉 |
-| `footer` | 6 | 页脚 |
-| `figure_title` | 4 | 图片标题或表格标题 |
-| `table` | 2 | 表格主体，内容是 HTML table |
-| `image` | 1 | 图片主体，内容通常是 `<img>` HTML |
-| `algorithm` | 1 | 代码/算法块 |
-| `display_formula` | 1 | 行间公式 |
-| `vision_footnote` | 1 | 视觉脚注/表注/附注 |
+| `text` | 25 | Body text |
+| `paragraph_title` | 12 | Paragraph Title/Subsection Title |
+| `header` | 6 | Header |
+| `footer` | 6 | Footer |
+| `figure_title` | 4 | Image title or table title |
+| `table` | 2 | table body, the content is HTML table |
+| `image` | 1 | Image subject; content typically `<img>` HTML |
+| `algorithm` | 1 | Code/Algorithm Block |
+| `display_formula` | 1 | Display formula |
+| `vision_footnote` | 1 | Visual footnote/Table Notes/Note |
 
-## 2. 实际样例摘录
+## 2. Actual sample excerpt
 
 ### `text`
-- 页 1 / block 4
-  正文中英混排的大段文字
-- 页 1 / block 6
-  带行内公式和解释文字的普通正文
+- page 1 / block 4
+  Mixed Chinese-English body text.
+- page 1 / block 6
+  Ordinary body text with inline formulas and explanatory text.
 
-建议：
-- 直接作为 normalized 的正文块主入口。
+Suggestion:
+- directly use as normalized Main body block entry.
 
 ### `paragraph_title`
-- 页 1 / block 3
+- page 1 / block 3
   `## 1. JSON Split Profile`
-- 页 1 / block 5
-  `### 1.1. 结构概览`
+- page 1 / block 5
+`### 1.1. ç»ææ¦è§`
 
-建议：
-- 作为标题类块，不要并入普通 `text`。
+Suggestion:
+- Heading block: do not merge with ordinary. `text`。
 
 ### `header`
 - `PaddleOCR JSON Split Research`
 - `March 31, 2026 · Provider: Paddle`
 
-建议：
-- 默认保留为结构块，但翻译主链路通常应跳过。
+Suggestion:
+- Default to keeping as structural blocks, but the main translation pipeline should usually skip.
 
 ### `footer`
 - `Confidential Draft`
 - `Page page.number / pages.count`
 
-建议：
-- 默认保留为结构块，翻译主链路通常也应跳过。
+Suggestion:
+- Default retain as structural blocks; main translation pipeline usually also skipped.
 
 ### `figure_title`
 - Figure caption
 - Table caption
 
-注意：
-- 这个 label 在 Paddle 样本里同时覆盖了“图片标题”和“表格标题”，不能简单等价成 `image_caption`。
+Note:
+- this label in Paddle Sample covers both "Figure Title" and "Table Title." Not equivalent. `image_caption`。
 
 ### `table`
-- 内容是完整 HTML table 字符串
+- Content complete. HTML table string
 
-建议：
-- 先保留原始 HTML 内容
-- 后续再决定是否把单元格进一步拆成结构化 table schema
+Suggestion:
+- Keep original first HTML Content
+- Decide later whether to further split cells into structured. table schema
 
 ### `image`
-- 内容通常是 `<img src=...>` 片段
+- Content is usually `<img src=...>` snippet
 
-建议：
-- 视为图片区主块，不要拿 `block_content` 当正文文本
+Suggestion:
+- Treat as the main block of the image area; do not take. `block_content` When body text
 
 ### `algorithm`
-- 当前样本里是代码块/命令行块
+- Current sample is a code block./Command block
 
-建议：
-- 先统一映射到 `code`
-- 后续如果 Paddle 里还有真正算法伪代码，再决定是否细分 `algorithm_block`
+Suggestion:
+- First map uniformly to. `code`
+- If later Paddle Contains real algorithm pseudocode. Decide later on subdivision. `algorithm_block`
 
 ### `display_formula`
-- 内容是 `$$ ... $$`
+- Content is `$$ ... $$`
 
-建议：
-- 直接映射到 `formula`
-- 保留原始 LaTeX/Math 字符串
+Suggestion:
+- Directly maps to `formula`
+- Preserve original LaTeX/Math string
 
 ### `vision_footnote`
-- 当前样本是 `表注：数值只是示意，不代表真实 benchmark 结论。`
+- Current sample is `è¡¨æ³¨ï¼æ°å¼åªæ¯ç¤ºæï¼ä¸ä»£è¡¨çå® benchmark ç»è®ºã`
 
-建议：
-- 先统一看成 footnote/caption_note 类
-- 这类字段常在图表附近出现，应保留相邻关系线索
+Suggestion:
+- First treat uniformly as footnote/caption_note class
+- Such fields often appear near charts; preserve adjacency clues.
 
-## 3. 首版 normalized_document_v1 映射建议
+## 3. First version. normalized_document_v1 Mapping suggestions
 
-这里先给“保守、稳定”的映射，不追求一次到位。
+First provide conservative, stable mapping. Do not aim for one-shot perfection.
 
-| Paddle block_label | normalized type | normalized sub_type | 备注 |
+| Paddle block_label | normalized type | normalized sub_type | Notes |
 | --- | --- | --- | --- |
-| `text` | `text` | `body` | 主体正文 |
-| `paragraph_title` | `text` | `heading` | 后续可根据编号/层级再细分 |
-| `header` | `text` | `header` | 通常跳过翻译 |
-| `footer` | `text` | `footer` | 通常跳过翻译 |
-| `figure_title` | `text` | `caption` | 先统一 caption，再通过邻接块判断图/表标题 |
-| `table` | `table` | `table_html` | 保留 HTML 原文 |
-| `image` | `image` | `image_body` | 不以文本逻辑处理 |
-| `algorithm` | `code` | `code_block` | 先统一到代码块 |
-| `display_formula` | `formula` | `display_formula` | 行间公式 |
-| `vision_footnote` | `text` | `footnote` | 图注/表注/脚注先统一入这一类 |
+| `text` | `text` | `body` | Body |
+| `paragraph_title` | `text` | `heading` | Refer later by number./Subdivide levels |
+| `header` | `text` | `header` | usually skip translation |
+| `footer` | `text` | `footer` | usually skip translation |
+| `figure_title` | `text` | `caption` | Glossary first. Terms to standardize? captionGraph traversal uses adjacency list. Simplify: adjacency matrix if dense graph, add when sparse graph./Table header |
+| `table` | `table` | `table_html` | retain original HTML text |
+| `image` | `image` | `image_body` | Text logic not used. |
+| `algorithm` | `code` | `code_block` | Unify to code blocks first |
+| `display_formula` | `formula` | `display_formula` | display formula |
+| `vision_footnote` | `text` | `footnote` | Caption/Table note/Footnotes centralized here. |
 
-## 4. 哪些字段需要额外保留到 raw trace
+## 4. Which fields need extra retention? raw trace
 
-建议每个 normalized block 都保留以下 provider trace：
+Suggest each normalized block all retain the following provider trace：
 
 - `provider = "paddle"`
 - `source_page_index`
 - `source_block_index`
 - `source_block_label`
-- `source_block_id`（如果有）
-- `source_group_id`（如果有）
+- `source_block_id`if any
+- `source_group_id` (if present)
 - `source_bbox`
 - `source_polygon`
 
-原因：
-- `figure_title` 需要靠邻接关系区分图标题还是表格标题
-- `vision_footnote` 后续可能要再分成 `table_footnote` / `image_footnote`
-- `table` 当前是 HTML 字符串，后续若做结构化拆表，需要追溯到原始块
+Reason:
+- `figure_title` Graph title vs table title. Adjacency matters. Check structure.
+- `vision_footnote` May need further splitting later. `table_footnote` / `image_footnote`
+- `table` Currently is HTML String. Later structured table splitting: trace to original block.
 
-## 5. 当前最值得先做的三件事
+## 5. 1. Define success metric. 2. Identify bottleneck. 3. Delete non-essentials.
 
-1. 先写 `block_label -> normalized type/sub_type` 的纯映射函数
-2. 先把 `figure_title` 和 `vision_footnote` 保守落到 `caption/footnote`
-3. 不要立刻把 `table` 和 `image` 深拆，先稳定把它们作为块保留下来
+1. First write `block_label -> normalized type/sub_type` pure mapping function of
+2. For `figure_title` and `vision_footnote`, conservatively fallback to `caption/footnote`
+3. Don't immediately deeply decompose `table` and `image`; first stably keep them as blocks.
 
-## 6. 当前样本暴露出的几个工程结论
+## 6. Engineering conclusions from current samples
 
-- Paddle 的 `figure_title` 明显是混合类标签，后面必须结合前后块关系判断“图标题/表格标题”。
-- `table` 和 `image` 的 `block_content` 更像“富文本或嵌入片段”，不能直接走普通正文抽取逻辑。
-- `algorithm` 目前更像代码块，不要单独再开一套复杂分支。
-- `display_formula` 单独有标签，这比 MinerU 更直接，应该优先利用。
+- Paddle's `figure_title` label is mixed. Infer 'chart title' or 'table title' from block context.
+- `table` and `image` `block_content` is more like rich text or embedded fragments; ordinary body extraction logic not applicable.
+- `algorithm` Currently is more like a code block, do not open a separate complex branch.
+- `display_formula` Separate tags; this is better than MinerU more direct, and should be prioritized.
 
-## 7. 建议的后续文件
+## 7. Suggested follow-up files
 
-如果下一步开始写 adapter，建议直接新增：
+If next step starts writing. adaptersuggest adding directly:
 
 - `paddle/block_labels.py`
-  只管 label 映射和标签判定
+  only responsible for label Mapping and Label Determination
 - `paddle/adapter.py`
-  只管 `json_full -> document.v1`
+  Go ahead `json_full -> document.v1`
 - `paddle/trace.py`
-  只管 provider raw trace 的落点
+only handle provider raw trace landing point
 
-这样后面遇到新 label，只改 `block_labels.py`，不会污染主 adapter。
+so that later when encountering new labelOnly change. `block_labels.py`, won't pollute the main adapter. adapter。

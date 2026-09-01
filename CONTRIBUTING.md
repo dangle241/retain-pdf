@@ -1,37 +1,37 @@
-# 贡献指南
+# Contribution Guide
 
-感谢你愿意参与 RetainPDF。这个项目包含 Rust API、数据库、Python OCR/翻译/渲染流水线、静态前端、桌面端和 Docker 交付。贡献时最重要的是：边界清楚、改动可验证、问题可复现。
+Thanks for participating. RetainPDFProject contains Rust APIDatabase.Python OCR/Translation/Rendering pipeline, static frontend, desktop, and Docker Deliver. Contributions: clear boundaries, verifiable changes, reproducible issues.
 
-## 贡献方向
+## Contribution Areas
 
-- 前端与桌面端：任务状态、对照阅读、术语表 UI、下载体验和 Electron bundle 同步。
-- Rust API：任务管理、图书馆接口、产物下载、事件流、reader、断点恢复和权限边界。
-- 数据库与持久化：job/artifact/event/glossary 记录、schema 兼容、旧数据恢复和存储路径。
-- Python 流水线：OCR 归一化、翻译一致性、公式保护、渲染、PDF 处理和失败诊断。
-- 专业测试：真实样本回归、边界用例、fixture、自动化脚本、性能基准和验收清单。
-- AI 辅助开发：推荐使用 Codex 或 Claude Code，按项目边界拆任务、生成测试、做代码审查和文档更新。
-- Docker、CI、文档和维护者发布流程。
+- Frontend and Desktop: Task Status, Side-by-Side Reading, Glossary. UIDownload experience and Electron bundle Sync.
+- Rust APITask Management, Library API, Artifact Download, Event Stream,reader, breakpoint recovery, and permission boundaries.
+- Database and Persistence:job/artifact/event/glossary Recordsschema Compatibility, old data recovery, and storage paths.
+- Python Pipeline:OCR Normalization, translation consistency, formula protection, renderingPDF Processing and failure diagnosis.
+- Professional Testing: real-sample regression, boundary cases,fixtureAutomated scripts performance benchmarks acceptance checklist
+- AI Development assistance: recommended for use. Codex or Claude CodeBreak tasks by project boundary, generate tests, perform code review, and update documentation.
+- Docker、CIDocumentation maintainer release process.
 
-## 子文档
+## Subdocument
 
-- [前端与桌面端贡献指南](doc/core/contributing/frontend.md)
-- [Rust API 贡献指南](doc/core/contributing/backend.md)
-- [数据库与持久化贡献指南](doc/core/contributing/database.md)
-- [Python 流水线贡献指南](doc/core/contributing/python-pipeline.md)
-- [测试贡献指南](doc/core/contributing/testing.md)
-- [AI 辅助开发指南](doc/core/contributing/ai-development.md)
-- [Issue、PR、代码风格与发布说明](doc/core/contributing/process-and-style.md)
+- [Frontend and Desktop Contribution Guide](doc/core/contributing/frontend.md)
+- [Rust API Contributing Guidelines](doc/core/contributing/backend.md)
+- [Database and Persistence Contribution Guide](doc/core/contributing/database.md)
+- [Python Pipeline Contribution Guide](doc/core/contributing/python-pipeline.md)
+- [Testing Contribution Guide](doc/core/contributing/testing.md)
+- [AI Auxiliary Development Guide](doc/core/contributing/ai-development.md)
+- [Issue、PR, Code Style and Release Notes](doc/core/contributing/process-and-style.md)
 
-建议同时阅读：
+See also:
 
 - [README](README.md)
-- [本地启动与配置](doc/core/api/local-dev.md)
-- [运行时存储结构](doc/core/api/storage.md)
-- [主线文档](doc/core/README.md)
+- [Local Startup and Configuration](doc/core/api/local-dev.md)
+- [Runtime Storage Structure](doc/core/api/storage.md)
+- [Main branch documentation](doc/core/README.md)
 
-## 本地最小启动
+## Local minimal startup
 
-后端：
+Backend:
 
 ```bash
 cd backend/rust_api
@@ -43,27 +43,27 @@ RUST_API_SCRIPTS_DIR="$(cd ../scripts && pwd)" \
 cargo run
 ```
 
-前端：
+Frontend:
 
 ```bash
 cd frontend
 python3 -m http.server 40001 --bind 0.0.0.0
 ```
 
-默认端口：
+Default port:
 
-- Rust API：`41000`
-- multipart 异步提交 API：`42000`
-- Web 前端：`40001`
+- Rust API:`41000`
+- multipart Async Submit API：`42000`
+- Web frontend: `40001`
 
-Docker 交付也默认使用同一组端口。如果本机已经启动 Docker Web，本地静态前端可以临时换成其他未占用端口；换端口只影响浏览器访问入口，不改变 Rust API 默认端口。
+Docker Delivery also uses the same ports by default. If the local machine has already started Docker WebLocal static frontend can temporarily switch to another unused port. Changing port only affects browser access entry, no change to. Rust API Default port.
 
-## 提交前最低要求
+## Minimum pre-commit requirements
 
-- 说明改了什么、为什么改、影响哪些模块。
-- 根据改动范围跑对应测试或检查。
-- 如果有检查没跑，在 PR 描述里说明原因。
-- 不提交本地密钥、token、真实用户文件、`data/db/jobs.db`、`data/jobs/*`、`tmp/*` 或大体积实验输出。
-- 改动 API、事件、数据库 schema、产物结构、模块边界或部署方式时，同步更新文档。
+- Explain what was changed, why, and which modules are affected.
+- Run corresponding tests or checks based on the scope of changes.
+- If any checks haven't run, in PR Explain the reason in the description.
+- Do not commit local keys.tokenReal user files`data/db/jobs.db`、`data/jobs/*`、`tmp/*` Or large-volume experiment output.
+- Changes APIEvent database schemaDocumentation update when build output structure, module boundaries or deployment method change.
 
-维护者发布、Docker 交付和线上运维流程不放在普通贡献者主线里，相关记录见 [运维与过程记录](doc/ops/README.md) 和 Docker 文档。
+Maintainer release, Docker delivery, and online ops not in regular contributor mainline. See [Ops and Process Records](doc/ops/README.md) and Docker docs.

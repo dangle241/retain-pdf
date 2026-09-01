@@ -1,23 +1,23 @@
-# Book Card 组件族
+# Book Card Component family
 
-## 边界
+## Boundary
 
-`book-card` 负责图书馆首页里的单本书卡片。它是一个组件族，外部代码应该从 `./book-card` 这个入口导入，不要直接依赖内部文件。
+`book-card` Responsible for the single book card on the library homepage. It is a component family; external code should import from `./book-card` Entry import. Do not directly depend on internal files.
 
-## 文件
+## Files
 
-- `book-card.tsx`：组合层，把 `LibraryBook` 转成卡片各部分需要的 props。
-- `book-card-shell.tsx`：可点击外壳、hover 效果和选中态。
-- `book-card-meta.tsx`：标题和作者区域的布局。
-- `book-status-badge.tsx`：旧状态标记组件，当前卡片不展示状态，保留给后续列表密度模式复用。
-- `index.ts`：组件族的公共出口。
+- `book-card.tsx`Composition layer, `LibraryBook` Convert to card section requirements. props。
+- `book-card-shell.tsx`Clickable shell,hover Effects and selected state.
+- `book-card-meta.tsx`Title and author area layout.
+- `book-status-badge.tsx`: Legacy status badge component; the current card does not show status, kept for potential future use in list density mode.
+- `index.ts`Common export for component family.
 
-## 规则
+## Rules
 
-- 产品文案和状态定义放在 `library-config.ts`。
-- 数据结构定义放在 `types.ts`。
-- 后续只要是书卡片自己的展示能力，就优先放在这个目录里。
-- 外部只导入 `BookCard`，内部小组件默认不对外暴露。
-- 点击卡片主体进入详情。
-- hover 封面中心出现眼睛按钮，点击眼睛进入对照阅读。
-- hover 封面右上角出现删除按钮，点击删除只触发删除回调，不打开详情。
+- Product copy and status definitions go in `library-config.ts`。
+- Place data structure definitions in `types.ts`。
+- Place all book card display capabilities in this directory going forward.
+- External import only `BookCard`Internal widgets not exposed by default.
+- Click the card body to view details
+- hover Eye button at cover center. Click for side-by-side reading.
+- hover Delete button appears in upper-right corner of cover. Clicking Delete triggers only the delete callback; does not open details.

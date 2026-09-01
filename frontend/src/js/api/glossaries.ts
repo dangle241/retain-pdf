@@ -9,7 +9,7 @@ export async function fetchGlossaries(apiPrefix) {
       items: [
         {
           glossary_id: "mock-glossary-quantum",
-          name: "Mock 量子化学术语",
+name: "Mock quantum chemistry terms",
           entry_count: 2,
           created_at: "",
           updated_at: "",
@@ -21,7 +21,7 @@ export async function fetchGlossaries(apiPrefix) {
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`读取术语表失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Failed to read glossary, please try again later.(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -29,13 +29,13 @@ export async function fetchGlossaries(apiPrefix) {
 export async function fetchGlossary(glossaryId, apiPrefix) {
   const normalizedGlossaryId = `${glossaryId || ""}`.trim();
   if (!normalizedGlossaryId) {
-    throw new Error("读取术语表失败: 缺少 glossary_id");
+throw new Error("Failed to read glossary: missing glossary_id");
   }
   if (isMockMode()) {
     void apiPrefix;
     return {
       glossary_id: normalizedGlossaryId,
-      name: normalizedGlossaryId === "mock-glossary-quantum" ? "Mock 量子化学术语" : "Mock 术语表",
+name: normalizedGlossaryId === "mock-glossary-quantum" ? "Mock quantum chemistry terms" : "Mock glossary",
       entry_count: 2,
       entries: [
         {
@@ -44,15 +44,15 @@ export async function fetchGlossary(glossaryId, apiPrefix) {
           level: "preserve",
           match_mode: "case_insensitive",
           context: "",
-          note: "保留英文",
+note: "Keep English",
         },
         {
           source: "density functional theory",
-          target: "密度泛函理论",
+target: "Density functional theory",
           level: "canonical",
           match_mode: "case_insensitive",
           context: "",
-          note: "固定译法",
+          note: "Fixed translation",
         },
       ],
     };
@@ -61,7 +61,7 @@ export async function fetchGlossary(glossaryId, apiPrefix) {
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`读取术语表详情失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Failed to read glossary details, please try again later.(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -81,7 +81,7 @@ export async function createGlossary(apiPrefix, payload) {
 export async function updateGlossary(apiPrefix, glossaryId, payload) {
   const normalizedGlossaryId = `${glossaryId || ""}`.trim();
   if (!normalizedGlossaryId) {
-    throw new Error("保存术语表失败: 缺少 glossary_id");
+throw new Error("Failed to save glossary: missing glossary_id");
   }
   if (isMockMode()) {
     void apiPrefix;
@@ -100,7 +100,7 @@ export async function updateGlossary(apiPrefix, glossaryId, payload) {
   });
   if (!resp.ok) {
     const text = await resp.text();
-    throw new Error(`保存术语表失败: ${resp.status} ${text}`);
+    throw new Error(`Failed to save glossary.: ${resp.status} ${text}`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -108,7 +108,7 @@ export async function updateGlossary(apiPrefix, glossaryId, payload) {
 export async function deleteGlossary(apiPrefix, glossaryId) {
   const normalizedGlossaryId = `${glossaryId || ""}`.trim();
   if (!normalizedGlossaryId) {
-    throw new Error("删除术语表失败: 缺少 glossary_id");
+throw new Error("Failed to delete glossary: missing glossary_id");
   }
   if (isMockMode()) {
     void apiPrefix;
@@ -120,7 +120,7 @@ export async function deleteGlossary(apiPrefix, glossaryId) {
   });
   if (!resp.ok) {
     const text = await resp.text();
-    throw new Error(`删除术语表失败: ${resp.status} ${text}`);
+    throw new Error(`Failed to delete glossary: ${resp.status} ${text}`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -128,11 +128,11 @@ export async function deleteGlossary(apiPrefix, glossaryId) {
 export async function exportGlossaryCsv(apiPrefix, glossaryId) {
   const normalizedGlossaryId = `${glossaryId || ""}`.trim();
   if (!normalizedGlossaryId) {
-    throw new Error("导出术语表失败: 缺少 glossary_id");
+throw new Error("Failed to export glossary: missing glossary_id");
   }
   if (isMockMode()) {
     void apiPrefix;
-    return new Response("source,target,note,level,match_mode,context\nHartree-Fock,,保留英文,preserve,case_insensitive,\n", {
+return new Response("source,target,note,level,match_mode,context\nHartree-Fock,,Keep English,preserve,case_insensitive,\n", {
       headers: {
         "content-type": "text/csv; charset=utf-8",
         "content-disposition": `attachment; filename="${normalizedGlossaryId}.csv"`,
@@ -144,7 +144,7 @@ export async function exportGlossaryCsv(apiPrefix, glossaryId) {
   });
   if (!resp.ok) {
     const text = await resp.text();
-    throw new Error(`导出术语表失败: ${resp.status} ${text || "unknown error"}`);
+    throw new Error(`Failed to export glossary: ${resp.status} ${text || "unknown error"}`);
   }
   return resp;
 }

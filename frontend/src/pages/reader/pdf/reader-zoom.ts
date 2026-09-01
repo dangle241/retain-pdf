@@ -1,20 +1,20 @@
-// 缩放百分比 = 相对「整个阅读区（shell）宽度」的占比，三种模式同一套数字：
+// Zoom percentage = proportion relative to "Entire reading area (shellWidth)". Three modes share same figures:
 //
-//   50%  → 页宽 ≈ 半个浏览器阅读区（对照时刚好铺满左/右一侧）
-//   100% → 页宽 ≈ 整个阅读区宽度（单栏全宽；对照时每侧横向溢出但页一样大）
+//   50%  â page width â half browser viewport (fills left pane during comparison/right side)
+//   100% â page width â full reading area width (single column full width; side-by-side: horizontal overflow each side, page size identical).
 //
-// 绝不能按「当前栏宽 × 百分比」再算一次，否则对照 50% 会变成整屏 25%。
+// Never recalculate using "Current column width Ã percentage"; otherwise, 50% in comparison becomes 25% of full screen.
 
 export const READER_ZOOM_MIN = 0.25;
 export const READER_ZOOM_MAX = 1;
 export const READER_ZOOM_STEP = 0.05;
-/** 默认 50%：半屏宽，对照两侧刚好铺满 */
+/** 默认 50%Default 50%: half-screen width, fits perfectly with side-by-side comparison. */
 export const READER_ZOOM_DEFAULT = 0.5;
 /** @deprecated */
 export const READER_ZOOM_SINGLE_DEFAULT = 0.5;
 export const READER_ZOOM_COMPARE_DEFAULT = 0.5;
 
-/** 栏内左右 padding 合计 */
+/** Total left/right padding within column */
 export const READER_PANE_PAD_X = 16;
 export const READER_PANE_FIT_GUTTER = 8;
 
@@ -24,7 +24,7 @@ export function defaultZoomForMode(_mode?: ReaderZoomMode | string): number {
   return READER_ZOOM_DEFAULT;
 }
 
-/** 内部 zoom 即「占 shell 全宽的比例」0.25–1 */
+/** Internal zoom is the "occupy shell full-width ratio" 0.25â1 */
 export function clampReaderZoom(value: number): number {
   if (!Number.isFinite(value)) {
     return READER_ZOOM_DEFAULT;
@@ -37,12 +37,12 @@ export function stepReaderZoom(current: number, direction: 1 | -1): number {
   return Math.round(next * 100) / 100;
 }
 
-/** UI 显示百分比 = zoom × 100（最大 100） */
+/** UI Display percentage = zoom × 100Max. 100） */
 export function zoomToDisplayPercent(zoom: number): number {
   return Math.round(clampReaderZoom(zoom) * 100);
 }
 
-/** UI 百分比 → zoom */
+/** UI percentage â zoom */
 export function displayPercentToZoom(percent: number): number {
   if (!Number.isFinite(percent)) {
     return READER_ZOOM_DEFAULT;
@@ -50,15 +50,15 @@ export function displayPercentToZoom(percent: number): number {
   return clampReaderZoom(percent / 100);
 }
 
-/** 对照半栏宽（仅布局用，不参与 zoom 百分比语义） */
+/** Match half-column width (layout only, excluded from zoom Percentage semantics */
 export function comparePaneWidth(shellWidth: number): number {
   const w = Number(shellWidth) || 0;
   return Math.max(160, Math.floor((w - 1) / 2));
 }
 
 /**
- * 目标容器可用内容宽（扣 padding）。
- * 这里的 containerWidth 应是「期望页宽对应的壳宽度」= shellWidth × zoom。
+ * Target container available content width (deduct padding）。
+* containerWidth here should be "shell width matching expected page width" = shellWidth Ã zoom.
  */
 export function fitContentWidth(containerWidth: number): number {
   const raw = Number(containerWidth) || 0;
@@ -67,21 +67,21 @@ export function fitContentWidth(containerWidth: number): number {
 }
 
 /**
- * 由 shell 全宽 + 全宽占比 zoom 得到绘制页宽。
- * 原文/译文/对照共用：同一 zoom → 同一页像素宽。
+* Get draw page width from shell full width + full-width ratio zoom.
+* Source/Translation/Shared: identical zoom â same page pixel width.
  */
 export function pageWidthFromShell(shellWidth: number, userZoom = READER_ZOOM_DEFAULT): number {
   const zoom = clampReaderZoom(userZoom);
-  // 先按占比得到目标宽，再扣 padding，保证 50% 正好是半屏内容宽
+// Calculate target width by ratio, then deduct padding to ensure 50% is exactly half-screen content width
   return fitContentWidth((Number(shellWidth) || 0) * zoom);
 }
 
 /**
- * @deprecated 易误解为「按栏宽缩放」。请用 pageWidthFromShell(shellWidth, zoom)。
- * 保留签名以免旧调用崩：把 first arg 当作 shell 半宽时行为与旧半栏 unit 不同。
+ * @deprecated Easily misinterpreted as「Scale by column width.」Please use pageWidthFromShell(shellWidth, zoom)。
+* Keep signature to prevent breaking old calls: first arg treated as shell half-width; behavior matches legacy half-column, but unit is different.
  */
 export function pageWidthForPane(shellOrPaneWidth: number, userZoom = READER_ZOOM_DEFAULT): number {
-  // 兼容：若误传半栏宽，×2 还原成 shell 近似值再算
+  // Compatibility: handle accidental half-width input.×2 restore to shell Approximation recalculated.
   return pageWidthFromShell(shellOrPaneWidth, userZoom);
 }
 

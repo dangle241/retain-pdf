@@ -139,13 +139,13 @@ def assert_parallel_status(report, events):
     combined = f"{card_text} {status_text} {report.get('ringLabel', '')} {report.get('ringValue', '')} {report.get('progressText', '')}"
     if report.get("workflowOpen") != "1" or report.get("statusHidden"):
         errors.append("status dialog did not open from the recent job card")
-    if "翻译中" not in card_text:
+if "Translating" not in card_text:
         errors.append("recent job card is not showing translation as the main stage")
-    if "渲染中" in card_text:
+    if "Rendering in progress." in card_text:
         errors.append("recent job card was overwritten by background render stage")
-    if "翻译" not in combined:
+if "Translation" not in combined:
         errors.append("status card is not showing translation content")
-    if "第 120/900 批" not in combined and "120/900" not in combined:
+if "Batch 120/900" not in combined and "120/900" not in combined:
         errors.append("status card did not preserve translation batch progress")
     if report.get("selectedStageKey") == "render":
         errors.append("status card selected render stage for background prewarm")

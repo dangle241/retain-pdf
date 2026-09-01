@@ -52,9 +52,9 @@ def _emit_paddle_poll_progress(
     page_total: int | None,
 ) -> None:
     current = page_total if state == "done" and page_total is not None else None
-    detail = f"Paddle 正在解析文件，共 {page_total} 页" if page_total else "Paddle 正在解析文件"
+detail = f"Paddle Parsing file, total {page_total} pages" if page_total else "Paddle is parsing file"
     if state == "done" and page_total:
-        detail = f"Paddle 解析完成，共 {page_total} 页"
+detail = f"Paddle Parsing complete, total {page_total} pages"
     emit_stage_progress(
         stage="ocr_processing",
         substage="ocr_processing",
@@ -152,8 +152,8 @@ def run_paddle_to_job_dir(
         emit_stage_transition(
             stage="ocr_processing",
             substage="ocr_processing",
-            message=f"OCR 正在解析，共 {page_total} 页",
-            stage_detail=f"OCR 正在解析，共 {page_total} 页",
+message=f"OCR parsing in progress, total {page_total} pages",
+stage_detail=f"OCR parsing, total {page_total} pages",
             provider="paddle",
             provider_stage="provider_processing",
             progress_current=None,

@@ -33,7 +33,7 @@ def test_build_translation_debug_index_keeps_core_item_fields() -> None:
                 "skip_reason": "",
                 "final_status": "translated",
                 "source_text": "This is a long English source sentence.",
-                "translated_text": "这是一句中文翻译。",
+                "translated_text": "This is English translation.",
                 "translation_diagnostics": {
                     "route_path": ["block_level", "direct_typst"],
                     "fallback_to": "",
@@ -191,7 +191,7 @@ def test_replay_translation_item_returns_result_without_mutating_payload(monkeyp
             return {
                 item["item_id"]: {
                     "decision": "translate",
-                    "translated_text": "这是重放后的翻译。",
+                    "translated_text": "This is the translation after replay.",
                     "final_status": "translated",
                     "translation_diagnostics": {
                         "route_path": ["block_level"],
@@ -207,7 +207,7 @@ def test_replay_translation_item_returns_result_without_mutating_payload(monkeyp
         assert result["job_id"] == "job-1"
         assert result["item_id"] == "p001-b001"
         assert result["policy_after"]["should_translate"] is True
-        assert result["replay_result"]["translated_text"] == "这是重放后的翻译。"
+assert result["replay_result"]["translated_text"] == "This is the translation after replay."
         assert result["replay_error"] is None
         reloaded = json.loads(payload_path.read_text(encoding="utf-8"))
         assert reloaded[0]["translated_text"] == ""
@@ -272,7 +272,7 @@ def test_replay_translation_item_redirects_pipeline_stdout_to_stderr(
         return {
             batch[0]["item_id"]: {
                 "decision": "translate",
-                "translated_text": "重放结果",
+                "translated_text": "Replay results.",
                 "final_status": "translated",
             }
         }
@@ -298,7 +298,7 @@ def test_replay_translation_item_redirects_pipeline_stdout_to_stderr(
         result = replay_module.replay_translation_item(Path("/tmp/job"), "p001-b001")
 
     captured = capsys.readouterr()
-    assert result["replay_result"]["translated_text"] == "重放结果"
+assert result["replay_result"]["translated_text"] == "Replay result"
     assert captured.out == ""
     assert "noisy policy log" in captured.err
     assert "noisy translate log" in captured.err
@@ -363,7 +363,7 @@ def test_replay_translation_item_recovers_env_api_key_from_job_db(monkeypatch) -
         return {
             "p001-b001": {
                 "decision": "translate",
-                "translated_text": "恢复了数据库里的 key。",
+                "translated_text": "Restored from DB key。",
                 "final_status": "translated",
             }
         }
@@ -393,7 +393,7 @@ def test_replay_translation_item_recovers_env_api_key_from_job_db(monkeypatch) -
     result = replay_module.replay_translation_item(Path("/tmp/job"), "p001-b001")
 
     assert seen["api_key"] == "db-recovered-key"
-    assert result["replay_result"]["translated_text"] == "恢复了数据库里的 key。"
+assert result["replay_result"]["translated_text"] == "Recovered the key from the database."
 
 
 def test_replay_translation_case_artifact_uses_frozen_page_payload(monkeypatch) -> None:
@@ -491,7 +491,7 @@ def test_replay_translation_case_artifact_uses_frozen_page_payload(monkeypatch) 
             return {
                 batch[0]["item_id"]: {
                     "decision": "translate",
-                    "translated_text": "冻结输入回放成功。",
+                    "translated_text": "Input playback frozen.",
                     "final_status": "translated",
                 }
             }
@@ -516,4 +516,4 @@ def test_replay_translation_case_artifact_uses_frozen_page_payload(monkeypatch) 
         assert seen["api_key"] == "artifact-key"
         assert seen["item_id"] == "p001-b001"
         assert result["job_id"] == "job-artifact"
-        assert result["replay_result"]["translated_text"] == "冻结输入回放成功。"
+assert result["replay_result"]["translated_text"] == "Frozen input replay succeeded."

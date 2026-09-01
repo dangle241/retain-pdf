@@ -1062,7 +1062,7 @@ def test_render_prewarm_fingerprint_tracks_translated_text_changes() -> None:
 
         first_payload = _translated_page_payload()
         second_payload = _translated_page_payload()
-        second_payload[0][0]["protected_translated_text"] = "另一版译文"
+        second_payload[0][0]["protected_translated_text"] = "another version of the translation"
 
         first = build_render_prewarm_fingerprint(
             source_pdf_path=source_pdf,
@@ -1137,8 +1137,8 @@ def test_background_page_specs_manifest_fails_closed_on_bad_block() -> None:
                         "background_rect": [10.0, 20.0, 150.0, 60.0],
                         "content_rect": ["bad"],
                         "content_kind": "markdown",
-                        "content_text": "译文",
-                        "plain_text": "译文",
+"content_text": "translation",
+"plain_text": "translation",
                         "math_map": [],
                         "font_size_pt": 10.0,
                         "leading_em": 0.56,

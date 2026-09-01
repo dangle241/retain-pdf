@@ -1,43 +1,43 @@
-# MinerU 集成说明
+# MinerU Integration notes
 
-这一层只负责 MinerU 接入，不负责翻译策略，也不负责 PDF 渲染。
+This layer is only responsible for MinerU access, not responsible for translation strategy, nor PDF rendering.
 
-如果你现在关注的是“外部 OCR API 应该如何独立抽象，而不是耦合到当前工作流里”，先读：
+If you are currently focusing on "external OCR API How to abstract independently, not couple to current workflow. Read first:
 
 - `scripts/services/ocr_provider/README.md`
 
-`services/mineru/` 只是 MinerU 这个 provider 的具体实现。
+services/mineru/ is the specific implementation of the MinerU provider.
 
-## 作用边界
+## Scope boundary
 
-- 向 MinerU 提交任务
-- 查询任务状态
-- 下载并解包 MinerU 结果
-- 在标准 job root 下整理 MinerU provider 产物，主要写入 `source/`、`ocr/unpacked/` 和 `ocr/normalized/`
-- 保留 raw `layout.json` 供 adapter、调试和回溯使用
-- 产出统一中间层 `document.v1.json`
+- Submit tasks to MinerU
+- Query task status
+- Download and unpack MinerU results
+- In the standard job root, organize MinerU provider primary write output source/, ocr/unpacked/, and ocr/normalized/
+- Keep raw layout.json for adapter debug and trace use.
+- Produce a unified middleware layer. `document.v1.json`
 
-这里不做的事情：
+Not done here:
 
-- 不做 OCR 后处理
-- 不做翻译
-- 不做 PDF 渲染
-- 不决定 `fast/sci/precise` 的翻译策略
+- Do not do OCR post-processing
+- Do not do translation
+- Do not do PDF rendering
+- Do not decide the fast/sci/precise translation strategy.
 
-## 推荐入口
+## Recommended entry points
 
 - `scripts/entrypoints/run_provider_case.py`
-  本地人工使用时优先走这个通用入口名。它是中性入口名，不把 provider 名字写死。
+  When used locally by humans, prioritize this generic entry name. It is a neutral entry name, does not provider hardcoded names.
 - `mineru_pipeline.py`
-  `entrypoints/run_provider_case.py` 背后的稳定实现。
+  `entrypoints/run_provider_case.py` Underlying stable implementation.
 - `mineru_job.py`
-  只做解析和解包，适合先拿 MinerU 结果再手动接翻译。
+  Only parse and unpack; suitable to take first. MinerU result and then manually connect translation.
 - `mineru_api.py`
-  最底层 API 调用封装，只在需要直接调 MinerU 接口时使用。
+  Bottom API Encapsulate calls; call directly only when necessary. MinerU Use when interfacing.
 - `scripts/devtools/tools/mineru_api_example.py`
-  最小示例，适合调通接口和查看返回结构。
+  Minimal example. Use to test API connectivity and inspect response structure.
 
-## 目录结构
+## Directory structure
 
 - `<job-root>/source`
 - `<job-root>/ocr`
@@ -46,79 +46,79 @@
 - `<job-root>/artifacts`
 - `<job-root>/logs`
 
-## 默认约定
+## Default convention
 
-- MinerU 阶段会同时产出：
+- MinerU The phase produces concurrently:
   - `ocr/unpacked/layout.json`
   - `ocr/normalized/document.v1.json`
   - `ocr/normalized/document.v1.report.json`
-- 当前翻译/渲染主链路默认要求并优先使用 `ocr/normalized/document.v1.json`
-- `ocr/unpacked/layout.json` 保留给适配器、调试和回溯，不再作为主链路的隐式 fallback
-- `content_list_v2.json` 目前仅用于实验和适配，不是主路径
-- 如果只想做 provider / defaults / validation 摘要展示，优先读取 `document.v1.report.json`
+- Provide source text./Main render pipeline defaults require and prioritize. `ocr/normalized/document.v1.json`
+- `ocr/unpacked/layout.json` Reserved for adapters, debugging, and backtracking; no longer implicit in the main path. fallback
+- `content_list_v2.json` Currently for experiment and adaptation only, not the main path.
+- If you only want to provider / defaults / validation Show summary, read first. `document.v1.report.json`
 
-职责拆分：
+Responsibility Breakdown:
 
 - `document_v1.py`
-  只负责 MinerU 的 `layout.json -> document.v1.json`
+Only responsible for MinerU's layout.json -> document.v1.json
 - `artifacts.py`
-  只负责 MinerU 产物路径和 provider 内部文件组织
+Only responsible for MinerU artifact path and provider internal file organization
 - `contracts.py`
-  只负责 MinerU provider 私有产物文件名、目录名
+Only responsible for MinerU provider private artifact filenames and directory names
 - `job_flow.py`
-  只负责任务编排、下载解包和持久化
+  Only responsible for task orchestration, download and extraction, and persistence.
 - `mineru_pipeline.py`
-  只负责把规范化后的 OCR 输入送进翻译/渲染主链路
+  Only handles the normalized. OCR feed input into translation/Main Rendering Pipeline
 
-注意：
+Note:
 
-- 主线 `pipeline_summary.json`、stdout labels、source-json 选择规则都已经收口到 `services/pipeline_shared/`
-- `services/mineru/` 不再承担任何共享规范壳
+- Main Story `pipeline_summary.json`、stdout labels、source-json selection rules have all been consolidated into `services/pipeline_shared/`
+- `services/mineru/` No longer bear any shared spec shell.
 
-现在这条链路已经通过 `services/document_schema/adapters.py` 暴露为统一 adapter，
-也就是 MinerU 不再直接把自己的原始结构泄漏到翻译主线。
+Link passed. `services/document_schema/adapters.py` Expose as unified adapter，
+That is, MinerU no longer leaks raw structure into the translation mainline.
 
-## 与主流程的关系
+## Relationship to main flow
 
-典型链路是：
+Typical chain:
 
-1. `mineru_job.py` 或 `mineru_pipeline.py` 向 MinerU 提交 PDF
-2. 轮询直到任务完成
-3. 下载并解包结果
-4. 把原始 PDF 复制到 `source`
-5. 把解析结果放到 `ocr/unpacked`
-6. 同时生成 `ocr/normalized/document.v1.json`
-7. 后续由 `runtime/pipeline` 调 `services/translation` 和 `services/rendering` 完成剩余流程
+1. mineru_job.py or mineru_pipeline.py submits the PDF to MinerU
+2. Poll until task completes.
+3. Download and unpack result
+4. Copy the original PDF to source
+5. Place parsing result into `ocr/unpacked`
+6. Generate simultaneously `ocr/normalized/document.v1.json`
+7. Continued by runtime/pipeline calling services/translation and services/rendering to complete remaining steps.
 
-当前 `pipeline_summary.json` 里还会写入一份 `schema_validation`，用于快速确认
-规范化文档是否满足当前 `document.v1` 契约；同时会带上 `normalization_report`
-和 `normalization_summary`，避免外层再次自己解析 raw OCR。
+Currently, a copy of pipeline_summary.json will also be written inside schema_validation for quick confirmation.
+Does the normalized document meet current requirements? `document.v1` Contract; also includes. `normalization_report`
+and normalization_summary to avoid outer layer re-parsing raw OCR.
 
-也就是说，这一层的职责是“把 PDF 变成主链路可消费的 OCR 输入”，而不是承担后续业务。
+That is, this layer's responsibility is to "take" PDF Make it consumable by the main pipeline. OCR "Input", not handle follow-up operations.
 
 ## Provider Stage Spec
 
-`provider.stage.v1` 现在主要保留给本地 provider-case helper 和兼容路径：
+`provider.stage.v1` Now primarily reserved for local. provider-case helper Compatibility paths:
 
 `python -u scripts/entrypoints/run_provider_case.py --spec <job_root>/specs/provider.spec.json`
 
-生产主链中，Rust API 负责 provider-backed OCR flow：按请求中的 OCR provider 分发 MinerU / Paddle transport，产出 provider raw 结果后再进入 normalize、translate 和 render 阶段。MinerU provider 代码仍只维护 MinerU API 语义和 raw 产物整理，不定义上层 book workflow contract。
+In the production main chain, Rust API is responsible for provider-backed OCR flow per the request. OCR provider dispatches MinerU/Paddle transport, produces provider raw input after results. normalize, translate, and render phases. MinerU provider only maintains MinerU API semantics and raw artifact organization; does not define upper-layer book workflow contract.
 
-安全约定：
+Security Conventions:
 
-- MinerU token 不直接落盘到 spec 或 job artifact
-- 兼容 provider spec 中使用 `credential_ref=env:RETAIN_MINERU_API_TOKEN`
-- 翻译 key 同样使用 `credential_ref=env:RETAIN_TRANSLATION_API_KEY`
+- Do not write MinerU token directly to disk spec or job artifact
+- Compatible provider spec use: credential_ref=env:RETAIN_MINERU_API_TOKEN
+- Translation key also uses credential_ref=env:RETAIN_TRANSLATION_API_KEY
 
-兼容说明：
+Compatibility notes:
 
-- 老任务目录如果还是 `originPDF/jsonPDF/transPDF/typstPDF`，当前后端会直接拒绝详情/下载接口，请重新跑任务
+- If the old task directory still has originPDF/jsonPDF/transPDF/typstPDF, the current backend will directly reject detail/download API rerun tasks.
 
-## 协作规矩
+## Collaboration rules
 
-如果 OCR 这块单独分人维护，这里只负责“拿到 provider 结果，并把它整理成主链路可消费的 OCR 输入”。
+If OCR this part is maintained separately by assigned personnel; here we are only responsible for 'obtaining' provider results and structuring them for main pipeline consumption as OCR input.
 
-- 允许在这里改 provider API 接入、下载解包、任务目录整理和 provider 侧兼容
-- 不要在这里直接补翻译规则、术语逻辑或 PDF 渲染逻辑
-- 如果发现下游需要的字段不够，优先通过 `document_schema` 提升成稳定字段，不要把 raw provider 字段直接泄漏给 translation / rendering
-- 如果改了 OCR 产物目录约定、stdout 标签或主链路输入位置，必须同步更新 `document_schema`、`runtime/pipeline` 和对应测试
+- Allow editing here provider API Access, download and unpack, organize task directories, and provider Side Compatibility
+- Do not directly add translation rules, terminology logic, or PDF Rendering logic
+- If downstream required fields are insufficient, prioritize pass-through. `document_schema` Promote to stable field; do not raw provider Fields directly exposed to translation / rendering
+- If changed OCR Artifact directory conventionsstdout Tag or main chain input location must update synchronously. `document_schema`、`runtime/pipeline` and corresponding tests

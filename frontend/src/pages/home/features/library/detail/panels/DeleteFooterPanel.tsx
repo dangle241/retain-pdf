@@ -1,4 +1,4 @@
-// 右栏：错误提示 + 删除确认。
+// Right column: error message + Delete confirmation.
 
 import { cn } from "@/lib/utils";
 
@@ -24,7 +24,7 @@ export function DeleteFooterPanel({ error, confirmingDelete, busy, onDelete }) {
             confirmingDelete && "font-semibold",
           )}
         >
-          {confirmingDelete ? "确认删除这本书？" : "删除"}
+          {confirmingDelete ? "Delete this book?" : "删除"}
         </button>
       </div>
     </>

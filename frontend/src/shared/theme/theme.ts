@@ -1,5 +1,5 @@
-// 主题皮肤运行时 API
-// 注册表：./registry.ts · 文档：docs/theme-system/
+// Theme skin runtime API
+// Registry: ./registry.ts Â· Docs: docs/theme-system/
 
 import {
   DEFAULT_THEME_ID,
@@ -29,7 +29,7 @@ export {
   type ThemeSeries,
 } from "./registry.js";
 
-/** 兼容旧 import 名 */
+/** Compatible with old import names */
 export const THEME_IDS = listThemes().map((t) => t.id);
 export const THEME_META = Object.fromEntries(
   listThemes().map((t) => [t.id, { id: t.id, label: t.label, description: t.description }]),
@@ -56,7 +56,7 @@ export function getTheme(): ThemeId {
   return getStoredTheme();
 }
 
-/** 写入 storage + <html data-theme>，并广播事件 */
+/** Write to storage + <html data-theme> broadcast event */
 export function setTheme(theme: ThemeId) {
   const next = isThemeId(theme) ? theme : DEFAULT_THEME_ID;
   try {
@@ -66,7 +66,7 @@ export function setTheme(theme: ThemeId) {
   }
   if (typeof document !== "undefined") {
     document.documentElement.dataset.theme = next;
-    // 深色皮肤可给 body 一个 class，方便个别组件写 .theme-dark 特例
+// Dark skin available body class `ponytail:` per-component write hook. Skip: custom store. Add when: shared state grows. .theme-dark special case
     const def = getThemeDefinition(next);
     document.documentElement.dataset.themeGroup = def?.group || "light";
     document.documentElement.classList.toggle("theme-dark", def?.group === "dark");
@@ -83,7 +83,7 @@ export function setTheme(theme: ThemeId) {
   return next;
 }
 
-/** 入口最顶部调用，减少换肤 FOUC */
+/** Call at entry top. Reduce theme switching. FOUC */
 export function bootTheme() {
   return setTheme(getStoredTheme());
 }

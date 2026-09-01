@@ -16,7 +16,7 @@ export interface RecentJobsState {
   items: LibraryJobItem[];
 }
 
-/** 兼容旧扁平字段名的初始态 */
+/** Initial state compatible with old flat field names */
 export type RecentJobsInitialState = Partial<RecentJobsState> & {
   recentJobsOffset?: number;
   recentJobsHasMore?: boolean;
@@ -155,9 +155,9 @@ export function createRecentJobsStore(
           }),
         };
       },
-      // Soft reset：只重置分页游标，保留当前 items。
-      // 旧实现 items:[] 会让 silent/全量 reload 在请求返回前整格变空（主页闪烁根因）。
-      // 新数据到齐后由 setItems / commitRecentJobsEmpty 原子替换。
+      // Soft resetReset pagination cursor only, keep current items. items。
+      // Legacy implementation items:[] Will cause silent/Full reload Grid blanks pre-response (homepage flicker root cause).
+      // After new data arrives setItems / commitRecentJobsEmpty Atomic replacement.
       resetPagination(currentState) {
         return {
           ...currentState,

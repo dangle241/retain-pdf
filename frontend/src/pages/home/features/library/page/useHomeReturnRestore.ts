@@ -1,6 +1,6 @@
-// 从阅读器返回主页后：恢复 tab 滚动位置。
-// - bfcache（pageshow.persisted）：DOM 完好，清掉 pending 即可
-// - 普通 reload：列表有数据后再 apply scroll（避免高度为 0 时写 scrollTop 无效）
+// Restore state on return to home from reader tab Scroll position.
+// - bfcache (pageshow.persisted): DOM Clear cache. pending is sufficient
+// - Normal reloadafter list has data apply scroll(avoid height being 0 Write time scrollTop Invalid)
 
 import { useEffect, useRef } from "react";
 import {
@@ -26,12 +26,12 @@ export function readInitialLibraryTabFromReturn(): string {
 }
 
 /**
- * @param ready 图书馆列表已有内容（或合集/收藏视图已挂载）时再恢复滚动
+ * @param ready Library list populated (or collection/Restore scroll after favorites view mounted.
  */
 export function useHomeReturnRestore(ready: boolean) {
   const restoredRef = useRef(false);
 
-  // bfcache：整页从缓存唤起，滚动本来就在，丢掉 pending 避免二次跳动
+  // bfcachebfcache: page restored from cache, scroll position preserved, discard pending Prevent double jump
   useEffect(() => {
     function onPageShow(event: PageTransitionEvent) {
       if (event.persisted) {
@@ -51,7 +51,7 @@ export function useHomeReturnRestore(ready: boolean) {
       restoredRef.current = true;
       return;
     }
-    // 无有效滚动也清掉，避免脏数据
+    // Clear invalid scroll to prevent stale data.
     if (
       state.libraryScrollTop <= 0
       && state.panelScrollTop <= 0
@@ -66,11 +66,11 @@ export function useHomeReturnRestore(ready: boolean) {
     state = consumeHomeReturnState();
     if (!state) return;
 
-    // 双 rAF：等布局 / 图片占位后再设 scrollTop
+// Double rAF wait for layout / Set image placeholder first. scrollTop
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         applyHomeReturnScroll(state!);
-        // 列表异步增高时再补一次
+        // Re-append on async list height increase.
         window.setTimeout(() => applyHomeReturnScroll(state!), 80);
         window.setTimeout(() => applyHomeReturnScroll(state!), 320);
       });

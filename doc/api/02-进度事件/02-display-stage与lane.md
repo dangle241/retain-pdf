@@ -1,21 +1,21 @@
-# display_stage 与 lane
+# display_stage and lane
 
 ## display_stage
 
-`display_stage` 是前端展示层稳定大阶段。
+`display_stage` Stable major phase of the front-end presentation layer.
 
-允许值：
+Allowed values:
 
 - `ocr`
 - `translation`
 - `render`
 - `done`
 
-它和后端内部 `stage` 不同。前端主状态不要直接使用内部 `stage`。
+It and the backend internals. `stage` Frontend main state not use internal directly. `stage`。
 
 ## stage
 
-`stage` 是后端内部阶段名，例如：
+`stage` Backend internal phase name, e.g.:
 
 - `ocr_processing`
 - `translating`
@@ -23,11 +23,11 @@
 - `saving`
 - `failed`
 
-它用于诊断和日志归类，不保证适合直接作为 UI 大阶段。
+Used for diagnosis and log classification; not guaranteed suitable for direct use as UI Major Phase.
 
 ## substage
 
-`substage` 是机器可读的小阶段，例如：
+`substage` Machine-readable substage, e.g.:
 
 - `ocr_upload`
 - `ocr_processing`
@@ -43,12 +43,12 @@
 
 ## lane
 
-`lane` 用于解决“翻译和渲染预处理同步进行”的显示问题。
+`lane` Resolves display issue where translation and rendering preprocessing run simultaneously.
 
-- `main`: 当前任务主线。
-- `background`: 后台辅助阶段。
+- `main`: Current task main line.
+- `background`: Backend auxiliary phase.
 
-例子：
+Example:
 
 ```json
 {
@@ -68,4 +68,4 @@
 }
 ```
 
-前端应把第一条作为主状态，把第二条作为后台准备状态。
+Frontend should treat the first as primary status and the second as background ready status.

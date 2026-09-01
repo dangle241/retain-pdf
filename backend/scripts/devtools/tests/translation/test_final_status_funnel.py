@@ -25,15 +25,15 @@ def test_normal_transitions_leave_no_breadcrumb() -> None:
     item: dict = {}
 
     set_final_status(item, FAILED_STATUS)  # pending -> failed
-    set_final_status(item, TRANSLATED_STATUS)  # failed -> translated(修复链拉回)
-    set_final_status(item, KEPT_ORIGIN_STATUS)  # translated -> kept_origin(策略收口)
+    set_final_status(item, TRANSLATED_STATUS)  # failed -> translated(Fix Chain Pullback)
+    set_final_status(item, KEPT_ORIGIN_STATUS)  # translated -> kept_origin(Strategy finalization)
 
     assert item["final_status"] == KEPT_ORIGIN_STATUS
     assert "translation_diagnostics" not in item
 
 
 def test_demoting_translated_to_failed_records_breadcrumb_but_still_writes() -> None:
-    # v1 契约:只观测不拦截。违规照常写入,但必须留下可观测的面包屑。
+# v1 contract:Observe only, no intercept. Write violations normally.,Must leave observable breadcrumbs.
     item = {"final_status": TRANSLATED_STATUS}
 
     set_final_status(item, FAILED_STATUS)
@@ -80,11 +80,11 @@ def test_final_status_violation_is_pure_check() -> None:
 
 
 def test_policy_helpers_route_through_funnel() -> None:
-    # mark_translation_failed_policy_state 打在已译 item 上 = 真实的降级场景,
-    # 走漏斗后必须留面包屑;mark_policy_skip 的正常收口不留。
+    # mark_translation_failed_policy_state Marked as translated. item on = Real degradation scenarios,
+    # Must leave breadcrumbs after funnel.;mark_policy_skip Normal closure not retained.
     translated_item = {
         "final_status": TRANSLATED_STATUS,
-        "translated_text": "已有译文",
+        "translated_text": "translation already exists",
     }
     mark_translation_failed_policy_state(translated_item)
     assert translated_item["final_status"] == FAILED_STATUS

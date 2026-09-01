@@ -1,52 +1,52 @@
-# RetainPDF AI Runtime（设计文档索引）
+# RetainPDF AI RuntimeDesign doc index.
 
-**状态：** 设计草案（C 架构 + B Session/压缩）  
-**日期：** 2026-07-21  
-**代码现状：** `backend/ai_service` 为无状态薄循环（`RetrievalAgent` + `ToolRegistry`）  
-**产品入口：** 阅读器整本问答 → Rust 代理 `POST /api/v1/ai/ask` → retainpdf-ai `:41100`
+**Status:** Design draft (C Architecture + B Session/Compress
+**Date:** 2026-07-21
+**Current code state:** `backend/ai_service` For stateless thin loop (`RetrievalAgent` + `ToolRegistry`）  
+**Product entry point:** Reader full-book Q&A. → Rust Proxy `POST /api/v1/ai/ask` → retainpdf-ai `:41100`
 
 ---
 
-## 文档
+## Documentation
 
-| 文档 | 内容 |
+| Document | Content |
 |------|------|
-| **[AI_RUNTIME.md](./AI_RUNTIME.md)** | 目标架构：Transport / Session / Orchestrator / Runtime / Skills / Evidence |
-| **[SESSION_AND_MEMORY.md](./SESSION_AND_MEMORY.md)** | 多轮会话协议、上下文压缩、API 与数据形状（B 的详细草案） |
-| **[SKILLS.md](./SKILLS.md)** | Skill 包格式、与 Tool 的边界、首个 `literature-qa` 示例 |
+| **[AI_RUNTIME.md](./AI_RUNTIME.md)** | Target architecture:Transport / Session / Orchestrator / Runtime / Skills / Evidence |
+| **[SESSION_AND_MEMORY.md](./SESSION_AND_MEMORY.md)** | Multi-turn session protocol, context compression,API Data shape mismatch.B detailed draft) |
+| **[SKILLS.md](./SKILLS.md)** | Skill Package format, Tool boundary, and first `literature-qa` example |
 
 ---
 
-## 一句话目标
+## One-sentence goal
 
-> **AI 服务只做编排；Rust 管数据与权限；工具形状与主流 SDK 同构；Skills / Memory / Multi-agent 可插拔挂上，不必推倒重写。**
+> **AI Service orchestrates only.Rust Manage data & permissions; tool shape aligns with mainstream SDK IsomorphicSkills / Memory / Multi-agent Plugin architecture enables incremental integration, avoiding full rewrite.**
 
 ---
 
-## 与现状的关系
+## Relationship to current state
 
 ```
-现状（MVP）
-  POST /v1/ask → RetrievalAgent 裸循环 → 4 个 tools → answer + citations
+Current status（MVP）
+POST /v1/ask â RetrievalAgent Bare loop â 4 tools â answer + citations
 
-目标（可扩展 runtime）
+Goal (Extensible) runtime）
   POST /v1/runs  → Orchestrator
-                    ├─ Session/Memory（窗口 + 摘要 + evidence 包）
+ââ Session/Memory(Window) + Summary + evidence Package)
                     ├─ Skill(s)（literature-qa / …）
-                    ├─ Agent loop(s)（检索 / 分析 / 可选 critic）
-                    └─ Evidence（锚点、图、可跳转引用）
+ââ Agent loop(s)(Search) / Analysis / Optional critic)
+                    └─ Evidence(anchors, figures, jump links)
 ```
 
-迁移策略：默认 skill 仍是今天的整本检索问答；新能力以 skill/tool 增加，**不先绑死** LangGraph/Crew 等重框架。
+Migration strategy: default skill Still today's full-book retrieval Q&A; new capabilities as skill/tool Add**Don't hardcode binding.** LangGraph/Crew Equal-weight framework.
 
 ---
 
-## 实施顺序（建议）
+## Implementation order (suggested)
 
-1. **文档冻结接口** ✅（C + B 草案）  
-2. **Session 贯通（B1）** ✅ auto-create + 前端粘性 + done 回传  
-3. **Memory 压缩（B2）** ✅ 窗口 + extractive 摘要 + SSE `compress`  
-4. Skill 加载器 + 收口 `literature-qa`  
-5. Orchestrator + 第二 agent（可选）  
+1. **Freeze document API** ✅（C + B Draft  
+2. Session Integration (B1) ✅ auto-create + Frontend stickiness + done callback
+3. Memory Compress (B2) ✅ window + extractive summary + SSE compress
+4. Skill Loader + Finalize `literature-qa`
+5. Orchestrator + Second agent(Optional)  
 
-每步都应可单独合并、可回滚，不阻断现有 `/v1/ask`。
+Each step independently mergeable, revertible, non-blocking. `/v1/ask`。

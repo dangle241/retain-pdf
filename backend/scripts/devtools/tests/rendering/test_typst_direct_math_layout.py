@@ -73,7 +73,7 @@ from devtools.tests.rendering_support.page_specs import sample_page_spec as _pag
 def test_direct_math_layout_shrinks_font_to_fit_rect() -> None:
     font = fitz.Font(fontfile=str(fonts.DEFAULT_FONT_PATH))
     rect = fitz.Rect(0, 0, 90, 30)
-    markdown_text = "观察到 $\\mathrm{Ph(i-PrO)SiH_2}$ (6) 的消耗速率快于其他硅烷"
+    markdown_text = "Observed $\\mathrm{Ph(i-PrO)SiH_2}$ (6) Consumption rate higher. Optimize."
 
     tokens = _build_direct_draw_tokens(markdown_text, font)
     font_size, placements = _fit_segment_layout(rect, tokens, font)
@@ -86,7 +86,7 @@ def test_direct_math_layout_shrinks_font_to_fit_rect() -> None:
 def test_direct_math_layout_keeps_formula_token_atomic_on_wrap() -> None:
     font = fitz.Font(fontfile=str(fonts.DEFAULT_FONT_PATH))
     rect = fitz.Rect(0, 0, 80, 80)
-    markdown_text = "前文 $\\mathrm{Ph(i-PrO)SiH_2}$ 后文"
+    markdown_text = "Previous $\\mathrm{Ph(i-PrO)SiH_2}$ Next"
 
     tokens = _build_direct_draw_tokens(markdown_text, font)
     _font_size, placements = _fit_segment_layout(rect, tokens, font)
@@ -105,14 +105,14 @@ def test_suspicious_ocr_skip_detector_does_not_drop_continuation_direct_typst_bl
             "continuation_group": "cg-002-003",
             "translation_unit_kind": "group",
             "math_mode": "direct_typst",
-            "render_protected_text": "阴离子交叉反应中，醇类并不仅仅是作为反应介质或质子源来周转催化剂。",
+            "render_protected_text": "In anionic crossover reactions, alcohols are not merely reaction media or proton sources to turn over the catalyst.",
             "translation_unit_protected_source_text": "A" * 1200,
         },
         {
             "item_id": "p003-b001",
             "block_type": "text",
             "bbox": [56, 148, 301, 226],
-            "render_protected_text": "下一段",
+            "render_protected_text": "next paragraph",
             "translation_unit_protected_source_text": "B" * 20,
         },
     ]
@@ -132,7 +132,7 @@ def test_suspicious_ocr_skip_detector_does_not_drop_continuation_direct_typst_bl
 
 
 def test_direct_typst_continuation_split_keeps_inline_math_atomic() -> None:
-    text = "前文 观察到 $\\mathrm{Ph(i-PrO)SiH_2}$ (6) 的消耗速率快于其他硅烷，后文。"
+text = "Earlier text observed $\\mathrm{Ph(i-PrO)SiH_2}$ (6) consumption rate faster than other silanes, later in the text."
     chunks = split_protected_text_for_boxes(
         text,
         [],
@@ -150,9 +150,9 @@ def test_preserved_line_split_keeps_direct_typst_inline_math_atomic() -> None:
     from services.rendering.layout.payload.line_structure import split_text_by_source_line_weights
 
     text = (
-        r"a. $ \text{H}^{79}\text{Br} $ 或 $ \text{D}^{80}\text{Br} $　"
-        r"b. $ \text{C}=\text{N} $ 或 $ \text{C}\equiv\text{N} $　"
-        r"c. $ X^{1}\Sigma^+ $ CO（键长 1.128 Å）或 $ I^{1}\Sigma^- $ CO（键长 1.391 Å）"
+r"a. $ \text{H}^{79}\text{Br} $ or $ \text{D}^{80}\text{Br} $ã"
+r"b. $ \text{C}=\text{N} $ or $ \text{C}\equiv\text{N} $ã"
+r"c. $ X^{1}\Sigma^+ $ CO (bond length 1.128 Å) or $ I^{1}\Sigma^- $ CO (bond length 1.391 Å)"
     )
 
     chunks = split_text_by_source_line_weights(
@@ -190,8 +190,8 @@ def test_preserved_line_typst_allows_dense_math_lines_to_shrink() -> None:
         preserved_line_boxes=[
             RenderLineBox(
                 text=(
-                    r"a. $ \text{H}^{79}\text{Br} $ 或 $ \text{D}^{80}\text{Br} $　"
-                    r"b. $ \text{C}=\text{N} $ 或 $ \text{C}\equiv\text{N} $"
+r"a. $ \text{H}^{79}\text{Br} $ or $ \text{D}^{80}\text{Br} $ã"
+r"b. $ \text{C}=\text{N} $ or $ \text{C}\equiv\text{N} $"
                 ),
                 bbox=[33.996, 140.477, 244.973, 158.224],
             )
@@ -209,7 +209,7 @@ def test_preserved_line_marker_split_requires_increasing_source_markers() -> Non
     from services.rendering.layout.payload.line_structure import _split_text_by_source_line_markers
 
     chunks = _split_text_by_source_line_markers(
-        "c. 第三项 a. 第一项",
+        "c. Item 3 a. Item 1",
         [
             "c. third item",
             "a. first item",
@@ -222,7 +222,7 @@ def test_preserved_line_marker_split_requires_increasing_source_markers() -> Non
 def test_preserved_line_marker_split_rejects_mixed_marker_styles() -> None:
     from services.rendering.layout.payload.line_structure import split_text_by_source_line_weights
 
-    text = "1. 第一项 b. 第二项"
+    text = "1. First item b. Second item"
 
     chunks = split_text_by_source_line_weights(
         text,
@@ -232,7 +232,7 @@ def test_preserved_line_marker_split_rejects_mixed_marker_styles() -> None:
         ],
     )
 
-    assert chunks != ["1. 第一项", "b. 第二项"]
+assert chunks != ["1. first item", "b. Item 2"]
 
 
 def test_prepare_render_payloads_preserves_direct_typst_formula_at_group_boundary() -> None:
@@ -250,8 +250,8 @@ def test_prepare_render_payloads_preserves_direct_typst_formula_at_group_boundar
                 "protected_source_text": "A" * 300,
                 "translation_unit_protected_source_text": "A" * 600,
                 "translation_unit_protected_translated_text": (
-                    "前文保持在较低丰度（图1）。观察到 $\\mathrm{Ph(i-PrO)SiH_2}$ (6) 的消耗速率快于其他硅烷，"
-                    "这使我们推测其可能是一种更优的还原剂。"
+                    "Maintained at lower abundance (Fig.1). Observed. $\\mathrm{Ph(i-PrO)SiH_2}$ (6) Consumption rate faster than other silanes,"
+                    "This suggests it may be a superior reducing agent."
                 ),
                 "translation_unit_formula_map": [],
             }
@@ -269,8 +269,8 @@ def test_prepare_render_payloads_preserves_direct_typst_formula_at_group_boundar
                 "protected_source_text": "B" * 300,
                 "translation_unit_protected_source_text": "A" * 600,
                 "translation_unit_protected_translated_text": (
-                    "前文保持在较低丰度（图1）。观察到 $\\mathrm{Ph(i-PrO)SiH_2}$ (6) 的消耗速率快于其他硅烷，"
-                    "这使我们推测其可能是一种更优的还原剂。"
+"Earlier text remained at lower abundance (Figure 1). It was observed that the consumption rate of $\\mathrm{Ph(i-PrO)SiH_2}$ (6) was faster than other silanes,"
+"This leads us to speculate that it may be a superior reducing agent."
                 ),
                 "translation_unit_formula_map": [],
             }

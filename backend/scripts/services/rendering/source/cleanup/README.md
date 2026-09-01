@@ -1,29 +1,29 @@
 # rendering/source/cleanup
 
-## 负责什么
+## Responsibilities
 
-PDF 原页面清理层。这里直接操作 PyMuPDF 页面对象，处理原文删除、视觉遮盖、
-背景填充和相关诊断。它不负责 Typst 源码、译文排版、OCR provider 原始数据或
-workflow 编排。
+PDF Original page cleanup layer. Operate directly here. PyMuPDF Page object. Handles original text deletion, visual redaction.
+Background filling and related diagnostics. It is not responsible. Typst Source code, translation layout,OCR provider Raw data or
+Workflow orchestration.
 
-## 稳定入口
+## Stable entry point
 
-外部优先使用 source 层 facade：
+External first source layer facade:
 
 - `services.rendering.source.redaction.redact_source_text_areas`
 - `services.rendering.source.redaction.redact_translated_text_areas`
 
-cleanup 子包内部的稳定入口：
+cleanup Stable entry point within subpackage:
 
-- `redaction.py`：对外 redaction 入口。
-- `strategy.py`：用户可见/配置层 redaction strategy 解析。
-- `routes.py`：根据已解析路线分发到具体执行分支。
+- redaction.py external redaction entry.
+- strategy.py user-visible/configuration layer redaction strategy parsing.
+- `routes.py`Dispatch parsed route to execution branch.
 
-其它模块默认视为实现细节；新增调用时优先依赖具体实现模块，不要回到聚合 facade。
+Other modules default to implementation details. New calls: depend on concrete modules, not the aggregate. facade。
 
-## 已移除的旧兼容入口
+## Removed legacy compatibility entry point
 
-这些旧聚合/兼容模块已经删除；调用方必须改用具体实现模块或 source 层 primitive：
+These old aggregation/compatibility modules removed; callers must switch to concrete implementation modules or source layer primitives:
 
 - `analysis.py`
 - `document_ops.py`
@@ -39,67 +39,67 @@ cleanup 子包内部的稳定入口：
 - `text_match.py`
 - `vector_analysis.py`
 
-基础能力位置：
+Basic capability location:
 
-- 背景填充：`source/background/fill.py`
-- 基础矩形工具：`source/rects.py`
-- translated item 读取：`source/items.py`
-- PDF 文档操作：`source/document_ops.py`
+- Background fill:`source/background/fill.py`
+- Basic Rectangle Tool:`source/rects.py`
+- translated item Read:`source/items.py`
+- PDF Document operations:`source/document_ops.py`
 - dev overlay：`source/dev_overlay/`
 
-## 实现分组
+## Grouping implemented.
 
 ### Text Matching
-- `text_matching.py`：item 到可删除文本矩形的主匹配流程。
-- `text_safe_direct.py`：单个 span 与 OCR bbox 足够接近时的安全直删判断。
-- `text_ownership.py`：重叠 bbox 场景下 word/span/block 归属判断。
-- `text_math_guard.py`：公式保护区过滤和 display math 侵入检测。
-- `text_rects.py`：word/block 匹配结果到 redaction rect 的转换。
-- `text_extract.py`：PyMuPDF 文本 blocks/spans/words 提取。
-- `text_intrusion.py`：检测页面里疑似侵入 display math 区域的大号短文本 span。
+- `text_matching.py`：item Go to main matching flow for deletable text rectangles.
+- text_safe_direct.py: single span and OCR bbox deletion if within threshold → skipped: detailed validation, add when needed.
+- `text_ownership.py`Overlap detected. Resolve conflict. bbox Scenario word/span/block Ownership
+- `text_math_guard.py`: formula guard filtering and display math Intrusion detection.
+- `text_rects.py`：word/block Match results to redaction rect Conversion needed. Determine source format. Identify target format. Execute conversion command. Verify output correctness.
+- text_extract.py: PyMuPDF text blocks/spans/words extraction.
+- `text_intrusion.py`: Detect short text spans on the page suspected of intruding into display math areas. display math Area large short text span。
 
 ### Route And Plan
-- `auto.py`：自动清理路线的执行细节；`routes.py` 只做 route selection 后的分发。
-- `valid_items.py`：将 translated item 转成 cleanup 可执行 item 列表。
-- `route_decision.py`：redaction route decision 的类型定义。
-- `route_context.py`：从 plan/page 生成路线选择所需的 image/drawing facts。
-- `route_decider.py`：根据 route、context 和 fill policy 选择具体执行分支。
-- `plan_types.py`：`RedactionPlan` 类型定义。
-- `page_facts.py`：采集 image page、drawing rects 和 drawing count。
-- `plan_builder.py`：从页面和 translated items 构造 `RedactionPlan`。
-- `plan_policy.py`：基于 plan 的页面级 cover/vector-heavy 判断 helper。
-- `empty_result.py`：空 redaction 输入的稳定诊断结果。
-- `redaction_flow.py`：对外 redaction 入口背后的流程编排。
+- auto.py: execution details of the automatic cleanup route; routes.py only does route selection and subsequent distribution.
+- valid_items.py: converts translated items to cleanup executable item list.
+- `route_decision.py`：redaction route decision Type definition.
+- `route_context.py`: From plan/page generate route selection required image/drawing facts。
+- route_decider.py: based on route, context, and fill policy, selects specific execution branch.
+- `plan_types.py`：`RedactionPlan` Type definitions.
+- page_facts.py: collects image page, drawing rects, and drawing count.
+- `plan_builder.py`From the page and translated items Constructor `RedactionPlan`。
+- `plan_policy.py`: based on plan page-level cover/vector-heavy Judge helper。
+- `empty_result.py`Empty redaction Input stability diagnosis result.
+- redaction_flow.py: external redaction process orchestration behind the entry point.
 
 ### Execution Routes
-- `standard.py`：标准文本层清理路线入口，保留历史 monkeypatch/debug 入口。
-- `standard_policy.py`：标准路线的 item/page 级策略判断。
-- `standard_thresholds.py`：标准路线阈值常量。
-- `standard_execution.py`：页面级 cover+text cleanup 和 redaction annotation 执行 helper。
-- `cover_only.py`：高绘制数量页面的纯遮盖+文本层清理执行分支。
-- `image_page.py`：图片页清理路线，先准备背景覆盖，再删除文本层，最后回贴背景。
-- `vector_heavy.py`：矢量复杂页清理路线，直接覆盖并删除可安全清理的文本层。
-- `visual_cover_execution.py`：视觉遮盖路线的执行 helper，包括 flat/normal cover 和可选文本层删除。
-- `layer_items.py`：按 cleanup item plan 提取 visual cover rect 和 bbox text strip rect。
+- standard.py: standard text layer cleanup entry (keep history). monkeypatch/debug entry.
+- `standard_policy.py`Standard Route item/page Level policy determination.
+- `standard_thresholds.py`Standard route threshold constant.
+- standard_execution.py: page-level cover+text cleanup and redaction annotation execution helpers.
+- `cover_only.py`Pure overlay for high-draw-count pages.+Text layer cleanup execution branch.
+- `image_page.py`Image page cleanup workflow: prepare background overlay, delete text layer, then paste background back.
+- `vector_heavy.py`Vector complex page cleanup: overwrite and delete safe-to-clean text layers.
+- `visual_cover_execution.py`Visual occlusion route execution. helper, including flat/normal cover Delete optional text layer.
+- layer_items.py: based on cleanup item plan, extract visual cover rect and bbox text strip rect.
 
 ### Math And Vector Guards
-- `math_fonts.py`：特殊公式字体识别。
-- `math_spans.py`：从页面文本 span 采集公式保护 rect 和普通文本高度。
-- `math_intrusion.py`：判断公式保护 rect 是否侵入可删除文本区域。
-- `vector_overlap.py`：计算 item bbox 与页面绘制 rect 的 overlap 数量和面积比例。
-- `vector_item_policy.py`：根据 overlap 统计判断 item 是否只能走视觉遮盖。
+- `math_fonts.py`Special formula font recognition.
+- `math_spans.py`From page text span Collection Formula Protection rect Same height as normal text.
+- `math_intrusion.py`Check formula protection. rect Intrude into deletable text area?
+- vector_overlap.py: calculates overlap count and area ratio between item bbox and page drawing rects.
+- `vector_item_policy.py`Based on overlap Statistical Judgment item Is visual masking the only option?
 
 ### Legacy / Dev Overlay
-- 旧 `text_layer.py` / `visual_cover.py` 兼容包装已移除；调用方必须使用
-  `routes.py` 或具体执行模块。
-- 旧 `text_draw.py` / `builders.py` 兼容包装已移除；调用方必须使用
+- Old text_layer.py / visual_cover.py compatibility wrappers removed; callers must use
+  `routes.py` Or specific execution module.
+- Old text_draw.py / builders.py compatibility wrappers removed; callers must use
   `source/dev_overlay/`。
 
-## 边界规则
+## Boundary Rules
 
-- 不被 `source/background/` 直接 import；background 只能通过 source 层 facade
-  或 primitive 调用。
-- 不从 layout/output/workflow 层反向 import；只接收 source/page/item 层输入。
-- 新代码不要 import 兼容入口；架构门禁会拦截 cleanup 内部对这些 facade 的依赖。
-- 基础 geometry、item 读取、PDF 文档操作需要共享时，上移到 `source/rects.py`、
+- Not supported: source/background/ direct import; background only via source layer facade
+or primitive call.
+- Do not import from layout/output/workflow reverse layer; only receive source/page/item layer input.
+- Understood. No new code. import Compatibility entry; architecture gate blocks. cleanup Internal to these facade Dependencies.
+- Basic geometry, item reading, PDF document operations requiring sharing, move up to source/rects.py,
   `source/items.py`、`source/document_ops.py`。

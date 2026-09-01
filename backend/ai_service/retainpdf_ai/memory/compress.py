@@ -1,4 +1,4 @@
-"""抽取式上下文压缩 extractive_v1：不调用 LLM，规则折叠早期轮次。"""
+"""Extractive Context Compression extractive_v1: does not call LLM, fold early rounds by rules."""
 
 from __future__ import annotations
 
@@ -6,13 +6,13 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-SUMMARY_PREFIX = "【对话摘要】"
+SUMMARY_PREFIX = "【Conversation summary】"
 CITATION_RE = re.compile(r"\[(\d+)\]")
 
 
 @dataclass
 class CompressResult:
-    """压缩结果；summary_message 非空时调用方应持久化并通知前端。"""
+    """Compression result.summary_message When non-empty, caller should persist and notify frontend."""
 
     messages: list[dict[str, Any]]
     compressed: bool = False
@@ -28,7 +28,7 @@ def is_summary_message(message: dict[str, Any]) -> bool:
 def split_transcript(
     messages: list[dict[str, Any]],
 ) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
-    """返回 (最新 summary 消息或 None, 该 summary 之后的 turn 消息)。"""
+"""Returns (latest summary message or None, messages after this summary turn)."""
     last_summary: dict[str, Any] | None = None
     last_summary_idx = -1
     for index, message in enumerate(messages):
@@ -46,7 +46,7 @@ def split_transcript(
 
 
 def count_turns(messages: list[dict[str, Any]]) -> int:
-    """粗算「轮」：user 条数。"""
+"""Rough estimate of turns: user count."""
     return sum(1 for m in messages if str(m.get("role") or "") == "user")
 
 
@@ -58,7 +58,7 @@ def _clip(text: str, max_chars: int) -> str:
 
 
 def build_extractive_summary(turns: list[dict[str, Any]], *, max_chars: int = 1800) -> str:
-    """从被折叠的 turns 抽出问题 / 带引用结论 / 证据片段。"""
+    """From collapsed turns Extract issue / Conclusion with references / Evidence snippet."""
     user_questions: list[str] = []
     cited_lines: list[str] = []
     evidence_lines: list[str] = []
@@ -102,23 +102,23 @@ def build_extractive_summary(turns: list[dict[str, Any]], *, max_chars: int = 18
                 parts = [f"[{ref}]", page_label, block, snippet]
                 evidence_lines.append(" ".join(p for p in parts if p))
 
-    lines = [SUMMARY_PREFIX, "- 用户关注："]
+    lines = [SUMMARY_PREFIX, "- User concerns:"]
     if user_questions:
         for q in user_questions[-8:]:
             lines.append(f"  · {q}")
     else:
-        lines.append("  · （无）")
+        lines.append("  · (none)")
 
-    lines.append("- 已确认结论（含引用）：")
+    lines.append("- Confirmed conclusion (with citations):")
     if cited_lines:
         for line in cited_lines[-10:]:
             lines.append(f"  · {line}")
     else:
-        lines.append("  · （早期回答未标注 [n]，仅保留主题）")
+        lines.append("  · (early answers not annotated [n](only the topic is retained)")
 
-    lines.append("- 重要证据：")
+    lines.append("- Key evidence:")
     if evidence_lines:
-        # 去重保序
+        # Deduplicate preserving order.
         seen: set[str] = set()
         for line in evidence_lines:
             if line in seen:
@@ -128,7 +128,7 @@ def build_extractive_summary(turns: list[dict[str, Any]], *, max_chars: int = 18
             if len(seen) >= 12:
                 break
     else:
-        lines.append("  · （无结构化 citations）")
+        lines.append("  · Unstructured. citations）")
 
     text = "\n".join(lines)
     if len(text) > max_chars:
@@ -145,12 +145,12 @@ def maybe_compress_transcript(
     summary_max_chars: int = 1800,
 ) -> CompressResult:
     """
-    若 turn 数超过阈值或 force，则把「最新 summary 之后、窗口之外」的早期轮次
-    折叠为一条 assistant 摘要消息。
+if turn count exceeds threshold or forced, then place the latest summary outside the window.
+    Collapse to one line. assistant Summarize message.
 
-    返回的 messages 是**逻辑 transcript**（内存视图）：
-    [可选旧 summary] + [新 summary] + [近期窗口 turns]
-    调用方负责把新 summary 写入 Rust。
+Returned messages are the **logical transcript** memory view.
+    [Optional old summary] + [new summary] + [Recent Windows turns]
+    Caller responsible for new. summary Write Rust。
     """
     normalized = [
         {
@@ -170,13 +170,13 @@ def maybe_compress_transcript(
     if not force and turn_count <= compress_after_turns:
         return CompressResult(messages=normalized, compressed=False)
 
-    # 保留最近 window_turns 个 user 开启的轮次 → 约 2*window 条消息
+    # Keep recent window_turns items user Active round → approx. 2*window message
     keep_n = window_turns * 2
     if len(turns) <= keep_n:
-        # 强制压缩但窗口已覆盖全部 → 仍可整段摘要后只留窗口（空折叠）
+        # Force compress but window already covers all → Still summarize entire block, keeping only window (empty fold).
         if not force:
             return CompressResult(messages=normalized, compressed=False)
-        # force: 生成覆盖全部 turns 的摘要，窗口仍保留最近 keep_n
+        # force: Generate full coverage turns Summary, window retains recent keep_n
         to_fold = turns[:-keep_n] if len(turns) > keep_n else turns[:]
         kept = turns[-keep_n:] if len(turns) > keep_n else turns[:]
     else:
@@ -188,9 +188,9 @@ def maybe_compress_transcript(
 
     summary_text = build_extractive_summary(to_fold, max_chars=summary_max_chars)
     summary_message = {"role": "assistant", "content": summary_text}
-    # 新 transcript：丢弃旧 summary 与被折叠 turns，保留新 summary + 窗口
-    # （旧 summary 信息已可能融入 to_fold 的早期内容；若 to_fold 不含旧 summary 文本，
-    #  把旧 summary 拼进摘要头部以免丢）
+# New transcript: discard old summary collapsed turns, keep the new summary + window
+    # (old summary Info likely integrated. to_fold early content; if to_fold Excludes legacy summary Text,
+    #  Migrate legacy summary Prepend to summary header to prevent loss.
     if last_summary and str(last_summary.get("content") or "").strip():
         prior = str(last_summary.get("content") or "").strip()
         if prior not in summary_text:

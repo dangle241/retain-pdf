@@ -19,19 +19,19 @@ def _sse(obj) -> str:
 
 def test_assemble_streaming_pure_content_emits_each_delta():
     lines = [
-        _sse({"choices": [{"delta": {"content": "选择"}}]}),
-        _sse({"choices": [{"delta": {"content": "性来自"}}]}),
-        _sse({"choices": [{"delta": {"content": "共轭 [1]"}}]}),
+        _sse({"choices": [{"delta": {"content": "Select"}}]}),
+        _sse({"choices": [{"delta": {"content": "Gender from"}}]}),
+        _sse({"choices": [{"delta": {"content": "conjugate [1]"}}]}),
         "data: [DONE]",
-        _sse({"choices": [{"delta": {"content": "被忽略"}}]}),  # [DONE] 之后不再处理
+        _sse({"choices": [{"delta": {"content": "Ignored"}}]}),  # [DONE] No further processing.
     ]
     deltas: list[str] = []
     message = assemble_streaming_message(iter(lines), deltas.append)
 
-    # 审计 A3 后的新契约:前 64 字符先缓冲定性(防工具轮前言泄漏),
-    # 短纯回答在流结束时合并补发——总文本不变,分片方式不再逐 piece 锁死
-    assert "".join(deltas) == "选择性来自共轭 [1]"
-    assert message["content"] == "选择性来自共轭 [1]"
+# Audit A3 New contract after: first 64 Buffer chars for classification.(prevent tool-call preamble leak),
+    # Merge short pure answers at stream end for retransmission.——Total text unchanged.,Sharding no longer per piece lock
+    assert "".join(deltas) == "Selectivity from conjugation. [1]"
+assert message["content"] == "Selectivity from conjugation [1]"
     assert "tool_calls" not in message
 
 
@@ -73,7 +73,7 @@ def test_assemble_streaming_tool_calls_do_not_emit_deltas():
     deltas: list[str] = []
     message = assemble_streaming_message(iter(lines), deltas.append)
 
-    assert deltas == []  # 工具调用轮绝不 emit answer_delta
+    assert deltas == []  # Never invoke tools. emit answer_delta
     assert message["content"] == ""
     call = message["tool_calls"][0]
     assert call["id"] == "call-1"
@@ -82,11 +82,11 @@ def test_assemble_streaming_tool_calls_do_not_emit_deltas():
 
 
 def test_ask_endpoint_streams_answer_deltas(monkeypatch):
-    pieces = ["选择", "性来自", "共轭 [1]"]
+pieces = ["Selectivity", " from ", "conjugation [1]"]
     full = "".join(pieces)
 
     def fake_build(settings, client=None, *, on_delta=None):
-        def chat(messages, tools):  # 2 参契约:与非流式一致
+        def chat(messages, tools):  # 2 Participate in covenant:Consistent with non-streaming
             for piece in pieces:
                 if on_delta is not None:
                     on_delta(piece)

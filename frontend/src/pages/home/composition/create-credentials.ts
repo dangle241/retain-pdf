@@ -1,4 +1,4 @@
-// credentials 特性 + dialog stores。
+// credentials feature + dialog stores。
 
 import {
   API_PREFIX,
@@ -92,7 +92,7 @@ export function createCredentials({
     });
   }
 
-  // balance/legacy ports 在 mount 内有默认实现；下层签名仍标成必填。
+// balance/legacy ports have Default impl present at mount; lower-layer sig still marked required.
   const browserCredentialsFeature = mountBrowserCredentialsFeature({
     apiPrefix: API_PREFIX,
     state: {},
@@ -112,7 +112,7 @@ export function createCredentials({
     queryDeepSeekBalance: queryDeepSeekBalanceOverride,
     onCredentialStateChange: () => {
       features.workflowFeature.applyWorkflowMode();
-      // 通知 AI 输入门禁等：仅认设置里的 modelApiKey
+// Notify AI input gate etc.: only recognize modelApiKey in settings modelApiKey
       try {
         // dynamic import path avoided — event is fire-and-forget string
         document.dispatchEvent(new CustomEvent("retainpdf:credentials-changed"));

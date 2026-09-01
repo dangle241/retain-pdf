@@ -1,6 +1,6 @@
-// StatusCard 子树 DOM id 上下文。
-// 主流程 StatusCard 用全局契约 id（smoke 依赖）；书籍详情等嵌入态用前缀 id，
-// 避免与 #job-status-card / #status-stage-flow 等冲突。
+// StatusCard Subtree DOM id Context.
+export type ProgressRenderModelInput = {
+// Tránh xung đột. Kiểm tra trước. #job-status-card / #status-stage-flow to avoid conflicts.
 
 import { createContext, useContext } from "react";
 import { STATUS_CARD_ACTION_IDS, STATUS_CARD_IDS } from "./status-card-dom-ids.js";
@@ -24,8 +24,8 @@ export function createPrefixedStatusCardIds(prefix = "book-detail-"): StatusCard
 }
 
 /**
- * 下载按钮 id 必须保持契约字符串（artifact-downloads 文档级委托按 id 命中）。
- * 嵌入态若也渲染 ResultActions，应继续用全局 DOWNLOAD ids，不要加前缀。
+ * Download button id Contract string must be preserved (artifact-downloads Document-level delegation by id Hit).
+ * Render embedded state too ResultActionsshould continue using global DOWNLOAD ids, do not add a prefix.
  */
 export function createPrefixedStatusCardActionIds(prefix = "book-detail-"): StatusCardActionIds {
   const p = `${prefix || ""}`;

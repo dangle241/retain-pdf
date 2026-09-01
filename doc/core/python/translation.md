@@ -1,16 +1,16 @@
-# 翻译层说明
+# Translation layer description
 
-本文记录当前 Python 翻译层的稳定边界、目录职责和排查入口。这里描述的是主线契约，不记录临时迁移过程。
+This document records the current Python Stable boundaries of translation layer, directory responsibilities, troubleshooting entry. Describes mainline contract; temporary migration process not recorded.
 
-## 位置与职责
+## Location and Responsibilities
 
-翻译层位于：
+The translation layer is at:
 
 ```text
 backend/scripts/services/translation/
 ```
 
-它只负责把标准化 OCR 文档变成可渲染的翻译产物：
+It only handles standardization. OCR Documents become renderable translation artifacts.
 
 ```text
 document.v1.json
@@ -19,57 +19,57 @@ document.v1.json
 -> translation diagnostics/debug index
 ```
 
-翻译层不负责：
+Translation layer not responsible for:
 
-- 调用 OCR provider、下载 provider zip 或解析 provider raw JSON。
-- 修改源 PDF、擦除英文、生成 Typst overlay 或写最终 PDF。
-- 直接处理 Rust API 的 HTTP 请求和 job 状态机。
+- Calling the OCR provider, downloading the provider zip, or parsing provider raw JSON.
+- Edit Source PDFErase English. Generate English. Typst overlay Or write final PDF。
+- Directly handling HTTP requests and the job state machine from the Rust API.
 
-稳定上游输入是 `ocr/normalized/document.v1.json`。稳定下游输出是 `translated/translation-manifest.json` 加逐页 payload JSON。
+Stable upstream input is `ocr/normalized/document.v1.json`Stable downstream output is critical. `translated/translation-manifest.json` Add per page payload JSON。
 
-## 主入口
+## Main entry
 
-外部和 stage worker 不应直接拼翻译内部模块，优先走这些入口：
+External and stage worker Do not translate internal modules directly. Use these entry points first:
 
 - `backend/scripts/services/translation/translate_only_pipeline.py`
-  `translate.stage.v1` worker，要求 `--spec <job_root>/specs/translate.spec.json`。
+  `translate.stage.v1` workerRequirements [action] [clarify] User must state goal not solution. `--spec <job_root>/specs/translate.spec.json`。
 - `backend/scripts/services/translation/from_ocr_pipeline.py`
-  provider/normalize 后继续翻译和渲染的入口之一。
+  provider/normalize One of the entry points for subsequent translation and rendering.
 - `backend/scripts/services/translation/workflow`
-  翻译层内部 facade，`runtime/pipeline/translation_stage.py` 通过这里进入翻译执行。
+  Translation Layer Internals facade，`runtime/pipeline/translation_stage.py` Enter translation execution here.
 
-当前 stage spec 里的 `start_page` / `end_page` 是 0 基页码，`end_page=0` 表示只处理第一页，不能被当成未设置值。
+In the current stage spec, start_page / end_page are 0‑based page numbers; end_page=0 indicates processing only the first page and must not be interpreted as an unset value.
 
-## 目录分层
+## Directory hierarchy
 
-当前一级目录按职责拆分：
+Current top-level directories split by responsibility:
 
-| 目录 | 职责 |
+| Directory | Responsibilities |
 | --- | --- |
-| `workflow/` | 翻译流程编排：加载输入、生成执行计划、跑 continuation/policy/batch、写 manifest 和 summary。 |
-| `ocr/` | 只读取 `document.v1.json`，抽取可翻译 block，投影成 translation payload item。 |
-| `payload/` | payload 协议、模板、公式保护、结果回填、manifest 写出。 |
-| `policy/` | 是否翻译、技术块 hint、正文过滤、模式配置。 |
-| `context/` | 翻译上下文、邻近窗口、执行上下文模型。 |
-| `continuation/` | 同页/跨页连续段候选、规则和审阅。 |
-| `orchestration/` | translation unit、layout zone、文档级编排元数据。 |
-| `batching/` | pending item 收集、去重、快路径、批次划分、并发队列入口。 |
-| `results/` | 翻译结果应用、重复 item 展开、job memory 更新、周期性刷盘。 |
-| `llm/` | provider runtime、prompt 协议、缓存、响应解析、重试和校验。 |
-| `memory/` | job 级术语/缩写/稳定翻译记忆的候选、过滤、摘要和持久化。 |
-| `terms/` | 术语表归一化、提示词注入和术语命中统计。 |
-| `diagnostics/` | 翻译诊断、debug index、item 级定位信息。 |
-| `classification/` | `precise` 模式下的可疑块分类。 |
-| `fast_path/` | 明确无需模型翻译的 keep-origin 快路径。 |
-| `postprocess/` | 翻译后轻量修复，例如乱码候选恢复。 |
+| workflow/ | Translation workflow orchestration: load input, generate execution plan, run continuation/policy/batch, write manifest and summary. |
+| `ocr/` | Read-only `document.v1.json`, extract translatable blockproject to translation payload item。 |
+| `payload/` | payload Protocol, template, formula protection, result backfill.manifest Write out. |
+| `policy/` | whether to translate, technical blocks hintText filtering. Pattern configuration. |
+| `context/` | Context translation. Nearby window model. Execution context model. |
+| continuation/ | Same‑page/cross‑page consecutive paragraph candidates, rules, and review. |
+| `orchestration/` | translation unit、layout zoneDocument-level orchestration metadata. |
+| `batching/` | pending item Collect, deduplicate, fast path, batch partition, concurrent queue entry. |
+| `results/` | Apply translation result, repeat item Expand,job memory Update, periodic flush to disk. |
+| `llm/` | provider runtime、prompt Protocol, caching, response parsing, retries, validation. |
+| `memory/` | job Level Terminology/Abbreviation/Stabilize TM candidate selection, filtering, summarization, and persistence. |
+| `terms/` | Glossary normalization, prompt injection, and term hit statistics. |
+| `diagnostics/` | Diagnosisdebug index、item Level positioning information. |
+| `classification/` | `precise` Suspicious block classification by mode. |
+| `fast_path/` | Explicitly no model translation needed. keep-origin Fast path. |
+| `postprocess/` | After translation, light fixes, e.g. garbled candidate recovery. |
 
-`backend/scripts/runtime/pipeline/book_translation_*.py` 兼容 shim 已删除。新代码不要再依赖 `runtime.pipeline.book_translation_*`。
+The compatibility shim backend/scripts/runtime/pipeline/book_translation_*.py has been deleted. New code must not depend on runtime.pipeline.book_translation_*.
 
-## 数据契约
+## Data contract
 
-### 输入
+### Input
 
-翻译层默认只消费 `document.v1` 的正式字段：
+Translation layer consumes only by default. `document.v1` Formal fields:
 
 - `geometry`
 - `content`
@@ -79,18 +79,18 @@ document.v1.json
 - `policy`
 - `provenance`
 
-正文白名单是：
+Body whitelist:
 
 ```text
 content.kind == "text"
 policy.translate == true
 ```
 
-是否进入翻译应由 normalize/adapter 阶段显式决定。翻译层不再从 provider raw 字段、旧 `sub_type` 或 `metadata` 里重新猜正文。
+Whether to enter translation should be explicitly determined at the normalize/adapter phase. The translation layer no longer re‑guesses main text from provider raw fields, old sub_type, or metadata.
 
-### 输出
+### Output
 
-翻译输出固定为：
+The translation output is fixed as:
 
 ```text
 translated/
@@ -103,7 +103,7 @@ artifacts/
   translation_debug_index.json
 ```
 
-逐页 payload 的正式字段优先放在顶层，例如：
+Per‑page payload places formal fields at the top level, e.g.:
 
 - `block_kind`
 - `layout_role`
@@ -115,11 +115,11 @@ artifacts/
 - `raw_block_type`
 - `normalized_sub_type`
 
-`metadata` 只用于调试、provider trace 和少量桥接信息，不作为新逻辑的正式语义入口。
+`metadata` Debug only.provider trace and minor bridging information; not a formal semantic entry point for new logic.
 
-## 执行流程
+## Execution flow
 
-主流程可以简化为：
+Main flow simplified:
 
 ```text
 load document.v1
@@ -138,32 +138,32 @@ load document.v1
 -> write manifest, diagnostics, debug index
 ```
 
-这里的 batch 执行已经从旧 runtime pipeline 拆出：
+Batch execution here has been extracted from the old runtime pipeline:
 
-- `batching/` 决定哪些 item 进入哪些队列。
-- `workflow/batch_runner.py` 执行串行或并行 batch。
-- `results/` 负责回填和刷盘。
+- `batching/` determine which item Which queues to enter?
+- `workflow/batch_runner.py` Execute serially or in parallel. batch。
+- `results/` Responsible for backfill and disk flush.
 
-## 凭证与页范围
+## Credentials and page range
 
-API key 不写入 stage spec。spec 只保存：
+API keys are not written into the stage spec. The spec only saves:
 
 ```json
 "credential_ref": "env:RETAIN_TRANSLATION_API_KEY"
 ```
 
-运行时由环境变量注入真实 key。
+Real values injected by environment variables at runtime. key。
 
-页范围字段是 0 基闭区间：
+Page range field 0 Closed interval:
 
-- `start_page=0, end_page=0`：只处理第一页。
-- `start_page=0, end_page=-1`：从第一页处理到末页。
+- `start_page=0, end_page=0`Only process the first page.
+- `start_page=0, end_page=-1`Process from first page to last page.
 
-stage spec loader 必须保留合法的 `0`，不能用 `value or default` 解析页码。
+stage spec loader must keep legal `0`, cannot use `value or default` Parse page number.
 
-## 调试入口
+## Debug Entry
 
-排查某个 job 的翻译问题时，优先看：
+Troubleshoot a certain job For translation issues, prioritize:
 
 ```text
 data/jobs/<job_id>/translated/translation-manifest.json
@@ -172,15 +172,15 @@ data/jobs/<job_id>/artifacts/translation_debug_index.json
 data/jobs/<job_id>/logs/pipeline_events.jsonl
 ```
 
-判断一个 item 为什么未翻译、降级或保留原文：
+Determine a item Why an item was not translated, downgraded, or kept as original:
 
-1. 在 `translation_debug_index.json` 里找 item。
-2. 看 `translation_diagnostics` 的 `route_path`、`output_mode_path`、`error_trace`、`fallback_to`。
-3. 如需复现，使用已有 replay/debug 工具，不要手改 payload。
+1. Find the item in translation_debug_index.json.
+2. Look at route_path, output_mode_path, error_trace, and fallback_to in translation_diagnostics.
+3. To reproduce, use existing. replay/debug Tools only. No manual edits. payload。
 
-## 验证命令
+## Verify command
 
-翻译层改动后至少跑：
+After translation layer changes, at least run:
 
 ```bash
 python3 -m compileall -q backend/scripts/services/translation
@@ -188,25 +188,25 @@ PYTHONPATH=backend/scripts python3 -m pytest backend/scripts/devtools/tests/tran
 python3 backend/scripts/devtools/check_pipeline_architecture.py
 ```
 
-如果改了 stage spec、页范围或 provider-backed workflow，还要跑：
+If you change the stage spec page range or provider‑backed workflow, also run:
 
 ```bash
 PYTHONPATH=backend/scripts python3 -m pytest backend/scripts/devtools/tests/document_schema/test_normalize_stage_spec.py -q
 python3 backend/scripts/devtools/check_stage_specs_contract.py data/jobs
 ```
 
-## 边界规则
+## Boundary rules
 
-翻译层禁止反向依赖：
+Translation layer: no reverse dependencies.
 
 - `services.rendering`
-- provider 私有 raw 结构
+- Provider private raw structure
 - `runtime.pipeline.book_translation_*`
 
-新增代码应优先放进已有分层目录。架构边界以：
+New code should first be placed into existing layered directories. Architecture boundaries:
 
 ```text
 backend/scripts/devtools/check_pipeline_architecture.py
 ```
 
-为准。
+As the source of truth.

@@ -1,104 +1,104 @@
-# Session 与上下文压缩（B 草案）
+# Session Context compression (Draft B)
 
-**状态：** API / 数据形状草案 v0.1 · **B1 + B2 已落地**  
-**日期：** 2026-07-21  
-**依赖：** [AI_RUNTIME.md](./AI_RUNTIME.md)  
-**目标：** 多轮真正可用；长聊不爆上下文；证据（引用/图）跨轮可复用  
+**Status:** API / Data shape draft v0.1 Â· **B1 + B2 Landed**
+**Date:** 2026-07-21
+**Dependencies:** [AI_RUNTIME.md](./AI_RUNTIME.md)  
+**Goal:** Multi-turn usable; long chat avoids context overflow; evidence (citations)/Fig) Cross-turn reusable  
 
-### B1 落地摘要（实现）
+### B1 Implementation Summary
 
-| 项 | 位置 |
+| Item | Position |
 |----|------|
 | AI auto-create + `done.conversation_id` | `retainpdf_ai/app.py` |
-| Rust create 客户端 | `retainpdf_ai/rust_client.py` |
-| 前端粘性存储 | `frontend/src/js/reader/ai/conversation-store.ts` |
-| ask 传/收 conversationId | `api/ai.ts` + `ask-answerer.ts` |
+| Rust create client | `retainpdf_ai/rust_client.py` |
+| Frontend Sticky Storage | `frontend/src/js/reader/ai/conversation-store.ts` |
+| ask send/receive conversationId | `api/ai.ts` + `ask-answerer.ts` |
 
-### B2 落地摘要（实现）
+### B2 Implementation Summary
 
-| 项 | 位置 |
+| Item | Location |
 |----|------|
-| 抽取式压缩 `extractive_v1` | `retainpdf_ai/memory/compress.py` |
-| 窗口组装 | `retainpdf_ai/memory/assemble.py` |
+| Extractive Compression `extractive_v1` | `retainpdf_ai/memory/compress.py` |
+| Window Assembly | `retainpdf_ai/memory/assemble.py` |
 | SSE `compress` + `done.memory` | `retainpdf_ai/app.py` |
-| 配置 | `RETAIN_AI_MEMORY_WINDOW_TURNS` 等（见 config.py） |
-| 摘要落库 | assistant 消息，正文以 `【对话摘要】` 开头 |
+| Configuration | `RETAIN_AI_MEMORY_WINDOW_TURNS` etc. (see config.py) |
+| Persist summary to database. | assistant message, with body starting with `ãå¯¹è¯æè¦ã` Start |
 
 
 ---
 
-## 1. 现状与缺口
+## 1. Current state and gaps
 
-### 1.1 已有
+### 1.1 Existing
 
-| 能力 | 位置 |
+| Capability | Location |
 |------|------|
-| Rust 会话 CRUD | `/api/v1/ai/conversations` |
-| 消息追加 | `.../messages`（user/assistant + citations_json + tool_trace_json） |
-| AI 读历史 | `load_history` → **最近 12 条** `role+content` |
-| AI 回写 | `persist_turn` 写 user + assistant |
+| Rust Session CRUD | `/api/v1/ai/conversations` |
+| Append Message | `.../messages`（user/assistant + citations_json + tool_trace_json） |
+| AI Read history | `load_history` â **Recently 12 items** `role+content` |
+| AI Write back | `persist_turn` write user + assistant |
 
-### 1.2 缺口
+### 1.2 Gap
 
-1. 前端阅读器 **常不传 / 不创建 `conversation_id`** → 实际多轮无状态。  
-2. 历史 **只塞原文**，无摘要、无 evidence 包 → 长了既贵又丢结构。  
-3. `tool_trace` 落库但 **不回灌模型**（正确，但需要别的形式保留证据）。  
-4. 无 **压缩事件**，用户不知道「早期轮次被摘要了」。  
-5. 无统一 **memory 视图**（给 runtime 的 `messages[]` 与给存储的 transcript 未分层）。
+1. Frontend reader **Often omitted / Do not create `conversation_id`** → Actually multi-turn stateless.  
+2. History **Paste source text only.**Bug in auth middleware. Token expiry check use `<` not `<=`. Fix: `if (now < expiry)` â skipped: strict `<=`, add when spec changes. evidence package â Long = expensive + structure loss.
+3. `tool_trace` Persisted but **No model backfill**Evidence keep.  
+4. No **Compress events**User doesn't know "Early rounds summarized.".
+5. No unified **memory view**(for runtime `messages[]` To storage transcript Not layered).
 
 ---
 
-## 2. 概念分层
+## 2. Conceptual hierarchy
 
 ```text
-Transcript（持久化，Rust）
-  = 用户可见的完整对话记录（可含 summary 消息）
+TranscriptPersist,Rust）
+  = User-visible full conversation history (may contain summary Message)
 
-MemoryView（运行时，AI 内存中拼装）
-  = 本轮喂给 LLM 的 messages[]
+MemoryView(runtime,AI in-memory assembly)
+= Current round input LLM `messages[]`
   = f(Transcript, EvidenceStore, CompressPolicy)
 
-EvidenceStore（运行时 + 可选快照落库）
-  = 本会话累积的 EvidenceItem（按 ref 或按 content hash）
+EvidenceStore(runtime + Optional snapshot storage)
+  = Session cumulative EvidenceItem"(Press".(Press ref Or press content hash）
 ```
 
-原则：
+Principle:
 
-- **Transcript 求真**（可回放 UI）  
-- **MemoryView 求省**（可截断、可替换为 summary）  
-- **Evidence 求稳**（[ n ] 与锚点跨轮尽量稳定）
+- **Transcript Seek truth**(Replayable) UI）  
+- **MemoryView Seek savings.**(truncatable, replaceable with summary）  
+- **Evidence Prioritize stability.**（[ n ] Keep anchor cross-round stable.
 
 ---
 
-## 3. 数据形状
+## 3. Data shape
 
-### 3.1 Conversation（Rust，已有可扩展）
+### 3.1 Conversation（Rust, already extensible)
 
 ```json
 {
   "conversation_id": "conv_...",
   "document_id": "doc_...",
   "job_id": "2026...",
-  "title": "可选自动标题",
+  "title": "Auto Title (optional)",
   "skill_id": "literature-qa",
   "created_at": "...",
   "updated_at": "..."
 }
 ```
 
-扩展字段（建议）：
+Extension Fields (recommended):
 
-| 字段 | 说明 |
+| Field | Description |
 |------|------|
-| `document_id` / `job_id` | 会话默认 scope（阅读器创建时写入） |
-| `skill_id` | 默认 skill |
-| `memory_json` | 可选：压缩状态 `{ "summary": "...", "through_message_id": "..." }` |
+| `document_id` / `job_id` | Session Default scope(Written at reader creation) |
+| `skill_id` | Default skill |
+| `memory_json` | Compression State (optional) `{ "summary": "...", "through_message_id": "..." }` |
 
 ### 3.2 Message（Rust）
 
-现有大致：`role`, `content`, `citations_json`, `tool_trace_json`, `model`, timestamps。
+Current roughly:`role`, `content`, `citations_json`, `tool_trace_json`, `model`, timestamps。
 
-**建议扩展 `metadata_json`（对象序列化）**：
+**Extension recommended. `metadata_json`Object serialization**：
 
 ```json
 {
@@ -114,15 +114,15 @@ EvidenceStore（运行时 + 可选快照落库）
 }
 ```
 
-| kind | role 建议 | 用途 |
+| kind | Suggested role | Purpose |
 |------|-----------|------|
-| `turn` | user / assistant | 正常问答（默认） |
-| `summary` | `assistant` 或专用 `system` | 压缩后的历史摘要（UI 可折叠显示「已压缩 N 轮」） |
-| `system_note` | system | 调试/策略说明，默认不对用户展示 |
+| `turn` | user / assistant | Normal Q&A (Default) |
+| `summary` | `assistant` or dedicated `system` | Compressed history summary (UI Collapsible "Compressed N rounds") |
+| `system_note` | system | Debug/Policy description; hidden from users by default. |
 
-**兼容：** 无 `metadata_json` 的旧消息视为 `kind=turn`。
+**Compatibility:** No `metadata_json` Treat old messages as `kind=turn`.
 
-### 3.3 EvidenceSnapshot（可嵌在 assistant metadata 或独立表）
+### 3.3 EvidenceSnapshot(can be embedded in assistant metadata or standalone table)
 
 ```json
 {
@@ -142,14 +142,14 @@ EvidenceStore（运行时 + 可选快照落库）
 }
 ```
 
-同一会话内 **ref 单调递增不回收**（避免「[2] 上轮是 A 这轮是 B」）。  
-若必须回收，UI 只展示本轮 `citations`，历史气泡绑定当时 snapshot。
+Within same session **ref Monotonically increasing; no reclamation.**Avoid.「[2] Previous round was A this round is B」）。  
+If recycling is required,UI Show only this round. `citations`historical bubble bound at that time snapshot。
 
 ---
 
-## 4. Memory 组装算法（B2 核心）
+## 4. Memory Assembly algorithm (B2 Core)
 
-### 4.1 输入
+### 4.1 Input
 
 ```text
 assemble_memory(
@@ -160,83 +160,83 @@ assemble_memory(
 ) -> { messages: ChatMessage[], evidence: EvidenceItem[], debug }
 ```
 
-### 4.2 策略 `extractive_v1`（默认，不依赖 LLM 摘要）
+### 4.2 Strategy `extractive_v1`Default, no dependencies. LLM Summary
 
 ```text
-1. 分离：
-   - summaries = kind==summary 的消息（按时间）
-   - turns = kind==turn 的 user/assistant 对
+1. Separation:
+   - summaries = kind==summary Messages (by time)
+- turns = user/assistant pairs where kind==turn
 
-2. 取「最新 summary」S（若有），它覆盖 through 某 message_id 之前的内容。
+2. Get "latest summary" S (if any), overrides previous content through a certain message_id.
 
-3. 近期窗口 W：
-   - 取 S 之后的 turns，再截断为最近 K 轮（默认 K=6 轮 = 12 条消息）
-   - 单条 content 超长则 clip（user 2k / assistant 3k 字符硬顶）
+3. Recent window W:
+- Get turns after S, then truncate to the most recent K Round (default) K=6 rounds = 12 messages)
+   - Single content Need full source text. clip（user 2k / assistant 3k Character hard top)
 
-4. Evidence 包 E：
-   - 合并 W 内 assistant 的 citations / evidence_snapshot
-   - 上限 max_evidence_items（默认 24）
-   - 优先保留：被最近一轮引用到的 ref > 较新 > 有 image_urls 的
+4. Evidence package E:
+- Merge assistant citations / evidence_snapshot within W
+- Limit max_evidence_items (Default 24)
+- Prioritize keeping: those referenced in the most recent round ref > Newer > those with image_urls
 
-5. 拼 messages：
+5. assemble messages：
    [ system = skill.system_prompt + scope_lock_text ]
    [ developer? = skill.developer ]
    if S: [ {role:user, content: "以下是更早对话的摘要，请当作已知背景：\n"+S.content } ]
-          [ {role:assistant, content: "好的，我将基于摘要与新问题继续。" } ]  # 可选稳定前缀
+          [ {role:assistant, content: "Ready." } ]  # Optional stable prefix
    for m in W: append role/content
-   if E:  append 一条隐藏/user 工具式上下文？ → 否；
-          改为在 system 尾部附 "已知证据表"：
+   if E:  append Hidden item revealed./user Tool-style context? → No;
+          Change to system Attached at end. "Known Evidence Table"：
           "E1 [1] p.4 block … snippet"
-          （控制在 ~2k 字符）
+          (controlled within ~2k characters)
 
-6. 若估算 tokens > budget：
-   - 先减 K（窗口）
-   - 再缩短 snippet
-   - 再触发 compress_now() 生成新 summary（见 4.3）
+6. If estimating tokens > budget：
+   - Subtract first. K(Window)
+   - Shorten snippet further snippet
+   - Trigger again compress_now() Generate new summary(see 4.3）
 ```
 
-### 4.3 何时压缩 `compress_now`
+### 4.3 When to compress `compress_now`
 
-触发条件（任一）：
+Trigger (any):
 
-- `len(turns) > 2K`（例如 12 轮）  
-- 估算 prompt tokens > `0.55 * context_window`  
-- 显式请求 `force_compress: true`
+- `len(turns) > 2K`(e.g., 12 turn)  
+- Estimate prompt tokens > `0.55 * context_window`  
+- explicitly request `force_compress: true`
 
-**extractive 摘要内容模板：**
+**extractive Summary content template:**
 
 ```text
-【对话摘要】
-- 用户关注：…
-- 已确认结论：…（附 [n] 若有）
-- 未解决问题：…
-- 重要证据：
+ãConversation Summaryã
+- User focus: ...
+- Confirmed conclusion:…(attached [n] if any
+- Unresolved issues:…
+- Key evidence:
   [1] p.3 … 
   [2] p.7 …
 ```
 
-生成方式 v1：
+Generation method v1：
 
-1. 从被折叠的 turns 抽取：所有 user 问题（截断）、所有带 [n] 的 assistant 句、全部 citations  
-2. 规则拼接，**不调用 LLM**（稳、便宜、可测）  
-3. v2 可选：LLM 摘要 skill，失败回退 v1  
+1. From collapsed turns Extract: all user questions (truncated), all assistant sentences with [n]. citations
+2. Rule concatenation,**No call LLM**Stable, cheap, testable.  
+3. v2 Optional: LLM summary skillFallback on failure. v1
 
-压缩后：
+After compression:
 
-1. 向 Rust append `kind=summary` 消息  
-2. 更新 `conversation.memory_json.through_message_id`  
-3. SSE 发 `compress` 事件  
+1. Append `kind=summary` message to Rust
+2. Update `conversation.memory_json.through_message_id`
+3. SSE emit `compress` event
 
-### 4.4 Token 估算
+### 4.4 Token Estimate
 
-v1 使用廉价估算：`tokens ≈ chars / 3`（中英混合偏保守可 `/2.5`）。  
-不强制 tiktoken，避免 AI 服务重依赖。
+v1 Use cheap estimation:`tokens ≈ chars / 3`(conservative for mixed Chinese-English can `/2.5`）。  
+Do not force tiktoken to avoid heavy dependencies in AI Service.
 
 ---
 
-## 5. API 形状
+## 5. API Shape
 
-### 5.1 保持兼容：`POST /v1/ask`（retainpdf-ai）
+### 5.1 Maintain compatibility:`POST /v1/ask`（retainpdf-ai）
 
 ```json
 {
@@ -253,21 +253,21 @@ v1 使用廉价估算：`tokens ≈ chars / 3`（中英混合偏保守可 `/2.5`
 }
 ```
 
-| 字段 | 现状 | B 后 |
+| Field | Current | After B |
 |------|------|------|
-| `conversation_id` | 可选 | **阅读器应总是带**（无则后端可 auto-create 并在 done 返回） |
-| `skill_id` | 无 | 可选，默认 `literature-qa` |
-| `force_compress` | 无 | 可选 |
-| `history` 客户端直传 | 无 | **不鼓励**；以服务端读 Rust 为准（防双源） |
+| `conversation_id` | Optional | **Reader should always carry**(if missing, backend can auto-create and return in done) |
+| `skill_id` | None | Optional, default `literature-qa` |
+| `force_compress` | None | Optional |
+| `history` Client direct upload | None | **Discouraged**; based on server-side read Rust Authoritative (prevent dual-source). |
 
-### 5.2 `done` 扩展（可选字段）
+### 5.2 `done` Extensions (optional field)
 
 ```json
 {
   "type": "done",
   "answer": "……",
-  "citations": [ /* Evidence 子集 */ ],
-  "tool_trace": [ /* 本 run */ ],
+  "citations": [ /* Evidence Subset */ ],
+  "tool_trace": [ /* this run */ ],
   "rounds": 3,
   "conversation_id": "conv_…",
   "run_id": "run_…",
@@ -284,7 +284,7 @@ v1 使用廉价估算：`tokens ≈ chars / 3`（中英混合偏保守可 `/2.5`
 }
 ```
 
-### 5.3 新 SSE：`compress`
+### 5.3 New SSE: `compress`
 
 ```json
 {
@@ -296,7 +296,7 @@ v1 使用廉价估算：`tokens ≈ chars / 3`（中英混合偏保守可 `/2.5`
 }
 ```
 
-### 5.4 Rust：创建会话（阅读器打开 AI 或首问时）
+### 5.4 RustCreate session (reader opens AI or on first question)
 
 ```http
 POST /api/v1/ai/conversations
@@ -309,7 +309,7 @@ POST /api/v1/ai/conversations
 → { "conversation_id": "conv_…" }
 ```
 
-### 5.5 Rust：追加消息（扩展）
+### 5.5 RustAppend Message (Extension
 
 ```http
 POST /api/v1/ai/conversations/{id}/messages
@@ -323,17 +323,17 @@ POST /api/v1/ai/conversations/{id}/messages
 }
 ```
 
-Summary 消息：
+Summary Message:
 
 ```json
 {
   "role": "assistant",
-  "content": "【对话摘要】…",
+"content": "ãConversation Summaryã...",
   "metadata_json": "{\"kind\":\"summary\",\"compress\":{\"policy\":\"extractive_v1\",\"covers_message_ids\":[…]}}"
 }
 ```
 
-### 5.6 前端阅读器流程（目标）
+### 5.6 Frontend reader workflow (target)
 
 ```text
 open AI panel
@@ -341,15 +341,15 @@ open AI panel
       create conversation → store in memory/localStorage key
 ask(question):
   POST ask with conversation_id + job_id + document_id
-  on compress → 可选 toast「已压缩早期对话」
-  on done → 渲染 answer + citations；记住 conversation_id
+  on compress → Optional toast「Compressed earlier conversations」
+on done â render answer + citations; remember conversation_id
 ```
 
-存储键建议：`retainpdf.reader.ai.conversation.v1:{jobId}`。
+Storage key suggestion:`retainpdf.reader.ai.conversation.v1:{jobId}`。
 
 ---
 
-## 6. Runtime 伪代码
+## 6. Runtime Pseudocode
 
 ```python
 def ask(question, *, conversation_id, scope, skill_id, budget, force_compress=False):
@@ -378,80 +378,80 @@ def ask(question, *, conversation_id, scope, skill_id, budget, force_compress=Fa
 
 ---
 
-## 7. 与引用编号的关系
+## 7. Relation to reference number
 
-| 规则 | 说明 |
+| Rule | Description |
 |------|------|
-| 单 run 内 | 与现 ` _assign_refs` 相同，从 1 或从 `ref_counter+1` 起 |
-| 跨 run | **继续递增**（读上次 snapshot 的 `ref_counter`） |
-| 回答中的 [n] | 必须落在本 run 可见 evidence 或已知证据表 |
-| 压缩后 | 摘要里保留 [n] 与 snippet；旧气泡 UI 仍显示当时 citations |
+| Within single run | current ` _assign_refs` Same, from 1 Or from `ref_counter+1` from |
+| Cross-run run | **Continue incrementing**(Read last snapshot `ref_counter`) |
+| In the answer [n] | Must fall on this. run Visible evidence Or Known Evidence Table |
+| After compression | Keep in summary. [n] and snippetOld bubble UI Still shows that time. citations |
 
 ---
 
-## 8. 测试计划（B）
+## 8. Test plan (B）
 
-| 用例 | 期望 |
+| Use Cases | Expected |
 |------|------|
-| 无 conversation_id | 行为与现网一致（单轮）；或 auto-create 并在 done 返回 |
-| 有 conversation_id 连问 2 轮 | 第二轮 memory 含第一轮 user/assistant |
-| 15 轮后触发压缩 | 出现 summary 消息；assemble 不再含全部早期原文 |
-| evidence 上限 | 超过 max 时丢最旧未引用项 |
-| scope 锁 | memory 的 system 含 document_id；工具参数被注入 |
-| 字符 clip | 超长 assistant 被截断且不炸 JSON |
+| No conversation_id | Behavior matches production (single-turn); or auto-create and return in done |
+| With conversation_id Keep Asking 2 rounds | Round 2 memory including the first round user/assistant |
+| 15 Compress after rotation. | Appear summary Messageassemble No longer contains full original text. |
+| evidence limit | Exceeds max Drop oldest unreferenced items. |
+| scope lock | memory system contains document_idTool parameters are injected. |
+| Character clip | Overlong assistant Truncated, no crash. JSON |
 
 ---
 
-## 9. 分阶段实现清单
+## 9. Phased implementation checklist
 
-### B1 — Session 贯通（小、优先）
+### B1 — Session Code refactor. Remove redundant. Test.
 
-- [ ] 前端：创建/复用 `conversation_id` 并随 ask 上传  
-- [ ] 后端：done 回显 `conversation_id`  
-- [ ] Rust：conversation 支持 `document_id`/`job_id`/`skill_id`（若尚无）  
-- [ ] 文档 + 单测：history 注入条数  
+- [ ] Frontend: Create/reuse `conversation_id` Follow ask upload
+- [ ] Backend: done Echo `conversation_id`
+- [ ] Rust: conversation support `document_id`/`job_id`/`skill_id`If none
+- [ ] Documentation + Unit test: history Injection count
 
-### B2 — Memory 压缩
+### B2 — Memory Compress
 
 - [ ] `memory/assemble.py` + `memory/compress.py`  
-- [ ] `metadata_json` 读写  
+- [ ] `metadata_json` Read/Write  
 - [ ] SSE `compress`  
-- [ ] 估算 token 与 budget 配置项  
-- [ ] 单测：压缩前后 messages 长度  
+- [ ] Estimate token and budget Configuration Items
+- [ ] Unit test: before and after compression messages Length  
 
-### B3 — Evidence 跨轮
+### B3 — Evidence Cross-turn
 
-- [ ] snapshot 落库 / 回灌「已知证据表」  
-- [ ] ref_counter 持久化  
+- [ ] snapshot Write to database / Recharge "Known Evidence Table"
+- [ ] ref_counter persistence
 
 ---
 
-## 10. 配置项（建议 env）
+## 10. Configuration items (recommended env）
 
-| 变量 | 默认 | 说明 |
+| Variable | Default | Description |
 |------|------|------|
-| `RETAIN_AI_MEMORY_WINDOW_TURNS` | `6` | 近期保留轮数 |
-| `RETAIN_AI_MEMORY_MAX_CHARS` | `24000` | MemoryView 粗上限 |
-| `RETAIN_AI_MEMORY_COMPRESS_AFTER_TURNS` | `12` | 超过则压缩 |
-| `RETAIN_AI_MEMORY_MAX_EVIDENCE` | `24` | 证据条数 |
-| `RETAIN_AI_MEMORY_POLICY` | `extractive_v1` | 压缩策略名 |
+| `RETAIN_AI_MEMORY_WINDOW_TURNS` | `6` | Recent rounds to keep |
+| `RETAIN_AI_MEMORY_MAX_CHARS` | `24000` | MemoryView Coarse upper limit |
+| `RETAIN_AI_MEMORY_COMPRESS_AFTER_TURNS` | `12` | Compress if exceeded |
+| `RETAIN_AI_MEMORY_MAX_EVIDENCE` | `24` | Evidence Count |
+| `RETAIN_AI_MEMORY_POLICY` | `extractive_v1` | Compression Policy Name |
 
 ---
 
-## 11. 开放决策
+## 11. Open decision
 
-| ID | 问题 | 建议 |
+| ID | Question | Suggestion |
 |----|------|------|
-| M1 | 无 conversation_id 时 auto-create？ | **是**（减少前端状态机），done 必须回传 |
-| M2 | summary 是否在 UI 展示？ | 默认折叠一行「已总结前 N 轮」 |
-| M3 | tool_trace 是否进 memory？ | **否**；只进 evidence 与本 run trace |
-| M4 | 是否允许客户端传 history？ | v1 **忽略**客户端 history，避免分叉 |
+| M1 | auto-create when no conversation_id? | **Yes**Reduce frontend state machine.done Must return. |
+| M2 | summary whether in UI Display? | Default collapse one line. "Summarized previous N rounds" |
+| M3 | tool_trace Enter? memory? | **No**Only allow inbound. evidence With this run trace |
+| M4 | Allow client transmission? history? | v1 **Ignore** client historyAvoid forks |
 
 ---
 
-## 12. 验收标准（B 完成时）
+## 12. Acceptance Criteria (B On completion)
 
-1. 同一阅读任务连续追问 5 次，第 5 次回答能引用第 1 次结论或证据。  
-2. 人为加长历史至 20 轮后，请求仍成功；SSE 至少出现一次 `compress` 或存在 summary 消息。  
-3. 压缩后 citations 跳转仍正确（page_idx 0 基）。  
-4. 旧前端不传新字段时行为不回退到 5xx。  
+1. Continuous queries on same reading task 5 Times, ordinal 5 answers can cite the 1 Secondary conclusion or evidence.  
+2. Manually extend history to 20 After polling, request still succeeds;SSE Appears at least once. `compress` or exists summary Message.  
+3. After compression citations Redirect still correct (page_idx 0 Base).
+4. When old frontend does not send new field, behavior does not fall back. 5xx。  

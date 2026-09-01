@@ -1,12 +1,12 @@
-// Credentials/SettingsHub 对话框的 DOM 契约 id 拷贝。
+// Credentials/SettingsHub Dialog DOM contract id copy.
 //
-// 拷贝自 src/js/features/credentials/credentials-dom-contract.js(该文件名
-// 命中 architecture-boundaries.test.mjs 的 features/*dom-contract.js 防回弹
-// 正则,即便内容本身只是零逻辑 id 常量——3b 状态卡域已用同一手法拷贝出
-// status-card-dom-ids.js,这里照此处理)与
-// src/js/components/dialogs/app-settings-dialog-contract.js(该目录整体属旧
-// 自定义元素视图层,禁止 pages import)。id 字符串逐一保留,视觉基线与
-// 门禁按这些 id 断言;新增 id 一律不改名旧世界字符串。
+// Copied from src/js/features/credentials/credentials-dom-contract.js(this filename
+// Matches architecture-boundaries.test.mjs features/*dom-contract.js bounce prevention
+// Regex, even if content has zero logic id constantsâ3b Status card field copied using same method.
+// status-card-dom-ids.js, handle accordingly here and
+// src/js/components/dialogs/app-settings-dialog-contract.js(This directory as a whole belongs to the old
+// Custom element view layer, pages import forbidden). Preserve id strings individually, visual baseline and
+// Gate checks based on these id assertions; never rename legacy strings for new ids.
 
 export const CREDENTIAL_DOM_IDS = {
   dialog: "browser-credentials-dialog",
@@ -39,8 +39,8 @@ export const CREDENTIAL_DOM_IDS = {
   },
 };
 
-// OCR provider 面板/校验/token 输入 id 全部按 provider.id 拼接(镜像旧
-// components/dialogs/browser-credentials-dialog.js 的模板拼接规则)。
+// OCR provider panel/validation/token input id Select all provider.id concatenation(mirroring old
+// components/dialogs/browser-credentials-dialog.js template concatenation rules)。
 export function credentialTokenInputId(providerId = "") {
   return `browser-${providerId}-token`;
 }
@@ -60,16 +60,16 @@ export const CREDENTIAL_DOM_DATASETS = {
   ocrProviderPanel: "ocrProviderPanel",
 };
 
-// SettingsHubDialog(蓝图 §0.4,拷贝自
+// SettingsHubDialog(Blueprint Â§0.4, Copied from
 // src/js/components/dialogs/app-settings-dialog-contract.js)。
 export const APP_SETTINGS_DIALOG_IDS = {
   dialog: "app-settings-dialog",
   openButton: "app-settings-btn",
   closeButton: "app-settings-close-btn",
-  /** 已退役（设置 v2：API 区内嵌 CredentialsWorkbench，无二层弹窗入口）。
-   *  保留常量仅供历史对照，勿再新增消费点。 */
+  /** Retired (settings v2：API Inline zone CredentialsWorkbenchNo second-layer popup entry
+   *  Constant retained for historical reference only. Do not add new consumers. */
   credentialsButton: "credentials-btn",
-  // 词表/更新两个 tab 本阶段只占位(蓝图 §0.4);id 先落地供后续 agent 对齐。
+// Glossary/Update both tab placeholder only.(Blueprint Â§0.4); implement id now for later use. agent alignment.
   glossaryButton: "glossary-btn",
   appUpdateButton: "app-update-btn",
 };

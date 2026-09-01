@@ -1,30 +1,30 @@
-# 0003 用架构检查守住 Python 模块边界
+# 0003 Enforce via architecture checks. Python Module boundaries
 
-## 背景
+## Background
 
-随着 OCR、翻译、渲染、桌面端和 Rust API 持续增长，单纯靠人工记忆无法长期维护模块边界。文件数量本身不是问题，真正的问题是跨层 import、循环依赖和 provider 私有字段泄漏。
+As OCRTranslation, rendering, desktop Rust API Continuous growth: relying solely on human memory cannot maintain module boundaries long-term. File count itself is not the problem; cross-layer coupling is. import, circular dependencies, and provider Private field leak.
 
-## 决策
+## Decision
 
-短期先使用仓库已有的 `backend/scripts/devtools/check_pipeline_architecture.py` 固化 Python 后端核心边界，并接入 CI。
+Short-term, use existing repository content. `backend/scripts/devtools/check_pipeline_architecture.py` Commit Python Backend core boundaries. Integrate. CI。
 
-长期可以评估引入 `tach`、`import-linter` 或 `grimp`，但不会在没有收益验证前增加新依赖。
+Long-term, evaluate adoption of tach, import-linter, or grimp, but will not add new dependencies without first verifying the benefit.
 
-当前必须守住的方向：
+The direction that must be maintained currently:
 
-- `runtime/pipeline` 只编排，不直接依赖 provider raw、translation internals、rendering internals。
-- `translation` 和 `rendering` 不消费 provider raw JSON。
-- `typst` 不反向 import `redaction`。
-- `layout` 不 import `source_pdf`、`typst`、`redaction`。
-- `ocr_provider` 不依赖 translation/rendering。
+- `runtime/pipeline` Orchestrate only; no direct dependencies. provider raw、translation internals、rendering internals。
+- translation and rendering do not consume provider raw JSON.
+- `typst` No reverse proxy needed. import `redaction`。
+- layout does not import source_pdf, typst, or redaction.
+- `ocr_provider` No dependencies. translation/rendering。
 
-## 后果
+## Consequences
 
-- 结构性违规会在架构检查中失败。
-- 新模块要么放进现有边界，要么先更新架构文档和检查规则。
-- 不是所有边界都一次性卡死，先卡最容易腐化的关键方向。
+- Structural violations fail architecture checks.
+- New modules: either fit within existing boundaries, or update architecture docs and check rules first.
+- Key boundaries not all at once. Tighten most vulnerable direction first.
 
-## 替代方案
+## Alternatives
 
-- 只写 README 靠约定。这个方案执行成本低，但长期会失效。
-- 立刻引入完整第三方依赖治理工具。这个方案更系统，但需要先评估配置成本和 CI 稳定性。
+- Write only README Rely on convention. This solution has low execution cost, but will fail in the long run.
+- Immediately adopt full third-party dependency governance tool. More systematic. Evaluate configuration cost and overhead first. CI Stability.

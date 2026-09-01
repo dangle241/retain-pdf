@@ -3,16 +3,16 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
 
-// 源码级命名空间门禁：reader/detail 源文件选择器必须带页前缀。
-// 构建已按页拆包 dist/css/{home,detail,reader}.css，跨页污染风险已大幅下降；
-// 本测试继续锁住「别在 reader/detail 源码里写裸全局选择器」。
+// Source-level namespace gatekeeping:reader/detail Source file selector must include page prefix.
+// Build split by page. dist/css/{home,detail,reader}.cssCross-page pollution risk significantly reduced.
+// Test remains locked.「Do not reader/detail Naked global selectors in source.」。
 
 const PROJECT_ROOT = process.cwd();
 const STYLES_ROOT = join(PROJECT_ROOT, "src/styles");
 
 const GROUPS = [
   {
-    name: "reader 页/阅读器组件",
+name: "reader page/Reader Component",
     files: [
       ...readdirSync(join(STYLES_ROOT, "reader"))
         .filter((f) => f.endsWith(".css"))
@@ -21,13 +21,13 @@ const GROUPS = [
     allowed: [
       /(\.|#)reader-/,
       /\[data-reader/,
-      /^reader-dialog\b/, // <reader-dialog> 自定义标签选择器
+      /^reader-dialog\b/, // <reader-dialog> Custom tag selector unnecessary. Use CSS class or ID.
       /body\.reader/,
       /^:root$/,
     ],
   },
   {
-    name: "detail 页",
+name: "detail page",
     files: [
       join(STYLES_ROOT, "pages.css"),
       ...readdirSync(join(STYLES_ROOT, "pages/detail"))
@@ -37,26 +37,26 @@ const GROUPS = [
     allowed: [
       /(\.|#)detail-/,
       /\[data-detail/,
-      /\.markdown-/, // detail 页 Markdown 预览区块
+/\.markdown-/, // detail page Markdown Preview block
       /body\.detail/,
       /^:root$/,
     ],
   },
 ];
 
-// 解析出规则选择器,跳过 @keyframes 内部的步进选择器(0%/from/to)。
+// Parse rule selectors, skip @keyframes Internal stepper selector(0%/from/to).
 //
-// Tailwind v4 迁移后,部分样式文件改用了原生 CSS 嵌套(`&:hover`/`& p`/`&.foo`)
-// 和 `@utility <name> { ... }` 语法(v4 官方迁移工具的产物)。这两种写法编译后
-// 等价于旧版摊平的复合选择器,但字面文本不再自带页面前缀,所以这里需要把 `&`
-// 展开成最近一层的选择器上下文(`@utility <name>` 视为 `.<name>`),否则会把
-// 完全合规的嵌套选择器误判成"没有命名空间"。
+// Tailwind v4 after migration,Some style files switched to native. CSS Nested(`&:hover`/`& p`/`&.foo`)
+// and `@utility <name> { ... }` syntax(v4 Output of official migration tool) After compilation, these two forms
+// Equivalent to legacy flattened compound selector,Literal text no longer includes page prefix.,Need what? `&`
+// Expand to nearest selector context(`@utility <name>` treated as `.<name>`),Otherwise, it will
+// Fully compliant nested selector misidentified as"No namespace"。
 function ruleSelectors(css) {
   const noComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const selectors = [];
-  // 每一层记录 { header, resolved }:resolved 为 null 表示这一层是透传的
-  // at-rule(@media/@keyframes 等),不建立新的选择器上下文,`&` 应穿透它去找
-  // 最近一层真正的选择器/`@utility` 上下文。
+// Log each layer. { header, resolved }: resolved as null indicates this layer is pass-through.
+// at-rule(@media/@keyframes etc), Do not create new selector context, `&` Traverse to find.
+// Nearest real selector/`@utility` context.
   const stack = [];
   let buffer = "";
 
@@ -109,7 +109,7 @@ function ruleSelectors(css) {
 }
 
 for (const group of GROUPS) {
-  test(`${group.name} 样式文件的选择器全部带页面命名空间`, () => {
+test(`${group.name} style file selectors all have page namespace`, () => {
     const violations = [];
     for (const file of group.files) {
       for (const selector of ruleSelectors(readFileSync(file, "utf8"))) {
@@ -127,7 +127,7 @@ for (const group of GROUPS) {
     assert.deepEqual(
       violations,
       [],
-      `以下选择器没有页面命名空间(应使用 reader-/detail- 前缀):\n  ${violations.join("\n  ")}`,
+`Following selectors lack page namespace.(Use reader-/detail- prefix):\n  ${violations.join("\n  ")}`,
     );
   });
 }

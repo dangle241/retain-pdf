@@ -258,9 +258,9 @@ export function mountBrowserCredentialsFeature({
   }
 
   /**
-   * 设置面板内嵌模式（SettingsHubDialog API 区）：只做"从凭据状态回填表单 +
-   * 复位到 api tab"，不经 viewPort.openDialog()——表单宿主是设置面板本身，
-   * 没有独立弹窗可开。首次配置门（setupMode）仍走 openBrowserCredentialsDialog。
+   * settings panel embedded mode (SettingsHubDialog API Area): only"Populate form from credential state. +
+   * Reset to api tab", without going through viewPort.openDialog()——The form host is the settings panel itself,
+   * No independent popup can be opened. First configuration gate (setupMode) still goes openBrowserCredentialsDialog。
    */
   function prepareCredentialsPanels() {
     syncBrowserDialogFromCredentialState();
@@ -378,7 +378,7 @@ export function mountBrowserCredentialsFeature({
     const definition = getOcrProviderDefinition(currentOcrProvider());
     const existing = readCurrentCredentials();
     const raw = readCredentialDialogValues({ elementsPort: dialogElementsPort });
-    // 密码框未回填/被清空时：空串表示「沿用已保存值」，避免把 localStorage 冲掉
+// Password field not repopulated / empty string on clear. 「Use saved value」 to avoid overwriting localStorage.
     const values = {
       ...raw,
       paddleToken: `${raw.paddleToken || ""}`.trim() || `${existing.paddleToken || ""}`.trim(),
@@ -393,7 +393,7 @@ export function mountBrowserCredentialsFeature({
       if (!modelApiKey) {
         viewPort.setDeepSeekValidationMessage(TRANSLATION_PROVIDER_DEFINITION.validationMissingMessage, "error");
       }
-      viewPort.setDialogStatus("请填写 OCR Token 与模型 API Key 后再保存", "error");
+      viewPort.setDialogStatus("Please fill in OCR Token With Model API Key Save Later", "error");
       return;
     }
 
@@ -403,13 +403,13 @@ export function mountBrowserCredentialsFeature({
       modelApiKey,
     };
 
-    // 保存只做落盘；联网校验留给「检测」按钮。
-    // 必须 await 完整持久化（含桌面 snapshot），再通知 AI 门禁刷新。
+    // Save only persists to disk; network validation left for「Check」Button.
+// Must await full persistence (including desktop snapshot); invalid input will refresh AI access.
     try {
       credentialsStatePort.setCredentials?.(nextCredentials);
-      // 统一走 savePersisted*：localStorage + 桌面 snapshot/IPC 一次写齐
+      // Route via unified path. savePersisted*：localStorage + Desktop snapshot/IPC Write all at once
       await savePersistedBrowserStoredConfig(nextCredentials);
-      // 兼容旧注入（桌面 markConfigured / 任务选项）
+      // Support legacy injection (desktop) markConfigured / Task options)
       if (runtimeEnv.isDesktopMode() && saveDesktopConfig) {
         await persistDesktopCredentials({
           currentOcrProvider,
@@ -438,7 +438,7 @@ export function mountBrowserCredentialsFeature({
           values: { ...values, paddleToken: ocrToken, modelApiKey },
         });
       }
-      // 再次保证内存态与刚写入的 next 一致
+// Re-ensure in-memory state matches freshly written data; consistent with next.
       credentialsStatePort.setCredentials?.(nextCredentials);
     } catch (error) {
       const message = (error as { message?: string })?.message || String(error);
@@ -446,12 +446,12 @@ export function mountBrowserCredentialsFeature({
       viewPort.setDeepSeekValidationMessage(message, "error");
       return;
     }
-    // 写回可见输入，避免保存后输入框仍显示空
+    // Write back visible input; prevents empty field after save.
     syncBrowserDialogFromCredentialState();
     onCredentialStateChange?.();
     notifyCredentialsChanged();
-    viewPort.setDialogStatus("已保存", "valid");
-    // 首次配置弹窗保存后关闭；设置中心内嵌时保持打开以便继续改任务选项
+    viewPort.setDialogStatus("Saved", "valid");
+    // First-run config modal: save then close. Settings center embedded: keep open for further task option edits.
     if (setupModePort.currentSetupMode?.()) {
       viewPort.closeDialog();
     }

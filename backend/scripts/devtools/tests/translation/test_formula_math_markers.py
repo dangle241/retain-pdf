@@ -20,13 +20,13 @@ from services.rendering.layout.inline_content.mode_router import item_render_mat
 
 def test_typst_markdown_supports_typed_formula_placeholders() -> None:
     formula_map = [{"placeholder": "<f1-17a/>", "formula_text": r"(\mathrm{CaO}_2)"}]
-    markdown = build_markdown_from_parts("过氧化钙<f1-17a/>释放", formula_map)
-    assert markdown == r"过氧化钙 $(\mathrm{CaO}_2)$ 释放"
+    markdown = build_markdown_from_parts("Calcium peroxide<f1-17a/>Release", formula_map)
+assert markdown == r"Calcium peroxide $(\mathrm{CaO}_2)$ release"
 
 
 def test_typst_markdown_supports_direct_math_text_without_formula_map() -> None:
-    markdown = build_markdown_from_direct_text(r"转移矩阵Q_t表明，且x_t∈{0,1}^K。")
-    assert markdown == r"转移矩阵Q_t表明，且x_t∈{0,1}^K。"
+    markdown = build_markdown_from_direct_text(r"Transfer matrixQ_tindicates, andx_t∈{0,1}^K。")
+    assert markdown == r"Transition MatrixQ_tindicate, andx_t∈{0,1}^K。"
 
 
 def test_render_markdown_defaults_to_placeholder_mode() -> None:
@@ -36,15 +36,15 @@ def test_render_markdown_defaults_to_placeholder_mode() -> None:
 
 def test_render_markdown_uses_direct_typst_path_for_item() -> None:
     item = {"math_mode": "direct_typst"}
-    markdown = build_item_render_markdown(item, r"积分$\int f(x) dx$值", [])
-    assert markdown == r"积分 $\int f(x) dx$ 值"
+    markdown = build_item_render_markdown(item, r"Points$\int f(x) dx$value", [])
+assert markdown == r"Integral $\int f(x) dx$ value"
 
 
 def test_direct_typst_render_markdown_does_not_rewrite_latex_cite_commands() -> None:
     item = {"math_mode": "direct_typst"}
     markdown = build_item_render_markdown(
         item,
-        r"ACONF\cite{124}、PCONF21\cite{117,126,127} 和 GMTKN55 \citep{117}",
+r"ACONF\cite{124}, PCONF21\cite{117,126,127} and GMTKN55 \citep{117}",
         [],
     )
     assert r"ACONF\cite{124}" in markdown
@@ -54,18 +54,18 @@ def test_direct_typst_render_markdown_does_not_rewrite_latex_cite_commands() -> 
 
 def test_render_markdown_uses_formula_map_for_placeholder_mode() -> None:
     formula_map = [{"placeholder": "<f1-17a/>", "formula_text": r"\pi"}]
-    markdown = build_render_markdown("你好<f1-17a/>，下一步", formula_map, math_mode="placeholder")
-    assert markdown == r"你好 $\pi$，下一步"
+    markdown = build_render_markdown("Hello<f1-17a/>, next", formula_map, math_mode="placeholder")
+assert markdown == r"Hello $\pi$, next step"
 
 
 def test_placeholder_boundary_helpers_preserve_token_splitting_and_lookup() -> None:
     formula_map = [{"placeholder": "<f1-17a/>", "formula_text": r"\pi"}]
     assert formula_map_lookup(formula_map) == {"<f1-17a/>": r"\pi"}
-    assert split_protected_text("你好<f1-17a/>，下一步") == ["你好", "<f1-17a/>", "，下一步"]
+assert split_protected_text("Hello<f1-17a/>, next step") == ["Hello", "<f1-17a/>", ", next step"]
 
 
 def test_typst_markdown_direct_typst_conservative_mode_does_not_guess_plain_scripts() -> None:
-    markdown = build_markdown_from_direct_text(r"转移矩阵Q_t表明，且x_t∈{0,1}^K。")
+markdown = build_markdown_from_direct_text(r"The transition matrix Q_t indicates that, and x_tâ{0,1}^K.")
     assert "$Q_t$" not in markdown
     assert "$x_t$" not in markdown
     assert "Q_t" in markdown
@@ -73,7 +73,7 @@ def test_typst_markdown_direct_typst_conservative_mode_does_not_guess_plain_scri
 
 
 def test_typst_markdown_direct_typst_conservative_mode_keeps_raw_latex_text() -> None:
-    markdown = build_markdown_from_direct_text(r"离子为 \left[ NTf _ { 2 } \right] ，并形成 \mathrm { Co(IV) } 物种。")
+    markdown = build_markdown_from_direct_text(r"ion is \left[ NTf _ { 2 } \right] , and forms the \mathrm { Co(IV) } Species.")
     assert r"$\left[" not in markdown
     assert r"$\mathrm" not in markdown
     assert r"\left[ NTf _ { 2 } \right]" in markdown
@@ -82,7 +82,7 @@ def test_typst_markdown_direct_typst_conservative_mode_keeps_raw_latex_text() ->
 
 def test_typst_markdown_direct_text_does_not_rewrite_latex_cite() -> None:
     markdown = build_markdown_from_direct_text(
-        r"集合 ACONF\cite{124} 和 PCONF21\cite{117,126,127}。",
+r"The set ACONF\cite{124} and PCONF21\cite{117,126,127}.",
     )
     assert r"ACONF\cite{124}" in markdown
     assert r"PCONF21\cite{117,126,127}" in markdown
@@ -91,7 +91,7 @@ def test_typst_markdown_direct_text_does_not_rewrite_latex_cite() -> None:
 
 def test_typst_markdown_direct_typst_keeps_existing_inline_math_latex() -> None:
     markdown = build_markdown_from_direct_text(
-        r"观察到 $\mathrm{Ph(i-PrO)SiH_2}$ (6) 的消耗速率快于其他硅烷。",
+        r"Observed. $\mathrm{Ph(i-PrO)SiH_2}$ (6) Consumes faster than other silanes.",
         normalize_existing_inline_math=True,
     )
     assert r"$\mathrm{Ph(i-PrO)SiH_2}$" in markdown
@@ -99,7 +99,7 @@ def test_typst_markdown_direct_typst_keeps_existing_inline_math_latex() -> None:
 
 def test_typst_markdown_direct_typst_keeps_existing_left_right_inline_math_latex() -> None:
     markdown = build_markdown_from_direct_text(
-        r"形成了 $\left(\mathrm{Ph}\left(i-\mathrm{PrO}\right)_2\mathrm{Si}\right)_2\mathrm{O}$ 物种。",
+        r"formed $\left(\mathrm{Ph}\left(i-\mathrm{PrO}\right)_2\mathrm{Si}\right)_2\mathrm{O}$ Species.",
         normalize_existing_inline_math=True,
     )
     assert r"\left" in markdown
@@ -109,7 +109,7 @@ def test_typst_markdown_direct_typst_keeps_existing_left_right_inline_math_latex
 
 def test_direct_typst_passthrough_keeps_short_latex_text_subscripts_atomic() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"外势集合 ($v_{\text{ext}}, \mathbf{B}_{\text{ext}}$) 之间的映射。"
+        r"Outside Influence Set ($v_{\text{ext}}, \mathbf{B}_{\text{ext}}$) Mapping between."
     )
 
     assert r"v_{\text{ext}}, \mathbf{B}_{\text{ext}}" in markdown
@@ -119,7 +119,7 @@ def test_direct_typst_passthrough_keeps_short_latex_text_subscripts_atomic() -> 
 
 def test_direct_typst_passthrough_keeps_adjacent_short_latex_text_subscripts_atomic() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"势场组分别为$v_{\text{ext}}, A_{\text{ext}}$和$v_{\text{ext}}^{\prime}, A_{\text{ext}}^{\prime}$。"
+        r"Potential field groups:$v_{\text{ext}}, A_{\text{ext}}$和$v_{\text{ext}}^{\prime}, A_{\text{ext}}^{\prime}$。"
     )
 
     assert r"$v_{\text{ext}}, A_{\text{ext}}$" in markdown
@@ -130,7 +130,7 @@ def test_direct_typst_passthrough_keeps_adjacent_short_latex_text_subscripts_ato
 
 def test_direct_typst_passthrough_does_not_demote_formula_text_blocks() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"其中 $x^{\text{this is intentionally long text inside math}} + y$ 保持模型输出。"
+r"Where $x^{\text{this is intentionally long text inside math}} + y$ Keep model output."
     )
 
     assert r"$x^{\text{this is intentionally long text inside math}} + y$" in markdown
@@ -138,13 +138,13 @@ def test_direct_typst_passthrough_does_not_demote_formula_text_blocks() -> None:
 
 
 def test_typst_markdown_escapes_literal_double_asterisk_in_plain_text() -> None:
-    markdown = build_markdown_from_direct_text(r"使用 6-310** 基组及其对应优化几何结构计算。")
+markdown = build_markdown_from_direct_text(r"Using 6-310** Basis set and corresponding optimized geometry calculation.")
     assert r"6-310\*\*" in markdown
 
 
 def test_direct_typst_passthrough_escapes_literal_double_asterisk_outside_math() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"使用 6-310** 基组，并保留 $E=mc^2$ 不变。"
+        r"Usage 6-310** Basis set, retained. $E=mc^2$ Unchanged."
     )
     assert r"6-310\*\*" in markdown
     assert r"$E=mc^2$" in markdown
@@ -152,7 +152,7 @@ def test_direct_typst_passthrough_escapes_literal_double_asterisk_outside_math()
 
 def test_direct_typst_passthrough_preserves_markdown_italic_outside_math() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"源自德语 *Farbe*，并保留 $C_{3\nu}$ 不变。"
+r"Derived from German *Farbe* and preserve $C_{3\nu}$ unchanged."
     )
     assert r"*Farbe*" in markdown
     assert r"\*Farbe\*" not in markdown
@@ -161,32 +161,32 @@ def test_direct_typst_passthrough_preserves_markdown_italic_outside_math() -> No
 
 def test_build_markdown_from_parts_direct_typst_passthrough() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"观察到 $\mathrm{Ph(i-PrO)SiH_2}$ (6) 的消耗速率快于其他硅烷。"
+r"Observed that the consumption rate of $\mathrm{Ph(i-PrO)SiH_2}$ (6) is faster than that of other silanes."
     )
-    assert markdown == r"观察到 $\mathrm{Ph(i-PrO)SiH_2}$ (6) 的消耗速率快于其他硅烷。"
+assert markdown == r"Observed that the consumption rate of $\mathrm{Ph(i-PrO)SiH_2}$ (6) is faster than other silanes."
 
 
 def test_typst_markdown_keeps_spaces_around_inline_math() -> None:
     formula_map = [{"placeholder": "<f1-17a/>", "formula_text": r"\pi"}]
-    markdown = build_markdown_from_parts("你好<f1-17a/>，下一步", formula_map)
-    assert markdown == r"你好 $\pi$，下一步"
+markdown = build_markdown_from_parts("Hello<f1-17a/>, next step", formula_map)
+assert markdown == r"Hello $\pi$, next step"
 
 
 def test_typst_markdown_adds_spaces_between_cjk_text_and_inline_math() -> None:
-    markdown = build_direct_typst_passthrough_text(r"积分$\int f(x) dx$值")
-    assert markdown == r"积分 $\int f(x) dx$ 值"
+    markdown = build_direct_typst_passthrough_text(r"integral$\int f(x) dx$value")
+assert markdown == r"Integral $\int f(x) dx$ value"
 
 
 def test_direct_typst_passthrough_keeps_existing_inline_math_latex_shape() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"$ \mathbf{f}_{\alpha}^{IJ}(\mathbf{R}) $ 是理解单态 Born-Oppenheimer 近似局限性的关键。"
+        r"$ \mathbf{f}_{\alpha}^{IJ}(\mathbf{R}) $ Understands monostate. Born-Oppenheimer Key to approximation limitations."
     )
-    assert markdown.startswith(r"$\mathbf{f}_{\alpha}^{IJ}(\mathbf{R})$ 是理解")
+    assert markdown.startswith(r"$\mathbf{f}_{\alpha}^{IJ}(\mathbf{R})$ Understood.")
 
 
 def test_direct_typst_passthrough_normalizes_angle_expectation_for_mitex() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"其中 $ \langle S^{2}\rangle_{T_{1}} $ 和 $ \langle S^{2}\rangle_{BS} $ 分别是 $ T_{1} $ 态。"
+r"where $ \langle S^{2}\rangle_{T_{1}} $ and $ \langle S^{2}\rangle_{BS} $ respectively $ T_{1} $ state."
     )
 
     assert r"$⟨S^{2}⟩_{T_{1}}$" in markdown
@@ -196,7 +196,7 @@ def test_direct_typst_passthrough_normalizes_angle_expectation_for_mitex() -> No
 
 def test_direct_typst_passthrough_normalizes_bare_angle_expectation_for_mitex() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"表1. $ \langle\Delta E_{ST}\rangle $（单位：eV）。"
+        r"表1. $ \langle\Delta E_{ST}\rangle $Unit:eV）。"
     )
 
     assert r"$⟨\Delta E_{ST}⟩$" in markdown
@@ -206,33 +206,33 @@ def test_direct_typst_passthrough_normalizes_bare_angle_expectation_for_mitex() 
 
 def test_direct_typst_passthrough_separates_adjacent_inline_math_blocks() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"该阻尼函数相关。$^{86}$$a_{n}$ 是调整后的全局参数。"
+        r"Related to the damping function.$^{86}$$a_{n}$ Adjusted global parameters."
     )
-    assert r"$^{86}$ $a_{n}$ 是调整后的全局参数。" in markdown
+assert r"$^{86}$ $a_{n}$ is the adjusted global parameter." in markdown
     assert "$$a" not in markdown
 
 
 def test_direct_typst_passthrough_wraps_parenthesized_inline_math_boundary() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"而 $R_{0}^{AB} = 0.5$ ($R_{0}^{A'} + R_{0}^{B'}$) 决定阻尼。"
+        r"while $R_{0}^{AB} = 0.5$ ($R_{0}^{A'} + R_{0}^{B'}$) Determine damping."
     )
-    assert r"而 $R_{0}^{AB} = 0.5$ $(R_{0}^{A'} + R_{0}^{B'})$ 决定阻尼。" == markdown
+assert r"while $R_{0}^{AB} = 0.5$ $(R_{0}^{A'} + R_{0}^{B'})$ determines damping." == markdown
 
 
 def test_direct_typst_passthrough_does_not_wrap_cjk_parenthesized_inline_math() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"$ w_j $ 是积分权重，由网格点 $j$（$ j \in [1, 23] $）之间的梯形分割得到。"
+        r"$ w_j $ Integral weight from grid points. $j$（$ j \in [1, 23] $Obtained by trapezoidal segmentation between )."
     )
     assert r"$j$$（" not in markdown
-    assert r"$w_j$ 是积分权重，由网格点 $j$（$j \in [1, 23]$）之间的梯形分割得到。" == markdown
+assert r"$w_j$ is the integration weight, obtained by trapezoidal partition between grid points $j$ ($j \in [1, 23]$)." == markdown
 
 
 def test_direct_typst_passthrough_normalizes_display_math_delimiters() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"$$ \delta E _{ \mathrm{c} }^{ \mathrm{MP2} }/ \delta\phi_{k}^{\dagger}(\boldsymbol{r}) $$ 的衰减速度"
+        r"$$ \delta E _{ \mathrm{c} }^{ \mathrm{MP2} }/ \delta\phi_{k}^{\dagger}(\boldsymbol{r}) $$ Decay Rate"
     )
     assert "$ $" not in markdown
-    assert r"$\delta E _{ \mathrm{c} }^{ \mathrm{MP2} } / \delta\phi_{k}^{\dagger}(\boldsymbol{r})$ 的衰减速度" == markdown
+assert r"the decay rate of $\delta E _{ \mathrm{c} }^{ \mathrm{MP2} } / \delta\phi_{k}^{\dagger}(\boldsymbol{r})$" == markdown
 
 
 def test_convert_latexish_to_typst_splits_attached_angle_command() -> None:
@@ -240,94 +240,94 @@ def test_convert_latexish_to_typst_splits_attached_angle_command() -> None:
 
 
 def test_direct_typst_passthrough_rewrites_mathscr_for_mitex_compatibility() -> None:
-    markdown = build_direct_typst_passthrough_text(r"$\mathscr{P}$ 空间")
-    assert markdown == r"$\mathcal{P}$ 空间"
+    markdown = build_direct_typst_passthrough_text(r"$\mathscr{P}$ Space")
+    assert markdown == r"$\mathcal{P}$ Space"
 
 
 def test_direct_typst_sanitizer_keeps_only_inline_math_compat_cleanup() -> None:
-    markdown = sanitize_direct_typst_inline_math(r"正文 $\mathscr{P}$ 与 $\angleABC$ 保持")
-    assert markdown == r"正文 $\mathcal{P}$ 与 $\angle ABC$ 保持"
+markdown = sanitize_direct_typst_inline_math(r"body text $\mathscr{P}$ and $\angleABC$ keep")
+assert markdown == r"body text $\mathcal{P}$ and $\angle ABC$ kept"
 
 
 def test_direct_typst_sanitizer_normalizes_double_backslash_math_commands() -> None:
-    markdown = sanitize_direct_typst_inline_math(r"浓度 $2.5~\\mu\\text{g}~\\text{ml}^{-1}$ 保持")
-    assert markdown == r"浓度 $2.5~\mu\text{g}~\text{ml}^{-1}$ 保持"
+    markdown = sanitize_direct_typst_inline_math(r"concentration $2.5~\\mu\\text{g}~\\text{ml}^{-1}$ Keep")
+assert markdown == r"concentration $2.5~\mu\text{g}~\text{ml}^{-1}$ kept"
 
 
 def test_direct_typst_sanitizer_rewrites_unsupported_circled_command() -> None:
-    markdown = sanitize_direct_typst_inline_math(r"路径 $\circled{\times}$ 与 $\circled{A}$ 保持")
-    assert markdown == r"路径 $\otimes$ 与 $A$ 保持"
+markdown = sanitize_direct_typst_inline_math(r"path $\circled{\times}$ and $\circled{A}$ kept")
+assert markdown == r"path $\otimes$ and $A$ kept"
 
 
 def test_direct_typst_sanitizer_rewrites_hbar_for_mitex_compatibility() -> None:
-    markdown = sanitize_direct_typst_inline_math(r"动量算符 $-i\hbar d/dq_k$ 和 $i\hbar d/dp_j$。")
+markdown = sanitize_direct_typst_inline_math(r"momentum operator $-i\hbar d/dq_k$ and $i\hbar d/dp_j$.")
     assert markdown == "动量算符 $-iℏ d/dq_k$ 和 $iℏ d/dp_j$。"
 
 
 def test_direct_typst_sanitizer_rewrites_partial_for_mitex_compatibility() -> None:
-    markdown = sanitize_direct_typst_inline_math(r"导数 $\partial E/\partial N = \mu$ 保持。")
-    assert markdown == r"导数 $∂ E/∂ N = \mu$ 保持。"
+    markdown = sanitize_direct_typst_inline_math(r"derivative $\partial E/\partial N = \mu$ maintained.")
+assert markdown == r"derivative $â E/â N = \mu$ kept."
 
 
 def test_direct_typst_sanitizer_rewrites_bra_ket_rangle_for_mitex_compatibility() -> None:
-    markdown = sanitize_direct_typst_inline_math(r"态 $|k\rangle$ 与 $|0\rangle$ 保持。")
-    assert markdown == r"态 $|k⟩$ 与 $|0⟩$ 保持。"
+markdown = sanitize_direct_typst_inline_math(r"state $|k\rangle$ and $|0\rangle$ kept.")
+assert markdown == r"state $|kâ©$ and $|0â©$ kept."
 
 
 def test_direct_typst_sanitizer_rewrites_varphi_for_mitex_compatibility() -> None:
-    # sanitizer 同时会剥掉 mitex 不支持的 \left/\right 尺寸修饰
-    markdown = sanitize_direct_typst_inline_math(r"基态 $\left|\varPhi_{0}\right\rangle$ 保持。")
-    assert markdown == r"基态 $|\Phi_{0}⟩$ 保持。"
+    # sanitizer Also strips. mitex Unsupported \left/\right Size modifier
+markdown = sanitize_direct_typst_inline_math(r"ground state $\left|\varPhi_{0}\right\rangle$ kept.")
+assert markdown == r"ground state $|\Phi_{0}â©$ kept."
 
 
 def test_direct_typst_sanitizer_restores_spreadsheet_cell_pseudo_math() -> None:
-    markdown = sanitize_direct_typst_inline_math(r"目标框输入 $\C\107$，变量框输入 $\B\3$。")
-    assert markdown == "目标框输入 C107，变量框输入 B3。"
+    markdown = sanitize_direct_typst_inline_math(r"Bounding box input $\C\107$Variable box input $\B\3$。")
+assert markdown == "Target box input C107, variable box input B3."
 
 
 def test_direct_typst_boundary_module_matches_legacy_passthrough_behavior() -> None:
-    text = r"使用 6-310** 基组，并保留 $E=mc^2$ 与 $\mathscr{P}$ 不变。"
+text = r"Use 6-310** base group, keep $E=mc^2$ and $\mathscr{P}$ keep"
     assert build_direct_typst_passthrough_markdown(text) == build_direct_typst_passthrough_text(text)
 
 
 def test_typst_markdown_does_not_render_superscript_citation_as_unicode_text() -> None:
     formula_map = [{"placeholder": "<f1-17a/>", "formula_text": r"^{6c}"}]
-    markdown = build_markdown_from_parts("方法<f1-17a/>促使", formula_map)
+markdown = build_markdown_from_parts("Method<f1-17a/>Prompt", formula_map)
     assert "⁶ᶜ" not in markdown
     assert "6c" in markdown
 
 
 def test_typst_markdown_does_not_compact_bracket_citation_text() -> None:
     formula_map = [{"placeholder": "<f1-17a/>", "formula_text": r"[35, 36]"}]
-    markdown = build_markdown_from_parts("见<f1-17a/>下一步", formula_map)
+markdown = build_markdown_from_parts("See<f1-17a/>Next step", formula_map)
     assert "[35" in markdown
     assert "36]" in markdown
 
 
 def test_typst_markdown_does_not_promote_bare_superscript_citation_by_default() -> None:
-    markdown = build_markdown_from_parts("Herzon课题组也使用了该条件。^{18}", [])
+    markdown = build_markdown_from_parts("HerzonThe research group also used this condition.^{18}", [])
     assert markdown.endswith("。^{18}")
 
 
 def test_typst_markdown_does_not_promote_bare_scripted_chemical_formula() -> None:
-    text = "Co(III)(Sal^{tBu,tBu})(i - Pr) (4) 与中间体反应。"
+    text = "Co(III)(Sal^{tBu,tBu})(i - Pr) (4) React with intermediate."
     markdown = build_markdown_from_direct_text(text)
     assert markdown == text
 
 
 def test_typst_markdown_does_not_promote_double_slash_latex_command_outside_math() -> None:
-    markdown = build_markdown_from_direct_text(r"$\mathrm{Ni(II)}$-芳基/ \\mathrm{Co(IV)} -烷基")
+    markdown = build_markdown_from_direct_text(r"$\mathrm{Ni(II)}$-aryl/ \\mathrm{Co(IV)} -alkyl")
     assert r"$\mathrm{Ni(II)}$" in markdown
     assert r"\\mathrm{Co(IV)}" in markdown
     assert r"$\mathrm{Co(IV)}$" not in markdown
 
 
 def test_typst_markdown_does_not_promote_left_right_bracket_formula() -> None:
-    markdown = build_markdown_from_direct_text(r"离子为 \left[ NTf _ { 2 } \right] 和配体。")
+markdown = build_markdown_from_direct_text(r"The ion is \left[ NTf _ { 2 } \right] with ligand.")
     assert r"$\left[ NTf" not in markdown
     assert r"\left[ NTf _ { 2 } \right]" in markdown
 
 
 def test_typst_markdown_does_not_promote_bracketed_ion_pair() -> None:
-    markdown = build_markdown_from_direct_text(r"溶剂使用 [BMM][PF6] 体系。")
-    assert markdown == r"溶剂使用 [BMM][PF6] 体系。"
+    markdown = build_markdown_from_direct_text(r"solvent used [BMM][PF6] System.")
+    assert markdown == r"Solvent Use [BMM][PF6] System."

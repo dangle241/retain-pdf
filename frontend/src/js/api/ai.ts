@@ -3,8 +3,8 @@ import { API_PREFIX } from "../config/api-constants.js";
 import { unwrapEnvelope } from "../job/core.js";
 import { buildApiEndpoint } from "./http.js";
 
-// 图书馆 AI 问答(POST /api/v1/ai/ask,SSE 流式)。
-// 用流式 fetch 而不是 EventSource:EventSource 无法携带 X-API-Key 请求头。
+// Library AI Q&A (POST /api/v1/ai/ask, SSE streaming).
+// Use streaming fetch rather than EventSource:EventSource Cannot carry X-API-Key request headers.
 
 export class AiAskError extends Error {
   status: number;
@@ -22,8 +22,8 @@ function normalizeDonePayload(payload: any = {}) {
     toolTrace: Array.isArray(payload?.tool_trace) ? payload.tool_trace : [],
     rounds: Number(payload?.rounds) || 0,
     conversationId: `${payload?.conversation_id || payload?.conversationId || ""}`.trim(),
-    // 审计 C2:后端历史回写失败时 done.persisted=false,上层提示"未存入历史"。
-    // 旧后端无此字段 → 视为已持久化(不误报)。
+// Audit C2: when backend history write-back fails, done.persisted=false, top-level prompt "Not saved to history".
+    // Legacy backend lacks this field. → Treat as persisted(No false positives)。
     persisted: payload?.persisted !== false,
   };
 }
@@ -44,11 +44,11 @@ function parseSseEvent(line = "") {
   }
 }
 
-// 消费 /ai/ask 的 SSE body:按行切分 `data: {json}`,tool 事件回调,
-// done 事件返回最终结果,error 事件抛 AiAskError。
+// Consume /ai/ask's SSE body: split by line, data: {json}, tool event callback,
+// done Event returns final result,error Event dispatch AiAskError。
 export async function readAiAskStream(body, { onToolEvent = null, onAnswerDelta = null } = {}) {
   if (!body || typeof body.getReader !== "function") {
-    throw new AiAskError("AI 服务响应格式异常,请重试。");
+    throw new AiAskError("AI Service response format error,Please retry.");
   }
   const reader = body.getReader();
   const decoder = new TextDecoder();
@@ -66,7 +66,7 @@ export async function readAiAskStream(body, { onToolEvent = null, onAnswerDelta 
       return;
     }
     if (event.type === "answer_delta") {
-      // 最终回答轮的逐 token 增量:累积并回调,前端据此增量渲染
+// Final answer round step-by-step token delta: accumulate and callback; frontend incremental render based on this.
       const chunk = `${event.text || ""}`;
       if (chunk) {
         streamedAnswer += chunk;
@@ -75,7 +75,7 @@ export async function readAiAskStream(body, { onToolEvent = null, onAnswerDelta 
       return;
     }
     if (event.type === "done") {
-      // done.answer 为权威全文;后端未回 answer 时用累积的流式文本兜底
+      // done.answer For authoritative full text;Backend unresponsive. answer Use accumulated streaming text as fallback.
       result = normalizeDonePayload({
         ...event,
         answer: event.answer || streamedAnswer,
@@ -83,7 +83,7 @@ export async function readAiAskStream(body, { onToolEvent = null, onAnswerDelta 
       return;
     }
     if (event.type === "error") {
-      throw new AiAskError(`${event.message || "AI 服务返回错误。"}`);
+      throw new AiAskError(`${event.message || "AI Service returned an error."}`);
     }
   }
 
@@ -112,7 +112,7 @@ export async function readAiAskStream(body, { onToolEvent = null, onAnswerDelta 
     reader.releaseLock?.();
   }
   if (!result) {
-    throw new AiAskError("AI 服务响应中断,请重试。");
+throw new AiAskError("AI Service response interrupted, please retry.");
   }
   return result;
 }
@@ -149,21 +149,21 @@ async function extractErrorMessage(resp) {
     }
     return "";
   } catch (_err) {
-    // 非 JSON 时截一段原文，避免整页 HTML 糊到聊天气泡
+// Non-JSON: truncate text snippet, avoid full-page HTML blurring chat bubble.
     return `${text || ""}`.replace(/\s+/g, " ").trim().slice(0, 240);
   }
 }
 
-// mock 模式的 SSE 流:忠实复刻真实后端事件序列(tool → answer_delta → done)。
-// 引用 block_id 对齐 mock 阅读区域(b-intro-3),使引用跳转可端到端验证。
+// mock pattern's SSE stream:Faithfully replicate the actual backend event sequence.(tool → answer_delta → done)。
+// Reference block_id aligns with mock reading area (b-intro-3), enabling end-to-end verification for reference navigation.
 function buildMockAskStream(question = "") {
   const encoder = new TextEncoder();
   const answer = [
-    `关于「${question}」,检索到以下要点:\n\n`,
-    "- **卤素-锂交换**在共轭体系中表现出显著选择性 [1]\n",
-    "- 该效应源于锂原子与芳环的有效共轭 [1]\n\n",
-    "### 结论\n\n",
-    "四重卤素交换未表现出配位倾向,量子化学计算支持这一解释。原始 HTML 如 <img src=x> 会以文本显示。\n",
+Regarding 「${question}」, key points retrieved:\\n\\n,
+    "- **Halogen-Lithium exchange**Exhibits significant selectivity in conjugated systems [1]\n",
+    "- This effect originates from effective conjugation between lithium atoms and aromatic rings. [1]\n\n",
+"### Conclusion\n\n",
+"Quadruple halogen exchange showed no coordination tendency. Quantum chemical calculations support this explanation. Original HTML like  displayed as text\n",
   ];
   const events = [
     { type: "tool", round: 1, tool: "search_fulltext", arguments: { query: question } },
@@ -179,7 +179,7 @@ function buildMockAskStream(question = "") {
           job_id: "mock-job-20260415",
           page_idx: 0,
           block_id: "b-intro-3",
-          snippet: "现代有机合成已达到极高的精密水平",
+          snippet: "Modern organic synthesis has reached an extremely high level of precision.",
         },
       ],
       tool_trace: [{ round: 1, tool: "search_fulltext" }],
@@ -197,18 +197,18 @@ function buildMockAskStream(question = "") {
   });
 }
 
-// 图书馆 agentic 问答。documentId 传入时限定单文档,不传全库检索。
-// jobId 一并上传:服务端可反查 document,历史 run 更稳。
-// conversationId 传入时走多轮;缺省服务端可 auto-create 并在 done.conversation_id 回传。
-// 返回 { answer, citations, toolTrace, rounds, conversationId };失败抛 AiAskError。
+// Library agentic Q&A: documentId limits to single document on input, skip full DB scan if param missing.
+// jobId uploaded together: server-side reverse lookup supported for document and history run, more stable.
+// conversationId iterates on input; default server is OK, auto-create and callback in done.conversation_id.
+// Returns { answer, citations, toolTrace, rounds, conversationId }; throw on failure with AiAskError.
 export async function askLibraryAi({
   question = "",
   documentId = "",
   jobId = "",
   conversationId = "",
-  /** 新 user 的 parent / regenerate 时的 user 消息 id */
+/* parent for new user / regenerate time user message id */
   parentId = "",
-  /** 重新生成:只追加 assistant 兄弟分支 */
+/* regenerate: only append, assistant sibling branch */
   regenerate = false,
   userMessageId = "",
   assistantMessageId = "",
@@ -223,11 +223,11 @@ export async function askLibraryAi({
 } = {}) {
   const trimmed = `${question}`.trim();
   if (!trimmed) {
-    throw new AiAskError("请输入问题。", 400);
+    throw new AiAskError("Enter question.", 400);
   }
   if (isMockMode()) {
-    // 忠实模拟真实 SSE 流:tool 事件 → answer_delta 逐块 → done 带引用,
-    // 让 markdown 渲染 / 流式 / 引用跳转三条链路都能在 mock 下端到端复现。
+// Faithfully simulate real-world behavior: SSE stream: tool events → answer_delta chunk by chunk → done with reference,
+// Let markdown rendering / streaming / all three reference jump paths function; mock reproduces end-to-end.
     return readAiAskStream(buildMockAskStream(trimmed), { onToolEvent, onAnswerDelta });
   }
   const payload: Record<string, any> = { question: trimmed, stream: true };
@@ -254,10 +254,10 @@ export async function askLibraryAi({
   const aid = `${assistantMessageId || ""}`.trim();
   if (uid) payload.user_message_id = uid;
   if (aid) payload.assistant_message_id = aid;
-  // 按请求携带 LLM 凭据:必须非空,禁止带出空 Authorization: Bearer
+// Carried by request LLM credentials: must be non-empty, disallow empty exports. Authorization: Bearer
   const key = `${llmApiKey || ""}`.trim();
   if (key) {
-    // 若用户误把 "Bearer xxx" 整段粘进设置,剥掉前缀
+    // If user mistakenly "Bearer xxx" Paste entire block into settings.,Strip prefix
     payload.llm_api_key = key.replace(/^Bearer\s+/i, "").trim();
   }
   if (`${llmBaseUrl || ""}`.trim()) {
@@ -274,30 +274,30 @@ export async function askLibraryAi({
   });
   if (!resp.ok) {
     if (resp.status === 502) {
-      throw new AiAskError("AI 服务未运行(502),请先启动 retainpdf-ai 服务。", 502);
+throw new AiAskError("AI service not running (502), please start retainpdf-ai service", 502);
     }
     const message = await extractErrorMessage(resp);
-    // 401：多半是服务入口 X-API-Key（runtime xApiKey），不是模型 Key
+    // 401likely service entry X-API-Key（runtime xApiKeyNo translation needed. Source is Chinese, not Vietnamese. Key
     if (resp.status === 401) {
       const hint = /X-API-Key|api key|invalid api key|Unauthorized/i.test(message)
         ? message
-        : "服务鉴权失败：X-API-Key 无效或未配置（检查 runtime-config 的 xApiKey / 后端 auth 配置）。";
+: "Service authentication failed: X-API-Key invalid or unconfigured (check runtime-config's xApiKey / backend auth settings).";
       throw new AiAskError(`${hint}(${resp.status})`, 401);
     }
-    // 400 缺 LLM key：明确指向「设置 → 凭据」的模型 API Key
-    if (resp.status === 400 && /LLM|模型\s*API\s*Key|api key/i.test(message)) {
+// 400 missing LLM key, explicitly point to 「Settings → Credentials」model API Key
+if (resp.status === 400 && /LLM|æ¨¡å\s*API\s*Key|api key/i.test(message)) {
       throw new AiAskError(
-        message.includes("凭据") || message.includes("设置")
+message.includes("Credential") || message.includes("Settings")
           ? `${message}(${resp.status})`
-          : `缺少模型 API Key：请到设置 → API 设置填写后再提问。(${resp.status})`,
+          : `Missing model API KeyGo settings → API fill in settings before asking questions.(${resp.status})`,
         400,
       );
     }
-    throw new AiAskError(`${message || "AI 问答请求失败,请稍后重试。"}(${resp.status})`, resp.status);
+    throw new AiAskError(`${message || "AI Q&A request failed,Please try again later."}(${resp.status})`, resp.status);
   }
   const contentType = `${resp.headers?.get?.("content-type") || ""}`.toLowerCase();
   if (contentType.includes("application/json")) {
-    // 后端未按流式返回时,兼容一次性 JSON envelope
+    // Backend not streaming response.,Support one-time JSON envelope
     return normalizeDonePayload(unwrapEnvelope(await resp.json()));
   }
   return readAiAskStream(resp.body, { onToolEvent, onAnswerDelta });

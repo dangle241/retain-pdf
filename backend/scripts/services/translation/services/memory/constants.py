@@ -13,10 +13,10 @@ MIN_TERM_HITS_FOR_PROMPT = 1
 MAX_TRANSLATED_TERM_VALUE_CHARS = 12
 MAX_TRANSLATED_TERM_VALUE_CJK = 8
 MAX_TERM_KEY_WORDS_FOR_PROMPT = 4
-TERM_VALUE_BLOCKLIST_WORDS = {"的", "已", "将", "被", "从", "在", "这", "其"}
+TERM_VALUE_BLOCKLIST_WORDS = {"的", "already", "将", "is", "从", "在", "this", "its"}
 
 TERM_PAIR_PATTERNS = (
-    re.compile(r"(?P<zh>[\u4e00-\u9fff][\u4e00-\u9fffA-Za-z0-9·\-]{1,24})（(?:或称|又称|简称)?(?P<en>[A-Za-z][A-Za-z0-9 ._+/\-]{1,48})）"),
+    re.compile(r"(?P<zh>[\u4e00-\u9fff][\u4e00-\u9fffA-Za-z0-9·\-]{1,24})（(?:or|also known as|Abbreviation)?(?P<en>[A-Za-z][A-Za-z0-9 ._+/\-]{1,48})）"),
     re.compile(r"(?P<zh>[\u4e00-\u9fff][\u4e00-\u9fffA-Za-z0-9·\-]{1,24})\((?:or |also known as )?(?P<en>[A-Za-z][A-Za-z0-9 ._+/\-]{1,48})\)"),
     re.compile(r"(?P<zh>[\u4e00-\u9fff][\u4e00-\u9fffA-Za-z0-9·\-]{1,24})（(?P<en>[A-Za-z][A-Za-z0-9 ._+/\-]{1,48})）"),
 )

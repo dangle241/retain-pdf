@@ -19,12 +19,12 @@ def finalize_payload_orchestration_metadata(payload: list[dict]) -> None:
 
 
 def finalize_orchestration_metadata_by_page(page_payloads: dict[int, list[dict]]) -> None:
-    # 必须以全书扁平口径执行一次,与 save_pages 的 refresh 口径一致。
-    # 逐页执行时跨页 continuation 组在每页都只有 1 个成员:
-    # - review 拼接的组(candidate ids 已清空、无 provider id)会被
-    #   clear_singleton_continuation_group 当孤儿直接抹掉;
-    # - provider 跨页组虽保住 group id,unit 字段也会被降级成 single,
-    #   与随后 save_pages 的扁平分组结论互相矛盾。
+# Execute once using book-wide flat scope, consistent with save_pages refresh logic.
+    # Cross-page execution during page-by-page processing. continuation Group appears on every page only 1 member:
+# - review concatenated group (candidate ids cleared, no provider id) will be
+    #   clear_singleton_continuation_group Delete orphans directly.;
+    # - provider Cross-page groups preserve group id,unit Field also downgraded to single,
+    #   and subsequently save_pages Flat grouping conclusions contradict.
     flat_payload = [item for page_idx in sorted(page_payloads) for item in page_payloads[page_idx]]
     finalize_payload_orchestration_metadata(flat_payload)
 

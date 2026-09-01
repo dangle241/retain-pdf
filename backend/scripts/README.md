@@ -1,43 +1,43 @@
-# Scripts 总览
+# Scripts Overview
 
-`scripts/` 是整套“PDF -> OCR -> 翻译 -> 保留排版渲染”的脚本工程目录。
+`scripts/` is the complete set: PDF -> OCR -> translation -> layout-preserving rendering script project directory.
 
-现在顶层按职责分成五层：
+Top level now split into five layers by responsibility:
 
 - `runtime/`
-  运行时编排层，只放 pipeline。
+  Runtime orchestration layer. Put only pipeline。
 - `services/`
-  OCR、MinerU、翻译、渲染等具体实现层。
+  OCR、MinerUImplementation layer: rendering, translation, etc.
 - `foundation/`
-  配置、共享工具和提示词资源。
+  Configurations, shared tools, and prompt resources.
 - `entrypoints/`
-  人工执行入口。
+  Manual execution entry.
 - `devtools/`
-  实验、迁移、示例、测试探针、诊断脚本。
+  Experiments, migrations, examples, test probes, diagnostic scripts.
 
-其中 `services/` 内部现在又明确分成两类：
+Within `services/`, now clearly divided into two categories:
 
-- provider / translation / rendering 这类能力模块
-- `services/pipeline_shared/` 这类跨阶段共享协议模块
+- provider / translation / rendering These capability modules.
+- `services/pipeline_shared/` Such cross-stage shared protocol modules
 
-## 主链路
+## Main path
 
-核心流程可以概括成：
+Core process summary:
 
 `PDF -> OCR provider -> document_schema -> services/translation -> services/rendering -> PDF`
 
-更具体一点：
+More specifically:
 
 1. `normalize.stage.v1`
-   OCR provider 原始结果进入 `document_schema`，产出 `ocr/normalized/document.v1.json` 和 `document.v1.report.json`
+OCR provider feeds raw results to `document_schema`, producing `ocr/normalized/document.v1.json` and `document.v1.report.json`.
 2. `translate.stage.v1`
-   翻译链只读取 `document.v1.json`，抽取正文白名单 block，补 continuation / orchestration 元数据，输出 `translated/`
+   Translation chain read-only. `document.v1.json`Extract body whitelist block, fill continuation / orchestration Metadata, output `translated/`
 3. `render.stage.v1`
-   渲染链只读取翻译产物和源 PDF，输出 `rendered/*.pdf`
+   Render chain reads translation output and source only. PDFOutput `rendered/*.pdf`
 4. `book.stage.v1`
-   顶层整书流程，只负责编排 `normalize -> translate -> render`，不再让下游直接猜 provider 原始结构
+   Top-level book workflow: orchestration only. `normalize -> translate -> render`No longer let downstream guess directly. provider Original structure
 
-现在的正式块级契约是：
+The current formal block-level contract is:
 
 - `geometry`
 - `content`
@@ -47,102 +47,102 @@
 - `policy`
 - `provenance`
 
-说明：
+Note:
 
-- `type/sub_type/bbox/text/lines/segments` 仍保留，但已经降级为兼容字段
-- translation / rendering 主线不应该再基于 raw OCR 字段或 `derived/sub_type` 重新猜正文
-- 是否进入翻译，以 `policy.translate` 为唯一正式入口
-- translation payload 的正式消费口径也已固定为 strict top-level contract，不再依赖 `metadata` 镜像
+- `type/sub_type/bbox/text/lines/segments` Retained as compatibility field.
+- translation / rendering Main branch no longer based on legacy monorepo. raw OCR Field or `derived/sub_type` re-guess body text
+- whether to enter translation, with `policy.translate` Main entry point only
+- translation payload Official consumption metric fixed as. strict top-level contractNo longer dependent. `metadata` Image
 
-## 推荐入口
+## Recommended entry point
 
-日常使用优先走这些入口：
+For daily use, prioritize these entry points:
 
 - `scripts/entrypoints/run_book.py`
-  当前最上层完整入口。通过 `book.stage.v1` 串起 `normalize -> translate -> render`，适合人工本地跑整条主链路。
+  Current topmost complete entry. Through `book.stage.v1` Chain together `normalize -> translate -> render`Suitable for manually running the entire main chain locally.
 - `scripts/entrypoints/run_provider_case.py`
-  本地一条命令跑“provider -> normalize -> translate -> render”的通用入口名。底层由 provider 分发层决定具体 OCR 实现，入口名不暴露 provider。
+  Run with one local commandprovider -> normalize -> translate -> renderUniversal entry name. Underlying provider Distribution layer determines specifics. OCR Implementation: entry name not exposed. provider。
 - `scripts/entrypoints/run_document_flow.py`
-  已经有 OCR JSON 和 PDF 时，优先用这个中性入口名跑完整流程。
+When you already have OCR JSON and PDF, prefer this neutral entry name to run the complete process.
 - `scripts/entrypoints/run_normalize_ocr.py`
-  顶层 normalize worker。把 raw OCR JSON 收口成 `document.v1.json`。
+Top-level normalize worker. Converts raw OCR JSON to final `document.v1.json`.
 - `scripts/entrypoints/run_provider_ocr.py`
-  本地 OCR-only 通用入口名。只跑 provider -> unpack -> normalize。
+Local OCR-only generic entry. Runs only provider -> unpack -> normalize.
 - `scripts/entrypoints/run_translate_only.py`
-  顶层 translate worker。只接受已经标准化的 `document.v1.json`。
+Top-level translate worker; accepts only standardized `document.v1.json`.
 - `scripts/entrypoints/run_render_only.py`
-  顶层 render worker。只接受翻译产物和 PDF。
+Top-level render worker. Produces PDF.
 - `scripts/entrypoints/translate_book.py`
-  只翻译，不渲染。
+  Translate only, do not render.
 - `scripts/entrypoints/build_book.py`
-  只渲染，不重新翻译。
+  Render only, do not re-translate.
 - `scripts/entrypoints/build_page.py`
-  单页渲染调试入口。
+  Single-page rendering debug entry.
 - `scripts/entrypoints/translate_page.py`
-  单页翻译调试入口。
+  Single-page translation debug entry.
 - `scripts/entrypoints/validate_document_schema.py`
-  契约排错入口。只用于检查 `document.v1` 或 adapter 行为，不是日常整链路入口。
+Contract debugging entry. Inspects `document.v1` or adapter behavior, not daily full-chain entry.
 - `scripts/devtools/tests/document_schema/regression_check.py`
-  长期回归工具，不是主流程入口。
+  Long-term regression tool, not main entry point.
 
-不要把测试脚本当主入口。正常验证整条链路时，优先跑：
+Don't set test scripts as main entry. For full-chain validation, run first:
 
 1. `run_book.py --spec <job_root>/specs/book.spec.json`
-2. 或 Rust API 提交 job，让 Rust 通过 spec 驱动三个 worker
+Or submit job via Rust API; Rust drives three workers via spec.
 
-如果要改翻译链路，推荐阅读顺序是：
+If modifying the translation pipeline, recommended reading order:
 
 1. `services/translation/README.md`
 2. `services/translation/llm/README.md`
-3. 再按需要进入 `services/translation/llm/providers/` 或 `services/translation/llm/shared/orchestration/`
+Then enter as needed: `services/translation/llm/providers/` or `services/translation/llm/shared/orchestration/`.
 
-## 新 Provider 接入顺序
+New provider integration order
 
-如果后续要接新的 OCR provider，先按这个顺序走，不要直接改翻译/渲染主线：
+If adding new OCR provider, first follow this order, do not directly change translation/Rendering pipeline:
 
-1. 先看 `scripts/services/ocr_provider/README.md`
-   先把 provider API 层边界、状态、原始产物职责定义清楚。
-2. 再看 `scripts/services/document_schema/README.md`
-   明确字段应该落到 `geometry/content/layout_role/semantic_role/structure_role/policy/provenance` 的哪一层。
-3. 准备最小 raw fixture
-   放到 `scripts/devtools/tests/document_schema/fixtures/`。
-4. 新增 provider 实现和 adapter
-   通过 `scripts/services/document_schema/adapters.py` 接进统一 schema。
-5. 把 fixture 登记到 `scripts/devtools/tests/document_schema/fixtures/registry.py`
-   不要手改主线去兼容 provider 原始 JSON。
-6. 跑 `scripts/devtools/tests/document_schema/regression_check.py`
-   至少确认 detector、adapt、validation、extractor smoke 全都通过。
+First read `scripts/services/ocr_provider/README.md` to define provider API boundaries, state, raw artifact responsibilities.
+   First. provider API Clearly define layer boundaries, state, and raw artifact responsibilities.
+Then read `scripts/services/document_schema/README.md` to know which fields go to `geometry/content/layout_role/semantic_role/structure_role/policy/provenance`.
+   Explicit fields should go to. `geometry/content/layout_role/semantic_role/structure_role/policy/provenance` which layer.
+3. Prepare minimum raw fixture
+   Place `scripts/devtools/tests/document_schema/fixtures/`。
+Implement new provider and adapter via `scripts/services/document_schema/adapters.py` to unify access to schema.
+Through `scripts/services/document_schema/adapters.py` unify access to schema.
+Register fixture to `scripts/devtools/tests/document_schema/fixtures/registry.py`; do not patch mainline for compatibility. Fork branch. Cherry-pick fixes only for provider raw JSON.
+Do not patch mainline for compatibility. Fork branch. Cherry-pick fixes only for provider raw JSON.
+6. run `scripts/devtools/tests/document_schema/regression_check.py`
+   At least confirm detector、adapt、validation、extractor smoke All passed.
 
-## 顶层目录说明
+## Top-level directory description
 
 - `services/mineru`
-  MinerU 接入、下载、解包、job 组织。
+  MinerU Access, download, unpackjob Organize.
 - `services/pipeline_shared`
-  provider / translate / render 共用的阶段协议、summary 和 JSON IO。
+Provider / translate / render shared stage protocol, summary, and JSON IO.
 - `services/translation`
-  OCR payload 到翻译 JSON。
+OCR payload to translation JSON.
 - `services/rendering`
-  翻译 JSON 到 PDF。
+Translation JSON to PDF.
 - `runtime/pipeline`
-  翻译和渲染的总编排层。
+  Overall orchestration layer for translation and rendering.
 - `services/README.md`
-  具体能力实现层总说明。
+  Concrete Capability Implementation Layer: Overview.
 - `foundation/config`
-  路径、字体、版式和运行时默认配置。
+  Paths, fonts, layout, and runtime default configuration.
 - `foundation/shared`
-  输入解析、job 目录、环境变量、提示词加载等共享能力。
+  Input parsing,job Shared capabilities: directories, environment variables, prompt loading, etc.
 - `foundation/prompts`
-  可编辑提示词模板。
+  Editable prompt template.
 - `devtools/experiments`
-  实验性流程，不属于稳定主链路。
+  Experimental process, not part of stable mainline.
 - `devtools/tests`
-  测试探针和排版实验。
+  Test probe and layout experiment.
 - `devtools/tools`
-  示例脚本、迁移工具和诊断脚本。
+  Example scripts, migration tools, and diagnostic scripts.
 
-## 结构化输出
+## Structured output
 
-任务输出统一落到标准 job root 下。Rust API 默认是：
+Unify task outputs to standard. job root below.Rust API Default:
 
 - `DATA_ROOT/jobs/<job-id>/source`
 - `DATA_ROOT/jobs/<job-id>/ocr`
@@ -151,47 +151,47 @@
 - `DATA_ROOT/jobs/<job-id>/artifacts`
 - `DATA_ROOT/jobs/<job-id>/logs`
 
-其中：
+Where:
 
-- `ocr/unpacked/` 或 provider raw 目录保留 OCR provider 原始产物；MinerU 常见为 `layout.json`，Paddle 常见为 `paddle_result.json` / `paddle_raw`
-- `ocr/normalized/document.v1.json` 是当前翻译/渲染主链路使用的统一 OCR 输入
-- `ocr/normalized/document.v1.report.json` 记录 adapter/provider 探测、defaults 默认补齐和 schema 校验摘要
-- `translated/translation-manifest.json` 与其引用的逐页 payload 是翻译阶段正式产物
-- `rendered/*.pdf` 是最终输出 PDF
-- `rendered/typst/` 保留 Typst 中间产物，便于查错和回溯
-- `artifacts/` 放 summary、bundle 索引等下载产物
-- `logs/` 放阶段日志和结构化事件输出
+`ocr/unpacked/` or provider raw directory holds OCR provider original output; MinerU common `layout.json`, Paddle common `paddle_result.json` / `paddle_raw`.
+`ocr/normalized/document.v1.json` is the unified OCR input for translation/main rendering pipeline.
+`ocr/normalized/document.v1.report.json` records adapter/provider detection, default completion, and schema validation summary.
+- `translated/translation-manifest.json` Page references removed. payload are the official products of the translation stage
+- `rendered/*.pdf` Is final output PDF
+`rendered/typst/` preserves Typst intermediate artifacts for debugging and traceability.
+- `artifacts/` place summary、bundle Indexes and other download artifacts
+- `logs/` Emit stage logs and structured events.
 
-当前约定：
+Current convention:
 
-- 主链路优先消费 `document.v1.json`
-- `document.v1.json` 的正式消费口径是 `geometry/content/layout_role/semantic_role/structure_role/policy/provenance`
-- 如果入口给的是 raw `layout.json`，会先做一次显式规范化，再进入翻译主线
-- raw MinerU 结构保留给 adapter、调试和回溯，不再作为主链路的隐式数据契约
-- 如果只是做排错、状态展示或 API 输出摘要，优先消费 `document.v1.report.json`
-- Python 侧统一通过 `services/document_schema/reporting.py` 读取 report 和生成 normalization summary
-- `specs/` 保存阶段 spec JSON，当前已覆盖：
+- Main link priority consumption `document.v1.json`
+- `document.v1.json` Official consumption definition: `geometry/content/layout_role/semantic_role/structure_role/policy/provenance`
+- If the entry gives raw `layout.json`Perform explicit normalization first, then proceed to main translation.
+- raw MinerU Reserved for structure adapterDebugging and tracing no longer implicit data contract in main path.
+- If only for troubleshooting, status display, or API Output summary; prioritize consumption. `document.v1.report.json`
+Python side uniformly reads report and generates normalization summary via `services/document_schema/reporting.py`.
+- `specs/` Save Stage spec JSONCurrently covered:
   - `normalize.spec.json` -> `normalize.stage.v1`
   - `translate.spec.json` -> `translate.stage.v1`
   - `render.spec.json` -> `render.stage.v1`
   - `provider.spec.json` -> `provider.stage.v1`
   - `book.spec.json` -> `book.stage.v1`
 
-## Stage Spec 约定
+## Stage Spec Convention
 
-当前 Rust API 到 Python worker 的稳定协议，已经固定为：
+Rust API to Python worker stable protocol fixed to:
 
 `python -u <entrypoint> --spec DATA_ROOT/jobs/<job-id>/specs/<stage>.spec.json`
 
-约定如下：
+Conventions are as follows:
 
-- spec 只保存阶段输入、参数和 job 引用，不再把 Python 内部实现细节暴露给 Rust
-- `job.job_root` 是路径推导锚点；各阶段内部通过 `job_dirs.py` 派生 `source/ocr/translated/rendered/artifacts/logs`
-- 密钥不明文写入 spec
-  - 翻译 key 通过 `credential_ref=env:RETAIN_TRANSLATION_API_KEY`
-  - 如果 provider 是 `mineru`，对应 token 通过 `credential_ref=env:RETAIN_MINERU_API_TOKEN`
-  - 运行时由 Rust 注入环境变量，Python 通过 `stage_specs.resolve_credential_ref(...)` 读取
-- Rust 主工作流和本地 book/translate 入口都已切到 spec-only
+- spec Save only stage inputs, parameters, and job Cite, no longer put. Python Expose internal implementation details to Rust
+- `job.job_root` Path derivation anchor; used internally across stages. `job_dirs.py` Derivation `source/ocr/translated/rendered/artifacts/logs`
+- Do not write secrets in plaintext. spec
+Translation key via `credential_ref=env:RETAIN_TRANSLATION_API_KEY`.
+If provider is `mineru`, token via `credential_ref=env:RETAIN_MINERU_API_TOKEN`.
+At runtime, Rust injects env vars; Python reads via `stage_specs.resolve_credential_ref(...)`.
+- Rust Main workflow and local book/translate All entry points switched. spec-only
   - `run_normalize_ocr.py`
   - `run_provider_ocr.py`
   - `run_translate_only.py`
@@ -202,28 +202,28 @@
   - `run_book.py`
   - `translate_book.py`
 
-本地开发入口当前也已统一到 stage spec 主路径：
+Local development entry now unified to stage spec Main path:
 
-- `entrypoints/run_provider_case.py` -> 当前 provider-backed full workflow 的本地通用入口名
-- `entrypoints/run_document_flow.py` -> 当前 normalized-document full flow 的本地通用入口名
-- `entrypoints/run_provider_ocr.py` -> 当前 OCR-only provider flow 的本地通用入口名
+`entrypoints/run_provider_case.py` -> local common entry for provider-backed full workflow.
+`entrypoints/run_document_flow.py` -> local common entry for normalized-document full flow.
+`entrypoints/run_provider_ocr.py` -> local common entry for OCR-only provider flow.
 - `services/document_schema/normalize_pipeline.py` -> `normalize.stage.v1`
 - `services/translation/translate_only_pipeline.py` -> `translate.stage.v1`
 - `services/rendering/workflow/render_only.py` -> `render.stage.v1`
 - `services/translation/from_ocr_pipeline.py` -> `book.stage.v1`
 - `entrypoints/run_book.py` -> `book.stage.v1`
 
-也就是说，当前“最上层整个流程”的真实执行口径是：
+That is, the actual execution standard of the current "top-level entire process" is:
 
-- 本地：`run_book.py --spec .../book.spec.json`
-- Rust API：创建 job，由 Rust 生成 `specs/*.spec.json` 并依次启动 worker
-- 测试脚本：只做回归，不代表主执行路径
+- Local:`run_book.py --spec .../book.spec.json`
+- Rust APICreate jobby Rust Generate `specs/*.spec.json` Start sequentially worker
+- Test script: regression only, not main execution path.
 
-## Python 依赖真相源
+## Python Depend on source of truth.
 
-当前 Python 依赖已经收敛到仓库根目录的 [`pyproject.toml`](/home/wxyhgk/tmp/Code/pyproject.toml)。
+Python dependencies consolidated to repository root: [`pyproject.toml`](/home/wxyhgk/tmp/Code/pyproject.toml).
 
-不要直接手改这些 requirements 文件：
+Do not manually edit these requirement files:
 
 - [`docker/requirements-app.txt`](/home/wxyhgk/tmp/Code/docker/requirements-app.txt)
 - [`docker/requirements-test.txt`](/home/wxyhgk/tmp/Code/docker/requirements-test.txt)
@@ -231,24 +231,24 @@
 - [`desktop/requirements-desktop-windows.txt`](/home/wxyhgk/tmp/Code/desktop/requirements-desktop-windows.txt)
 - [`desktop/requirements-desktop-macos.txt`](/home/wxyhgk/tmp/Code/desktop/requirements-desktop-macos.txt)
 
-修改依赖后统一执行：
+After modifying dependencies, run all:
 
 ```bash
 python backend/scripts/devtools/sync_python_requirements.py --repo-root .
 ```
 
-只检查是否漂移：
+Check for drift only:
 
 ```bash
 python backend/scripts/devtools/sync_python_requirements.py --repo-root . --check
 ```
 
-兼容说明：
+Compatibility Notes.
 
-- 旧任务目录如果还是 `originPDF/jsonPDF/transPDF/typstPDF`，当前后端会直接拒绝详情/下载接口，请重新跑任务生成标准 schema
-- 旧的逐页 translation JSON 直扫模式已经退出主线；render-only 必须提供 `translation-manifest.json`
+- If the old task directory is still `originPDF/jsonPDF/transPDF/typstPDF`, the current backend will directly reject detail/Download interface rerun task generate standard. schema
+- Old per-page translation JSON Direct scan mode has exited the mainline;render-only Required `translation-manifest.json`
 
-## 子目录文档
+## Subdirectory docs
 
 - [PIPELINE_DIRECTORY_MAP.md](./PIPELINE_DIRECTORY_MAP.md)
 - [foundation/config/README.md](./foundation/config/README.md)
@@ -263,28 +263,28 @@ python backend/scripts/devtools/sync_python_requirements.py --repo-root . --chec
 - [services/rendering/README.md](./services/rendering/README.md)
 - [services/mineru/README.md](./services/mineru/README.md)
 
-## 设计边界
+## Design Boundaries
 
-- `services/translation` 不直接操作 PDF
-- `services/rendering` 不直接决定翻译策略
-- `runtime/pipeline` 负责编排，不下沉到实现细节
-- `foundation/` 不承载具体业务流程
-- `entrypoints/` 只做入口，不承载核心实现
-- `devtools/` 不能反向成为主链路依赖
+- `services/translation` Do not manipulate directly PDF
+- `services/rendering` Translation strategy not predefined.
+- `runtime/pipeline` Orchestrates; does not sink to implementation details.
+- `foundation/` Does not carry specific business logic.
+- `entrypoints/` Entry only, no core implementation.
+- `devtools/` Cannot reverse into main dependency chain.
 
-## 架构检查
+## Architecture check
 
-日常改动建议至少跑这两条：
+Daily changes: run at least these two:
 
 - `python3 backend/rust_api/scripts/check_architecture.py`
 - `python3 backend/scripts/devtools/check_pipeline_architecture.py`
 
-第二条负责卡住 Python 主链最容易回退的边界：
+Second rule handles blocking. Python Main chain easiest revert boundary:
 
-- `runtime/pipeline` 重新直接 import `services.ocr_provider` / `services.mineru`
-- `runtime/pipeline` 重新理解 provider raw token，例如 `layoutParsingResults`
-- `services/translation` / `services/rendering` 重新碰 provider raw adapter
-- `entrypoints/*` 绕过稳定入口，直接连深层实现
-- `services/ocr_provider/__init__.py` 丢掉显式公共导出面
-- `services/ocr_provider/provider_pipeline.py` 丢掉稳定 compat symbol 或不再承担主链 handoff
-- `services/ocr_provider/paddle_*` 反向依赖 `runtime/pipeline` / `services/translation` / `services/rendering`
+- `runtime/pipeline` re-directly import `services.ocr_provider` / `services.mineru`
+- `runtime/pipeline` re-understand provider raw token, e.g. `layoutParsingResults`
+- `services/translation` / `services/rendering` Retry provider raw adapter
+- `entrypoints/*` Bypass stable entry; connect to deep implementation directly.
+- `services/ocr_provider/__init__.py` Discard explicit public export surface.
+- `services/ocr_provider/provider_pipeline.py` Discard stable. compat symbol or no longer act as the main chain handoff
+- `services/ocr_provider/paddle_*` Reverse dependency `runtime/pipeline` / `services/translation` / `services/rendering`

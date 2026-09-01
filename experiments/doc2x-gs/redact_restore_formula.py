@@ -179,7 +179,7 @@ def _parse_pages(raw: str, page_count: int) -> list[int]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="POC: redact broad text bands, then restore formula clips.")
-    parser.add_argument("--input", type=Path, default=Path("电子结构方法-第四章-高斯基组.pdf"))
+parser.add_argument("--input", type=Path, default=Path("Electronic-Structure-Methods-Chapter-4-Gaussian-Basis-Sets.pdf"))
     parser.add_argument("--output", type=Path, default=Path("work/redact-restore-formula.pdf"))
     parser.add_argument("--diagnostics", type=Path, default=Path("work/redact-restore-formula-diagnostics.json"))
     parser.add_argument("--preview", type=Path, default=Path("work/redact-restore-formula-page1.png"))

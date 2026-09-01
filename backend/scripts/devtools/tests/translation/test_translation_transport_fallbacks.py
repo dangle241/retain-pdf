@@ -220,8 +220,8 @@ class TranslationTransportFallbackTests(unittest.TestCase):
                     module,
                     "translate_single_item_plain_text_with_retries",
                     side_effect=[
-                        {"p001-b001": {"decision": "translate", "translated_text": "第一条已翻译", "final_status": "translated"}},
-                        {"p001-b002": {"decision": "translate", "translated_text": "第二条已翻译", "final_status": "translated"}},
+                        {"p001-b001": {"decision": "translate", "translated_text": "First item translated", "final_status": "translated"}},
+                        {"p001-b002": {"decision": "translate", "translated_text": "Second item translated", "final_status": "translated"}},
                     ],
                 ) as single_mock:
                     result = module.translate_items_plain_text(
@@ -271,7 +271,7 @@ class TranslationTransportFallbackTests(unittest.TestCase):
         ]
         batch_result = {
             "p001-b001": {"decision": "keep_origin", "translated_text": "", "final_status": "kept_origin"},
-            "p001-b002": {"decision": "translate", "translated_text": "这一段应该直接接受。", "final_status": "translated"},
+            "p001-b002": {"decision": "translate", "translated_text": "this paragraph should be accepted directly.", "final_status": "translated"},
         }
         suspicious_error = placeholder_module.SuspiciousKeepOriginError("p001-b001", batch_result)
         retried_items: list[str] = []
@@ -281,7 +281,7 @@ class TranslationTransportFallbackTests(unittest.TestCase):
             return {
                 item["item_id"]: {
                     "decision": "translate",
-                    "translated_text": "这段通过单条补跑得到译文。",
+                    "translated_text": "Translate sentence → skipped: additional context, add when needed.",
                     "final_status": "translated",
                 }
             }
@@ -299,7 +299,7 @@ class TranslationTransportFallbackTests(unittest.TestCase):
                     )
 
         self.assertEqual(retried_items, [])
-        self.assertEqual(result["p001-b002"]["translated_text"], "这一段应该直接接受。")
+self.assertEqual(result["p001-b002"]["translated_text"], "This paragraph should be accepted directly.")
         self.assertEqual(
             result["p001-b002"]["translation_diagnostics"]["route_path"],
             ["block_level", "batched_plain"],

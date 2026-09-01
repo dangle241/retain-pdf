@@ -1,10 +1,10 @@
-# 图书馆 API 契约
+# Library API Contract
 
-图书馆 **对外 HTTP** 已合并到统一 API 入口：
+Library **external HTTP** Merged into unified. API Entry point:
 
-- [RetainPDF 后端 API 总入口](../../../doc/core/api/index.md)
+- [RetainPDF Backend API Main Entry](../../../doc/core/api/index.md)
 
-**实现分层**（模块化单体，非微服务）：
+**YAGNI. Premature abstraction. Implement flat structure first. Add layers only when complexity forces separation.**Modular monolith, not microservices:
 
 ```text
 routes/library*.rs, collections.rs
@@ -12,10 +12,10 @@ routes/library*.rs, collections.rs
       → services/library/*
 ```
 
-协作说明见：
+Collaboration notes:
 
 - [RUST_API_ARCHITECTURE.md](../RUST_API_ARCHITECTURE.md) §2.2–2.3
 - [RUST_API_DIRECTORY_MAP.md](../RUST_API_DIRECTORY_MAP.md)
 - [BOUNDARIES.md](../BOUNDARIES.md)（Library Facade）
 
-保留这个文件是为了兼容旧链接。不要在这里维护第二份接口字段说明。
+Keep this file for backward compatibility with old links. Do not maintain interface field documentation here.

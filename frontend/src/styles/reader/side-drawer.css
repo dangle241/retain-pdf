@@ -1,4 +1,4 @@
-/* 右侧工具抽屉 chrome（仅 legacy 包；栏宽见 layout-legacy.css） */
+/* Right tool drawer chrome (legacy Package only; see column width layout-legacy.css) */
 
 .reader-side-drawer {
   position: fixed;
@@ -63,7 +63,7 @@
   line-height: 1;
 }
 
-/* 窄屏：抽屉改底部浮层（栏宽归零 / 左栏隐藏在 reader-page） */
+/* Narrow screen: drawer becomes bottom overlay (bar width zero) / Left column hidden in reader-page） */
 @media (max-width: 720px) {
   .reader-side-drawer {
     top: auto;

@@ -12,9 +12,9 @@ import {
   saveStoredConversationId,
 } from "./conversation-store.js";
 
-// 阅读器问答的 agentic 应答器:走 /api/v1/ai/ask(带 SSE 过程事件与可跳转引用)。
-// document_id 经后端 GET /documents?job_id= 直查(含历史 run),查不到时 fail closed。
-// conversation_id 本地粘性 + 服务端 auto-create / done 回传,实现多轮。
+// Reader Q&A. agentic Transponder: use /api/v1/ai/ask (with SSE process events and jumpable references).
+// document_id checked via backend GET /documents?job_id= (including historical runs). Fail closed when not found.
+// conversation_id Local affinity + server-side auto-create / done callback. Multi-turn.
 
 const QUOTE_MAX_LENGTH = 240;
 
@@ -35,14 +35,14 @@ export function buildScopedQuestion({ question = "", scope = "document", context
     const quote = typeof resolveQuote === "function" && context ? resolveQuote(context) : null;
     const quoteText = clipQuoteText(quote?.quoteText || "");
     if (quoteText) {
-      return `（针对选中的原文片段：「${quoteText}」）${trimmed}`;
+      return `Select text. Translate. Save.「${quoteText}」）${trimmed}`;
     }
     if (context?.page) {
-      return `（针对第 ${Number(context.page)} 页的选区内容）${trimmed}`;
+      return `(for the ${Number(context.page)} selection content on the page)${trimmed}`;
     }
   }
   if (scope === "page" && context?.page) {
-    return `（当前第 ${Number(context.page)} 页）${trimmed}`;
+    return `(Trạng thái hiện tại thứ ${Number(context.page)} page)${trimmed}`;
   }
   return trimmed;
 }
@@ -53,11 +53,11 @@ export function createReaderAskAnswerer({
   ask = askLibraryAi,
   documentByJobId = fetchDocumentByJobId,
   resolveQuote = null,
-  // 前端凭据设置里的模型 API Key(与翻译流程同源),按请求随问答一起传给后端
+  // Model in frontend credential settings API Key(Same source as translation pipeline),Pass request with Q&A to backend.
   llmConfig = resolveReaderAiConfig,
 } = {}) {
   let documentIdPromise = null;
-  // 内存优先,localStorage 兜底(跨刷新)
+  // Memory first.,localStorage Fallback(across refreshes)
   let conversationId = loadStoredConversationId({ jobId });
 
   function resolveDocumentId() {
@@ -93,25 +93,25 @@ export function createReaderAskAnswerer({
     regenerate = false,
     userMessageId = "",
     assistantMessageId = "",
-    /** 取消信号：中止 SSE；aborted 后不回写会话粘性（防旧流污染新会话） */
+    /** Cancel signal: abort SSE；aborted No session affinity write-back. Prevents stale flow polluting new sessions. */
     signal = null,
   } = {}) {
     const scopedQuestion = buildScopedQuestion({ context, question, resolveQuote, scope });
     if (!scopedQuestion) {
-      throw new Error("请输入问题。");
+throw new Error("Please enter a question.");
     }
-    // 凭据门禁必须在任何网络请求之前：否则用户会先看到「检索中」再报缺 Key
+    // Credential gate must precede any network request; otherwise user sees「Searching」Report missing again Key
     const config = typeof llmConfig === "function" ? llmConfig() : (llmConfig || {});
     const apiKey = `${config.apiKey || ""}`.trim();
     if (!apiKey) {
       throw new Error(MISSING_MODEL_API_KEY_MESSAGE);
     }
     const documentId = await resolveDocumentId();
-    // 阅读器默认整本问答:反查不到文档时 fail closed,禁止静默变全库检索
+    // Reader defaults to full-book Q&A.:Reverse lookup fails when document missing. fail closed,Prevent silent fallback to full DB scan
     if (!documentId && `${jobId || ""}`.trim()) {
-      throw new Error("无法关联当前文档，暂不能做整本问答。请确认任务已绑定文档后重试。");
+      throw new Error("Cannot link current document. Full-document Q&A unavailable. Confirm task bound to document and retry.");
     }
-    // document 解析后若 storage 里只有 job key,再补写一份 doc key
+    // document If only after parsing storage Nothing inside. job key,Missing source text. Provide Chinese comment to translate. doc key
     if (!conversationId) {
       conversationId = loadStoredConversationId({ jobId, documentId });
     }
@@ -132,8 +132,8 @@ export function createReaderAskAnswerer({
       signal,
     });
     const nextConversationId = `${(result as { conversationId?: string })?.conversationId || ""}`.trim();
-    // aborted 的旧流禁止回写粘性：否则"生成中切会话"会被 done 事件把
-    // conversation_id 拽回旧会话，下一问落错线程（审计 P0-4）
+// aborted Legacy stream write-back sticky disabled: otherwise "Generating mid-cut session" will be triggered by done Event
+    // conversation_id Dragging back old session causes next question to land in wrong thread (audit). P0-4）
     if (nextConversationId && !(signal as AbortSignal | null)?.aborted) {
       rememberConversationId(nextConversationId, documentId);
     }
@@ -160,7 +160,7 @@ export function createReaderAskAnswerer({
     },
     getDocumentId: () => resolveDocumentId(),
     ensureLoaded: async () => {
-      // 预热 document_id;失败在 answer 时再报错
+      // Warm up document_id;Failed at answer Error again at runtime.
       const documentId = await resolveDocumentId();
       return Boolean(documentId);
     },

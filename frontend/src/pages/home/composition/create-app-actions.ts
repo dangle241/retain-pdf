@@ -1,4 +1,4 @@
-// app-actions（提交任务 / 桌面输出目录）。
+// app-actionsSubmit task / Desktop output directory).
 
 import {
   API_PREFIX,
@@ -49,7 +49,7 @@ type CreateAppActionsArgs = {
   jobRuntimeState: Record<string, unknown>;
   statusCardPresenter: StatusCardPresenterPort;
   libraryEventPort: LibraryEventPort;
-  /** 常规凭据入口：打开设置 → API，避免与首次配置弹窗双轨 */
+  /** Standard credential entry: open settings → APIavoid duplication with first-time config popup */
   settingsHubDialogStore?: SettingsHubDialogStore | null;
 };
 
@@ -82,17 +82,17 @@ export function createAppActions({
       uploadStatePort.reset({ includePageRange: false });
       workflowView.setSubmitDisabled(true);
       uploadView.resetUploadedFileView();
-      setText("error-box", "当前上传文件已失效，请重新上传 PDF 后再提交。");
+setText("error-box", "The current uploaded file has expired, please re-upload the PDF and submit again.");
     },
   };
 
-  // credentials / workflow 在本函数调用前已挂到 features
+  // credentials / workflow Already mounted before this function call. features
   const creds = () => features.browserCredentialsFeature;
   const workflow = () => features.workflowFeature;
   const upload = () => features.uploadFeature;
   const jobRuntime = () => features.jobRuntimeFeature;
 
-  // apiBase 可由 configPort 替代；下层签名仍标成必填。
+  // apiBase can be configPort Replace; lower signature still marked required.
   const appActionsFeature = mountAppActionsFeature({
     state: jobRuntimeState,
     uploadStatePort,
@@ -124,7 +124,7 @@ export function createAppActions({
           creds().openBrowserCredentialsDialog({ setupMode: true });
           return;
         }
-        // 常规缺 Key：设置 → API（与 UI 事件路由一致）
+        // Default missing KeySet → API(Consistent with UI Event routing consistent)
         if (settingsHubDialogStore?.open) {
           settingsHubDialogStore.open({ tab: "api" });
           return;

@@ -72,7 +72,7 @@ from devtools.tests.rendering_support.page_specs import sample_page_spec as _pag
 
 def test_direct_typst_inline_math_internal_newline_is_folded_before_rendering() -> None:
     markdown = build_direct_typst_passthrough_text(
-        "对于较大的 $ CN_{A}^{\\prime}\n$ 值，该 d 能级降低。"
+        "For larger $ CN_{A}^{\\prime}\n$ Value, this d Lower level."
     )
 
     assert "$CN_{A}^{\\prime}$" in markdown
@@ -82,7 +82,7 @@ def test_direct_typst_inline_math_internal_newline_is_folded_before_rendering() 
 
 def test_direct_typst_keeps_short_latex_text_tags_inside_math() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"其中 $ W_l^{\text{pre}}, W_l^{\text{post}} \in \mathbb{R}^{n_{\text{hc}} d \times n_{\text{hc}}} $ 是参数。"
+r"where $ W_l^{\text{pre}}, W_l^{\text{post}} \in \mathbb{R}^{n_{\text{hc}} d \times n_{\text{hc}}} $ Parameter."
     )
 
     assert r"W_l^{\text{pre}}" in markdown
@@ -92,7 +92,7 @@ def test_direct_typst_keeps_short_latex_text_tags_inside_math() -> None:
 
 def test_direct_typst_renders_hbar_as_unicode_symbol_for_mitex() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"振动常数 $ \omega_e = \hbar \sqrt{k / \mu} $ 等间距分布。"
+        r"vibration constant $ \omega_e = \hbar \sqrt{k / \mu} $ Evenly spaced."
     )
 
     assert "ℏ" in markdown
@@ -102,7 +102,7 @@ def test_direct_typst_renders_hbar_as_unicode_symbol_for_mitex() -> None:
 
 def test_direct_typst_renders_partial_as_unicode_symbol_for_mitex() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"曲率 $ k=\left(\frac{\partial^{2}U}{\partial R^{2}}\right) $。"
+        r"curvature $ k=\left(\frac{\partial^{2}U}{\partial R^{2}}\right) $。"
     )
 
     assert "∂" in markdown
@@ -111,7 +111,7 @@ def test_direct_typst_renders_partial_as_unicode_symbol_for_mitex() -> None:
 
 def test_direct_typst_renders_otimes_as_unicode_symbol_for_mitex() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"选择规则 $ \Gamma_i \otimes \Gamma_f \ni \Gamma_\mu $。"
+        r"Select Rule $ \Gamma_i \otimes \Gamma_f \ni \Gamma_\mu $。"
     )
 
     assert "⊗" in markdown
@@ -120,7 +120,7 @@ def test_direct_typst_renders_otimes_as_unicode_symbol_for_mitex() -> None:
 
 def test_direct_typst_normalizes_left_right_angle_ket_for_mitex() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"将单激发行列式与 $ \left|\Psi_0\right\rangle $ 混合。"
+        r"Single-excitation determinant and $ \left|\Psi_0\right\rangle $ Mixed."
     )
 
     assert r"\left" not in markdown
@@ -130,7 +130,7 @@ def test_direct_typst_normalizes_left_right_angle_ket_for_mitex() -> None:
 
 def test_direct_typst_normalizes_left_right_bra_matrix_for_mitex() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"非对角元满足 $ \left\langle\chi_i\right|f|\chi_j\rangle=0 $。"
+        r"Off-diagonal elements satisfy $ \left\langle\chi_i\right|f|\chi_j\rangle=0 $。"
     )
 
     assert r"\left" not in markdown
@@ -140,7 +140,7 @@ def test_direct_typst_normalizes_left_right_bra_matrix_for_mitex() -> None:
 
 def test_direct_typst_normalizes_nested_left_right_matrix_element_for_mitex() -> None:
     markdown = build_direct_typst_passthrough_text(
-        r"矩阵元 $ \left\langle\Psi_a^{rs}\right|\mathcal{H}\left|\Psi_{ab}^{rs}\right\rangle $。"
+        r"matrix element $ \left\langle\Psi_a^{rs}\right|\mathcal{H}\left|\Psi_{ab}^{rs}\right\rangle $。"
     )
 
     assert r"\left" not in markdown
@@ -151,7 +151,7 @@ def test_direct_typst_normalizes_nested_left_right_matrix_element_for_mitex() ->
 def test_direct_typst_does_not_inject_empty_base_for_prefix_scripts() -> None:
     """Prefix-script empty bases are translation's job, not render-time regex."""
     markdown = build_direct_typst_passthrough_text(
-        r"能量为 $ ^{N}E_0 = \langle ^{N}\Psi_0 | \mathcal{H} | ^{N}\Psi_0 \rangle $。"
+        r"Energy: $ ^{N}E_0 = \langle ^{N}\Psi_0 | \mathcal{H} | ^{N}\Psi_0 \rangle $。"
     )
 
     assert r"\{}^{" not in markdown
@@ -162,7 +162,7 @@ def test_direct_typst_does_not_inject_empty_base_for_prefix_scripts() -> None:
 def test_direct_typst_preserves_backslash_space_before_degree_mathrm() -> None:
     r"""LaTeX backslash-space before ^{\circ} must not become \{}^{\circ}."""
     markdown = build_direct_typst_passthrough_text(
-        r"反应在 $-78\ ^{\circ}\mathrm{C}$ 至室温下进行。"
+        r"Reflected in $-78\ ^{\circ}\mathrm{C}$ Perform at room temperature."
     )
 
     assert r"-78\{}^{\circ}" not in markdown
@@ -178,10 +178,10 @@ def test_body_rendering_folds_model_visual_line_breaks_for_flow_text() -> None:
         "structure_role": "body",
         "text_flow": "preserve_lines",
     }
-    translated = "对于较大的 $ CN_{A}^{\\prime}\n$ 值，该 d 能级能量降低。"
+translated = "For larger $ CN_{A}^{\\prime}\n$ values, the d Energy level decreases."
 
     rendered = maybe_preserve_structured_line_breaks(item, translated)
 
     assert "\n" not in rendered
-    assert rendered == "对于较大的 $ CN_{A}^{\\prime} $ 值，该 d 能级能量降低。"
+assert rendered == "For larger $ CN_{A}^{\\prime} $ values, the d energy level decreases."
     assert "_render_preserve_line_breaks" not in item

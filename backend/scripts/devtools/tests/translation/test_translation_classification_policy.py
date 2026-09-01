@@ -21,12 +21,12 @@ def test_apply_classification_labels_marks_model_no_trans_as_keep_origin() -> No
             "classification_label": "",
             "should_translate": True,
             "skip_reason": "",
-            "translation_unit_protected_translated_text": "旧译文",
-            "translation_unit_translated_text": "旧译文",
-            "protected_translated_text": "旧译文",
-            "translated_text": "旧译文",
-            "group_protected_translated_text": "旧译文",
-            "group_translated_text": "旧译文",
+            "translation_unit_protected_translated_text": "Old Translation",
+"translation_unit_translated_text": "old translation",
+"protected_translated_text": "old translation",
+"translated_text": "old translation",
+"group_protected_translated_text": "old translation",
+"group_translated_text": "old translation",
             "final_status": "",
         }
     ]

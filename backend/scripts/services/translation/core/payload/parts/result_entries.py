@@ -4,23 +4,23 @@ import json
 import re
 
 REASONING_LEAK_MARKERS = (
-    "保持简洁",
-    "按照规则",
-    "因此输出",
-    "综上，输出",
-    "注意：原文",
-    "译文也应保留",
-    "为保准确",
-    "更简洁",
-    "我选择",
-    "可以译为",
-    "可译为",
+    "Keep it concise",
+    "Follow rules.",
+    "Therefore output.",
+    "In summary, output.",
+    "Note: the original",
+    "The translation should also retain",
+    "For accuracy ensure.",
+    "more concise",
+    "I choose.",
+    "Source text missing. Provide Chinese source for translation.",
+    "Source text missing. Provide source string.",
 )
 REASONING_LEAK_FINAL_PATTERNS = (
-    re.compile(r"(?:综上，输出。?|因此输出：?)\s*(?P<text>.+?)\s*$", re.S),
-    re.compile(r"输出[:：]\s*(?P<text>.+?)\s*$", re.S),
-    re.compile(r"我选择[:：]\s*[\"“](?P<text>[^\"”\n]+)[\"”]", re.S),
-    re.compile(r"我选择[:：]\s*(?P<text>[^\n。]+)", re.S),
+    re.compile(r"(?:print(result) → skipped: formatting, add when needed.?|Output:?)\s*(?P<text>.+?)\s*$", re.S),
+    re.compile(r"print(output)[:：]\s*(?P<text>.+?)\s*$", re.S),
+    re.compile(r"Select[:：]\s*[\"“](?P<text>[^\"”\n]+)[\"”]", re.S),
+re.compile(r"I choose[:ï¼]\s*(?P<text>[^\nã]+)", re.S),
 )
 
 

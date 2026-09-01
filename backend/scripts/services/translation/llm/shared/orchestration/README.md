@@ -1,165 +1,165 @@
 # Translation LLM Orchestration
 
-这一层只负责一件事：
-把“单个 block / 单批 items 的翻译请求”编排成稳定、可回退、可诊断的 provider 调用流程。
+This layer does one thing:
+Single block / Single Batch items Orchestrate translation requests to be stable, revertible, and diagnosable. provider Call flow.
 
-它不负责：
+It is not responsible for:
 
-- provider 专属 HTTP 细节
-- OCR payload 抽取
-- page payload 回填落盘
-- PDF 渲染
+- Provider-specific HTTP details
+- OCR payload Extract
+- page payload Backfill to disk.
+- PDF rendering
 
-## 新人先读
+## Newcomers read first
 
-- 想看总入口：
+- See main entry:
   `retrying_translator.py`
-- 想看 plain-text 单条降级主链：
+- To see plain-text single degradation main chain
   `single_item_flow.py`
-- 想看单条编排的路由包装：
+- View routing wrapper for single orchestration:
   `single_item_routes.py`
-- 想看 fallback facade：
+- To see fallback facade:
   `fallbacks.py`
-- 想看公式 segment 路由：
+- To see formula segment routing:
   `segment_routing.py`
-- 想看公式 segment 请求/切窗执行：
+- To see formula segment request/switch window execution:
   `segment_request.py` / `segment_windows.py` / `segment_executor.py`
-- 想看 direct-typst 特殊路径：
+- To see direct-typst special paths:
   `direct_typst.py`
-- 想看 batch/cache/tail retry：
+- To see batch/cache/tail retry:
   `batched_plain.py`
 
-## 当前边界
+## Current boundary
 
 - `retrying_translator.py`
-  shared orchestration 稳定入口。
-  只负责 `translate_batch` / `translate_items_to_text_map`，不承载真实编排逻辑，也不再暴露历史 `_xxx` 私有 API。
+  shared orchestration Stable entry.
+  Responsible only `translate_batch` / `translate_items_to_text_map`Remove orchestration logic. Hide history. `_xxx` Private API。
 
 - `fallbacks.py`
-  plain-text 单条编排 facade。
-  负责：
-  - 保留顶层测试/调用入口
-  - 通过显式依赖注入把 facade 上的测试替身传给 `single_item_flow.py`
-  - 转发到 `single_item_flow.py`
-  不再保留 tagged-placeholder 等旧私有路径包装。
+  plain-text Single Orchestration facade。
+Responsibilities:
+  - Preserve top-level tests/Entry point
+  - Via explicit dependency injection facade Test doubles pass to. `single_item_flow.py`
+  - Forward to `single_item_flow.py`
+  Discard tagged-placeholder and other old private path wrappers.
 
 - `single_item_flow.py`
-  plain-text 单条编排主链。
-  负责：
-  - 选择 direct-typst / segmented / plain-text 主路径
-  - tagged placeholder first 决策
-  - 单条 plain-text attempt loop
-  - sentence-level fallback 接入
+  plain-text Single orchestration main chain.
+Responsibilities:
+  - select direct-typst / segmented / plain-text Main Path
+  - tagged placeholder first Decision
+- Single plain-text attempt loop
+- Sentence-level fallback integration
 
 - `single_item_deps.py`
-  单条编排的显式依赖注入对象。
-  只负责把 provider 调用、segment 调用、sentence fallback、validation 等可替换函数集中传入 `single_item_flow.py`。
+  Explicit dependency injection object for single orchestration.
+Only responsible for passing provider calls, segment calls, sentence fallback, validation, and other replaceable functions centrally into `single_item_flow.py`.
 
 - `single_item_routes.py`
-  单条编排的路由包装。
-  只负责 direct-typst、heavy-formula、tagged-placeholder 这些可替换 route 的调用形状，避免 `single_item_flow.py` 继续承载测试替身和历史包装入口。
+  Route wrapper for single orchestration.
+Only responsible for direct-typst, heavy-formula, tagged-placeholder these replaceable route call shape, avoiding `single_item_flow.py` continuing to carry test doubles and historical wrapper entry points.
 
 - `batched_plain.py`
-  batched plain-text 编排。
-  负责：
+  batched plain-text Orchestration.
+Responsibilities:
   - cache hit / cache drop
-  - low-risk batch 决策
+- Low-risk batch decision
   - batch partial accept + retry split
   - transport tail retry pass
 
 - `direct_typst.py`
-  direct-typst 主 retry loop。
-  负责：
-  - direct-typst plain/raw 两条路径的 attempt loop
-  - validation failure 后的最终收口
-  - sentence fallback / transport degrade 接入
+direct-typst main retry loop.
+Responsibilities:
+  - direct-typst plain/raw Two paths. attempt loop
+  - validation failure Final closure after
+- Sentence fallback / transport degrade integration
 
 - `direct_typst_long_text.py`
-  direct-typst 长文本预切分。
-  只负责拆块和 chunk 级拼回，不处理 provider transport。
+  direct-typst Pre-split long text.
+  Only responsible for splitting blocks and chunk Level reassembly, do not process. provider transport。
 
 - `direct_typst_salvage.py`
   direct-typst protocol/json shell salvage。
-  只负责从异常文本中提取可接受译文并做 partial accept。
+  Only responsible for extracting acceptable translations from abnormal text and performing partial accept。
 
 - `heavy_formula.py`
-  heavy formula block 预拆分。
-  只负责：
-  - 是否需要 heavy split
-  - 如何按 placeholder 密度拆块
-  - chunk 级重试后再拼回
+  heavy formula block Pre-split.
+Only responsible for:
+- Whether heavy split is needed
+  - How to placeholder Split density blocks
+  - chunk After retrying at level, reassemble.
 
 - `plain_text_validation.py`
-  plain-text validation 失败后的收口逻辑。
-  只负责：
+  plain-text validation Failure cleanup logic.
+Only responsible for:
   - protocol shell salvage
   - English residue partial salvage
-  - repeated validation failure 最终 degrade 决策
+- Repeated validation failure final degrade decision
 
 - `sentence_level.py`
   sentence-level fallback。
-  只负责句级拆分、逐句请求、部分成功拼回。
+  Only: sentence-level split, per-sentence request, partial-success reassembly.
 
 - `segment_routing.py`
-  公式 segment 对外路由 facade。
-  只负责暴露 routing / risk / plan 入口，并把执行转发给 executor。
+Formula segment external routing facade.
+  Exposes only. routing / risk / plan Entry point, forwards execution to executor。
 
 - `segment_request.py`
-  公式 segment provider 请求。
-  只负责 tagged/json 双格式请求、响应解析和格式错误收口。
+Formula segment provider request.
+Only responsible for tagged/json dual-format request and response parsing and format error handling.
 
 - `segment_windows.py`
-  公式 segment 单窗口重试。
-  只负责窗口上下文合并、窗口级 attempt loop 和 provider 请求调用。
+Formula segment single-window retry.
+Only handles window context merging, at window level attempt loop and provider request invocation.
 
 - `segment_executor.py`
-  公式 segment 执行编排。
-  只负责单窗口/多窗口整体流程、结果拼回、validation 和窗口失败收口。
+Formula segment execution orchestration.
+  Single window only./Multi-window overall process, result reassembly.validation and failed window closure.
 
 - `segment_failures.py`
-  公式 segment 失败 payload 构造。
-  只负责把窗口失败诊断写成统一 `failed` payload。
+Formula segment failure payload construction.
+  Only responsible for unifying window failure diagnostics. `failed` payload。
 
 - `transport.py`
-  transport tail retry / DLQ 公共逻辑。
+  transport tail retry / DLQ Common logic.
 
 - `terminal_payloads.py`
-  翻译终态 payload 构造器。
-  约定：
-  - 明确不可译/可跳过内容才使用 `kept_origin`
-  - provider、transport、validation、chunk/window 失败统一使用 `failed`
-  - `failed` 默认带 `fallback_to=retry_required`，让导出门禁拦住半成品
+  Final state payload Constructor.
+Convention:
+  - clearly non‑translatable/Use only if content is skippable. `kept_origin`
+  - provider、transport、validation、chunk/window Use uniformly for failures. `failed`
+  - `failed` Default `fallback_to=retry_required`Export gate blocks semi-finished products.
 
 - `keep_origin.py`
-  keep-origin 兼容入口。
-  新增失败终态时优先使用 `terminal_payloads.py`，不要再把失败写成 keep-origin。
+  keep-origin Compatibility entry.
+  When adding a failure terminal state, use it first. `terminal_payloads.py`, do not write failure as keep-origin。
 
 - `metadata.py`
   translation_diagnostics / formula diagnostics / runtime term restore。
 
 - `common.py`
-  文本长度、continuation、CJK、placeholder 数量等纯判定工具。
+  Text length,continuation、CJK、placeholder Quantity and other pure judgment tools.
 
-## 调用链
+## Call Chain
 
-最常见的调用链是：
+Most common call chain:
 
 `retrying_translator.py`
 -> `fallbacks.py` / `single_item_flow.py`
 -> `direct_typst.py` / `segment_routing.py` / plain-text provider runtime
 -> `terminal_payloads.py` / `plain_text_validation.py` / `sentence_level.py`
 
-batch 路径是：
+batch Path:
 
 `retrying_translator.py`
 -> `batched_plain.py`
 -> `fallbacks.py`
 
-## 后续约定
+## Subsequent conventions
 
-- 新的降级策略，优先放进对应的责任模块，不要再回堆到 `fallbacks.py` 或 `retrying_translator.py`
-- 失败不是 keep-origin。除 fast-path metadata、短非正文标签、明确中文原文等有意保留场景外，所有异常终态都应写成 `failed`。
-- `fallbacks.py` 保持薄 facade 定位，不再塞真实流程或旧私有别名
-- `retrying_translator.py` 保持稳定入口定位，不再塞 `_xxx_impl` 历史别名和真实流程
-- provider 专属逻辑不要进入这里，统一留在 `shared/provider_runtime.py` 之后的 provider 实现里
-- 如果某个模块再次超过 400-500 行，优先按责任切，不按代码块机械切
+- New degradation strategy: preferentially place into corresponding responsibility module; do not pile back to `fallbacks.py` or `retrying_translator.py`
+- Failure is not keep-originExcept fast-path metadataAll terminal states must be written in English. `failed`。
+- `fallbacks.py` Keep thin facade Reposition: stop embedding real flows or old private aliases.
+- `retrying_translator.py` Maintain stable entry positioning; do not cram additional content. `_xxx_impl` Historical aliases and actual workflow
+- Provider-specific logic kept elsewhere. Unified under `shared/provider_runtime.py` and subsequent provider implementations
+- If a module exceeds again. 400-500 OK, prioritize by responsibility, not mechanically by code blocks.

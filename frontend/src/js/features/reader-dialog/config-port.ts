@@ -23,7 +23,7 @@ export function createReaderDialogConfigPort({
     if (!normalizedJobId) {
       return "";
     }
-    // iframe 是独立文档,mock 场景需要显式透传,否则嵌入式阅读器会去请求真实后端
+    // iframe Standalone document.,mock Scenario requires explicit passthrough.,Otherwise embedded reader requests real backend.
     const scenario = currentMockScenarioSafe();
     const pageIdx = Number(anchor?.pageIdx);
     return buildPageUrl("./reader.html", {
@@ -36,7 +36,7 @@ export function createReaderDialogConfigPort({
     });
   }
 
-  // 馆藏文档"读原文":没有 job,用 document_id 打开只读源文档阅读器(F4)。
+// Collection document 「read original」: no job, use document_id to open read-only source document viewer (F4).
   function buildReaderDocumentPageUrl(documentId, anchor = null) {
     const normalizedId = `${documentId || ""}`.trim();
     if (!normalizedId) {

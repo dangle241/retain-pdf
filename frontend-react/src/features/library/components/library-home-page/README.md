@@ -1,16 +1,16 @@
-# Library Home Page 组件族
+# Library Home Page component family
 
-## 边界
+## Boundary
 
-`library-home-page` 负责图书馆主页的页面级布局。它组合顶部栏、筛选工具条和图书网格，但不拥有数据请求、弹窗状态或后端 API。
+`library-home-page` Handles page-level layout for the library homepage. Composes top bar, filter toolbar, and book grid; does not own data requests, modal state, or backend. API。
 
-## 文件
+## Files
 
-- `library-home-page.tsx`：主页组合层。
-- `index.ts`：组件族公共出口。
+- `library-home-page.tsx`Homepage composition layer.
+- `index.ts`Public exports for component family.
 
-## 规则
+## Rules
 
-- 页面状态由上层容器传入。
-- 产品文案和排序项来自 `library-config.ts`。
-- 后续搜索、筛选、上传入口可以在这个组件族内继续拆成独立区域。
+- Page state is passed in by the parent container.
+- Product copy and sorting items sourced from `library-config.ts`。
+- Subsequent search, filtering, and upload entry points can be further split into independent areas within this component family.

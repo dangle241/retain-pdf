@@ -1,14 +1,14 @@
-# OCR-only 任务
+# OCR-only tasks
 
-## 创建接口
+## Define purpose. Input/output? Auth?
 
 ```http
 POST /api/v1/ocr/jobs
 ```
 
-用于只执行 OCR provider 和 normalized document 生成，不进入翻译和渲染。
+For executing only OCR provider and generating normalized document, without entering translation and rendering.
 
-## 查询接口
+## Query endpoint
 
 ```http
 GET /api/v1/ocr/jobs/{job_id}
@@ -20,13 +20,13 @@ GET /api/v1/ocr/jobs/{job_id}/normalization-report
 POST /api/v1/ocr/jobs/{job_id}/cancel
 ```
 
-## 请求重点
+## Request Highlights
 
-OCR-only 的 `workflow` 语义固定为 `ocr`，OCR provider 仍然由 `ocr.provider` 决定。
+OCR-only workflow semantics fixed to ocr, OCR provider still decided by ocr.provider.
 
-## 产物
+## Artifacts
 
-成功后核心产物：
+On success, core deliverables:
 
 - `source_pdf`
 - `provider_result_json`
@@ -34,4 +34,4 @@ OCR-only 的 `workflow` 语义固定为 `ocr`，OCR provider 仍然由 `ocr.prov
 - `normalized_document_json`
 - `normalization_report_json`
 
-其中 `normalized_document_json` 是后续翻译和渲染唯一应消费的 OCR 中间契约。
+Among these, normalized_document_json is the sole source to be consumed for subsequent translation and rendering, the OCR middle contract.

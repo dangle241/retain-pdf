@@ -1,10 +1,10 @@
 # rendering/source
 
-## 负责什么
+## Responsibilities
 
-原 PDF 改造层。这里负责把源 PDF 变成可承载译文的底板。
+Original PDF adaptation layer. Responsible for making the source PDF a base that can carry translations.
 
-## 对外入口
+## Public entry point
 
 - `render_source.py`
 - `rects.py`
@@ -20,26 +20,26 @@
 - `compression/`
 - `dev_overlay/`
 
-## 不该做什么
+## What not to do
 
-- 不生成 Typst。
-- 不计算译文排版。
-- 不调用翻译模型。
-- 不承担 workflow 编排职责。
+- Do not generate Typst.
+- Understood.
+- No translation.
+- Does not assume workflow Orchestration responsibilities.
 
-## 边界约定
+## Boundary Conventions
 
-- `rects.py` 放 source 层共享的矩形基础工具，`background/`、
-  `cleanup/`、`preparation/` 可以依赖它。
-- `items.py` 放 source 层共享的 translated item 读取、token 拆分和文本归一化 helper。
-- `document_ops.py` 放 source 层共享的 PDF 文档操作 primitive。
-- `redaction.py` 是 source 层对 cleanup redaction 策略的门面；外部子包不要直接
+- rects.py holds source layer-shared basic rectangle utilities. background/, cleanup/, preparation/ may rely on it.
+  `cleanup/`、`preparation/` You can rely on it.
+- items.py holds source layer-shared translated item reading, token segmentation, and text normalization helpers.
+- document_ops.py holds source layer-shared PDF document operation primitives.
+- redaction.py is the source layer facade for cleanup redaction strategy; do not access directly from external sub-packages.
   import `cleanup.redaction`。
-- `text_redaction.py` 放 source 层共享的文本层删除 primitive。
-- `vector_profile.py` 放 source 层共享的页面 vector drawing 统计 primitive。
-- `vector_text.py` 放 source 层共享的 vector text 检测 primitive；具体删除和
-  背景修补由 cleanup/background 执行层决定。
-- `dev_overlay/` 是旧 PyMuPDF 直绘译文路径，仅用于 direct overlay 和单页调试；
-  主渲染路径不要在这里扩展正文排版规则。
-- 子包之间不要为了共享基础 geometry 互相 import；需要共享时先上移到
+- `text_redaction.py` place source Delete shared text layer primitive。
+- vector_profile.py holds source layer-shared page vector drawing statistics primitives.
+- vector_text.py holds source layer-shared vector text detection primitives; specific deletion and background repair are decided by cleanup/background execution layer.
+  Background repair by cleanup/background Execution layer decides.
+- `dev_overlay/` Old PyMuPDF Direct translation path, for use only. direct overlay and single-page debugging;
+  Main render path avoid extending body typography rules here.
+- Do not share a base between subpackages purely for sharing. geometry Mutual importWhen sharing needed, first move up to.
   `rects.py`。

@@ -3,20 +3,20 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-// 事件名/命令名是字符串契约,typo 只能运行时静默失效。
-// 现状:retainpdf:* 事件已全部收敛在 contracts/app-contract.js 的 APP_EVENTS,
-// 命令总线两端都走 RECENT_JOBS_COMMANDS 常量。本测试锁住这个状态,
-// 禁止未来出现绕过契约的裸字面量。
-// 扫描覆盖 .js 与 .jsx(React 迁移的新世界 src/pages、src/shared 一并纳入)。
+// Event name/Command name is string contract.,typo Silent failure at runtime only.
+// Current status: retainpdf:* Events fully converged in contracts/app-contract.js's APP_EVENTS,
+// Command bus both ends. RECENT_JOBS_COMMANDS Constant. This test locks this state,
+// Ban bare literals bypassing contract.
+// Scan coverage for .js and .jsx (Include src/pages and src/shared together for React migration).
 
 const PROJECT_ROOT = process.cwd();
 const JS_ROOT = join(PROJECT_ROOT, "src/js");
 const SCAN_ROOTS = [JS_ROOT, join(PROJECT_ROOT, "src/pages"), join(PROJECT_ROOT, "src/shared")];
 const EVENT_CONTRACT_FILE = join(JS_ROOT, "contracts/app-contract.js");
-// generated/ 为构建产物(打包内联的事件名字面量来自源码,由源码扫描守卫)
+// generated/ for build artifacts(Bundled inline event name literals originate from source code.,Guarded by source code scanning)
 const GENERATED_ROOT = join(JS_ROOT, "generated");
 
-// 非事件用途的 retainpdf: 前缀字符串(如 localStorage key),逐条登记
+// Non-event use. retainpdf: Prefix string (e.g., localStorage key), Register item by item
 const ALLOWED_LITERALS = [
   { file: join(JS_ROOT, "features/app-update/state.js"), literal: "retainpdf:update-check:v1" },
 ];
@@ -39,7 +39,7 @@ function walkJsFiles(dir) {
 
 const jsFiles = SCAN_ROOTS.filter((root) => existsSync(root)).flatMap(walkJsFiles);
 
-test("retainpdf:* 事件名只允许定义在 contracts/app-contract.js", () => {
+test("retainpdf:* event names must only be defined in contracts/app-contract.js", () => {
   const violations = [];
   for (const file of jsFiles) {
     if (file === EVENT_CONTRACT_FILE) {
@@ -58,11 +58,11 @@ test("retainpdf:* 事件名只允许定义在 contracts/app-contract.js", () => 
   assert.deepEqual(
     violations,
     [],
-    `发现契约外的 retainpdf:* 字面量,请改用 APP_EVENTS 常量:\n  ${violations.join("\n  ")}`,
+`Found retainpdf:* literal outside of contract, please use APP_EVENTS constant:\n  ${violations.join("\n  ")}`,
   );
 });
 
-test("命令总线与 CustomEvent 不允许裸字符串事件名", () => {
+test("Command bus and CustomEvent do not allow bare string event names", () => {
   const patterns = [
     [/\.dispatch\(\s*["']/, ".dispatch(\"...\")"],
     [/\.on\(\s*["']/, ".on(\"...\")"],
@@ -81,6 +81,6 @@ test("命令总线与 CustomEvent 不允许裸字符串事件名", () => {
   assert.deepEqual(
     violations,
     [],
-    `发现裸字符串事件/命令名,请引用契约常量:\n  ${violations.join("\n  ")}`,
+`Found bare string event/command name, please reference contract constant:\n  ${violations.join("\n  ")}`,
   );
 });

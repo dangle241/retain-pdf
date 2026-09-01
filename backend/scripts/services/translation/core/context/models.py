@@ -110,18 +110,18 @@ class TranslationItemContext:
         if self.preserve_line_structure_for_prompt and self.line_texts:
             payload["text_flow"] = "preserve_lines"
             payload["line_count"] = len(self.line_texts)
-            payload["instruction"] = "保持原文多行结构，译文尽量使用相同换行数量和行序。"
+            payload["instruction"] = "Keep the original multi-line structure; the translation should use roughly the same number of line breaks and line order."
         if self.toc_entries:
             payload["structure"] = "table_of_contents"
-            payload["instruction"] = "这是目录页内容。逐行翻译标题，保留章节编号、点线省略号和页码的位置关系，不要合并行。"
+            payload["instruction"] = "This is a table of contents. Translate each title line by line, preserving the relative positions of chapter numbers, dotted leaders, and page numbers; do not merge lines."
         if self.continuation_group:
             payload["continuation_group"] = self.continuation_group
         context_before = self.context_before_for_prompt()
         context_after = self.context_after_for_prompt()
         if context_before:
-            payload["context_before"] = f"仅供理解，禁止翻译进输出：{context_before}"
+payload["context_before"] = f"For understanding only, do not translate into output: {context_before}"
         if context_after:
-            payload["context_after"] = f"仅供理解，禁止翻译进输出：{context_after}"
+payload["context_after"] = f"For understanding only, do not translate into output: {context_after}"
         return payload
 
     def as_classification_record(self, *, rule_label: str = "") -> dict[str, Any]:

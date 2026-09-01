@@ -1,4 +1,4 @@
-/** createTranslationState() 状态袋形状（可变，由 dataPort 就地写） */
+/** createTranslationState() State bag shape (variable, by dataPort Write in-place. */
 export interface TranslationStateBag {
   jobId: string;
   loaded: boolean;

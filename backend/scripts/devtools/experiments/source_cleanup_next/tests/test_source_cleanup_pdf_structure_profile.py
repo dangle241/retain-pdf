@@ -134,13 +134,13 @@ def test_source_cleanup_decision_keeps_multi_item_text_object_deletable() -> Non
                             "item_id": "p001-b001",
                             "block_kind": "text",
                             "bbox": [20.0, 35.0, 120.0, 50.0],
-                            "protected_translated_text": "译文一",
+                            "protected_translated_text": "translation one",
                         },
                         {
                             "item_id": "p001-b002",
                             "block_kind": "text",
                             "bbox": [20.0, 52.0, 120.0, 68.0],
-                            "protected_translated_text": "译文二",
+                            "protected_translated_text": "translation two",
                         },
                     ]
                 },
@@ -169,7 +169,7 @@ def test_source_cleanup_decision_keeps_formula_adjacent_body_with_protected_rect
                             "item_id": "p001-b001",
                             "block_kind": "text",
                             "bbox": [20.0, 35.0, 180.0, 55.0],
-                            "protected_translated_text": "上方正文",
+                            "protected_translated_text": "Main Text Above",
                         },
                         {
                             "item_id": "p001-f001",
@@ -203,7 +203,7 @@ def _translated_item() -> dict:
         "item_id": "p001-b001",
         "block_kind": "text",
         "bbox": [20.0, 35.0, 180.0, 70.0],
-        "protected_translated_text": "译文",
+"protected_translated_text": "Translation",
     }
 
 
@@ -213,7 +213,7 @@ def _translated_caption_item() -> dict:
         "block_kind": "text",
         "layout_role": "caption",
         "bbox": [20.0, 35.0, 180.0, 70.0],
-        "protected_translated_text": "图注",
+"protected_translated_text": "Caption",
     }
 
 

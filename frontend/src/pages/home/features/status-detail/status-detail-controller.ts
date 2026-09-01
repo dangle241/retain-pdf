@@ -1,23 +1,23 @@
-// StatusDetailDialog 的组合逻辑(蓝图 §1 判决表的落地点)。
+// StatusDetailDialog combination logic of (Blueprint Â§1 Judgment table drop location).
 //
-// 与旧世界 features/status-detail/controller.js 的关系(关键偏离,写进汇报):
-// controller.js 的公开返回值只有 { activateDetailTab, bindEvents,
+// To the Old World features/status-detail/controller.js relationship with(Critical Deviation,Add to Report):
+// controller.js Public return value only { activateDetailTab, bindEvents,
 // openStatusDetailDialog, buildDetailPageUrl, ensureTranslationData,
 // syncRerunAction, ensureOverviewData } —— applyFilter/changePage/loadItem/
-// replay/rerunCurrentJob 全部是内部闭包,只能通过 bindEvents() 接的
-// event-commands.js 触达(document 委托点击,DOM 事件驱动设计)。JSX 组件需要
-// 直接调用这些动作(受控 select/input、按钮 onClick),这个"回调只认 DOM
-// 事件"的窄公开面在 React 世界不可行。
+// replay/rerunCurrentJob All internal closures,Only via bindEvents() Connected
+// event-commands.js reach(document Delegate click,DOM Event-driven design)。JSX Component required
+// Invoke actions directly (controlled select/inputButton onClick), this "Callback only recognizes DOM
+// events" Narrow public surface area. React World infeasible.
 //
-// 因此本文件不 import controller.js/translation-tab-port.js/
+// Thus this file does not import controller.js/translation-tab-port.js/
 // event-commands.js/navigation-view-port.js/dialog-view-port.js/
-// resume-view-port.js/translation-renderer.js/view.js(蓝图判死清单 + 均属
-// architecture-boundaries 防回弹禁区),改为直接组合蓝图判"保留"的纯逻辑层:
+// resume-view-port.js/translation-renderer.js/view.js(Blueprint kill checklist + All belong
+// architecture-boundaries Anti-bounce dead zone), Directly compose blueprint judgment. "Retain" pure logic layer:
 // overview-coordinator.js / resume-actions.js / translation-data-port.js /
 // translation-tab-coordinator.js / translation-state.js / status-detail/
-// snapshot.js —— 用自己的 viewPort/render* 回调把它们的输出写进
-// status-detail-store.js,而不是拼 DOM markup。逐个方法在 pages 层重新
-// 暴露,JSX 直接调用。
+// snapshot.js —— Use own. viewPort/render* Callbacks write their output to
+// status-detail-store.js,rather than concatenating DOM markupMethod by method. pages Reset Layer
+// Expose,JSX Call directly.
 
 import type { StatusDetailRuntimePort } from "./status-detail-runtime-port.js";
 import type { StatusDetailStore, StatusDetailTranslation } from "./status-detail-store.js";
@@ -106,8 +106,8 @@ export function createStatusDetailController({
     return runtimePort.currentJobId();
   }
 
-  // ---- resume/rerun(resume-actions.js 保留;resumeViewPort 换 store 驱动,
-  //      不再走 view.js 的 dialogComponent() DOM 查询) ----
+// go through ReaderDialog unified openReaderRequested entry, href kept as
+// JS fallback available on invalidation.
   const resumeViewPort: StatusDetailResumeViewPort = {
     closeDialog: () => dialogStore.close(),
     setRerunAction: ({ enabled, status }: { enabled?: boolean; status?: string } = {}) => {
@@ -136,10 +136,10 @@ export function createStatusDetailController({
     });
   }
 
-  // ---- overview(overview-coordinator.js 保留;renderOverviewSnapshot 落到
-  //      store,job/eventsPayload 存原始值——蓝图 §1 判决表:history.js/
-  //      events.js 的 markup 拼接部分不用,StageHistoryList/EventsList 从这
-  //      两个原始字段用纯函数各自计算结构化数组) ----
+//
+// markdownBundle/sourcePdf/pdf 3 download links (dialogs blueprint §7): these few id
+// hit artifact-downloads domain document click delegated level (controller.js's
+  //      Compute structured arrays from two raw fields using pure functions.) ----
   function renderOverviewSnapshot(context: StatusDetailOverviewRenderContext | null | undefined) {
     const job = context?.job || null;
     const eventsPayload = context?.events || null;
@@ -179,8 +179,8 @@ export function createStatusDetailController({
   }
 
   // ---- translation(translation-data-port.js + translation-tab-coordinator.js
-  //      保留;render* 回调改成"浅拷贝 translationState 写 store"——store 的
-  //      translation 段就是这份状态袋的镜像,加少量纯 UI 态(*Loading/
+// handleProtectedArtifactClick, composition.js mounted bindEvents()), click
+// handler runs before native <a> default redirect executes. event.preventDefault() — button itself does not
   //      *ErrorText)) ----
   const translationState = createTranslationState();
   const dataPort = createStatusDetailTranslationDataPort({
@@ -252,8 +252,8 @@ export function createStatusDetailController({
     }
   }
 
-  // ---- 对外统一入口(蓝图 §1:ResultActions.jsx 的 #status-detail-btn 直调
-  //      openStatusDetailDialog("overview"),不是事件分发) ----
+// need extra onClick (delegate click. button renderer irrelevant.) subscribe only here
+  //      openStatusDetailDialog("overview"),Not event dispatch) ----
   function activateDetailTab(name = "overview") {
     dialogStore.open({ activeTab: name });
     if (name === "translation") {

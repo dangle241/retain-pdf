@@ -4,7 +4,7 @@
     {
       "id": "protocol-json-shell",
       "category": "protocol_shell",
-      "description": "模型返回 JSON/协议壳时必须被识别、修复或降级，不能当作正常译文渲染。",
+      "description": "Model returned JSON/Protocol shell must be recognized, repaired, or downgraded; cannot be rendered as normal translation.",
       "source_artifact": "",
       "expected": {
         "must_not_render_raw_json_shell": true,
@@ -14,7 +14,7 @@
     {
       "id": "empty-translation-output",
       "category": "empty_output",
-      "description": "模型返回空译文时必须有明确 diagnostics 和可控降级路径。",
+      "description": "Model returns empty translation; must be explicit. diagnostics and a controllable downgrade path.",
       "source_artifact": "",
       "expected": {
         "diagnostic_error_type": "EMPTY_TRANSLATION",
@@ -24,7 +24,7 @@
     {
       "id": "english-residue-body",
       "category": "english_residue",
-      "description": "正文译文中残留大段英文时必须触发英文残留检测或 fallback。",
+      "description": "When large chunks of English remain in the body translation, must trigger English residue detection or fallback。",
       "source_artifact": "",
       "expected": {
         "must_not_accept_copy_dominant_english": true,
@@ -34,7 +34,7 @@
     {
       "id": "structured-technical-block",
       "category": "technical_block",
-      "description": "Default/Type/命令/参数类技术块应保留结构，只翻译自然语言说明，不应被本地规则直接跳过正文。",
+"description": "Default/Type/Command/Provide source text.",
       "source_artifact": "",
       "expected": {
         "should_translate": true,

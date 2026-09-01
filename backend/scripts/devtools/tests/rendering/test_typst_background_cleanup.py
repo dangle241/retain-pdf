@@ -349,8 +349,8 @@ def test_redaction_items_from_render_blocks_preserve_source_item_metadata() -> N
             "semantic_role": "body",
             "source_text": "This editable source text should be matched in the PDF text layer.",
             "bbox": [20.0, 40.0, 180.0, 70.0],
-            "translated_text": "这段可编辑源文本应在 PDF 文字层中匹配。",
-            "protected_translated_text": "这段可编辑源文本应在 PDF 文字层中匹配。",
+            "translated_text": "Editable source text should display. Implement. PDF Match in text layer.",
+"protected_translated_text": "This editable source text should match in the PDF text layer.",
             "formula_map": [],
         }
     ]
@@ -378,8 +378,8 @@ def test_redaction_items_from_layout_blocks_use_background_rect() -> None:
             "item_id": "p001-b001",
             "block_type": "text",
             "source_text": "source text",
-            "translated_text": "译文",
-            "protected_translated_text": "译文",
+"translated_text": "translation",
+"protected_translated_text": "translation",
             "bbox": [20.0, 40.0, 180.0, 70.0],
         }
     ]
@@ -389,8 +389,8 @@ def test_redaction_items_from_layout_blocks_use_background_rect() -> None:
         background_rect=[10.0, 30.0, 190.0, 80.0],
         content_rect=[20.0, 40.0, 180.0, 70.0],
         content_kind="markdown",
-        content_text="译文",
-        plain_text="译文",
+content_text="translation",
+plain_text="translation",
         math_map=[],
         font_size_pt=10.0,
         leading_em=0.6,

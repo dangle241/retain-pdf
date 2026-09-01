@@ -1,298 +1,298 @@
-# job_runner 边界
+# job_runner boundaries
 
-这份文档只回答一个问题：
+This document answers only one question:
 
-**改 `backend/rust_api/src/job_runner` 时，逻辑应该放在哪里。**
+Where should logic be placed when modifying backend/rust_api/src/job_runner?
 
-`job_runner` 是运行态执行层，不是 HTTP API 层，也不是 view/presentation 层。它负责把已经创建好的 job 真正跑起来：排队、分派 workflow、启动 Python worker、消费 stdout/stderr、同步运行态、处理 OCR provider transport、处理失败/取消/超时。
+job_runner is the runtime execution layer, not the HTTP API layer or view/presentation layer. It is responsible for taking the already‑created job and running it for real: queueing, dispatching workflows, starting Python workers, consuming stdout/stderr, syncing runtime state, processing OCR provider transport, and handling failures/cancellations/timeouts.
 
-## 总规则
+## General rules
 
-`job_runner` 只做运行态执行，不做这些事：
+`job_runner` Handles runtime execution only; does not perform the following:
 
-- 不解析 HTTP request。
-- 不组装对外 API view。
-- 不直接依赖 `AppState`。
-- 不理解前端展示细节。
-- 不把 provider raw 私有结构暴露成 published artifact。
-- 不在 leaf helper 里随手接收整包 `ProcessRuntimeDeps`。
+- Does not parse HTTP request。
+- Do not assemble for external use. API view。
+- Do not directly depend. `AppState`。
+- Frontend display details unclear. Specify component, layout, or data mapping.
+- Do not expose provider raw private structures as published artifacts.
+- Do not pass the full ProcessRuntimeDeps to leaf helpers.
 
-依赖方向保持：
+Maintain dependency direction:
 
 ```text
 services/jobs -> job_runner -> worker_command / ocr_provider / db facade
 ```
 
-`job_runner` 内部尽量按两类依赖区分：
+`job_runner` Internally, distinguish by two dependency types.
 
 - `ProcessRuntimeDeps`
-  orchestrator 层使用，例如 workflow 分派、OCR flow、process runner 主入口。
+  orchestrator Layer usage, e.g. workflow AssignOCR flow、process runner Main entry point.
 - `JobPersistDeps`
-  leaf helper 使用，只需要 `db + data_root + output_root` 时不要拿整包 runtime deps。
+  leaf helper Use, only need `db + data_root + output_root` Do not take the whole package. runtime deps。
 
-## 顶层模块
+## Top-level module
 
 ### `mod.rs`
 
-作用：
+Purpose:
 
 - `job_runner` facade。
-- 对外导出 runner 入口和少量运行态 helper。
-- 挂载内部子模块。
+- Export runner Entry and Minimal Runtime State helper。
+- Mount internal submodule.
 
-不要放：
+Don't add.
 
-- workflow 业务逻辑。
-- provider 分支细节。
-- stdout 规则。
-- 文件下载/解包实现。
+- workflow Business logic.
+- provider Branch details.
+- stdout rules.
+- Download/Unpack implementation.
 
 ### `lifecycle.rs`
 
-作用：
+Purpose:
 
-- job 排队。
-- 执行槽控制。
-- cancel 短路。
-- 按 workflow 分派到 OCR / translation / render / process runner。
+- job Queue.
+- Execute slot control.
+- cancel Short circuit.
+- Assign to OCR/translation/render/process runner based on workflow.
 
-不要放：
+Do not place:
 
-- 具体 OCR provider 逻辑。
-- Python stdout 解析规则。
-- 单个 worker 的完成态细节。
+- Specific OCR provider logic.
+- Python stdout Parsing rules.
+- Single worker completion state details.
 
 ## process runner
 
-入口：
+Entry point:
 
 - `process_runner.rs`
 
-边界：
+Boundary:
 
 - `process_runner.rs`
-  只保留 worker 执行 orchestrator：启动、收集执行结果、分派 timeout/completion。
+Keep only the worker execution orchestrator: start, collect execution results, and dispatch timeout/completion.
 - `process_runner/startup.rs`
-  worker 启动、pid 持久化、启动前 cancel 检查。
+Worker startup, PID persistence before startup, and cancellation checks.
 - `process_runner/execution.rs`
-  等待进程、收集 stdout/stderr、区分 completed/timed out。
+  Wait for processes, collect. stdout/stderrDistinguish completed/timed out。
 - `process_runner/completion.rs`
-  完成态分类、shutdown noise 判定、终态应用。
+  Completion status classificationshutdown noise Determination, final state application.
 - `process_runner/completion_pipeline.rs`
-  完成后的总收口：挂载 stdout/stderr、校验 worker output contract、应用完成态、失败 AI 诊断。
+  Final step after completion: mount. stdout/stderrVerify worker output contractApp state: completed failed AI diagnosis.
 - `process_runner/timeout_support.rs`
-  timeout 失败落态。
+  timeout Failure state.
 - `process_runner/io_support.rs`
-  stdout/stderr 消费。
+  stdout/stderr Consume.
 - `process_runner/result_support.rs`
-  process 结果写回 job。
+  process Write back result. job。
 - `process_runner/failure_ai_diagnosis.rs`
-  失败 AI 诊断。
+AI failure diagnosis.
 
-规则：
+Rules:
 
-- 新增 worker 成功后必需产物校验，放 `process_contract.rs`，由 `completion_pipeline.rs` 调用。
-- 新增 stdout label 解析，不要放 process runner，放 `stdout_parser/*`。
-- 新增 Python worker 命令参数，不要放 process runner，放 `worker_command/*`。
+- When adding a new worker, required artifact validation after success should be placed in process_contract.rs, called by completion_pipeline.rs.
+- New stdout label parsing should not be placed in the process runner; put it in stdout_parser/*.
+- New Python worker command args should not be placed in the process runner; put them in worker_command/*.
 
 ## workflow flow
 
 ### `translation_flow.rs` + `translation_flow_*.rs`
 
-作用：
+Purpose:
 
-- book / translate-only workflow 编排。
-- OCR child job 创建和父任务状态同步。
-- OCR 完成后进入 translation。
-- translation 完成后按 `PipelinePlan` 决定是否进入 render。
+- book / translate‑only workflow orchestration.
+- OCR child job Create and sync status with parent task.
+- OCR Enter after completion. translation。
+- translation Press when done. `PipelinePlan` Decide whether to enter render。
 
-边界：
+Boundary:
 
 - `translation_flow.rs`
   orchestrator。
 - `translation_flow_child.rs`
-  upload source 读取、父任务进入 OCR submitting、OCR child 创建。
+Upload source reading, parent task entering OCR submitting, and OCR child creation.
 - `translation_flow_artifacts.rs`
-  从已有 OCR artifacts 继续翻译的输入准备。
+  From existing OCR artifacts Input preparation for continuing translation.
 - `translation_flow_stage.rs`
-  translation/render stage 调用和 `ocr_child_finished` 事件。
+translation/render stage invocation and ocr_child_finished event.
 - `translation_flow_executor.rs`
-  translation 后续 plan 执行。
+Execute the translation next plan.
 - `translation_flow_support.rs`
-  OCR child 终态判断和父任务收口。
+  OCR child Final state determination and parent task closure.
 
-规则：
+Rules:
 
-- 不要在 `translation_flow.rs` 里直接读写 artifact 细节；已有产物复用放 `translation_flow_artifacts.rs`。
-- 不要在这里拼 Python 命令；命令构造在 `worker_command/*`。
+- Do not directly read/write artifact details in translation_flow.rs; reuse existing artifacts via translation_flow_artifacts.rs.
+- Don't spell here. Python Command; command construction at `worker_command/*`。
 
 ### `render_flow.rs` + `render_flow_artifacts.rs`
 
-作用：
+Purpose:
 
-- render-only workflow 编排。
-- 从已有 translation artifacts 准备 render 输入。
+- render‑only workflow orchestration.
+- Prepare render input from existing translation artifacts.
 
-规则：
+Rules:
 
-- `render_flow.rs` 只负责构造 render command、设置 running/rendering 状态、调用 process runner。
-- 读取源 job、复制 translation inputs、校验 translations dir/source pdf 放 `render_flow_artifacts.rs`。
+- `render_flow.rs` Only responsible for construction. render commandSet running/rendering Status, Call process runner。
+- Reading source job, copying translation inputs, and validating translations dir/source pdf should be in render_flow_artifacts.rs.
 
 ## OCR flow
 
-入口：
+Entry point:
 
 - `ocr_flow/mod.rs`
 
-边界：
+Boundary:
 
 - `ocr_flow/mod.rs`
-  OCR child job orchestrator：初始化状态、准备 workspace、执行 provider transport、进入 normalize worker。
+OCR child job orchestrator: initialize state, ready workspace, execute provider transport, enter normalize worker.
 - `ocr_flow/provider_transport.rs`
-  本地上传/远程 URL、MinerU/Paddle provider 分发。
+Local upload/remote URL, MinerU/Paddle provider dispatch.
 - `ocr_flow/workspace.rs`
-  OCR job 路径和目录准备。
+  OCR job Path and directory preparation.
 - `ocr_flow/transport.rs`
-  source pdf 准备与远程 source 恢复。
+  source pdf Preparation and Remote source recovery.
 - `ocr_flow/support.rs`
-  OCR job 保存、父任务 OCR 状态镜像、transport/source-pdf 失败处理。
+OCR job saving, parent task OCR status mirroring, transport/source‑pdf failure handling.
 - `ocr_flow/status.rs`
-  provider status 映射到 job stage/detail/progress。
+  provider status Map to job stage/detail/progress。
 - `ocr_flow/polling.rs`
-  通用 poll 等待、timeout、cancel 检查。
+General poll wait, timeout, and cancellation checks.
 
 ### MinerU
 
 - `ocr_flow/mineru.rs`
-  MinerU submit 入口，本地 batch 和远程 task 两条链路的 provider 调用。
+MinerU submit local entry batch and remote task two‑step provider invocation.
 - `ocr_flow/mineru_polling.rs`
   MinerU batch/task polling loop。
 - `ocr_flow/mineru_status_handlers.rs`
-  MinerU batch/task 状态处理，done 后落 provider result，并进入 bundle 下载。
+  MinerU batch/task Status handling,done Back provider resultand enter bundle Download.
 - `ocr_flow/mineru_retry.rs`
-  MinerU query retry 策略、可重试错误识别。
+  MinerU query retry Strategy, retryable error identification.
 - `ocr_flow/bundle_download.rs`
-  MinerU bundle 成功后的总编排：readiness wait、download retry、unpack、markdown export。
+  MinerU bundle Overall orchestration after success:readiness wait、download retry、unpack、markdown export。
 - `ocr_flow/bundle_ready_wait.rs`
-  bundle readiness probe 等待和 degraded fallback。
+  bundle readiness probe Wait and degraded fallback。
 - `ocr_flow/bundle_download_retry.rs`
-  bundle 真实下载重试。
+  bundle Retry actual download.
 - `ocr_flow/bundle_events.rs`
-  bundle retry/degraded 事件和 `ocr_result_ready` 状态标记。
+  bundle retry/degraded Events and `ocr_result_ready` Status marker.
 - `ocr_flow/bundle_retry_policy.rs`
-  bundle retry/fallback/timeout 纯策略。
+  bundle retry/fallback/timeout Pure strategy.
 - `ocr_flow/markdown_bundle.rs`
-  provider raw markdown 导出。
+  provider raw markdown Export
 
-规则：
+Rules:
 
-- provider API 协议字段优先放 `ocr_provider/mineru/*`。
-- job 状态更新放 `ocr_flow/status.rs` 或 status handler。
-- retry 判定放 retry/policy 模块，不要塞进 polling loop。
-- bundle 下载事件统一走 `bundle_events.rs`。
+- provider API Prioritize protocol fields. `ocr_provider/mineru/*`。
+- Job status updates go into ocr_flow/status.rs or status handlers.
+- retry Judgment Release retry/policy Module, do not insert. polling loop。
+- bundle Download event unified go `bundle_events.rs`。
 
 ### Paddle
 
 - `ocr_flow/paddle.rs`
-  Paddle submit/poll/download 主流程。
+Paddle submit/poll/download main flow.
 - `ocr_flow/paddle_payload.rs`
-  Paddle optional payload 构造。
+Paddle optional payload construction.
 - `ocr_flow/paddle_errors.rs`
-  Paddle provider error 挂载到 job。
+  Paddle provider error Mount to job。
 - `ocr_flow/paddle_markdown.rs`
   Paddle markdown artifact materialize。
 
-规则：
+Rules:
 
-- Paddle 请求参数不要写在 transport orchestrator 外的随机位置，统一放 `paddle_payload.rs`。
-- Paddle 错误映射不要散在 polling 中，统一走 `paddle_errors.rs`。
+- Paddle Do not write request parameters in transport orchestrator External random positions, place uniformly. `paddle_payload.rs`。
+- Paddle Error mappings must not be scattered. polling Unified routing. `paddle_errors.rs`。
 
 ## stdout parser
 
-入口：
+Entry point:
 
 - `stdout_parser/mod.rs`
 
-边界：
+Boundary:
 
 - `labels.rs`
-  stdout label 常量。
+  stdout label Constants.
 - `state.rs`
-  stdout parser 共享状态 helper。
+  stdout parser Shared state helper。
 - `artifact_fields.rs`
-  stdout label / structured artifact key 到内部 artifact field 的映射。
+  stdout label / structured artifact key Internal artifact field mapping of.
 - `artifact_rules.rs`
-  artifact 行和 `artifact_published` JSON event 写入 job artifacts。
+Artifact row and artifact_published JSON event written to job artifacts.
 - `metric_rules.rs`
-  `pages processed`、`translated items`、耗时类指标。
+  `pages processed`、`translated items`Performance metrics
 - `stage_rules.rs`
-  stdout 行触发的 stage 变化。
+  stdout Row-triggered stage Change.
 - `failure.rs`
-  provider failure 归因。
+  provider failure Attribution.
 
-规则：
+Rules:
 
-- artifact 模块只写 artifact，不推进 stage。
-- stage 推进只放 `stage_rules.rs`。
-- metric 不要塞进 artifact。
-- 新 stdout label 必须同步考虑是否属于 artifact、metric、stage 还是 failure。
+- artifact Module write-only. artifact, does not advance stage。
+- stage Advance only `stage_rules.rs`。
+- metric Don't inject artifact。
+- New stdout labels must also consider whether they belong to artifact, metric, stage, or failure.
 
-## 契约模块
+## Contract module
 
 ### `process_contract.rs`
 
-作用：
+Purpose:
 
-- 根据 worker command 判断 worker 类型。
-- 校验 worker 成功退出后必须存在的产物。
+- Determine the worker type based on the worker command.
+- Validate required artifacts after successful worker exit.
 
-规则：
+Rules:
 
-- Python worker 成功退出但缺关键产物，应在这里失败。
-- 不要在 process runner 主流程里手写某个 stage 的产物判断。
+- Python worker Exited successfully but missing critical artifacts; should fail here.
+- Do not customize stage product determination in the process runner main flow.
 
 ### `stage_contract.rs`
 
-作用：
+Purpose:
 
-- 从已有 job artifacts 中解析 OCR -> translation、translation -> render 所需输入。
-- 校验 source pdf、normalized document、translations manifest 等 stage-ready 条件。
+- Parse required inputs from existing job artifacts: OCR -> translation, translation -> render.
+- Validate source pdf, normalized document, translations manifest, and other stage‑ready conditions.
 
-规则：
+Rules:
 
-- 重试、resume、from-artifacts workflow 要复用这里的 ready input 解析。
-- 不要在各个 flow 里重复解析 artifact 路径。
+- Retry, resume, and from‑artifacts workflows reuse this ready input parsing.
+- Do not add duplicate artifact path parsing inside flows.
 
 ### `artifact_requirements.rs`
 
-作用：
+Purpose:
 
-- 共享 artifact path 解析和 file/dir existence 检查。
+- Shared artifact path parsing and file/directory existence checks.
 
-规则：
+Rules:
 
-- 只做路径和存在性检查。
-- 不理解具体 workflow。
+- Only perform path and existence checks.
+- Unclear. Specify file path, command, error message, code snippet, or context. workflow。
 
-## 什么时候不该继续拆
+## Stop splitting when abstraction cost exceeds reuse benefit. YAGNI.
 
-不要为了行数继续拆这些情况：
+Don't split cases further just to inflate line count.
 
-- 模块已经只有单一算法职责，例如 page range 解析、retry 策略。
-- 拆完以后调用链比原来更难读。
-- 需要引入 trait/generic 才能消除少量重复。
-- 只是两个 poll loop 长得像，但参数、错误文案、状态处理不同。
+- Module already has only a single algorithm responsibility, for example page range parsing or retry strategy.
+- After splitting, the call chain is harder to read than before.
+- Requires import trait/generic Only then can minor duplication be eliminated.
+- Just two. poll loop Looks similar, but parameters, error messages, and status handling differ.
 
-优先拆这些情况：
+Prioritize splitting these cases:
 
-- 同一个文件同时包含 orchestration 和 provider 协议细节。
-- 同一个函数同时做状态判断、事件写入、文件路径解析、进程控制。
-- 某个 leaf helper 为了一个路径或 db 写入接收了整包 `ProcessRuntimeDeps`。
-- artifact、stage、metric、failure 规则混在一起。
+- Same file contains both orchestration and provider protocol details.
+- The same function simultaneously performs state checking, event logging, file path resolution, and process control.
+- Some leaf helper Path or URL not found. db Write received full packet. `ProcessRuntimeDeps`。
+- artifact、stage、metric、failure rules mixed together.
 
-## 最小验证
+## Minimal validation
 
-改 `job_runner` 后至少跑：
+After modifying job_runner, run at least:
 
 ```bash
 cargo test --manifest-path backend/rust_api/Cargo.toml ocr_flow -- --nocapture
@@ -301,4 +301,4 @@ cargo test --manifest-path backend/rust_api/Cargo.toml process_runner -- --nocap
 cargo test --manifest-path backend/rust_api/Cargo.toml
 ```
 
-如果只改某个小模块，可以先跑对应 filter，但收口前建议跑全量 Rust API 测试。
+If only a small module is changed, run the corresponding filter first; run the full suite before finalizing Rust API tests.

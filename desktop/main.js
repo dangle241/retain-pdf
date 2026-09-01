@@ -127,11 +127,11 @@ async function createSplashWindow() {
     },
   });
   await splashWindow.loadFile(path.join(__dirname, "splash.html"));
-  updateSplashProgress(6, "正在准备运行环境", "正在检查桌面组件与本地资源");
+  updateSplashProgress(6, "Preparing environment", "Checking desktop components and local resources.");
 }
 
 async function startBundledBackend() {
-  updateSplashProgress(18, "正在检查运行文件", "正在校验后端、Python 和脚本资源");
+  updateSplashProgress(18, "Checking runtime files", "Verifying backend...Python and script resources");
   const backendRoot = resolveBackendRoot();
   const backendBin = resolveBackendBinary(backendRoot);
   let pythonRuntime = resolvePythonRuntime(backendRoot);
@@ -147,7 +147,7 @@ async function startBundledBackend() {
   const apiPort = 41000;
   const simplePort = 42000;
   const aiServicePort = AI_SERVICE_PORT;
-  // packaged: backend/ai_service；开发未 prepare 时可回退仓库 backend/ai_service
+  // packaged: backend/ai_serviceDev work not needed. prepare Fallback repo available. backend/ai_service
   let aiServiceRoot = path.join(backendRoot, "ai_service");
   if (!fs.existsSync(path.join(aiServiceRoot, "retainpdf_ai", "__main__.py"))) {
     const repoAi = path.join(appRoot, "..", "backend", "ai_service");
@@ -197,7 +197,7 @@ async function startBundledBackend() {
   fs.mkdirSync(dataRoot, { recursive: true });
   fs.mkdirSync(rustApiRoot, { recursive: true });
   fs.mkdirSync(typstPackageCachePath, { recursive: true });
-  updateSplashProgress(34, "正在准备工作目录", "正在初始化本地数据目录");
+  updateSplashProgress(34, "Preparing working directory.", "Initializing local data directory.");
 
   const apiPortBusy = await canConnectToPort("127.0.0.1", apiPort);
   logDesktop(`[desktop] port ${apiPort} busy=${apiPortBusy}`);
@@ -206,18 +206,18 @@ async function startBundledBackend() {
     if (app.isPackaged && !allowExternalBackend) {
       throw new Error(
         [
-          `端口 ${apiPort} 已被占用。`,
-          "正式桌面端不会复用已有后端，避免连接到旧版本或开发版后端导致渲染错误。",
-          "请关闭其他 RetainPDF、旧版桌面端、Docker/系统服务后再启动。",
+          `Port ${apiPort} Already in use.`,
+          "Official desktop client does not reuse existing backend to avoid rendering errors from connecting to older or development backends.",
+          "Close Others RetainPDFOld desktop versionDocker/Start after system services.",
         ].join("\n"),
       );
     }
     if (await canReuseExistingBackend(apiPort)) {
       usingExternalBackend = true;
       logDesktop(`[desktop] reusing existing backend on port ${apiPort}`);
-      updateSplashProgress(52, "检测到已有本地服务", "桌面端将直接复用当前后端");
+      updateSplashProgress(52, "Existing local service detected.", "Desktop will directly reuse the current backend.");
       await waitForPort("127.0.0.1", apiPort, 5000);
-      // 仍尝试拉起 AI（若 41100 空闲）；复用的 Rust 会反代到本机 AI
+      // Still attempting to launch. AI(if 41100 idle); reused Rust Reverse proxy to localhost. AI
       const reuseEnv = buildBackendEnv({
         apiPort,
         aiServicePort,
@@ -245,18 +245,18 @@ async function startBundledBackend() {
         env: reuseEnv,
         pythonCommand: pythonRuntime.command,
       });
-      updateSplashProgress(92, "本地服务已就绪", "正在加载主界面");
+      updateSplashProgress(92, "Local service ready.", "Loading main interface");
       return;
     }
     throw new Error(
-      `端口 ${apiPort} 已被其他进程占用，且不是可复用的 RetainPDF 后端。请先关闭占用进程后再启动桌面端。`,
+`Port {apiPort} in use by another process. Not reusable. RetainPDF backend. Close occupying processes before starting desktop client.,
     );
   }
 
   const simplePortBusy = await canConnectToPort("127.0.0.1", simplePort);
   logDesktop(`[desktop] port ${simplePort} busy=${simplePortBusy}`);
   if (simplePortBusy) {
-    throw new Error(`端口 ${simplePort} 已被其他进程占用，请先释放后再启动桌面端。`);
+throw new Error(Port {simplePort} occupied by another process. Release then start desktop.`);
   }
 
   const bundledPythonHome = resolveBundledPythonHome(pythonRuntime.bundledHome);
@@ -282,7 +282,7 @@ async function startBundledBackend() {
     typstPackagePath,
   });
 
-  updateSplashProgress(52, "正在启动本地服务", "Rust API 与 AI 服务正在启动");
+updateSplashProgress(52, "Starting local service.", "Rust API and AI Service starting");
   logDesktop(`[desktop] spawning backend: ${backendBin}`);
   backendStartupDiagnostics.reset(backendBin, backendRoot);
   backendChild = spawn(backendBin, [], {
@@ -316,7 +316,7 @@ async function startBundledBackend() {
     dialog.showErrorBox("Rust API worker crashed", detail);
   });
 
-  // retainpdf-ai：与 Rust 同生命周期；LLM key 由前端按请求传入
+// retainpdf-ai with Rust same lifecycle; LLM key passed by frontend per request
   await startRetainpdfAiService({
     aiServicePort,
     aiServiceRoot,
@@ -329,8 +329,8 @@ async function startBundledBackend() {
     waitingProgress = Math.min(waitingProgress + 3, 88);
     updateSplashProgress(
       waitingProgress,
-      "正在连接本地服务",
-      "首次启动可能稍慢，请稍候",
+      "Connecting to local service",
+      "First startup may be slow. Please wait.",
     );
   }, 500);
   const backendReadyTimeoutMs = app.isPackaged ? 90000 : 30000;
@@ -338,7 +338,7 @@ async function startBundledBackend() {
   await backendStartupDiagnostics.waitForBackendReady("127.0.0.1", apiPort, backendReadyTimeoutMs);
   clearInterval(waitingTimer);
   logDesktop(`[desktop] backend ready on port ${apiPort}`);
-  updateSplashProgress(92, "本地服务已就绪", "正在加载主界面");
+updateSplashProgress(92, "Local service ready", "Loading main interface");
 }
 
 async function startRetainpdfAiService({
@@ -391,7 +391,7 @@ async function startRetainpdfAiService({
     await waitForPort("127.0.0.1", aiServicePort, aiReadyTimeoutMs);
     logDesktop(`[desktop] retainpdf-ai ready on port ${aiServicePort}`);
   } catch (error) {
-    // 不阻断主程序：翻译流水线仍可用，仅 AI 问答会 502
+    // Non-blocking: translation pipeline remains usable, only AI Q&A session. 502
     logDesktopError(
       `[desktop] retainpdf-ai failed to become ready: ${error && error.message ? error.message : error}`,
     );
@@ -423,7 +423,7 @@ if (gotSingleInstanceLock) {
         const desktopLogPath = getDesktopLogPath();
         const dialogDetail = [
           String(error && error.message ? error.message : error),
-          desktopLogPath ? `\n完整日志: ${desktopLogPath}` : "",
+          desktopLogPath ? `\nFull log: ${desktopLogPath}` : "",
         ].filter(Boolean).join("\n");
         dialog.showErrorBox("RetainPDF startup failed", dialogDetail);
         app.quit();

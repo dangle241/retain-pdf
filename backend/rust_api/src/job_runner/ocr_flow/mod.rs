@@ -57,7 +57,7 @@ pub async fn execute_ocr_job(
     }
     job.updated_at = now_iso();
     job.stage = Some("ocr_upload".to_string());
-    job.stage_detail = Some("OCR provider transport 启动中".to_string());
+    job.stage_detail = Some("OCR provider transport Starting".to_string());
     clear_job_failure(&mut job);
     sync_runtime_state(&mut job);
     save_ocr_job(&deps, &job, parent_job_id.as_deref()).await?;
@@ -100,7 +100,7 @@ pub async fn execute_ocr_job(
     if is_cancel_requested_with_registry(deps.canceled_jobs.as_ref(), &job.job_id).await {
         job.status = JobStatusKind::Canceled;
         job.stage = Some("canceled".to_string());
-        job.stage_detail = Some("OCR 任务已取消".to_string());
+        job.stage_detail = Some("OCR OCR task canceled".to_string());
         job.updated_at = now_iso();
         job.finished_at = Some(now_iso());
         clear_canceled_runtime_artifacts(&mut job);
@@ -132,7 +132,7 @@ pub async fn execute_ocr_job(
         },
     )?;
     job.stage = Some("normalizing".to_string());
-    job.stage_detail = Some("OCR provider 已完成，开始标准化 document.v1".to_string());
+    job.stage_detail = Some("OCR provider Done, starting standardization. document.v1".to_string());
     job.updated_at = now_iso();
     sync_runtime_state(&mut job);
     save_ocr_job(&deps, &job, parent_job_id.as_deref()).await?;
@@ -162,11 +162,11 @@ mod tests {
         assert_eq!(job.stage.as_deref(), Some("failed"));
         assert_eq!(
             job.stage_detail.as_deref(),
-            Some("OCR 已完成，但任务源 PDF 缺失")
+Some("OCR completed, but task source PDF missing")
         );
         let failure = job.failure.as_ref().expect("failure");
         assert_eq!(failure.category, "source_pdf_missing");
-        assert_eq!(failure.summary, "源 PDF 缺失");
+assert_eq!(failure.summary, "source PDF missing");
         assert!(!failure.retryable);
     }
 }

@@ -1,56 +1,56 @@
 # Rust API Directory Map
 
-这份文档只回答一个问题：
+This document answers only one question:
 
-**现在要改 `rust_api`，应该先进哪个目录。**
+**Change required now. `rust_api`cd /**
 
-## 最常见入口
+## Most common entry point
 
-- 改 HTTP 接口：
+- Change HTTP API:
   [`src/routes`](src/routes)
-- 改 jobs 用例编排：
+- Change jobs use case orchestration:
   [`src/services/jobs`](src/services/jobs)
-- 改图书馆域（文档/收藏/检索/资产/会话/合集）：
+- Change library domain (document/Favorite/Search/Assets/Session/Collection):
   [`src/services/library_api.rs`](src/services/library_api.rs) +
   [`src/services/library`](src/services/library)
-- 改 worker 运行链路：
+- Change worker execution path:
   [`src/job_runner`](src/job_runner)
-- 改 OCR provider 分发和适配：
+- Change OCR provider distribution and adaptation:
   [`src/ocr_provider`](src/ocr_provider)
-- 改后端运行参数、provider 超时/重试、路径和认证配置：
+- Modify backend runtime parameters: provider timeout/retry, path, and authentication configuration:
   [`src/config`](src/config)
-- 改 Python worker 入口命令或 stage spec：
+- Change Python worker entry command or stage spec:
   [`src/worker_command`](src/worker_command)
 
-## 目录地图
+## Directory map
 
 ### `src/app`
 
-- 作用：
-  应用启动、`AppState` 组装、router 挂载、服务启动。
-- 进入条件：
-  只有在改全局资源、启动逻辑、路由挂载时才进这里。
-- 关键文件：
+- Purpose:
+  Application startup,`AppState` Assemble,router Mount, start service.
+- Entry conditions:
+  Only enter here when modifying global resources, startup logic, or route mounting.
+- Key files:
   - [`src/app/state.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/state.rs)
-    `AppState` 和全局资源初始化。
+    `AppState` Global resource initialization.
   - [`src/app/router.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/router.rs)
-    axum 路由总挂载点。
+    axum Route root mount point.
   - [`src/app/jobs.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/jobs.rs)
-    jobs facade 组合根。这里负责把 `AppState` 装成 `JobsFacade`，`routes` 不再直接碰 `job_runner`。
+    jobs facade Composition root. Responsible for `AppState` Pretend `JobsFacade`，`routes` No longer touch directly `job_runner`。
 
 ### `src/config.rs` + `src/config/*`
 
-- 作用：
-  运行时配置入口。`config.rs` 是兼容 facade，继续暴露原来的 `AppConfig` 字段；`src/config/*` 才是实际配置分组。
-- 进入条件：
-  改 env、部署参数、provider timeout/retry、路径、auth、上传限制、worker 运行参数时进这里。
-- 当前子边界：
+- Purpose:
+Runtime configuration entry point. `config.rs` is a compatibility facade continuing to expose the original `AppConfig` fields; `src/config/*` is the actual configuration group.
+- Entry condition:
+Change env/deployment parameters: provider timeout/retry, path, auth, upload limit 10 MB, worker running parameters. Enter here.
+- Current sub-boundary:
   - `config.rs`
-    `AppConfig` 兼容层；`from_env()` / `from_desktop()` 只解析来源，统一通过内部 `AppConfigParts` 组装。不要继续往这里堆具体 env 解析。
+    `AppConfig` Compatibility layer;`from_env()` / `from_desktop()` Only parse source; consistently use internal. `AppConfigParts` assemble. Do not continue to pile specific env parse.
   - `config/env_vars.rs`
-    env 读取 helper；统一处理空字符串和正整数 fallback。
+env reading helper: handles empty strings and positive integers uniformly, with fallback.
   - `config/paths.rs`
-    project root、rust_api root、data root、scripts、jobs/uploads/downloads 路径和 runtime 目录创建。
+project root, rust_api root, data root, scripts, jobs/uploads/downloads paths and runtime directory creation.
   - `config/auth.rs`
     `auth.local.json`、`RUST_API_KEYS`、`RUST_API_MAX_RUNNING_JOBS`、`RUST_API_SIMPLE_PORT`。
   - `config/server.rs`
@@ -58,241 +58,241 @@
   - `config/upload.rs`
     `RUST_API_UPLOAD_MAX_BYTES`、`RUST_API_UPLOAD_MAX_PAGES`。
   - `config/provider.rs`
-    MinerU / Paddle / DeepSeek 的 base URL、HTTP timeout、retry、provider 上传门槛和 Paddle input image limit。
+MinerU / Paddle / DeepSeek base URL, HTTP timeout, retry, provider upload threshold settings. Paddle input image limit.
   - `config/job_runner.rs`
-    队列轮询、worker terminate grace、AI failure diagnosis timeout、同步 bundle 等待间隔。
-- 规则：
-  新增部署可调参数时，优先放进上述子模块；只有需要保持现有调用方兼容时，才在 `AppConfig` 上暴露字段。
-  stage 名、artifact key、API path、schema version、stdout label 这类协议常量不要配置化。
+queue polling, worker termination grace, AI failure diagnosis timeout, sync bundle wait interval.
+- Rule:
+  When adding new deployment-tunable parameters, prioritize the above submodule; only if existing caller compatibility must be preserved, then in `AppConfig` Expose fields.
+  stage Nameartifact key、API path、schema version、stdout label Such protocol constants should not be made configurable.
 
 ### `src/routes`
 
-- 作用：
-  HTTP 参数提取、请求转发、统一响应封装。
-- 不该做的事：
-  不直接碰 `job_runner`，不自己拼底层业务逻辑，不 `state.db` / 内部 service，
-  models 只经 `models::api` / `domain` / `request`。
+- Purpose:
+  HTTP Parameter extraction, request forwarding, unified response wrapping.
+- What not to do:
+Do not touch `job_runner` directly, do not assemble low-level business logic yourself, do not access `state.db` / internal service.
+  models Only via `models::api` / `domain` / `request`。
 
 #### `src/routes/jobs`
 
 - `json_response/`
-  jobs JSON 查询 / detail / cancel / retry 的响应出口，只调用 `JobsFacade`
-  并封装 `ApiResponse`。
+jobs JSON query / detail / cancel / retry: only call the response outlet `JobsFacade`.
+  and encapsulate `ApiResponse`。
 - `create.rs` / `download.rs` / `query.rs` / `control.rs` / `translation_debug.rs`
-  真正的 axum route 入口。
+  True axum route Entry.
 
-#### `src/routes` library 面
+#### `src/routes` library surface
 
 - `library.rs`
-  books 投影 API；只调 `library_api`；cover/thumbnail 走 `download_response`。
+  books Projection APIAdjust only. `library_api`；cover/thumbnail go `download_response`。
 - `library_data.rs`
-  documents / media / translate-from-library / favorites / search；只调 `library_api`。
+documents / media / translate-from-library / favorites / search; only call `library_api`.
 - `library_extras.rs`
-  assets / conversations；multipart 解包留在 route，业务进 `library_api`。
+  assets / conversations；multipart Extract and Keep routeBusiness proceed `library_api`。
 - `collections.rs`
-  合集 CRUD 与成员关系；只调 `library_api`。
+collection CRUD and member relationships; only calls `library_api`.
 - deps：`routes/common.rs::build_library_route_deps`（`LibraryDeps` + `JobsFacade`）。
 
 #### `src/routes/download_response`
 
-- 作用：
-  文件下载、markdown、preview、cover、thumbnail 的响应出口。
-- 使用方：
-  `routes/jobs/*` 和 `routes/library.rs` 都可以调用它；route 模块之间不要互相复用私有 helper。
+- Purpose:
+  File Downloadmarkdown、preview、cover、thumbnail Export response.
+- User:
+`routes/jobs/*` and `routes/library.rs` can both call it; route modules must not reuse private members across boundaries. helper.
 
 ### `src/services`
 
-- 作用：
-  application service 入口和内部业务实现。
+- Purpose:
+  application service Entry and internal business implementation.
 
 #### `src/services/jobs/facade`
 
-- 作用：
-  给 route 提供统一 jobs 入口。
+- Purpose:
+Provide route with a unified jobs entry point.
 - `command/*`
-  创建、取消、同步 bundle 这类命令型能力。
+  Create, Cancel, Sync bundle Such imperative capabilities.
 - `query/*`
-  列表、详情、下载、artifacts、translation debug 这类查询型能力。
+  List, Details, Download,artifacts、translation debug Query capabilities.
 
 #### `src/services/library_api.rs` + `src/services/library/*`
 
-- 作用：
-  给 route 提供统一 **Library** 入口（与 `JobsFacade` / `glossary_api` 同级）。
-- 进入条件：
-  改文档、馆藏翻译入口、收藏、全文检索、资产、会话、合集业务时进这里；
-  **不要** 把逻辑写回 `routes/library_*`。
-- 子模块：
-  - `books.rs` — library books 列表/详情/删除（投影委托 `book_projection`）
-  - `documents.rs` / `media.rs` — 文档 CRUD 与 source.pdf/cover/thumbnail
-  - `translate.rs` — 绑定文档 upload 后调 `JobsFacade::create_submission`
-  - `favorites.rs` / `search.rs` — 锚点收藏与 blocks FTS
-  - `assets.rs` / `conversations.rs` / `collections.rs` — 资产、会话、合集
-- 规则：
-  route 只 import `library_api::`；`derived_artifacts` 只允许在 service 内部使用。
+- Purpose:
+  Provide route Provide unified **Library** Entry (with `JobsFacade` / `glossary_api` Same level).
+- Entry condition:
+  Enter here for changes to documents, holdings translation entry, favorites, full-text search, assets, sessions, and collections.
+  **Don't** Revert logic. `routes/library_*`。
+- Submodule:
+- `books.rs` â library books list/detail/delete (projection delegation to `book_projection`)
+- `documents.rs` / `media.rs` â document CRUD and source.pdf/cover/thumbnail
+- `translate.rs` â bound document upload based on `JobsFacade::create_submission`
+  - `favorites.rs` / `search.rs` — Anchor Favorites and blocks FTS
+  - `assets.rs` / `conversations.rs` / `collections.rs` — Assets, Sessions, Collections
+- Rule:
+route only imports `library_api::`; `derived_artifacts` only allowed for internal service use.
 
 #### `src/services/jobs/creation`
 
 - `submit.rs`
-  创建并启动任务。
+  Create and start task.
 - `bundle.rs`
-  同步跑完整链路并产出 bundle。
+  Run full end-to-end sync and produce output. bundle。
 - `prepare.rs`
-  输入解析、存在性检查、前置校验，只产出 `Prepared*` 输入，不生成 `JobSnapshot`。
+  Input parsing missing. Add: `if (!input) return error("Input required.");` `Prepared*` input, no generation `JobSnapshot`。
 - `job_builders.rs`
-  workflow 级快照编排；只消费 `Prepared*` 输入并调用 snapshot factory，不再自己做前置校验。
+  workflow Level snapshot orchestration; consume only `Prepared*` input and call snapshot factoryRemove pre-validation. Let downstream handle it.
 - `upload.rs`
-  upload 持久化和 upload record 读取。
+  upload Persistence and upload record Read.
 - `context.rs`
-  creation 侧显式 deps。
+explicit deps on the creation side.
 
 #### `src/services/jobs/presentation`
 
-- 作用：
-  对外 view 组装、摘要读取、响应投影。
-- 进入条件：
-  改 API 返回结构、摘要字段、脱敏展示时进这里。
+- Purpose:
+external view assembly, summary read, response projection.
+- Entry condition:
+Change API return structure, summary fields, desensitized display: go here.
 
-#### 其他 service 入口
+#### Other service entries
 
 - [`src/services/upload_api.rs`](src/services/upload_api.rs)
-  上传接口入口。
+  Upload endpoint.
 - [`src/services/glossary_api.rs`](src/services/glossary_api.rs)
-  术语表接口入口。
+  Glossary API endpoint.
 - [`src/services/library_api.rs`](src/services/library_api.rs)
-  图书馆接口入口（见上）。
+  Library API entry point (see above).
 - [`src/services/job_snapshot_factory.rs`](src/services/job_snapshot_factory.rs)
-  job snapshot/command 构造边界。
+  job snapshot/command Construct boundaries.
 - [`src/services/job_launcher.rs`](src/services/job_launcher.rs)
-  job 持久化与启动边界。
+  job Persistence and startup boundary.
 - [`src/services/runtime_gateway.rs`](src/services/runtime_gateway.rs)
-  services 访问 runtime 能力的收口层。
+  services Access runtime Capability consolidation layer.
 
 ### `src/worker_command.rs` + `src/worker_command/*`
 
-- 作用：
-  Python worker 命令、worker 入口脚本和 stage spec 文件构造。
-- 进入条件：
-  改 `normalize/translate/render/provider` spec 字段、Python entrypoint、命令行参数时进这里。
-- 边界：
-  这是 `services` 和 `job_runner` 共同依赖的中性契约层，不属于 `services`，避免 `job_runner -> services` 的反向依赖。
-- 当前子边界：
+- Purpose:
+  Python worker Commands,worker Entry script and stage spec File structure.
+- Entry condition:
+Changes to `normalize/translate/render/provider` spec fields, Python entrypoint command-line arguments go here.
+- Boundaries:
+This is a neutral contract layer for shared dependencies between `services` and `job_runner`; it is not part of `services`. Avoid `job_runner -> services` reverse dependencies.
+- Current sub-boundaries:
   - `worker_command.rs`
-    对外 `build_ocr_command` / `build_translate_only_command` / `build_render_only_command` / `build_normalize_ocr_command` facade。
+External facade: `build_ocr_command` / `build_translate_only_command` / `build_render_only_command` / `build_normalize_ocr_command`.
   - `worker_command/stage_specs.rs`
-    写 stage spec JSON。
+Writes stage spec JSON.
   - `worker_command/entrypoints.rs`
-    选择 Python 脚本入口并拼入口参数。
+Select Python script entry point and concatenate entry parameters.
   - `worker_command/command_builder.rs`
-    命令行拼装细节。
+    Command-line assembly details.
 
 ### `src/job_runner`
 
-- 作用：
-  任务排队、worker 启动、stdout/stderr 消费、失败归因、取消、超时。
-- 快速判断：
-  改 stage 执行顺序、并发槽位、进程控制、运行态同步时进这里。
-- 详细边界：
-  [`doc/core/rust_api/12-job_runner 边界.md`](/home/wxyhgk/tmp/Code/doc/core/rust_api/12-job_runner%20%E8%BE%B9%E7%95%8C.md)
-- 当前目录地图：
+- Purpose:
+Task queue, worker startup, stdout/stderr consumption, failure attribution, cancellation, timeout.
+- Quick judgment:
+Changes to stage execution order, concurrency slots, process control, runtime sync go here.
+- Detailed boundaries:
+[`doc/core/rust_api/12-job_runner boundaries.md`](/home/wxyhgk/tmp/Code/doc/core/rust_api/12-job_runner%20%E8%BE%B9%E7%95%8C.md)
+- Current directory map:
   - `mod.rs`
-    runner facade、公共 deps、对外导出；这里的 `ProcessRuntimeDeps` 只给 orchestrator 用，`JobPersistDeps` 是叶子 helper 的持久化资源边界。
+    runner facadepublic depsExport external `ProcessRuntimeDeps` Only for orchestrator Use,`JobPersistDeps` Leaf. helper Persistent resource boundary.
   - `lifecycle.rs`
-    任务排队、执行槽、workflow 分发。
+    Task queue, execution slot,workflow Distribute.
   - `process_runner.rs` + `process_runner/*`
-    真实 worker 执行器；`process_runner.rs` 只保留 orchestrator，并通过 `ProcessRuntimeDeps` 的窄 accessor 下传依赖。`startup.rs` 负责 worker 启动和 pid 持久化，`execution.rs` 负责进程等待和 timeout 分流，`completion.rs` 负责完成态归类与 shutdown-noise 判定，`timeout_support.rs` 负责超时落态，`failure_ai_diagnosis.rs` 负责失败 AI 诊断，`io_support.rs` 负责 stdout/stderr 消费。叶子 helper 只拿 `JobPersistDeps`、cancel handle 或 `WorkerProcessRuntimeConfig` 这类窄依赖。
+Real worker actuator; `process_runner.rs` keeps only the orchestrator and passes `ProcessRuntimeDeps` narrow accessors to download dependencies. `startup.rs` handles worker startup and pid persistence, `execution.rs` handles process waiting and timeout traffic splitting, `completion.rs` handles completed state classification and shutdown-noise determination, `timeout_support.rs` handles timeout state persistence, `failure_ai_diagnosis.rs` handles failure AI diagnosis, `io_support.rs` handles stdout/stderr consumption. Leaf helpers take only `JobPersistDeps`, cancel handle, or `WorkerProcessRuntimeConfig` â these narrow dependencies.
   - `translation_flow.rs` + `translation_flow_*.rs`
-    OCR 后续的翻译/渲染父任务编排；`translation_flow.rs` 保留 orchestrator，`translation_flow_child.rs` 负责 upload source 读取、父任务进入 `ocr_submitting`、OCR child 创建，`translation_flow_stage.rs` 负责 translate/render stage 准备和 `ocr_child_finished` 事件，`translation_flow_support.rs` 负责 OCR 终态判定和翻译输入提取。
+OCR subsequent translation/render parent task orchestration. `translation_flow.rs` retains the orchestrator, `translation_flow_child.rs` handles upload source reading, parent task entering `ocr_submitting`, and OCR child creation; `translation_flow_stage.rs` handles translate/render stage preparation and the `ocr_child_finished` event; `translation_flow_support.rs` handles OCR final state determination and translation input extraction.
   - `ocr_flow/*`
-    OCR child job 执行链路、provider 轮询/下载/markdown materialize；其中 `ocr_flow/mod.rs` 是 orchestrator，`ocr_flow/support.rs` 负责 OCR job 保存、parent OCR 状态镜像、transport/source-pdf 失败处理和 `sync_parent_with_ocr_child(...)`，`workspace.rs` 只管路径和目录，`polling.rs` 只管轮询等待和 cancel 检查。
+OCR child job execution chain: provider polling/download/markdown materialization. Among these, `ocr_flow/mod.rs` is the orchestrator; `ocr_flow/support.rs` handles OCR job saving, parent OCR state mirroring, transport/source-pdf error handling, and `sync_parent_with_ocr_child(...)`; `workspace.rs` contains only paths and directories; `polling.rs` just polls, waits, and checks cancellation.
   - `stdout_parser/*`
-    stdout 行级规则解析；`mod.rs` 是 facade，`labels.rs` 管 stdout 标签常量，`state.rs` 管解析共享状态，`stage_rules.rs` / `artifact_rules.rs` 管行级规则，`failure.rs` 管 provider failure 归因。
+stdout line-level rule parsing; `mod.rs` is the facade, `labels.rs` manages stdout tag constants, `state.rs` state management needed. Redux too heavy. Use Context API. â skipped: Redux, add when scaling needed. `stage_rules.rs` / `artifact_rules.rs` manage line-level rules, `failure.rs` manages provider failure attribution.
   - `runtime_state.rs`
-    runtime snapshot / failure / artifact 的统一更新工具。
+    runtime snapshot / failure / artifact Unified update tool.
   - `worker_process.rs`
-    子进程启动、env 注入、进程树终止；现在只拿 `WorkerProcessRuntimeConfig + job`，不再依赖整包 runtime deps。
+    Subprocess started.env Injection, process tree termination; now only fetch. `WorkerProcessRuntimeConfig + job`No longer depends on the full package. runtime deps。
 
 ### `src/ocr_provider`
 
-- 作用：
-  OCR provider 分发、provider 特定协议转换、provider 输出收口。
-- 快速判断：
-  改 MinerU / Paddle 接入细节时进这里。
+- Purpose:
+  OCR provider Distribute,provider Specific protocol conversion,provider Finalize Output.
+- Quick check:
+Change MinerU / Paddle. For integration details, go here.
 
 ### `src/storage_paths.rs` + `src/storage_paths/*`
 
-- 作用：
-  artifact key、路径归一化、路径解析、artifact registry 收集。
-- 现在的子边界：
+- Purpose:
+  artifact keyPath normalization resolve redundant segments `.` `..` case differences. Use `path` module `normalize()`. `path.resolve()` for absolute paths.  ponytail: preserve trailing slashes if required, switch to `path.posix` for cross-platform.artifact registry Collect.
+- Current sub-boundary:
   - `constants.rs`
-    artifact key / group / kind 常量。
+    artifact key / group / kind Constants.
   - `job_paths.rs`
-    `JobPaths` 和任务目录创建。
+    `JobPaths` And task directory creation.
   - `path_ops.rs`
-    相对路径规范化、存储归一化、legacy 判定。
+    Normalize relative paths, unify storage.legacy Judge.
   - `resolvers.rs`
-    各类 published artifact 路径解析。
+    All Categories published artifact Path resolution.
   - `registry.rs`
-    把任务文件投影成 artifact entry 列表。
+Project task file to artifact entry list.
 
 ### `src/db.rs` + `src/db/*`
 
-- 作用：
-  SQLite 持久化入口。
-- 现在的子边界：
+- Purpose:
+  SQLite Persistence entry.
+- Current sub-boundaries:
   - `rows.rs`
-    SQLite row -> 领域模型解码。
+    SQLite row -> Domain model decoding.
   - `schema.rs`
-    schema 检查和启动期迁移保护。
+    schema Check and enable startup migration protection.
   - `db.rs`
-    主 `Db` facade 和具体读写用例。
+Main `Db` facade and specific read/write use cases.
 
-## 三条快速判断
+## Three quick checks
 
-- “这是 HTTP 行为变化吗？”
-  先看 `src/routes`
-- “这是 jobs 用例编排变化吗？”
-  先看 `src/services/jobs/facade` 和 `src/services/jobs/creation`
-- “这是 worker / Python 执行变化吗？”
-  先看 `src/job_runner`
+- This HTTP Behavior change?
+  Check first `src/routes`
+- Is this jobs? Does the use case orchestration change?
+Look first at `src/services/jobs/facade` and `src/services/jobs/creation`
+- Is this worker / Python? Apply changes?
+Look first at `src/job_runner`
 
-## 一张更直观的目录地图
+## More intuitive directory map
 
-当前建议按这条线理解后端：
+Current recommendation: understand backend along this line:
 
 1. `src/routes`
-   HTTP 适配层，只做参数提取和响应封装。
+   HTTP Adapter layer: parameter extraction and response encapsulation only.
 2. `src/services/jobs/facade`
-   jobs 用例总入口，route 只和 facade 说话。
+   jobs Use case main entryroute Only sum facade speak.
 3. `src/services/jobs/creation` / `src/services/jobs/presentation`
-   前者负责创建与提交，后者负责 detail/list/events 对外投影。
+   The former handles creation and submission; the latter handles detail/list/events External projection.
 4. `src/job_runner`
-   运行态编排、子进程、OCR flow、translation/render flow。
+   Runtime orchestration, child processes,OCR flow、translation/render flow。
 5. `src/ocr_provider`
-   provider 协议和 provider 输出归一化。
+   provider Protocol and provider Output normalization.
 
-新人如果只想快速定位修改入口，可以先问自己是在改：
+New starters: to quickly locate modification entry points, ask: which layer are you changing?
 
-- HTTP 适配
-- 用例编排
-- 展示投影
-- 运行时执行
-- provider 协议
+- HTTP adapter
+- Use Case Orchestration
+- Show Projection
+- Runtime execution
+- provider Protocol
 
-然后再进对应目录，不要一上来横跨 `routes -> services -> job_runner` 多层同时改。
+Then cd to matching dir; don't cross from start. `routes -> services -> job_runner` Modify multiple layers simultaneously.
 
-## 新人阅读顺序
+## Newcomer reading order
 
-如果第一次进这个后端，建议按这个顺序看：
+First time with this backend? Suggested reading order:
 
 1. [`src/app/router.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/router.rs)
-   先知道有哪些 HTTP 入口。
+First, know what's available. HTTP entry point.
 2. [`src/app/jobs.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/jobs.rs)
-   再看 jobs 相关依赖是怎么装起来的。
+   Then check jobs How were the relevant dependencies installed?
 3. [`src/routes/jobs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/routes/jobs)
-   看 route 只是怎么转发。
+   look route How to forward?
 4. [`src/services/jobs/facade`](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs/facade)
-   看 command/query 用例入口。
+View command/query use case entry.
 5. [`src/services/jobs/creation`](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs/creation)
-   看创建链路的准备、快照、提交、bundle。
+   View preparation, snapshot, commit of create link.bundle。
 6. [`src/job_runner`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner)
-   最后再进 runtime 执行层。
+   Finally, enter again. runtime Execution layer.

@@ -44,7 +44,7 @@ def test_final_untranslated_recovery_translates_blocking_item() -> None:
     payload = [_failed_item("p001-b001", "The density functional is evaluated on the numerical grid.")]
 
     def _fake_request(*_args, **_kwargs):
-        return "密度泛函在数值网格上求值。"
+        return "Density functional evaluated on a numerical grid."
 
     summary = recover_blocking_untranslated_items(
         {0: payload},
@@ -56,7 +56,7 @@ def test_final_untranslated_recovery_translates_blocking_item() -> None:
 
     assert summary.recovered_items == 1
     assert summary.blocking_after == 0
-    assert payload[0]["translated_text"] == "密度泛函在数值网格上求值。"
+    assert payload[0]["translated_text"] == "Density functional evaluated on numerical grid."
     assert payload[0]["final_status"] == "translated"
     assert blocking_untranslated_items({0: payload}) == []
 
@@ -111,7 +111,7 @@ def test_final_untranslated_recovery_stage_saves_pages(monkeypatch, tmp_path: Pa
     payload = [_failed_item("p001-b003", "The matrix is diagonalized in the basis.")]
     path.write_text(json.dumps(payload), encoding="utf-8")
 
-    monkeypatch.setattr(repair_phase, "request_chat_content", lambda *_args, **_kwargs: "该矩阵在基组中被对角化。")
+    monkeypatch.setattr(repair_phase, "request_chat_content", lambda *_args, **_kwargs: "The matrix is diagonalized in the basis set.")
     summary = stages.run_final_untranslated_recovery_stage(
         page_payloads={0: payload},
         translation_paths={0: path},
@@ -124,7 +124,7 @@ def test_final_untranslated_recovery_stage_saves_pages(monkeypatch, tmp_path: Pa
 
     saved = json.loads(path.read_text(encoding="utf-8"))
     assert summary["recovered_items"] == 1
-    assert saved[0]["translated_text"] == "该矩阵在基组中被对角化。"
+    assert saved[0]["translated_text"] == "The matrix is diagonalized in the basis set."
 
 
 def test_final_untranslated_recovery_respects_item_budget(monkeypatch) -> None:
@@ -137,7 +137,7 @@ def test_final_untranslated_recovery_respects_item_budget(monkeypatch) -> None:
     def _fake_request(*_args, **_kwargs):
         nonlocal calls
         calls += 1
-        return "已翻译。"
+        return "Translated."
 
     monkeypatch.setenv("RETAIN_TRANSLATION_FINAL_RECOVERY_MAX_ITEMS", "1")
     summary = recover_blocking_untranslated_items(

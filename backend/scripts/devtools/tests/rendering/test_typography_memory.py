@@ -38,7 +38,7 @@ def test_typography_memory_learns_after_min_observations(tmp_path, monkeypatch) 
     memory = TypographyMemory(tmp_path / "typography.sqlite3")
     feature = build_typography_feature(
         item=_item(),
-        translated_text="这是一个稳定的正文段落，用于测试字号和行距缓存。",
+        translated_text="This stable paragraph tests font size and line spacing cache.",
         font_size_pt=10.5,
         leading_em=0.78,
         page_width=595.0,
@@ -72,7 +72,7 @@ def test_typography_memory_rejects_unstable_samples(tmp_path, monkeypatch) -> No
     memory = TypographyMemory(tmp_path / "typography.sqlite3")
     feature = build_typography_feature(
         item=_item(),
-        translated_text="这是另一个稳定正文段落。",
+        translated_text="This is another stable body paragraph.",
         font_size_pt=10.5,
         leading_em=0.78,
         page_width=595.0,
@@ -123,7 +123,7 @@ def test_typography_memory_hit_still_runs_final_fit(monkeypatch) -> None:
         "bbox": [40.0, 80.0, 330.0, 142.0],
         "source_text": "This is a stable body paragraph with enough source words for metrics.",
         "protected_source_text": "This is a stable body paragraph with enough source words for metrics.",
-        "protected_translated_text": "这是一个稳定的正文段落，用于测试缓存命中后仍然经过最终安全拟合。",
+        "protected_translated_text": "This stable paragraph tests cache hit still undergoes final security fit.",
         "lines": [
             {"bbox": [40.0, 80.0, 330.0, 94.0]},
             {"bbox": [40.0, 98.0, 330.0, 112.0]},

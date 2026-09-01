@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// useAppEvent(APP_EVENTS → React 适配 hook)单测:
-// 订阅生命周期、handler ref 更新不重订阅、卸载解绑、自定义 target。
+// useAppEvent(APP_EVENTS â React adapter hook) unit tests:
+// Subscription lifecycle,handler ref Update: no resubscribe. Uninstall: unbind. Custom. target。
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost/" });
 for (const key of ["window", "document", "HTMLElement", "CustomEvent", "Event", "Node"]) {
@@ -15,10 +15,10 @@ for (const key of ["window", "document", "HTMLElement", "CustomEvent", "Event", 
 }
 globalThis.window = dom.window;
 globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
-// Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
-// (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
-// animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
-// 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。
+// Radix Presence/Tabs (introduced in Phase B) requires cancelAnimationFrame under jsdom
+// (TabsContent mount animation timer cleanup) and getComputedStyle (Presence reads
+// animation-name to determine if exit animation ended)âimplemented on jsdom window, but not
+// copied to bare global like requestAnimationFrame; adding it here.
 globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
 globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
 globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -39,7 +39,7 @@ async function waitFor(predicate, description) {
     }
     await wait(10);
   }
-  assert.fail(`等待超时：${description}`);
+assert.fail(`Wait timeout: ${description}`);
 }
 
 function Probe({ eventName, handler, target }) {
@@ -47,7 +47,7 @@ function Probe({ eventName, handler, target }) {
   return null;
 }
 
-test("useAppEvent：订阅 document 事件并随卸载解绑", async () => {
+test("useAppEvent: subscribe to document events and unbind on unmount", async () => {
   const host = dom.window.document.createElement("div");
   dom.window.document.body.appendChild(host);
   const calls = [];
@@ -60,18 +60,18 @@ test("useAppEvent：订阅 document 事件并随卸载解绑", async () => {
   await waitFor(() => {
     dom.window.document.dispatchEvent(new dom.window.CustomEvent("retainpdf-test:ping", { detail: "a" }));
     return calls.length > 0;
-  }, "首个事件送达");
+}, "First event delivered");
   assert.equal(calls[calls.length - 1], "a");
 
   const seen = calls.length;
   root.unmount();
   dom.window.document.dispatchEvent(new dom.window.CustomEvent("retainpdf-test:ping", { detail: "b" }));
   await wait(20);
-  assert.equal(calls.length, seen, "卸载后不应再收到事件");
+assert.equal(calls.length, seen, "Should not receive events after unmount");
   host.remove();
 });
 
-test("useAppEvent：handler 引用漂移不重订阅,始终调用最新 handler", async () => {
+test("useAppEvent: handler reference drift does not resubscribe, always calls latest handler", async () => {
   const host = dom.window.document.createElement("div");
   dom.window.document.body.appendChild(host);
 
@@ -94,10 +94,10 @@ test("useAppEvent：handler 引用漂移不重订阅,始终调用最新 handler"
   await waitFor(() => {
     doc.dispatchEvent(new dom.window.CustomEvent("retainpdf-test:swap"));
     return calls.length > 0;
-  }, "初始 handler 生效");
+}, "Initial handler effective");
   assert.equal(calls[calls.length - 1], "first");
 
-  // 换新 handler(新引用)重渲染:不应重复 addEventListener
+// Re-render with new handler (New reference): Must not repeat addEventListener
   root.render(React.createElement(Probe, {
     eventName: "retainpdf-test:swap",
     handler: () => calls.push("second"),
@@ -105,15 +105,15 @@ test("useAppEvent：handler 引用漂移不重订阅,始终调用最新 handler"
   await waitFor(() => {
     doc.dispatchEvent(new dom.window.CustomEvent("retainpdf-test:swap"));
     return calls[calls.length - 1] === "second";
-  }, "新 handler 生效");
-  assert.equal(addCount, 1, "handler 引用变化不应重建订阅");
+}, "New handler effective");
+assert.equal(addCount, 1, "Handler reference change should not rebuild subscription");
 
   doc.addEventListener = originalAdd;
   root.unmount();
   host.remove();
 });
 
-test("useAppEvent：支持自定义 target", async () => {
+test("useAppEvent: supports custom target", async () => {
   const host = dom.window.document.createElement("div");
   dom.window.document.body.appendChild(host);
   const target = dom.window.document.createElement("section");
@@ -127,12 +127,12 @@ test("useAppEvent：支持自定义 target", async () => {
   await waitFor(() => {
     target.dispatchEvent(new dom.window.CustomEvent("retainpdf-test:scoped"));
     return calls.length > 0;
-  }, "target 事件送达");
+}, "Target event delivered");
 
   const seen = calls.length;
   dom.window.document.dispatchEvent(new dom.window.CustomEvent("retainpdf-test:scoped"));
   await wait(20);
-  assert.equal(calls.length, seen, "document 上的同名事件不应触发 target 订阅");
+assert.equal(calls.length, seen, "Same-name events on document should not trigger target subscription");
 
   root.unmount();
   host.remove();

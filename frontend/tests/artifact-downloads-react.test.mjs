@@ -2,15 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// artifact-downloads(dialogs 蓝图 §7)组件级测试。本域此前被历轮 agent 跳过——
-// ResultActions.jsx/StatusDetailDialog.jsx 的 7 个下载 id 只渲染了裸
-// <a href target="_blank">,composition.js 从未 mount 过
-// mountArtifactDownloadsFeature,导致点击是纯浏览器跳转（未带 X-API-Key，
-// 后端多半 401）而不是 fetchProtected 下载。本文件覆盖两条新增验收测试:
-// ① 点击命中 7 个 id 各自触发正确的下载(mock fetchProtected,不是裸导航);
-// ② busy 态文案不被父组件重渲染覆盖(蓝图 §7.5 方案二核心机制)。
+// artifact-downloads (dialogs Blueprint Â§7) Component-level test. This domain was previously skipped by successive rounds agent Skip unnecessary code. Simplifyâ
+// ResultActions.jsx/StatusDetailDialog.jsx 7 Download ids Rendered bare
+// <a href target="_blank">,composition.js Never mount Pass
+// mountArtifactDownloadsFeature,Causes click to trigger pure browser navigation (without X-API-Key，
+// Backend likely 401) instead of fetchProtected Download. This file overrides two new acceptance tests:
+// â  Click hit 7 ids Trigger correct download individually. (mock fetchProtected, Not bare navigation.);
+// â¡ busy Dynamic text not overwritten by parent component re-render. (Blueprint Â§7.5 Option 2 core mechanism).
 //
-// makeDom/waitFor/bootHomeApp 模式镜像 status-card-component.test.mjs 先例。
+// makeDom/waitFor/bootHomeApp Mode mirror status-card-component.test.mjs Precedent.
 
 function makeDom(search) {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
@@ -25,12 +25,12 @@ function makeDom(search) {
   }
   globalThis.window = dom.window;
   globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
-  // Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
-  // (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
-  // animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
-  // 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。NodeFilter
-  // 是阶段 C(TranslationWorkflowDialog/StatusDetailDialog 换 Radix Dialog)
-  // 新增的需要——Dialog.Content 的 FocusScope 用它做可聚焦元素树遍历。
+// Radix Presence/Tabs (introduced in Phase B) requires cancelAnimationFrame under jsdom
+// (TabsContent mount animation timer cleanup) and getComputedStyle (Presence reads
+// animation-name to determine if exit animation ended)âimplemented on jsdom window, but not
+// copied to bare global like requestAnimationFrame; adding it here. NodeFilter
+// is Phase C (TranslationWorkflowDialog/StatusDetailDialog replaced with Radix Dialog)
+// new requirementâDialog.Content's FocusScope uses it for focusable element tree traversal.
   globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
   globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -49,14 +49,14 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-  assert.fail(`等待超时：${description}`);
+assert.fail(`Wait timeout: ${description}`);
 }
 
 function click(dom, element) {
-  // Radix Tabs 的 Trigger 激活逻辑挂在 onMouseDown(不是 onClick)上——阶段 B
-  // 迁移 StatusDetailDialog 到 Radix Tabs 后,只 dispatch "click" 不会触发 tab
-  // 切换。真实浏览器点击本来就是 mousedown→mouseup→click 全套,这里补上
-  // mousedown 让模拟点击更贴近真实交互,而不是放宽任何断言。
+// Radix Tabs Trigger activation logic is on onMouseDown (not onClick)âPhase B
+// After migrating StatusDetailDialog to Radix Tabs, dispatching only "click" Won't trigger tab
+// switching. Real browser clicks are a full mousedownâmouseupâclick sequence, Here.
+// mousedown makes simulated clicks closer to real interaction, rather than relaxing any assertions.
   element.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, cancelable: true, button: 0 }));
   element.dispatchEvent(new dom.window.MouseEvent("click", { bubbles: true, cancelable: true }));
 }
@@ -84,21 +84,21 @@ async function bootHomeApp(dom) {
 
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-  await waitFor(() => byId(dom, "library-add-pdf-btn"), "HomeApp 首帧渲染");
-  // 阶段 C(shadcn 改造):TranslationWorkflowDialog 换成 Radix Dialog 后不
-  // forceMount Content——job-status-card/ResultActions 的下载按钮嵌在这个
-  // 对话框内部,只有对话框打开过才会挂载(同 CredentialsDialog 等阶段 C 第一批
-  // 对话框的先例)。
+await waitFor(() => byId(dom, "library-add-pdf-btn"), "HomeApp first frame rendering");
+// Phase C (shadcn refactor): After replacing TranslationWorkflowDialog with Radix Dialog, do not
+  // forceMount Content——job-status-card/ResultActions The download button is embedded in this
+// forceMount Contentâjob-status-card/ResultActions The download button is embedded in this
+// Dialog interior, Mount only if dialog opened. (Same as CredentialsDialog and other Phase C first batch
   services.workflowDialog.openUpload();
-  await waitFor(() => byId(dom, "job-status-card"), "工作流对话框打开后 job-status-card 挂载");
+await waitFor(() => byId(dom, "job-status-card"), "job-status-card mounted after workflow dialog opens");
   await wait(0);
 
   return { services, root, host };
 }
 
-// jsdom 未实现 URL.createObjectURL/revokeObjectURL(downloads.js#downloadBlob
-// 用于把 Blob 交给浏览器保存)——用一个可记录调用的 stub 替换,镜像
-// glossaries-dialog-component.test.mjs「CSV 导出」测试的先例。
+// jsdom Not implemented URL.createObjectURL/revokeObjectURL(downloads.js#downloadBlob
+// Used to Blob Let browser save)âUse a callable with call logging. stub Replace, mirror
+// glossaries-dialog-component.test.mjs "CSV Export" Test precedent.
 function stubObjectUrl() {
   const previousURL = globalThis.URL;
   const calls = [];
@@ -118,23 +118,23 @@ function stubObjectUrl() {
   };
 }
 
-test("artifact-downloads：真实轮询(mock=done)驱动 ResultActions 三个下载按钮就绪且可点击", async () => {
+test("artifact-downloadsReal Polling (mock=done) drives ResultActions Three download buttons ready and clickable.", async () => {
   const dom = makeDom("?mock=done");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockJobId } = await import("../src/js/mock/index.js");
 
   services.features.jobRuntimeFeature.startPolling(getMockJobId());
-  await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "准备中", "真实任务数据到达");
+await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "Preparing", "real task data arrives");
 
   const markdownBtn = byId(dom, "status-markdown-bundle-btn");
   const sourcePdfBtn = byId(dom, "source-pdf-btn");
   const pdfBtn = byId(dom, "pdf-btn");
 
   for (const [label, el] of [["status-markdown-bundle-btn", markdownBtn], ["source-pdf-btn", sourcePdfBtn], ["pdf-btn", pdfBtn]]) {
-    assert.ok(el, `${label} 应存在`);
-    assert.equal(el.getAttribute("aria-disabled"), "false", `${label} 应处于可点击态`);
-    assert.match(el.dataset.url || "", /^mock:\/\//, `${label} 的 data-url 应指向后端受保护资源(而非空/'#')`);
-    assert.equal(el.classList.contains("disabled"), false, `${label} 不应带 disabled 类`);
+    assert.ok(el, `${label} Required`);
+    assert.equal(el.getAttribute("aria-disabled"), "false", `${label} Clickable`);
+assert.match(el.dataset.url || "", /^mock:\/\//, `${label} data-url should point to protected backend resource.(Check for null. Use `if (value !== null)` â skipped: optional chaining, add when nullable objects involved./'#')`);
+assert.equal(el.classList.contains("disabled"), false, `${label} must not contain disabled class`);
   }
 
   root.unmount();
@@ -142,7 +142,7 @@ test("artifact-downloads：真实轮询(mock=done)驱动 ResultActions 三个下
   host.remove();
 });
 
-test("artifact-downloads：点击 ResultActions 的 3 个受保护下载按钮触发 fetchProtected 下载流程(不是裸导航)", async () => {
+test("artifact-downloadsClick ResultActions 3 ProtectedDownloadButton.onclick = () => downloadProtectedFile(url, token); fetchProtected download process start. Select file. Confirm save location. Wait progress complete.(Not bare navigation.)", async () => {
   const dom = makeDom("?mock=done");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockJobId } = await import("../src/js/mock/index.js");
@@ -150,18 +150,18 @@ test("artifact-downloads：点击 ResultActions 的 3 个受保护下载按钮�
 
   try {
     services.features.jobRuntimeFeature.startPolling(getMockJobId());
-    await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "准备中", "真实任务数据到达");
-    await waitFor(() => byId(dom, "pdf-btn").getAttribute("aria-disabled") === "false", "下载按钮就绪");
+await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "Preparing", "real task data arrives");
+    await waitFor(() => byId(dom, "pdf-btn").getAttribute("aria-disabled") === "false", "Download ready");
 
     const startHref = dom.window.location.href;
     const cases = [
-      // status-markdown-bundle-btn 无 preferSuggestedName,文件名来自
-      // fileNameFromDisposition 兜底 `${jobId}-markdown.zip`(mock 响应没有
-      // content-disposition 头)。
+// status-markdown-bundle-btn no preferSuggestedName, from filename
+// fileNameFromDisposition fallback `${jobId}-markdown.zip`(mock no response
+// content-disposition header).
       ["status-markdown-bundle-btn", /-markdown\.zip$/],
-      // source-pdf-btn/pdf-btn 都 preferSuggestedName,文件名来自
-      // resolveSourcePdfDownloadName/resolveTranslatedPdfDownloadName——按
-      // .pdf 后缀断言即可,不依赖 mock job 是否能推出原始文件名。
+      // source-pdf-btn/pdf-btn all preferSuggestedName,Filename derived from
+// resolveSourcePdfDownloadName/resolveTranslatedPdfDownloadName based on
+// .pdf use suffix assertion. Cannot depend on mock job. Original filename lost after upload/processing unless explicitly preserved in metadata or headers.
       ["source-pdf-btn", /\.pdf$/],
       ["pdf-btn", /\.pdf$/],
     ];
@@ -169,22 +169,22 @@ test("artifact-downloads：点击 ResultActions 的 3 个受保护下载按钮�
     for (const [id, expectedNamePattern] of cases) {
       const before = urlStub.calls.length;
       const link = byId(dom, id);
-      assert.equal(link.getAttribute("aria-disabled"), "false", `${id} 点击前应可用`);
+      assert.equal(link.getAttribute("aria-disabled"), "false", `${id} should be available before clicking`);
       click(dom, link);
-      // 点击瞬间应同步 preventDefault,不发生真实页面跳转(document 级委托点击
-      // 在 handleProtectedArtifactClick 顶部就调用了 event.preventDefault())。
-      assert.equal(dom.window.location.href, startHref, `${id} 点击不应触发页面导航`);
-      await waitFor(() => urlStub.calls.length > before, `${id} 点击应经 fetchProtected→saveResponseDownload 触发一次 downloadBlob`);
+// Sync on click. preventDefault, no actual page navigation.(document-level delegated click
+// in handleProtectedArtifactClick called at the top event.preventDefault()).
+      assert.equal(dom.window.location.href, startHref, `${id} Click must not trigger page navigation.`);
+      await waitFor(() => urlStub.calls.length > before, `${id} Click Apply fetchProtected→saveResponseDownload Trigger once downloadBlob`);
       const blob = urlStub.calls[urlStub.calls.length - 1];
-      assert.ok(blob.size > 0, `${id} 下载到的 Blob 应有实际字节(证明真的走了 mock fetch,不是空占位)`);
-      // download-toast(DownloadToastHost.jsx)应反映正确的文件名——证明走的
-      // 是 downloads.js 的真实响应处理链路,不是随手拼的假数据。
+      assert.ok(blob.size > 0, `${id} Downloaded Blob Actual bytes expected(Prove it really left. mock fetch,not empty placeholder)`);
+      // download-toast(DownloadToastHost.jsx)Reflect correct filename——prove that it follows
+// Use downloads.js real response processing pipeline, not ad-hoc fake data.
       await waitFor(
         () => expectedNamePattern.test(byId(dom, "download-toast-title")?.textContent || ""),
-        `${id} 下载完成后 toast 标题应包含预期文件名`,
+        `${id} After download toast Title must include expected filename.`,
       );
-      // 下载完成后 busy 态应清空,按钮恢复可用(controller.js 的 finally 分支)。
-      await waitFor(() => byId(dom, id).getAttribute("aria-disabled") === "false", `${id} 下载完成后应恢复可点击`);
+// After download completes, busy state should be cleared and button re-enabled (controller.js finally block).
+      await waitFor(() => byId(dom, id).getAttribute("aria-disabled") === "false", `${id} Re-enable after download completes.`);
     }
   } finally {
     urlStub.restore();
@@ -195,7 +195,7 @@ test("artifact-downloads：点击 ResultActions 的 3 个受保护下载按钮�
   host.remove();
 });
 
-test("artifact-downloads：StatusDetailDialog 概览面板的 markdown-bundle-btn 同样接入下载流程", async () => {
+test("artifact-downloads：StatusDetailDialog Overview Panel markdown-bundle-btn Also access download flow.", async () => {
   const dom = makeDom("?mock=done");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockJobId } = await import("../src/js/mock/index.js");
@@ -203,20 +203,20 @@ test("artifact-downloads：StatusDetailDialog 概览面板的 markdown-bundle-bt
 
   try {
     services.features.jobRuntimeFeature.startPolling(getMockJobId());
-    await waitFor(() => byId(dom, "status-detail-btn"), "状态卡详情按钮就绪");
+await waitFor(() => byId(dom, "status-detail-btn"), "Status card detail button ready");
     click(dom, byId(dom, "status-detail-btn"));
-    // 阶段 C(shadcn 改造):StatusDetailDialog 换成 Radix Dialog 后不 forceMount
-  // Content——断言从"open 属性真假"改为"是否挂载"。
-  await waitFor(() => byId(dom, "status-detail-dialog") !== null, "详情对话框打开");
+// Phase C (shadcn refactor): StatusDetailDialog no longer uses forceMount after switching to Radix Dialog
+// Content: Change assertion from "open attribute truthiness" to "whether mounted".
+await waitFor(() => byId(dom, "status-detail-dialog") !== null, "Detail dialog opened");
 
-    await waitFor(() => byId(dom, "markdown-bundle-btn")?.getAttribute("aria-disabled") === "false", "概览面板下载按钮就绪(读 statusCardStore)");
+await waitFor(() => byId(dom, "markdown-bundle-btn")?.getAttribute("aria-disabled") === "false", "Overview download ready (read statusCardStore)");
     const link = byId(dom, "markdown-bundle-btn");
     assert.match(link.dataset.url || "", /^mock:\/\/bundle\.zip/);
 
     const before = urlStub.calls.length;
     click(dom, link);
-    await waitFor(() => urlStub.calls.length > before, "点击概览面板下载按钮触发 downloadBlob");
-    await waitFor(() => byId(dom, "markdown-bundle-btn").getAttribute("aria-disabled") === "false", "下载完成后恢复可点击");
+    await waitFor(() => urlStub.calls.length > before, "Overview panel download button click triggers. downloadBlob");
+    await waitFor(() => byId(dom, "markdown-bundle-btn").getAttribute("aria-disabled") === "false", "Re-enable after download completes.");
   } finally {
     urlStub.restore();
   }
@@ -226,7 +226,7 @@ test("artifact-downloads：StatusDetailDialog 概览面板的 markdown-bundle-bt
   host.remove();
 });
 
-test("artifact-downloads：document 级委托覆盖全部 7 个契约 id(含当前无 UI 消费点的 3 个)", async () => {
+test("artifact-downloads: document Level delegation overrides all. 7 Contract id (Currently contains none. 3 UI Consumption Points)", async () => {
   const dom = makeDom("?mock=done");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockJobId } = await import("../src/js/mock/index.js");
@@ -235,13 +235,13 @@ test("artifact-downloads：document 级委托覆盖全部 7 个契约 id(含当�
 
   try {
     services.features.jobRuntimeFeature.startPolling(getMockJobId());
-    await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "准备中", "真实任务数据到达");
+await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "Preparing", "Real task data arrived");
 
-    // download-btn/markdown-btn/markdown-raw-btn 当前没有任何 React 组件渲染
-    // (recent-jobs 承建方判定为死代码清单之外),但 controller.js 的
-    // document 级委托点击是纯 id 选择器匹配,与谁渲染了按钮无关——用合成节点
-    // 验证这 3 个 id 同样被正确接管，证明 7 个契约 id 全部生效，不是只接了
-        // 4 个已渲染的。
+    // download-btn/markdown-btn/markdown-raw-btn Currently none React Component rendering
+// (recent-jobs Contractor deems outside dead code list.), but controller.js's
+    // document Level delegation click is pure id Selector match,Button renderer irrelevant——Use synthetic nodes
+// Invalid input. Need full text to translate. 3 ids also correctly taken over, proving 7 Contract ids all active, not just connected.
+        // 4 Already rendered.
     const syntheticIds = [
       DOWNLOAD_ACTION_IDS.BUNDLE,
       DOWNLOAD_ACTION_IDS.MARKDOWN_JSON,
@@ -261,7 +261,7 @@ test("artifact-downloads：document 级委托覆盖全部 7 个契约 id(含当�
 
       const before = urlStub.calls.length;
       click(dom, link);
-      await waitFor(() => urlStub.calls.length > before, `合成节点 #${id} 点击应命中同一个 document 级委托处理器`);
+      await waitFor(() => urlStub.calls.length > before, `Composite node #${id} Click must hit same target. document Level delegation handler`);
       link.remove();
     }
   } finally {
@@ -273,28 +273,28 @@ test("artifact-downloads：document 级委托覆盖全部 7 个契约 id(含当�
   host.remove();
 });
 
-test("artifact-downloads：busy 态文案不被父组件(StatusCard)重渲染覆盖(蓝图 §7.5 方案二核心保障)", async () => {
+test("artifact-downloads: busy state text unaffected by parent (StatusCard) re-render overwrites (Blueprint Â§7.5 Plan 2 Core Guarantees)", async () => {
   const dom = makeDom("?mock=done");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockJobId } = await import("../src/js/mock/index.js");
 
   services.features.jobRuntimeFeature.startPolling(getMockJobId());
-  await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "准备中", "真实任务数据到达");
-  await waitFor(() => byId(dom, "pdf-btn").getAttribute("aria-disabled") === "false", "下载按钮就绪");
+await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "Preparing", "Real task data arrived");
+await waitFor(() => byId(dom, "pdf-btn").getAttribute("aria-disabled") === "false", "Download button ready");
 
   const { DOWNLOAD_ACTION_IDS } = await import("../src/js/contracts/download-action-contract.js");
   const actionId = DOWNLOAD_ACTION_IDS.PDF; // "pdf-btn"
 
-  // 模拟 controller.js 在下载中途调用 viewPort.setLinkBusy(link, true, "37%")
-  // ——不直改 DOM,只写 busy store。
+// Simulate controller.js Invoke mid-download. viewPort.setLinkBusy(link, true, "37%")
+// Do not modify DOM directly, only write to busy store.
   services.artifactDownloads.busyStore.setBusy(actionId, true, "37%");
-  await waitFor(() => byId(dom, actionId).querySelector("span").textContent === "37%", "busy 态文案立即生效");
-  assert.equal(byId(dom, actionId).getAttribute("aria-disabled"), "true", "下载中应视为不可再次点击");
+  await waitFor(() => byId(dom, actionId).querySelector("span").textContent === "37%", "busy Status text applies immediately.");
+  assert.equal(byId(dom, actionId).getAttribute("aria-disabled"), "true", "Disabled while downloading");
 
-  // 制造一次与下载无关的父组件(StatusCard)重渲染——镜像
-  // status-card-component.test.mjs「无关的 store 通知不应重置手动选择」先例，
-  // 这里验证的是下载 busy 文案不应被同款重渲染打回原始 label(旧世界直改 DOM
-  // 会在这里被虚拟 DOM diff 吃掉，方案二应该扛住)。
+// Create parent component unrelated to download (StatusCard) re-renderâmirror
+// status-card-component.test.mjs "Unrelated store notifications should not reset manual selection" Precedent
+  // here what is verified is the download busy Copy must not revert to original on same-style re-render. label(Old World Direct Edit DOM
+  // Virtualized here. DOM diff Swallow. Option 2 holds.)。
   for (let i = 0; i < 5; i += 1) {
     services.statusCard.store.actions.setCancelDisabled(i % 2 === 0);
   }
@@ -302,14 +302,14 @@ test("artifact-downloads：busy 态文案不被父组件(StatusCard)重渲染覆
   assert.equal(
     byId(dom, actionId).querySelector("span").textContent,
     "37%",
-    "父组件(StatusCard)因无关 store 变化重渲染后，下载中文案应保持不变(不被打回'下载 PDF')",
+"parent component (StatusCard) re-renders due to unrelated store changes, the download text should remain unchanged (not revert to "Download PDF")(StatusCard) Irrelevant store Download label unchanged on re-render (Not reverted to 'Download PDF')",
   );
   assert.equal(byId(dom, actionId).getAttribute("aria-disabled"), "true");
 
-  // 下载结束(controller.js finally 分支 setLinkBusy(link, false))——文案应
-  // 恢复原始 label 且重新可点击。
+// Download complete (controller.js finally block setLinkBusy(link, false))âCopy should
+  // Restore original label Re-clickable.
   services.artifactDownloads.busyStore.setBusy(actionId, false);
-  await waitFor(() => byId(dom, actionId).querySelector("span").textContent === "下载 PDF", "busy 结束后文案恢复");
+await waitFor(() => byId(dom, actionId).querySelector("span").textContent === "Download PDF", "busy After completion, the text restores");
   assert.equal(byId(dom, actionId).getAttribute("aria-disabled"), "false");
 
   root.unmount();
@@ -317,32 +317,32 @@ test("artifact-downloads：busy 态文案不被父组件(StatusCard)重渲染覆
   host.remove();
 });
 
-test("artifact-downloads：StatusDetailDialog 概览下载按钮的 busy 态同样不被翻页/tab 切换等重渲染覆盖", async () => {
+test("artifact-downloads：StatusDetailDialog Download Overview busy State also not paginated/tab Toggle equal-weight render overlay.", async () => {
   const dom = makeDom("?mock=done");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockJobId } = await import("../src/js/mock/index.js");
 
   services.features.jobRuntimeFeature.startPolling(getMockJobId());
-  await waitFor(() => byId(dom, "status-detail-btn"), "状态卡详情按钮就绪");
+await waitFor(() => byId(dom, "status-detail-btn"), "Status card detail button ready");
   click(dom, byId(dom, "status-detail-btn"));
-  // 阶段 C(shadcn 改造):StatusDetailDialog 换成 Radix Dialog 后不 forceMount
-  // Content——断言从"open 属性真假"改为"是否挂载"。
-  await waitFor(() => byId(dom, "status-detail-dialog") !== null, "详情对话框打开");
-  await waitFor(() => byId(dom, "markdown-bundle-btn")?.getAttribute("aria-disabled") === "false", "概览面板下载按钮就绪");
+// Phase C (shadcn refactor): StatusDetailDialog no longer forceMounts after switching to Radix Dialog
+// Content: assertion changed from "open attribute truthiness" to "whether mounted".
+await waitFor(() => byId(dom, "status-detail-dialog") !== null, "Detail dialog opened");
+await waitFor(() => byId(dom, "markdown-bundle-btn")?.getAttribute("aria-disabled") === "false", "Overview panel download button ready");
 
-  services.artifactDownloads.busyStore.setBusy("markdown-bundle-btn", true, "下载中...");
-  await waitFor(() => byId(dom, "markdown-bundle-btn").textContent === "下载中...", "busy 文案生效");
+services.artifactDownloads.busyStore.setBusy("markdown-bundle-btn", true, "Downloading...");
+await waitFor(() => byId(dom, "markdown-bundle-btn").textContent === "Downloading...", "busy Copy applied");
 
-  // 切 tab 再切回来(overview 常驻挂载不卸载,但会触发 StatusDetailDialog 整体
-  // 重渲染)——busy 文案应保持。
+// Switch tab. Switch back. (Overview persistent mount, but triggers StatusDetailDialog full
+  // re-render)——busy Copy stays.
   click(dom, byId(dom, "detail-tab-events"));
-  await waitFor(() => byId(dom, "detail-panel-events").hidden === false, "切到事件 tab");
+await waitFor(() => byId(dom, "detail-panel-events").hidden === false, "Switched to events tab");
   click(dom, byId(dom, "detail-tab-overview"));
-  await waitFor(() => byId(dom, "detail-panel-overview").hidden === false, "切回概览 tab");
-  assert.equal(byId(dom, "markdown-bundle-btn").textContent, "下载中...", "切 tab 不应打回下载中文案");
+await waitFor(() => byId(dom, "detail-panel-overview").hidden === false, "Switched back to overview tab");
+assert.equal(byId(dom, "markdown-bundle-btn").textContent, "Downloading...", "Switching tabs must not reject download text.");
 
   services.artifactDownloads.busyStore.setBusy("markdown-bundle-btn", false);
-  await waitFor(() => byId(dom, "markdown-bundle-btn").textContent === "下载 Markdown ZIP", "busy 结束后文案恢复");
+await waitFor(() => byId(dom, "markdown-bundle-btn").textContent === "Download Markdown ZIP", "Text restored after busy state");
 
   root.unmount();
   services.dispose();

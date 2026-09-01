@@ -5,8 +5,8 @@ import re
 
 TEXT_FLOW_PRESERVE_LINES = "preserve_lines"
 TEXT_FLOW_FLOW = "flow"
-SENTENCE_END_RE = re.compile(r"[.!?。！？]\s*$")
-SOFT_CONTINUATION_END_RE = re.compile(r"(?:[-,，;；:]|(?:\b(?:and|or|of|for|to|in|on|with|the|a|an)\b))\s*$", re.IGNORECASE)
+SENTENCE_END_RE = re.compile(r"[.!?.!?]\s*$")
+SOFT_CONTINUATION_END_RE = re.compile(r"(?:[-,，;;:]|(?:\b(?:and|or|of|for|to|in|on|with|the|a|an)\b))\s*$", re.IGNORECASE)
 WORD_RE = re.compile(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*")
 ORDERED_MARKER_RE = re.compile(r"^\s*(?:\d{1,4}|[A-Za-z])\s*[\.)、]\s+\S+")
 BULLET_MARKER_RE = re.compile(r"^\s*(?:[-*•‣◦])\s+\S+")

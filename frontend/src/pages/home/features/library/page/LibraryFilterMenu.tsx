@@ -1,5 +1,5 @@
-// 书架筛选(照搬 PDF_MD_lib 的 LibraryFilterModal,做成轻量 popover 而非 Radix
-// 弹窗——满载测试下少一个重型 modal 更稳):按状态 + 标签筛选,客户端过滤已加载项。
+// Bookshelf filter (Copy PDF_MD_lib's LibraryFilterModal, use lightweight popover instead of Radix
+// Modal——Missing one heavy unit under full-load test. modal More stable):By status + Tag filter,Client filters loaded items.
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -56,16 +56,16 @@ export function LibraryFilterMenu({
           activeCount > 0 ? "bg-secondary text-secondary-foreground" : "border border-border text-foreground hover:bg-muted/30",
         )}
       >
-        筛选
+Filter
         {activeCount > 0 ? <span className="tabular-nums text-[11px] text-muted-foreground/70">{activeCount}</span> : null}
       </button>
 
       {open ? (
-        // 非 Radix 的轻量 popover(满载测试下比重型 modal 稳),没有 Presence 卸载延迟,
-        // 关闭只能瞬间收起——但至少进场要有生命感:从触发按钮所在的右上角
-        // 展开(origin-top-right),不从 scale(0) 凭空出现(emil-design-eng skill)。
+// Non-Radix Lightweight popover (Modal is more stable under full-load testing), no Presence uninstall delay,
+        // Closing only instant collapse——Entry must feel alive.:Top-right corner of the trigger button
+// Expand (origin-top-right), avoid scale(0), appear spontaneously (emil-design-eng skill).
         <div className="absolute right-0 z-30 mt-2 w-64 origin-top-right rounded-2xl border border-border bg-paper p-4 shadow-[0_16px_40px_color-mix(in_srgb,var(--shadow-color)_16%,transparent)] transition-[opacity,transform] duration-150 ease-[var(--ease-out)] starting:scale-95 starting:opacity-0">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">翻译状态</p>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Translation status</p>
           <div className="flex flex-wrap gap-2">
             {STATUS_FILTERS.map((s) => (
               <Pill key={s.value} active={statusFilter === s.value} onClick={() => setStatusFilter(s.value)}>
@@ -76,9 +76,9 @@ export function LibraryFilterMenu({
 
           {tags.length ? (
             <>
-              <p className="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">标签</p>
+              <p className="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Tags</p>
               <div className="flex flex-wrap gap-2">
-                <Pill active={!tagFilter} onClick={() => setTagFilter("")}>全部</Pill>
+                <Pill active={!tagFilter} onClick={() => setTagFilter("")}>All</Pill>
                 {tags.map((t) => (
                   <Pill key={t} active={tagFilter === t} onClick={() => setTagFilter(tagFilter === t ? "" : t)}>{t}</Pill>
                 ))}
@@ -91,7 +91,7 @@ export function LibraryFilterMenu({
               type="button"
               onClick={() => { setStatusFilter("all"); setTagFilter(""); }}
               className="mt-4 text-xs text-muted-foreground hover:text-foreground hover:underline"
-            >清空筛选</button>
+            >clear filters → skipped: reset state, add when dynamic filters introduced.</button>
           ) : null}
         </div>
       ) : null}
@@ -99,7 +99,7 @@ export function LibraryFilterMenu({
   );
 }
 
-// 客户端筛选谓词(和 sort 一样只作用已加载项)。
+// Client-side filter predicate (and sort only applies to loaded items).
 export function matchesLibraryFilter(item, statusFilter, tagFilter, { isLibraryOnly, isActive }) {
   if (tagFilter && !(Array.isArray(item.tags) ? item.tags : []).includes(tagFilter)) {
     return false;

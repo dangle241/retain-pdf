@@ -1,20 +1,20 @@
-# Library Side Panel 组件族
+# Library Side Panel component family
 
-## 边界
+## Boundary
 
-`library-side-panel` 负责主页左侧的可折叠功能入口。它只展示入口和轻量操作面板，真实动作通过回调交给页面容器处理。
+`library-side-panel` Responsible for the collapsible feature entry on the left side of the homepage. It only displays the entry and a lightweight operation panel; actual actions are delegated to the page container via callbacks.
 
-## 文件
+## Files
 
-- `library-side-panel.tsx`：展开/收起组合层。
-- `library-side-panel-trigger.tsx`：收起状态的小按钮。
-- `library-side-panel-item.tsx`：展开状态的单个功能项，支持激活态和点击回调。
-- `library-side-panel-config.ts`：布局 class。
-- `library-side-panel-types.ts`：组件族类型。
-- `index.ts`：公共出口。
+- `library-side-panel.tsx`Expand/Collapse composite layer.
+- `library-side-panel-trigger.tsx`Small button for collapsed state.
+- `library-side-panel-item.tsx`Expanded single function item with active state and click callback.
+- library-side-panel-config.ts: layout class.
+- `library-side-panel-types.ts`Component family type.
+- `index.ts`Public egress.
 
-## 规则
+## Rules
 
-- 功能文案和图标列表来自 `library-config.ts`。
-- 真实功能通过回调传入，不在 item 组件里直接请求 API。
-- 多选模式只在这里展示选择数量和批量操作按钮，选择集合由页面容器维护。
+- Feature copy and icon list from `library-config.ts`。
+- Real functionality passed via callback, not in item Request directly in component. API。
+- Multi-select mode displays selection count and batch action buttons here only; selection set is managed by the page container.

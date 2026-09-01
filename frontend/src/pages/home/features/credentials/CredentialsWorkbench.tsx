@@ -1,14 +1,14 @@
-// CredentialsWorkbench：凭据表单主体（API/任务选项双 tab + 面板 + 保存行），
-// 从 CredentialsDialog 抽出的双宿主组件：
-//   1. SettingsHubDialog 的 API 区内嵌（常规入口，无二层弹窗）
-//   2. CredentialsDialog（仅剩首次配置门 setupMode 一个场景）
-// 两个宿主互斥挂载（设置是模态、门弹窗只从上传引导触发），BROWSER_IDS 的
-// DOM id 不会同屏重复。状态/保存/校验全部走 useCredentialsController 的
-// 单例 store——宿主只是壳。
+// CredentialsWorkbenchCredentials form body (API/Duplicate task options tab + panel + save row),
+// Extracted dual-host component from CredentialsDialog:
+//   1. SettingsHubDialog API in-area embed (standard entry, no second-level popup)
+//   2. CredentialsDialog(only the first-time setup gateway setupMode A Scene)
+// Mutually exclusive host mounts (modal settings; door popup triggers only from upload guide). BROWSER_IDS
+// DOM id no duplicates on screen. Status/Save/Run all validations. useCredentialsController
+// Singleton store——Host is just a shell.
 //
-// TaskOptionsPanel 常驻挂载（不随 tab 卸载）的约束沿用 CredentialsDialog
-// 头注释结论：其字段 ref 在保存时被统一读取，卸载会复现"切到 API 面板点
-// 保存，任务选项静默丢失"。
+// TaskOptionsPanel Persistent mount (not following tab Uninstall constraints apply. CredentialsDialog
+// Header comment conclusion: its fields ref reads unified on save; unmount reproduces "Switch to API Panel click
+// Save silently drops task options."。
 
 import { Tabs as TabsPrimitive } from "radix-ui";
 import { CREDENTIAL_DOM_IDS } from "./credentials-dom-ids.js";
@@ -18,14 +18,14 @@ import { DeepSeekPanel } from "./DeepSeekPanel.jsx";
 import { TaskOptionsPanel } from "./TaskOptionsPanel.jsx";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size 在未注解源文件里被推断为必填;unstyled 路径运行时不用 size。
+// Button.size inferred as required in unannotated source; unstyled path does not use size at runtime.
 const Button = ButtonBase as any;
 
 const { browser: BROWSER_IDS } = CREDENTIAL_DOM_IDS;
 
 const TABS = [
   { id: "api", label: "API 设置" },
-  { id: "task", label: "任务选项" },
+  { id: "task", label: "Task Options" },
 ];
 
 export function CredentialsWorkbench() {
@@ -52,7 +52,7 @@ export function CredentialsWorkbench() {
         <TabsPrimitive.List
           id={BROWSER_IDS.tabs}
           className={`developer-tabs credential-tabs${setupMode ? " hidden" : ""}`}
-          aria-label="接口设置"
+aria-label="Interface Settings"
         >
           {TABS.map((tab) => (
             <TabsPrimitive.Trigger
@@ -84,8 +84,8 @@ export function CredentialsWorkbench() {
               <DeepSeekPanel />
             </div>
           </TabsPrimitive.Content>
-          {/* 不套 TabsPrimitive.Content 的理由见 CredentialsDialog 原注释：
-              TaskOptionsPanel 自带 role=tabpanel，再包一层语义重复 */}
+          {/* Not set TabsPrimitive.Content reason see CredentialsDialog Please provide the Chinese comment text for translation.
+              TaskOptionsPanel Built-in role=tabpanelwrapping again causes semantic duplication */}
           <TaskOptionsPanel hidden={activeTab !== "task"} />
         </div>
         <div className="actions credential-dialog-actions">
@@ -95,7 +95,7 @@ export function CredentialsWorkbench() {
             className="app-button"
             onClick={() => handlers?.save?.()}
           >
-            {setupMode ? "保存并启动" : "保存"}
+            {setupMode ? "Save & Start" : "保存"}
           </Button>
         </div>
       </div>

@@ -1,17 +1,17 @@
-# 主线文档
+# Mainline docs
 
-这里放 RetainPDF 当前直接参与开发、联调和运行的主线文档。
+This is where RetainPDF's primary documents for active development, joint debugging, and runtime are placed.
 
-## 入口
+## Entry points
 
-- [API 与联调](./api/README.md)
-- [贡献文档](./contributing/README.md)
+- [API Integration Testing](./api/README.md)
+- [Contributing Documentation](./contributing/README.md)
 - [Rust API](./rust_api/README.md)
-- [OCR / 文档解析 Provider](./paddle_ocr_api/README.md)
-- [Python 后端](./python/README.md)
-- [前端文档](./frontend/README.md)
+- [OCR / Document Parsing Provider](./paddle_ocr_api/README.md)
+- Python backend
+- [Frontend documentation](./frontend/README.md)
 
-## 读法
+## How to read
 
-先按“接口 / 后端 / OCR / Python / 前端”找入口，再进入具体子文档。
-这层不放外部资料，也不放历史台账。
+First press "Interface". / Backend / OCR / Python / Frontend: find entry point, then navigate to specific subdocument.
+No external materials or historical records in this layer.

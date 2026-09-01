@@ -1,11 +1,11 @@
-// CredentialsDialog 家族(CredentialsDialog/OcrProviderPanels/DeepSeekPanel/
-// TaskOptionsPanel)的唯一装配面——把 composition.js 的 credentials 域
-// (services.credentials:{feature, view, dialogStore})折成一个 hook,组件
-// 只订阅需要的切片,不各自重复 useStoreSnapshot/useDialogState 样板。
+// CredentialsDialog family (CredentialsDialog/OcrProviderPanels/DeepSeekPanel/
+// TaskOptionsPanel) unique assembly face ââ take composition.js credentials domain
+// (services.credentials:{feature, view, dialogStore}) Collapse to One hook, component
+// Subscribe only to needed slices.,Do not repeat individually useStoreSnapshot/useDialogState Template.
 //
-// handlers 来自 browser.js(kept 控制器)在 mount 时同步调用一次
-// viewPort.bindEvents(...)捕获的处理函数(save/validateOcr/validateDeepSeek/
-// changeProvider/resetXxxValidation 等)——见 credentials-view-store.js 头注释。
+// handlers From browser.js (kept controller) Call once synchronously on mount.
+// viewPort.bindEvents(...)Captured handler(save/validateOcr/validateDeepSeek/
+// changeProvider/resetXxxValidation etc.) ââ see credentials-view-store.js Header comment.
 
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
 import { useHomeServices } from "../../home-services-context.js";

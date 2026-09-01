@@ -1,20 +1,20 @@
 export const USER_STAGE_FLOW = [
   {
     key: "ocr",
-    label: "OCR 解析",
-    detail: "正在识别 PDF 内容",
+label: "OCR Parsing",
+detail: "Identifying PDF content",
     matches: ["ocr", "parse", "mineru", "paddle", "normaliz", "document", "submit", "startup"],
   },
   {
     key: "translate",
-    label: "翻译",
-    detail: "正在翻译正文内容",
+label: "Translation",
+detail: "Translating body content",
     matches: ["translat"],
   },
   {
     key: "render",
-    label: "渲染",
-    detail: "正在生成翻译后的 PDF",
+label: "Rendering",
+detail: "Generating translated PDF",
     matches: ["render", "sav"],
   },
 ];

@@ -1,18 +1,18 @@
-# 前端文档
+# Frontend documentation
 
-这里存放前端联调、状态检查和优化记录，不是业务产品文档。
+Frontend integration, state checks, and optimization records — not business product documentation.
 
-- [前端状态 Smoke](./status_smoke.md)
-- [前端优化记录](./optimization_notes.md)
-- [前端状态 Smoke 最新报告](../../ops/reports/frontend-status-smoke-latest.json)
+- [Frontend Status Smoke](./status_smoke.md)
+- [Frontend Optimization Notes](./optimization_notes.md)
+- Frontend status smoke latest report
 
-主要代码入口：
+Main entry point:
 
 - `frontend/src/js/`
 - `frontend/src/styles/`
 - `frontend/package.json`
 
-桌面端同步：
+Desktop sync:
 
-- 修改 `frontend/src/**` 后，运行 `npm --prefix desktop run sync-frontend`，它会重新构建网页前端并同步到 `desktop/app/frontend`。
-- 提交前运行 `npm --prefix desktop run verify-frontend-sync`，它会先同步桌面前端，再跑桌面前端 smoke，避免 Electron 打包继续使用旧页面。
+- After modifying frontend/src/**, run npm --prefix desktop run sync-frontend to rebuild frontend sync to desktop/app/frontend.
+- Before commit, run npm --prefix desktop run verify-frontend-sync; desktop sync runs smoke before desktop frontend starts, avoiding Electron packaging continuing with old page.

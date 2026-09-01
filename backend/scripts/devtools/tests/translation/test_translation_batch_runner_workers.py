@@ -53,7 +53,7 @@ def test_parallel_batch_runner_only_keeps_worker_count_futures_active(monkeypatc
         with lock:
             active -= 1
         item_id = batch[0]["item_id"]
-        return {item_id: {"decision": "translate", "translated_text": f"译{item_id}", "final_status": "translated"}}
+return {item_id: {"decision": "translate", "translated_text": f"translated {item_id}", "final_status": "translated"}}
 
     monkeypatch.setattr(batch_runner, "translate_batch", _translate)
     flush_state = _FlushState()
@@ -103,7 +103,7 @@ def test_parallel_batch_runner_workers_keep_pulling_when_result_apply_is_slow(mo
             peak_started_before_apply = max(peak_started_before_apply, started - apply_count)
         time.sleep(0.002)
         item_id = batch[0]["item_id"]
-        return {item_id: {"decision": "translate", "translated_text": f"译{item_id}", "final_status": "translated"}}
+return {item_id: {"decision": "translate", "translated_text": f"translated {item_id}", "final_status": "translated"}}
 
     monkeypatch.setattr(batch_runner, "translate_batch", _translate)
     flush_state = _FlushState()
@@ -170,7 +170,7 @@ def test_parallel_batch_runner_fast_workers_share_batched_and_single_tail(monkey
         with lock:
             active -= 1
         item_id = batch[0]["item_id"]
-        return {item_id: {"decision": "translate", "translated_text": f"译{item_id}", "final_status": "translated"}}
+return {item_id: {"decision": "translate", "translated_text": f"translated {item_id}", "final_status": "translated"}}
 
     monkeypatch.setattr(batch_runner, "translate_batch", _translate)
     flush_state = _FlushState()
@@ -219,7 +219,7 @@ def test_parallel_batch_runner_keeps_single_fast_workers_separate_from_batched_f
             started.append(item_id)
         if item_id.startswith("b"):
             time.sleep(0.03)
-        return {item_id: {"decision": "translate", "translated_text": f"译{item_id}", "final_status": "translated"}}
+return {item_id: {"decision": "translate", "translated_text": f"translated {item_id}", "final_status": "translated"}}
 
     monkeypatch.setattr(batch_runner, "translate_batch", _translate)
     flush_state = _FlushState()
@@ -248,4 +248,4 @@ def test_parallel_batch_runner_keeps_single_fast_workers_separate_from_batched_f
     )
 
     assert "s0" in started[:3]
-    assert payload[-1]["translated_text"] == "译s0"
+assert payload[-1]["translated_text"] == "translated s0"

@@ -1,4 +1,4 @@
-// 主页 AI 消息列表：轻量 markdown 预览 + 引用跳阅读器
+// Homepage AI Message list: lightweight markdown preview + Skip to reader
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, FlaskConical, ListTree, Loader2, Sparkles } from "lucide-react";
@@ -23,23 +23,23 @@ export const HOME_ASK_SUGGESTIONS: Array<{
   icon: typeof BookOpen;
 }> = [
   {
-    prompt: "最近入库的文献里，有哪些值得优先阅读的主题？",
-    label: "浏览馆藏主题",
+    prompt: "Among recently added documents, which topics are worth reading first?",
+    label: "browse collection themes",
     icon: BookOpen,
   },
   {
-    prompt: "帮我对比不同文献对同一问题的主要结论。",
-    label: "跨文献对比结论",
+    prompt: "Compare main conclusions across literature on same issue.",
+    label: "shared across dialogs",
     icon: ListTree,
   },
   {
-    prompt: "有哪些常用的方法或实验设计？",
-    label: "梳理方法模型",
+    prompt: "Common methods or experimental designs?",
+    label: "sort out methodology models",
     icon: FlaskConical,
   },
   {
-    prompt: "用几句话总结图书馆里一篇核心论文。",
-    label: "快速总结一篇",
+    prompt: "Summarize a core paper from the library in a few sentences.",
+    label: "Quickly summarize a",
     icon: Sparkles,
   },
 ];
@@ -158,7 +158,7 @@ export function HomeAskThread({ messages, isRunning = false }: HomeAskThreadProp
     bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [messages, isRunning]);
 
-  // 空态由 HomeAskView 的 hero 区渲染（Notion：问候 + 居中输入 + 建议）
+// Empty state by HomeAskView hero Area render (NotionGreeting + Center input + Suggestion)
   if (empty) {
     return null;
   }
@@ -188,7 +188,7 @@ export function HomeAskThread({ messages, isRunning = false }: HomeAskThreadProp
             {streaming && !m.progress && !hasBody ? (
               <div className="home-ask-thinking" role="status">
                 <Loader2 className="home-ask-spin" size={13} strokeWidth={2.4} aria-hidden />
-                <span>思考中…</span>
+                <span>Thinking……</span>
               </div>
             ) : null}
             {hasBody || m.status === "error" ? (

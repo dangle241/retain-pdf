@@ -1,4 +1,4 @@
-/** 状态卡 snapshot 中与进度展示相关的字段 */
+/** Status card snapshot Fields related to progress display */
 export interface StatusCardProgressSnapshot {
   status?: string;
   progressPercent?: number | null;
@@ -6,7 +6,7 @@ export interface StatusCardProgressSnapshot {
   [key: string]: unknown;
 }
 
-/** selectedProgress / previous 进度分片（stageProgressByKey 项） */
+/** selectedProgress / previous Progress chunking (stageProgressByKey Item) */
 export interface StatusCardSelectedProgress {
   current?: number | null;
   total?: number | null;
@@ -145,7 +145,7 @@ export function buildStatusCardProgressPresentation({
   const percent = cappedPercentOrNull(rawPercent, selected, status);
   const progressText = displayedCurrent === null || displayedCurrent >= Number(selectedProgress?.current)
     ? selectedProgress?.progressText || ""
-    : `第 ${displayedCurrent}/${total} 页`;
+: `Page ${displayedCurrent}/${total}`;
   return {
     current,
     total,

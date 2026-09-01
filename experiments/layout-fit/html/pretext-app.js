@@ -142,7 +142,7 @@ async function renderPdfPage() {
   const src = `../fixtures/pdf-pages/${state.sample.job_id}/page-${String(state.pdfPageIndex + 1).padStart(3, "0")}.png`;
   await new Promise((resolve, reject) => {
     els.pdfImage.onload = () => resolve();
-    els.pdfImage.onerror = () => reject(new Error(`无法加载 PDF 页图片: ${src}`));
+    els.pdfImage.onerror = () => reject(new Error(`Unable to load. PDF Page image: ${src}`));
     els.pdfImage.src = src;
   });
   const pageSample = state.payload.samples.find((sample) => sample.page_index === state.pdfPageIndex) || state.sample;
@@ -155,7 +155,7 @@ async function renderPdfPage() {
   els.pdfStack.style.height = `${viewportHeight}px`;
   els.pdfOverlay.style.width = `${viewportWidth}px`;
   els.pdfOverlay.style.height = `${viewportHeight}px`;
-  els.pdfPageLabel.textContent = `第 ${state.pdfPageIndex + 1} / ${pageCount} 页`;
+els.pdfPageLabel.textContent = `Page ${state.pdfPageIndex + 1} / ${pageCount}`;
   els.pdfPrev.disabled = state.pdfPageIndex <= 0;
   els.pdfNext.disabled = state.pdfPageIndex >= pageCount - 1;
   renderPdfOverlay(pageWidth, pageHeight, viewportWidth, viewportHeight);
@@ -166,7 +166,7 @@ async function renderPdfPage() {
 // Data loading and sample selection.
 function loadPayload(payload) {
   if (!payload || !Array.isArray(payload.samples) || payload.samples.length === 0) {
-    setStatus("样本 JSON 不合法。", true);
+setStatus("Sample JSON Invalid.", true);
     return;
   }
   state.payload = payload;
@@ -178,7 +178,7 @@ function loadPayload(payload) {
     els.sampleSelect.append(option);
   }
   applySample(payload.samples[0].sample_id);
-  setStatus(`已载入 ${payload.samples.length} 个样本。`);
+setStatus(`Loaded ${payload.samples.length} samples.`);
 }
 
 function applySample(sampleId) {
@@ -210,11 +210,11 @@ function applySample(sampleId) {
   compareNow();
   if (typst?.fontSizePt && typst?.lineHeightRatio) {
     setStatus(
-      `已加载 ${sample.block_id}，默认采用 Typst 参数种子：字号 ${typst.fontSizePt}pt，行高倍率 ${typst.lineHeightRatio}；文本仍来自翻译 JSON。`
+      `Loaded ${sample.block_id}, default uses Typst Seed Parameter: Font Size ${typst.fontSizePt}ptLine Height Multiplier ${typst.lineHeightRatio}; text still comes from translation JSON。`
     );
   } else if (best) {
     setStatus(
-      `已加载 ${sample.block_id}，默认采用 Pretext 自动拟合：字号 ${best.fontSizePt}pt，行高倍率 ${best.lineHeightRatio}，Pretext 高度 ${best.height}pt。`
+`Loaded ${sample.block_id}, defaulting to the Pretext Auto-fit: font size ${best.fontSizePt}pt, line-height scale ${best.lineHeightRatio}, Pretext height ${best.height}pt.`
     );
   }
 }
@@ -267,7 +267,7 @@ function fitCurrentSample() {
 
 function compareNow() {
   if (!state.sample) {
-    setStatus("先加载样本。", true);
+setStatus("Load sample first.", true);
     return;
   }
   try {
@@ -325,9 +325,9 @@ function compareNow() {
     );
 
     els.domLinesText.textContent =
-      `DOM 说明:\nheight=${dom.height}pt\nlineCount=${dom.lineCount}\nmaxLineWidth=${dom.maxLineWidth}pt\nlineHeight=${round(lineHeightPt)}pt (${lineHeightEm}x)`;
+`DOM Info:\nheight=${dom.height}pt\nlineCount=${dom.lineCount}\nmaxLineWidth=${dom.maxLineWidth}pt\nlineHeight=${round(lineHeightPt)}pt (${lineHeightEm}x)`;
     els.pretextLinesText.textContent = [
-      `Pretext 说明:`,
+`Pretext Info:`,
       `height=${pretext.height}pt`,
       `lineCount=${pretext.lineCount}`,
       `maxLineWidth=${pretext.maxLineWidth}pt`,
@@ -337,7 +337,7 @@ function compareNow() {
       ...pretext.lines.map((line) => `${round(line.width)}pt | ${line.text}`),
     ].join("\n");
 
-    setStatus(`已完成 ${state.sample.block_id} 的 DOM / Pretext 对照。`);
+setStatus(`Completed DOM / Pretext comparison for ${state.sample.block_id}.`);
     if (state.payload) {
       renderPdfPage().catch(() => {});
     }
@@ -346,13 +346,13 @@ function compareNow() {
       typesetMath(els.pretextPreview),
     ]).catch(() => {});
   } catch (error) {
-    setStatus(`Pretext 对照失败：${error.message}`, true);
+    setStatus(`Pretext Comparison failed:${error.message}`, true);
   }
 }
 
 function autoFit() {
   if (!state.sample) {
-    setStatus("先加载样本。", true);
+setStatus("Load sample first.", true);
     return;
   }
   try {
@@ -360,7 +360,7 @@ function autoFit() {
     const targetHeightPt = targetHeightForSample(state.sample);
 
     if (!best) {
-      setStatus("自动拟合失败。", true);
+      setStatus("Auto-fit failed.", true);
       return;
     }
 
@@ -368,10 +368,10 @@ function autoFit() {
     els.lineHeight.value = best.lineHeightRatio;
     compareNow();
     setStatus(
-      `自动拟合完成：字号 ${best.fontSizePt}pt，行高倍率 ${best.lineHeightRatio}，Pretext 高度 ${best.height}pt，目标 ${targetHeightPt}pt，行数 ${best.lineCount}，评分 ${round(best.score)}。`
+`Auto-fit complete: font size ${best.fontSizePt}pt, line-height ratio ${best.lineHeightRatio}, Pretext height ${best.height}pt, target ${targetHeightPt}pt, line count ${best.lineCount}, score ${round(best.score)}.`
     );
   } catch (error) {
-    setStatus(`自动拟合失败：${error.message}`, true);
+    setStatus(`Auto-fit failed:${error.message}`, true);
   }
 }
 
@@ -409,7 +409,7 @@ async function loadSamplesForJob(jobId = null) {
     }
     throw lastError || new Error("no fixture found");
   } catch (error) {
-    setStatus(`样本加载失败：${error.message}`, true);
+    setStatus(`Sample load failed:${error.message}`, true);
   }
 }
 
@@ -442,14 +442,14 @@ function bindEvents() {
     state.pdfPageIndex -= 1;
     renderPdfPage().catch((error) => {
       setPdfRenderState(`error:${error.message}`);
-      setStatus(`PDF 渲染失败：${error.message}`, true);
+      setStatus(`PDF Render failed:${error.message}`, true);
     });
   });
   els.pdfNext.addEventListener("click", () => {
     state.pdfPageIndex += 1;
     renderPdfPage().catch((error) => {
       setPdfRenderState(`error:${error.message}`);
-      setStatus(`PDF 渲染失败：${error.message}`, true);
+setStatus(`PDF rendering failed: ${error.message}`, true);
     });
   });
   window.addEventListener("resize", () => {
@@ -459,7 +459,7 @@ function bindEvents() {
   });
   els.applyTypst.addEventListener("click", () => {
     if (!state.sample?.typst) {
-      setStatus("当前样本没有 Typst 参数。", true);
+setStatus("Current sample has no Typst parameters.", true);
       return;
     }
     const typst = state.sample.typst;
@@ -476,7 +476,7 @@ function bindEvents() {
     try {
       loadPayload(JSON.parse(await file.text()));
     } catch (error) {
-      setStatus("读取样本 JSON 失败。", true);
+      setStatus("Read sample JSON Failed.", true);
     }
   });
 }

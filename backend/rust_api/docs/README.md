@@ -1,22 +1,22 @@
 # Rust API Docs
 
-这里保留 `backend/rust_api` 目录内的文档兼容入口。
+Keep here `backend/rust_api` Compatibility entry point for documents in the directory.
 
-对外 HTTP API、图书馆接口、任务接口、产物下载、事件流和删除语义统一看：
+External HTTP API Library API task interface artifact download event stream unified deletion semantics
 
-- [RetainPDF 后端 API 总入口](../../../doc/core/api/index.md)
+- [RetainPDF Backend API Main Entry](../../../doc/core/api/index.md)
 
-后端实现和协作边界看：
+See: backend implementation and collaboration boundaries.
 
-- [Rust API 架构入口](../../../doc/core/rust_api/README.md)
-- [当前运行主链](../CURRENT_API_MAP.md)
-- [Stage 执行契约](../STAGE_EXECUTION_CONTRACT.md)
-- [OCR Provider 契约](../OCR_PROVIDER_CONTRACT.md)
-- [渲染参数契约](../RENDER_OPTIONS_CONTRACT.md)
-- [目录边界](../RUST_API_DIRECTORY_MAP.md)
+- [Rust API Architecture Entry](../../../doc/core/rust_api/README.md)
+- [Current Main Chain](../CURRENT_API_MAP.md)
+- [Stage Execution contract](../STAGE_EXECUTION_CONTRACT.md)
+- [OCR Provider Contract](../OCR_PROVIDER_CONTRACT.md)
+- [Rendering Parameter Contract](../RENDER_OPTIONS_CONTRACT.md)
+- [Directory Boundary](../RUST_API_DIRECTORY_MAP.md)
 
-原则：
+Principles:
 
-- `doc/core/api/index.md` 是对外 API 唯一真源。
-- `backend/rust_api/docs/*` 不再维护第二份接口详情。
-- `backend/rust_api/API_SPEC.md` 保留为历史/实现参考，不作为前端首读文档。
+- `doc/core/api/index.md` External. API The one true source.
+- `backend/rust_api/docs/*` Stop maintaining duplicate interface details.
+- `backend/rust_api/API_SPEC.md` Keep as History/Implementation reference, not frontend first-read.

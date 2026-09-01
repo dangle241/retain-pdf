@@ -1,101 +1,101 @@
-# 「素纸 · 江南」装饰包 —— 美术资产生成说明
+# 「Plain paper · Jiangnan」Decoration pack —— Art asset generation instructions
 
-> 本文件是给 **AI 生成工具（文生图 / 文生 3D）+ 后续接手的人** 看的资产规格书。
-> 生成的资产替换本目录同名文件即可生效，不用改任何代码；新增图层才需要
-> 改 manifest.json（格式契约见 `docs/theme-system/DECOR_PACKS.md`）。
-> 当前目录里的三张 SVG 为手绘矢量定稿（契约允许 svg 格式）；若日后改用
-> 文生图位图，按下方提示词生成 webp 同名替换即可。
+> This file is for AI Generation tool (text-to-image) / text-to-3D） + Maintainer to review asset spec.
+> Replace same-named files in this directory with generated assets to apply; no code changes. Only needed for new layers.
+> Change manifest.json. See format contract in docs/theme-system/DECOR_PACKS.md.
+> Three in the current directory. SVG Hand-drawn vector finalize contract-allowed svg format); if later switching to
+> For text-to-image bitmaps, generate webp with the prompts below and replace with same name.
 
 ---
 
-## 1. 主题气质（所有资产共同遵守）
+## 1. Theme ethos (all assets comply)
 
-**意象**：江南园林 · 雾中远山 · 素纸 · 文人书斋。克制、留白、低饱和。
-**禁止**：高饱和色、硬边卡通描线、赛博/现代元素、拥挤构图。
+Imagery Jiangnan Gardens · Misty distant mountains · Plain paper · Scholar's study. Restrained, negative space, low saturation.
+Forbidden Cyberpunk neon noir aesthetic / Modern elements, crowded composition.
 
-配色必须从主题 token 取（资产内允许写死颜色，但色相必须落在这套里）：
+Colors must come from the theme. token Use (hardcoded colors allowed in assets; hue must fall within this set):
 
-| token | 值 | 用途 |
+| token | Value | Usage |
 |---|---|---|
-| 纸底 `--paper` | `#fbfaf8` | 亮部 / 留白 |
-| 石灰底 `--bg` | `#f1f0ed` | 背景基调 |
-| 青绿 `--accent` | `#2a5f57` | 竹、山的深部（多用其淡化色阶） |
-| 墨 `--ink` | `#1b1b1d` | 仅点睛，不大面积用 |
-| 朱砂 `--danger` 族 | `#c23b32` → 占位印用 `#b0493f` | 只给印章/点缀 |
+| Paper base `--paper` | `#fbfaf8` | Highlights / Whitespace |
+| Lime base `--bg` | `#f1f0ed` | Background tone |
+| Teal-green. `--accent` | `#2a5f57` | Bamboo, mountain depths (use faded tones) |
+| Ink `--ink` | `#1b1b1d` | Use sparingly as accent, not broadly. |
+| Cinnabar --danger family | #c23b32 → placeholder usage #b0493f | Seal only/Embellish |
 
-**对比度红线**：所有装饰都垫在功能 UI 之下，功能面板是 ~88% 不透明的纸色。
-背景资产整体明度必须 ≥ `#dde2dd`（雾感），否则透出面板会显脏。
+**Contrast red line**All decorations placed under functional UI UI Below, the feature panel is ~88% Opaque paper color.
+Background asset overall brightness must ≥ `#dde2dd`Panel shows dirt otherwise.
 
-## 2. 通用技术规格（契约强制，超限过不了门禁）
+## 2. General Technical Specifications (Contractual mandate; exceed limits and access denied)
 
-- 格式：`webp`（首选）/ `png` / `svg` / `avif`；**道具类必须透明背景**
-- 单文件 ≤ **512 KB**（`IMAGE_BUDGET_KB`，contract.ts 真值）
-- 色彩空间 sRGB；位图按下表"出图尺寸"输出（已含 2x 余量）
-- 命名与 manifest.json 的 `src` 一致；替换 = 同名覆盖
+- Format:`webp`Preferred./ `png` / `svg` / `avif`；**Props must have transparent backgrounds**
+- Single file ≤ 512 KB (IMAGE_BUDGET_KB, contract.ts truth value)
+- Color space sRGBBitmap per table below."Output Dimensions"Output (contains 2x Remaining)
+- Naming and manifest.json's src consistent; replace = overwrite
 
-## 3. 逐资产规格 + 生成提示词
+## 3. Per-asset specification + Generate prompt
 
-### 3.1 `bg.svg` → 建议换成 `bg.webp`（backdrop 全幅背景）
+### 3.1 `bg.svg` → Recommend switching to `bg.webp`（backdrop Full-width background
 
-- 出图：**3200×1800**（16:9，object-fit: cover，窄屏裁两侧）
-- 构图硬约束：**上部 60% 接近留白**（雾/天，功能面板压在这里）；
-  山体集中在**下部 1/3**，画面四角最暗处不深于 `#93aa9d`
-- 提示词：
-  > 水墨淡彩风格的江南远山，晨雾弥漫，青灰色调（#93aa9d 到 #f1f0ed），
-  > 山影层叠三层由浅入深，画面上部三分之二为空白雾色，极简留白构图，
-  > 低饱和，无人物无建筑，横幅 16:9
+- Generate image:**3200×1800**（16:9，object-fit: coverNarrow screen crop sides
+- Composition hard constraints:**Top 60% Approach whitespace**(fog/Feature panel compressed here.
+  Mountains concentrate in**Bottom 1/3**Darken corners only. `#93aa9d`
+- Prompt:
+> Jiangnan distant mountains in ink-and-wash style, morning mist, bluish-gray tones #93aa9d to #f1f0ed,
+  > Three layers of mountain shadows from light to dark. Upper two-thirds of frame is misty blank space. Minimalist negative-space composition.
+  > Low saturation. No people. No buildings. Horizontal. 16:9
 
-### 3.2 `bamboo.svg` → `bamboo.webp`（left-bottom 竹枝）
+### 3.2 `bamboo.svg` → `bamboo.webp`（left-bottom Bamboo branch)
 
-- 出图：**600×840**（5:7 竖构图，透明背景）
-- 构图硬约束：主体**贴左缘和下缘**生长（slot 锚在屏幕左下角），
-  右侧、上侧留透明呼吸空间；2-3 竿竹 + 少量叶，忌茂密
-- 提示词：
-  > 两三竿墨竹从画面左下角斜出，水墨风格，青绿色调（#4c7466、#5d8273），
-  > 疏朗留白，竹叶三五成组，透明背景，中国画小品质感
+- Output: 600×840 (5:7 portrait orientation, transparent background
+- Composition hard constraint: subject**Align left bottom. Simplify layout.**Growth (slot Anchor at screen bottom-left.
+  Transparent breathing space on right and top.2-3 bamboo pole + Sparse leaves; avoid density.
+- Prompt:
+  > Two or three ink bamboo stalks extend diagonally from the bottom-left corner of the frame, in ink wash style with a blue-green tone (#4c7466、#5d8273），
+  > Sparse blank space, bamboo leaves in small clusters of three to five, transparent background, small Chinese painting texture.
 
-### 3.3 `seal.svg` → `seal.webp`（right-bottom 藏书印）
+### 3.3 `seal.svg` → `seal.webp`（right-bottom Book seal)
 
-- 出图：**280×280**（正方形，透明背景）
-- 构图硬约束：单枚印章占满画面 85%，微微右倾 2-3° 更自然
-- 提示词：
-  > 一枚朱砂藏书印，篆刻风格，暗红色（#b0493f），方形圆角边框，
-  > 印文可为"藏书"或抽象篆纹，边缘有手工钤印的微残缺感，透明背景
+- Output: 280×280 square, transparent background.
+- Hard constraint: single seal fills frame. 85%Tilt slightly right. 2-3° more natural
+- Prompt:
+  > A cinnabar book-collecting seal, seal-script style, dark red (#b0493fBorder radius.
+  > Seal inscription can be"Library"Or abstract seal-script motifs, subtle hand-stamped edge imperfections, transparent background.
 
-### 3.4 题字（quote）—— 不是图片资产
+### 3.4 Inscription (quote）—— Not an image asset.
 
-竖排文字由舞台直接渲染（改 manifest.json 的 `quote.text` 即可），
-**不要**生成文字图片。当前文案：「书藏万卷 / 心游千载」。
+Vertical text is rendered directly by the stage (change manifest.json's quote.text just that),
+Do not generate text image. Current copy: 「10k books / Roam through millennia」.
 
-## 4. 空置锚点（想加新资产往这里放）
+## 4. Empty anchor (place new assets here)
 
-按 manifest 加一行 `{ "type": "image", "slot": "<id>", "src": "<文件>" }` 即可：
+按 manifest Add line `{ "type": "image", "slot": "<id>", "src": "<文件>" }` Just:
 
-| slot | 屏幕位置 | 建议出图 | 适合内容 |
+| slot | Screen position | Drawing recommended. | Suitable Content |
 |---|---|---|---|
-| `hero` | 顶部横幅区（原"继续阅读"位） | 440×520 透明 | 看书人物（概念稿的少女/少年） |
-| `left-top` / `right-top` | 左右上翼 | 560×720 透明 | 垂枝、灯笼、飞鸟 |
-| `top-center` | 导航上方 | 1040×220 透明 | 拱形饰件、蝴蝶 |
-| `edge-left` / `edge-right` | 贴边压 UI（唯一浮在 UI 上的层） | 280×1920 透明 | 探进面板的花枝——**必须极稀疏**，中部 80% 留空 |
+| `hero` | Top banner area (original"Continue reading."bit) | 440×520 Transparent | Reading Character (Concept Draft Girl)/Youth) |
+| left-top / right-top | Left, right upper wings | 560×720 transparent | Weeping branches, lanterns, flying birds |
+| top-center | Above navigation | 1040×220 transparent | Arch-shaped ornaments, butterflies |
+| `edge-left` / `edge-right` | Edge case ignored. Add when needed. UI(only floating UI upper layer) | 280×1920 Transparent | Flower branch extending into panel——**Must be extremely sparse**, middle 80% Leave blank |
 
-## 5. 3D 资产（three 引擎接入后启用，规格先立在这）
+## 5. 3D Assets (three Enable after engine integration. Specs defined here.
 
-- 格式 `.glb`，**Draco + KTX2 压缩后 ≤ 2 MB、≤ 50,000 三角面**（contract.ts 真值）
-- 动画 clip 内嵌并命名，manifest 里 `idleClip`（循环待机）/ `clickClip`（点击一次性）引用
-- **必须配同名 fallback 图**（manifest `fallback` 必填）——图片版舞台/低端机/
-  reduced-motion 都渲染这张图，所以 fallback 本身要达到上面 2D 资产的质量标准
-- 管线：AI 生成 → `gltf-transform optimize` → 预算检查 → 入库
+- Format .glb, Draco + KTX2 after compression ≤ 2 MB, ≤ 50,000 triangle faces (contract.ts truth value)
+- Animation clip embed and name, in manifest idleClip for cycle standby / clickClip for quote (one-click)
+- Must configure same-name fallback image (manifest fallback required — for image stage / low-end device /
+  reduced-motion All render this image, so fallback To achieve the above itself. 2D Asset quality standards
+- Pipeline: AI generation → gltf-transform optimize → budget check → receive
 
-## 6. 验收（替换/新增资产后必跑）
+## 6. Accept replace/Run after adding assets.
 
 ```bash
 cd frontend
-# manifest 契约 + 舞台计划（新增图层/改 manifest 后）
+# manifest contract + Stage plan (after adding layer / changing manifest)
 node --import ./tests/helpers/register-jsx.mjs --test tests/decor-stage.test.mjs
-# 体积门禁（512KB）
+# Volume gate (512KB）
 find decor/jiangnan -type f \( -name '*.webp' -o -name '*.png' -o -name '*.svg' -o -name '*.avif' \) -size +512k
-# ↑ 有输出 = 超预算，压缩后再入库
+# ↑ Has output = Over budget. Compress before committing.
 ```
 
-浏览器目检：切主题到「素纸」，确认 <1100px 窄屏只留背景、
-功能面板文字可读性不受背景干扰。
+Browser visual inspection: switch topic to "Plain Paper", confirm <1100px Narrow screen: background only.
+Function panel text readability unaffected by background.

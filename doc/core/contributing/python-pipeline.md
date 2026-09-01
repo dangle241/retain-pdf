@@ -1,35 +1,35 @@
-# Python 流水线贡献指南
+# Python Pipeline Contribution Guide
 
-## 分层方向
+## Layering direction
 
-总体分层：
+Overall layering:
 
 ```text
 entrypoints -> runtime/pipeline -> services/* -> foundation
 ```
 
-基本规则：
+Basic rules:
 
-- OCR provider raw payload 必须先进入 `document_schema`，产出 `document.v1`。
-- 翻译主链只消费 `document.v1` 和 translation stage spec。
-- 渲染主链只消费源 PDF、translation manifest、逐页翻译 payload 和 render stage spec。
-- `runtime/pipeline` 只负责编排，不吸收 provider、LLM、Typst、redaction 的细节。
-- `translation` 不 import `services.rendering`，也不消费 provider raw JSON。
-- `ocr_provider` 不 import `services.translation` 或 `services.rendering`。
+- OCR provider raw payload must enter document_schema first, producing document.v1.
+- Main chain only consumes document.v1 and translation stage spec.
+- Main rendering chain only consumes source PDF, translation manifest, page payload, and render stage spec.
+- `runtime/pipeline` Orchestration only, no absorption. provider、LLM、Typst、redaction Details.
+- translation does not import services.rendering, nor consumes provider raw JSON.
+- ocr_provider does not import services.translation or services.rendering.
 
-更细规则见 [Python 后端架构边界](../python/architecture.md)。
+See more detailed rules in Python backend architecture boundaries.
 
-## 改动规则
+## Change rules
 
-- 新逻辑优先放在已有分层目录，避免跨层 import。
-- 翻译、渲染、OCR provider 的边界按 `doc/core/python/architecture.md` 执行。
-- 新增规则类逻辑时优先补最小回归测试，尤其是公式、术语、bbox、payload 变换。
-- 翻译一致性、术语表、公式保护、渲染策略应尽量通过稳定 manifest/spec 传递，不要靠跨模块读取内部临时文件。
-- 渲染和 PDF 处理改动要说明是否改变输出 PDF 内容、体积、首屏预览体验或可复制文本。
+- Place new logic in existing layered directories. Avoid cross-layer. import。
+- Translation, rendering, OCR provider boundaries are enforced by doc/core/python/architecture.md.
+- Prioritize adding minimal regression tests when adding new rule logic, especially for formulas and terminology.bbox、payload Transform.
+- Translation consistency, glossary, formula protection, and rendering strategy should be as stable as possible. manifest/spec Pass data; do not read internal temporary files across modules.
+- Rendering and PDF Ghi rõ thay đổi output khi dịch. Gửi văn bản cần dịch. PDF Content, size, first-screen preview experience, or copyable text.
 
-## 常用检查
+## Common checks
 
-Python 翻译相关：
+Python Please provide the source text to translate.
 
 ```bash
 python3 -m compileall -q backend/scripts/services/translation
@@ -37,25 +37,25 @@ PYTHONPATH=backend/scripts python3 -m pytest backend/scripts/devtools/tests/tran
 python3 backend/scripts/devtools/check_pipeline_architecture.py
 ```
 
-Python document schema / provider 相关：
+Python document schema / provider Related:
 
 ```bash
 PYTHONPATH=backend/scripts python3 -m pytest backend/scripts/devtools/tests/document_schema -q
 python3 backend/scripts/devtools/check_pipeline_architecture.py
 ```
 
-渲染相关：
+Rendering:
 
 ```bash
 PYTHONPATH=backend/scripts python3 -m pytest backend/scripts/devtools/tests/rendering -q
 python3 backend/scripts/devtools/check_pipeline_architecture.py
 ```
 
-## PR 说明
+## PR description
 
-涉及 Python 流水线的 PR 至少说明：
+PRs involving Python pipeline should at least state:
 
-- 影响 OCR、translation、rendering 中哪一段。
-- 是否改变 `document.v1`、translation manifest、render payload 或阶段事件。
-- 是否影响旧 job 的重新渲染、断点恢复或诊断。
-- 使用了哪些样本验证，是否包含公式、图注、脚注、长段落或大页数 PDF。
+- Impact OCR、translation、rendering which segment.
+- Whether it changes document.v1, translation manifest, render payload, or phase events.
+- Does it affect the old? job re-rendering, breakpoint recovery, or diagnostics.
+- Which samples were used for verification? Do they include formulas, figure captions, footnotes, long paragraphs, or high-page-count PDFs? PDF。

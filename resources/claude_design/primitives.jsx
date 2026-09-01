@@ -90,13 +90,13 @@ function PDFPage({
         {/* Title (1-2 lines centered) */}
         <text x={width / 2} y={48} textAnchor="middle"
           fontFamily={SERIF} fontSize={13} fontWeight={700} fill={INK}>
-          {language === 'zh' ? '保留排版的文档翻译方法综述'
-           : language === 'mixed' ? '保留排版的文档翻译方法综述'
+          {language === 'zh' ? 'Formatting-Preserving Document Translation: A Review.'
+: language === 'mixed' ? 'Formatting-Preserving Document Translation: A Review'
            : 'Layout-Preserving Document Translation'}
         </text>
         <text x={width / 2} y={64} textAnchor="middle"
           fontFamily={SERIF} fontSize={9} fill={FAINT}>
-          {language === 'zh' || language === 'mixed' ? '林知行  ·  陈雨桐  ·  2024' : 'Z. Lin · Y. Chen · 2024'}
+          {language === 'zh' || language === 'mixed' ? 'Lin Zhixing  ·  Chen Yutong  ·  2024' : 'Z. Lin · Y. Chen · 2024'}
         </text>
 
         {/* Abstract block — single column above the two columns */}

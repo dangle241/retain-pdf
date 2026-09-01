@@ -1,8 +1,8 @@
-# Python 后端架构边界
+# Python Backend architecture boundaries
 
-这份文档描述 `backend/scripts` 的长期维护边界。目标不是减少文件数量，而是保证代码增长后仍能定位、测试和修改。
+This document describes `backend/scripts` Long-term maintenance boundaries. Goal is not reduce file count, but ensure code remains locatable, testable, and modifiable after growth.
 
-## 总体分层
+## Overall layering
 
 ```text
 entrypoints
@@ -11,18 +11,18 @@ entrypoints
       -> foundation
 ```
 
-职责：
+Responsibilities:
 
 - `entrypoints/`
-  命令行入口，只解析参数并调用稳定服务入口。
+  Command-line entry point: only parses arguments and invokes the stable service entry.
 - `runtime/pipeline/`
-  阶段编排层，负责 OCR、翻译、渲染的顺序、阶段 spec、事件和产物交接。
+  Stage orchestration layer, responsible for OCRTranslation order, rendering order, stages specEvent handoff.
 - `services/`
-  具体能力层，包含 OCR provider、document schema、translation、rendering 等业务能力。
+  Capability layer: includes OCR provider、document schema、translation、rendering Await business capability.
 - `foundation/`
-  配置、共享基础工具和跨服务底层能力。
+  Configuration, shared foundational tools, and cross-service underlying capabilities.
 
-## 稳定子系统
+## Stable subsystem
 
 ```text
 services/document_schema
@@ -34,14 +34,14 @@ services/pipeline_shared
 runtime/pipeline
 ```
 
-核心规则：
+Core Rules:
 
-- OCR provider raw payload 必须先进入 `document_schema`，产出 `document.v1`。
-- 翻译主链只消费 `document.v1` 和 translation stage spec。
-- 渲染主链只消费源 PDF、translation manifest、逐页翻译 payload 和 render stage spec。
-- `runtime/pipeline` 只负责编排，不吸收 provider、LLM、Typst、redaction 的细节。
+- OCR provider raw payload must first enter document_schema to produce document.v1.
+- The translation main chain only consumes document.v1 and the translation stage spec.
+- The rendering main chain only consumes the source PDF, translation manifest, per‑page translation payload, and the render stage spec.
+- runtime/pipeline is only responsible for orchestration and does not absorb details of providers, LLMs, Typst, or redaction.
 
-## 渲染层边界
+## Rendering layer boundary
 
 ```text
 services/rendering/workflow
@@ -51,35 +51,35 @@ services/rendering/workflow
   -> output
 ```
 
-职责：
+Responsibilities:
 
 - `workflow/`
-  串联渲染模式，选择 overlay、dual、background typst 等路径。
+  Serial rendering mode select overlay、dual、background typst Wait for path.
 - `analysis/`
-  页面画像、页面分类和页面渲染路线决策。
+  Page profiling, classification, and rendering route decision.
 - `document/`
-  页码映射、目录/书签复制和文档级辅助。
+  Page mapping, table of contents/Copy bookmarks and document-level assistance.
 - `source/background/`
-  生成 cleaned background PDF。
+Generate a cleaned background PDF.
 - `source/cleanup/`
-  直接操作 PDF page，负责删除或覆盖原文区域。
+Directly manipulate PDF pages; responsible for deleting or overwriting the original text area.
 - `layout/`
-  把 translated items 转成 `RenderBlock` / page specs。
+Convert translated items into RenderBlock / page specs.
 - `output/typst/`
-  生成 Typst source，编译 overlay PDF，执行 overlay merge。
+Generate Typst source, compile an overlay PDF, and execute the overlay merge.
 - `source/compression/`
-  PDF 压缩。
+  PDF Compression.
 - `layout/model/`
-  渲染公共数据模型。
+  Render public data model.
 
-禁止方向：
+Prohibited directions:
 
-- `output/typst` 不 import `source/cleanup`。
-- `layout` 不 import `output/typst`、`source/cleanup`、`source/prepare`。
-- `source/cleanup` 不 import `output/typst` 或高层 layout 逻辑。
-- `runtime/pipeline` 不直接 import `services.rendering.output.typst`、`services.rendering.source.cleanup`、`services.rendering.layout`。
+- output/typst must not import source/cleanup.
+- layout must not import output/typst, source/cleanup, or source/prepare.
+- source/cleanup must not import output/typst or high‑level layout logic.
+- `runtime/pipeline` Not direct. import `services.rendering.output.typst`、`services.rendering.source.cleanup`、`services.rendering.layout`。
 
-## 翻译层边界
+## Layer boundary
 
 ```text
 services/translation/workflow
@@ -90,28 +90,28 @@ services/translation/workflow
   -> payload
 ```
 
-职责：
+Responsibilities:
 
 - `workflow/`
-  翻译请求入口和执行门面。
+  Translation request entry and execution facade.
 - `context/`
-  domain guidance、memory guidance 组合。
+  domain guidance、memory guidance Combine.
 - `policy/`
-  是否翻译、如何处理保留排版等策略。
+  whether to translate, how to handle layout preservation, and other strategies.
 - `memory/`
-  job 级术语和保留排版记忆。
+  job level terms and layout‑preservation memory.
 - `llm/`
-  provider 调用、重试、校验和 fallback。
+  provider Call, retry, checksum. fallback。
 - `payload/`
-  翻译产物协议。
+  Translation output agreement.
 
-禁止方向：
+Prohibited directions:
 
-- `runtime/pipeline/translation_stage.py` 不直接 import `policy`、`llm`、`diagnostics` 内部细节。
-- `translation` 不 import `services.rendering`。
-- `translation` 不消费 provider raw JSON。
+- runtime/pipeline/translation_stage.py must not directly import internal details of policy, llm, or diagnostics.
+- translation must not import services.rendering.
+- translation must not consume provider raw JSON.
 
-## OCR 边界
+## OCR boundary
 
 ```text
 ocr_provider / mineru
@@ -119,15 +119,15 @@ ocr_provider / mineru
   -> document.v1
 ```
 
-禁止方向：
+Prohibited directions:
 
-- `ocr_provider` 不 import `services.translation`。
-- `ocr_provider` 不 import `services.rendering`。
-- `translation` 和 `rendering` 不 import `services.ocr_provider` 或 `services.mineru`。
+- ocr_provider must not import services.translation.
+- ocr_provider must not import services.rendering.
+- translation and rendering must not import services.ocr_provider or services.mineru.
 
-## 公共入口
+## Public entry
 
-上层优先只调用这些入口：
+Top-level only calls these entry points:
 
 - `services.ocr_provider.provider_pipeline`
 - `services.document_schema.normalize_pipeline`
@@ -135,20 +135,20 @@ ocr_provider / mineru
 - `services.rendering.workflow.execute_render_plan`
 - `runtime.pipeline.book_pipeline`
 
-如果新增入口，必须同时更新：
+If adding a new entry, must also update:
 
-- 本文档。
-- 对应目录 README。
+- This document.
+- Corresponding directory README。
 - `backend/scripts/devtools/check_pipeline_architecture.py`。
 
-## 什么时候才继续拆文件
+## When to continue splitting files
 
-满足下面任一条件再拆：
+Split if any condition below:
 
-- 一个文件超过 300 行且包含 3 种以上职责。
-- 改一个小功能需要跨 5 个以上目录。
-- 出现循环依赖。
-- 同一逻辑重复出现在多个模块。
-- 测试很难写，因为 IO、策略、数据结构混在一个函数里。
+- File exceeds size limit. Split or compress. 300 line and contains 3 Multiple responsibilities.
+- Changing a small feature requires cross- 5 Directories above one.
+- Circular dependency detected.
+- Same logic repeated in multiple modules.
+- Tests are hard to write because IOStrategy data structure mixed in function. Refactor: separate into dedicated modules.
 
-不满足这些条件时，优先补测试、补文档、补架构检查，而不是继续拆文件。
+When conditions not met, add tests first, then docs, then arch checks. Do not split files.

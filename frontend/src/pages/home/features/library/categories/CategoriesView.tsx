@@ -1,10 +1,10 @@
-// "合集"tab 的内容:文件夹卡片网格 + 点开一个文件夹后的书目列表。
+// "Collection" tab content: Folder card grid + Book list after opening a folder.
 //
-// 图书馆网格的数据链路完全不动(调研计划「设计决策 2」)——文件夹展开时走
-// collection_id → documents(拿 active_job_id)→ job_ids 过滤 library/books
-// 这条桥接路径(services.collections.controller.fetchFolderBooks),换回来的
-// 数据形状和图书馆首页卡片完全一致,直接复用 BookCard,不用
-// 另外做一套"文件夹详情卡片"渲染,也不会有第二套删除确认气泡状态。
+// Library grid data pipeline frozen.(Research plan「Design Decision 2」)——Navigate on folder expand.
+// collection_id â documents (get active_job_id) â job_ids filter library/books
+// Bridge path.(services.collections.controller.fetchFolderBooks),Revert
+// Data shape matches library homepage card exactly. Reuse BookCard directly, no need
+// Create separate set. "Folder details card" render, no second delete confirmation popover state.
 
 import { useCallback, useEffect, useState } from "react";
 import { useHomeServices } from "../../../home-services-context.js";
@@ -13,10 +13,10 @@ import { EmptyState } from "../../../../../shared/icons/EmptyState.jsx";
 import { BookCard, buildDefaultBookCardActions } from "../shell/BookCard.jsx";
 import { useRecentJobCover } from "../display/useRecentJobCover.js";
 
-// 文件夹卡片的封面堆叠预览(参考 PDF_MD_lib 的 FolderCard.tsx:最多 4 本书的
-// 封面像扑克牌一样扇形叠放,越靠前的书 z 越高、叠在最外面)。封面图沿用
-// BookCard 同一个 useRecentJobCover hook(同一份 objectURL 缓存,不会
-// 因为这里多渲染一份而重复请求)。
+// Folder card cover stack preview (Reference PDF_MD_lib FolderCard.tsx: Maximum 4 books
+// Covers stacked in a fan shape like playing cards.,sách ở đầu → skipped: sắp xếp, add when cần sắp xếp động z Cấu trúc xếp chồng. Phần cao nhất nằm bên ngoài. Đảm bảo tính ổn định. Kiểm tra lại.)Reuse cover image.
+// BookCard uses same useRecentJobCover hook (Same objectURL cache, no
+// Extra render triggers duplicate request.)。
 const MAX_STACK = 4;
 
 function FolderCoverStackLayer({ item, index, total }) {
@@ -58,7 +58,7 @@ function FolderCoverStack({ items }) {
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3 7a2 2 0 0 1 2-2h4.5l1.5 2H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
           </svg>
-          <span>空合集</span>
+<span>Empty collection</span>
         </div>
       ) : (
         stack.map((item, index) => (
@@ -73,15 +73,15 @@ export function CategoriesView() {
   const services = useHomeServices();
   const { controller, dialogStore, reloadSignal } = services.collections;
   const { actions } = services.library;
-  // CollectionManageDialog 挂在 HomeApp.jsx 顶层,和这个组件是兄弟节点
-  // (不是父子),保存/删除后没法直接 prop 回调回来——靠一个共享的版本号信号
-  // 桥接:对话框保存成功就 bump 一次,这里订阅到变化就重新拉取列表。
+// CollectionManageDialog mounted at HomeApp.jsx top-level, sibling node of this component.
+// (Not parent-child), save/cannot proceed directly after deletion. prop Callback returned - Shared version signal.
+// Bridge: Dialog save success then bump once, subscription change triggers list refetch.
   const { version } = useStoreSnapshot(reloadSignal);
 
   const [collections, setCollections] = useState([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState("");
-  // 文件夹卡片的封面堆叠预览:collection_id → 该文件夹前几本书(job 卡片形状)。
+// Folder card cover stack preview: collection_id â first few books in this folder (job Card shape).
   const [previews, setPreviews] = useState({});
 
   const [openFolder, setOpenFolder] = useState(null);
@@ -90,7 +90,7 @@ export function CategoriesView() {
   const [folderError, setFolderError] = useState("");
 
   const reload = useCallback((options: { soft?: boolean } = {}) => {
-    // soft：version bump / 二次拉取时保留旧列表，不整表切成 loading（分类 tab 闪一下）
+    // soft：version bump / Retain old list on second fetch. Avoid full table truncation. loading(category tab Flashes once.
     const soft = Boolean(options.soft);
     if (!soft) {
       setListLoading(true);
@@ -100,7 +100,7 @@ export function CategoriesView() {
       .listCollections()
       .then(({ collections: items = [] } = {}) => {
         setCollections(items);
-        // 正在查看的文件夹如果被删了(管理弹窗里点了删除),退回文件夹网格。
+        // If the folder being viewed is deleted(Delete clicked in management modal.),Back to folder grid.
         setOpenFolder((current) => {
           if (!current) {
             return current;
@@ -109,7 +109,7 @@ export function CategoriesView() {
           return stillExists ? items.find((item) => item.collection_id === current.collection_id) : null;
         });
       })
-      .catch((err) => setListError(err?.message || "读取合集失败，请稍后重试。"))
+      .catch((err) => setListError(err?.message || "Failed to load collection. Retry later."))
       .finally(() => {
         if (!soft) {
           setListLoading(false);
@@ -118,7 +118,7 @@ export function CategoriesView() {
   }, [controller]);
 
   useEffect(() => {
-    // 首屏 hard loading；管理弹窗 bump version 后 soft 刷新
+// First screen. hard loading; Manage modal bump version then soft refresh
     reload({ soft: version > 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload, version]);
@@ -129,8 +129,8 @@ export function CategoriesView() {
       return undefined;
     }
     let cancelled = false;
-    // 每个文件夹卡片的封面堆叠预览各自独立拉取,互不阻塞——某个文件夹加载慢
-    // 不该拖住其余卡片先显示出来。
+    // Fetch folder card cover stack previews independently.,Non-blocking——Folder load slow.
+    // Don't block other cards from rendering first.
     collections.forEach((collection) => {
       controller
         .fetchFolderBooks(collection.collection_id)
@@ -150,10 +150,10 @@ export function CategoriesView() {
     return () => {
       cancelled = true;
     };
-    // collectionIdsKey 只在"文件夹集合本身"变化时变——只加/删书(文件夹集合
-    // 不变)不会触发这个 key 变化。version 补上这一半:管理弹窗保存成功就
-    // bump 一次,不管这次改的是名称还是成员,预览缩略图都要跟着刷新,否则
-    // 编辑完书目后卡片上的封面堆叠会停在旧数据,直到下次新建/删除文件夹。
+// collectionIdsKey only changes on "Folder collection itself" changes - Add only/Delete book (folder collection
+// unchanged) won't trigger this. key Change.version Missing context. Provide source text.: Save management modal success.
+// bump once, regardless of whether this change affects the name or members, thumbnail previews refresh too, otherwise
+    // Cover stack retains stale data after editing bibliography.,Until next creation/Delete folder.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, collectionIdsKey, version]);
 
@@ -179,7 +179,7 @@ export function CategoriesView() {
         if (cancelled) {
           return;
         }
-        setFolderError(err?.message || "读取合集内容失败，请稍后重试。");
+        setFolderError(err?.message || "Failed to read collection content. Please try again later.");
       })
       .finally(() => {
         if (cancelled) {
@@ -187,12 +187,12 @@ export function CategoriesView() {
         }
         setFolderLoading(false);
       });
-    // 用 collection_id(原始类型)而不是 openFolder(对象引用)做依赖——
-    // reload() 每次都会给同一个文件夹造一个新对象(见上面 setOpenFolder 里
-    // 的 items.find(...)),按对象引用算依赖会导致"没真的切换文件夹"也
-    // 重新请求一次;更关键的是原来那版完全没有 cancelled 守卫,快速切换
-    // 两个文件夹时后发的请求可能先resolve、先发的请求后resolve,导致标题
-    // 显示 B 文件夹、书目列表却是 A 文件夹的旧数据。
+// Use collection_id (primitive types) instead of openFolder (object reference) to avoid dependency -
+// reload() instantiates new object for same folder every time (see setOpenFolder above
+// items.find(...)), object-reference dependency calculation causes "Folder switch not applied." also
+// Request again.; More critically, the previous version lacked this entirely. cancelled guard, quick switch
+    // Requests for two folders may arrive out of order.resolveEarlier request sent later.resolve,Causes title
+    // Show B Folders, bibliography list are A Legacy folder data.
     return () => {
       cancelled = true;
     };
@@ -200,7 +200,7 @@ export function CategoriesView() {
 
   if (openFolder) {
     return (
-      <section id="categories-folder-view" className="library-view categories-view" aria-label={`合集:${openFolder.name}`}>
+<section id="categories-folder-view" className="library-view categories-view" aria-label={`Collection:${openFolder.name}`}>
         <div className="categories-folder-head">
           <button
             id="categories-back-btn"
@@ -208,19 +208,19 @@ export function CategoriesView() {
             className="categories-back-btn"
             onClick={() => setOpenFolder(null)}
           >
-            ← 返回合集
+            ← Back to Collection
           </button>
           <h2>{openFolder.name}</h2>
         </div>
         {folderLoading ? (
-          <div className="events-empty">正在加载…</div>
+          <div className="events-empty">Loading...…</div>
         ) : folderError ? (
           <div className="events-empty">{folderError}</div>
         ) : folderItems.length === 0 ? (
           <EmptyState
             instrument="balance"
-            title="这个合集还没有书"
-            hint="点合集卡片上的「管理」，从书库勾选 PDF 放进来。"
+            title="this collection has no books yet"
+            hint="Click the collection card.「Admin」Select from library PDF put in."
           />
         ) : (
           <div className="recent-jobs-list library-grid">
@@ -243,7 +243,7 @@ export function CategoriesView() {
   }
 
   return (
-    <section id="categories-view" className="library-view categories-view" aria-label="合集">
+<section id="categories-view" className="library-view categories-view" aria-label="Collections">
       <div className="categories-head">
         <button
           id="categories-create-btn"
@@ -251,26 +251,26 @@ export function CategoriesView() {
           className="app-button"
           onClick={() => dialogStore.open(null)}
         >
-          新建合集
+Create collection
         </button>
       </div>
       {listLoading ? (
-        <div className="events-empty">正在加载合集…</div>
+        <div className="events-empty">Loading collection…</div>
       ) : listError ? (
         <div className="events-empty">{listError}</div>
       ) : collections.length === 0 ? (
         <EmptyState
           id="categories-empty"
           instrument="telescope"
-          title="还没有合集"
-          hint="把 PDF 按主题分组成书架，之后更好找。"
+          title="no collections yet"
+hint="Group PDFs by theme into bookshelves for easier finding later."
         >
           <button
             type="button"
             className="app-button empty-state-action"
             onClick={() => dialogStore.open(null)}
           >
-            新建合集
+Create collection
           </button>
         </EmptyState>
       ) : (
@@ -284,13 +284,13 @@ export function CategoriesView() {
               >
                 <FolderCoverStack items={previews[collection.collection_id]} />
                 <span className="category-card-name" title={collection.name}>{collection.name}</span>
-                <span className="category-card-count">{collection.document_count} 本</span>
+                <span className="category-card-count">{collection.document_count} this</span>
               </button>
               <button
                 type="button"
                 className="category-card-manage"
-                aria-label={`管理合集 ${collection.name}`}
-                title="管理"
+                aria-label={`Manage collection ${collection.name}`}
+                title="Manage"
                 onClick={(event) => {
                   event.stopPropagation();
                   dialogStore.open(collection);

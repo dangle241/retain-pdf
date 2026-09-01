@@ -13,12 +13,12 @@ function formatDurationMs(ms) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   if (hours > 0) {
-    return `${hours}小时 ${minutes}分 ${seconds}秒`;
+return `${hours} hours ${minutes} min ${seconds} sec`;
   }
   if (minutes > 0) {
-    return `${minutes}分 ${seconds}秒`;
+return `${minutes} min ${seconds} sec`;
   }
-  return `${seconds}秒`;
+return `${seconds} sec`;
 }
 
 export function summarizeRuntimeField(value) {
@@ -95,12 +95,12 @@ export function formatJobDuration(payload) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   if (hours > 0) {
-    return `${hours}小时 ${minutes}分 ${seconds}秒`;
+return `${hours} hours ${minutes} min ${seconds} sec`;
   }
   if (minutes > 0) {
-    return `${minutes}分 ${seconds}秒`;
+return `${minutes} min ${seconds} sec`;
   }
-  return `${seconds}秒`;
+return `${seconds} sec`;
 }
 
 export function summarizeInvocationProtocol(payload) {

@@ -90,7 +90,7 @@ def test_build_render_page_specs_uses_layout_block_protocol() -> None:
                     "lines": [{"text": "raw"}],
                     "source_text": "Raw CBFZ text with formula",
                     "protected_source_text": "Raw <f1-17a/> text",
-                    "protected_translated_text": "译文 <f1-17a/> 内容",
+"protected_translated_text": "translated text <f1-17a/> content",
                     "formula_map": [
                         {
                             "placeholder": "<f1-17a/>",
@@ -146,7 +146,7 @@ def test_build_render_page_specs_reports_progress_only_via_callback() -> None:
                     "block_type": "text",
                     "bbox": [10.0, 20.0, 180.0, 80.0],
                     "lines": [{"text": "raw"}],
-                    "translated_text": "第一页",
+                    "translated_text": "First page",
                 }
             ],
             1: [
@@ -156,7 +156,7 @@ def test_build_render_page_specs_reports_progress_only_via_callback() -> None:
                     "block_type": "text",
                     "bbox": [10.0, 20.0, 180.0, 80.0],
                     "lines": [{"text": "raw"}],
-                    "translated_text": "第二页",
+                    "translated_text": "Second page",
                 }
             ],
         }

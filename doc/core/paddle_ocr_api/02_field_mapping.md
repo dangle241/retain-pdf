@@ -1,63 +1,63 @@
 # 02 Field Mapping
 
-## 核心原则
+## Core principles
 
-映射时只问一件事：
+When mapping, only ask one thing:
 
-- 这个 Paddle 字段应该落到 `document.v1` 的哪一层
+- Which layer of document.v1 should this Paddle field map to?
 
-当前允许的落位层：
+Currently allowed placement layers:
 
-1. 核心结构层：`type/sub_type/bbox/text/lines/segments/tags/derived`
-2. 通用 trace 层：多个 provider 可能共用的 `metadata`
-3. provider raw trace 层：Paddle 私有字段，保留在 `metadata/source`
+1. Core structure layer:`type/sub_type/bbox/text/lines/segments/tags/derived`
+2. Common trace layer: shared metadata that may be supplied by multiple providers
+3. Provider raw trace layer: Paddle private fields, kept in metadata/source
 
-## 顶层映射
+## Top-level mapping
 
-| Paddle 字段 | `document.v1` 字段 | 说明 |
+| Paddle field | document.v1 field | Description |
 | --- | --- | --- |
-| provider 固定值 | `source.provider` | 当前固定为 `paddle` |
-| 输入文件路径 | `source.raw_files.source_json` | 由 adapter 外层注入 |
-| 页数 | `page_count` | 由 pages 数量确定 |
+| provider fixed value | `source.provider` | Currently set to `paddle` |
+| Enter file path | source.raw_files.source_json | Injected by adapter from outside |
+| Page count | page_count | Confirmed by pages |
 
-## 页面映射
+## Page mapping
 
-| Paddle 字段 | `document.v1` 字段 | 说明 |
+| Paddle field | document.v1 field | Description |
 | --- | --- | --- |
-| `dataInfo.pages[i].width` | `pages[i].width` | 首选 |
-| `dataInfo.pages[i].height` | `pages[i].height` | 首选 |
-| `prunedResult.width` | `pages[i].width` | 兜底 |
-| `prunedResult.height` | `pages[i].height` | 兜底 |
-| 页序号 | `pages[i].page_index` | 从 0 开始 |
-| 固定值 | `pages[i].unit` | 当前固定 `pt` |
+| `dataInfo.pages[i].width` | `pages[i].width` | Preferred |
+| dataInfo.pages[i].height | pages[i].height | Preferred |
+| `prunedResult.width` | `pages[i].width` | Fallback |
+| prunedResult.height | pages[i].height | Fallback |
+| Page number | pages[i].page_index | Starts from 0 |
+| Fixed value | pages[i].unit | Currently fixed to pt |
 
-## block 映射
+## Block mapping
 
-| Paddle 字段 | `document.v1` 字段 | 说明 |
+| Paddle field | document.v1 field | Description |
 | --- | --- | --- |
-| `block_bbox` | `bbox` | 归一化 bbox |
-| `block_content` | `text` | 归一化文本 |
-| `block_label` | `type/sub_type/tags` | 走 `block_labels.py` |
-| 行/段拆分结果 | `lines/segments` | 走 `content_extract.py` |
-| `block_id` | `source.raw_block_id` | 保留原始来源 |
-| `block_label` | `source.raw_type` | 保留原始类型 |
-| `block_bbox` | `source.raw_bbox` | 保留原始 bbox |
-| `block_content[:200]` | `source.raw_text_excerpt` | 排错用 |
-| 原始路径 | `source.raw_path` | 指向原始 JSON 路径 |
+| block_bbox | bbox | Normalized bbox |
+| `block_content` | `text` | Normalize Text |
+| block_label | type/sub_type/tags | Uses block_labels.py |
+| Lines/Segmentation result | lines/segments | Uses content_extract.py |
+| `block_id` | `source.raw_block_id` | Keep original source |
+| `block_label` | `source.raw_type` | Preserve original type |
+| block_bbox | source.raw_bbox | Keep original bbox |
+| `block_content[:200]` | `source.raw_text_excerpt` | Troubleshooting |
+| Original path | source.raw_path | Link to original JSON path |
 
-## 当前 label 映射
+## Current label mapping
 
-当前主要规则见：
+Current main rules see:
 
 - `backend/scripts/services/document_schema/provider_adapters/paddle/block_labels.py`
 
-已实现映射示例：
+Implemented mapping example:
 
 | `block_label` | `type` | `sub_type` | `tags` |
 | --- | --- | --- | --- |
 | `doc_title` | `text` | `title` | `title` |
 | `abstract` | `text` | `abstract` | `abstract` |
-| `text` | `text` | `body` | 空 |
+| `text` | `text` | `body` | empty |
 | `paragraph_title` | `text` | `heading` | `heading` |
 | `reference_content` | `text` | `reference_entry` | `reference_entry, reference_zone, skip_translation` |
 | `formula_number` | `text` | `formula_number` | `formula_number, skip_translation` |
@@ -66,13 +66,13 @@
 | `algorithm` | `code` | `code_block` | `code` |
 | `display_formula` | `formula` | `display_formula` | `formula` |
 
-## `derived` 映射
+## derived mapping
 
-当前 `derived` 主要由 provider 规则生成，见：
+Current derived is mainly composed of provider-generated rules, see:
 
 - `backend/scripts/services/document_schema/provider_adapters/paddle/trace.py`
 
-典型规则：
+Typical rules:
 
 - `doc_title -> derived.role = title`
 - `abstract -> derived.role = abstract`
@@ -80,8 +80,8 @@
 - `formula_number -> derived.role = formula_number`
 - `header/footer -> derived.role = header/footer`
 
-## 不要这么做
+## Do not do this
 
-1. 不要把 Paddle 私有字段直接塞成新的主契约字段。
-2. 不要在 translation 层再重新解释 `block_label`。
-3. 不要为了单个 fixture 临时改 `type/sub_type` 语义。
+1. Don't directly pack Paddle private fields into new main contract fields.
+2. Do not translation layer to re-interpret `block_label`。
+3. Don't add dependency for single use. fixture Temporary change `type/sub_type` Semantics.

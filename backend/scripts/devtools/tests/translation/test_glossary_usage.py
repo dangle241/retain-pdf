@@ -14,19 +14,19 @@ def test_summarize_glossary_usage_counts_hits_and_unapplied_terms() -> None:
         entries=[
             {"source": "band gap", "target": "带隙", "note": ""},
             {"source": "density of states", "target": "态密度", "note": "physics", "level": "preferred"},
-            {"source": "photocatalyst", "target": "光催化剂", "note": "", "level": "canonical"},
+            {"source": "photocatalyst", "target": "photocatalyst", "note": "", "level": "canonical"},
         ],
         translated_pages_map={
             0: [
                 {
                     "source_text": "The band gap and density of states were calculated.",
-                    "translated_text": "计算了带隙和 DOS。",
+                    "translated_text": "calculated band gap and DOS。",
                 }
             ],
             1: [
                 {
                     "translation_unit_protected_source_text": "The sample is a photocatalyst.",
-                    "translated_text": "该样品是一种催化剂。",
+                    "translated_text": "The sample is a catalyst.",
                 }
             ],
         },

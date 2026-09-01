@@ -1,452 +1,452 @@
 # Rust API Architecture
 
-这份文档只回答一个问题：
+This document answers only one question:
 
-**`rust_api` 现在的团队协作边界是什么，改哪里才是对的。**
+**`rust_api` Current team collaboration boundaries are unclear. Define module ownership and API contracts first. Update `CONTRIBUTING.md` with explicit interface rules.**
 
-不讲历史，不讲兼容迁移，默认只看当前主干代码。
+Current trunk only. No history. No migration.
 
-相关文档：
+Related documents:
 
-- 文档总入口：
+- Document entry point:
   [`README.md`](/home/wxyhgk/tmp/Code/backend/rust_api/README.md)
-- 目录地图：
+- Table of Contents:
   [`RUST_API_DIRECTORY_MAP.md`](/home/wxyhgk/tmp/Code/backend/rust_api/RUST_API_DIRECTORY_MAP.md)
-- 当前运行主链：
+- Current running main chain:
   [`CURRENT_API_MAP.md`](/home/wxyhgk/tmp/Code/backend/rust_api/CURRENT_API_MAP.md)
-- OCR provider 边界：
+- OCR provider boundary:
   [`OCR_PROVIDER_CONTRACT.md`](/home/wxyhgk/tmp/Code/backend/rust_api/OCR_PROVIDER_CONTRACT.md)
-- stage 运行时契约：
+- stage runtime contract:
   [`STAGE_EXECUTION_CONTRACT.md`](/home/wxyhgk/tmp/Code/backend/rust_api/STAGE_EXECUTION_CONTRACT.md)
-- Rust 侧 artifact boundary：
-  [`doc/core/rust_api/10-Rust 侧 Artifact Boundary.md`](/home/wxyhgk/tmp/Code/doc/core/rust_api/10-Rust%20%E4%BE%A7%20Artifact%20Boundary.md)
-- 外部 API 协议：
+- Rust-side artifact boundary:
+[`doc/core/rust_api/10-Rust ä¾§ Artifact Boundary.md`](/home/wxyhgk/tmp/Code/doc/core/rust_api/10-Rust%20%E4%BE%A7%20Artifact%20Boundary.md)
+- External API protocol:
   [`API_SPEC.md`](/home/wxyhgk/tmp/Code/backend/rust_api/API_SPEC.md)
 
-## 1. 总体分层
+## 1. Overall layering
 
-当前 `rust_api` 分成 6 层：
+Current `rust_api` Split 6 Layer:
 
 1. `app`
 2. `routes`
-3. `services` 中的 application 入口
-4. `services` 中的内部实现
+3. `services` application entry
+4. `services` Internal implementation
 5. `job_runner`
 6. `ocr_provider`
 
-依赖方向必须保持单向：
+Dependencies must be unidirectional:
 
 ```text
 app -> routes -> application services -> internal services -> job_runner / ocr_provider
 ```
 
-禁止反向依赖。
+No reverse dependencies.
 
-例如：
+For example:
 
-- `routes` 不应该知道 Python worker 命令怎么拼
-- `job_runner` 不应该知道 HTTP Header 和 JSON envelope
-- `ocr_provider` 不应该知道路由层返回结构
+- `routes` Should not know Python worker how to construct the command
+- `job_runner` should not know HTTP Header and JSON envelope
+- `ocr_provider` Route layer return structure unknown.
 
-## 1.1 `AppState` 允许出现的位置
+## 1.1 `AppState` Allowed locations
 
-`AppState` 不是通用依赖注入容器，当前只允许停留在这些位置：
+`AppState` Not general DI container. Only allow here:
 
 - `app/*`
-  负责组装和持有全局资源
-- `axum` route 入口函数
-  也就是 `State(AppState)` 解包的那一层
-- 少量边界层装配口
-  用来把 `AppState` 压缩成更窄的 deps 结构
-- 测试辅助代码
+  Assembles and holds global resources.
+- `axum` route Entry function
+  i.e. `State(AppState)` The unpacking layer.
+- Few boundary-layer assembly ports.
+  Used to `AppState` compress into a narrower deps Structure
+- Test helper code
 
-禁止直接把 `AppState` 往下传到：
+Forbid directly passing `AppState` Propagate to:
 
-- `services` 的业务实现主链
-- `job_runner` 的运行时主链
+- `services` Business implementation main chain
+- `job_runner` Runtime main chain
 - `ocr_provider`
-- presentation / view 组装层
+- presentation / view Assembly Layer
 
-如果某个模块需要资源，正确做法是：
+If a module requires resources, the correct approach is:
 
-1. 在边界层从 `AppState` 取出需要的字段
-2. 组装成显式 deps struct
-3. 业务模块只接收这个更窄的 deps
+1. At the boundary layer from `AppState` Extract required fields.
+2. Make explicit. deps struct
+3. Narrower interface only. deps
 
-当前已经固定的公共模式：
+Fixed public patterns:
 
 - `routes/common.rs`
-  负责 route 侧公共轻量 deps builder、`request_base_url(...)` 和 `ok_json(...)`
+responsible for route Common Lightweight Side deps builder, `request_base_url(...)` and `ok_json(...)`
   - `build_jobs_route_deps` → `JobsFacade`
-  - `build_library_route_deps` → `LibraryDeps` + `JobsFacade`（馆藏发起翻译等 library→job 场景）
+  - `build_library_route_deps` → `LibraryDeps` + `JobsFacade`(Collection initiates translation, etc.) library→job Scenario)
   - `build_glossary_route_deps` / `build_upload_route_deps` / `build_health_route_deps`
 - `routes/download_response.rs` / `routes/download_response/**`
-  负责文件下载、markdown、preview、cover、thumbnail 的 response boundary
+File downloadmarkdownãpreviewãcoverãthumbnail response boundary
 - `routes/jobs/json_response/**`
-  负责 jobs JSON 查询 / 调试 / 控制 / retry 的 response boundary
+responsible for jobs JSON query / debug / Control / retry response boundary
 - `app/jobs.rs::build_process_runtime_deps(...)`
-  负责 runner 装配
+responsible for runner Assembly
 
-其中 runner 侧规则已经固定为：
+including runner Side rules have been fixed as:
 
-- `job_runner` 只暴露 `ProcessRuntimeDeps::new(...)`
-- `AppState -> ProcessRuntimeDeps` 的装配责任留在 `app/*` 边界层
+- `job_runner` Expose Only `ProcessRuntimeDeps::new(...)`
+- `AppState -> ProcessRuntimeDeps` Assembly responsibility remains `app/*` boundary layer
 - `ProcessRuntimeDeps`
-  只保留 orchestrator 级入口使用
+  Keep only orchestrator Level Entry Usage
 - `JobPersistDeps`
-  负责 `db + data_root + output_root` 这组持久化/事件资源；叶子 helper 优先拿它，不再顺手拿整包 runtime deps
+responsible for `db + data_root + output_root` Persist This Group/Event Resource; Leaf helper Take this first; do not take whole package. runtime deps
 - `app/state.rs`
-  只负责 `AppState` 组装；启动期遗留 running 任务恢复已经下沉到 `app/state_recovery.rs`
+  Responsible only `AppState` Assembly; startup legacy running Task recovery has been pushed down to `app/state_recovery.rs`
 - `job_runner/lifecycle.rs`
-  只保留 runner 顶层编排；其中“queued 持久化/取消短路”和“按 workflow 分派执行”应继续保持为小 helper，而不是重新塞回一个大函数
+Keep only runner Top-level orchestration; among them "queued persistence/"Cancel Short-Circuit" and "Press" workflow Dispatch execution should remain small. helperrather than stuffing it back into a big function.
 
-不要再把 `AppState` 直接引进 `job_runner`。
+Stop. `AppState` Direct import. `job_runner`。
 
-禁止在每个 route 文件里重复手写一套局部 `route_deps(...)`。
+Forbid in each route File repeats a manually written set of locals. `route_deps(...)`。
 
-## 1.2 内部契约 vs 对外契约
+## 1.2 Internal contract vs External contract
 
-这条边界必须明确：
+This boundary must be clear:
 
 - `CreateJobInput` / `ResolvedJobSpec` / `JobSnapshot`
-  是**内部运行契约**
+is **Internal runtime contract**
 - `JobDetailView` / `JobEventListView` / `TranslationDiagnosticsView`
-  是**对外 API 契约**
+is **External API Contract**
 
-内部契约允许持有真实 credential：
+Internal contract allows holding real. credential：
 
 - `translation.api_key`
 - `ocr.mineru_token`
 - `ocr.paddle_token`
 
-但这些字段只能存在于：
+But these fields can only exist in:
 
-- 运行态内存
+- Runtime memory
 - SQLite job record
-- worker env 注入
-- stage spec 的 `credential_ref`
+- worker env Inject
+- stage spec's `credential_ref`
 
-禁止直接进入：
+No direct entry:
 
 - HTTP JSON response
-- 对外 diagnostics / replay / debug payload
+- external diagnostics / replay / debug payload
 - events API payload
 
-当前的安全适配层分两类：
+Current security adaptation layer has two types:
 
 1. `public_request_payload(...)`
-   负责把内部 `ResolvedJobSpec` 投影成对外可返回的 request payload
+   Responsible for internal `ResolvedJobSpec` Project to externally returnable. request payload
 2. `models/redaction.rs`
-   负责对任意字符串 / JSON payload 做统一脱敏
+   Handles any string / JSON payload Unified desensitization
 
-团队协作规则：
+Team Collaboration Rules:
 
-- 如果新增一个对外 view，先决定它消费的是内部契约还是对外契约
-- 任何从内部对象直接序列化到 HTTP 的改动，都默认视为错误
-- 新增 secret 字段时，必须同步更新 redaction 模块，而不是在路由里局部打补丁
+- If adding an external viewFirst determine whether it consumes an internal or external contract.
+- Any direct serialization from internal objects to HTTP All changes considered errors by default.
+- When adding new secret or updating fields, must sync updates. redaction Module, not local patches in routes.
 
-## 1.3 配置层边界
+## 1.3 Configuration layer boundary
 
-`src/config.rs` 是兼容 facade，保留当前 `AppConfig` 字段给既有调用方使用。真实配置分组在 `src/config/*`：
+`src/config.rs` Compatible. facadeKeep current `AppConfig` Field used by existing callers. Real config grouping in `src/config/*`：
 
 - `paths.rs`
-  只处理 root/data/scripts/jobs/uploads/downloads 这类路径和 runtime 目录创建。
+  Process only. root/data/scripts/jobs/uploads/downloads Such paths and runtime Create directory.
 - `auth.rs`
-  只处理 `auth.local.json`、API keys、并发数和 simple port。
+handles only `auth.local.json`, API keysConcurrency limit set. simple port.
 - `server.rs`
-  只处理 bind host、API port、Python binary。
+handles only bind host, API port, Python binary.
 - `upload.rs`
-  只处理全局上传大小/页数限制。
+  Only handle global upload size./Page limit.
 - `provider.rs`
-  只处理 MinerU / Paddle / DeepSeek provider runtime、HTTP timeout、retry 和 provider 上传门槛。
+handles only MinerU / Paddle / DeepSeek provider runtime, HTTP timeout, retry and provider Upload threshold.
 - `job_runner.rs`
-  只处理队列轮询、worker terminate、AI failure diagnosis、同步等待这类 runner 运行参数。
+  Process queue polling only,worker terminate、AI failure diagnosisSync wait use `await` not manual loops. runner Runtime parameters.
 - `env_vars.rs`
-  只放 env 读取 helper。
+only contains env Read helper.
 
-新增部署可调参数时，先判断属于哪个子模块，不要继续把 env 解析写回 `config.rs`。`config.rs` 只负责：
+When adding new deployment-tunable parameters, first determine which submodule they belong to; do not continue to env Parse Write Back `config.rs`。`config.rs` Responsible only for:
 
-1. `from_env()` 解析服务端环境来源
-2. `from_desktop()` 解析桌面端来源
-3. 通过内部 `AppConfigParts` 组装兼容的 `AppConfig`
+1. `from_env()` Parse server environment source
+2. `from_desktop()` Parse desktop source
+3. Internal `AppConfigParts` Assembly compatible `AppConfig`
 
-不要把以下内容配置化：
+Don't configure below.
 
 - API path
-- stage 名
+- stage name
 - artifact key / artifact group
 - schema version
 - stdout label
-- 对外 JSON 字段名
+- external JSON Field name
 
-这些是协议常量，不是部署参数。把它们做成 env 会让前端、Python worker、测试和历史 job 解释同时失去稳定锚点。
+These are protocol constants, not deployment parameters. Make them env Causes frontend,Python workerTest history. job Explain simultaneous loss of stable anchor points.
 
-## 1.4 架构门禁
+## 1.4 Architecture gate
 
-这套边界不只靠文档约定，还靠硬性检查：
+Boundaries enforced by hard checks, not just docs.
 
-- 本地命令：
+- Local Commands:
   `python3 backend/rust_api/scripts/check_architecture.py`
 - CI workflow：
   `.github/workflows/rust-api-architecture.yml`
 
-当前门禁最少覆盖：
+Current minimum door access coverage:
 
-- `AppState` 不允许回流到 `services/job_runner/ocr_provider` 主链
-- `routes` 不允许直接依赖 `job_runner`
-- `routes/jobs/*` 不允许重复定义局部 `route_deps(...)`
-- artifact / download 边界层不允许开始理解 provider raw 内部字段
-- published markdown artifact 不允许重新从 `provider_raw_dir/full.md` 或 `provider_raw_dir/images` 反推
+- `AppState` Not allowed to reflow to `services/job_runner/ocr_provider` Mainnet
+- `routes` Do not directly depend. `job_runner`
+- `routes/jobs/*` Local variable redefinition disallowed. `route_deps(...)`
+- artifact / download Boundary layer does not allow understanding to start. provider raw internal fields
+- published markdown artifact Not allowed to re-download. `provider_raw_dir/full.md` or `provider_raw_dir/images` reverse-derive
 
-如果后续要调整白名单，必须同步改脚本和这份文档，不能只改其中一个。
+If adjusting the whitelist later, update both the script and this document synchronously; do not update only one.
 
 ## 1.4 Artifact Boundary
 
-Rust 侧和产物直接相关的边界固定为四层：
+Rust The boundary directly related to the side and product is fixed at four layers:
 
 1. `provider raw`
 2. `normalized`
 3. `published artifact`
 4. `download API`
 
-依赖和职责必须保持单向：
+Dependencies and responsibilities must remain one-way:
 
 ```text
 provider raw -> normalized -> published artifact -> download API
 ```
 
-每层的最小定义：
+Minimum definition per layer:
 
 - `provider raw`
-  provider 原始结果快照，只用于保真、回溯、排错、normalize 输入
+  provider Raw result snapshot: fidelity, rollback, debug only.normalize Input
 - `normalized`
-  OCR 到翻译/渲染的统一文档契约
+  OCR to translation/Unified Rendering Document Contract
 - `published artifact`
-  Rust 对任务文件的 artifact key 注册、发现和导出层
+  Rust Task File artifact key Registration, Discovery, and Export Layer
 - `download API`
-  最外层 HTTP 下载暴露层
+  Outermost HTTP Expose layer download
 
-Rust 侧关键落点：
+Rust Side key placement:
 
 - [src/storage_paths.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/storage_paths.rs)
-  facade；现在已拆成 `constants / job_paths / path_ops / resolvers / registry`
+  facade; now split into `constants / job_paths / path_ops / resolvers / registry`
 - [src/services/artifacts/mod.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/artifacts/mod.rs)
-  artifact facade；现在已拆成 `registry / bundle / response`
+artifact facade; now split into `registry / bundle / response`
 - [src/routes/download_response.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/routes/download_response.rs)
-  负责文件下载、markdown、preview、cover、thumbnail 的 HTTP 响应出口
+responsible for file download, markdown, preview, cover, thumbnail HTTP Response Output
 - [src/routes/jobs/json_response](/home/wxyhgk/tmp/Code/backend/rust_api/src/routes/jobs/json_response)
-  负责 jobs JSON 查询 / 调试 / 控制 / retry 类 HTTP 响应出口
+responsible for jobs JSON query / debug / control / retry class HTTP response exit
 
-边界规则：
+Boundary rules:
 
-- `storage_paths.rs` 和 `services/artifacts/*`
-  只处理文件、artifact key、稳定资源，不解释 provider raw 内部 JSON 结构
+- `storage_paths.rs` and `services/artifacts/*`
+Process files only.artifact keystable resources, without parsing provider raw internal JSON structure
 - `db.rs`
-  现在也只保留 `Db` facade；row decode 和 schema 检查分别下沉到 `src/db/rows.rs`、`src/db/schema.rs`
+Now keep only. `Db` facade; row decode and schema Checks respectively pushed down to `src/db/rows.rs`, `src/db/schema.rs`
 - `routes/jobs/download.rs`
-  只暴露稳定下载入口，不承诺 provider 私有字段语义
+  Only expose stable download entry; no commitment. provider Private field semantics
 - `normalized-document` / `normalization-report`
-  属于 normalized 边界，不属于 provider raw
+belongs to normalized Boundary, not included provider raw
 - `provider_result_json` / `provider_raw_dir`
-  属于 provider raw 边界，只能作为显式 artifact 下载，不是统一文档接口
+belongs to provider raw Boundary: explicit only. artifact Download not unified document interface.
 - published markdown materialize
-  必须保留 provider 返回的图片相对路径语义；允许增加页作用域前缀，但不允许把内部路径模式固定改写成自定义目录规则
+  must retain provider Relative image path semantics; page-scope prefix may be added, but internal path patterns must not be fixedly rewritten to custom directory rules.
 
-快速判定：
+Quick judgment:
 
-- 如果一个改动要求下载层理解 `layoutParsingResults`、`prunedResult` 之类的 provider 字段名，说明边界已经穿透了
-- 如果一个改动只是新增 artifact key、调整资源路径、调整稳定下载入口，通常应该落在 published artifact 或 download API 层
+- If a change requires download-layer understanding. `layoutParsingResults`、`prunedResult` like that provider Field name, indicates boundary has been breached.
+- If a change only adds artifact keyResource path adjustment. Stable download entry adjustment. Place in build script or deployment manifest. published artifact or download API layer
 
 ## 1.4 Published Markdown Artifact Boundary
 
-这一条是最近重点收紧的边界：
+This is a boundary recently tightened as a key focus:
 
 - `provider_result_json`
 - `provider_raw_dir`
 
-属于 provider raw。
+belongs to provider raw.
 
 - `ocr/normalized/document.v1.json`
 
-属于 normalize 后的统一契约。
+belongs to normalize Unified contract thereafter.
 
 - `md/full.md`
 - `md/images/`
 - `markdown_bundle_zip`
 
-属于已经发布出来的 job artifact。
+Already released. job artifact。
 
-规则：
+Rules:
 
-1. `provider_raw_dir` 可以保留 provider 原始回包和调试材料。
-2. `provider_raw_dir` 不能被当成 published markdown artifact 的回退来源。
-3. `resolve_markdown_path()` / `resolve_markdown_images_dir()` 这类对外资源解析函数，只能解析 `job_root/md/*` 这类已发布路径。
-4. 如果某个 provider 将来要暴露 Markdown，应该显式新增一个 publish/materialize 步骤，而不是让下载层或 storage path 层去猜 provider raw 布局。
+1. `provider_raw_dir` can be retained provider Original response packets and debugging materials.
+2. `provider_raw_dir` Cannot be treated as published markdown artifact Fallback source.
+3. `resolve_markdown_path()` / `resolve_markdown_images_dir()` Resource resolution functions only parse external resources. `job_root/md/*` Published paths.
+4. If a certain provider To be exposed later. MarkdownExplicitly add one. publish/materialize Steps, not download layer or storage path Guess Layer provider raw Layout.
 
-补充约束：
+Constraints?
 
-- publish/materialize 可以做“防冲突包装”，例如多页任务下给图片路径增加 `page-N/`
-- markdown 内图片路径必须指向已发布目录 `md/images/`
-- 但不能重写 provider 返回的内部相对路径结构
-- 例如 Paddle 返回 `<img src="imgs/foo.jpg">` 时，发布后可以是 `images/page-6/imgs/foo.jpg`
-- 不能变成我们自定义拍板的固定模式，比如 `assets/foo.jpg` 或其他仓库私有命名
+- publish/materialize Can implement 'collision prevention packaging', e.g., append to image paths under multi-page tasks. `page-N/`
+- markdown Internal image paths must point to the published directory. `md/images/`
+- But must not rewrite provider Returned internal relative path structure
+- For example when Paddle returns `<img src="imgs/foo.jpg">`, after publishing, can be `images/page-6/imgs/foo.jpg`
+- Not our custom decision fixed pattern. `assets/foo.jpg` or other private repository naming
 
-这样做的原因很简单：
+The reason is simple:
 
-- provider raw 变化频繁
-- published artifact 是外部稳定下载口径
-- 两层一旦混在一起，`markdown_ready` 就会失真，下载接口也会和 provider 私有结构耦合
+- provider raw Frequent changes
+- published artifact External stable download metric.
+- Two layers mixed together. Refactor: separate.`markdown_ready` will become distorted, and the download interface will also provider Private structure coupling
 
-## 2. 模块职责
+## 2. Module responsibilities
 
 ### 2.1 `app/`
 
-文件：
+Files:
 
 - [src/app/mod.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/mod.rs)
 - [src/app/state.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/state.rs)
 - [src/app/router.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/router.rs)
 - [src/app/server.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/server.rs)
 
-职责：
+Responsibilities:
 
-- 组装 `AppState`
-- 启动 HTTP server
-- 挂载路由
-- 启动时恢复遗留 running job
+- Assemble `AppState`
+- Start HTTP server
+- Mount Routes
+- Restore legacy on startup running job
 
-不该做的事：
+Unnecessary code delete.
 
-- 不写业务校验
-- 不拼 job view
-- 不决定 worker workflow
+- Business validation omitted.
+- No input. job view
+- No decision made. worker workflow
 
 ### 2.2 `routes/`
 
-目录：
+Contents:
 
 - [src/routes](/home/wxyhgk/tmp/Code/backend/rust_api/src/routes)
 
-职责：
+Responsibilities:
 
-- HTTP 请求解析
-- Header / Query / Multipart 提取
-- 把请求转给 service
-- 返回统一 JSON / file response
+- HTTP Request Parsing
+- Header / Query / Multipart Extract
+- Forward request to service
+- Return Unified JSON / file response
 
-不该做的事：
+What not to do:
 
-- 不直接访问 SQLite 细节
-- 不自己读 artifacts 文件
-- 不自己拼 Python 命令
+- Do not access directly SQLite details
+- Read it yourself. artifacts files
+- Not your problem. Python Command
 
-当前路由已经统一收口到 application facade：
+All routes are now consolidated to application facade：
 
 - jobs → [src/services/jobs/facade.rs](src/services/jobs/facade.rs)
 - library → [src/services/library_api.rs](src/services/library_api.rs)
 - glossaries → [src/services/glossary_api.rs](src/services/glossary_api.rs)
 - uploads → [src/services/upload_api.rs](src/services/upload_api.rs)
 
-也就是：
+That is:
 
-- `routes/jobs/*` 只通过 response boundary 调 `JobsFacade`
+- `routes/jobs/*` Pass only response boundary call `JobsFacade`
 - `routes/library.rs` / `library_data.rs` / `library_extras.rs` / `collections.rs`
-  只调 `services/library_api.rs`（经 `build_library_route_deps`）
+  Adjust only `services/library_api.rs`(Classic `build_library_route_deps`）
 - `routes/common.rs`
-  只保留 route 侧公共 deps builder、base URL 和统一 HTTP envelope helper
+keep only route Side Public deps builder, base URL and unify HTTP envelope helper
 - `routes/download_response/**`
-  只保留文件响应出口
+  Keep only file response output.
 - `routes/jobs/json_response/**`
-  只保留 JSON 响应出口
+keep only JSON response exit
 - `routes/glossaries.rs`
-  只调 `services/glossary_api.rs`
+only calls `services/glossary_api.rs`
 - `routes/uploads.rs`
-  只调 `services/upload_api.rs`
+only calls `services/upload_api.rs`
 
-**Library route 文件分工（HTTP 边界，业务不进 route）：**
+**Library route File responsibilities (HTTP boundary, no business logic in route route）：**
 
-| Route 文件 | HTTP 面 |
+| Route file | HTTP surface |
 |------------|---------|
-| `library.rs` | books 列表/详情/删除、book cover/thumbnail |
+| `library.rs` | books List/Details/Deletebook cover/thumbnail |
 | `library_data.rs` | documents CRUD/media/translate、favorites、search |
 | `library_extras.rs` | assets、conversations |
-| `collections.rs` | 合集 CRUD 与文档成员 |
+| `collections.rs` | Collection CRUD and document members |
 
-快速判断：
+Quick judgment:
 
-- 要改 HTTP 入参/出参，先看 `routes/*`
-- 要改用例编排，先看 application service
-- 要改 provider / worker / stage 行为，不要先从 route 下手
+- Code review needed. Improve readability. HTTP Input parameters/Output params, check first `routes/*`
+- To switch to use case orchestration, first see. application service
+- To change provider / worker / stage Behavior, do not start from. route Start.
 
-### 2.3 `services/` 中的 application 入口
+### 2.3 `services/` application entry
 
-目录：
+Directory:
 
 - [src/services](src/services)
 
-职责：
+Responsibilities:
 
-- 给 route 提供稳定调用入口
-- 负责用例编排和返回对外 view
-- 屏蔽 `db/config/data_root/storage` 等资源拼装细节
+- to route Provide stable call entry.
+- Orchestrates test cases and returns external-facing responses. view
+- Block `db/config/data_root/storage` Pending resource assembly details.
 
-当前已经成型的 application 入口：
+Current finalized state. application Entry:
 
 - [src/services/jobs/facade.rs](src/services/jobs/facade.rs)
 - [src/services/library_api.rs](src/services/library_api.rs)
 - [src/services/glossary_api.rs](src/services/glossary_api.rs)
 - [src/services/upload_api.rs](src/services/upload_api.rs)
 
-规则：
+Rules:
 
-- route 优先只依赖这些入口
-- 不要让 route 直接再去拼 `db + config + helper + artifact service`
-- application service 内部如果继续长大，优先拆 facade 子模块或 deps 子结构，不要再回退成一个总入口文件加一个总 deps
-- library 域 DTO（`DocumentRecord`、favorites/search/collections 等）经
-  `models::api` 再导出；route 与 migrated `db/*` **不得** 直连 `models::library`
+- route Prioritize only these entry points.
+- Do not let route Retry directly. `db + config + helper + artifact service`
+- application service If internal grows, split first. facade Submodule or deps Substructure, do not revert to one main entry file plus one master. deps
+- library domain DTO（`DocumentRecord`、favorites/search/collections etc.) via
+`models::api` Re-export.route and migrated `db/*` **Forbidden** Direct connection `models::library`
 
 #### `services/library_api` + `services/library/*`
 
-模块化单体下的 Library 域（**不是**微服务拆分）：
+Under modular monolith Library Domain (**not** Microservice decomposition:
 
 ```text
 routes/library*.rs, collections.rs
-  → library_api (view 级 API)
+  → library_api (view level API)
       → services/library/*
            books | documents | media | translate
            favorites | search | assets | conversations | collections
-      → JobsFacade   (仅 translate-from-library 创建 job)
-      → derived_artifacts (仅 media 内部使用 cover/thumbnail)
+â JobsFacade   (only translate-from-library creates job)
+â derived_artifacts (media only Internal use only. cover/thumbnail)
 ```
 
 - [src/services/library_api.rs](src/services/library_api.rs)
-  route 唯一允许的 library service import
+  route the only permitted library service import
 - [src/services/library/](src/services/library/)
-  内部实现；`LibraryDeps` 持有 `db + data_root + output_root + downloads_dir + scripts_dir + python_bin`
-- 从馆藏发起翻译：`library/translate.rs` 绑定文档 upload 后只调用
-  `JobsFacade::create_submission`，不绕过 job 创建管线
-- 文件流式响应仍在 route：`stream_file` / download response；service 只返回路径或字节
+  Internal implementation.`LibraryDeps` Hold `db + data_root + output_root + downloads_dir + scripts_dir + python_bin`
+- Translate from Collection`library/translate.rs` Bind Document upload Then only call
+  `JobsFacade::create_submission`Do not bypass. job Create Pipeline
+- File streaming response still active. route：`stream_file` / download response；service /dev/null
 
-### 2.4 `services/` 中的内部实现
+### 2.4 `services/` Internal implementation in
 
-当前关键分工：
+Current key division of responsibilities:
 
 - [src/services/job_snapshot_factory.rs](src/services/job_snapshot_factory.rs)
-  负责 job snapshot / command 组装
+Responsible for job snapshot / command assembly
 - [src/services/job_launcher.rs](src/services/job_launcher.rs)
-  负责 job 持久化与执行启动
+Responsible for job Persistence and Startup Execution
 - [src/services/runtime_gateway.rs](src/services/runtime_gateway.rs)
-  负责 services 侧 runtime 能力收口
+Responsible for services-side runtime Capability consolidation
 - [src/services/jobs](src/services/jobs)
-  负责 jobs 相关业务
+Responsible for jobs Related Business
 - [src/services/library](src/services/library)
-  负责图书馆域业务（见 2.3）
+  Responsible for library domain business (see 2.3）
 - [src/services/book_projection](src/services/book_projection)
-  负责 library books 投影（由 `library/books` 调用）
+Responsible for library books Projection (by `library/books` Call)
 - [src/services/derived_artifacts](src/services/derived_artifacts)
-  负责 cover/thumbnail/page preview 等派生产物（由 library media / jobs downloads 调用，**不**被 route 直连）
+Responsible for cover/thumbnail/page preview Pending derivative (by library media / jobs downloads called,**No**by route Direct connection)
 
-其中 `services/jobs` 又拆成：
+Where `services/jobs` Split again into:
 
 - `creation`
 - `control`
@@ -457,158 +457,158 @@ routes/library*.rs, collections.rs
 
 #### `services/jobs/facade`
 
-文件：
+Files:
 
 - [src/services/jobs/facade.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs/facade.rs)
 - [src/services/jobs/facade/command](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs/facade/command)
 - [src/services/jobs/facade/query](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs/facade/query)
 
-职责：
+Responsibilities:
 
-- 给路由层提供统一入口
-- 屏蔽 `db/config/data_root` 等底层细节
-- 按 use case 继续拆成更小的 facade 子模块，而不是把所有入口堆回一个文件
-- 命令侧和查询侧依赖分离，避免一个总 deps 同时拖着 create/query/debug/download 一起膨胀
+- Provide unified entry point for routing layer.
+- Hide `db/config/data_root` Low-level details pending.
+- By use case continue splitting into smaller facade Submodules, not all entry points in one file.
+- Separate command and query dependencies to avoid a single monolithic dependency. deps Drag simultaneously. create/query/debug/download Inflate together
 
-规则：
+Rules:
 
-- 新增 job 路由能力，优先先加到 facade，再由 route 调用
-- 需要创建 / 取消类资源，优先放进 `CommandJobsDeps`
-- 需要查询 / 下载 / debug 类资源，优先放进 `QueryJobsDeps`
+- New job Add routing capability first. facadethen by route call
+- Need to create / Cancel class resources, prioritize placing into `CommandJobsDeps`
+- Query required / Download / debug Class resources, prioritize placing into. `QueryJobsDeps`
 
 #### `services/jobs/creation`
 
-目录：
+Directory:
 
 - [src/services/jobs/creation](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs/creation)
 
-职责：
+Responsibilities:
 
 - `submit.rs`
-  只负责“接收输入后创建并启动任务”
+  Only responsible for creating and starting tasks after receiving input.
 - `bundle.rs`
-  只负责“同步跑完整链路并产出下载 bundle”
+  Only: sync full chain, produce download. bundle”
 - `job_builders.rs`
-  只负责把输入解析成 `JobSnapshot`
+  Only responsible for parsing input into `JobSnapshot`
 - `upload.rs`
-  只负责 PDF 上传持久化和 upload record 读取
+Only responsible for PDF Upload persistence upload record reading
 - `context.rs`
-  只负责 creation 侧显式 deps
+Only responsible for creation Side Display deps
 
-规则：
+Rules:
 
-- 不要把“提交任务”和“同步打包”重新塞回一个文件
-- 不要在 facade 或 route 里重新拼 upload 存储细节
-- 新增 creation use case 时，优先先判断它属于 `submit`、`bundle`、`job_builders` 还是 `upload`
+- Do not put "submit task" and "sync bundle" back into a single file.
+- Don't include facade or route Reassemble inside upload Storage Details
+- New creation use case First, determine which category it belongs to. `submit`ã`bundle`ã`job_builders` or `upload`
 
 #### `services/jobs/presentation`
 
-目录：
+Directory:
 
 - [src/services/jobs/presentation](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs/presentation)
 
-职责：
+Responsibilities:
 
 - `views.rs`
-  负责 API view 组装
+Responsible for API view assembly
 - `summary_loaders.rs`
-  负责从 manifest / report / summary 文件读取摘要信息
+  Responsible from manifest / report / summary File Read Summary
 - `mod.rs`
-  负责 presentation 对外边界
+Responsible for presentation External Boundary
 
-规则：
+Rules:
 
-- 改 JSON 返回结构，优先改 `views.rs`
-- 改从磁盘补充的摘要字段，优先改 `summary_loaders.rs`
-- 不要把文件读取逻辑重新塞回 view 组装函数
+- Change JSON return structure, prefer to change `views.rs`
+- When modifying summary fields supplemented from disk, prefer to change `summary_loaders.rs`
+- Do not put file reading logic back into view Assemble function
 
 ### 2.5 `job_runner/`
 
-目录：
+Directory:
 
 - [src/job_runner](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner)
 
-职责：
+Responsibilities:
 
-- job 运行时调度
-- Python worker 启动
-- stdout/stderr 解析
-- 取消、超时、失败归因
-- OCR child job / translate / render 的运行链路
+- job Runtime Scheduling
+- Python worker startup
+- stdout/stderr parsing
+- Cancellation, Timeout, Failure Attribution
+- OCR child job / translate / render Execution path.
 
-当前拆分：
+Current split:
 
 - `lifecycle`
-  任务排队、取执行槽、按 workflow 分发
+Queue tasks, acquire execution slot, press workflow dispatch
 - `cancel_registry`
-  取消请求注册表
+  Cancel Request Registry
 - `execution_queue`
-  并发槽位等待
+  Concurrent slot wait
 - `worker_command`
-  stage command / stage spec / worker 入口命令统一工厂；这是 `services` 和 `job_runner` 共同依赖的中性契约层
+stage command / stage spec / worker Unified factory for entry commands; this is `services` and `job_runner` Neutral Contract Layer for Common Dependencies
 - `worker_process`
-  进程启动、环境注入、进程树终止
+  Process startup, environment injection, process tree termination.
 - `process_runner`
-  真实 worker 执行 orchestrator
+Real worker execution orchestrator
 - `process_runner/completion.rs`
-  cancel / success / shutdown noise / failed 的完成态归类与回填
+  cancel / success / shutdown noise / failed Completion status classification and backfill.
 - `process_runner/timeout_support.rs`
-  timeout 文案和 timeout failure 落态
+  timeout Copy and timeout failure Normal
 - `process_runner/failure_ai_diagnosis.rs`
-  失败 AI 诊断 request/response 与 event 记录
+Failed AI diagnosis request/response and event Record
 - `process_runner/io_support.rs`
-  stdout/stderr 消费与 cancel 期间的流读取策略；这里只再拿 `JobPersistDeps + canceled_jobs`
+  stdout/stderr Consumption & cancel Stream reading strategy during the interval; only fetch again here. `JobPersistDeps + canceled_jobs`
 - `runtime_state`
-  运行态 snapshot 变更
+  Runtime snapshot Change
 - `translation_flow`
-  translate / book 相关 orchestrator；只负责串 OCR child -> translate -> optional render
+translate / book related orchestratorOnly responsible for strings. OCR child -> translate -> optional render
 - `translation_flow_child.rs`
-  upload source 读取、父任务进入 `ocr_submitting`、OCR child 构造与 `ocr_child_created` 事件
+upload source Read, Enter Parent Task `ocr_submitting`ãOCR child Construction and `ocr_child_created` event
 - `translation_flow_stage.rs`
-  translate stage command 准备、`ocr_child_finished` 事件、translate 后 render stage 准备
+translate stage command preparation,`ocr_child_finished` Events,translate after render stage preparation
 - `translation_flow_support.rs`
-  OCR 终态判定、translate 输入提取这类纯规则辅助
+  OCR Final state determination,translate Input extraction: pure rule-based assistance.
 - `render_flow`
-  render-only 链路
+  render-only Link
 - `ocr_flow`
-  OCR provider 运行链路
+  OCR provider Execution path
 - `ocr_flow/support.rs`
-  OCR job 保存、parent OCR 状态镜像、transport/source-pdf 失败处理、`sync_parent_with_ocr_child(...)`
+  OCR job Saveparent OCR Status Mirror,transport/source-pdf Failure handling`sync_parent_with_ocr_child(...)`
 - `ocr_flow/workspace.rs`
-  只负责 OCR workspace 路径与目录准备；现在只拿 `output_root`
+Only responsible for OCR workspace path and directory preparation; now only takes `output_root`
 - `ocr_flow/polling.rs`
-  只负责轮询等待与 cancel 检查；`should_stop_polling(...)` 现在只拿 cancel handle
+  Only responsible for polling wait and cancel Check;`should_stop_polling(...)` Now only take. cancel handle
 - `stdout_parser`
-  stdout 解析 facade
+stdout parsing facade
 - `stdout_parser/labels.rs` / `state.rs` / `stage_rules.rs` / `artifact_rules.rs` / `failure.rs`
-  stdout 行标签、共享解析状态、stage/artifact/failure 规则
+  stdout Row label, shared parse state,stage/artifact/failure Rules
 
 #### `worker_command`
 
-目录：
+Directory:
 
 - [src/worker_command](/home/wxyhgk/tmp/Code/backend/rust_api/src/worker_command)
 
-职责：
+Responsibilities:
 
 - `stage_specs.rs`
-  写 `provider/normalize/translate/render` 的 spec 文件
+Writes spec files for `provider/normalize/translate/render`
 - `entrypoints.rs`
-  选 Python 脚本入口，拼入口参数
+  select Python Script entry: assemble entry parameters.
 - `command_builder.rs`
-  只做命令行构建细节
+  Command-line build details only.
 - [src/worker_command.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/worker_command.rs)
-  只保留对外 `build_*` facade
+  Keep external only `build_*` facade
 
-规则：
+Rules:
 
-- 改 spec 字段，改 `stage_specs.rs`
-- 改 worker 入口脚本，改 `entrypoints.rs`
-- 不要在 facade 层重新写 JSON
+- Change spec Field, Edit `stage_specs.rs`
+- Change worker Entry script, modify. `entrypoints.rs`
+- Do not Rewrite layer JSON in facade
 
 #### `job_runner/process_runner`
 
-文件：
+Files:
 
 - [src/job_runner/process_runner.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/process_runner.rs)
 - [src/job_runner/process_runner/startup.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/process_runner/startup.rs)
@@ -618,88 +618,88 @@ routes/library*.rs, collections.rs
 - [src/job_runner/process_runner/failure_ai_diagnosis.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/process_runner/failure_ai_diagnosis.rs)
 - [src/job_runner/process_runner/io_support.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/process_runner/io_support.rs)
 
-职责：
+Responsibilities:
 
 - `process_runner.rs`
-  只保留 worker 执行 orchestrator
+Only keep worker execution orchestrator
 - `startup.rs`
-  处理 worker 启动、pid 持久化和启动后取消短路；只拿 `JobPersistDeps + canceled_jobs + WorkerProcessRuntimeConfig`
+  No source text provided. Send Chinese source for translation. worker Start,pid Persist and cancel short-circuit after startup; only take. `JobPersistDeps + canceled_jobs + WorkerProcessRuntimeConfig`
 - `execution.rs`
-  处理 stdout/stderr task、进程等待和 timeout 分流；只拿 `JobPersistDeps + canceled_jobs + WorkerProcessRuntimeConfig`
+Handles stdout/stderr taskProcess waits on signal. timeout Diversion; take only. `JobPersistDeps + canceled_jobs + WorkerProcessRuntimeConfig`
 - `completion.rs`
-  处理 timeout 之外的完成态归类、shutdown noise 成功判定、failure 回填
+Handles timeout Final state classification excluded.shutdown noise Success determination,failure Backfill
 - `timeout_support.rs`
-  处理 timeout 失败落态；只拿 `JobPersistDeps + project_root`
+Handles timeout Failure fallback state; fetch only. `JobPersistDeps + project_root`
 - `failure_ai_diagnosis.rs`
-  处理 AI 辅助失败诊断
+Handles AI Failure Diagnosis Assistance
 - `io_support.rs`
-  处理 stdout/stderr 消费和 cancel 特判；叶子 helper 不再拿整包 `ProcessRuntimeDeps`
+Handles stdout/stderr Consumption and cancel Special case; leaf helper Discard entire package. `ProcessRuntimeDeps`
 
-规则：
+Rules:
 
-- 不在这里写新的命令构建逻辑
-- 不在这里维护取消注册表
-- 不在这里决定执行槽策略
+- Don't write new command build logic here.
+- Unregister table not maintained here.
+- Do not decide execution slot policy here.
 - `execute_process_job(...)`
-  可以保留整包 `ProcessRuntimeDeps`，但下传到叶子 helper 前必须转换成 `persist`、cancel handle 或窄 config projection
+  Keep entire package. `ProcessRuntimeDeps`but pass down to leaf helper Must be converted before. `persist`、cancel handle or narrow config projection
 - `spawn_worker_process(...)` / `spawn_started_process(...)` / `collect_process_execution(...)` / `read_stdout(...)`
-  这类叶子 helper 应只拿自己真正需要的 config / persist / cancel 依赖
+  These leaves helper Take only what you truly need. config / persist / cancel Dependencies
 
 #### `job_runner` Stop Line
 
-最后一轮去耦合做到这里就应该停止：
+The final round of decoupling should stop here:
 
-- orchestrator 级入口继续拿 `ProcessRuntimeDeps`
-- 叶子 helper 改拿 `JobPersistDeps`、`&Db`、窄 config projection 或 cancel handle
-- 不再继续把 orchestrator 再拆成更多跨文件小函数
-- 不再为了少传 1-2 个字段继续引入 trait / wrapper / facade
+- orchestrator Continue taking at level entrance. `ProcessRuntimeDeps`
+- Leaf helper Change to Take `JobPersistDeps`ã`&Db`Narrow config projection or cancel handle
+- Stop. orchestrator further split into more small functions across files
+- Stop sending data unnecessarily. 1-2 Add field. Confirm necessity. trait / wrapper / facade
 
 #### `job_runner/translation_flow_*`
 
-文件：
+Files:
 
 - [src/job_runner/translation_flow.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/translation_flow.rs)
 - [src/job_runner/translation_flow_child.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/translation_flow_child.rs)
 - [src/job_runner/translation_flow_stage.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/translation_flow_stage.rs)
 - [src/job_runner/translation_flow_support.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/translation_flow_support.rs)
 
-职责：
+Responsibilities:
 
 - `translation_flow.rs`
-  只保留 parent translation job 的 orchestrator。
+Keep only the parent translation job orchestrator.
 - `translation_flow_child.rs`
-  负责 upload source 读取、parent 进入 `ocr_submitting`、OCR child job 创建与 `ocr_child_created` 事件。
+Handles upload source read, parent enter `ocr_submitting`, OCR child job create, and `ocr_child_created` events.
 - `translation_flow_stage.rs`
-  负责 OCR child 结束事件、translate stage command 准备、translate 后 render stage 准备。
+Handles OCR child end event, translate stage command preparation, and render stage prepare after translation.
 - `translation_flow_support.rs`
-  负责 `finalize_parent_after_ocr(...)`、`translation_inputs_from_artifacts(...)` 这类纯规则辅助。
+Handles `finalize_parent_after_ocr(...)`, `translation_inputs_from_artifacts(...)` pure rule assistance.
 
-规则：
+Rules:
 
-- 不在 orchestrator 里重复堆 OCR child 构造细节
-- 不在 support helper 里做持久化入口选择
-- translate/render 的 command 改写统一收口在 stage helper
+- Do not duplicate heap inside orchestrator. OCR child construction details.
+- Do not select persistence entry point within support helper.
+- Consolidate translate/render command rewrites in stage helper.
 
 #### `job_runner/ocr_flow/*`
 
-文件：
+Files:
 
 - [src/job_runner/ocr_flow/mod.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/ocr_flow/mod.rs)
 - [src/job_runner/ocr_flow/support.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/ocr_flow/support.rs)
-- 以及 `transport / polling / mineru / paddle / artifacts / provider_result / workspace / markdown_bundle / bundle_download / status / page_subset / mineru_retry / mineru_polling / paddle_markdown`
+- And `transport / polling / mineru / paddle / artifacts / provider_result / workspace / markdown_bundle / bundle_download / status / page_subset / mineru_retry / mineru_polling / paddle_markdown`
 
-职责：
+Responsibilities:
 
 - `ocr_flow/mod.rs`
-  只保留 OCR orchestrator，串 transport -> normalize -> process runner。
+Keep only the OCR orchestrator: string transport -> normalize -> process runner.
 - `ocr_flow/support.rs`
-  负责 OCR job 保存、parent OCR 状态镜像、transport/source-pdf 失败处理、`sync_parent_with_ocr_child(...)`。
-- 其他子文件
-  分别处理 provider transport、轮询、下载、raw 结果落位、markdown materialize、workspace 和状态回填。
+Handles OCR job saving, parent OCR status mirroring, transport/source-pdf failure handling, `sync_parent_with_ocr_child(...)`.
+- Other subfiles
+  Process separately. provider transportPoll. Download.raw Result placement,markdown materialize、workspace and status backfill.
 
 #### `job_runner/stdout_parser/*`
 
-文件：
+Files:
 
 - [src/job_runner/stdout_parser/mod.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/stdout_parser/mod.rs)
 - [src/job_runner/stdout_parser/labels.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/stdout_parser/labels.rs)
@@ -708,40 +708,40 @@ routes/library*.rs, collections.rs
 - [src/job_runner/stdout_parser/artifact_rules.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/stdout_parser/artifact_rules.rs)
 - [src/job_runner/stdout_parser/failure.rs](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/stdout_parser/failure.rs)
 
-职责：
+Responsibilities:
 
 - `mod.rs`
-  facade；按行调用 artifact/stage 规则。
+  facadecall per line artifact/stage rules.
 - `labels.rs`
-  stdout contract 标签常量。
+  stdout contract Label constants.
 - `state.rs`
-  artifact/provider diagnostics 共享解析状态。
+  artifact/provider diagnostics Shared parsing state.
 - `stage_rules.rs`
-  stage/progress 相关规则。
+  stage/progress Related rules.
 - `artifact_rules.rs`
-  artifact/metric 相关规则。
+Rules related to artifact/metric.
 - `failure.rs`
-  provider failure 归因与 detail 提取。
+  provider failure Attribution and detail extraction.
 
 ### 2.5 `ocr_provider/`
 
-目录：
+Directory:
 
 - [src/ocr_provider](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider)
 
-职责：
+Responsibilities:
 
-- Provider transport 抽象
-- MinerU / Paddle 的客户端、状态映射、错误归类
+- Provider transport Abstraction
+- MinerU / Paddle Client, state mapping, error classification
 
-规则：
+Rules:
 
-- 这里只处理 provider 通信和 provider 语义
-- 不处理翻译、渲染、HTTP 返回结构
+- Handle only here. provider Communication and provider Semantics
+- No handling translation renderHTTP Response structure
 
-## 3. 当前主调用链
+## 3. Current main call chain
 
-主链：
+Mainnet
 
 1. `POST /api/v1/jobs`
 2. `routes/jobs/create.rs`
@@ -754,113 +754,113 @@ routes/library*.rs, collections.rs
 9. `job_runner/process_runner.rs`
 10. Python worker
 
-也就是：
+That is:
 
-- route 只进 facade
-- facade 只进 service
-- service 只进 runner
+- route Input only facade
+- facade only calls service
+- service only calls runner
 
-## 4. 团队协作红线
+## 4. Team collaboration red lines
 
-下面这些是硬约束：
+Hard constraints:
 
-### 红线 1
+### Red line 1
 
-`routes/*` 不直接读：
+`routes/*` Don't read directly:
 
 - `Db`
 - `job_paths`
-- manifest/report JSON 文件
-- Python worker 命令细节
+- manifest/report JSON files
+- Python worker Command Details
 
-### 红线 2
+### Red line 2
 
-`job_runner/*` 不依赖：
+`job_runner/*` No dependencies:
 
 - `axum`
 - `HeaderMap`
 - HTTP response model
 
-### 红线 3
+### Red line 3
 
-`ocr_provider/*` 不做：
+`ocr_provider/*` Do not:
 
-- job view 组装
-- 翻译策略
-- 渲染策略
+- job view assembly
+- Translation Strategy
+- Rendering Strategy
 
-### 红线 4
+### Red line 4
 
-如果一个改动同时要碰：
+If a change involves both:
 
 - route
 - service
 - runner
 
-先停一下，先问是不是边界放错了。
+Pause. Check boundary placement.
 
-### 红线 5
+### Red line 5
 
-新增文件读取摘要逻辑，优先放：
+Add file read summary logic, place first:
 
 - `services/jobs/presentation/summary_loaders.rs`
 
-不要散落到：
+Do not scatter
 
 - route
 - facade
 - `views.rs`
 
-## 5. 改动指南
+## 5. Change Guide
 
-### 场景 1：新增一个 jobs 查询接口
+### Scenario 1Add a new jobs Query API
 
-改动顺序：
+Change order:
 
 1. `routes/jobs/*`
 2. `services/jobs/facade.rs`
-3. `services/jobs/query.rs` 或 `presentation/*`
+3. `services/jobs/query.rs` or `presentation/*`
 
-不要直接从 route 跨过 facade 去摸底层。
+Don't translate from route Step over facade access the underlying layers.
 
-### 场景 2：新增一个 worker stage spec 字段
+### Scenario 2: Add a worker stage spec field
 
-改动顺序：
+Change order:
 
 1. `worker_command/stage_specs.rs`
 2. Python `stage_specs` loader
-3. 对应 worker 消费逻辑
+3. Corresponding worker Consumption Logic
 
-不要在 route/service 层补临时参数。
+Do not add temporary parameters to layer in route/service.
 
-### 场景 3：新增一个 provider
+### Scenario 3: Add a provider
 
-改动顺序：
+Change order:
 
 1. `ocr_provider/<provider>/`
 2. `job_runner/ocr_flow/*`
 3. Python provider pipeline
 
-不要把 provider 判断散落到 route 或 facade。
+Don't scatter provider determination across route or facade.
 
-### 场景 4：调整 job detail 返回字段
+### Scenario 4: Adjust job detail return fields
 
-改动顺序：
+Change order:
 
 1. `services/jobs/presentation/views.rs`
-2. 如果字段来自磁盘摘要，再改 `summary_loaders.rs`
+2. If field from disk summary, modify again. `summary_loaders.rs`
 
-## 6. 当前建议
+## 6. Current recommendation
 
-如果后面继续重构，优先级建议是：
+If further refactoring, priority suggestions:
 
-1. 给 `services/jobs` 增加更明确的 request/response DTO 边界
-2. 给 `job_runner` 增加 stage execution contract 文档
-3. 给 `ocr_provider` 定统一 trait / capability contract
+1. Give `services/jobs` clearer request/response DTO boundaries
+2. Give `job_runner` stage execution contract documentation
+3. Unify trait / capability contract for `ocr_provider`
 
-但当前这一版已经足够支撑多人并行开发，前提是遵守上面的依赖方向和红线。
+Current version already supports parallel development, provided the above dependency directions and red lines are adhered to.
 
-相关补充文档：
+Relevant supplementary documentation:
 
 - [`STAGE_EXECUTION_CONTRACT.md`](/home/wxyhgk/tmp/Code/backend/rust_api/STAGE_EXECUTION_CONTRACT.md)
 - [`OCR_PROVIDER_CONTRACT.md`](/home/wxyhgk/tmp/Code/backend/rust_api/OCR_PROVIDER_CONTRACT.md)

@@ -1,4 +1,4 @@
-// 底栏：页码（可点跳转）+ 缩放 +/- / 模式默认重置。
+// Bottom bar: page number (clickable to jump)+ Zoom +/- / Mode reset to default.
 
 import { useEffect, useState } from "react";
 import {
@@ -18,7 +18,7 @@ export type ReaderZoomHudProps = {
   currentPage: number;
   numPages: number;
   onGoToPage?: (page: number) => void;
-  /** 点百分比时重置到该模式默认缩放 */
+  /** Reset to default zoom for mode on percentage click. */
   mode?: ReaderZoomMode | string;
 };
 
@@ -30,12 +30,12 @@ export function ReaderZoomHud({
   onGoToPage,
   mode = "compare",
 }: ReaderZoomHudProps) {
-  // zoom 本身就是「占阅读区全宽的比例」：0.5→50%，1→100%
+  // zoom Is inherently「Ratio of full reading area width」：0.5→50%，1→100%
   const percent = zoomToDisplayPercent(userZoom);
   const canZoomOut = userZoom > READER_ZOOM_MIN + 0.001;
   const canZoomIn = userZoom < READER_ZOOM_MAX - 0.001;
   const resetZoom = defaultZoomForMode(mode);
-  const resetLabel = "50%（半屏，对照铺满）";
+  const resetLabel = "50%Half-screen layout contrast full-screen. Simplify: remove half-screen option, use full-screen only.";
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(`${currentPage}`);
@@ -57,7 +57,7 @@ export function ReaderZoomHud({
 
   return (
     <div className="reader-react-hud" data-reader-hud="true">
-      <div className="reader-react-hud-group" aria-label="页码">
+      <div className="reader-react-hud-group" aria-label="page number">
         {editing ? (
           <form
             className="reader-react-hud-page-form"
@@ -71,7 +71,7 @@ export function ReaderZoomHud({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              aria-label="跳转到页码"
+              aria-label="Redirect"
               value={draft}
               autoFocus
               onChange={(event) => setDraft(event.target.value.replace(/[^\d]/g, ""))}
@@ -90,8 +90,8 @@ export function ReaderZoomHud({
           <button
             type="button"
             className="reader-react-hud-page reader-react-hud-page-btn"
-            aria-label={numPages > 0 ? `跳转页码，当前第 ${currentPage} 页，共 ${numPages} 页` : "页码"}
-            title={numPages > 0 ? "点击输入页码跳转" : undefined}
+aria-label={numPages > 0 ? `Jump to read original ${currentPage} pages, total ${numPages} pages` : "Page number"}
+            title={numPages > 0 ? "Click to enter page number to jump" : undefined}
             disabled={!onGoToPage || numPages <= 0}
             onClick={() => {
               if (!onGoToPage || numPages <= 0) return;
@@ -105,11 +105,11 @@ export function ReaderZoomHud({
           </button>
         )}
       </div>
-      <div className="reader-react-hud-group" aria-label="缩放">
+<div className="reader-react-hud-group" aria-label="Zoom">
         <button
           type="button"
           className="reader-react-hud-btn"
-          aria-label="缩小"
+          aria-label="Shrink → skipped: detailed logic, add when needed."
           disabled={!canZoomOut}
           onClick={() => onZoomChange(stepReaderZoom(userZoom, -1))}
         >
@@ -118,7 +118,7 @@ export function ReaderZoomHud({
         <button
           type="button"
           className="reader-react-hud-btn reader-react-hud-zoom-label"
-          aria-label={`重置为${resetLabel}`}
+          aria-label={`reset to${resetLabel}`}
           title={resetLabel}
           onClick={() => onZoomChange(resetZoom)}
         >
@@ -127,14 +127,14 @@ export function ReaderZoomHud({
         <button
           type="button"
           className="reader-react-hud-btn"
-          aria-label="放大"
+          aria-label="Zoom In"
           disabled={!canZoomIn}
           onClick={() => onZoomChange(stepReaderZoom(userZoom, 1))}
         >
           +
         </button>
       </div>
-      <div className="reader-react-hud-group reader-react-hud-help" aria-label="帮助">
+      <div className="reader-react-hud-group reader-react-hud-help" aria-label="Help">
         <ReaderShortcutsHelp />
       </div>
     </div>

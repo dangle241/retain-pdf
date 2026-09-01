@@ -1,15 +1,15 @@
-# API 文档
+# API documentation
 
-当前统一入口是：
+Current unified entry:
 
-- [RetainPDF 后端 API 总入口](./index.md)
+- RetainPDF backend API entry
 
-以后新增或修改对外 API，优先更新 `index.md`。其它文件只作为专题页或历史兼容入口。
+Future external additions or modifications. APIUpdate first. `index.md`Other files serve as special-topic pages or legacy compatibility entry points.
 
-## 专题页
+## Topic page
 
-- [本地启动与配置](./local-dev.md)
-- [存储结构](./storage.md)
+- Local startup and configuration
+- [Storage Structure](./storage.md)
 - [Reader AI Chat](./reader-ai-chat.md)
-- [错误排查](./troubleshooting.md)
-- [Rust API 架构边界](../rust_api/README.md)
+- [Troubleshooting](./troubleshooting.md)
+- [Rust API Architectural Boundary](../rust_api/README.md)

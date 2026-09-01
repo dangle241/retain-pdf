@@ -212,7 +212,7 @@ export function mountAppActionsFeature({
       const label = typeof configPort.apiBaseLabel === "function"
         ? configPort.apiBaseLabel()
         : configPort.apiBaseLabel;
-      const message = `当前前端无法连接后端。API Base: ${label}。请确认本地服务已经启动，然后重试。`;
+      const message = `The current frontend cannot connect to the backend.API Base: ${label}Confirm local service is running, then retry.`;
       setText("error-box", message);
       throw new Error(message);
     }

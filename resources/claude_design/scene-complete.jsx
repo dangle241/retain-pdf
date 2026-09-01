@@ -1,7 +1,7 @@
 // scene-complete.jsx
 // 3 substeps: publish, summary, download.
 
-// ── 4.1 产物发布 ──────────────────────────────────────────────────────────
+// ── 4.1 Release artifacts ──────────────────────────────────────────────────────────
 function ScenePublish({ progress }) {
   // PDF artifact card flies in and gets a "Published" stamp.
   const cardP = animate({ from: 0, to: 1, start: 0.05, end: 0.4, ease: Easing.easeOutCubic })(progress);
@@ -31,7 +31,7 @@ function ScenePublish({ progress }) {
             <div style={{
               fontFamily: SANS, fontSize: 18, fontWeight: 600, color: INK,
               letterSpacing: '-0.01em', marginBottom: 4,
-            }}>保留排版的文档翻译方法综述</div>
+}}>Formatting-Preserving Document Translation: A Review</div>
             <div style={{
               fontFamily: MONO, fontSize: 11, color: FAINT,
             }}>output_zh.pdf · 12 pages · 3.1 MB</div>
@@ -101,15 +101,15 @@ function RegistryRow({ icon, name, meta, check }) {
   );
 }
 
-// ── 4.2 写 summary ────────────────────────────────────────────────────────
+// ââ 4.2 Write summary ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function SceneSummary({ progress }) {
   // A summary card with stats appearing line by line.
   const stats = [
     { label: '页数', value: '12', detail: 'pages' },
-    { label: '字数', value: '8,420', detail: 'words translated' },
-    { label: '段落', value: '87', detail: 'paragraphs · cross-flow merged' },
+    { label: 'Character count', value: '8,420', detail: 'words translated' },
+    { label: 'Paragraph', value: '87', detail: 'paragraphs · cross-flow merged' },
     { label: '图表', value: '6', detail: 'figures preserved' },
-    { label: '表格', value: '3', detail: 'tables · cell-by-cell' },
+    { label: 'Table', value: '3', detail: 'tables · cell-by-cell' },
     { label: '乱码修复', value: '14', detail: 'unicode fixes' },
     { label: '耗时', value: '2 分 47 秒', detail: 'wall-clock' },
     { label: '体积', value: '28.4 → 3.1 MB', detail: 'compressed 89%' },
@@ -127,11 +127,11 @@ function SceneSummary({ progress }) {
           fontFamily: SANS, fontSize: 38, fontWeight: 700,
           color: INK, letterSpacing: '-0.025em', lineHeight: 1.1,
           marginBottom: 18,
-        }}>翻译完成</div>
+        }}>Translation complete.</div>
         <div style={{
           fontFamily: SANS, fontSize: 14, color: FAINT, lineHeight: 1.6,
         }}>
-          已生成保留排版的中文版 PDF。可下载产物、查看运行日志，或导出 Typst 源文件继续编辑。
+          Generated Chinese version with formatting preserved. PDFDownload artifacts. View logs. Export. Typst source file for further editing.
         </div>
 
         {/* Sparkle / signature */}
@@ -185,7 +185,7 @@ function SceneSummary({ progress }) {
   );
 }
 
-// ── 4.3 可下载 ────────────────────────────────────────────────────────────
+// ── 4.3 Downloadable ────────────────────────────────────────────────────────────
 function SceneDownload({ progress }) {
   // Big download button activates and pulses; PDF preview behind.
   const buttonReveal = animate({ from: 0, to: 1, start: 0.0, end: 0.3, ease: Easing.easeOutBack })(progress);
@@ -233,7 +233,7 @@ function SceneDownload({ progress }) {
               strokeLinecap="round" strokeLinejoin="round" />
             <path d="M4 17 H18" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          <span>下载 output_zh.pdf</span>
+<span>Download output_zh.pdf</span>
           <span style={{
             fontFamily: MONO, fontSize: 12, fontWeight: 400,
             color: '#a8a8ad',
@@ -307,7 +307,7 @@ function SceneDownload({ progress }) {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: SANS, fontSize: 13, fontWeight: 600 }}>
-              已下载 · output_zh.pdf
+              Downloaded · output_zh.pdf
             </div>
             <div style={{ fontFamily: MONO, fontSize: 10, color: '#a8a8ad', marginTop: 2 }}>
               ~/Downloads · 3.1 MB
@@ -315,7 +315,7 @@ function SceneDownload({ progress }) {
           </div>
           <div style={{
             fontFamily: SANS, fontSize: 12, color: '#a8a8ad',
-          }}>打开</div>
+}}>Open</div>
         </div>
       )}
     </div>

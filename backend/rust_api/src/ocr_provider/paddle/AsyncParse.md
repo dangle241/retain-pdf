@@ -1,30 +1,30 @@
-# PaddleOCR-VL-1.5 服务化部署调用示例及 API 介绍：
+# PaddleOCR-VL-1.5 Service deployment call examples and API Introduction:
 
 > 
 > 
 > 
-> [PaddleOCR 开源项目 GitHub 地址](https://github.com/PaddlePaddle/PaddleOCR/tree/release/3.3)，本服务**基于该开源项目的 PaddleOCR-VL 模型构建**。
+> [PaddleOCR 开源项目 GitHub 地址](https://github.com/PaddlePaddle/PaddleOCR/tree/release/3.3)Service main file**Based on this open-source project PaddleOCR-VL Model building**。
 > 
-> **版本说明**：PaddleOCR 官网当前对应的 **PaddleX 版本为 3.4.0**，**PaddlePaddle 版本为 3.2.1**。
+> **Release Notes**: PaddleOCR currently corresponds to the official website **PaddleX version 3.4.0**, **PaddlePaddle version 3.2.1**.
 > 
 
-## 1. PaddleOCR-VL-1.5 介绍
+## 1. PaddleOCR-VL-1.5 Introduction
 
-2026年1月29日，我们在PaddleOCR-VL的基础上发布了**PaddleOCR-VL-1.5**。PaddleOCR-VL-1.5不仅以94.5%精度大幅刷新了评测集OmniDocBench v1.5，更创新性地支持了异形框定位，使得PaddleOCR-VL-1.5 在扫描、倾斜、弯折、屏幕拍摄及复杂光照等真实场景中均表现优异。此外，模型还新增了印章识别与文本检测识别能力，关键指标持续领跑。
+2026year1Month29Day, we arePaddleOCR-VLreleased on the basis of**PaddleOCR-VL-1.5**。PaddleOCR-VL-1.5Not only94.5%Accuracy significantly refreshed on evaluation set.OmniDocBench v1.5Shape-aware bounding box positioning supported.PaddleOCR-VL-1.5 Excels in real-world scenarios: scanning, skewing, bending, screen capture, complex lighting. Adds seal recognition and text detection/recognition. Key metrics lead.
 
-### **关键指标:**
+### **Key metrics:**
 
 ![](https://paddle-model-ecology.bj.bcebos.com/paddlex/demo_image/paddleocr-vl-1.5_metrics.png)
 
-下图展示了 PaddleOCR-VL-1.5 的整体流程及新增能力：
+Image shows diagram. PaddleOCR-VL-1.5 Overall Process and New Capabilities:
 
 ![](https://paddle-model-ecology.bj.bcebos.com/paddlex/demo_image/PaddleOCR-VL-1.5.png)
 
-## 2. 接口说明
+## 2. API docs
 
-请查看[文档](https://ai.baidu.com/ai-doc/AISTUDIO/Xmjclapam)
+Please check [documentation](https://ai.baidu.com/ai-doc/AISTUDIO/Xmjclapam)
 
-## 3. 服务调用示例（python）
+## 3. Service call example (python）
 
 ```
 # Please make sure the requests library is installed
@@ -33,7 +33,7 @@ import base64
 import os
 import requests
 
-# API_URL 及 TOKEN 请访问 [PaddleOCR 官网](https://aistudio.baidu.com/paddleocr/task) 在 API 调用示例中获取。
+# API_URL and TOKEN: Visit [PaddleOCR official website](https://aistudio.baidu.com/paddleocr/task) to obtain from the API call examples.
 API_URL = "<your url>"
 TOKEN = "<access token>"
 
@@ -93,131 +93,131 @@ for i, res in enumerate(result["layoutParsingResults"]):
             print(f"Failed to download image, status code: {img_response.status_code}")
 ```
 
-对于服务提供的主要操作：
+Main service operations:
 
-- HTTP请求方法为POST。
-- 请求体和响应体均为JSON数据（JSON对象）。
-- 当请求处理成功时，响应状态码为`200`，响应体的属性如下：
+- HTTPRequest method:POST。
+- Both request and response bodies areJSONData (JSONObject).
+- On successful request processing, response status code is`200`Response body properties:
 
-| 名称 | 类型 | 含义 |
+| Name | Type | Description |
 | --- | --- | --- |
-| `logId` | `string` | 请求的UUID。 |
-| `errorCode` | `integer` | 错误码。固定为`0`。 |
-| `errorMsg` | `string` | 错误说明。固定为`"Success"`。 |
-| `result` | `object` | 操作结果。 |
-- 当请求处理未成功时，响应体的属性如下：
+| `logId` | `string` | RequestedUUID。 |
+| `errorCode` | `integer` | Error code. Fixed as`0`。 |
+| `errorMsg` | `string` | Error description. Fixed as.`"Success"`。 |
+| `result` | `object` | Operation result. |
+- When request processing is unsuccessful, the response body has the following properties:
 
-| 名称 | 类型 | 含义 |
+| Name | Type | Meaning |
 | --- | --- | --- |
-| `logId` | `string` | 请求的UUID。 |
-| `errorCode` | `integer` | 错误码。与响应状态码相同。 |
-| `errorMsg` | `string` | 错误说明。 |
+| `logId` | `string` | Request UUID. |
+| `errorCode` | `integer` | Error code. Same as the response status code. |
+| `errorMsg` | `string` | Error description. |
 
-服务提供的主要操作如下：
+Primary service operations:
 
 - **`infer`**
 
-进行版面解析。
+Perform layout analysis.
 
 `POST /layout-parsing`
 
-## 4. 请求参数说明
+## 4. Request Parameter Description
 
-| 名称 | 参数 | 类型 | 含义 | 是否必填 |
+| 名称 | 参数 | 类型 | 含义 | Required? |
 | --- | --- | --- | --- | --- |
-| `输入文件` | `file` | `string` | 服务器可访问的图像文件或PDF文件的URL，或上述类型文件内容的Base64编码结果。默认对于超过100页的PDF文件，只有前100页的内容会被处理。 要解除页数限制，请在产线配置文件中添加以下配置： 
+| `Input file` | `file` | `string` | Server-accessible image file or PDF file URL or Base64-encoded content of above file types. Default for PDF files exceeding 100 pages: only first 100 pages processed. Remove page limit: add the following config to production config file:
 
 `Serving:
   extra:
     max_num_input_imgs: null`
- | 是 |
-| `文件类型` | `fileType` | `integer`｜`null` | 文件类型。`0`表示PDF文件，`1`表示图像文件。若请求体无此属性，则将根据URL推断文件类型。 | 否 |
-| `图片方向矫正` | `useDocOrientationClassify` | `boolean` | `null` | 是否在推理时使用文本图像方向矫正模块，开启后，可以自动识别并矫正 0°、90°、180°、270°的图片。 | 否 |
-| `图片扭曲矫正` | `useDocUnwarping` | `boolean` | `null` | 是否在推理时使用文本图像矫正模块，开启后，可以自动矫正扭曲图片，例如褶皱、倾斜等情况。 | 否 |
-| `版面分析` | `useLayoutDetection` | `boolean` | `null` | 是否在推理时使用版面区域检测排序模块，开启后，可以自动检测文档中不同区域并排序。 | 否 |
-| `图表识别` | `useChartRecognition` | `boolean` | `null` | 是否在推理时使用图表解析模块，开启后，可以自动解析文档中的图表（如柱状图、饼图等）并转换为表格形式，方便查看和编辑数据。 | 否 |
-| `版面区域过滤强度` | `layoutThreshold` | `number` | `object` | `null` | 版面模型得分阈值。`0-1` 之间的任意浮点数。如果不设置，将使用产线初始化的该参数值，默认初始化为 `0.5`。 | 否 |
-| `NMS后处理` | `layoutNms` | `boolean` | `null` | 版面检测是否使用后处理NMS，开启后，会自动移除重复或高度重叠的区域框。 | 否 |
-| `扩张系数` | `layoutUnclipRatio` | `number` | `array` | `object` | `null` | 版面区域检测模型检测框的扩张系数。 任意大于 `0` 浮点数。如果不设置，将使用产线初始化的该参数值，默认初始化为 `1.0`。 | 否 |
-| `版面区域检测的重叠框过滤方式` | `layoutMergeBboxesMode` | `string` | `object` | `null` |  
-• **large**，设置为large时，表示在模型输出的检测框中，对于互相重叠包含的检测框，只保留外部最大的框，删除重叠的内部框； 
-• **small**，设置为small，表示在模型输出的检测框中，对于互相重叠包含的检测框，只保留内部被包含的小框，删除重叠的外部框； 
-• **union**，不进行框的过滤处理，内外框都保留；  如果不设置，将使用产线初始化的该参数值，默认初始化为`large`。 | 否 |
-| `版面检测结果的几何形状` | `layoutShapeMode` | `string` | `null` | 用于指定版面检测结果的几何形状表示模式，该参数决定了检测区域（如文本块、图片、表格等）边界的计算方式及展示形态。可填写参数为 `rect` (矩形)、`quad` (四边形)、`poly` (多边形) 和 `auto` (自动)，默认初始化为`auto`。 | 否 |
-| `prompt类型设置` | `promptLabel` | `string` | `null` | VL模型的 prompt 类型设置，当且仅当 `useLayoutDetection=False` 时生效。可填写参数为 `ocr`、`formula`、`table` 和 `chart`，默认初始化为`ocr`。 | 否 |
-| `重复抑制强度` | `repetitionPenalty` | `number` | `null` | 结果中出现重复文字、重复表格内容时，可适当调高。 | 否 |
-| `识别稳定性` | `temperature` | `number` | `null` | 结果不稳定或出现明显幻觉时调低，漏识别或者重复较多时可略微调高。 | 否 |
-| `结果可信范围` | `topP` | `number` | `null` | 结果发散、不够可信时可适当调低，让模型更保守。 | 否 |
-| `最小图像尺寸` | `minPixels` | `number` | `null` | 输入图片太小、文字看不清时可适当调高，一般无需调整。 | 否 |
-| `最大图像尺寸` | `maxPixels` | `number` | `null` | 输入图片特别大、处理变慢或显存压力较大时可适当调低。 | 否 |
-| `公式编号展示` | `showFormulaNumber` | `boolean` | 输出的 Markdown 文本中是否包含公式编号。 | 否 |
-| `重构多页结果` | `restructurePages` | `boolean` | 对多页 pdf 解析结果进行重构，用于适配跨页表格合并和段落标题级别识别，默认初始化为`False`。 | 否 |
-| `跨页表格合并` | `mergeTables` | `boolean` | 开启后，会识别跨页表格，将其合并为一个，当且仅当 `useLayoutDetection=False` 时生效，默认初始化为`True`。 | 否 |
-| `段落标题级别识别` | `relevelTitles` | `boolean` | 开启后，会识别段落标题级别，当且仅当 `useLayoutDetection=False` 时生效，默认初始化为`True`。 | 否 |
-| `Markdown 美化` | `prettifyMarkdown` | `boolean` | 是否输出美化后的 Markdown 文本。 | 否 |
-| `可视化` | `visualize` | `boolean` | `null` | 支持返回可视化结果图及处理过程中的中间图像。开启此功能后，将增加结果返回时间。  
-• 传入 `true`：返回图像。 
-• 传入 `false`：不返回图像。 
-• 若请求体中未提供该参数或传入 `null`：遵循产线配置文件`Serving.visualize` 的设置。  例如，在产线配置文件中添加如下字段： 
+| Yes |
+| `File type` | `fileType` | `integer`ï½`null` | File type. `0` for PDF, `1` for image. If missing, inferred from URL. | Optional |
+| `Image orientation correction` | `useDocOrientationClassify` | `boolean` | `null` | Enable text image orientation correction during inference? If enabled, auto-detects and corrects 0Â°, 90Â°, 180Â°, 270Â° images. | No |
+| `Image distortion correction` | `useDocUnwarping` | `boolean` | `null` | Enable text image rectification during inference. When enabled, automatically corrects distorted images (wrinkles, skew). | No |
+| `Layout analysis` | `useLayoutDetection` | `boolean` | `null` | Enable layout region detection and sorting module during inference. When enabled, detects and sorts different document regions automatically. | No |
+| `Chart recognition` | `useChartRecognition` | `boolean` | `null` | Enable chart parsing during inference. When enabled, parses charts (bar, pie, etc.) in documents and converts to tables for easy viewing and data editing. | No |
+| `Layout region filter threshold` | `layoutThreshold` | `number` | `object` | `null` | Layout model score threshold, any float between 0â1. If unset, uses production-line initialized value; default 0.5. | No |
+| `NMS post-processing` | `layoutNms` | `boolean` | `null` | Use NMS for layout detection post-processing? When enabled, automatically removes duplicate or heavily overlapping region boxes. | No |
+| `Expansion coefficient` | `layoutUnclipRatio` | `number` | `array` | `object` | `null` | Expansion coefficient for bounding boxes from layout detection model. Any float >0. If unset, uses production-initialized parameter value; default 1.0. | No |
+| `Overlapping Box Filtering for Layout Region Detection` | `layoutMergeBboxesMode` | `string` | `object` | `null` |  
+• **large**Set tolargeWhen set, retain only the largest outer bounding box among overlapping boxes in model output; discard inner overlaps. 
+â¢ **small** â set to small to keep only inner boxes among overlapping boxes, delete outer overlaps.
+• **union**No box filtering. Keep both inner and outer boxes.  If unset, uses production-initialized value. Defaults to`large`。 | No |
+| `Layout detection result geometry` | `layoutShapeMode` | `string` | `null` | Specifies geometric representation mode for layout detection results. Determines how boundaries of detected regions (text blocks, images, tables, etc.) are computed and displayed. Acceptable values: `rect`, `quad`, `poly`, `auto`; default initialized to `auto`. | No |
+| `prompt type setting` | `promptLabel` | `string` | `null` | VL model's prompt type, effective only when `useLayoutDetection=False`. Fillable: `ocr`, `formula`, `table`, `chart`; default initialized to `ocr`. | Optional |
+| `Repetition suppression strength` | `repetitionPenalty` | `number` | `null` | If duplicate text or table content appears in results, increase accordingly. | No |
+| `Recognition stability` | `temperature` | `number` | `null` | Lower when results unstable or hallucinating; raise slightly for frequent misses or duplicates. | No |
+| `Result confidence range` | `topP` | `number` | `null` | Lower appropriately when results are divergent or insufficiently credible to make model more conservative. | No |
+| `Minimum image size` | `minPixels` | `number` | `null` | Increase if input image too small or text illegible; usually no adjustment. | No |
+| `Max image size` | `maxPixels` | `number` | `null` | If input image very large, slows processing or high GPU memory pressure; reduce appropriately. | No |
+| `Formula number display` | `showFormulaNumber` | `boolean` | Whether output Markdown text includes equation numbers. | No |
+| `Refactor multi-page results` | `restructurePages` | `boolean` | Refactor multi-page PDF parse results, adapt cross-page table merging and paragraph heading level recognition; default initialized to `False`. | No |
+| `Cross-page table merge` | `mergeTables` | `boolean` | When enabled, identifies cross-page tables and merges them into one; effective only when `useLayoutDetection=False`; default initialized to `True`. | No |
+| `Heading level detection` | `relevelTitles` | `boolean` | When enabled, identifies paragraph heading levels, if and only if `useLayoutDetection=False` Takes effect when, default initialized to`True`。 | whether |
+| `Markdown prettify` | `prettifyMarkdown` | `boolean` | Output prettified Markdown text? | No |
+| `Visualize` | `visualize` | `boolean` | `null` | Supports returning visualization result charts and intermediate images during processing. Enabling this increases result return time.
+• Input `true`Return image. 
+â¢ Pass `false` to not return images.
+• If the parameter is not provided in the request body or passed in `null`Follow production line configuration file.`Serving.visualize` settings.  Example: add fields to production config: 
 
 `Serving:
   visualize: False`
- 将默认不返回图像，通过请求体中的`visualize`参数可以覆盖默认行为。如果请求体和配置文件中均未设置（或请求体传入`null`、配置文件中未设置），则默认返回图像。 | 否 |
-- 请求处理成功时，响应体的`result`具有如下属性：
+By default, images are not returned; request body `visualize` overrides default. If neither request body nor config sets it (or request body passes `null`), default is to return image if no config set. | No |
+- On successful request, response body`result`Has the following properties:
 
-| 名称 | 类型 | 含义 |
+| Name | Type | Meaning |
 | --- | --- | --- |
-| `layoutParsingResults` | `array` | 版面解析结果。数组长度为1（对于图像输入）或实际处理的文档页数（对于PDF输入）。对于PDF输入，数组中的每个元素依次表示PDF文件中实际处理的每一页的结果。 |
-| `dataInfo` | `object` | 输入数据信息。 |
+| `layoutParsingResults` | `array` | Layout parsing results. Array length 1 for image input, or number of actually processed pages for PDF. For PDF, each element sequentially represents each processed page's result. |
+| `dataInfo` | `object` | Enter data information. |
 
-`layoutParsingResults`中的每个元素为一个`object`，具有如下属性：
+`layoutParsingResults`Each element is a`object`Has the following properties:
 
-| 名称 | 类型 | 含义 |
+| Name | Type | Meaning |
 | --- | --- | --- |
-| `prunedResult` | `object` | 对象的 `predict` 方法生成结果的 JSON 表示中 `res` 字段的简化版本，其中去除了 `input_path` 和 `page_index` 字段。 |
-| `markdown` | `object` | Markdown结果。 |
-| `outputImages` | `object` | `null` | 参见预测结果的 `img` 属性说明。图像为JPEG格式，使用Base64编码。 |
-| `inputImage` | `string` | `null` | 输入图像。图像为JPEG格式，使用Base64编码。 |
+| `prunedResult` | `object` | Object's `predict` method results JSON, simplified version of `res` field, with `input_path` and `page_index` removed. |
+| `markdown` | `object` | MarkdownResult. |
+| `outputImages` | `object` | `null` | See prediction results. `img` Attribute description. The image isJPEGformat, usingBase64Encoding. |
+| `inputImage` | `string` | `null` | Input image. Image is JPEG format, Base64-encoded. |
 
-`markdown`为一个`object`，具有如下属性：
+`markdown` is an `object` with the following properties:
 
-| 名称 | 类型 | 含义 |
+| Name | Type | Meaning |
 | --- | --- | --- |
-| `text` | `string` | Markdown文本。 |
-| `images` | `object` | Markdown图片相对路径和Base64编码图像的键值对。 |
+| `text` | `string` | MarkdownText. |
+| `images` | `object` | MarkdownImage relative path andBase64Encoded image key-value pairs. |
 - **`restructurePages`**
 
-重构多页结果 (可选)。
+Refactor multi-page results (optional).
 
 `POST /restructure-pages`
 
-- 请求体的属性如下：
+- Request body properties:
 
-| 名称 | 参数 | 类型 | 含义 | 是否必填 |
+| Name | Parameter | Type | Meaning | Required? |
 | --- | --- | --- | --- | --- |
-| `跨页表格合并` | `mergeTables` | `boolean` | 开启后，会识别跨页表格，将其合并为一个，当且仅当 `useLayoutDetection=False` 时生效，默认初始化为`True`。 | 否 |
-| `段落标题级别识别` | `relevelTitles` | `boolean` | 开启后，会识别段落标题级别，当且仅当 `useLayoutDetection=False` 时生效，默认初始化为`True`。 | 否 |
-| `重构多页结果` | `concatenatePages` | `boolean` | 对多页 pdf 解析结果进行重构，用于适配跨页表格合并和段落标题级别识别，默认初始化为`False`。 | 否 |
-| `Markdown 美化` | `prettifyMarkdown` | `boolean` | 是否输出美化后的 Markdown 文本。 | 否 |
-| `公式编号展示` | `showFormulaNumber` | `boolean` | 输出的 Markdown 文本中是否包含公式编号。 | 否 |
+| `Cross-page table merge` | `mergeTables` | `boolean` | When enabled, identifies cross-page tables and merges them into one; effective only when `useLayoutDetection=False`; default initialized to `True`. | No |
+| `Paragraph heading level recognition` | `relevelTitles` | `boolean` | When enabled, identifies paragraph heading levels; effective only when `useLayoutDetection=False`; default initialized to `True`. | No |
+| `Refactor multi-page results` | `concatenatePages` | `boolean` | Refactor multi-page PDF parse results to adapt cross-page table merging and paragraph heading level recognition; default initialized to `False`. | No |
+| `Markdown prettify` | `prettifyMarkdown` | `boolean` | Output prettified Markdown text? | No |
+| `Formula number display` | `showFormulaNumber` | `boolean` | Whether output Markdown text includes equation numbers. | No |
 
-`pages`中的每个元素为一个`object`，具有如下属性：
+Each element in `pages` is an `object` with the following properties:
 
-| 名称 | 类型 | 含义 |
+| Name | Type | Meaning |
 | --- | --- | --- |
-| `prunedResult` | `object` | 对应`infer`操作返回的`prunedResult`对象。 |
-| `markdownImages` | `object`|`null` | 对应`infer`操作返回的`markdown`对象的`images`属性。 |
-- 请求处理成功时，响应体的`result`具有如下属性：
+| `prunedResult` | `object` | Corresponds to `prunedResult` object from `infer` return value. |
+| `markdownImages` | `object`|`null` | Corresponds to the `markdown` object's `images` property from `infer` operation. |
+- On successful request, response body `result` has the following properties:
 
-| 名称 | 类型 | 含义 |
+| Name | Type | Meaning |
 | --- | --- | --- |
-| `layoutParsingResults` | `array` | 重构后的版面解析结果。其中每个元素包含的字段请参见对`infer`操作返回结果的说明（不含可视化结果图和中间图像）。 |
+| `layoutParsingResults` | `array` | Refactored layout parsing results. Each element contains fields as described for the `infer` operation result (excluding visualization result images and intermediate images). |
 
-对于返回的数据结构及字段说明，请查阅[文档](https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html)。
+See return data structure and field descriptions.[文档](https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html)。
 
-**注**：如果在使用过程中遇到问题，欢迎随时在 [issue](https://github.com/PaddlePaddle/PaddleOCR/issues) 区提交反馈。
+**Note**If you encounter any issues during use, feel free to [issue](https://github.com/PaddlePaddle/PaddleOCR/issues) Submit feedback.
 
-# 异步调用代码
+# Async call code
 
 # Please make sure the requests library is installed
 # pip install requests

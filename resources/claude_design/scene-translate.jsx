@@ -1,7 +1,7 @@
 // scene-translate.jsx
 // 4 substeps: cross-layout detect, page strategy, batch translate, fix garble.
 
-// ── 2.1 跨栏 / 跨页判断 ────────────────────────────────────────────────────
+// ── 2.1 Cross-column / Cross-page detection ────────────────────────────────────────────────────
 function SceneCrossLayout({ progress }) {
   // Two pages side by side. Lines drawn between text blocks across columns and pages.
   const linkA = animate({ from: 0, to: 1, start: 0.15, end: 0.45, ease: Easing.easeInOutCubic })(progress);
@@ -55,9 +55,9 @@ function SceneCrossLayout({ progress }) {
 
       {/* Drawn arc connectors between blocks */}
       <svg style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} width="1440" height="600">
-        <Arc x1={a1.x} y1={a1.y} x2={a2.x} y2={a2.y} progress={linkA} color="#0071e3" label="跨栏 cross-column" />
-        <Arc x1={b1.x} y1={b1.y} x2={b2.x} y2={b2.y} progress={linkB} color="#ff8a00" label="跨页 cross-page" big />
-        <Arc x1={c1.x} y1={c1.y} x2={c2.x} y2={c2.y} progress={linkC} color="#34c759" label="续段 continuation" small />
+<Arc x1={a1.x} y1={a1.y} x2={a2.x} y2={a2.y} progress={linkA} color="#0071e3" label="cross-column" />
+<Arc x1={b1.x} y1={b1.y} x2={b2.x} y2={b2.y} progress={linkB} color="#ff8a00" label="cross-page" big />
+        <Arc x1={c1.x} y1={c1.y} x2={c2.x} y2={c2.y} progress={linkC} color="#34c759" label="Continuation segment continuation" small />
       </svg>
 
       {/* Right side: detected paragraphs panel */}
@@ -125,18 +125,18 @@ function Arc({ x1, y1, x2, y2, progress, color, label, big, small }) {
   );
 }
 
-// ── 2.2 页面策略 ──────────────────────────────────────────────────────────
+// ── 2.2 Page policy ──────────────────────────────────────────────────────────
 function SceneStrategy({ progress }) {
   // Show 6 mini page thumbnails. As time progresses, each gets classified with a strategy badge.
   const pages = [
+    { type: 'two-col',     strategy: 'Two-column full paragraph', color: '#0071e3' },
+    { type: 'figure',      strategy: 'Retain chart', color: '#ff8a00' },
     { type: 'two-col',     strategy: '双栏整段', color: '#0071e3' },
+    { type: 'table',       strategy: 'Cell-by-cell', color: '#5e5ce6' },
+    { type: 'single',      strategy: 'Single-column literal translation', color: '#34c759' },
     { type: 'figure',      strategy: '图表保留', color: '#ff8a00' },
     { type: 'two-col',     strategy: '双栏整段', color: '#0071e3' },
-    { type: 'table',       strategy: '表格逐格', color: '#5e5ce6' },
-    { type: 'single',      strategy: '单栏直译', color: '#34c759' },
-    { type: 'figure',      strategy: '图表保留', color: '#ff8a00' },
-    { type: 'two-col',     strategy: '双栏整段', color: '#0071e3' },
-    { type: 'references',  strategy: '引用整理', color: '#86868b' },
+    { type: 'references',  strategy: 'Organize references', color: '#86868b' },
   ];
 
   return (
@@ -257,7 +257,7 @@ function MiniPage({ type, pageNumber }) {
   );
 }
 
-// ── 2.3 批量翻译 ──────────────────────────────────────────────────────────
+// ── 2.3 Batch translate ──────────────────────────────────────────────────────────
 function SceneBatch({ progress }) {
   // Many parallel translation calls. English on left → Chinese on right.
   // Animate text rows: each transitions from EN line bars to ZH line bars at staggered times.
@@ -357,14 +357,14 @@ function SceneBatch({ progress }) {
   );
 }
 
-// ── 2.4 乱码修复 ──────────────────────────────────────────────────────────
+// ── 2.4 Mojibake fix ──────────────────────────────────────────────────────────
 function SceneFixGarble({ progress }) {
   // Big text: shows garbled chars being repaired one by one.
   // Then a "before/after" comparison.
 
-  const text = '生成式翻译在长篇文档中常出现 □□□ 与 ' +
-    '\\uFFFD 编码错误，本系统结合 Unicode ' +
-    '范围检测与上下文重建，自动修复乱码。';
+const text = 'Generative translation in long documents often encounters â¡â¡â¡ and â¡â¡â¡ with ' +
+    '\\uFFFD Encoding error, this system combines. Unicode ' +
+    'Range detection, context reconstruction, auto-fix garbled text.';
 
   // Marked positions to fix
   const fixIndices = [13, 14, 15, 22, 23, 24, 25, 26, 27, 28];
@@ -383,7 +383,7 @@ function SceneFixGarble({ progress }) {
       const f = fixed[fixIndices.indexOf(i)];
       if (f >= 1) {
         // Replace with actual char
-        const cleanText = '生成式翻译在长篇文档中常出现编码错误的字符与不可识别的字节序列编码错误，本系统结合 Unicode';
+        const cleanText = 'Generative translation in long documents often produces encoding errors and unrecognizable byte sequences. This system combines Unicode';
         display += cleanText[i] || text[i];
       } else {
         display += text[i];
@@ -431,7 +431,7 @@ function SceneFixGarble({ progress }) {
 }
 
 function GarbleText({ text, fixIndices, progress }) {
-  const cleanText = '生成式翻译在长篇文档中常出现编码错误的字符与不可识别的字节序列编码错误，本系统结合 Unicode 范围检测与上下文重建，自动修复乱码。';
+const cleanText = 'Generative translation in long documents often encounters characters with encoding errors and unrecognizable byte sequences; this system combines Unicode range detection and context reconstruction to automatically fix garbled text.';
   return (
     <div style={{
       fontFamily: HAN, fontSize: 26, lineHeight: 1.7,

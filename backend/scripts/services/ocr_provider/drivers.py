@@ -99,7 +99,7 @@ def run_registered_ocr_provider(
     emit_stage_transition(
         stage="ocr_processing",
         substage="ocr_processing",
-        message=f"开始执行 {provider_name} OCR provider 流程",
+        message=f"Start executing {provider_name} OCR provider Workflow",
         provider=provider_name,
     )
     return driver(args)

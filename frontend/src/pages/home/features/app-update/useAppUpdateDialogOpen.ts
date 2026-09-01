@@ -1,7 +1,7 @@
-// AppUpdateBanner 详情 dialog 的开合态——纯 UI 瞬态(总计划「状态策略」第 5
-// 条:现状不在 store 里的东西,重写后也不进 store)。本地 useState 即可,不
-// 需要 dialog-store.js 那套跨子树共享机制:按钮与 dialog 现在合并进同一个
-// AppUpdateBanner.jsx(蓝图 §5),不存在"跨子树"开合场景。
+// AppUpdateBanner details dialog toggle state. Implement: `isOpen = !isOpen`. ââ pure UI transient (General Plan "State Strategy" item 5
+// item: status absent store items in, rewrite still not entering store) local useState is sufficient, no
+// need dialog-store.js cross-subtree sharing mechanism: button and dialog now merged into the same
+// AppUpdateBanner.jsx (Blueprint Â§5), no "cross-subtree" open/close scenario exists.
 
 import { useState, type Dispatch, type SetStateAction } from "react";
 

@@ -9,7 +9,7 @@ import { resolveSubmitControlState } from "../src/js/features/workflow/submit-co
 
 const workflowNeedsUpload = (workflow) => workflow !== "render";
 const workflowNeedsCredentials = (workflow) => workflow !== "render";
-const workflowSubmitLabel = (workflow) => workflow === "render" ? "开始渲染" : "直接翻译";
+const workflowSubmitLabel = (workflow) => workflow === "render" ? "Start Rendering" : "Direct Translation";
 
 test("resolveSubmitReadiness allows mock submissions without source or credentials", () => {
   const readiness = resolveSubmitReadiness({
@@ -91,7 +91,7 @@ test("resolveSubmitControlState consumes shared submit readiness", () => {
   assert.equal(state.disabled, false);
   assert.equal(state.actionVisible, true);
   assert.equal(state.pageRangeVisible, true);
-  assert.equal(state.label, "直接翻译");
+assert.equal(state.label, "Direct Translation");
   assert.equal(state.readiness.ready, true);
 });
 
@@ -130,6 +130,6 @@ test("resolveSubmitControlState preserves render source disabled behavior", () =
   assert.equal(state.disabled, true);
   assert.equal(state.actionVisible, true);
   assert.equal(state.pageRangeVisible, false);
-  assert.equal(state.label, "开始渲染");
+assert.equal(state.label, "Start Rendering");
   assert.equal(state.readiness.reason, SUBMIT_BLOCK_REASONS.MISSING_RENDER_SOURCE);
 });

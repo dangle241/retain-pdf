@@ -1,11 +1,11 @@
 import { DOWNLOAD_ACTION_IDS } from "../../composition/external.js";
 
-// 状态卡 DOM 契约 id 拷贝(蓝图 §2 features/status/)。
+// lines 45-164 (blueprint §1 components/status/ verdict, this file is entirely dead from cutover —
 //
-// 拷贝自 components/status/job-status-card-dom-contract.js(该文件属"死,由
-// StatusCard.jsx 家族替代"清单,js/components/ 禁止 import;
-// DOWNLOAD_ACTION_IDS 来自 contracts/,不在禁区,原样 import)。id 字符串
-// 逐一保留——smoke DOM 契约(蓝图 §0)靠这些 id 断言。
+// js/components/ anti-rebound access control restricted zone, only pure functions can be copied, cannot import).
+// Keep verbatim, no behavior rewrite; ProgressBlock.jsx / useStagedProgressAnimation.js
+// share this file.
+/** useStagedProgressAnimation / buildProgressOptions output → ProgressBlock input /
 
 export const STATUS_CARD_IDS = Object.freeze({
   cancelButton: "cancel-btn",

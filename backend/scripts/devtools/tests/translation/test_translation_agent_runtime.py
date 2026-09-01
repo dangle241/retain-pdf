@@ -93,7 +93,7 @@ def test_coordinator_can_run_repair_through_agent_runtime() -> None:
     def _fake_request(*_args, **_kwargs):
         return json.dumps(
             {
-                "repaired_text": "自洽场循环保留 <f1-abc/>。",
+"repaired_text": "SCF loop retains <f1-abc/>.",
                 "applied_issue_kinds": ["english_residue"],
                 "confidence": 0.91,
                 "needs_manual_review": False,
@@ -116,5 +116,5 @@ def test_coordinator_can_run_repair_through_agent_runtime() -> None:
         runtime=TranslationAgentRuntime(request_chat_content_fn=_fake_request),
     )
 
-    assert result.repaired_text == "自洽场循环保留 <f1-abc/>。"
+assert result.repaired_text == "SCF loop retains <f1-abc/>."
     assert result.applied_issue_kinds == ["english_residue"]

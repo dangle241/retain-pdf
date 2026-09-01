@@ -90,9 +90,9 @@ def test_text_heavy_inline_math_demotes_latex_text_to_plain_text() -> None:
                     r"and nuclei (with charges } Z_\alpha e, e = |e|), $"
                 ),
                 "protected_translated_text": (
-                    r"$ (\nabla_i \equiv \nabla_{r_i}, \text{其中 } \mathbf{r}_i "
-                    r"\text{ 表示电子 } i \text{ 的位置}), \text{电子与原子核（带有电荷 } "
-                    r"Z_\alpha e, e = |e|) \text{ 之间的相互作用}, $"
+                    r"$ (\nabla_i \equiv \nabla_{r_i}, \text{Of which } \mathbf{r}_i "
+                    r"\text{ denotes electron } i \text{ position of}), \text{electrons and nuclei (with charge } "
+                    r"Z_\alpha e, e = |e|) \text{ Interaction}, $"
                 ),
             }
         ],
@@ -102,16 +102,16 @@ def test_text_heavy_inline_math_demotes_latex_text_to_plain_text() -> None:
 
     markdown = blocks[0].markdown_text
 
-    assert r"\text{其中" not in markdown
-    assert "表示电子" in markdown
+assert r"\text{where" not in markdown
+    assert "Represents electronic" in markdown
 
 
 def test_dense_inline_math_paragraph_builds_render_blocks_without_backtracking() -> None:
     text = (
-        r"其中 $\lambda_{\parallel}$ 和 $\lambda_{\perp}$ 分别表示层内和层间几何自旋-轨道耦合强度，"
-        r"由 $\lambda = -\hbar^{2}/8mS$ 给出，其中 $S$ 为相邻位点间的弧长。"
-        r"算符 $\Omega_{nl}^{\parallel}$ 和 $\Omega_{nl}^{\perp}$ 包含依赖于曲率的自旋-轨道场。"
-        r"具体地，$\Omega_{n+1,l}^{\parallel} = \kappa_{n+1,l} \sigma_{n+1,l}^{\parallel}"
+r"where $\lambda_{\parallel}$ and $\lambda_{\perp}$ Denote intra-layer and inter-layer geometric spins, respectively.-orbital coupling strength,"
+r"given by $\lambda = -\hbar^{2}/8mS$, where $S$ arc_length_between_adjacent_sites"
+r"Operator $\Omega_{nl}^{\parallel}$ and $\Omega_{nl}^{\perp}$ Contains curvature-dependent spin.-Orbit field."
+        r"Specifically,$\Omega_{n+1,l}^{\parallel} = \kappa_{n+1,l} \sigma_{n+1,l}^{\parallel}"
         r" = \kappa_{n+1,l} [(\sin \theta_n \cos \varphi_{nl} \sin \Psi_n"
         r" - \sin \varphi_{nl} \cos \Psi_n) \sigma_x +"
         r"(\sin \theta_n \sin \varphi_{nl} \sin \Psi_n + \cos \varphi_{nl} \cos \Psi_n)"
@@ -139,7 +139,7 @@ def test_dense_inline_math_paragraph_builds_render_blocks_without_backtracking()
 
     assert time.perf_counter() - started < 1.0
     assert len(blocks) == 1
-    assert "自旋-轨道场" in blocks[0].markdown_text
+    assert "Spin lock busy wait. Avoid. Use threading.Lock.-orbitals participate in overlap. Therefore, the energy difference between bonding and antibonding orbitals becomes smaller, leading to" in blocks[0].markdown_text
     assert r"\sigma_x" in blocks[0].markdown_text
 
 
@@ -148,8 +148,8 @@ def test_direct_typst_adjacent_inline_math_boundaries_do_not_cross_text() -> Non
     from services.rendering.layout.text_analysis import analyze_text
 
     text = (
-        r"根据Stewart的高斯展开，$^{70}$$ \phi_{\kappa} $指的是收缩型高斯原子轨道，"
-        r"用于近似指数为$ \zeta_{\kappa} $的球面斯莱特型轨道。"
+r"According to StewartGaussian expansion,$^{70}$$ \phi_{\kappa} $Refers to contracted Gaussian-type atomic orbitals,"
+        r"Used as approximate exponent.$ \zeta_{\kappa} $spherical Slater-type orbitals."
     )
 
     markdown = build_direct_typst_passthrough_text(text)
@@ -157,14 +157,14 @@ def test_direct_typst_adjacent_inline_math_boundaries_do_not_cross_text() -> Non
     assert "$^{70}$" in markdown
     assert r"$\phi_{\kappa}$" in markdown
     assert r"$\zeta_{\kappa}$" in markdown
-    assert "指的是收缩型高斯原子轨道" in markdown
+    assert "Refers to contracted Gaussian-type atomic orbitals." in markdown
     assert r"\$phi" not in markdown
-    assert not any("指的是收缩型高斯原子轨道" in segment.value for segment in analyze_text(markdown).formula_segments)
+    assert not any("Refers to contracted Gaussian-type atomic orbitals." in segment.value for segment in analyze_text(markdown).formula_segments)
 
 
 def test_formula_safety_insets_reserve_more_bottom_space_for_subscripts() -> None:
     insets = formula_safety_insets_pt(
-        "文字 $x_i$",
+        "text $x_i$",
         [],
         font_size_pt=10.0,
         box_height_pt=20.0,
@@ -176,13 +176,13 @@ def test_formula_safety_insets_reserve_more_bottom_space_for_subscripts() -> Non
 
 def test_long_inline_chemical_formula_is_layout_risk() -> None:
     text = (
-        r"例如，Zheng团队开发了巨型POM，"
+        r"For example,ZhengThe team developed a giantPOM，"
         r"$[Sb_{15}Tb_{7}W_{3}O_{29}(OH)_{3}(DMF)(H_{2}O)_{6}(SbW_{8}O_{30})(SbW_{9}O_{33})_{5}]^{27-}$ "
-        r"$[Sb_{21}Tb_{7}W_{56})$，具有优异的水溶性。"
+        r"$[Sb_{21}Tb_{7}W_{56})$Excellent water solubility."
     )
 
     assert has_long_inline_math_layout_risk(text, [], font_size_pt=11.0, box_width_pt=255.0)
-    assert not has_long_inline_math_layout_risk("短公式 $x_i$ 正文", [], font_size_pt=11.0, box_width_pt=255.0)
+assert not has_long_inline_math_layout_risk("Short formula $x_i$ body text", [], font_size_pt=11.0, box_width_pt=255.0)
 
 
 def test_typst_block_adds_formula_safety_padding_without_shrinking_outer_fill() -> None:
@@ -191,8 +191,8 @@ def test_typst_block_adds_formula_safety_padding_without_shrinking_outer_fill() 
         bbox=[10.0, 20.0, 180.0, 42.0],
         cover_bbox=[10.0, 20.0, 180.0, 42.0],
         inner_bbox=[10.0, 20.0, 180.0, 42.0],
-        markdown_text="这是一段文字 $x_i$",
-        plain_text="这是一段文字 xi",
+        markdown_text="Text display required. Simplify: Remove unnecessary elements. $x_i$",
+plain_text="This is a piece of text xi",
         render_kind="markdown",
         font_size_pt=10.0,
         leading_em=0.55,
@@ -223,8 +223,8 @@ def test_typst_block_relaxes_justification_for_long_inline_math() -> None:
         bbox=[34.0, 622.0, 290.0, 739.0],
         cover_bbox=[34.0, 622.0, 290.0, 739.0],
         inner_bbox=[34.0, 622.0, 290.0, 739.0],
-        markdown_text=f"除了与特定生物分子相互作用外，巨型POM {formula} 具有优异的水溶性和稳定性。",
-        plain_text="除了与特定生物分子相互作用外，巨型POM具有优异的水溶性和稳定性。",
+        markdown_text=f"Giant molecule interact only specific biomolecule. Remove.POM {formula} Excellent water solubility and stability.",
+plain_text="Besides interacting with specific biomolecules, giant POMs have excellent water solubility and stability.",
         render_kind="markdown",
         font_size_pt=11.0,
         leading_em=0.58,
@@ -258,7 +258,7 @@ def test_toc_entries_render_with_typst_style_rows() -> None:
                 "bbox": [100.0, 200.0, 780.0, 260.0],
                 "text_flow": "preserve_lines",
                 "source_text": "1 Introduction ..... 1\n2 Foundations of Density Functional Theory ..... 11",
-                "protected_translated_text": "1 引言 ..... 1\n2 密度泛函理论基础 ..... 11",
+"protected_translated_text": "1 Introduction ..... 1\n2 Density Functional Theory Fundamentals ..... 11",
                 "source_line_texts": [
                     "1 Introduction ..... 1",
                     "2 Foundations of Density Functional Theory ..... 11",
@@ -295,8 +295,8 @@ def test_toc_entries_render_with_typst_style_rows() -> None:
 
     assert "layout(size =>" in typst
     assert "measure(title-body)" in typst
-    assert '"1 引言"' in typst
-    assert '"2 密度泛函理论基础"' in typst
+assert '"1 Introduction"' in typst
+    assert '"2 Density Functional Theory Fundamentals"' in typst
     assert "dash: (1pt, 2pt)" in typst
     assert '_toc_0_page = "1"' in typst
     assert '_toc_1_page = "11"' in typst
@@ -321,8 +321,8 @@ def test_toc_line_fallback_uses_model_lines_without_content_rules() -> None:
                 "text_flow": "preserve_lines",
                 "source_text": "opaque source line A\nopaque source line B",
                 "protected_translated_text": (
-                    "图1.1 球极坐标下的类氢原子 22\n"
-                    "表8.4 2-丁酮构象热力学性质 279"
+"Fig.1.1 Hydrogen-like atom in spherical polar coordinates. 22\n"
+"Table 8.4 2-Ketone conformation thermodynamics properties 279"
                 ),
                 "source_line_texts": [
                     "opaque source line A",
@@ -345,8 +345,8 @@ def test_toc_line_fallback_uses_model_lines_without_content_rules() -> None:
     assert block.toc_entries
     assert '_toc_0_page = "22"' in typst
     assert '_toc_1_page = "279"' in typst
-    assert '"图1.1 球极坐标下的类氢原子"' in typst
-    assert '"表8.4 2-丁酮构象热力学性质"' in typst
+assert '"Fig.1.1 Hydrogen-like atom in spherical polar coordinates"' in typst
+assert '"Table 8.4 2-Butanone conformation thermodynamic properties"' in typst
     assert "dash: (1pt, 2pt)" in typst
     assert "pdftr_fit_single_line_markdown" not in typst
 
@@ -374,12 +374,12 @@ def test_toc_entries_render_plain_page_number_lines_without_dot_leaders() -> Non
                     "5 Summary 17"
                 ),
                 "protected_translated_text": (
-                    "1 引言 2\n"
-                    "2 热力学量组分的来源 2\n"
-                    "2.1 平动贡献 ..... 3\n"
-                    "3 来自Gaussian的热化学输出 8\n"
-                    "3.2 复合模型化学输出 11\n"
-                    "5 总结 17"
+"1 Introduction 2\n"
+                    "2 Sources of thermodynamic quantity components. 2\n"
+                    "2.1 Translational contribution ..... 3\n"
+                    "3 FromGaussianThermochemical Output 8\n"
+                    "3.2 Composite model chemical output 11\n"
+"5 Summary 17"
                 ),
                 "source_line_texts": [
                     "1 Introduction 2",
@@ -404,10 +404,10 @@ def test_toc_entries_render_plain_page_number_lines_without_dot_leaders() -> Non
     typst = build_typst_block("rp0_item_p001_b006_0", block)
 
     assert len(block.toc_entries or []) == 6
-    assert '"1 引言"' in typst
-    assert '"2 热力学量组分的来源"' in typst
-    assert '"3 来自Gaussian的热化学输出"' in typst
-    assert '"5 总结"' in typst
+assert '"1 Introduction"' in typst
+assert '"2 Sources of thermodynamic quantity components"' in typst
+assert '"3 Thermochemical output from Gaussian"' in typst
+assert '"5 Summary"' in typst
     assert '_toc_0_page = "2"' in typst
     assert '_toc_3_page = "8"' in typst
     assert '_toc_5_page = "17"' in typst
@@ -434,9 +434,9 @@ def test_toc_entries_rebuild_partial_source_entries_before_rendering() -> None:
                     "2.1 Contributions from translation ..... 3"
                 ),
                 "protected_translated_text": (
-                    "1 引言 2\n"
-                    "2 热力学量组分的来源 2\n"
-                    "2.1 平动贡献 ..... 3"
+"1 Introduction 2\n"
+"2 Sources of thermodynamic quantity components 2\n"
+"2.1 Translational contribution ..... 3"
                 ),
                 "source_line_texts": [
                     "1 Introduction 2",
@@ -467,9 +467,9 @@ def test_toc_entries_rebuild_partial_source_entries_before_rendering() -> None:
     typst = build_typst_block("rp0_item_p001_b006_0", block)
 
     assert len(block.toc_entries or []) == 3
-    assert '"1 引言"' in typst
-    assert '"2 热力学量组分的来源"' in typst
-    assert '"2.1 平动贡献"' in typst
+assert '"1 Introduction"' in typst
+assert '"2 Sources of thermodynamic quantity components"' in typst
+assert '"2.1 Translational contribution"' in typst
     assert '_toc_0_page = "2"' in typst
     assert '_toc_1_page = "2"' in typst
     assert '_toc_2_page = "3"' in typst
@@ -496,10 +496,10 @@ def test_toc_rendering_maps_two_column_translated_lines_by_geometry() -> None:
                     "5 Right second 5"
                 ),
                 "protected_translated_text": (
-                    "1 左一 1\n"
-                    "4 右一 4\n"
-                    "2 左二 2\n"
-                    "5 右二 5"
+                    "1 Leftmost 1\n"
+                    "4 Rightmost 4\n"
+                    "2 Left 2 2\n"
+                    "5 Second from right 5"
                 ),
                 "source_line_texts": [
                     "1 Left first 1",
@@ -523,7 +523,7 @@ def test_toc_rendering_maps_two_column_translated_lines_by_geometry() -> None:
     block = blocks[0]
     typst = build_typst_block("rp9_item_p010_b002_0", block)
 
-    assert [entry.title for entry in block.toc_entries or []] == ["左一", "左二", "右一", "右二"]
+    assert [entry.title for entry in block.toc_entries or []] == ["Leftmost", "Second from left", "Right 1", "Second from right"]
     assert '_toc_0_page = "1"' in typst
     assert '_toc_1_page = "2"' in typst
     assert '_toc_2_page = "4"' in typst
@@ -545,7 +545,7 @@ def test_toc_entries_normalize_spaced_inline_math() -> None:
                 "bbox": [100.0, 200.0, 780.0, 230.0],
                 "text_flow": "preserve_lines",
                 "source_text": "4.2 Exact Representations of $ E_{xc}[n] $ ..... 115",
-                "protected_translated_text": "4.2 $ E_{xc}[n] $ 的精确表示 ..... 115",
+                "protected_translated_text": "4.2 $ E_{xc}[n] $ exact representations of ..... 115",
                 "source_line_texts": ["4.2 Exact Representations of $ E_{xc}[n] $ ..... 115"],
                 "lines": [
                     {
@@ -571,5 +571,5 @@ def test_toc_entries_normalize_spaced_inline_math() -> None:
 
     typst = build_typst_block("rp9_item_p010_b001_0", blocks[0])
 
-    assert '"4.2 $E_{xc}[n]$ 的精确表示"' in typst
-    assert '"4.2 $ E_{xc}[n] $ 的精确表示"' not in typst
+    assert '"4.2 $E_{xc}[n]$ precise representation"' in typst
+assert '"4.2 $ E_{xc}[n] $ precise representation"' not in typst

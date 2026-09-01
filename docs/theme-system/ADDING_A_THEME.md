@@ -1,24 +1,24 @@
-# 如何新增一套主题皮肤
+# Check if CSS variables suffice. If yes, define `:root` overrides in new `.css`. No JS needed. If dynamic switching required, toggle class on `<html>`. Avoid complex theming engines unless multiple simultaneous themes needed. YAGNI.
 
-目标：后期加大量主题时，**只动 3 处**，不动业务组件。
+Goal: scale themes later.**Move only 3 places**without touching business components.
 
 ---
 
-## 步骤（约 10 分钟）
+## Steps (approx 10 minutes)
 
-### 1. 写 CSS 皮肤文件
+### 1. Write CSS Skin file
 
-复制模板：
+Copy template:
 
 ```bash
 cp frontend/src/styles/themes/classic.css \
    frontend/src/styles/themes/<id>.css
 ```
 
-编辑为：
+Edit to:
 
 ```css
-/* 皮肤 <id>：一句话说明 */
+/* Skin <id>: one-line description */
 [data-theme="<id>"] {
   --bg: …;
   --paper: …;
@@ -45,32 +45,32 @@ cp frontend/src/styles/themes/classic.css \
 }
 ```
 
-**必选变量**见 `frontend/src/styles/themes/_contract.css`。
+**Required variable** see `frontend/src/styles/themes/_contract.css`.
 
-注意：
+Note:
 
-- 主按钮文字用 `var(--paper)` 叠在 `var(--accent)` 上，请保证对比度。
-- 深色皮肤：`group: "dark"`，`--ink` 应是浅色字，`--bg` 深底。
+- Primary button text uses `var(--paper)` Stacked on `var(--accent)` Up. Ensure contrast.
+- Dark skin:`group: "dark"`，`--ink` Light text.`--bg` Deep bottom.
 
-### 2. 挂进构建
+### 2. Integrate into build
 
-`frontend/src/styles/themes/index.css` 增加一行：
+`frontend/src/styles/themes/index.css` Add one line:
 
 ```css
 @import "./<id>.css";
 ```
 
-### 3. 登记注册表
+### 3. Register
 
-`frontend/src/shared/theme/registry.ts` 的 `THEME_REGISTRY` 数组追加：
+`frontend/src/shared/theme/registry.ts`'s `THEME_REGISTRY` Append to array:
 
 ```ts
 {
   id: "<id>",
-  label: "显示名",
-  description: "一句话",
+  label: "Display Name",
+  description: "Sentence.",
   group: "light" | "dark" | "accent",
-  order: 50, // 排序
+  order: 50, // Sort
   preview: {
     bg: "#……",
     paper: "#……",
@@ -81,47 +81,47 @@ cp frontend/src/styles/themes/classic.css \
 },
 ```
 
-`preview` 只用于设置页色块，**请与 CSS 主色一致**。
+`preview` Settings page color blocks only.**Please match CSS Primary color consistent.**。
 
-### 4. 构建
+### 4. Build
 
 ```bash
 cd frontend && npm run build:css && npm run build:js
 ```
 
-### 5. 验证
+### 5. Verify
 
 ```js
 localStorage.setItem("retainpdf.theme", "<id>");
 location.reload();
-// 或 设置 → 外观 点选
+// Or Settings â Appearance Click
 ```
 
 ---
 
-## 禁止事项
+## Prohibited items
 
-| 不要 | 原因 |
+| Don't | Reason |
 |------|------|
-| 在组件里写 `if (theme === 'xxx')` 换色 | 应走 CSS 变量 |
-| 在业务 CSS 写死 `#1d1d1f` | 用 `var(--ink)` |
-| 改 shadcn 变量名 | 只改底层 `--accent` 等 |
-| 忘记 index.css import | 皮肤不会进 dist |
+| Write in component. `if (theme === 'xxx')` Change Color | Use CSS variables |
+| In business CSS Hardcode `#1d1d1f` | Use `var(--ink)` |
+| Change shadcn Variable name | Modify underlying layer only. `--accent` etc. |
+| Forget. index.css import | Skin not applied. dist |
 
 ---
 
-## 可选增强
+## Optional enhancements
 
-- 设计说明：`docs/theme-system/skins/<id>.md`
-- 监听换肤：`window.addEventListener('retainpdf:theme-change', …)`
-- 深色特例：`html.theme-dark` 或 `[data-theme-group="dark"]`
+- Design notes:`docs/theme-system/skins/<id>.md`
+- Listen for theme changes:`window.addEventListener('retainpdf:theme-change', …)`
+- Dark theme exceptions: `html.theme-dark` or `[data-theme-group="dark"]`
 
 ---
 
-## 检查清单
+## Checklist
 
-- [ ] `themes/<id>.css` 含全部必选 token  
-- [ ] `themes/index.css` 已 import  
-- [ ] `registry.ts` 已登记且 preview 对齐  
-- [ ] 主按钮 / 选中 tab 在该皮肤下可读  
-- [ ] `npm run build:css` 通过  
+- [ ] `themes/<id>.css` Include all required token  
+- [ ] `themes/index.css` imported
+- [ ] `registry.ts` Registered and preview Align  
+- [ ] Primary button / Selected tab Readable under this skin.  
+- [ ] `npm run build:css` passed

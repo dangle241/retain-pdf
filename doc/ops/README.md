@@ -1,13 +1,13 @@
-# 运维与过程记录
+# Ops & Process Logs
 
-这里放工程判断、执行计划、历史台账和自动生成报告。
+Place engineering assessments, execution plans, historical records, and auto-generated reports here.
 
-## 入口
+## Entry
 
-- [工程规划与台账](./planning/README.md)
-- [生成报告](./reports/README.md)
+- [Project Planning and Ledger](./planning/README.md)
+- [Generate Report](./reports/README.md)
 
-## 读法
+## How to read
 
-这层适合看历史决策、排障留痕和自动导出结果。
-如果你在找“当前功能怎么用”，不要从这里开始。
+This layer is for viewing historical decisions, troubleshooting traces, and automated export results.
+If looking for "how to use this feature", don't start here.

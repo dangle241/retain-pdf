@@ -8,18 +8,18 @@
 }
 
 /*
-  阶段 C 收官批(shadcn 改造):StageHistoryModal/EventsModal 的外层结构从
+Phase C Final approval (shadcn Refactor): StageHistoryModal/EventsModal Outer structure from
   <section className="detail-modal"><div className="detail-modal-panel"
-  role="dialog"> 换成 Radix Dialog + 现有 desktop-dialog/desktop-shell/
-  desktop-head/desktop-body 视觉骨架(见 EventsTimeline.jsx 头注释),原来的
-  .detail-modal/.detail-modal-panel/.detail-modal-head 三条结构性规则不再有
-  任何消费者,已删除。detail-timeline-overlay/detail-timeline-dialog 这两个
-  新增覆盖类复刻它们的像素级视觉(920px 宽上限/82vh 高上限/28px 圆角/
-  var(--line) 描边/0 24px 64px 阴影),挂在 DialogPrimitive.Overlay/Content 上。
-  下面的 detail-modal-title/-subtitle/-close/-status 这几个纯排版类名原样
-  保留,只是父级结构换了;detail-modal-body 的职责(内层滚动容器的
-  padding/background/overflow)并入上面 detail-timeline-dialog 对
-  desktop-body 的覆盖,原规则已删除。
+role="dialog"> replaced by Radix Dialog + existing desktop-dialog/desktop-shell/
+desktop-head/desktop-body Skeleton(see EventsTimeline.jsx Header comment),Original
+  .detail-modal/.detail-modal-panel/.detail-modal-head `/* Remove structural rules. ponytail: kept only semantic classes. Add back when design system requires spacing/flow. */`
+Any Consumer,deleted. detail-timeline-overlay/detail-timeline-dialog these two
+  Add override classes to replicate their pixel-perfect visuals.(920px Broad upper limit/82vh High limit/28px Border Radius/
+var(--line) Stroke/0 24px 64px box-shadow none â skipped: shadow effect, add when needed),attached to DialogPrimitive.Overlay/Content Up
+  Below detail-modal-title/-subtitle/-close/-status these pure layout class names as is
+Keep,Only parent structure changed.;detail-modal-body Responsibilities(Inner scroll container's
+padding/background/overflow)Merge with above detail-timeline-dialog
+  desktop-body Override,Original rule deleted.
 */
 @utility detail-timeline-overlay {
   @apply fixed inset-0 z-[100];

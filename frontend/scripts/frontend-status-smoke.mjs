@@ -14,10 +14,10 @@ const FRONTEND_ROOT = path.resolve(__dirname, "..");
 const REPO_ROOT = path.resolve(FRONTEND_ROOT, "..");
 const DEFAULT_API_BASE = "http://127.0.0.1:41000";
 const DEFAULT_EXPECTED_LABELS = [
-  "第 1/4 步 · OCR 解析",
-  "第 2/4 步 · 翻译",
-  "第 3/4 步 · 渲染",
-  "完成",
+"Step 1/4 · OCR parsing",
+"Step 2/4 · Translation",
+"Step 3/4 · Rendering",
+"Done",
 ];
 
 function printUsage() {

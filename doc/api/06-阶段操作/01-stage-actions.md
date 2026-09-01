@@ -1,14 +1,14 @@
 # stage-actions
 
-## 接口
+## Endpoint
 
 ```http
 GET /api/v1/jobs/{job_id}/stage-actions
 ```
 
-用于查询每个阶段是否可以主动重试，以及重试会复用和重跑哪些产物。
+Query whether each stage can be actively retried, and which artifacts are reused and rerun on retry.
 
-## 响应示例
+## Response example
 
 ```json
 {
@@ -16,7 +16,7 @@ GET /api/v1/jobs/{job_id}/stage-actions
   "stages": [
     {
       "stage": "translation",
-      "label": "重试翻译",
+"label": "Retry translation",
       "can_retry": true,
       "disabled_reason": "",
       "will_reuse": ["source_pdf", "ocr_result"],
@@ -34,9 +34,9 @@ GET /api/v1/jobs/{job_id}/stage-actions
 }
 ```
 
-## 前端规则
+## Frontend rules
 
-- 按后端返回的 `can_retry` 决定按钮是否可点。
-- 不要前端自己猜哪些产物能复用。
-- `will_reuse` 和 `will_rerun` 只用于展示和确认。
-- 真正执行以 `action` 和 [retry-stage](02-retry-stage.md) 为准。
+- As returned by backend `can_retry` Determines whether button is clickable.
+- Don't guess frontend reusable artifacts.
+- will_reuse and will_rerun are for display and confirmation only.
+- Actual execution is based on action and retry-stage.

@@ -40,7 +40,7 @@ def test_long_stem_uses_hash_when_full_path_too_long(tmp_path: Path, monkeypatch
     )
     deep.mkdir(parents=True, exist_ok=True)
     long_title = (
-        "Jabbar 等 - 2026 - TransKla A Local-Global Cross-Attention Based "
+"Jabbar et al. - 2026 - TransKla A Local-Global Cross-Attention Based "
         "Transformer Approach for Prediction of Lysine Lactyla-translated.pdf"
     )
     out = deep / long_title

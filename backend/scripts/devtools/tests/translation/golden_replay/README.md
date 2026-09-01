@@ -1,26 +1,26 @@
 # Translation Replay Golden Cases
 
-这个目录只放可复现的翻译回归样本清单和脱敏 fixture，不能放真实 API key。
+This directory contains only the reproducible translation regression sample list and redacted data. fixtureDo not use real data. API key。
 
-## 用途
+## Purpose
 
-- 复现模型返回协议壳/JSON 壳。
-- 复现空译文降级。
-- 复现英文残留未翻译。
-- 复现技术块误翻译或误跳过。
+- Reproduce model response protocol shell./JSON Shell.
+- Reproduce empty translation fallback.
+- Untranslated English remnants reappear.
+- Reproduce mistranslation or accidental skipping of technical blocks.
 
-## 运行方式
+## How to run
 
-优先使用已有工具：
+Prefer existing tools.
 
 ```bash
 python3 backend/scripts/devtools/replay_translation_item.py --case <case-json>
 ```
 
-如果样本来自真实 job，先用 promptfoo capture 工具脱敏保存成 case artifact，再加入本目录 manifest。不要在本目录提交 `sk-*`、PaddleOCR token、完整用户文件或未脱敏 job 数据。
+If the sample is from real data. job, first use promptfoo capture Save desensitized tool as case artifactThen add this directory. manifestDo not commit in this directory. `sk-*`、PaddleOCR tokenFull user file or unredacted. job Data.
 
-## 文件约定
+## File conventions
 
-- `manifest.json` 是样本索引。
-- `cases/*.json` 存放脱敏后的单 item replay 输入。
-- 每个 case 必须有 `id`、`category`、`expected`、`fixture` 或 `source_artifact`。
+- `manifest.json` Sample index.
+- `cases/*.json` Store desensitized orders item replay Input.
+- Each case requires `id`, `category`, `expected`, `fixture` or `source_artifact`.

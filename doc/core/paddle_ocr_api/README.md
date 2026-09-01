@@ -1,46 +1,46 @@
-# Paddle OCR 对接文档
+# Paddle OCR Integration docs
 
-这里是 RetainPDF 自己的 OCR adapter 说明，不是 Paddle 官方文档本体。
-如果你要改“Paddle 原始 JSON 怎么进 `document.v1`”，先看这里。
+This is RetainPDF's own OCR adapter description, not Paddle official documentation.
+If you want to change how Paddle raw JSON gets into document.v1, look here.
 
-这套文档只服务一件事：
+This documentation serves one purpose:
 
-- 把 Paddle OCR 原始返回结果稳定收敛成 `normalized_document_v1`
+- Stably converge the original Paddle OCR returned result to normalized_document_v1
 
-不要把这里写成翻译规则文档，也不要把渲染策略塞进来。
+Do not write this as a translation rules document, nor include rendering strategies here.
 
-## 对接边界
+## Integration boundary
 
-适配 Paddle OCR 的同学只负责：
+Students adapting Paddle OCR are only responsible for:
 
-1. 理解 Paddle 原始 API 和 JSON 结构
-2. 实现 provider 探测与 adapter
-3. 把 Paddle 私有字段映射到 `document.v1`
-4. 补 fixture、回归测试和文档
+1. Understand Paddle's raw API and JSON structure
+2. Implement provider detection and the adapter
+3. Map Paddle private fields to document.v1
+4. Add fixtures, regression testing, and documentation
 
-明确不负责：
+Not responsible:
 
-1. 不改翻译层 `services/translation/*`
-2. 不改渲染层 `services/rendering/*`
-3. 不在 `runtime/pipeline/*` 里写 Paddle 私有特判
-4. 不让下游直接读取 Paddle raw JSON
+1. Skip translation layer. `services/translation/*`
+2. Render layer unchanged. `services/rendering/*`
+3. Absent `runtime/pipeline/*` write in Paddle Private special case
+4. Downstream read access denied. Paddle raw JSON
 
-## 当前代码入口
+## Current entry point
 
-- provider 注册入口：
+- provider Sign up:
   `backend/scripts/services/document_schema/adapters.py`
-- provider 常量：
+- provider Constants:
   `backend/scripts/services/document_schema/providers.py`
-- Paddle adapter 入口：
+- Paddle adapter entry point:
   `backend/scripts/services/document_schema/provider_adapters/paddle/adapter.py`
 - Paddle page reader：
   `backend/scripts/services/document_schema/provider_adapters/paddle/page_reader.py`
 - Paddle block reader：
   `backend/scripts/services/document_schema/provider_adapters/paddle/block_reader.py`
-- 通用契约说明：
+- General Contract Notes
   `backend/scripts/services/document_schema/README.md`
 
-## 阅读顺序
+## Reading Order
 
 1. [00_overview.md](./00_overview.md)
 2. [01_response_shape.md](./01_response_shape.md)
@@ -51,10 +51,10 @@
 7. [06_job_artifact_boundary.md](./06_job_artifact_boundary.md)
 8. [official/README.md](./official/README.md)
 
-## 对接原则
+## Integration principles
 
-1. Paddle 私有字段只允许留在 adapter 层和 trace 层。
-2. 下游主链路只消费 `document.v1.json`。
-3. 如果 Paddle 已经识别出连续段落组，写入 `continuation_hint`，不要把 `group_id` 之类的私有字段直接泄漏给 translation。
-4. 先保证 schema 正确，再做语义增强；不要一上来就堆规则。
-5. `provider raw -> normalized_document -> artifact export -> download API` 是四层边界，不要混用。
+1. Paddle private fields are only allowed to remain in the adapter layer and trace layer.
+2. Downstream main chain only consumes. `document.v1.json`。
+3. If Paddle has identified consecutive paragraph groups, write continuation_hint; do not leak group_id private fields directly to translation.
+4. Ensure first. schema Correct. Then semantic enhancement; don't pile rules upfront.
+5. `provider raw -> normalized_document -> artifact export -> download API` Four-layer boundary. Do not mix.

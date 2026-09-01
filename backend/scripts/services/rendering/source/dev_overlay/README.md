@@ -1,14 +1,14 @@
 # rendering/source/dev_overlay
 
-旧的 PyMuPDF 直绘译文路径，仅用于 direct overlay、单页调试 PDF 和兼容旧
-`services.rendering.legacy.pdf_overlay` 调用。
+Old PyMuPDF direct-draw translation path, only for direct overlay page single debug PDF and backward compatibility
+services.rendering.legacy.pdf_overlay call.
 
-这里不是主渲染路径。新的图书/页面正式渲染逻辑应走 Typst overlay 和
-`source.redaction` / `source.render_source`，不要在这里继续扩展正文排版规则。
+Not the main render path. New book/official page rendering logic should use Typst overlay and
+`source.redaction` / `source.render_source`Do not continue expanding the body layout rules here.
 
-## 边界
+## Boundaries
 
-- 可以调用 source 层 primitive/facade，例如 `source.redaction`、`source.items`、
+- May call source layer primitives/facades, e.g., source.redaction, source.items,
   `source.background.fill`。
-- 不要直接依赖 `source.cleanup.redaction`；需要原文清理时走 source 层 facade。
-- 不要新增 Typst 生成、OCR provider 解析或翻译策略逻辑。
+- Do not directly depend on source.cleanup.redaction; use source layer facade when original text cleanup is needed.
+- Don't add. Typst generation,OCR provider Parse or translate strategy logic.

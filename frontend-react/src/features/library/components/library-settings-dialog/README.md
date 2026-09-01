@@ -1,21 +1,21 @@
-# Library Settings Dialog 组件族
+# Library Settings Dialog component family
 
-## 边界
+## Boundary
 
-`library-settings-dialog` 负责图书馆主页的设置弹窗。当前只提供设置分区占位，不直接读写 API、localStorage 或全局状态。
+`library-settings-dialog` Library homepage settings popup. Currently only placeholder for sections. No direct read write. Remove popup. API、localStorage or global state.
 
-## 文件
+## Files
 
-- `library-settings-dialog.tsx`：弹窗组合层。
-- `library-settings-config.ts`：布局 class 和组件族本地配置。
-- `library-settings-selectors.ts`：把配置转换为设置视图数据。
-- `library-settings-tabs.tsx`：设置分区 tab 切换。
-- `library-settings-panel.tsx`：单个设置分区面板。
-- `library-settings-types.ts`：设置组件族类型。
-- `index.ts`：组件族公共出口。
+- library-settings-dialog.tsx: popup composition layer.
+- `library-settings-config.ts`Layout class And local configuration for component family.
+- `library-settings-selectors.ts`Convert configuration to settings view data.
+- `library-settings-tabs.tsx`Set partition tab Switch.
+- `library-settings-panel.tsx`Single settings partition panel.
+- `library-settings-types.ts`Set component family type.
+- index.ts: component family public export.
 
-## 规则
+## Rules
 
-- 产品文案来自 `library-config.ts`。
-- 后续真实设置项应先补类型和 view model，再交给展示组件渲染。
-- 不要把后端 API 字段直接写进展示组件。
+- Product copy comes from library-config.ts.
+- Subsequent real setting items should first supplement type and view modelthen pass to display component for rendering.
+- Don't move backend logic to frontend. API Fields written directly into presentation components.

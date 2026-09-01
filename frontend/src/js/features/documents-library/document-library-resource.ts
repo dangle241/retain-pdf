@@ -1,6 +1,6 @@
-// 文档中心网格数据源的 resource 包装(计划 F2),镜像
-// recent-jobs/library-books-resource.js 的形状,供 recent-jobs 引擎的
-// loader.js/bindings.js 当作 libraryBooksResource 注入使用。
+// Documentation center grid data source resource wrap (plan F2), mirror.
+// recent-jobs/library-books-resource.js shape, for recent-jobs engine's
+// loader.js/bindings.js treat as libraryBooksResource Use injection.
 
 import { createResource } from "../../app-framework/resource.js";
 import { RECENT_JOBS_PAGE_SIZE } from "../recent-jobs/pagination.js";

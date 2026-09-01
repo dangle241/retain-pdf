@@ -2,10 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// DetailApp(任务详情页 React 编排根)组件级测试:
-// 经 tests/helpers/jsx-loader.mjs 的 esbuild 钩子直接加载 .jsx。
-// 校验:加载编排(overview → markdown)、setText/setActionLink 适配、
-// 命令式孤岛(产物清单)落地、事件流按需加载与模态框开合。
+// DetailApp (Task Detail Page React Orchestration Root) component-level test:
+// .jsx loaded directly via esbuild hook in tests/helpers/jsx-loader.mjs.
+// Validate:Load Orchestration(overview → markdown)、setText/setActionLink adaptation,
+// Imperative Island (Artifact List) Implement landing, on-demand event stream loading, and modal open/close.
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost/detail.html?job_id=job-react-detail" });
 for (const key of ["window", "document", "HTMLElement", "HTMLInputElement", "HTMLSelectElement", "CustomEvent", "Event", "KeyboardEvent", "MouseEvent", "Node", "MutationObserver", "NodeFilter"]) {
@@ -17,10 +17,10 @@ for (const key of ["window", "document", "HTMLElement", "HTMLInputElement", "HTM
 }
 globalThis.window = dom.window;
 globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
-// Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
-// (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
-// animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
-// 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。
+// Radix Presence/Tabs (introduced in Phase B) require cancelAnimationFrame under jsdom
+// (TabsContent mount animation timer cleanup) and getComputedStyle (Presence reads
+// animation-name to determine if exit animation ended) â implemented on jsdom window, but not
+// copied to bare global like requestAnimationFrame; adding them here.
 globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
 globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
 globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -33,7 +33,7 @@ function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// 并行跑测时进程负载不定,固定等待会抖;轮询直到条件成立(上限 3s)
+// Process load varies during parallel tests, fixed wait causes jitter; poll until condition met (max 3s)
 async function waitFor(predicate, description) {
   const deadline = Date.now() + 3000;
   while (Date.now() < deadline) {
@@ -42,7 +42,7 @@ async function waitFor(predicate, description) {
     }
     await wait(20);
   }
-  assert.fail(`等待超时:${description}`);
+assert.fail(`Wait timeout:${description}`);
 }
 
 function click(element) {
@@ -97,14 +97,14 @@ function makePorts() {
     ],
   };
   const eventItems = [
-    { seq: 1, event: "stage_transition", level: "info", message: "开始翻译", display_stage: "translation" },
+    { seq: 1, event: "stage_transition", level: "info", message: "Start translation", display_stage: "translation" },
     { seq: 2, event: "stage_transition", level: "info", message: "渲染完成", display_stage: "render" },
   ];
   const calls = { events: [] };
   return {
     calls,
     getJobId: () => "job-react-detail",
-    configPort: { detailShareNote: () => "分享提示文案(测试)" },
+    configPort: { detailShareNote: () => "Share prompt(测试)" },
     resumePort: { submit: async () => ({ job_id: "job-next" }) },
     dataPort: {
       apiPrefix: "/api/v1",
@@ -115,7 +115,7 @@ function makePorts() {
         resumePlan: { can_resume: true, from_stage: "translation" },
       }),
       loadMarkdownPayload: async () => ({
-        content: "# 测试文档\n\n正文内容",
+content: "# Test documentation\n\nBody content",
         file_name: "book.md",
         json_url: "/api/v1/jobs/job-react-detail/markdown",
         raw_url: "/api/v1/jobs/job-react-detail/markdown/raw",
@@ -126,7 +126,7 @@ function makePorts() {
         return { items: eventItems };
       },
       fetchProtected: async () => {
-        throw new Error("本测试不应发起受保护请求");
+        throw new Error("Test must not initiate protected requests.");
       },
       rerunJob: async () => ({}),
       resumeJob: async () => ({}),
@@ -134,7 +134,7 @@ function makePorts() {
   };
 }
 
-test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框", async () => {
+test("DetailApp: load orchestration, copy adaptation, artifact isolation, event flow modal", async () => {
   const host = dom.window.document.createElement("div");
   host.id = "detail-root";
   dom.window.document.body.appendChild(host);
@@ -147,77 +147,77 @@ test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框"
     getJobId: ports.getJobId,
     resumePort: ports.resumePort,
   }));
-  // 等待 overview + markdown 两段异步编排全部落地
+// Wait for both overview + markdown async orchestrations to land
   await waitFor(
-    () => /已加载/.test(byId("detail-markdown-status")?.textContent || ""),
-    "markdown 状态就绪",
+() => /loaded/.test(byId("detail-markdown-status")?.textContent || ""),
+"markdown status ready",
   );
 
-  // 头部:job id 与分享提示走 setText 适配
+// Header: job id and share prompt use setText adaptation
   assert.equal(byId("detail-job-id")?.textContent, "job-react-detail");
-  assert.equal(byId("detail-head-note")?.textContent, "分享提示文案(测试)");
+assert.equal(byId("detail-head-note")?.textContent, "Share prompt text(test)");
   assert.notEqual(byId("detail-status-summary")?.textContent, "-");
 
-  // 断点恢复:resumePlan 可恢复 → 文案与按钮状态(命令式写入)
-  assert.match(byId("detail-rerun-status")?.textContent || "", /可从 translation 恢复/);
+// Breakpoint recovery: resumePlan recoverable â text and button state (imperative write)
+assert.match(byId("detail-rerun-status")?.textContent || "", /recoverable from translation/);
   assert.equal(byId("detail-rerun-btn")?.disabled, false);
 
-  // 动作链接:setActionLink 适配(reader/pdf 均就绪)
+// Action links: setActionLink adaptation (reader/pdf both ready)
   assert.equal(byId("detail-reader-btn")?.classList.contains("disabled"), false);
   assert.equal(byId("detail-reader-btn")?.getAttribute("aria-disabled"), "false");
   assert.equal(byId("detail-pdf-btn")?.classList.contains("disabled"), false);
 
-  // 产物清单:保留的 artifacts.js 经 overview-renderer 命令式写入 React 容器
-  assert.equal(byId("detail-artifacts-summary")?.textContent, "共 2 项");
+// Artifact list: retained artifacts.js written to React container via overview-renderer imperatively
+assert.equal(byId("detail-artifacts-summary")?.textContent, "2 items total");
   assert.equal(host.querySelectorAll(".detail-artifact-row").length, 2);
 
-  // Markdown:markdown-flow 复用 → 状态与预览
-  assert.match(byId("detail-markdown-status")?.textContent || "", /已加载 \/markdown JSON/);
-  assert.match(byId("detail-markdown-preview")?.textContent || "", /# 测试文档/);
+// Markdown: markdown-flow reuse â status and preview
+assert.match(byId("detail-markdown-status")?.textContent || "", /loaded \/markdown JSON/);
+assert.match(byId("detail-markdown-preview")?.textContent || "", /# Test Document/);
   assert.equal(byId("detail-markdown-image-count")?.textContent, "0");
 
-  // 阶段时间线模态框(阶段 C 收官批换 Radix Dialog,不 forceMount:关闭态
-  // 整个 Content 不挂载于 DOM,断言从"hidden class 真假"改为"是否挂载"):
-  // 打开渲染条目,Escape 关闭
-  assert.equal(byId("detail-stage-history-modal"), null, "初始未打开时不挂载");
+// Stage timeline modal (Phase C final batch replaced with Radix Dialog, no forceMount: closed state
+// Entire Content not mounted to DOM, assertion changed from "hidden class truth" to "is mounted"):
+// Open to render entries, Escape to close
+assert.equal(byId("detail-stage-history-modal"), null, "Not mounted when initially closed");
   click(byId("detail-open-stage-history-btn"));
   await waitFor(
     () => byId("detail-stage-history-modal") !== null,
-    "阶段时间线模态框打开",
+"stage timeline modal opened",
   );
-  // Radix Dialog Content 走 Portal,渲染到 document.body 而不是 host 子树内,
-  // 断言从 host 作用域改成整个 document(镜像其余已迁移对话框测试的先例)。
+// Radix Dialog Content uses Portal, renders to document.body instead of host subtree,
+// Assertion scope changed from host to entire document (mirroring other migrated dialog test precedents).
   assert.equal(dom.window.document.querySelectorAll(".detail-stage-item").length, 2);
   assert.match(dom.window.document.querySelector(".detail-stage-item .detail-stage-title")?.textContent || "", /^1\. /);
   dom.window.document.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   await waitFor(
     () => byId("detail-stage-history-modal") === null,
-    "Escape 关闭阶段时间线模态框",
+"Escape closes stage timeline modal",
   );
 
-  // 事件流:按需分页拉全量 + 页内缓存 + 按钮文案变为「查看」
-  assert.equal(byId("detail-open-events-btn")?.textContent, "按需加载");
-  assert.equal(byId("detail-events-modal"), null, "初始未打开时不挂载");
+// Event flow: on-demand paginated full fetch + page cache + button text becomes "View"
+assert.equal(byId("detail-open-events-btn")?.textContent, "Load on demand");
+assert.equal(byId("detail-events-modal"), null, "Not mounted when initially closed");
   click(byId("detail-open-events-btn"));
   await waitFor(
     () => dom.window.document.querySelectorAll(".detail-event-item").length === 2,
-    "事件流条目渲染",
+"event flow entries rendered",
   );
-  assert.ok(byId("detail-events-modal"), "事件流模态框已挂载");
+assert.ok(byId("detail-events-modal"), "Event flow modal mounted");
   assert.deepEqual(ports.calls.events, [["job-react-detail", "/api/v1", 200, 0]]);
-  assert.equal(byId("detail-events-status")?.textContent, "全部事件 · 2 条");
-  assert.equal(byId("detail-open-events-btn")?.textContent, "查看");
+assert.equal(byId("detail-events-status")?.textContent, "All events Â· 2 items");
+assert.equal(byId("detail-open-events-btn")?.textContent, "View");
 
-  // 再次打开不重复请求(页内缓存)
+// Re-opening does not repeat request (page cache)
   click(byId("detail-close-events-btn"));
   await waitFor(
     () => byId("detail-events-modal") === null,
-    "关闭事件流模态框",
+"close event flow modal",
   );
   click(byId("detail-open-events-btn"));
   await waitFor(
     () => byId("detail-events-modal") !== null,
-    "再次打开事件流模态框",
+"re-open event flow modal",
   );
   assert.equal(ports.calls.events.length, 1);
 
@@ -225,7 +225,7 @@ test("DetailApp:加载编排、文案适配、产物孤岛、事件流模态框"
   host.remove();
 });
 
-test("DetailApp:缺少 job_id 时提示且不发起请求", async () => {
+test("DetailApp: prompt and no request when job_id is missing", async () => {
   const host = dom.window.document.createElement("div");
   dom.window.document.body.appendChild(host);
 
@@ -247,8 +247,8 @@ test("DetailApp:缺少 job_id 时提示且不发起请求", async () => {
     resumePort: { submit: async () => ({}) },
   }));
   await waitFor(
-    () => host.querySelector("#detail-head-note")?.textContent === "缺少 job_id，请通过 detail.html?job_id=... 打开。",
-    "缺少 job_id 提示",
+() => host.querySelector("#detail-head-note")?.textContent === "Missing job_id, please open via detail.html?job_id=...",
+"missing job_id prompt",
   );
   assert.equal(overviewCalls, 0);
 

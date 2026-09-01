@@ -85,7 +85,7 @@ def test_promptfoo_provider_suppresses_success_stderr(monkeypatch, capsys) -> No
         print("replay cache hit", file=sys.stderr)
         return {
             "replay_result": {
-                "translated_text": "这是一条回放翻译。",
+                "translated_text": "Playback translation.",
                 "final_status": "translated",
             },
             "replay_error": None,
@@ -113,7 +113,7 @@ def test_promptfoo_provider_suppresses_success_stderr(monkeypatch, capsys) -> No
 
     captured = capsys.readouterr()
     assert captured.err == ""
-    assert result["output"] == "这是一条回放翻译。"
+assert result["output"] == "This is a replay translation."
     assert "replay_logs" in result["metadata"]
     assert "replay cache hit" in result["metadata"]["replay_logs"]
 
@@ -127,7 +127,7 @@ def test_promptfoo_provider_replays_from_case_artifact_when_job_root_missing(mon
             print("artifact replay log", file=sys.stderr)
             return {
                 "replay_result": {
-                    "translated_text": "来自 artifact 的翻译。",
+"translated_text": "Translation from artifact.",
                     "final_status": "translated",
                 },
                 "replay_error": None,
@@ -160,5 +160,5 @@ def test_promptfoo_provider_replays_from_case_artifact_when_job_root_missing(mon
 
         captured = capsys.readouterr()
         assert captured.err == ""
-        assert result["output"] == "来自 artifact 的翻译。"
+assert result["output"] == "Translation from artifact."
         assert "artifact replay log" in result["metadata"]["replay_logs"]

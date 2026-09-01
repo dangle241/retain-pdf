@@ -1,9 +1,9 @@
 import { stringifyPretty } from "../../composition/external.js";
 
-// 翻译调试详情/重放面板共用的两个小展示块——JSX 重写
-// features/status-detail/formatters.js 的 renderField/renderTextBlock(两者
-// 都是 markup 拼接,蓝图 §1.1 判死;stringifyPretty 是纯格式化函数,保留
-// 直接 import)。
+// Debug details/Two small display blocks shared by the replay panel.ââJSX rewrite
+// DOWNLOAD_ACTION_IDS from contracts/, not in restricted area, import as-is). id strings
+// keep each one. — smoke DOM contract (blueprint §0) these id assertions.
+<ItemRow
 
 export function InfoRow({ label, value }) {
   return (

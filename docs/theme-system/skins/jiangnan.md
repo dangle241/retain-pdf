@@ -1,30 +1,30 @@
-# 皮肤：素纸（id 仍为 `jiangnan`）
+# Skin: Plain Paper (id Still `jiangnan`）
 
-## 为什么旧版显「土」
+## Incomplete input. Provide full sentence or context.「dated」
 
-| 问题 | 旧值倾向 | 观感 |
+| Issue | Old value preference | look and feel |
 |------|----------|------|
-| 底色过暖 | `#ede8e1` 米黄 | 夯土、陈旧 |
-| 纸色发黄 | `#f7f3eb` | 廉价宣纸黄 |
-| 强调偏铜绿 | `#2f6f5e` | 锈绿、俗气 |
-| 点缀砖朱/亮金 | 砖红 + 鎏金 | 装修样板间 |
+| Background too warm | `#ede8e1` Beige | rammed earth, aged |
+| Paper yellowed | `#f7f3eb` | Cheap Xuan paper yellow |
+| Emphasize patina | `#2f6f5e` | Rust green, tacky. |
+| Brick red accent./Bright Gold | Brick red + Gilding | Model room |
 
-## 修正方向
+## Correction direction
 
-**素雅 = 冷灰中性大面 + 一点冷青绿 + 干净红只做状态。**
+**Elegant = Neutral gray large surface + A touch of cool cyan-green + Clean Red handles state only.**
 
-| Token | 新值 | 说明 |
+| Token | New value | Description |
 |-------|------|------|
-| `--bg` | `#f1f0ed` | 冷石灰，几乎不黄 |
-| `--paper` | `#fbfaf8` | 近白纸 |
-| `--ink` / `--muted` / `--line` | 中性冷灰 | 不跟暖黄 |
-| `--accent` | `#2a5f57` | 冷青绿，非橄榄绿 |
-| `--selection` | `#e8efed` | 极浅冷罩 |
-| `--danger` | `#c23b32` | 干净红 |
-| `--gold` | `#8a7a5c` | 哑青铜，仅小标签 |
+| `--bg` | `#f1f0ed` | Cold lime, barely yellow. |
+| `--paper` | `#fbfaf8` | Start clean. Minimalize. Ship zero. Add only if needed. |
+| `--ink` / `--muted` / `--line` | Neutral cool gray | Avoid warm yellow. |
+| `--accent` | `#2a5f57` | Cool teal, not olive green |
+| `--selection` | `#e8efed` | Ultra-light cold shield |
+| `--danger` | `#c23b32` | Clean Red |
+| `--gold` | `#8a7a5c` | Mute Bronze, small tags only |
 
-## 纪律（不变）
+## Discipline (immutable)
 
-1. 大面积只用灰与纸，不用大块绿/金/朱。  
-2. 不贴梅枝亭台印章。  
-3. 层次靠明度与间距，不靠脏纹理。  
+1. Use gray and paper tones extensively; avoid large green blocks./gold/Zhu.  
+2. Don't paste branch pavilion terrace seal.  
+3. Hierarchy via lightness and spacing, not messy textures.  

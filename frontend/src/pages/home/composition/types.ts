@@ -1,5 +1,5 @@
-// composition 层公共类型。HomeServices / HomeFeatures 表面 API 不用 any；
-// 深层 payload 用 unknown；store/port 复用已有模块类型。
+// composition Layer common types.HomeServices / HomeFeatures Surface API Not needed. any；
+// Use unknown for deep payloads; reuse existing module types for store/port.
 
 import type {
   Store,
@@ -22,8 +22,8 @@ import type {
 } from "../features/library/types.js";
 
 /**
- * 通用 app-framework store。
- * 用 Store 默认参（未建模 snapshot/actions），避免把消费方推成 never/unknown。
+* General app-framework store.
+* Use Store default params (unmodeled snapshot/actions) to avoid forcing consumers to never/unknown.
  */
 export type AppStore = Store;
 
@@ -85,7 +85,7 @@ export type AppUpdateFeature = {
 export type AppActionsFeature = {
   checkApiConnectivity: () => Promise<unknown> | unknown;
   handleOpenOutputDir: () => unknown;
-  /** React SubmitEvent 与 DOM Event 均允许 */
+/** Allow all for React SubmitEvent and DOM Event. */
   submitForm: (event?: { preventDefault?: () => void } | null) => unknown;
 };
 
@@ -121,7 +121,7 @@ export type AppShellFeature = {
   initializeIdleView: () => void;
 };
 
-/** 装配期逐步填满的 features 注册表 */
+/** Populated incrementally during assembly features Registry */
 export type HomeFeatures = {
   workflowFeature?: WorkflowFeature;
   uploadFeature?: UploadFeature;
@@ -159,7 +159,7 @@ export type HomeStores = {
 
 // ── Domain bags ───────────────────────────────────────────────────────
 
-/** 事件处理函数表（viewPort.bindEvents 写入 handlersRef） */
+/** Event handler table (viewPort.bindEvents writes to handlersRef) */
 export type HandlersBag = {
   [key: string]: ((...args: unknown[]) => unknown) | undefined | null;
 };
@@ -226,7 +226,7 @@ export type LibraryActions = RecentJobActions & {
   openSourceReader: LibraryController["openSourceReader"];
   translateDocument: LibraryController["translateDocument"];
   deleteDocument: LibraryController["deleteDocument"];
-  /** 选择集可能是 unknown[]（view state），参数放宽 */
+  /** Selection set may be unknown[]（view state), loosen parameters */
   deleteDocuments: (
     documentIds?: Array<string | null | undefined | unknown>,
   ) => Promise<DeleteDocumentsResult>;
@@ -247,7 +247,7 @@ export type HomeBookDetail = {
   dialogStore: DialogStore<LibraryCardItem | null>;
 };
 
-/** 分类/合集控制器（createCollectionsController 返回面） */
+/** Category/Collection controller (createCollectionsController back-face). */
 export type CollectionRecord = {
   collection_id?: string;
   name?: string;
@@ -284,7 +284,7 @@ export type CollectionsController = {
   fetchFolderBooks: (collectionId: string) => Promise<LibraryCardItem[]>;
 };
 
-/** createStore 返回的 actions 经 BoundStoreActions 后难精确建模；消费面只认 bump */
+/** Actions returned by createStore via BoundStoreActions are hard to model precisely; consumer side only recognizes bump */
 export type CollectionsReloadSignal = {
   getSnapshot: () => { version: number };
   subscribe: (listener: (snapshot: { version: number }, meta?: unknown) => void) => () => void;
@@ -342,7 +342,7 @@ export type HomeStatusDetail = {
   controller: StatusDetailController;
 };
 
-/** 主页阅读入口：跳转独立 reader.html（不再维护 dialogStore / iframe）。 */
+/** Home Reading Entry: Open Separately reader.htmlProject archived. dialogStore / iframe）。 */
 export type HomeReader = {
   openReader: (jobId: string, anchor?: unknown) => unknown;
 };
@@ -421,7 +421,7 @@ export type HomeServices = {
   statusCard: HomeStatusCard;
   statusDetail: HomeStatusDetail;
   reader: HomeReader;
-  /** text-store 的 selector 帮助函数（配合 useStoreSnapshot） */
+/** Selector helper function for text-store (with useStoreSnapshot) */
   textOf: (snapshot: unknown, id: string, fallback?: unknown) => unknown;
   uploadDomRefs: UploadDomRefs;
   uploadViewActions: UploadViewActions;
@@ -429,7 +429,7 @@ export type HomeServices = {
   workflowDialog: WorkflowDialogRuntime;
 };
 
-/** buildHomeServices 的 views 入参 */
+/** views input for buildHomeServices */
 export type HomeServicesViews = {
   textStore: {
     store: AppStore;
@@ -449,7 +449,7 @@ export type HomeServicesViews = {
   workflowDialog: WorkflowDialogRuntime;
 };
 
-/** buildHomeServices 的 domains 入参 */
+/** domains input for buildHomeServices */
 export type HomeServicesDomains = {
   credentials: {
     browserCredentialsFeature: BrowserCredentialsFeature;

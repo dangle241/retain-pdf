@@ -195,7 +195,7 @@ def build_payload_prewarm(
         stage="render_preprocess",
         substage="render_prewarm",
         message=message,
-        stage_detail="渲染 payload 预热完成",
+stage_detail="Render payload Warm-up complete.",
         progress_current=2,
         progress_total=3,
         elapsed_ms=int(elapsed_s * 1000),

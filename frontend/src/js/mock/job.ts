@@ -9,9 +9,9 @@ export function buildMockStageHistory(scenario: string): StageHistoryEntry[] {
   const stages = [
     { key: "queued", detail: "上传 PDF", duration_ms: scenario === "upload" ? null : 18_000 },
     { key: "ocr_processing", detail: "OCR 解析", duration_ms: scenario === "ocr" ? null : 126_000 },
-    { key: "translating", detail: "翻译正文", duration_ms: scenario === "translate" ? null : 214_000 },
+    { key: "translating", detail: "translating main text", duration_ms: scenario === "translate" ? null : 214_000 },
     { key: "rendering", detail: "渲染 PDF", duration_ms: scenario === "render" || scenario === "failed" ? null : 74_000 },
-    { key: "finished", detail: "产物发布", duration_ms: scenario === "done" ? 28_000 : null },
+    { key: "finished", detail: "Publish Artifacts", duration_ms: scenario === "done" ? 28_000 : null },
   ];
   const order = ["upload", "ocr", "translate", "render", "failed", "done"];
   const currentIndex = order.indexOf(scenario);
@@ -52,7 +52,7 @@ export function buildMockJobPayload(scenario = currentMockScenario()): JobLike {
       current: 2,
       total: 12,
       percent: 17,
-      stageDetail: "正在上传 PDF，准备提交 OCR 任务",
+stageDetail: "Uploading PDF, ready to submit OCR task",
       activeMs: 18_000,
       totalMs: 18_000,
     },
@@ -63,7 +63,7 @@ export function buildMockJobPayload(scenario = currentMockScenario()): JobLike {
       current: 5,
       total: 12,
       percent: 42,
-      stageDetail: "正在执行 OCR，第 5/12 页",
+stageDetail: "Performing OCR, page 5/12",
       activeMs: 126_000,
       totalMs: 144_000,
     },
@@ -78,7 +78,7 @@ export function buildMockJobPayload(scenario = currentMockScenario()): JobLike {
       current: 18,
       total: 55,
       percent: 33,
-      stageDetail: "正在翻译正文与公式，第 18/55 批",
+stageDetail: "Translating body text and formulas, batch 18/55",
       activeMs: 214_000,
       totalMs: 358_000,
     },
@@ -93,7 +93,7 @@ export function buildMockJobPayload(scenario = currentMockScenario()): JobLike {
       current: 120,
       total: 900,
       percent: 13,
-      stageDetail: "正在翻译正文内容，第 120/900 批",
+stageDetail: "Translating body content, batch 120/900",
       activeMs: 236_000,
       totalMs: 380_000,
       backgroundStages: [
@@ -118,7 +118,7 @@ export function buildMockJobPayload(scenario = currentMockScenario()): JobLike {
       current: 8,
       total: 12,
       percent: 67,
-      stageDetail: "正在渲染第 8/12 页",
+stageDetail: "Rendering page 8/12",
       activeMs: 74_000,
       totalMs: 512_000,
     },
@@ -129,7 +129,7 @@ export function buildMockJobPayload(scenario = currentMockScenario()): JobLike {
       current: 12,
       total: 12,
       percent: 100,
-      stageDetail: "处理完成，可以下载结果",
+stageDetail: "Processing complete, results available for download",
       activeMs: 28_000,
       totalMs: 540_000,
     },
@@ -140,7 +140,7 @@ export function buildMockJobPayload(scenario = currentMockScenario()): JobLike {
       current: 9,
       total: 12,
       percent: 75,
-      stageDetail: "渲染阶段失败",
+stageDetail: "Rendering stage failed",
       activeMs: 96_000,
       totalMs: 496_000,
     },
@@ -176,7 +176,7 @@ export function buildMockJobPayload(scenario = currentMockScenario()): JobLike {
       active_stage_elapsed_ms: scenarioConfig.activeMs,
       total_elapsed_ms: scenarioConfig.totalMs,
       retry_count: status === "failed" ? 1 : 0,
-      terminal_reason: status === "failed" ? "渲染器退出码非零" : status === "succeeded" ? "completed" : "",
+      terminal_reason: status === "failed" ? "renderer exit code non-zero" : status === "succeeded" ? "completed" : "",
       stage_history: buildMockStageHistory(normalized),
     },
     invocation: {
@@ -239,11 +239,11 @@ export function buildMockJobPayload(scenario = currentMockScenario()): JobLike {
     },
     failure: status === "failed"
       ? {
-          summary: "任务失败，但这是前端 mock 场景。",
+summary: "Task failed, but this is a frontend mock scenario.",
           category: "mock_render_failure",
           stage: "render",
-          root_cause: "用于 UI 调试的模拟失败。",
-          suggestion: "切换 ?mock=succeeded 查看成功态。",
+root_cause: "Simulated failure for UI debugging.",
+suggestion: "Switch to ?mock=succeeded to view success state.",
           retryable: true,
         }
       : null,

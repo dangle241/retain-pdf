@@ -1,4 +1,4 @@
-// 详情弹窗 panel 共用小工具（样式 / 图标），无业务。
+// Details popup panel Shared widget (style / Icon only, no business logic.
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button.jsx";

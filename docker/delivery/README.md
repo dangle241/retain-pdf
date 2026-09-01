@@ -1,180 +1,180 @@
 
 
-**痛点**
+**Pain points**
 
-外文论文、教材、技术文档信息密度高，但读起来费劲：
+Foreign papers, textbooks, and technical documents have high information density but are difficult to read:
 
-- 原文阅读门槛高，效率低
-- 普通翻译工具只吐纯文本，公式、图片、排版基本全崩
-- 译后结果难整理、难分享、难归档
+- Reading the original text is difficult and inefficient.
+- Plain-text only. Formulas, images, layout break.
+- Hard to organize, share, archive.
 
-**RetainPDF 做的事**
+**RetainPDF Actions**
 
-上传 PDF，一键拿到保留原始排版的中文译文。
+Upload PDF for one-click Chinese translation preserving original layout.
 
-- 输出译文 PDF、Markdown、ZIP 打包，按需取用
-- 网页端直接操作，也支持命令行和 API 接入
-- 图片型 PDF（扫描件、截图版）同样能处理，不只限于可编辑 PDF
+- output translation PDF、Markdown、ZIP Package, use as needed.
+- Direct operation via web interface; also supports command line and API access
+- Image PDFHandles scanned copies and screenshots, not just editable files. PDF
 
-**翻译效果示意**
+**Translation preview**
 
-普通 SCI 论文翻译效果：
+Typical SCI paper translation effect:
 
-![普通 SCI 论文翻译效果](./g-1.png)
+https://./g-1.png
 
-图片型 PDF 翻译对比效果：
+Image PDF translation comparison results:
 
-![图片型 PDF 翻译对比效果](./g-2.png)
+https://./g-2.png
 
-**和同类方案比，好在哪**
+**Compared to similar solutions, what are the advantages?**
 
-- 对比 [PDFMathTranslate](https://github.com/PDFMathTranslate/PDFMathTranslate)：补上了图片型 PDF 的短板，行内公式与正文的衔接更自然，排版崩掉的概率明显低
-- 对比 Doc2X 等闭源方案：可自主部署、自己掌控接口和结果文件；实测整体效果也更好
-- 实测产出接近直接可用，不需要再手工修排版
-
-
+- Compare [PDFMathTranslate](https://github.com/PDFMathTranslate/PDFMathTranslate)fills the gap for image-based PDF Weakness: inline formulas blend naturally with text, significantly reducing layout breakage risk.
+- Compare Doc2X Wait for closed-source solution: self-deployable, full control over API and result files; empirically superior overall quality.
+- Tested output near production-ready; no manual reformatting needed.
 
 
-# 小白用户
 
-如果你只是想把服务跑起来，按下面步骤做就够了。
 
-## 1. 先确认机器环境
+# Novice user
 
-建议环境：
+If you just want to get the service running, follow the steps below.
 
-- 系统：`Linux` 优先，推荐 `Ubuntu 22.04 / 24.04`
-- CPU 架构：当前镜像按 `x86_64 / amd64` 构建，不是 ARM 版本
-- CPU：至少 `4 核`
-- 内存：至少 `8GB`，推荐 `16GB` 或更高
-- 磁盘：至少预留 `10GB` 可用空间
-- 网络：需要能访问 Docker Hub、MinerU 和你的模型 API
+## 1. Verify machine environment.
 
-说明：
+Recommended environment:
 
-- 这个项目主要吃 CPU、内存和网络，不依赖独立显卡
-- 如果你的机器是 `Mac M`、树莓派、ARM 服务器，请先确认是否具备 `x86_64` 兼容运行环境
-- 如果只是轻量自用，`4 核 + 8GB` 可以起服务
-- 如果你要多人同时用，建议从 `8 核 + 16GB` 起步
+- System:`Linux` Priority, Recommended. `Ubuntu 22.04 / 24.04`
+- CPU Architecture: current image built for x86_64 / amd64, not ARM version
+- CPUAt least `4 core`
+- Memory: at least `8GB`, recommended `16GB` or higher
+- Disk: at least `10GB` Available space
+- Network: access required. Docker Hub、MinerU and your model API
 
-## 2. 安装 Docker
+Note:
 
-先确认系统里已经安装：
+- This project mainly eats. CPUMemory network no discrete GPU
+- If your machine is `Mac M`Raspberry PiARM Server, confirm availability first. `x86_64` Runtime Environment Compatibility
+- For lightweight personal use, 4 cores + 8GB can start the service.
+- If multiple users need simultaneous access, start from 8 cores + 16GB
+
+## 2. Install Docker
+
+First confirm already installed on system:
 
 - `docker`
 - `docker compose`
 
-安装完成后，先自检：
+Install complete. Self-check first:
 
 ```bash
 docker --version
 docker compose version
 ```
 
-## 3. 拉取 GitHub 项目
+## 3. Pull GitHub Project
 
 ```bash
 git clone https://github.com/wxyhgk/retain-pdf.git
 cd retain-pdf/docker/delivery
 ```
 
-## 4. 启动服务
+## 4. Start service
 
 ```bash
 docker compose up -d
 ```
 
-启动完成后，默认访问地址：
+After startup, default access address:
 
 ```text
 http://127.0.0.1:40001
 ```
 
-# 专业用户
+# Power user
 
-## 文件作用
+## File purpose
 
 - `docker-compose.yml`
-  Docker 编排入口。默认直接拉取 Docker Hub 镜像并启动 `app` + `web`。
+  Docker Orchestration entry. Default: direct pull. Docker Hub Mirror and start `app` + `web`。
 - `docker/app.env`
-  后端运行参数。控制容器内路径、字体、端口、并发和上传限制。
+  Backend runtime parameters. Controls container paths, fonts, ports, concurrency, and upload limits.
 - `docker/web.env`
-  Docker 公共版前端运行参数。控制前端默认注入的后端 key、模型默认值等。
+  Docker Public frontend runtime parameters. Control the default backend injected by the frontend. keyModel defaults etc.
 - `docker/auth.local.json`
-  Rust API 鉴权白名单。前端和 CLI 都需要用这里配置的后端 key 才能访问接口。
+  Rust API Authentication whitelist. Frontend and CLI All need to use the backend configured here. key Only then can the interface be accessed.
 
-## 常见修改项
+## Common changes
 
 ### docker/auth.local.json
 
 - `api_keys`
-  Rust API 允许访问的后端 key 列表。前端请求头里的 `X-API-Key` 必须命中这里的某一个值。
+  Rust API Allowed backends key List. In frontend request headers. `X-API-Key` Must match one of the values here.
 - `max_running_jobs`
-  后端允许同时运行的任务数上限。
+  Backend max concurrent tasks.
 - `simple_port`
-  multipart 扁平字段提交接口在容器内监听的端口，默认 `42000`。对外通常不直接暴露。
+  multipart Flat-field submission interface container listen port. Default: `42000`Externally expose nothing directly.
 
 ### docker/web.env
 
 - `FRONT_API_BASE`
-  前端内部使用的 API 基地址。通常留空，让前端自动走同源代理。
+  Internal frontend use only. API Base URL. Leave empty; frontend uses same-origin proxy.
 - `FRONT_X_API_KEY`
-  前端自动附带给后端的 `X-API-Key`。必须和 `docker/auth.local.json` 中某个值一致。
+  Frontend auto-attaches to backend. `X-API-Key`Must and required. `docker/auth.local.json` Value must match.
 - `FRONT_OCR_PROVIDER`
-  前端默认 OCR provider。当前建议填 `paddle`，也可以切成 `mineru`。
+  Frontend default OCR providerCurrent suggestion fill `paddle`can also be cut `mineru`。
 - `FRONT_PADDLE_TOKEN`
-  前端默认带出的 Paddle token。留空时，最终用户自己在页面弹窗里填写。
+  Frontend default Paddle tokenLeave blank. User fills in popup.
 - `FRONT_MINERU_TOKEN`
-  前端默认带出的 MinerU token。留空时，最终用户自己在页面弹窗里填写。
+Frontend default MinerU token. Leave empty for end user to fill in popup.
 - `FRONT_MODEL_API_KEY`
-  前端默认带出的模型 API key。留空时由最终用户自己填写。
+  Default frontend model API keyLeave blank for end user to fill.
 - `FRONT_MODEL`
-  前端默认模型名，例如 `deepseek-v4-flash`。
+  Frontend default model name, e.g. `deepseek-v4-flash`。
 - `FRONT_BASE_URL`
-  前端默认模型服务地址，例如 `https://api.deepseek.com/v1`。
+  Frontend default model service address, e.g. `https://api.deepseek.com/v1`。
 
 ### docker/app.env
 
 - `PROJECT_ROOT`
-  容器内项目根目录。
+  Project root directory inside container.
 - `RUST_API_ROOT`
-  容器内 Rust API 目录。
+Inside container Rust API directory.
 - `RUST_API_DATA_ROOT`
-  Rust API 运行时数据根目录，主要放上传文件、任务目录、下载缓存和数据库。`RUST_API_DATA_DIR` 仅作为旧别名兼容。
+  Rust API Runtime data root directory. Stores uploaded files, task directories, download cache, and database.`RUST_API_DATA_DIR` Legacy alias compatibility only.
 - `OUTPUT_ROOT`
-  任务输出目录。
+  Task output directory.
 - `PYTHON_BIN`
-  后端调用 Python 脚本使用的解释器。
+  Backend call Python Interpreter used by the script.
 - `TYPST_BIN`
-  Typst 可执行文件路径。
+  Typst Executable path.
 - `RETAIN_PDF_FONT_PATH`
-  默认中文字体文件路径。
+  Default Chinese font file path.
 - `RETAIN_PDF_TYPST_FONT_FAMILY`
-  Typst 默认字体族名称。
+  Typst Default font family name.
 - `RUST_API_PORT`
-  完整 API 在容器内监听的端口，默认 `41000`。
+Full API default listening port inside container 41000.
 - `RUST_API_SIMPLE_PORT`
-  multipart 扁平字段提交接口在容器内监听的端口，默认 `42000`。
+multipart flat field submit interface port inside container, default 42000.
 - `RUST_API_MAX_RUNNING_JOBS`
-  最大并发运行任务数。
+  Maximum concurrent running tasks.
 - `RUST_API_UPLOAD_MAX_BYTES`
-  后端普通上传大小限制，`0` 表示不限制；当前交付包建议写成 `209715200`。
+  Backend default upload size limit,`0` Indicates no limit; current delivery package suggests writing as. `209715200`。
 - `RUST_API_UPLOAD_MAX_PAGES`
-  后端普通上传页数限制，`0` 表示不限制；当前交付包建议写成 `300`。
+Backend normal upload page count limit; 0 means no limit; current delivery package suggests writing as 300.
 
-## 说明
+## Notes
 
-- 当前 compose 默认暴露：
-  - `40001`：前端页面
-  - `41000`：完整 Rust API
-  - `42000`：multipart 扁平字段提交接口，只提供 `/health` 和 `POST /api/v1/translate/bundle`
-- 前端通过同源代理访问后端；普通用户通常不需要手工理解 `API Base`
-- 当前主线前端默认 OCR provider 是 `paddle`
-- 页面里显示的大小 / 页数限制来自当前后端运行配置，不应再按旧的 MinerU 固定上游限制理解
+- Current compose exposes by default:
+- 40001: frontend page
+- 41000: full Rust API
+- 42000: multipart flat field submit API, only provides /health and POST /api/v1/translate/bundle
+- Frontend accesses backend via same-origin proxy; regular users typically need not understand. `API Base`
+- Current mainline frontend default OCR provider is paddle
+- Display size / Page limit from current backend runtime config; do not use old value. MinerU Understanding Fixed Upstream Limits
 
-## 可选默认值
+## Optional default value
 
-如果你想让前端默认带出下游配置，可以继续填写：
+If you want the frontend to default to downstream config, continue filling:
 
 - `FRONT_OCR_PROVIDER`
 - `FRONT_PADDLE_TOKEN`
@@ -183,11 +183,11 @@ http://127.0.0.1:40001
 - `FRONT_MODEL`
 - `FRONT_BASE_URL`
 
-如果留空，最终用户需要在页面右上角的“API 配置”弹窗中自己填写。
+If left blank, end users need to at the upper-right corner of the page's “API Configure manually in the popup.
 
-## 如果要换成你自己的镜像版本
+## Switch to your own image version.
 
-也可以这样启动：
+Alternatively, start like this:
 
 ```bash
 APP_IMAGE=wxyhgk/retainpdf-app:<version> \
@@ -195,11 +195,11 @@ WEB_IMAGE=wxyhgk/retainpdf-web:<version> \
 docker compose up -d
 ```
 
-# 开发者
+# Developer
 
-如果你想直接用 CLI 调接口，而不是走前端页面，可以按下面方式调用。
+If you want to use it directly CLI Call the API instead of going through the frontend page. Invoke as follows.
 
-先约定几个变量：
+Define variables.
 
 ```bash
 export HOST="http://127.0.0.1:40001"
@@ -212,13 +212,13 @@ export MODEL="deepseek-v4-flash"
 export BASE_URL="https://api.deepseek.com/v1"
 ```
 
-## 健康检查
+## Health check
 
 ```bash
 curl "$HOST/health"
 ```
 
-## 上传 PDF
+## Upload PDF
 
 ```bash
 curl -X POST "$HOST/api/v1/uploads" \
@@ -226,15 +226,15 @@ curl -X POST "$HOST/api/v1/uploads" \
   -F "file=@/absolute/path/to/your.pdf"
 ```
 
-返回里会拿到：
+Return will contain:
 
 - `upload_id`
 - `filename`
 - `page_count`
 
-## 创建异步任务
+## Create async task
 
-先把上一步返回的 `upload_id` 填进去：
+First, enter the `upload_id` returned from the previous step: `upload_id` Fill in:
 
 ```bash
 curl -X POST "$HOST/api/v1/jobs" \
@@ -269,19 +269,19 @@ curl -X POST "$HOST/api/v1/jobs" \
   }'
 ```
 
-返回里会拿到：
+The return will contain:
 
 - `job_id`
 - `status`
 
-## 查询任务状态
+## Query task status
 
 ```bash
 curl -H "X-API-Key: $X_API_KEY" \
   "$HOST/api/v1/jobs/your-job-id"
 ```
 
-重点看这些字段：
+Focus on these fields:
 
 - `status`
 - `stage`
@@ -289,15 +289,15 @@ curl -H "X-API-Key: $X_API_KEY" \
 - `progress`
 - `actions`
 
-任务终态通常是：
+The final state of a task is typically:
 
 - `succeeded`
 - `failed`
 - `canceled`
 
-## 下载结果
+## Download results
 
-下载 PDF：
+Download PDF:
 
 ```bash
 curl -L -H "X-API-Key: $X_API_KEY" \
@@ -305,7 +305,7 @@ curl -L -H "X-API-Key: $X_API_KEY" \
   -o translated.pdf
 ```
 
-下载 Markdown：
+Download Markdown:
 
 ```bash
 curl -L -H "X-API-Key: $X_API_KEY" \
@@ -313,7 +313,7 @@ curl -L -H "X-API-Key: $X_API_KEY" \
   -o translated.md
 ```
 
-下载 ZIP：
+Download ZIP:
 
 ```bash
 curl -L -H "X-API-Key: $X_API_KEY" \
@@ -321,24 +321,24 @@ curl -L -H "X-API-Key: $X_API_KEY" \
   -o result.zip
 ```
 
-## 取消任务
+## Cancel task
 
 ```bash
 curl -X POST -H "X-API-Key: $X_API_KEY" \
   "$HOST/api/v1/jobs/your-job-id/cancel"
 ```
 
-## multipart 扁平提交接口
+## multipart Flatten commit interface
 
-如果你不想自己先调用 `/api/v1/uploads`，可以直接上传 PDF 并创建异步任务。
+If you don't want to call it yourself first. `/api/v1/uploads`Upload directly. PDF Create asynchronous tasks.
 
-注意：
+Note:
 
-- 这个接口是由前端同源代理转发的
-- 默认路径是 `/api/v1/translate/bundle`
-- 请求返回 `ApiResponse<JobSubmissionView>`，其中包含 `job_id` 和初始 `status`
-- 接口不会等待 OCR / 翻译 / 渲染完成，也不会直接返回 ZIP
-- 后续仍需轮询 `GET /api/v1/jobs/{job_id}`，完成后再下载 `/api/v1/jobs/{job_id}/download`
+- This API is forwarded by a frontend same-origin proxy.
+- Default path is `/api/v1/translate/bundle`
+- Request returns `ApiResponse<JobSubmissionView>`, which contains `job_id` and initial `status`
+- Interface does not wait for OCR / translation / rendering to complete, does not directly return ZIP.
+- Polling still required. `GET /api/v1/jobs/{job_id}`Complete, then download. `/api/v1/jobs/{job_id}/download`
 
 ```bash
 curl -X POST "$HOST/api/v1/translate/bundle" \
@@ -355,7 +355,7 @@ curl -X POST "$HOST/api/v1/translate/bundle" \
   -F "batch_size=1"
 ```
 
-说明：
+Note:
 
-- `provider` 建议显式传 `paddle` 或 `mineru`
-- `paddle_token` / `mineru_token` 只需要传当前 `provider` 对应的那个
+- provider Recommend explicitly passing paddle or mineru.
+- `paddle_token` / `mineru_token` Only pass current. `provider` The corresponding one.

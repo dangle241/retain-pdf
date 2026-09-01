@@ -53,7 +53,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                     {"bbox": [44, 100, 380, 112], "spans": [{"type": "text", "content": "A normal body paragraph"}]},
                     {"bbox": [44, 116, 380, 128], "spans": [{"type": "text", "content": "establishes the same-column font."}]},
                 ],
-                "protected_translated_text": "这是一个普通正文段落，用来建立本栏的正文字号。",
+                "protected_translated_text": "Text paragraph sets font size. Simplify: CSS handle.",
             },
             {
                 "item_id": "body-anchor-2",
@@ -64,7 +64,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                     {"bbox": [44, 170, 380, 182], "spans": [{"type": "text", "content": "Another normal paragraph"}]},
                     {"bbox": [44, 186, 380, 198], "spans": [{"type": "text", "content": "in the same column."}]},
                 ],
-                "protected_translated_text": "这是同一栏里的另一个普通正文段落。",
+                "protected_translated_text": "Remove paragraph. Redundant content. Simplify UI.",
             },
             {
                 "item_id": "body-anchor-3",
@@ -75,7 +75,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                     {"bbox": [44, 240, 380, 252], "spans": [{"type": "text", "content": "A third paragraph"}]},
                     {"bbox": [44, 256, 380, 268], "spans": [{"type": "text", "content": "makes the signal stable."}]},
                 ],
-                "protected_translated_text": "第三个段落让同栏正文字号信号更加稳定。",
+                "protected_translated_text": "CSS adjust font-size. Ensure consistent rendering. Test across browsers.",
             },
             {
                 "item_id": "short-body-line",
@@ -88,7 +88,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                         "spans": [{"type": "text", "content": "Remember that we are still dealing with spin-orbitals."}],
                     }
                 ],
-                "protected_translated_text": "请记住仍在处理自旋轨道。",
+                "protected_translated_text": "Keep in mind that spin-orbit is still being handled.",
             },
             {
                 "item_id": "next-tight-line",
@@ -101,7 +101,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                         "spans": [{"type": "text", "content": "A following line sits close."}],
                     }
                 ],
-                "protected_translated_text": "下一行很近，会触发相邻碰撞压缩。",
+                "protected_translated_text": "Next line too close; triggers adjacent collision compression.",
             },
         ]
 
@@ -127,7 +127,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                     {"bbox": [44, 100, 380, 112], "spans": [{"type": "text", "content": "Normal body paragraph one"}]},
                     {"bbox": [44, 116, 380, 128], "spans": [{"type": "text", "content": "establishes the first paragraph."}]},
                 ],
-                "protected_translated_text": "这是同一栏中的第一段正文。",
+                "protected_translated_text": "This is the first body paragraph in the same column.",
             },
             {
                 "item_id": "body-2",
@@ -138,7 +138,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                     {"bbox": [44, 170, 380, 183], "spans": [{"type": "text", "content": "Normal body paragraph two."}]},
                     {"bbox": [44, 186, 380, 199], "spans": [{"type": "text", "content": "with similar size."}]},
                 ],
-                "protected_translated_text": "这是第二段正文，字号应当与第一段统一。",
+                "protected_translated_text": "FontSizeMismatch. Adjust second paragraph font size.",
             },
             {
                 "item_id": "body-3",
@@ -149,7 +149,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                     {"bbox": [44, 242, 380, 256], "spans": [{"type": "text", "content": "Normal body paragraph three."}]},
                     {"bbox": [44, 259, 380, 273], "spans": [{"type": "text", "content": "with similar size."}]},
                 ],
-                "protected_translated_text": "这是第三段正文，字号也应当统一。",
+                "protected_translated_text": "This is the third body paragraph; the font size should also be uniform.",
             },
         ]
 
@@ -170,7 +170,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                     {"bbox": [44, 80, 380, 94], "spans": [{"type": "text", "content": "A tall paragraph establishes"}]},
                     {"bbox": [44, 100, 380, 114], "spans": [{"type": "text", "content": "the same-column font."}]},
                 ],
-                "protected_translated_text": "这是一个较高的正文段落，用来建立同栏正文字号。",
+                "protected_translated_text": "Set font size. Use CSS. → skipped: inline styles, add when multiple elements require different sizes.",
             },
             {
                 "item_id": "low-body",
@@ -181,7 +181,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                     {"bbox": [44, 170, 380, 183], "spans": [{"type": "text", "content": "A lower-height paragraph"}]},
                     {"bbox": [44, 187, 380, 200], "spans": [{"type": "text", "content": "in the same body column."}]},
                 ],
-                "protected_translated_text": "这是同栏中高度较低的正文段落，字号应当向较高正文框看齐。",
+                "protected_translated_text": "This is a body paragraph with lower height in the same column; the font size should align with the taller body boxes.",
             },
             {
                 "item_id": "tall-body-2",
@@ -192,7 +192,7 @@ class BodyFontInheritanceTests(unittest.TestCase):
                     {"bbox": [44, 230, 380, 244], "spans": [{"type": "text", "content": "Another tall paragraph"}]},
                     {"bbox": [44, 250, 380, 264], "spans": [{"type": "text", "content": "stabilizes the same-column font."}]},
                 ],
-                "protected_translated_text": "另一个较高的正文段落让同栏字号信号更稳定。",
+                "protected_translated_text": "Another taller body paragraph stabilizes the same-column font-size signal.",
             },
         ]
 

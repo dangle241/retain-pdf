@@ -124,8 +124,8 @@ fn list_books_filtered(db: &Db, query: &ListJobsQuery) -> Result<Vec<JobSnapshot
         .as_deref()
         .map(str::trim)
         .filter(|value| !value.is_empty());
-    // 分类文件夹展开时用 job_ids 精确点名一批 job(见 ListJobsQuery 字段注释)——
-    // 和 q 一样需要先在全量里过滤,不能先按 limit/offset 截断再匹配。
+// Used when category folder is expanded. job_ids precisely specify a batch of job (see ListJobsQuery Field comment)â
+// Filter full set with q first., Cannot press first limit/offset Truncate then match.
     let job_ids: Option<std::collections::HashSet<String>> = query
         .job_ids
         .as_deref()
@@ -182,8 +182,8 @@ fn list_books_filtered(db: &Db, query: &ListJobsQuery) -> Result<Vec<JobSnapshot
         })
         .collect();
     if job_ids.is_some() {
-        // 精确集合查询:调用方要的是"这些 job 的完整数据",不是一页列表,
-        // 不做 limit/offset 截断。
+        // Exact set query:The caller wants"these job Complete data",Not a paginated list,
+// Do not apply limit/offset truncate.
         return Ok(filtered);
     }
     Ok(filtered

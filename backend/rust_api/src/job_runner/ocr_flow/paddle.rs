@@ -98,7 +98,7 @@ async fn run_paddle_poll_loop(
     ocr_provider_diagnostics_mut(job).handle.task_id = Some(job_id.clone());
     job.append_log(&format!("task_id: {}", job_id));
     job.stage = Some("ocr_processing".to_string());
-    job.stage_detail = Some("Paddle 任务已提交，等待解析".to_string());
+    job.stage_detail = Some("Paddle Task submitted. Awaiting parsing.".to_string());
     job.updated_at = now_iso();
     save_ocr_job(deps, job, parent_job_id).await?;
 

@@ -2,10 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// HomeApp(Phase 3a:app-shell / upload / workflow 三域 React 骨架)组件级测试。
-// 校验:DOM 契约 id 逐一存在、idle 复位链落 store、工作流对话框开合的
-// APP_EVENTS 契约(蓝图风险 5)、错误盒 setText 通道、页码区间约束、
-// 状态区可见性 → 对话框模式同步、3b 回调桥接口定型。
+// HomeApp(Phase 3a:app-shell / upload / workflow Three domains React skeleton)Component-level tests.
+// Validation: DOM contract ids exist individually, idle Reset chain drop storeToggle workflow dialog.
+// APP_EVENTS contract(Blueprint Risk 5)Error Box setText channel, page range constraints,
+// Status area visibility → Dialog mode sync.3b Finalize callback bridge interface.
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost/index.html" });
 for (const key of ["window", "document", "HTMLElement", "HTMLInputElement", "CustomEvent", "Event", "KeyboardEvent", "MouseEvent", "Node", "MutationObserver", "NodeFilter"]) {
@@ -17,10 +17,10 @@ for (const key of ["window", "document", "HTMLElement", "HTMLInputElement", "Cus
 }
 globalThis.window = dom.window;
 globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
-// Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
-// (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
-// animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
-// 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。
+// Radix Presence/Tabs(Introduced in Phase B) requires cancelAnimationFrame under jsdom
+// (TabsContent mount animation timer cleanup) and getComputedStyle(Presence reads
+// animation-name to determine if exit animation ended)ââimplemented on jsdom window, but not
+// copied to bare global like requestAnimationFrame, adding it here.
 globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
 globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
 globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -43,7 +43,7 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-  assert.fail(`等待超时：${description}`);
+assert.fail(`Timeout waiting: ${description}`);
 }
 
 function byId(id) {
@@ -51,15 +51,15 @@ function byId(id) {
 }
 
 function click(element) {
-  // Radix Tabs 的 Trigger 激活逻辑挂在 onMouseDown(不是 onClick)——
-  // LibraryTopTabs(分类改造)是本文件第一处 Radix Tabs,补上 mousedown 让
-  // 模拟点击贴近真实交互(同 status-detail-dialog-component.test.mjs 的
-  // 既有先例),对纯 <button> 元素无影响。
+// Radix Tabs Trigger activation logic is on onMouseDown(not onClick)ââ
+// LibraryTopTabs(Refactor classification)First occurrence in this file. Radix Tabs, add mousedown to
+// Simulate click for realistic interaction.(Same as status-detail-dialog-component.test.mjs
+  // Precedent exists.),Pure <button> Element unaffected.
   element.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
   element.dispatchEvent(new dom.window.MouseEvent("click", { bubbles: true }));
 }
 
-// 控制端输入:绕开 React 的 value 追踪,用原生 setter 写入再冒泡 input
+// Control input: Bypass React value track, Use native setter Write then bubble input
 function typeInput(element, value) {
   const setter = Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set;
   setter.call(element, value);
@@ -69,14 +69,14 @@ function typeInput(element, value) {
 function createServices() {
   return createHomeComposition({
     fetchGlossaries: async () => ({
-      items: [{ glossary_id: "g-1", name: "术语表甲", entry_count: 3 }],
+      items: [{ glossary_id: "g-1", name: "Glossary A", entry_count: 3 }],
     }),
     loadPersistedDeveloperConfig: () => ({}),
     loadPersistedBrowserConfig: () => ({}),
   });
 }
 
-test("HomeApp：契约 id、idle 链、工作流对话框事件契约与交互", async () => {
+test("HomeApp: Contract id, idle Chain, Workflow Dialog Event Contract and Interaction", async () => {
   const host = dom.window.document.createElement("div");
   host.id = "home-root";
   dom.window.document.body.appendChild(host);
@@ -90,67 +90,67 @@ test("HomeApp：契约 id、idle 链、工作流对话框事件契约与交互",
 
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-  await waitFor(() => byId("app-shell"), "HomeApp 首帧渲染");
-  // React 18 的 useSyncExternalStore 订阅落在 passive effect 里；首帧 DOM
-  // 提交（上面的 waitFor 已满足）与订阅真正生效之间有一拍时间差——jsdom 下
-  // 没有 act() 自动 flush passive effects，这里让出一个宏任务，确保
-  // dialog/statusArea 等 store 的订阅已建立，避免下面的首次交互在订阅生效
-  // 前触发 store 变更而被错过（表现为「工作流对话框打开」等待超时）。
+await waitFor(() => byId("app-shell"), "HomeApp first frame render");
+// React 18 useSyncExternalStore subscriptions fall into passive effect; first frame DOM
+// Submit (above waitFor Lag between fulfillment and subscription activation.ââUnder jsdom
+// No act() to automatically flush passive effects. Macro task yielded. Ensure next tick runs.
+// dialog/statusArea etc. store Subscription established. Avoid initial interaction before activation.
+  // pre-trigger store Missed due to change (manifests as「Open workflow dialog」Wait timeout).
   await wait(0);
 
-  // ---- DOM 契约:顶层 + 常驻挂载区块逐一存在 ----
-  // 注意:"translation-workflow-dialog"及其内部整个 job-form 家族(job-form/
+// ---- DOM Contract: Top-level + Resident mount blocks exist individually. ----
+// Note: "translation-workflow-dialog" and its entire interior job-form family(job-form/
   // ocr_provider/.../status-section/job-status-card)、"app-update-dialog"/
-  // "app-update-status"/"app-update-check-btn"、"page-range-dialog"及其内部
-  // 契约 id 都不在这个列表里——阶段 C(shadcn 改造)后 TranslationWorkflowDialog/
-  // SettingsHubDialog/AppUpdateBanner/PageRangeDialog 换成 Radix Dialog,不
-  // forceMount Content,这些 id 挂在各自 Content 子树下,只有对应对话框被
-  // 打开过之后才存在于 DOM(此前原生 <dialog> 或 bespoke <div> 是常驻挂载,
-  // 只是显示态切换)。它们的存在性挪到下面分别打开对话框后再断言。
+  // "app-update-status"/"app-update-check-btn"、"page-range-dialog"and its contents
+// Contract id Item not in list. Check list.ââAfter Phase C(shadcn refactor) TranslationWorkflowDialog/
+// SettingsHubDialog/AppUpdateBanner/PageRangeDialog replaced by Radix Dialog, no
+// forceMount Content, these ids Mount on respective Content Under the subtree, Only the corresponding dialog box is
+// Exists after opening. DOM(Previously native <dialog> or bespoke <div> Persistent mount,
+  // Toggle display state only)Move existence checks below. Assert after opening dialogs individually.
   const contractIds = [
     // app-shell
     "app-shell", "developer-btn", "open-output-btn",
-    // library 骨架(3b 占位)
+// library skeleton(3b placeholder)
     "library-view", "recent-jobs-scroll-body", "recent-jobs-summary", "recent-jobs-empty",
     "library-grid", "recent-jobs-list", "load-more-jobs-btn", "open-query-btn", "library-search-input",
     "library-add-pdf-btn", "app-settings-btn",
   ];
   for (const id of contractIds) {
-    assert.ok(byId(id), `契约 id 缺失：#${id}`);
+assert.ok(byId(id), `Contract id missing: #${id}`);
   }
 
-  // ---- app-update-* 三个契约 id:"app-update-btn" 挂在 SettingsHubDialog
-  //      Content 下(TabsPrimitive.Content 的 forceMount 让"更新"tab 面板即使
-  //      非激活也常驻挂载,只是 hidden),打开设置对话框即存在;
-  //      "app-update-dialog"/"app-update-status"/"app-update-check-btn" 则是
-  //      AppUpdateBanner 自己的详情 dialog 内容(阶段 C 换血后不
-  //      forceMount),还需要点一次"检查更新"按钮才会挂载。 ----
+// ---- app-update-* Three Contracts id:"app-update-btn" is under SettingsHubDialog
+//      Content (TabsPrimitive.Content forceMount makes "Update" tab Panel even if
+//      Inactive but still mounted persistently., just hidden), Present upon opening settings dialog.;
+  //      "app-update-dialog"/"app-update-status"/"app-update-check-btn" Then
+//      AppUpdateBanner's own detail dialog content(After Phase C refactor no
+  //      forceMount),Requires one more click"Check for updates"Button mounts only then. ----
   click(byId("app-settings-btn"));
-  await waitFor(() => byId("app-update-btn"), "设置对话框打开后 app-update-btn 挂载");
+await waitFor(() => byId("app-update-btn"), "After settings dialog opens app-update-btn is mounted");
   click(byId("app-update-btn"));
-  await waitFor(() => byId("app-update-dialog"), "点击检查更新后 app-update-dialog 挂载");
+await waitFor(() => byId("app-update-dialog"), "After clicking Check for updates app-update-dialog is mounted");
   for (const id of ["app-update-status", "app-update-check-btn"]) {
-    assert.ok(byId(id), `契约 id 缺失：#${id}`);
+assert.ok(byId(id), `Contract id missing: #${id}`);
   }
   services.settingsHub.dialogStore.close();
-  await waitFor(() => byId("app-update-dialog") === null, "关闭设置对话框");
+await waitFor(() => byId("app-update-dialog") === null, "Close settings dialog");
 
-  // ---- 打开:添加按钮 → dispatch openTranslationWorkflow → 对话框开(第一次
-  //      打开,同时挂载 job-form 家族 + job-status-card 契约 id) ----
-  assert.equal(byId("translation-workflow-dialog"), null, "初始未打开时不挂载");
+// ---- Open: Add button â dispatch openTranslationWorkflow â Open dialog (First time
+//      Open, Mount simultaneously job-form family + job-status-card contract id) ----
+assert.equal(byId("translation-workflow-dialog"), null, "Should not be mounted when initially closed");
   click(byId("library-add-pdf-btn"));
-  await waitFor(() => byId("translation-workflow-dialog") !== null, "工作流对话框打开");
+  await waitFor(() => byId("translation-workflow-dialog") !== null, "Open Workflow Dialog");
   let dialog = byId("translation-workflow-dialog");
-  assert.equal(events.open, 1, "打开必须经 APP_EVENTS.openTranslationWorkflow(3b 刷新挂起依赖)");
+  assert.equal(events.open, 1, "Open must pass through. APP_EVENTS.openTranslationWorkflow(3b Refresh Pending Dependencies)");
   assert.equal(dialog.dataset.open, "1");
   assert.equal(dialog.classList.contains("is-upload-mode"), true);
-  assert.equal(byId("translation-workflow-title").textContent, "添加 PDF");
+assert.equal(byId("translation-workflow-title").textContent, "Add PDF");
   assert.equal(dom.window.document.documentElement.classList.contains("translation-workflow-open"), true);
-  await waitFor(() => byId("library-add-pdf-btn").getAttribute("aria-expanded") === "true", "触发按钮 aria 同步");
+  await waitFor(() => byId("library-add-pdf-btn").getAttribute("aria-expanded") === "true", "Trigger button aria Sync");
   assert.equal(byId("library-add-pdf-btn").dataset.workflowOpen, "1");
 
-  // ---- job-form 家族 + status 区占位契约 id(挂在工作流对话框内部,只有打开
-  //      过才存在于 DOM) ----
+// ---- job-form family + status area placeholder contract id (mounted inside workflow dialog, only exists
+//      in DOM after opening) ----
   const workflowContractIds = [
     "translation-workflow-close-btn", "job-warning",
     "job-form", "ocr_provider", "paddle_token", "api_key",
@@ -161,91 +161,91 @@ test("HomeApp：契约 id、idle 链、工作流对话框事件契约与交互",
     "status-section", "job-status-card",
   ];
   for (const id of workflowContractIds) {
-    assert.ok(byId(id), `契约 id 缺失：#${id}`);
+assert.ok(byId(id), `Contract id missing: #${id}`);
   }
 
-  // ---- 专业翻译对话框(PageRangeDialog,阶段 C 收官批换 Radix,不
-  //      forceMount,只有点开过才挂载于 DOM):点击 #page-range-btn 打开,
-  //      契约 id 逐一存在,关闭按钮点击后卸载。背板点击/Esc 的纯关闭语义
-  //      统一(顺手修的真实 bug:原来背板点击会触发 applyPageRanges(),Esc
-  //      走另一条只清 flag 的路径,两者不一致)靠 fresh Playwright 实测验证——
-  //      jsdom 下 Radix DismissableLayer 的 outside-pointerdown 检测不可靠,
-  //      同其余已迁移对话框的既有测试先例(credentials-dialog-component.test.mjs
-  //      等同样只在这里测挂载/关闭按钮,不测背板/Esc)。 ----
-  assert.equal(byId("page-range-dialog"), null, "初始未打开时不挂载");
+// ---- Professional Translation Dialog (PageRangeDialog, Phase C final batch replacement with Radix, no
+//      forceMount, mounted in DOM only after being opened): click #page-range-btn to open,
+//      contract ids exist one by one, unmounted after close button click. Backdrop click/Esc pure close semantics
+//      unified (fixed real bug: previously backdrop click triggered applyPageRanges(), Esc
+//      followed another path that only cleared flags, causing inconsistency) verified via fresh Playwright testsâ
+//      Radix DismissableLayer outside-pointerdown detection is unreliable under jsdom,
+//      following existing test precedents of other migrated dialogs (credentials-dialog-component.test.mjs
+//      etc., which also only test mounting/close buttons here, not backdrop/Esc). ----
+assert.equal(byId("page-range-dialog"), null, "Should not be mounted when initially closed");
   click(byId("page-range-btn"));
-  await waitFor(() => byId("page-range-dialog") !== null, "专业翻译对话框打开");
+  await waitFor(() => byId("page-range-dialog") !== null, "Open Professional Translation Dialog");
   for (const id of [
     "page-range-title", "page-range-limit-text", "job-glossary-id",
     "page-range-close-btn", "page-range-clear-btn", "page-range-apply-btn",
   ]) {
-    assert.ok(byId(id), `契约 id 缺失：#${id}`);
+assert.ok(byId(id), `Contract id missing: #${id}`);
   }
   click(byId("page-range-close-btn"));
-  await waitFor(() => byId("page-range-dialog") === null, "关闭按钮点击后对话框卸载");
+  await waitFor(() => byId("page-range-dialog") === null, "Unload dialog on close button click.");
 
-  // ---- idle 复位链:上传瓦片回到默认态,提交按钮置灰 ----
-  assert.equal(byId("file-label").textContent, "点击选择文件或拖到这里");
-  assert.equal(byId("upload-help").textContent, "选择 PDF 后，可直接翻译或仅收藏到书架。");
+// ---- idle reset chain: upload tile returns to default state, submit button disabled ----
+assert.equal(byId("file-label").textContent, "Click to select file or drag here");
+assert.equal(byId("upload-help").textContent, "éæ© PDF After, translate directly or save to bookshelf.");
   assert.equal(byId("submit-btn").disabled, true);
-  assert.equal(byId("submit-btn").textContent, "直接翻译");
+assert.equal(byId("submit-btn").textContent, "Translate Directly");
   assert.equal(byId("job-warning").classList.contains("hidden"), true);
   assert.equal(byId("status-section").classList.contains("hidden"), true);
 
-  // ---- setText("error-box") 通道:inline-error-box 显隐(对话框仍处于打开
-  //      状态,元素挂载中) ----
-  services.bridge.setText("error-box", "上传通道异常");
-  await waitFor(() => byId("error-box-inline").classList.contains("hidden") === false, "错误盒显示");
-  assert.match(byId("error-box-inline").textContent, /上传通道异常/);
+// ---- setText("error-box") channel:inline-error-box visibility (dialog still open
+//      state, element mounting) ----
+services.bridge.setText("error-box", "Upload channel anomaly");
+  await waitFor(() => byId("error-box-inline").classList.contains("hidden") === false, "Error box display");
+assert.match(byId("error-box-inline").textContent, /Upload channel anomaly/);
   services.bridge.setText("error-box", "-");
-  await waitFor(() => byId("error-box-inline").classList.contains("hidden") === true, "错误盒隐藏");
+  await waitFor(() => byId("error-box-inline").classList.contains("hidden") === true, "Error box hidden");
 
-  // ---- 页码区间:上传态就位后可见,输入越界被约束(对话框仍处于打开状态) ----
+// ---- Page range: Visible after upload state ready., Out-of-bounds input constrained (Dialog remains open) ----
   services.ports.uploadStatePort.setUpload({ uploadId: "u-1", uploadedPageCount: 10 });
   services.features.uploadFeature.renderPageRangeSummary();
-  await waitFor(() => byId("inline-page-range").classList.contains("hidden") === false, "页码区间显示");
+  await waitFor(() => byId("inline-page-range").classList.contains("hidden") === false, "Page range display");
   typeInput(byId("page-range-start"), "99");
-  await waitFor(() => byId("page-range-start").value === "10", "起始页被约束到总页数");
+  await waitFor(() => byId("page-range-start").value === "10", "Start page constrained to total page count.");
 
-  // ---- 状态区可见性 → 对话框模式同步(statusAreaVisibilityChanged 契约,
-  //      对话框全程保持打开,不需要重新点击"添加") ----
+// ---- Status area visibility â Dialog mode sync (statusAreaVisibilityChanged contract,
+//      dialog remains open throughout, no need to click "Add" again) ----
   services.bridge.setWorkflowSections({ job_id: "job-1", status: "running" });
-  await waitFor(() => byId("status-section").classList.contains("hidden") === false, "状态区显示");
-  await waitFor(() => dialog.classList.contains("is-status-mode"), "对话框切到状态模式");
-  assert.equal(byId("translation-workflow-title").textContent, "任务进度");
+  await waitFor(() => byId("status-section").classList.contains("hidden") === false, "status area displays");
+  await waitFor(() => dialog.classList.contains("is-status-mode"), "Switch Dialog to State Mode");
+assert.equal(byId("translation-workflow-title").textContent, "Task Progress");
   services.bridge.setWorkflowSections(null);
-  await waitFor(() => byId("status-section").classList.contains("hidden") === true, "状态区隐藏");
-  await waitFor(() => dialog.classList.contains("is-upload-mode"), "对话框回到上传模式");
+  await waitFor(() => byId("status-section").classList.contains("hidden") === true, "statusBar hide. Unnecessary UI element. Remove: `document.getElementById('statusBar').style.display = 'none';` → skipped: conditional show, add when needed.");
+  await waitFor(() => dialog.classList.contains("is-upload-mode"), "Dialog back to upload mode");
 
-  // ---- 状态模式下点 × = 一次点击直接关闭(不再是两段式:不 returnHome、不
-  //      弹回上传表单;中止任务由 StatusCard 的"取消任务"按钮负责) ----
+// ---- In status mode, clicking Ã = close directly in one click (no longer two-stage: no returnHome, no
+//      bounce back to upload form; task cancellation handled by StatusCard's "Cancel Task" button) ----
   services.bridge.setWorkflowSections({ job_id: "job-2", status: "running" });
-  await waitFor(() => dialog.classList.contains("is-status-mode"), "回到状态模式");
+  await waitFor(() => dialog.classList.contains("is-status-mode"), "Back to State Mode");
   let returnHomeCount = 0;
   dom.window.document.addEventListener(APP_EVENTS.returnHome, () => { returnHomeCount += 1; });
   const closesBefore = events.close;
   click(byId("translation-workflow-close-btn"));
-  await waitFor(() => byId("translation-workflow-dialog") === null, "状态模式点 × 直接关闭对话框");
-  assert.equal(returnHomeCount, 0, "状态模式关闭不应再走 returnHome(两段式已废除)");
-  assert.equal(events.close, closesBefore + 1, "状态模式关闭应 dispatch 一次 closeTranslationWorkflow");
+  await waitFor(() => byId("translation-workflow-dialog") === null, "Click the × in status mode directly closes the dialog × dialog.close() → skipped: animation, add when needed.");
+  assert.equal(returnHomeCount, 0, "Status mode closed. Do not proceed. returnHome(Two-phase commit deprecated.)");
+  assert.equal(events.close, closesBefore + 1, "State mode should be closed. dispatch once closeTranslationWorkflow");
   assert.equal(dom.window.document.documentElement.classList.contains("translation-workflow-open"), false);
 
-  // ---- Escape 关闭路径(重新打开→Escape,验证 Escape 也一次到位、且经
-  //      closeTranslationWorkflow 事件,3b 库刷新恢复依赖) ----
+// ---- Escape close path (reopen â Escape, verify Escape also works in one go, and via
+//      closeTranslationWorkflow event, 3b library refresh restores dependencies) ----
   click(byId("library-add-pdf-btn"));
-  await waitFor(() => byId("translation-workflow-dialog") !== null, "再次打开(上传态)");
+  await waitFor(() => byId("translation-workflow-dialog") !== null, "Reopen(Uploading)");
   dom.window.document.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-  await waitFor(() => byId("translation-workflow-dialog") === null, "Escape 关闭对话框");
-  assert.equal(events.close, closesBefore + 2, "Escape 关闭必须经 APP_EVENTS.closeTranslationWorkflow");
+  await waitFor(() => byId("translation-workflow-dialog") === null, "Escape Close");
+  assert.equal(events.close, closesBefore + 2, "Escape Close requires approval. APP_EVENTS.closeTranslationWorkflow");
 
-  // ---- 关闭按钮路径(重新打开后走关闭按钮;顺带验证 openUpload 的会话复位) ----
+// ---- Close button path (use close button after reopening; also verify openUpload session reset) ----
   click(byId("library-add-pdf-btn"));
-  await waitFor(() => byId("translation-workflow-dialog") !== null, "再次打开");
-  // openUpload 会复位上传会话(uploadId 清空)
+await waitFor(() => byId("translation-workflow-dialog") !== null, "Reopen");
+// openUpload will reset upload session (uploadId cleared)
   assert.equal(services.ports.uploadStatePort.getSnapshot().uploadId, "");
   dialog = byId("translation-workflow-dialog");
   click(byId("translation-workflow-close-btn"));
-  await waitFor(() => byId("translation-workflow-dialog") === null, "关闭按钮关闭对话框");
+  await waitFor(() => byId("translation-workflow-dialog") === null, "Close dialog");
   assert.equal(events.close, closesBefore + 3);
 
   root.unmount();
@@ -253,7 +253,7 @@ test("HomeApp：契约 id、idle 链、工作流对话框事件契约与交互",
   host.remove();
 });
 
-test("HomeApp：顶部图书馆/合集/收藏分栏 + 分类管理对话框", async () => {
+test("HomeAppTop Library/Collections/Favorites Column + Category Management", async () => {
   const host = dom.window.document.createElement("div");
   host.id = "home-root-categories";
   dom.window.document.body.appendChild(host);
@@ -263,76 +263,76 @@ test("HomeApp：顶部图书馆/合集/收藏分栏 + 分类管理对话框", as
 
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-  await waitFor(() => byId("app-shell"), "HomeApp 首帧渲染");
+await waitFor(() => byId("app-shell"), "HomeApp first frame render");
   await wait(0);
 
-  // ---- 分栏契约:四个 tab 都在,默认落在图书馆 ----
-  assert.ok(byId("library-top-tab-library"), "契约 id 缺失：#library-top-tab-library");
-  assert.ok(byId("library-top-tab-categories"), "契约 id 缺失：#library-top-tab-categories");
-  assert.ok(byId("library-top-tab-favorites"), "契约 id 缺失：#library-top-tab-favorites");
-  assert.ok(byId("library-top-tab-ask"), "契约 id 缺失：#library-top-tab-ask");
-  assert.ok(byId("library-view"), "默认应停在图书馆视图");
-  assert.equal(byId("categories-view"), null, "默认不挂载合集视图");
-  assert.equal(byId("favorites-view"), null, "默认不挂载收藏视图");
-  assert.equal(byId("home-ask-view"), null, "默认不挂载 AI 问答视图");
-  assert.ok(byId("library-search-input"), "图书馆 tab 下搜索框应可见");
+// ---- Column contract: four tabs present, default to library ----
+assert.ok(byId("library-top-tab-library"), "Contract ID missing: #library-top-tab-library");
+assert.ok(byId("library-top-tab-categories"), "Contract ID missing: #library-top-tab-categories");
+assert.ok(byId("library-top-tab-favorites"), "Contract ID missing: #library-top-tab-favorites");
+assert.ok(byId("library-top-tab-ask"), "Contract ID missing: #library-top-tab-ask");
+  assert.ok(byId("library-view"), "Default to library view.");
+  assert.equal(byId("categories-view"), null, "Do not mount collection view by default");
+  assert.equal(byId("favorites-view"), null, "Favorites view unmounted by default.");
+  assert.equal(byId("home-ask-view"), null, "Not mounted by default AI Q&A View");
+assert.ok(byId("library-search-input"), "Library tab Search box must be visible");
 
-  // ---- 切到合集:图书馆网格卸载,合集视图挂载,搜索框隐藏 ----
+// ---- Switch to collections: library grid unmounts, collection view mounts, search box hidden ----
   click(byId("library-top-tab-categories"));
-  await waitFor(() => byId("categories-view") !== null, "合集视图挂载");
-  assert.equal(byId("library-view"), null, "切到合集后图书馆视图应卸载");
-  assert.equal(byId("favorites-view"), null, "合集 tab 下不挂载收藏视图");
-  assert.equal(byId("library-search-input"), null, "合集 tab 下搜索框应隐藏");
-  assert.ok(byId("categories-create-btn"), "契约 id 缺失：#categories-create-btn");
+  await waitFor(() => byId("categories-view") !== null, "Mount Collection View");
+  assert.equal(byId("library-view"), null, "Library view should unmount after switching to collection.");
+assert.equal(byId("favorites-view"), null, "Collections tab Unmount favorites view.");
+assert.equal(byId("library-search-input"), null, "Collections tab search box should be hidden");
+assert.ok(byId("categories-create-btn"), "Contract ID missing: #categories-create-btn");
 
-  // ---- 新建合集对话框:挂载/契约 id/关闭卸载 ----
-  assert.equal(byId("collection-manage-dialog"), null, "初始未打开时不挂载");
+// ---- New collection dialog: mount/contract ID/unmount on close ----
+assert.equal(byId("collection-manage-dialog"), null, "Not mounted when initially closed");
   click(byId("categories-create-btn"));
-  await waitFor(() => byId("collection-manage-dialog") !== null, "合集管理对话框打开");
+  await waitFor(() => byId("collection-manage-dialog") !== null, "Collection Management Dialog Open");
   for (const id of ["collection-name-input", "collection-manage-close-btn", "collection-save-btn"]) {
-    assert.ok(byId(id), `契约 id 缺失：#${id}`);
+assert.ok(byId(id), Contract id missing: #${id});
   }
-  assert.equal(byId("collection-delete-btn"), null, "新建模式不应有删除按钮");
+  assert.equal(byId("collection-delete-btn"), null, "New mode should not have a delete button.");
   click(byId("collection-manage-close-btn"));
-  await waitFor(() => byId("collection-manage-dialog") === null, "关闭按钮点击后对话框卸载");
+await waitFor(() => byId("collection-manage-dialog") === null, "Dialog unmounts after close button click");
 
-  // ---- 切到收藏:合集卸载,收藏视图挂载,搜索框仍隐藏 ----
+// ---- Switch to favorites: collection unloaded, favorites view mounted, search box still hidden ----
   click(byId("library-top-tab-favorites"));
-  await waitFor(() => byId("favorites-view") !== null, "收藏视图挂载");
-  assert.equal(byId("categories-view"), null, "切到收藏后合集视图应卸载");
-  assert.equal(byId("library-view"), null, "收藏 tab 下图书馆视图应卸载");
-  assert.equal(byId("library-search-input"), null, "收藏 tab 下搜索框应隐藏");
-  // 加载中 / 空态 / 列表 / 错误 四者之一
+  await waitFor(() => byId("favorites-view") !== null, "Mount Favorites View");
+  assert.equal(byId("categories-view"), null, "Switch to favorites: unload collection view.");
+assert.equal(byId("library-view"), null, "Favorites tab Uninstall library view");
+assert.equal(byId("library-search-input"), null, "Search box should be hidden in Favorites tab");
+// One of loading / empty / list / error
   await waitFor(
     () => byId("favorites-loading") || byId("favorites-empty") || byId("favorites-list") || byId("favorites-error"),
-    "收藏视图应进入 loading/空态/列表/错误之一",
+"Enter favorites view loading/empty/list/One of the errors.",
   );
 
-  // ---- 切到 AI 问答:收藏卸载,AI 视图挂载 ----
+// ---- Switch to AI Q&A: favorites unloaded, AI view mounted ----
   click(byId("library-top-tab-ask"));
-  await waitFor(() => byId("home-ask-view") !== null, "AI 问答视图挂载");
-  assert.equal(byId("favorites-view"), null, "AI tab 下收藏视图应卸载");
-  assert.equal(byId("library-view"), null, "AI tab 下图书馆视图应卸载");
-  assert.equal(byId("library-search-input"), null, "AI tab 下搜索框应隐藏");
+  await waitFor(() => byId("home-ask-view") !== null, "AI Q&A view mount");
+  assert.equal(byId("favorites-view"), null, "AI tab Uninstall download view.");
+assert.equal(byId("library-view"), null, "Library view should be unmounted in AI tab");
+assert.equal(byId("library-search-input"), null, "Search box should be hidden in AI tab");
 
-  // ---- 切回图书馆:收藏/AI 卸载,图书馆网格与搜索框恢复 ----
+// ---- Switch back to library: favorites/AI unloaded, library grid and search box restored ----
   click(byId("library-top-tab-library"));
-  await waitFor(() => byId("library-view") !== null, "切回图书馆");
-  assert.equal(byId("categories-view"), null, "切回图书馆后合集视图应卸载");
-  assert.equal(byId("favorites-view"), null, "切回图书馆后收藏视图应卸载");
-  assert.equal(byId("home-ask-view"), null, "切回图书馆后 AI 视图应卸载");
-  assert.ok(byId("library-search-input"), "切回图书馆后搜索框应恢复");
+  await waitFor(() => byId("library-view") !== null, "Back to Library");
+  assert.equal(byId("categories-view"), null, "After switching back to library, collection view should be unloaded.");
+  assert.equal(byId("favorites-view"), null, "Unload favorites view on library return.");
+  assert.equal(byId("home-ask-view"), null, "After returning to the library AI View should unmount");
+  assert.ok(byId("library-search-input"), "Search box should be restored when switching back to library.");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("HomeApp：分类管理对话框快速切换编辑目标不被迟到响应覆盖(回归)", async () => {
-  // 回归覆盖:CollectionManageDialog 的 open-effect 曾经没有 cancelled 守卫——
-  // 快速为 A 打开对话框、关闭、再为 B 打开,如果 A 的网络请求比 B 的晚
-  // resolve(真实网络下完全可能发生的乱序),会把正在显示 B 的表单勾选状态
-  // 覆盖回 A 的旧数据。用可控 resolve 顺序的假 controller 复现这个乱序。
+test("HomeAppCategory management dialog: quick edit target switch not overwritten by delayed responses. (Regression)", async () => {
+// Regression coverage: CollectionManageDialog's open-effect previously had no cancelled guard——
+// Quickly open dialog for A, close, then open for B, if A's network request arrives later than B's
+// resolve (out-of-order which is entirely possible under real network) would overwrite the checkbox state of the form currently displaying B
+// Overwrite back to A's old data. Reproduce this out-of-order with a fake controller having controllable resolve order.
   const host = dom.window.document.createElement("div");
   host.id = "home-root-race";
   dom.window.document.body.appendChild(host);
@@ -353,41 +353,41 @@ test("HomeApp：分类管理对话框快速切换编辑目标不被迟到响应�
 
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-  await waitFor(() => byId("app-shell"), "HomeApp 首帧渲染");
+await waitFor(() => byId("app-shell"), "HomeApp first frame render");
   await wait(0);
 
   const dialogStore = services.collections.dialogStore;
 
   dialogStore.open({ collection_id: "col-a", name: "A" });
-  await waitFor(() => byId("collection-manage-dialog") !== null, "打开 A");
+await waitFor(() => byId("collection-manage-dialog") !== null, "Open A");
   await wait(0);
 
   dialogStore.close();
   await wait(0);
   dialogStore.open({ collection_id: "col-b", name: "B" });
-  await waitFor(() => byId("collection-name-input")?.value === "B", "切到 B");
+  await waitFor(() => byId("collection-name-input")?.value === "B", "Switch to B");
   await wait(0);
 
-  // 乱序 resolve:B(doc-1 不属于 B)先到,A(doc-1 属于 A)后到。
+// Out-of-order resolve: B (doc-1 does not belong to B) arrives first, A (doc-1 belongs to A) arrives later.
   memberResolvers["col-b"]([]);
   await wait(10);
   const checkboxAfterB = dom.window.document.querySelector("#collection-manage-dialog input[type=checkbox]");
-  assert.equal(checkboxAfterB.checked, false, "B 的书目勾选态应该是未勾选(doc-1 不属于 B)");
+assert.equal(checkboxAfterB.checked, false, "B Book list checkbox should be unchecked. (doc-1 does not belong to B)");
 
   memberResolvers["col-a"](["doc-1"]);
   await wait(10);
   const checkboxAfterLateA = dom.window.document.querySelector("#collection-manage-dialog input[type=checkbox]");
-  assert.equal(checkboxAfterLateA.checked, false, "A 的迟到响应不应把 B 的勾选态覆盖回勾选");
-  assert.equal(byId("collection-name-input").value, "B", "表单标题应该仍是 B,没被 A 的迟到响应带跑");
+  assert.equal(checkboxAfterLateA.checked, false, "A The late response should not B Checked state overrides to checked.");
+  assert.equal(byId("collection-name-input").value, "B", "Form title should still be B,not affected by A Late response throws off.");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("HomeApp：3b 回调桥接口定型(蓝图 §4)", () => {
+test("HomeApp: 3b callback bridge interface finalized (Blueprint Â§4)", () => {
   const services = createServices();
-  // mountJobRuntimeFeature / status-detail / credentials 接线所需的回调名
+// Callback names required for wiring mountJobRuntimeFeature / status-detail / credentials
   const bridgeContract = [
     "setText",
     "setWorkflowSections",
@@ -404,9 +404,9 @@ test("HomeApp：3b 回调桥接口定型(蓝图 §4)", () => {
     "submitForm",
   ];
   for (const name of bridgeContract) {
-    assert.equal(typeof services.bridge[name], "function", `bridge.${name} 缺失`);
+assert.equal(typeof services.bridge[name], "function", `bridge.${name} missing`);
   }
-  // 3b workflow-open-port 注入口
+// 3b workflow-open-port injection point
   assert.equal(typeof services.workflowDialog.isOpen, "function");
   assert.equal(services.workflowDialog.isOpen(), false);
   services.dispose();

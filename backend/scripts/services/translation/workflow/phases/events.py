@@ -11,17 +11,17 @@ def format_translation_progress_message(
     if touched_pages:
         sorted_pages = sorted(page_idx + 1 for page_idx in touched_pages)
         if len(sorted_pages) == 1:
-            page_suffix = f"（最近页: {sorted_pages[0]}）"
+            page_suffix = f"Recent: {sorted_pages[0]}）"
         else:
             preview = ",".join(str(page) for page in sorted_pages[:4])
             if len(sorted_pages) > 4:
                 preview = f"{preview}..."
-            page_suffix = f"（最近页: {preview}）"
+page_suffix = f" (recent page: {preview})"
     else:
         page_suffix = ""
     if substage == "translation_tail_retry":
-        return f"正在处理翻译重试队列，第 {current}/{total} 项{page_suffix}"
-    return f"已完成第 {current}/{total} 批翻译{page_suffix}"
+        return f"Processing translation retry queue, attempt {current}/{total} items{page_suffix}"
+return f"Completed translation batch {current}/{total}{page_suffix}"
 
 
 __all__ = ["format_translation_progress_message"]

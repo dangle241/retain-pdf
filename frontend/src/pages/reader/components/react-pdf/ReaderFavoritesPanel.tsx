@@ -1,4 +1,4 @@
-// 摘录悬浮窗：当前文档的服务端收藏列表（对齐 legacy 云端区）
+// Excerpt popup: server-side favorites list for current document (aligned legacy Cloud Zone)
 
 import { useCallback, useEffect, useState } from "react";
 import { Bookmark } from "lucide-react";
@@ -22,10 +22,10 @@ export type ReaderFavoritesPanelProps = {
 
 function kindLabel(kind: string) {
   const k = `${kind || ""}`.trim();
-  if (k === "figure") return "图表";
-  if (k === "data") return "数据";
-  if (k === "sentence") return "摘录";
-  return k || "摘录";
+if (k === "figure") return "Chart";
+if (k === "data") return "Data";
+if (k === "sentence") return "Excerpt";
+return k || "Excerpt";
 }
 
 export function ReaderFavoritesPanel({
@@ -42,7 +42,7 @@ export function ReaderFavoritesPanel({
   const reload = useCallback(async () => {
     if (!jobId && !documentId) {
       setItems([]);
-      setError("当前没有可关联的文档");
+      setError("No documents to associate.");
       return;
     }
     setLoading(true);
@@ -60,7 +60,7 @@ export function ReaderFavoritesPanel({
       }
       setItems(list);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "读取摘录失败");
+      setError(err instanceof Error ? err.message : "Failed to read excerpt.");
       setItems([]);
     } finally {
       setLoading(false);
@@ -76,16 +76,16 @@ export function ReaderFavoritesPanel({
     <ReaderFloatShell
       id="reader-favorites-panel"
       open={open}
-      title="摘录"
-      subtitle="本书云端收藏 · 本地保存"
+      title="Excerpts"
+      subtitle="Save to Cloud · Save Locally"
       titleIcon={<Bookmark size={14} strokeWidth={2.25} aria-hidden />}
       storageKey="retainpdf.reader.favorites-float.pos.v1"
-      ariaLabel="摘录"
+ariaLabel="Excerpts"
       onClose={onClose}
       toolbar={(
         <>
           <span className="reader-notes-count">
-            {loading ? "加载中…" : `${items.length} 条`}
+{loading ? "Loading..." : `${items.length} items`}
           </span>
           <button
             type="button"
@@ -93,7 +93,7 @@ export function ReaderFavoritesPanel({
             disabled={loading}
             onClick={() => void reload()}
           >
-            刷新
+Refresh
           </button>
         </>
       )}
@@ -101,10 +101,10 @@ export function ReaderFavoritesPanel({
       {error ? (
         <p className="reader-notes-empty" role="alert">{error}</p>
       ) : loading ? (
-        <p className="reader-notes-empty">正在加载摘录…</p>
+        <p className="reader-notes-empty">Loading excerpt...…</p>
       ) : items.length === 0 ? (
         <p className="reader-notes-empty">
-          暂无摘录。在阅读时选中文字添加批注，或从主页收藏跳转过来。
+          No excerpts yet. Select text while reading to add annotations, or jump from home favorites.
         </p>
       ) : (
         items.map((item) => (
@@ -117,7 +117,7 @@ export function ReaderFavoritesPanel({
                   className="reader-notes-link"
                   onClick={() => onJumpPage(Math.max(1, (item.pageIdx || 0) + 1))}
                 >
-                  第 {(item.pageIdx || 0) + 1} 页
+Page {(item.pageIdx || 0) + 1}
                 </button>
               </div>
             </div>

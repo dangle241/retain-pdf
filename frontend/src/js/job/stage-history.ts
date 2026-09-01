@@ -21,7 +21,7 @@ export function summarizeStageName(stage, detail) {
     || normalizedStage.includes("submit")
     || normalizedStage.includes("queued")
   ) {
-    return "上传 PDF";
+return "Upload PDF";
   }
   if (
     normalizedStage.includes("ocr_processing")
@@ -32,7 +32,7 @@ export function summarizeStageName(stage, detail) {
     || normalizedStage.includes("normalization")
     || normalizedStage.includes("normaliz")
   ) {
-    return "云端 OCR / 标准化";
+return "Cloud OCR / Normalization";
   }
   if (
     normalizedStage.includes("translation_prepare")
@@ -41,7 +41,7 @@ export function summarizeStageName(stage, detail) {
     || normalizedStage.includes("garbled")
     || normalizedStage.includes("translat")
   ) {
-    return "翻译准备 / 跨栏跨页判断";
+return "Translation Prep / Column & Page Detection";
   }
   if (
     normalizedStage.includes("render")
@@ -49,26 +49,26 @@ export function summarizeStageName(stage, detail) {
     || normalizedStage.includes("compile")
     || normalizedStage.includes("overlay")
   ) {
-    return "渲染 PDF";
+return "Render PDF";
   }
   switch (normalizedStage) {
     case "queued":
-      return "排队中";
+return "Queued";
     case "running":
-      return "处理中";
+return "Processing";
     case "translating":
-      return "翻译";
+return "Translating";
     case "parsing":
     case "ocr":
-      return "解析 / OCR";
+return "Parsing / OCR";
     case "translation_prepare":
-      return "翻译准备";
+return "Translation Prep";
     case "rendering":
-      return "渲染";
+return "Rendering";
     case "succeeded":
-      return "已完成";
+return "Completed";
     case "failed":
-      return "失败";
+return "Failed";
     default:
       return `${stage || "-"}`.trim() || "-";
   }

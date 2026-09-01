@@ -1,73 +1,73 @@
-# prunedResult 结构与 normalized_document_v1 值映射
+# prunedResult Structure and normalized_document_v1 Value mapping
 
-该 README 针对 `rust_api/src/ocr_provider/paddle/json_full.json` 中 `layoutParsingResults[*].prunedResult` 的输出而写，供 adapter 实现者快速定位 key 字段、理解语义与归一化时的映射思路；同时指明哪些字段适合作为 trace/debug 保留。
+This README For `rust_api/src/ocr_provider/paddle/json_full.json` in `layoutParsingResults[*].prunedResult` Written for output of adapter Quickly locate implementer key Field mapping logic for semantic understanding and normalization; identify fields suitable as trace/debug Keep.
 
-## JSON 层级
+## JSON Hierarchy
 
-- `layoutParsingResults` 是 Paddle OCR 在同一份输入上可能产生的多套 layout 结果（通常会有若干 `split`/`merge` 版本）
-- 每个条目都含 `prunedResult`（我们关心的归一化起点）以及源码的 `markdown`/`outputImages`/`inputImage` 等调试片段
-- `prunedResult` 直接包含：
-  - `page_count`（总页数）
-  - `width`、`height`（当前 layout 解析对应的画布尺寸，单位 px）
-  - `model_settings`（此轮推理使用的各类开关，用于复现/排错）
-  - `parsing_res_list`（Paddle 原生的 block 结构列表）
-  - `layout_det_res`（底层 layout detector 的 box 输出，便于 trace 到具体检测结果）
+- `layoutParsingResults` is multiple layout results generated from same input by Paddle OCR (usually several `split`/`merge` versions).
+- Each entry contains `prunedResult`(the normalization starting point we care about) and the source code's `markdown`/`outputImages`/`inputImage` Debug snippet pending
+- `prunedResult` Directly include:
+  - `page_count`Total pages
+  - `width`、`height`(current layout Parse corresponding canvas size and units. px）
+  - `model_settings`(Switches used in this reasoning turn, for reproduction.)/Troubleshooting）
+  - `parsing_res_list`（Paddle Native block Structure list)
+- `layout_det_res` (underlying layout detector box output, to facilitate trace to specific test results)
 
-## 关键字段说明
+## Key field descriptions
 
 ### `page_count` / `width` / `height`
-- 直接提供 document 级的页数和画布尺寸，建议在 normalized document 中映射到 `document.page_count` 以及每页默认的 `page.width/page.height`，用于 overflow/缩放判断。
+- directly provide document Page count and canvas size for level, recommend at normalized document Map to `document.page_count` and the default per page `page.width/page.height`, used for overflow/Zoom detection.
 
 ### `model_settings`
-- 包含本次解析的开关字段，字段名与实际值如下：
-  - `use_doc_preprocessor`: 是否使用文档预处理
-  - `use_layout_detection`: 是否启用了 layout 检测器
-  - `use_chart_recognition`: 是否尝试识别图表
-  - `use_seal_recognition`: 是否开启印章识别
-  - `use_ocr_for_image_block`: 是否对 image block 再做 OCR
-  - `format_block_content`: 是否对文本内容执行格式化（如 trim）
-  - `merge_layout_blocks`: 是否合并 layout 中相邻的 block
-  - `markdown_ignore_labels`: 对应 markdown 生成时会忽略的 block label，例如 `number/footnote/header/...`
-  - `return_layout_polygon_points`: 是否在每个 block 中附带 polygon 信息
-- 建议将该结构作为 adapter 的 trace metadata（写入 normalized document 的 `meta.ocr_settings` 或类似字段），以便后续问题追踪或与 Rust layer 的 `normalization_report` 对齐。
+- Contains the switch fields for this parse. Field names and actual values:
+  - `use_doc_preprocessor`: Preprocess documents?
+  - `use_layout_detection`: Enabled? layout Detector
+  - `use_chart_recognition`: Recognize charts?
+  - `use_seal_recognition`: Enable seal recognition?
+  - `use_ocr_for_image_block`: Is that correct? image block perform again OCR
+  - `format_block_content`: Format text content? (e.g. trim）
+  - `merge_layout_blocks`: Merge? layout Adjacent block
+  - `markdown_ignore_labels`: Corresponding markdown ignored during generation block labelExample needed. Provide details. `number/footnote/header/...`
+  - `return_layout_polygon_points`: whether in each block Attach polygon Information
+- Recommend using this structure as adapter trace metadata (write to normalized document `meta.ocr_settings` or similar) for subsequent issue tracking or Rust layer `normalization_report` alignment.
 
 ### `parsing_res_list`
-- 核心的 block 列表，是 normalized_document 的第一手输入。每项字段：
-  - `block_label`: Paddle 预测的 label（如 `header/paragraph_title/text/table/figure_title/footer`），可以映射到 normalized block 的 `type`/`sub_type` 或 `tags`
-  - `block_content`: 文字内容，直接填入 normalized block 的 `text_content` 或 `lines` 之类字段
-  - `block_bbox`: `[x0,y0,x1,y1]`，对应 block 的 axis-aligned bounding box
-  - `block_polygon_points`: 同 `block_bbox`，但支持 polygon（每个 point 为 `[x,y]`），适合落在 normalized block 的 `polygon` 字段
-  - `block_id`、`group_id`：局部 block/组 ID，可用于生成 normalized block 的 `provider_id` 或 `group_id`
-  - `global_block_id`、`global_group_id`: 含全局偏移的 ID，在多个 layout 版本/页之间保持唯一，建议在 normalized document 中作为 `meta.global_id` 追踪
-  - `block_order`: Paddle 推断的阅读顺序（此示例中部分值为 `null`），可用来填充 `normalized_document.pages[].items[].order`
-- 建议 adapter 采用如下思路：
-  1. 将 `parsing_res_list` 按 `block_order` 或 `block_id` 分页划分（若存在 `group_id`，可作为 `Page.blocks` 的 `group` 维度）
-  2. 使用 `block_label` 区分类别（`header`/`paragraph_title`/`text` 等），确定 normalized block 的 `type/sub_type`（例如 `text` 核心内容，`paragraph_title` 可当作 `title` 类型）
-  3. `block_content` 直接赋值为 normalized block 的 `text`，并保留 `block_polygon_points` 作为 `geometry.polygon`
-  4. `block_bbox` 同步填充到 normalized block 的 `bounding_box`，以便前端/渲染复用
+- Core block List, yes normalized_document First-hand input. Each field:
+- `block_label`: Paddle predicted label (e.g. `header/paragraph_title/text/table/figure_title/footer`), can map to normalized block `type`/`sub_type` or `tags`.
+- `block_content`: directly entered text. normalized block `text_content` or `lines` related fields.
+- `block_bbox`: `[x0,y0,x1,y1]` corresponds to block axis-aligned bounding box.
+- `block_polygon_points`: same as `block_bbox` but supports polygon (each point `[x,y]`), applicable to normalized block `polygon` field.
+- `block_id`, `group_id`: local block/group ID, used to generate normalized block `provider_id` or `group_id`.
+  - `global_block_id`、`global_group_id`: With global offset ID, across multiple layout Version/Keep unique across pages; recommend at normalized document as `meta.global_id` Track
+  - `block_order`: Paddle Inferred reading order (some values in this example are `null`), can be used to fill `normalized_document.pages[].items[].order`
+- Suggestions adapter Use the following approach:
+1. Divide `parsing_res_list` by `block_order` or `block_id` page-wise (if `group_id` exists, use as `Page.blocks` `group` dimension).
+2. Use `block_label` to categorize (`header`/`paragraph_title`/`text`, etc.), determine normalized block `type/sub_type` (e.g. `text` core content, `paragraph_title` as `title` type).
+3. Assign `block_content` directly to normalized block `text`, retain `block_polygon_points` as `geometry.polygon`.
+4. Sync `block_bbox` to normalized block `bounding_box` for frontend/render reuse.
 
 ### `layout_det_res`
-- 包含 layout detector 原始 box，当前结构是：
+- Includes layout detector raw boxes; current structure:
   - `boxes`: list of objects
-  - 每个 box 拥有 `cls_id`（分类器 ID）、`label`（类别名称）、`score`（置信度）、`coordinate`（`[x0,y0,x1,y1]`）、`order`（预测阅读顺序，可为 `null`）、`polygon_points`
-- 建议 adapter 将 `layout_det_res` 作为原始检测 trace：
-  - 可在 normalized document 的 `meta.raw_traces.layout_det_res` 中保留 `boxes`，便于回溯 label 与 score
-  - `coordinate` / `polygon_points` 对应 `parsing_res_list` 的 geometry，可用于验证两者是否一致（如 `merge_layout_blocks` 开启时会产生差异）
-  - `score` 适合写入 trace 而非 normalized block 的核心字段，保持 `document.normalization_trace` 供排查漏检/误检
+  - Each box Own `cls_id`Classifier not needed. Use built-in function. ID）、`label`(category name)`score`confidence`coordinate`（`[x0,y0,x1,y1]`）、`order`Predict reading order. Optional. `null`）、`polygon_points`
+- Suggest adapter treat `layout_det_res` as original detection trace:
+- Can store in normalized document `meta.raw_traces.layout_det_res` with `boxes` logging label and score.
+- `coordinate` / `polygon_points` correspond to `parsing_res_list` geometry; can verify consistency between the two (e.g. `merge_layout_blocks` causing differences).
+  - `score` Writable trace rather than normalized block Provide source text. `document.normalization_trace` For troubleshooting missed detections./False positive
 
-## 适配建议
+## Adaptation Suggestions
 
-1. Adapter 首先读 `page_count`/`width`/`height` 作为 normalized document 的基本页面信息；`layout_det_res.boxes` 可同步提供 `page_count` 的上下游一致性校验。
-2. `parsing_res_list` 每项生成一个 normalized block，`block_label` 决定 `type`（如 `table`、`image`、`text`），`block_content` 变成主要文本内容，`block_order`/`group_id` 用于构建 block 的阅读顺序/分群。
-3. 所有 polygon/bbox/cursor 相关字段（`block_bbox` + `block_polygon_points` + `layout_det_res.boxes coordinate/polygon_points`）都应该同步贴到 normalized block 的 geometry 和 trace，避免不同入口对坐标的理解แตก开。
-4. `model_settings` 和 `layout_det_res` 直接写 a debug trace（例如 `normalized_document.meta.provider_trace.paddle.pruned_result`），以便在 `normalization_report` 中复现该字段；只有 `parsing_res_list` 的 `block_content`/`label`/`geometry` 才需要真正映射到 normalized document 主链路。
-5. 如果后续走 `normalized_document_v1` 的 schema，建议在 `blocks[].meta` 里保存原始的 `block_id/global_block_id` 和 `group_id/global_group_id`，以便与不同 provider 的 ID 做对齐。
+1. Adapter first reads `page_count`/`width`/`height` as normalized document basic page info; `layout_det_res.boxes` can synchronously provide `page_count` for upstream/downstream consistency check.
+2. Generate one normalized block per item from `parsing_res_list`; `block_label` determines `type` (e.g. `table`, `image`, `text`); `block_content` becomes main text content; `block_order`/`group_id` used to build block reading order / segmentation.
+3. All polygon/bbox/cursor related fields (`block_bbox` + `block_polygon_points` + `layout_det_res.boxes coordinate/polygon_points`) should all synchronously populate normalized block geometry and trace to avoid coordinate ambiguity across entry points.
+4. Write `model_settings` and `layout_det_res` directly to debug trace (e.g. `normalized_document.meta.provider_trace.paddle.pruned_result`); include in `normalization_report`; only `parsing_res_list` `block_content`/`label`/`geometry` truly map to normalized document main flow.
+5. For later `normalized_document_v1` schema, recommend saving original `block_id/global_block_id` and `group_id/global_group_id` in `blocks[].meta` to align with different provider IDs.
 
-## Trace 保留的字段
+## Trace Reserved fields
 
-- `model_settings`：完整保存，便于对齐实验参数与 `normalization_summary`
-- `layout_det_res.boxes`：作为 `debug.traces.layout_detector`，保留 `label/score/coordinate/order`
-- `parsing_res_list` 中的 `block_polygon_points` 与 `block_id` 是往后排错时定位 block 的基础
-- 其余如 `global_block_id/global_group_id` 可直接写入 `blocks[].meta.source_ids`
+- `model_settings`Save completely, facilitate alignment of experimental parameters with `normalization_summary`
+- `layout_det_res.boxes`Invalid input. Fix: Provide valid command or request. `debug.traces.layout_detector`, keep `label/score/coordinate/order`
+- `parsing_res_list` `block_polygon_points` and `block_id` are basis for locating blocks during later troubleshooting.
+- Others such as `global_block_id/global_group_id` Directly writable. `blocks[].meta.source_ids`
 
-保持以上约定，能让 adapter 在生成 normalized document 时既不丢失 Paddle 提供的细粒度语义，也能在 trace 中完整还原 detection 过程，便于后续渲染、调试和 schema 回归。
+Keeping the above conventions can adapter Generating normalized document Time not lost. Paddle The provided fine-grained semantics can also be used in trace Full restore complete. detection Process, facilitating subsequent rendering, debugging, and schema regression.

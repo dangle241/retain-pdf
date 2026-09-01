@@ -1,16 +1,16 @@
 # 03 Semantics Rules
 
-## 总原则
+## General Principles
 
-适配 Paddle 时，先判断字段属于哪一类：
+When adapting Paddle, first determine which category the field belongs to:
 
-1. 稳定结构
-2. 稳定语义
-3. 仅供排错的原始 trace
+1. Stable structure
+2. Stable Semantics
+3. Original (debug only) trace
 
-## 哪些进核心结构层
+## Core structure layer includes: data models, core algorithms, essential business logic.
 
-只有跨 provider 也大概率稳定的内容，才允许进入核心结构层：
+Only cross provider Only content that is also highly stable is allowed into the core structural layer:
 
 - `type`
 - `sub_type`
@@ -22,11 +22,11 @@
 - `derived`
 - `continuation_hint`
 
-## 哪些进 `tags`
+## Which processes `tags`
 
-`tags` 适合放轻量、可组合、下游可能会用到的结构提示。
+`tags` Lightweight, composable structural hints. Downstream-consumable.
 
-当前 Paddle 已在用的示例：
+Current Paddle examples in use.
 
 - `title`
 - `abstract`
@@ -40,11 +40,11 @@
 - `table`
 - `formula`
 
-## 哪些进 `derived`
+## What goes into derived
 
-`derived` 适合放更强的语义结论，并注明是谁给的结论。
+`derived` Place stronger semantic conclusions here. Cite source.
 
-当前格式：
+Current format:
 
 ```json
 {
@@ -54,18 +54,18 @@
 }
 ```
 
-适合进 `derived` 的例子：
+Examples of eligible derived:
 
 - title
 - abstract
 - reference_entry
 - formula_number
 - header/footer
-- caption/footnote 这类 provider 已明确识别的角色
+- caption/footnote and other provider-identified roles
 
-## 哪些只留在 `metadata/source`
+## Which remain only in `metadata/source`
 
-Paddle 私有字段默认都应该先留在 trace 层：
+Paddle private fields should by default be left in the trace layer initially:
 
 - `raw_group_id`
 - `raw_global_group_id`
@@ -76,26 +76,26 @@ Paddle 私有字段默认都应该先留在 trace 层：
 - `model_settings`
 - `markdown.images`
 
-只有在多个 provider 都稳定产出、并且下游确实需要时，才考虑上提。
+Only when multiple provider Only consider upstreaming when all outputs are stable and downstream truly requires it.
 
-## 当前 trace 分层
+## Current trace layering
 
-当前 Paddle trace 分层建议：
+Current Paddle trace layering suggestions:
 
-1. 核心结构层
-2. 通用 trace 层
-3. provider raw trace 层
+1. Core structure layer
+2. Common trace layer
+3. Provider raw trace layer
 
-其中：
+Among them:
 
-- `content_format / asset_* / markdown_match_*` 更偏“通用 trace 层”
-- `layout_det_* / model_settings / 原始 group id` 更偏“provider raw trace 层”
+- content_format / asset_* / markdown_match_* are more generic trace layer items
+- `layout_det_* / model_settings / Original group id` leans more toward "provider raw trace layer"
 
-## 规则变更要求
+## Rule Change Requirements
 
-如果对 `block_label -> type/sub_type/tags/derived` 做变更，必须同时更新：
+If correct `block_label -> type/sub_type/tags/derived` On change, update simultaneously:
 
-1. 本目录文档
-2. 相关 fixture
+1. Directory Documentation
+2. Related fixtures
 3. regression check
-4. 如有必要，translation extractor smoke
+4. If necessary,translation extractor smoke

@@ -70,7 +70,7 @@ test("upload controller submits to config port upload url", async () => {
     frontMaxBytes: 1024 * 1024,
     frontMaxPageCount: 999,
     countPdfPages: async () => 12,
-    defaultFileLabel: "选择 PDF",
+defaultFileLabel: "Select PDF",
     collectUploadFormData: (input) => ({ fileName: input.name }),
     submitUploadRequest: async (url) => {
       submittedUrls.push(url);
@@ -164,7 +164,7 @@ test("upload controller reads and writes upload state through upload state port"
     frontMaxBytes: 1024 * 1024,
     frontMaxPageCount: 999,
     countPdfPages: async () => 8,
-    defaultFileLabel: "选择 PDF",
+defaultFileLabel: "Select PDF",
     collectUploadFormData: () => ({}),
     submitUploadRequest: async () => ({
       upload_id: "upload-port",
@@ -354,7 +354,7 @@ test("upload controller clears stale upload state before selecting a new file", 
   assert.ok(calls.some((call) => call[0] === "clear-input"));
   const errorCall = calls.find((call) => call[0] === "text" && call[1] === "error-box");
   assert.equal(errorCall[2].kind, "error-diagnostic");
-  assert.equal(errorCall[2].summary, "校验 PDF 文件失败：stop before upload");
+assert.equal(errorCall[2].summary, "PDF validation failed: stop before upload");
   assert.match(errorCall[2].diagnostic, /file_name: new\.pdf/);
 });
 
@@ -529,7 +529,7 @@ test("upload state port preserves page range reset semantics without legacy mirr
   assert.equal(port.getSnapshot().uploadId, "upload-1");
   assert.equal(port.getSnapshot().appliedPageRange, "2-8");
   assert.equal(port.getSnapshot().submitBusy, true);
-  // 迁移完成:store 是唯一真值,旧 state 对象不再被回写
+// Migration complete: store is the single source of truth, old state object no longer written back
   assert.equal(state.uploadId, "");
 
   port.reset({ includePageRange: false });
@@ -577,6 +577,6 @@ test("upload state port owns normalization without legacy upload helpers", () =>
     appliedPageRange: "",
     submitBusy: false,
   });
-  // 不再回写旧对象:保持调用方传入的原值
+// No longer writing back to old object: preserve original value passed by caller
   assert.equal(state.appliedPageRange, "3-5");
 });

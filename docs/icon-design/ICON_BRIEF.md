@@ -1,194 +1,194 @@
-# RetainPDF 图标 / 动效需求说明
+# RetainPDF Icon / Animation requirements
 
-**用途：** 给你（或设计师）按清单出图；产品会逐步替换现有 Lucide 线框 SVG 与内联 path。  
-**日期：** 2026-07-21  
-**风格参考：** 轻量、阅读产品、偏 Apple / 学术工具——**细线、圆角、少装饰**；主色跟随 UI（`currentColor`），不要写死黑底大色块。
+**Usage:** Generate images per checklist for you (or designer); product will gradually replace existing ones. Lucide Wireframe SVG Inline path。  
+**Date:** 2026-07-21
+**Style Reference:** Lightweight reading product. Prefer. Apple / Academic Tools——**Thin lines, rounded corners, minimal decoration**Follow primary color UI（`currentColor`), do not hardcode large black blocks.
 
 ---
 
-## 1. 交付约定（请按这个出）
+## 1. Delivery agreement (follow this)
 
-### 1.1 静态图标（UI 线标）
+### 1.1 Static icon (UI Line label)
 
-| 项 | 要求 |
+| item | requirement |
 |----|------|
-| 格式 | **SVG** 优先（矢量）；也可附带 24/48/96 PNG 预览 |
-| 画板 | **24×24** viewBox（统一）；重要入口可另出 **32×32 / 48×48** 变体 |
-| 描边 | 建议 **1.6–2.0** 视觉粗细，圆角线帽（round） |
-| 颜色 | **单色**，用 `currentColor` / `#000` 描边即可，我们会在 CSS 里换色 |
-| 边距 | 图形四周留约 **2px** 安全边，避免贴边裁切 |
-| 命名 | 小写 kebab-case，见下方文件名 |
-| 放置 | 做好后放进本目录的 `deliverables/`（你建也行），例如：`docs/icon-design/deliverables/nav-library.svg` |
+| format | **SVG** preferred (vector); optional attachment. 24/48/96 PNG preview |
+| Canvas | **24×24** viewBox(unified); provide separate variants for key entry points **32×32 / 48×48** Variant |
+| stroke | suggested **1.6â2.0** visual thickness circle cap mismatch. fix: use consistent styles. round) |
+| Color | **Monochrome**Use `currentColor` / `#000` Stroke only. We will CSS change color in CSS |
+| margin set wrong. Correct. | Add padding around graphic. **2px** Safe margins prevent edge clipping. |
+| Naming | lowercase kebab-case, see file names below |
+| Place | Place in this directory's `deliverables/`(you can create it too), for example:`docs/icon-design/deliverables/nav-library.svg` |
 
-### 1.2 动态图标（可选加分）
+### 1.2 Dynamic icons (optional bonus)
 
-| 项 | 要求 |
+| item | requirement |
 |----|------|
-| 格式 | **Lottie JSON**（优先，项目已有 lottie-web）或 **APNG / 短循环 WebM** |
-| 时长 | 循环 **1–2s**；处理中类可更长 |
-| 尺寸 | 导出逻辑 **64×64 或 128×128**，透明底 |
-| 命名 | `anim-<用途>.json`，如 `anim-processing.json` |
-| 注意 | 避免过重粒子；状态卡里会很小显示 |
+| format | **Lottie JSON** (preferred, project already has lottie-web). **APNG / Short loop WebM** |
+| Duration | Loop **1–2s**Processing class too long |
+| size | export logic **64Ã64 or 128Ã128** transparent background |
+| naming | `anim-<usage>.json`, such as `anim-processing.json` |
+| note | avoid heavy particles; display tiny in status card. |
 
-### 1.3 已有动效（可换代，不必重做清单外的）
+### 1.3 Existing animations (replaceable; no need to redo items outside the list)
 
-现有 Lottie 在 `frontend/src/assets/animations/`：
+Existing Lottie in `frontend/src/assets/animations/`:
 
-| 文件 | 用途（管线阶段） |
+| file | purpose (pipeline stage) |
 |------|------------------|
-| `pdf_upload_Lottie.json` | 上传 |
+| `pdf_upload_Lottie.json` | upload |
 | `ocr_Lottie.json` | OCR |
-| `deepseek_lottie.json` | 翻译（模型） |
-| `typst_rendering.json` | 排版 / 渲染 |
-| `pdf_download_Lottie.json` | 下载 / 产出 |
+| `deepseek_lottie.json` | model |
+| `typst_rendering.json` | typesetting / rendering |
+| `pdf_download_Lottie.json` | download / output |
 
-若你要「更好看的动效」，优先换这 5 个 + 下文 **P0 动态** 即可。
+If you want "smoother animations", prioritize changing these 5 + provide source text. **P0 Dynamic** is sufficient.
 
 ---
 
-## 2. 优先级总览
+## 2. Priority overview
 
-| 优先级 | 说明 |
+| priority | description |
 |--------|------|
-| **P0** | 每天看到：顶栏 Tab、底栏、阅读器模式/关闭/FAB、卡片状态徽标 |
-| **P1** | 书架操作、工具条、空状态、设置入口 |
-| **P2** | Toast / 通用对话框关闭、细节装饰 |
+| **P0** | daily view: top bar tab, bottom bar, reader mode/close/FAB card status badge |
+| **P1** | Bookshelf actions, toolbar, empty state, settings entry |
+| **P2** | Toast / general dialog close, detail decoration |
 
 ---
 
-## 3. P0 — 必须先做（导航 + 阅读器）
+## 3. P0 — Must do first (navigation + Reader.
 
-### 3.1 主页顶栏 Tab（三枚一组，风格要统一）
+### 3.1 Home top bar TabThree-piece set, unified style.
 
-| 文件名建议 | 语义 | 界面文案 | 现用大致形态 | 尺寸场景 |
+| file name suggestions | semantics | UI copy | current rough form | size scenario |
 |------------|------|----------|--------------|----------|
-| `nav-library.svg` | 图书馆 / 书架 | 图书馆 | 书脊并排 | 16–18px 内联 |
-| `nav-collections.svg` | 合集 / 文件夹书堆 | 合集 | 多层 stack | 同上 |
-| `nav-favorites.svg` | 收藏 / 书签摘录 | 收藏 | 书签 bookmark | 同上 |
+| `nav-library.svg` | library / bookshelf | library | spines side by side | 16â18px inline |
+| `nav-collections.svg` | collection / book stack folder | collection | layers stack | same as above |
+| `nav-favorites.svg` | favorites / bookmark excerpt | favorites | bookmark | same as above |
 
-**设计提示：** 三者并排在白色 pill 里；选中态会变白描边，**请保证在深底上仍清晰**。
+**Design Tip:** Three aligned side-by-side on white pill ；selected state becomes white outline,**Deep down clarity maintain. Simplify further.**。
 
-### 3.2 主页底栏
+### 3.2 Homepage footer
 
-| 文件名 | 语义 | 文案 | 现用 |
+| file name | semantics | copy | current |
 |--------|------|------|------|
-| `action-add-pdf.svg` | 添加 / 上传 PDF | 添加 PDF | 粗 **+** |
-| `action-settings.svg` | 设置 | 设置 | 齿轮 |
+| `action-add-pdf.svg` | add / upload PDF | add PDF | bold **+** |
+| `action-settings.svg` | settings | settings | gear |
 
-可选：`action-search.svg`（搜索框左侧装饰，当前是纯 input）。
+Optional: `action-search.svg` (decorative element left of search box, currently plain input).
 
-### 3.3 阅读器顶栏模式（三枚一组）
+### 3.3 Reader top bar mode (group of three)
 
-| 文件名 | 语义 | 文案 | 现用 Lucide |
+| file name | semantics | copy | current lucide |
 |--------|------|------|-------------|
-| `reader-mode-source.svg` | 原文单栏 | 原文 | FileText |
-| `reader-mode-translated.svg` | 译文单栏 | 译文 | Languages |
-| `reader-mode-compare.svg` | 左右对照 | 对照阅读 | Columns2 |
+| `reader-mode-source.svg` | single column | original | FileText |
+| `reader-mode-translated.svg` | single column | translation | Languages |
+| `reader-mode-compare.svg` | Side-by-side | Side-by-Side Reading | Columns2 |
 
-### 3.4 阅读器操作
+### 3.4 Reader operations
 
-| 文件名 | 语义 | 文案 / 场景 | 现用 |
+| file name | semantics | copy / scenario | current |
 |--------|------|-------------|------|
-| `reader-close.svg` | 关闭 / 回主页 | 关闭 | X |
-| `reader-fab.svg` | 悬浮工具钮主图标 | 工具菜单 | 菜单感 / 点阵亦可 |
-| `reader-notes.svg` | 批注列表 | 批注 | StickyNote |
-| `reader-download.svg` | 下载入口 | 下载 | Download |
-| `reader-download-source.svg` | 下原文 PDF | 原文 | FileText |
-| `reader-download-translated.svg` | 下译文 PDF | 译文 | Languages |
-| `reader-download-compare.svg` | 下对照 PDF | 对照 | Columns2 |
-| `reader-note-add.svg` | 选区加批注 | 加批注 | StickyNote |
-| `reader-shortcuts.svg` | 快捷键帮助 | 快捷键 | Keyboard |
+| `reader-close.svg` | close / back to home | close | X |
+| `reader-fab.svg` | Floating tool button main icon | Tools Menu | Menu Feel / Dot matrix acceptable. |
+| `reader-notes.svg` | annotation list | annotations | StickyNote |
+| `reader-download.svg` | download entry | download | Download |
+| `reader-download-source.svg` | download source PDF | original | FileText |
+| `reader-download-translated.svg` | translate PDF | translation | Languages |
+| `reader-download-compare.svg` | against PDF | comparison | Columns2 |
+| `reader-note-add.svg` | annotate selection | add annotation | StickyNote |
+| `reader-shortcuts.svg` | keyboard shortcuts | shortcuts | Keyboard |
 
-### 3.5 书架卡片状态徽标（小，11–14px）
+### 3.5 Bookshelf card status badge (small,11–14px）
 
-| 文件名 | 语义 | 状态文案方向 | 现用 key |
+| file name | semantics | status copy direction | current key |
 |--------|------|--------------|----------|
-| `badge-archive.svg` | 仅馆藏 / 未翻译 | 库存 | archive |
-| `badge-translated.svg` | 已翻译 | 已译 | languages |
-| `badge-processing.svg` | 处理中 | 进行中 | loader（可转） |
-| `badge-failed.svg` | 失败 | 失败 | alert |
-| `badge-queued.svg` | 排队 | 排队 | clock |
+| `badge-archive.svg` | Collection Only / Untranslated | Inventory | archive |
+| `badge-translated.svg` | translated | translated | languages |
+| `badge-processing.svg` | processing | in progress | loaderTransferable |
+| `badge-failed.svg` | failed | failed | alert |
+| `badge-queued.svg` | queued | queued | clock |
 
-**动态优先：** `anim-badge-processing.json`（替换 CSS spin 的 loader）。
+**Dynamic priority:** `anim-badge-processing.json` (replace CSS spin loader).
 
 ---
 
-## 4. P1 — 书架与空状态
+## 4. P1 — Bookshelf and empty state
 
-| 文件名 | 语义 | 出现位置 |
+| file name | semantics | location |
 |--------|------|----------|
-| `shelf-continue-book.svg` | 继续阅读封面占位 | 继续阅读条 |
-| `shelf-empty-favorites.svg` | 还没有收藏 | 收藏 Tab 空态 |
-| `shelf-empty-collection.svg` | 空合集 | 合集封面堆空 |
-| `shelf-view-grid.svg` | 网格视图 | 工具条 |
-| `shelf-view-list.svg` | 列表视图 | 工具条 |
-| `shelf-batch-select.svg` | 批量选择 | 工具条 |
-| `shelf-batch-delete.svg` | 批量删除 | 批量栏 |
-| `shelf-batch-collection.svg` | 加入合集 | 批量栏 |
-| `book-read.svg` | 读原文 / 眼睛 | 列表行、详情 |
-| `book-compare.svg` | 对照阅读 | 卡片操作 |
-| `book-translate.svg` | 发起翻译 | 详情 / 卡片 |
-| `book-cover-fallback.svg` | 无封面占位 | 卡片封面 |
-| `upload-lock.svg` | 未配凭据门禁 | 上传区 |
-| `collection-manage.svg` | 管理合集 | 合集卡片齿轮 |
+| `shelf-continue-book.svg` | Continue reading cover placeholder | Continue Reading |
+| `shelf-empty-favorites.svg` | no favorites yet | favorites tab empty state |
+| `shelf-empty-collection.svg` | Empty Collection | Collection cover stack empty |
+| `shelf-view-grid.svg` | Grid View | Toolbar |
+| `shelf-view-list.svg` | list view | toolbar |
+| `shelf-batch-select.svg` | batch select | toolbar |
+| `shelf-batch-delete.svg` | Batch Delete | Batch Bar |
+| `shelf-batch-collection.svg` | add to collection | batch bar |
+| `book-read.svg` | Read original / Eyes | List Row, Details |
+| `book-compare.svg` | comparison reading | card actions |
+| `book-translate.svg` | start translation | details / card |
+| `book-cover-fallback.svg` | No cover placeholder | Card Cover |
+| `upload-lock.svg` | No credentials for access control | Upload area |
+| `collection-manage.svg` | Manage Collections | Collection Card Gear |
 
-### 设置中心（Settings Hub 三栏）
+### Settings Hub (Settings Hub Three columns)
 
-| 文件名 | 语义 |
+| file name | semantics |
 |--------|------|
-| `settings-api.svg` | 接口 / 凭据 |
-| `settings-glossary.svg` | 术语表 |
-| `settings-about.svg` | 关于 / 更新 |
+| `settings-api.svg` | API / credentials |
+| `settings-glossary.svg` | glossary |
+| `settings-about.svg` | about / updates |
 
 ---
 
-## 5. P2 — 系统与反馈
+## 5. P2 — System and Feedback
 
-| 文件名 | 语义 | 现用 |
+| file name | semantics | current |
 |--------|------|------|
-| `toast-success.svg` | 成功 | CircleCheck |
-| `toast-info.svg` | 信息 | Info |
-| `toast-warning.svg` | 警告 | TriangleAlert |
-| `toast-error.svg` | 错误 | OctagonX |
-| `toast-loading.svg` | 加载中（可动态） | Loader2 spin |
-| `dialog-close.svg` | 对话框关闭 | X |
+| `toast-success.svg` | Success | CircleCheck |
+| `toast-info.svg` | "Info": "Info": "Info" but if it's a heading, "Information" might be better. But UI labels favor "Info". I'll output "Info".Info | Info |
+| `toast-warning.svg` | warning | TriangleAlert |
+| `toast-error.svg` | error | OctagonX |
+| `toast-loading.svg` | Loading (dynamic) | Loader2 spin |
+| `dialog-close.svg` | Close dialog | X |
 
 ---
 
-## 6. 建议优先做的「动态」清单
+## 6. Recommended priorities "Dynamic" list
 
-若时间有限，动态只做这些：
+If time is limited, only implement these dynamics:
 
-| 文件名 | 场景 | 说明 |
+| file name | scenario | description |
 |--------|------|------|
-| `anim-processing.json` | 卡片处理中 / 状态卡 | 温和旋转或进度环，可循环 |
-| `anim-upload.json` | 上传中 | 可替换 `pdf_upload_Lottie.json` |
-| `anim-ocr.json` | OCR 阶段 | 可替换 `ocr_Lottie.json` |
-| `anim-translate.json` | 翻译阶段 | 可替换 `deepseek_lottie.json` |
-| `anim-render.json` | 排版阶段 | 可替换 `typst_rendering.json` |
-| `anim-download.json` | 下载完成/进行 | 可替换 `pdf_download_Lottie.json` |
-| `anim-empty-favorites.json`（可选） | 收藏空态 | 书签轻动，不要吵 |
+| `anim-processing.json` | Processing card / Status card | Gentle spinning or progress ring, loopable. |
+| `anim-upload.json` | uploading... | can replace `pdf_upload_Lottie.json` |
+| `anim-ocr.json` | OCR Phase | Replaceable with `ocr_Lottie.json` |
+| `anim-translate.json` | Translation Phase | Replaceable with `deepseek_lottie.json` |
+| `anim-render.json` | Layout phase | Replaceable with `typst_rendering.json` |
+| `anim-download.json` | Download complete./Proceed | Replaceable with `pdf_download_Lottie.json` |
+| `anim-empty-favorites.json` (Optional) | No favorites | Move bookmarks quietly, no disturbance. |
 
 ---
 
-## 7. 视觉统一建议
+## 7. Visual Consistency Suggestions
 
-1. **同一套笔触**：全站 24 画板、相近 stroke。  
-2. **语义分组形状**：  
-   - 书 / 页 → 圆角矩形 + 折角  
-   - 翻译 → 文 / A 或双文气泡  
-   - 对照 → 双栏  
-   - 收藏 → 书签（不要用心形，和「喜欢」混淆）  
-3. **状态色由 UI 上色**：图标本身单色；失败/成功由外层 badge 背景表达。  
-4. **动效克制**：阅读场景避免闪烁；`prefers-reduced-motion` 时我们会停动画，请保证静态帧也看得懂。
+1. **Same brushstroke set**site-wide 24 Canvas, similar stroke。  
+2. **Semantic shape grouping**：  
+- book / page â rounded rectangle + Dog-ear
+- translation â text / A Or bilingual bubble
+- comparison â double column
+- favorites â Bookmark (do not use heart shape, andãLikeãobfuscation)
+3. **Status color by UI Colorize**Icons monochrome; failure/Successfully exited outer layer badge Background expression.  
+4. **Restrained animations**Read context avoid flicker.`prefers-reduced-motion` Pause animation. Ensure static frame remains intelligible.
 
 ---
 
-## 8. 交付目录结构（请按此丢文件）
+## 8. Delivery directory structure (place files here)
 
 ```
 docs/icon-design/
-  ICON_BRIEF.md          ← 本说明
+  ICON_BRIEF.md          ← This manual
   deliverables/
     svg/
       nav-library.svg
@@ -197,16 +197,16 @@ docs/icon-design/
     lottie/
       anim-processing.json
       ...
-    preview/             ← 可选：拼一张总览 PNG/PDF 方便评审
+    preview/             ← Optional: Create an overview. PNG/PDF For review
 ```
 
-做完后告诉我文件已就位，我可以按文件名接到 `frontend/src/assets/icons/` 并替换代码里的 Lucide / 内联 SVG。
+Done, notify file ready. Pick up by filename. `frontend/src/assets/icons/` and replace in the code. Lucide / inline SVG.
 
 ---
 
-## 9. 最小开工包（若只想先做 12 个）
+## 9. Minimum viable package (if you only want to start with 12 item)
 
-按产品曝光排序，**先做这 12 个**就够换一版气质：
+Sort by product exposure.**Do these first 12** Enough to swap a version's vibe:
 
 1. `nav-library`  
 2. `nav-collections`  
@@ -218,18 +218,18 @@ docs/icon-design/
 8. `reader-mode-compare`  
 9. `reader-close`  
 10. `reader-notes`  
-11. `badge-processing`（+ 可选 `anim-processing`）  
+11. `badge-processing` (+ optional `anim-processing`)
 12. `badge-translated`  
 
-其余可第二批发。
+Remainder in second batch.
 
 ---
 
-## 10. 代码侧现状（给你对照，不必改）
+## 10. Code status (reference only; no changes)
 
-- 阅读器：大量 `lucide-react`（ModeTabs / Fab / Close / Selection）。  
-- 主页：大量内联 `<svg>`（TopTabs / BottomBar / Badge / Toolbar）。  
-- 品牌：`frontend/src/assets/RetainPDF-logo.svg`（Logo 另算，不在本清单强制范围）。  
-- 阶段动效：Lottie 见 §1.3。
+- Reader: Bulk `lucide-react`（ModeTabs / Fab / Close / Selection）。  
+- Homepage: excessive inline styles `<svg>`（TopTabs / BottomBar / Badge / Toolbar）。  
+- Brand:`frontend/src/assets/RetainPDF-logo.svg`（Logo Separate, not mandatory within this list's scope.  
+- Phase animations: Lottie see Â§1.3.
 
-有问题可以直接在 `deliverables/` 旁加 `notes.md` 写你的命名或变体说明。
+If you have questions, you can directly `deliverables/` Add `notes.md` Write your naming or variant description.

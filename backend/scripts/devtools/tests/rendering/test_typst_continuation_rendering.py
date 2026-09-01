@@ -76,21 +76,21 @@ def test_continuation_group_member_prefers_member_translation_for_rendering() ->
     item = {
         "translation_unit_kind": "single",
         "continuation_group": "cg-002-004",
-        "protected_translated_text": "$来表征，所有这些量均可通过拟合不同温度及$Q_{0}$值下的激发谱获得。",
+        "protected_translated_text": "$To characterize, all these quantities can be obtained by fitting at different temperatures and$Q_{0}$Get excitation spectrum under value.",
         "translated_text": "$来表征，所有这些量均可通过拟合不同温度及$Q_{0}$值下的激发谱获得。",
         "translation_unit_protected_translated_text": (
-            "激发谱的每个模式$i$可通过其色散关系$\\omega^i(\\mathbf{Q})$、"
-            "寿命$\\tau_{\\mathrm{SW}}^i$以及强度$I_0$来表征，所有这些量均可通过拟合不同温度及$Q_{0}$值下的激发谱获得。"
-            "假设磁激发具有洛伦兹线型，则散射函数可写为"
+            "Each mode of the excitation spectrum$i$Obtainable via its dispersion relation.$\\omega^i(\\mathbf{Q})$、"
+            "Lifetime$\\tau_{\\mathrm{SW}}^i$and intensity$I_0$To characterize, all these quantities can be obtained by fitting at different temperatures and$Q_{0}$Obtain excitation spectrum under value."
+            "Assuming a Lorentzian line shape for magnetic excitations, the scattering function can be written as"
         ),
         "translation_unit_translated_text": (
             "激发谱的每个模式$i$可通过其色散关系$\\omega^i(\\mathbf{Q})$、"
             "寿命$\\tau_{\\mathrm{SW}}^i$以及强度$I_0$来表征，所有这些量均可通过拟合不同温度及$Q_{0}$值下的激发谱获得。"
-            "假设磁激发具有洛伦兹线型，则散射函数可写为"
+"Assuming the magnetic excitations have Lorentzian line shape, the scattering function can be written as"
         ),
     }
 
-    assert render_protected_translation_text(item).startswith("$来表征")
+    assert render_protected_translation_text(item).startswith("$Represent")
 
 
 def test_prepare_render_payloads_keeps_member_translations_for_continuation_group_members() -> None:
@@ -111,11 +111,11 @@ def test_prepare_render_payloads_keeps_member_translations_for_continuation_grou
                     "accessible by fitting the excitation spectrum."
                 ),
                 "translation_unit_protected_translated_text": (
-                    "激发谱的每个模式$i$可通过其色散关系$\\omega^i(\\mathbf{Q})$、寿命$\\tau_{\\mathrm{SW}}^i$"
+                    "激发谱的每个模式$i$可通过其色散关系$\\omega^i(\\mathbf{Q})$Lifespan$\\tau_{\\mathrm{SW}}^i$"
                     "以及强度$I_0$来表征，所有这些量均可通过拟合不同温度及$Q_{0}$值下的激发谱获得。"
-                    "假设磁激发具有洛伦兹线型，则散射函数可写为"
+"Assuming the magnetic excitations have Lorentzian line shape, the scattering function can be written as"
                 ),
-                "protected_translated_text": "局部旧文本",
+                "protected_translated_text": "Local old text",
                 "translation_unit_formula_map": [],
             }
         ],
@@ -137,7 +137,7 @@ def test_prepare_render_payloads_keeps_member_translations_for_continuation_grou
                 "translation_unit_protected_translated_text": (
                     "激发谱的每个模式$i$可通过其色散关系$\\omega^i(\\mathbf{Q})$、寿命$\\tau_{\\mathrm{SW}}^i$"
                     "以及强度$I_0$来表征，所有这些量均可通过拟合不同温度及$Q_{0}$值下的激发谱获得。"
-                    "假设磁激发具有洛伦兹线型，则散射函数可写为"
+"Assuming the magnetic excitations have Lorentzian line shape, the scattering function can be written as"
                 ),
                 "protected_translated_text": "$来表征，所有这些量均可通过拟合不同温度及$Q_{0}$值下的激发谱获得。",
                 "translation_unit_formula_map": [],
@@ -149,7 +149,7 @@ def test_prepare_render_payloads_keeps_member_translations_for_continuation_grou
     first = prepared[1][0]["render_protected_text"]
     second = prepared[2][0]["render_protected_text"]
 
-    assert first == "局部旧文本"
+    assert first == "Partial old text"
     assert second == "$来表征，所有这些量均可通过拟合不同温度及$Q_{0}$值下的激发谱获得。"
 
 
@@ -167,9 +167,9 @@ def test_prepare_render_payloads_does_not_resplit_materialized_cross_page_member
                 "continuation_group": "cg-012-016",
                 "protected_source_text": "Having demonstrated the good performance of GFN2-xTB for small systems including",
                 "translation_unit_protected_source_text": "Having demonstrated the good performance of GFN2-xTB for small systems including different elements and interaction types, we next turn our attention to larger systems. This behavior partially results from nonadditivity dispersion effects.",
-                "translated_text": "我们已经证明了GFN2-xTB对于包含不同元素和相互作用类型的小体系的",
-                "protected_translated_text": "我们已经证明了GFN2-xTB对于包含不同元素和相互作用类型的小体系的",
-                "translation_unit_protected_translated_text": "我们已经证明了GFN2-xTB对于包含不同元素和相互作用类型的小体系的非共价相互作用具有良好的性能，接下来我们将关注更大的体系。这种行为部分源于非加和色散效应。",
+                "translated_text": "We have provenGFN2-xTBFor small systems with diverse elements and interaction types.",
+"protected_translated_text": "We have demonstrated GFN2-xTB for small systems containing different elements and interaction types",
+"translation_unit_protected_translated_text": "We have demonstrated GFN2-xTB for small systems with diverse elements and interaction types, non-covalent interactions perform well; next we turn to larger systems. This behavior stems partly from non-additive dispersion effects.",
                 "translation_unit_formula_map": [],
             },
             {
@@ -183,9 +183,9 @@ def test_prepare_render_payloads_does_not_resplit_materialized_cross_page_member
                 "continuation_group": "cg-012-016",
                 "protected_source_text": "different elements and interaction types, we next turn our attention to larger systems.",
                 "translation_unit_protected_source_text": "Having demonstrated the good performance of GFN2-xTB for small systems including different elements and interaction types, we next turn our attention to larger systems. This behavior partially results from nonadditivity dispersion effects.",
-                "translated_text": "非共价相互作用具有良好的性能，接下来我们将关注更大的体系。",
-                "protected_translated_text": "非共价相互作用具有良好的性能，接下来我们将关注更大的体系。",
-                "translation_unit_protected_translated_text": "我们已经证明了GFN2-xTB对于包含不同元素和相互作用类型的小体系的非共价相互作用具有良好的性能，接下来我们将关注更大的体系。这种行为部分源于非加和色散效应。",
+                "translated_text": "The non-covalent interactions have good performance; next we turn our attention to larger systems.",
+"protected_translated_text": "Non-covalent interactions have good performance; next we turn our attention to larger systems.",
+"translation_unit_protected_translated_text": "We have demonstrated GFN2-xTB for small systems containing different elements and interaction types. Non-covalent interactions have good performance; next we turn our attention to larger systems. This behavior partially results from nonadditive dispersion effects.",
                 "translation_unit_formula_map": [],
             },
         ],
@@ -201,9 +201,9 @@ def test_prepare_render_payloads_does_not_resplit_materialized_cross_page_member
                 "continuation_group": "cg-012-016",
                 "protected_source_text": "This behavior partially results from nonadditivity dispersion effects.",
                 "translation_unit_protected_source_text": "Having demonstrated the good performance of GFN2-xTB for small systems including different elements and interaction types, we next turn our attention to larger systems. This behavior partially results from nonadditivity dispersion effects.",
-                "translated_text": "这种行为部分源于非加和色散效应。",
-                "protected_translated_text": "这种行为部分源于非加和色散效应。",
-                "translation_unit_protected_translated_text": "我们已经证明了GFN2-xTB对于包含不同元素和相互作用类型的小体系的非共价相互作用具有良好的性能，接下来我们将关注更大的体系。这种行为部分源于非加和色散效应。",
+                "translated_text": "This behavior partially results from nonadditive dispersion effects.",
+"protected_translated_text": "This behavior partially results from nonadditive dispersion effects.",
+"translation_unit_protected_translated_text": "We have demonstrated GFN2-xTB for small systems containing different elements and interaction types. Non-covalent interactions have good performance; next we turn our attention to larger systems. This behavior partially results from nonadditive dispersion effects.",
                 "translation_unit_formula_map": [],
             }
         ],
@@ -211,9 +211,9 @@ def test_prepare_render_payloads_does_not_resplit_materialized_cross_page_member
 
     prepared = prepare_render_payloads_by_page(translated_pages)
 
-    assert prepared[11][0]["render_protected_text"] == "我们已经证明了GFN2-xTB对于包含不同元素和相互作用类型的小体系的"
-    assert prepared[11][1]["render_protected_text"] == "非共价相互作用具有良好的性能，接下来我们将关注更大的体系。"
-    assert prepared[12][0]["render_protected_text"] == "这种行为部分源于非加和色散效应。"
+assert prepared[11][0]["render_protected_text"] == "We have demonstrated GFN2-xTB for small systems containing different elements and interaction types"
+assert prepared[11][1]["render_protected_text"] == "Non-covalent interactions have good performance; next we turn our attention to larger systems."
+assert prepared[12][0]["render_protected_text"] == "This behavior partially results from nonadditive dispersion effects."
 
 
 def test_continuation_member_does_not_inherit_short_body_font_from_context() -> None:
@@ -235,7 +235,7 @@ def test_continuation_member_does_not_inherit_short_body_font_from_context() -> 
             "render_kind": "markdown",
             "is_body": True,
             "inner_bbox": bbox,
-            "translated_text": "译文",
+"translated_text": "translation",
             "formula_map": [],
             "font_size_pt": font_size,
             "leading_em": 0.42,

@@ -50,11 +50,11 @@ const MODEL_CONSTANTS_FROM_ROOT_PATTERN = /import\s*{[^}]*(?:DEFAULT_MODEL|DEFAU
 const STORAGE_KEYS_FROM_ROOT_PATTERN = /import\s*{[^}]*(?:BROWSER_CONFIG_STORAGE_KEY|DEVELOPER_CONFIG_STORAGE_KEY)[^}]*}\s*from\s+["'](?:\.\.\/)+constants\.js["']/s;
 const WORKFLOW_DEFAULTS_FROM_ROOT_PATTERN = /import\s*{[^}]*(?:DEFAULT_MODE|DEFAULT_LANGUAGE|DEFAULT_RULE_PROFILE|DEFAULT_RENDER_MODE|DEFAULT_TYPST_FONT_FAMILY|DEFAULT_PDF_COMPRESS_DPI|DEFAULT_TRANSLATED_PDF_NAME|DEFAULT_BODY_FONT_SIZE_FACTOR|DEFAULT_BODY_LEADING_FACTOR|DEFAULT_INNER_BBOX_SHRINK_X|DEFAULT_INNER_BBOX_SHRINK_Y|DEFAULT_INNER_BBOX_DENSE_SHRINK_X|DEFAULT_INNER_BBOX_DENSE_SHRINK_Y|DEFAULT_FONT_UNIFY_MODE|DEFAULT_WORKERS|DEFAULT_BATCH_SIZE|DEFAULT_CLASSIFY_BATCH_SIZE|DEFAULT_COMPILE_WORKERS|DEFAULT_TIMEOUT_SECONDS)[^}]*}\s*from\s+["'](?:\.\.\/)+constants\.js["']/s;
 const BOOTSTRAP_EXTERNAL_IMPORT_PATTERN = /from\s+["']\.\.\/(?:features|ui|api|state)\/|from\s+["']\.\.\/(?:config|constants)\.js["']/;
-// Phase 3 home cutover 删掉了绝大部分 src/js/bootstrap/(227 个手工 DI 端口文件里的
-// 226 个);现存唯一文件是 reader-dialog-runtime-port.js(reader iframe 契约仍需要,
-// 见 src/js/reader/downloads/resolve.js)。以下两份清单曾各有 30~130 个条目对应
-// 已删除文件——Phase 4 收紧为只保留仍然存在的条目,新文件若再落进 bootstrap/ 会被
-// 下面两条门禁测试正确拦下,强制显式决定是否加回允许清单。
+// Phase 3 home cutover Removed most src/js/bootstrap/(227 Manual DI In the port file
+// 226 items); The only existing file is reader-dialog-runtime-port.js (reader iframe Contract required,
+// see src/js/reader/downloads/resolve.js) The following two lists each had 30~130 Map entries
+// File deletedâPhase 4 Filter to keep only existing entries. If new files land again in bootstrap/ they will be
+// Access control tests correctly blocked.,Force explicit decision on allowlist re-addition.
 const BOOTSTRAP_GROUPED_PORT_FILES = [];
 const BOOTSTRAP_GROUPED_PORT_DISCOVERY_ALLOWLIST = new Set([]);
 
@@ -70,7 +70,7 @@ function isSourceFile(filePath) {
     || filePath.endsWith(".jsx");
 }
 
-/** 源文件已迁 TS 后，测试里仍可写 foo.js，实际读 foo.ts */
+/** Source file migrated TS Tests can still write after foo.jsRead actual foo.ts */
 function resolveSourcePath(filePath) {
   if (existsSync(filePath)) {
     return filePath;
@@ -158,12 +158,12 @@ function filesUnder(...roots) {
   return roots.flatMap((root) => walkFiles(root));
 }
 
-/** 去掉 `import type` 再匹配——TS 类型导入不构成运行时对 view 层的依赖 */
+/** Remove `import type` RematchâTS Type imports don't create runtime dependencies. view Layer dependencies */
 function sourceWithoutTypeImports(source) {
   return source
     .replace(/import\s+type\s+[\s\S]*?from\s+["'][^"']+["']\s*;?/g, "")
     .replace(/import\s*\{[^}]*\}\s*from\s+["'][^"']+["']\s*;?/g, (block) => {
-      // 保留值导入；若整行只有 type 已在上一步处理
+      // Preserve value import; if line only type Handled in previous step
       return block;
     });
 }
@@ -426,7 +426,7 @@ test("job runtime default adapter shims are not kept in feature layer", () => {
 
 test("recent jobs feature does not import home state directly", () => {
   for (const fileName of ["controller.js", "loader.js", "commit.js", "runtime-item.js"]) {
-    // 允许 `import type { HomeStatePort }`（编译期擦除，无运行时依赖）
+    // Allow `import type { HomeStatePort }`Compile-time erasure, no runtime dependency.
     const source = sourceWithoutTypeImports(readFeatureSource("recent-jobs", fileName));
 
     assert.equal(source.includes("../home/state.js"), false);
@@ -450,10 +450,10 @@ test("current job state is store-only with no legacy mirror", () => {
   const currentJobStateSource = readJobRuntimeSource("current-job-state.js");
   const secondarySelectorSource = readJobRuntimeSource("current-job-secondary-selectors.js");
 
-  // 迁移完成:镜像 port 文件不得存在,选择器读 store 快照
+// Migration complete: Mirror port File must not exist. Selector read store snapshot
   assert.equal(existsSync(join(SOURCE_ROOTS.features, "job-runtime", "legacy-current-job-state-port.js")), false);
   assert.equal(/state\.currentJob[A-Za-z]*\s*=(?!=)/.test(currentJobStateSource), false);
-  // 允许 TS 收窄：currentJobStoreFor(state as object | null | undefined).getSnapshot()
+// Allow TS Narrow: currentJobStoreFor(state as object | null | undefined).getSnapshot()
   assert.match(
     currentJobStateSource,
     /currentJobStoreFor\(\s*state(?:\s+as\s+[^)]+)?\s*\)\.getSnapshot\(\)/,
@@ -495,7 +495,7 @@ test("status detail layer does not keep legacy render compatibility facades", ()
 });
 
 test("credentials runtime state is store-only with no legacy mirror ports", () => {
-  // credential slice 已统一到 app-framework store,镜像 port 文件不应再出现
+// credential slice Unified to app-framework store, mirror port File must not reappear.
   for (const fileName of ["runtime-state-port.js", "balance-state-port.js", "legacy-runtime-port.js"]) {
     assert.equal(existsSync(join(SOURCE_ROOTS.features, "credentials", fileName)), false);
   }
@@ -518,30 +518,30 @@ test("upload controller reads upload state only through upload state port", () =
   assert.equal(stateSource.includes("../../state/upload-state.js"), false);
 });
 
-// ===== React 迁移防回弹门禁(Phase 0 起生效) =====
-// 新世界(src/pages/**、src/shared/**)只能消费旧世界的纯逻辑层
-// (api/contracts/state-port/actions/view-model 等),禁止 import 旧视图层——
-// 一旦引用,旧 DOM 视图就会"回弹"进 React 树,迁移永远收不了口。
+// ===== React Migration anti-regression gate(Phase 0 Effective from) =====
+// New World (src/pages/**, src/shared/**) Consume legacy pure logic layer only
+// (api/contracts/state-port/actions/view-model etc.), forbid import Legacy view layerâ
+// Once referenced, old DOM view will "Rebound" into React tree, the migration will never be complete.
 //
-// 注:tests/esm-entry-resolution.test.mjs 已随 Phase 2b reader cutover 退役——
-// 三页(home/detail/reader)入口全部经 esbuild 打包,import 断链在 build:js
-// 构建期即失败,不再需要独立的原生 ESM 解析守卫。
+// Note: tests/esm-entry-resolution.test.mjs retired with Phase 2b reader cutoverâ
+// Three pages (home/detail/reader) All entries pass through esbuild Build, import Broken link at build:js
+// Build-time failure.,Standalone native no longer needed. ESM Guard parse fail. Fix: Validate input.
 
-test("React 新世界禁止 import 旧视图层(防回弹)", () => {
+test("React New World Forbidden import Legacy view layer(Anti-Rebound)", () => {
   const REACT_ROOTS = [join(PROJECT_ROOT, "src/pages"), join(PROJECT_ROOT, "src/shared")];
-  // 旧视图层路径特征:命中即违规
+  // Legacy view layer path signature:Hit violates
   const FORBIDDEN_IMPORT_PATTERNS = [
-    // 只拦旧世界的 src/js/components/;新世界页面自身的 components/ 子目录
-    // (src/pages/*/components/,目录约定)不在此列
-    [/from\s+["'][^"']*\/js\/components\//, "src/js/components/(自定义元素/对话框视图)"],
-    [/from\s+["'][^"']*\/generated\//, "src/js/generated/(预编译产物)"],
-    [/from\s+["'][^"']*\/bootstrap\//, "src/js/bootstrap/(旧 DI 装配层)"],
-    [/from\s+["'][^"']*\/features\/[^"']*\/view\.js["']/, "features/*/view.js(旧 DOM 视图)"],
-    [/from\s+["'][^"']*\/features\/[^"']*view-port\.js["']/, "features/*view-port.js(旧 DOM 端口)"],
-    [/from\s+["'][^"']*\/features\/[^"']*dom-contract\.js["']/, "features/*dom-contract.js(旧 DOM 契约)"],
-    [/from\s+["'][^"']*\/features\/[^"']*card-markup\.js["']/, "features/*card-markup.js(字符串模板)"],
-    [/from\s+["'][^"']*\/features\/[^"']*card-template\.js["']/, "features/*card-template.js(字符串模板)"],
-    [/from\s+["'][^"']*\/js\/dom\//, "src/js/dom/(旧 DOM 工具)"],
+    // Block legacy only. src/js/components/;New World page own components/ Subdirectory
+// (src/pages/*/components/, directory convention) Not in this column
+[/from\s+["'][^"']*\/js\/components\//, "src/js/components/(Custom elements/Dialog view)"],
+    [/from\s+["'][^"']*\/generated\//, "src/js/generated/(Precompiled artifacts.)"],
+[/from\s+["'][^"']*\/bootstrap\//, "src/js/bootstrap/(Old DI assembly layer)"],
+[/from\s+["'][^"']*\/features\/[^"']*\/view\.js["']/, "features/*/view.js (Old DOM view)"],
+[/from\s+["'][^"']*\/features\/[^"']*view-port\.js["']/, "features/*view-port.js (Old DOM port)"],
+[/from\s+["'][^"']*\/features\/[^"']*dom-contract\.js["']/, "features/*dom-contract.js (Old DOM contract)"],
+    [/from\s+["'][^"']*\/features\/[^"']*card-markup\.js["']/, "features/*card-markup.js(String template)"],
+[/from\s+["'][^"']*\/features\/[^"']*card-template\.js["']/, "features/*card-template.js (String template)"],
+[/from\s+["'][^"']*\/js\/dom\//, "src/js/dom/(Old DOM tools)"],
   ];
 
   function walkReactFiles(root) {
@@ -580,7 +580,7 @@ test("React 新世界禁止 import 旧视图层(防回弹)", () => {
   assert.deepEqual(
     violations,
     [],
-    `React 新世界引用了旧视图层,请改为消费纯逻辑层或在 React 内重写:\n  ${violations.join("\n  ")}`,
+    `React New world references old view layer.,Change to consuming the pure logic layer or at React Internal rewrite.:\n  ${violations.join("\n  ")}`,
   );
 });
 
@@ -642,7 +642,7 @@ test("reader non-legacy must not import src/js/* directly (use pages/reader/exte
     .filter((file) => {
       const base = relative(READER_PAGE_ROOT, file).replace(/\\/g, "/");
       if (base === "external.ts") return false;
-      if (base.startsWith("legacy/")) return false; // legacy 可直接依赖 js/reader
+      if (base.startsWith("legacy/")) return false; // legacy Direct dependency js/reader
       return pageHasDirectJsImport(readSource(file));
     })
     .map((file) => relative(READER_PAGE_ROOT, file).replace(/\\/g, "/"));

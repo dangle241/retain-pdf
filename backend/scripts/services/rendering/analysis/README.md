@@ -1,18 +1,18 @@
 # rendering/analysis
 
-## 负责什么
+## Responsibilities
 
-页面和文档分析层。这里负责回答“这一页是什么情况”和“这一页建议走什么渲染路线”。
+Page and document analysis layer. Answers: what this page is, and which rendering path to take.
 
-## 对外入口
+## External entry point
 
 - `classifier.py`
 - `profile/`
 - `route/`
 
-## 不该做什么
+## Don't
 
-- 不操作 PDF 内容。
-- 不生成 Typst。
-- 不执行 redaction。
-- 不做译文 bbox 排版。
+- No action PDF Content.
+- No output. Typst。
+- Skip execution. redaction。
+- No translation performed. bbox Formatting.

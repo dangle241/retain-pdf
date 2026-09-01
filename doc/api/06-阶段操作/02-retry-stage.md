@@ -1,14 +1,14 @@
 # retry-stage
 
-## 接口
+## Endpoint
 
 ```http
 POST /api/v1/jobs/{job_id}/retry-stage
 ```
 
-用于用户主动从某个阶段重新执行后续流程。
+Used for user-initiated re-execution of subsequent steps from a specific phase.
 
-## 请求示例
+## Request example
 
 ```json
 {
@@ -27,13 +27,13 @@ POST /api/v1/jobs/{job_id}/retry-stage
 }
 ```
 
-## 阶段语义
+## Stage semantics
 
-- `ocr`: 复用 source PDF，重跑 OCR -> translation -> render。
-- `translation`: 复用 source PDF + OCR 结果，重跑 translation -> render。
-- `render`: 复用 source PDF + OCR 结果 + 翻译结果，只重跑 render。
+- ocr: reuse source PDF, rerun OCR -> translation -> render.
+- translation: reuse source PDF + OCR result, rerun translation -> render.
+- render: reuse source PDF + OCR result + translation, rerun only render.
 
-## 响应示例
+## Response example
 
 ```json
 {
@@ -47,9 +47,9 @@ POST /api/v1/jobs/{job_id}/retry-stage
 }
 ```
 
-前端拿到新 `job_id` 后直接进入正常轮询。
+Frontend gets new `job_id` Then proceed to normal polling.
 
-## 与 resume 的区别
+## Difference from resume
 
-- `resume` 更偏失败后的恢复。
-- `retry-stage` 是用户主动从指定阶段重跑，成功任务也可以用。
+- `resume` Prefer recovery after failure.
+- `retry-stage` User actively reruns from specified stage; successful tasks also usable.

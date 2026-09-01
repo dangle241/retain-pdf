@@ -14,7 +14,7 @@ from services.document_schema.semantics import is_plain_bodylike_block
 
 WORD_RE = re.compile(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*")
 ZH_CHAR_RE = re.compile(r"[\u4e00-\u9fff]")
-SPLIT_PUNCTUATION = (".", "。", "!", "！", "?", "？", ";", "；", ":", "：", ",", "，")
+SPLIT_PUNCTUATION = (".", "。", "!", "!", "?", "?", ";", "；", ":", "：", ",", "，")
 COMPACT_TRIGGER_RATIO = 0.9
 COMPACT_SCALE = 0.9
 HEAVY_COMPACT_RATIO = 1.0

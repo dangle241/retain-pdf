@@ -76,14 +76,14 @@ class PlaceholderAliasTests(unittest.TestCase):
         )
 
         aliased_result = {
-            "demo": module.result_entry("translate", "译文 @@P1@@ 和 @@P2@@"),
+"demo": module.result_entry("translate", "translation @@P1@@ and @@P2@@"),
         }
         module.validate_batch_result([aliased_item], aliased_result)
 
         restored = module.restore_placeholder_aliases(aliased_result, alias_to_original)
         self.assertEqual(
             restored["demo"]["translated_text"],
-            "译文 [[FORMULA_1]] 和 [[FORMULA_2]]",
+"translation [[FORMULA_1]] and [[FORMULA_2]]",
         )
 
     def test_validate_allows_token_reordering_with_warning_only(self):
@@ -98,7 +98,7 @@ class PlaceholderAliasTests(unittest.TestCase):
         diagnostics = module.TranslationDiagnosticsCollector()
         module.validate_batch_result(
             [item],
-            {"demo": module.result_entry("translate", "在 <t1-b2d/> 之后是 <f1-a7c/>")},
+            {"demo": module.result_entry("translate", "在 <t1-b2d/> After <f1-a7c/>")},
             diagnostics=diagnostics,
         )
         assert any(item.kind == "placeholder_order_changed" for item in diagnostics.diagnostics)

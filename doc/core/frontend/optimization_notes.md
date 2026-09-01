@@ -1,310 +1,310 @@
-# 前端优化说明
+# Frontend optimization notes
 
-这份说明只聚焦当前 `frontend/` 的真实技术债，目的是让前端同学快速判断：
+These instructions only focus on the current. `frontend/` Real technical debt, for frontend peers to quickly judge:
 
-- 哪些问题是必须先修的
-- 哪些问题会直接拖慢后续开发
-- 哪些问题只是体验层优化
+- Which issues must be fixed first?
+- Which issues directly slow later development?
+- Which issues are merely experience-layer optimizations?
 
-## 当前结构概览
+## Current structure overview
 
-前端现在是一个非常轻量的原生 JS + Tailwind 页面，没有框架，也没有 bundler/runtime state 管理层。
+Frontend is now a very lightweight native. JS + Tailwind Page, no framework, and no bundler/runtime state Management.
 
-量化情况：
+Quantification:
 
-- 核心交互入口：[main.js](../../frontend/src/js/main.js) 约 `1291` 行
-- UI 渲染层：[ui.js](../../frontend/src/js/ui.js) 约 `624` 行
-- 任务数据整形层：[job.js](../../frontend/src/js/job.js) 约 `424` 行
-- 样式主文件：[components.css](../../frontend/src/styles/components.css) 约 `1747` 行
-- 前端源码总量约 `224K`
-- `frontend/node_modules` 已落仓，约 `16M`
+- Core interaction entry:[main.js](../../frontend/src/js/main.js) approximately `1291` rows
+- UI rendering layer: ui.js about 624 lines
+- Task data shaping layer: job.js about 424 lines
+- Main style file: components.css about 1747 lines
+- Total frontend source code approx. `224K`
+- `frontend/node_modules` Stored, approx. `16M`
 
-结论：这不是“功能太多”，而是“没有形成稳定分层”，所以复杂度集中在少数大文件里。
+Conclusion: Not "too many features" — "no stable layering." Complexity concentrates in a few large files.
 
-## P0：应该先处理的问题
+## P0Priority issues to address
 
-### 1. 主入口过大，业务、事件绑定、轮询、表单组装全耦合在一起
+### 1. Main entry bloated. Business logic, event binding, polling, form assembly coupled.
 
-文件：
+Files:
 
 - [main.js](../../frontend/src/js/main.js)
 
-问题：
+Problem:
 
-- `main.js` 同时负责：
-  - token 校验
-  - 表单收集
-  - 提交任务
-  - 轮询任务
-  - 最近任务列表
-  - 开发者设置
-  - 浏览器凭证弹窗
-  - 页面事件总绑定
-- 这会导致任何一个小改动都容易碰到别的流程。
+- `main.js` Also responsible for:
+- Token validation
+  - Form Collection
+- Submit task
+- Poll task
+  - Recent Tasks
+  - Developer Settings
+  - Browser credentials prompt
+  - Page Event Master Binding
+- This makes any small change likely to affect other processes.
 
-建议：
+Suggestions:
 
-- 至少拆成 4 个模块：
+- Split into at least 4 Module
   - `job-submit.js`
   - `job-polling.js`
   - `recent-jobs.js`
   - `settings-dialog.js`
-- `main.js` 只保留：
-  - 页面初始化
-  - 模块装配
-  - 顶层错误兜底
+- `main.js` Keep only:
+  - Page Initialization
+  - Module Assembly
+  - Top-level error fallback
 
-### 2. 全局可变状态过于原始，没有更新边界
+### 2. Global mutable state too primitive; lacks update boundaries.
 
-文件：
+Files:
 
 - [state.js](../../frontend/src/js/state.js)
 - [main.js](../../frontend/src/js/main.js)
 - [ui.js](../../frontend/src/js/ui.js)
 
-问题：
+Problems:
 
-- `state` 是一个裸对象，多个文件直接写：
+- `state` Plain object; write directly across multiple files:
   - `state.currentJobId = ...`
   - `state.recentJobsItems = ...`
   - `state.timer = ...`
-- 没有 mutation 边界，也没有订阅机制。
-- 现在还能撑住，是因为页面单一；一旦前端继续加功能，会越来越难查状态来源。
+- No mutation boundary or subscription mechanism.
+- Currently still manageable because the page is simple; once the frontend adds more features, tracing state origins will become increasingly difficult.
 
-建议：
+Suggestions:
 
-- 不一定非要上 React/Vue。
-- 先做一个轻量 store：
+- Not required. Remove. React/Vue。
+- First make a lightweight version. store：
   - `getState()`
   - `patchState(partial)`
-  - `subscribe(key, fn)` 或简单 `subscribe(fn)`
-- 至少把这几块独立出来：
+  - `subscribe(key, fn)` or simple `subscribe(fn)`
+- At least extract these parts:
   - `jobState`
   - `uploadState`
   - `recentJobsState`
   - `developerState`
 
-### 3. 大量 `innerHTML` 拼接，渲染和事件绑定都比较脆
+### 3. Large volume `innerHTML` Concatenation, rendering, and event binding are fragile.
 
-文件：
+Files:
 
 - [ui.js](../../frontend/src/js/ui.js)
 - [templates.js](../../frontend/src/js/templates.js)
 - [main.js](../../frontend/src/js/main.js)
 
-问题：
+Problems:
 
-- 多处直接整段重写：
+- Multiple sections directly rewritten in full:
   - `document.body.innerHTML = ...`
   - `list.innerHTML = ...`
-- 最近任务列表还会用：
+- Recent task list will also be used:
   - `list.innerHTML = reset ? markup : \`\${list.innerHTML}\${markup}\``
-- 这类写法的问题：
-  - 事件绑定容易丢
-  - 局部刷新不可控
-  - 性能和状态一致性都一般
+- Problems with this approach:
+  - Event bindings can be lost.
+  - Partial refresh uncontrollable.
+  - Performance and state consistency both mediocre.
 
-建议：
+Suggestions:
 
-- 不必重构成组件框架。
-- 先把高频列表改成 DOM 节点渲染：
+- No need refactor into component framework.
+- First change the high-frequency list to DOM Node rendering:
   - `document.createElement`
   - `replaceChildren`
   - `append`
-- 优先处理：
-  - 事件流列表
+- Priority:
+  - Event Stream List
   - stage history
-  - 最近任务列表
+- Recent task list
 
-### 4. 前端里有硬编码开发者密码，属于明显安全问题
+### 4. Hardcoded dev password in frontend. Critical security risk. Remove immediately. Use env vars or secure backend auth.
 
-文件：
+Files:
 
 - [main.js](../../frontend/src/js/main.js)
 
-问题：
+Problems:
 
-- 存在：
+- Exists:
   - `const DEVELOPER_PASSWORD = "Gk265157!";`
-- 这相当于前端公开密码，没有真正安全性。
+- This is equivalent to exposing passwords on the frontend, with no real security.
 
-建议：
+Suggestions:
 
-- 如果只是“隐藏高级配置”，直接改成：
-  - 本地开关
+- If only "hide advanced configuration", change directly to:
+  - Local switch
   - `runtime-config`
-  - 桌面端设置页入口
-- 如果真的需要鉴权，必须移到后端或桌面宿主层。
+  - Desktop settings page entry
+- If authentication is truly required, it must be moved to the backend or desktop host layer.
 
-## P1：会明显影响维护效率的问题
+## P1Issues significantly impacting maintenance efficiency
 
-### 5. Job 数据整形层太厚，前端承担了过多后端兼容逻辑
+### 5. Job Data shaping layer too thick; frontend bears excessive backend compatibility logic.
 
-文件：
+Files:
 
 - [job.js](../../frontend/src/js/job.js)
 
-问题：
+Problems:
 
-- `normalizeJobPayload()` 在做大量“兜底式兼容”：
-  - 多字段 fallback
-  - 绝对 URL 补全
-  - actions / artifacts 双来源兼容
-  - runtime / failure / legacy 风格字段融合
-- 这说明后端响应契约虽然稳定了，但前端还在按“宽松兼容”写。
+- `normalizeJobPayload()` Doing extensive "fallback compatibility":
+  - Multiple fields fallback
+  - Absolutely. URL completion
+  - actions / artifacts Dual-source compatibility
+  - runtime / failure / legacy Merge Style Fields
+- This shows that although the backend response contract has stabilized, the frontend is still written with "loose compatibility".
 
-建议：
+Suggestions:
 
-- 前端同学可以要求后端给一个更稳定的 view contract。
-- `normalizeJobPayload()` 目标应收敛成两类工作：
+- Frontend can ask backend for a more stable one. view contract。
+- `normalizeJobPayload()` Goal should converge into two work categories:
   - envelope unwrap
-  - 轻量格式化
-- 不要继续让它承担“接口兼容层”。
+  - Lightweight Formatting
+- Don't make it carry interface compatibility layer.
 
-### 6. 轮询逻辑和详情请求耦合过深
+### 6. Polling logic too tightly coupled with detail requests.
 
-文件：
+Files:
 
 - [main.js](../../frontend/src/js/main.js)
 
-问题：
+Problems:
 
-- `fetchJob(jobId)` 一次请求串行拉：
+- `fetchJob(jobId)` One request serial pull.
   - job detail
   - job events
   - artifacts manifest
-- 轮询频率固定 `3000ms`
-- 没有根据状态做自适应。
+- Fixed polling frequency `3000ms`
+- No state-based adaptation.
 
-建议：
+Suggestions:
 
-- 拆成：
+- Split into:
   - `pollJobSnapshot`
   - `refreshEvents`
   - `refreshArtifactsManifest`
-- 策略：
-  - `queued/running` 时高频轮询 detail
-  - events / manifest 低频刷新
-  - `succeeded/failed/canceled` 立即停表
+- Strategy:
+  - `queued/running` Timed high-frequency polling detail
+  - events / manifest Low Frequency Refresh
+  - `succeeded/failed/canceled` Stop Now
 
-### 7. 配置来源分散，浏览器版和桌面版逻辑掺在一起
+### 7. Config sources scattered. Browser/desktop logic mixed. Separate.
 
-文件：
+Files:
 
 - [config.js](../../frontend/src/js/config.js)
 - [desktop.js](../../frontend/src/js/desktop.js)
 - [main.js](../../frontend/src/js/main.js)
 
-问题：
+Problems:
 
-- 当前有三套来源混在一起：
+- Three source sets intermingled.
   - runtime config
   - localStorage browser config
   - desktop bridge config
-- 页面逻辑里到处判断 `desktopMode`
+- Judging everywhere in the page logic `desktopMode`
 
-当前进展：
+Current progress:
 
-- 已新增 [desktop-host.js](../../frontend/src/js/desktop-host.js)，由它统一识别 `retainPdfDesktop`，并只保留 `__TAURI_INTERNALS__` 兼容 shim。
-- [config.js](../../frontend/src/js/config.js) 不再直接探测旧桥名，桌面调用统一从 host 抽象进入。
+- Added desktop-host.js to unify recognition via retainPdfDesktop and keep only __TAURI_INTERNALS__ compatibility shim.
+- [config.js](../../frontend/src/js/config.js) No longer probe old bridge name. Desktop unified call from host Enter abstraction.
 
-后续建议：
+Follow-up suggestions:
 
-- 可以继续把 `desktop.js` 里“首次启动/保存配置”这类桌面专属流程再往宿主层收一层。
-- UI 层只读能力，不直接读宿主差异。
+- Can continue. `desktop.js` In “First Startup”/For desktop-specific flows like "Save Configuration", abstract one more layer up to the host layer.
+- UI Layer read-only capability; does not directly read host differences.
 
-### 8. 样式量集中在单文件，组件边界不清楚
+### 8. Styles concentrated in single file. Component boundaries unclear.
 
-文件：
+Files:
 
 - [components.css](../../frontend/src/styles/components.css)
 
-问题：
+Problems:
 
-- 单文件约 `1747` 行
-- dialog、topbar、hero、developer 面板、状态区、事件列表都混在一起
+- Single file about 1747 lines
+- dialog、topbar、hero、developer panel, status area, event list all mixed together
 
-建议：
+Suggestions:
 
-- 至少按区域拆：
+- At least split by region:
   - `layout.css`
   - `dialogs.css`
   - `job-status.css`
   - `developer-panel.css`
   - `recent-jobs.css`
 
-## P2：体验和工程规范层建议
+## P2Experience and Engineering Standards Suggestions
 
-### 9. `node_modules` 不应进入仓库
+### 9. `node_modules` Do not commit to repository
 
-文件：
+Files:
 
 - `frontend/node_modules`
 
-问题：
+Problems:
 
-- 当前仓里有整份依赖目录，约 `16M`
+- Current repo has full dependency directory, approximately `16M`
 
-建议：
+Suggestions:
 
-- 前端同学清掉并确认 `.gitignore` 生效。
-- 只保留：
+- Frontend: clear and confirm. `.gitignore` take effect.
+- Keep only:
   - `package.json`
   - `package-lock.json`
 
-### 10. 当前没有前端测试和基本 lint
+### 10. No frontend tests or baseline. lint
 
-文件：
+Files:
 
 - [package.json](../../frontend/package.json)
 
-问题：
+Problems:
 
-- 只有：
+- Only:
   - `build:css`
   - `watch:css`
-- 没有：
+- None:
   - `lint`
   - `test`
   - `format`
 
-建议：
+Suggestions:
 
-- 最小补齐：
+- Minimal completion:
   - ESLint
   - Prettier
-  - 1~2 个最基本的纯函数测试，先覆盖 [job.js](../../frontend/src/js/job.js) 的 normalize/summarize 系列
+- 1-2 tests for job.js normalize/summarize series
 
-## 建议的优化顺序
+## Suggested optimization order
 
-### 第一阶段：低风险收口
+### Phase 1: Low-risk closure
 
-- 删除前端硬编码开发者密码
-- 清掉 `node_modules`
-- 把最近任务列表 / 事件流 / stage history 从 `innerHTML` 拼接改成 DOM 渲染
-- 拆 `main.js`，至少拆出提交、轮询、最近任务三个模块
+- Remove hardcoded developer passwords from frontend.
+- Remove `node_modules`
+- Replace recent tasks / event stream / stage history innerHTML concatenation with DOM rendering.
+- Split main.js at least into three modules: submission, polling, and recent tasks.
 
-### 第二阶段：结构治理
+### Phase 2: Structural Governance
 
-- 增加轻量 store，收口 `state`
-- 拆配置来源，隔离 browser/desktop 宿主差异
-- 缩小 [job.js](../../frontend/src/js/job.js) 的“兼容层”职责
+- Add Lightweight store, converge `state`
+- Separate configuration sources; isolate. browser/desktop Host differences
+- Shrink [job.js](../../frontend/src/js/job.js) Compatibility layer responsibilities
 
-### 第三阶段：工程化补齐
+### Phase 3: Engineering Completion
 
-- 拆样式文件
-- 增加 lint / format / 最小测试
-- 再决定要不要上框架
+- Split style files.
+- Add lint/format/minimal tests
+- Then decide whether to adopt a framework
 
-## 给前端同学的结论
+## Frontend conclusion
 
-当前前端不是“性能差”，而是“结构松散”。
+The frontend isn't "poor performance" — it's "loose structure".
 
-最该先做的不是换框架，而是：
+The first priority is not replacing the framework, but:
 
-1. 把 [main.js](../../frontend/src/js/main.js) 拆掉
-2. 把裸 `state` 收口
-3. 把高频区域从 `innerHTML` 改成稳定 DOM 渲染
-4. 把前端里的伪鉴权和宿主差异清掉
+1. Remove main.js
+2. Consolidate bare state
+3. Move high-frequency areas from innerHTML to stable DOM rendering
+4. Remove mock auth and host-specific workarounds from frontend.
 
-做到这一步，后面不管继续写原生 JS，还是迁 React/Vue，成本都会低很多。
+Once this is done, whether you continue writing native JS, or migrate React/Vuecosts will be much lower.

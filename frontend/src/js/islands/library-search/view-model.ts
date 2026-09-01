@@ -1,6 +1,6 @@
-// 库检索岛的纯逻辑层:不碰 DOM/React,便于 node 单测
+// Pure logic layer for library retrieval island: Do not touch DOM/React, for node Unit test
 
-// 后端 snippet 用 [ ] 包裹命中词,拆成分段供展示层渲染 <mark>
+// Backend snippet uses [ ] to package hit words, Split into segments for presentation layer rendering. <mark>
 export function highlightSegments(snippet = "") {
   const text = `${snippet || ""}`;
   const segments = [];

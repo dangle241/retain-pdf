@@ -155,9 +155,9 @@ def test_segment_parser_rejects_empty_connector_segment() -> None:
     content = json.dumps(
         {
             "segments": [
-                {"segment_id": "1", "translated_text": "转移一个质子和一个电子会生成异丁腈"},
+                {"segment_id": "1", "translated_text": "turn into navigation."},
                 {"segment_id": "2", "translated_text": ""},
-                {"segment_id": "3", "translated_text": "通过核磁共振波谱检测，主要产物是自由基均偶联产物"},
+                {"segment_id": "3", "translated_text": "detected by NMR spectroscopy, the major product is the radical homocoupling product"},
             ]
         },
         ensure_ascii=False,
@@ -206,7 +206,7 @@ def test_segment_translation_requests_tagged_then_json_fallback() -> None:
         return json.dumps(
             {
                 "segments": [
-                    {"segment_id": segment["segment_id"], "translated_text": f"片段{segment['segment_id']}"}
+                    {"segment_id": segment["segment_id"], "translated_text": f"segment{segment['segment_id']}"}
                     for segment in segments
                 ]
             },
@@ -248,10 +248,10 @@ def test_segment_translation_skips_json_fallback_on_semantic_tagged_failure() ->
                 "",
                 "<<<END>>>",
                 "<<<SEG id=2>>>",
-                "片段2",
+"Segment 2",
                 "<<<END>>>",
                 "<<<SEG id=3>>>",
-                "片段3",
+"Segment 3",
                 "<<<END>>>",
             ]
         )

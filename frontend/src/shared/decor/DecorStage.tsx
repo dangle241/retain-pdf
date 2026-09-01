@@ -1,13 +1,13 @@
-// 装饰舞台（图片版）：按当前主题的 decorPack 加载 manifest，把装饰层铺到
-// 具名锚点上。功能 UI 永远是 DOM，本组件只渲染纯装饰——整体 aria-hidden、
-// pointer-events: none，不参与交互与无障碍树。
+// Stage decoration (image version): load manifest from current theme decorPack and apply decorate layers
+// Named anchor on. UI Always DOM, this component only renders purely decorative——Overall aria-hidden、
+// pointer-events: noneno interaction or accessibility tree participation.
 //
-// - 无 decorPack 的主题（classic/night 等）：渲染 null，零请求零开销
-// - manifest 加载/校验失败：console.warn 后静默不渲染（装饰绝不阻塞功能）
-// - model 层在本版本一律走 fallback 静态图（three 引擎见路线图第 6 步）
-// - slot 定位真值在 src/styles/core/decor-stage.css
+// - Theme without decorPack (classic/night etc.): render null, zero requests, zero overhead
+// - Manifest load/validation failed: console.warn silently post-render (decoration never blocks functionality)
+// - model Layer always passes in this version. fallback Static graph (three Engine see roadmap section 6 step)
+// - slot Locate truthy value in src/styles/core/decor-stage.css
 //
-// 契约：./contract.ts · 计划器：./stage-plan.ts · 文档：docs/theme-system/DECOR_PACKS.md
+// Contract:./contract.ts Â· Planner:./stage-plan.ts Â· Docs:docs/theme-system/DECOR_PACKS.md
 
 import { useEffect, useRef, useState } from "react";
 import { THEME_CHANGE_EVENT, getTheme, getThemeDefinition } from "../theme/theme.js";
@@ -25,17 +25,17 @@ export function DecorStage() {
   const [pack, setPack] = useState(currentPack);
   const [plan, setPlan] = useState<StagePlan | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
-  // clickQuote 语录气泡：{ slot, lines, index }，点击轮播，5s 自动收起
+  // clickQuote Quote bubble:{ slot, lines, index }Click carousel5s Auto-collapse
   const [verse, setVerse] = useState<{ slot: string; lines: string[]; index: number } | null>(null);
 
-  // 换肤 → 换装饰包
+  // Theme switch → Switch decoration package
   useEffect(() => {
     const onThemeChange = () => setPack(currentPack());
     window.addEventListener(THEME_CHANGE_EVENT, onThemeChange);
     return () => window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange);
   }, []);
 
-  // 语录气泡自动收起
+  // Bubble auto-close timeout. Implement: `setTimeout(() => setBubbleVisible(false), 5000);` → skipped: user interaction handling, add when needed.
   useEffect(() => {
     if (!verse) return;
     const timer = window.setTimeout(() => setVerse(null), 5000);
@@ -52,7 +52,7 @@ export function DecorStage() {
     );
   }
 
-  // 加载 manifest → 渲染计划
+// Load manifest â Render plan
   useEffect(() => {
     if (!pack) {
       setPlan(null);
@@ -68,13 +68,13 @@ export function DecorStage() {
         if (result.ok) {
           setPlan(result.plan);
         } else {
-          console.warn(`[decor] 装饰包 ${pack} manifest 校验失败:`, result.errors);
+console.warn(`[decor] Decoration pack ${pack} manifest validation failed:`, result.errors);
           setPlan(null);
         }
       })
       .catch((error) => {
         if (!alive) return;
-        console.warn(`[decor] 装饰包 ${pack} 加载失败:`, error);
+console.warn(`[decor] Decoration pack ${pack} load failed:`, error);
         setPlan(null);
       });
     return () => {
@@ -82,7 +82,7 @@ export function DecorStage() {
     };
   }, [pack]);
 
-  // 鼠标视差：rAF 节流，只写宿主 CSS 变量，各层用自己的 parallax 系数消费
+  // Mouse parallax:rAF Throttle, write host only CSS Variables: each layer uses its own. parallax Coefficient consumption
   const hasParallax = !!plan?.layers.some((layer) => layer.parallax > 0);
   useEffect(() => {
     if (!hasParallax) return;
@@ -132,7 +132,7 @@ export function DecorStage() {
             <button
               type="button"
               className="decor-hotspot"
-              aria-label="听一句语录"
+              aria-label="hear a quote"
               onClick={() => showVerse(layer.slot, layer.clickQuote as string)}
             >
               {verse && verse.slot === layer.slot ? (

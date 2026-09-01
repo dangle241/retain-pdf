@@ -45,7 +45,7 @@ def recover_blocking_untranslated_items(
     api_key: str,
     model: str,
     base_url: str,
-    target_language_name: str = "简体中文",
+target_language_name: str = "Simplified Chinese",
     max_items: int = DEFAULT_MAX_ITEMS,
     workers: int = DEFAULT_MAX_WORKERS,
     request_chat_content_fn=request_chat_content,
@@ -244,8 +244,8 @@ def _source_text(item: dict) -> str:
 
 
 def _mark_final_dead_letter(item: dict, exc: Exception | None) -> None:
-    # 先 mark 再 record:record 写入时重读 item 上的最新诊断,
-    # 避免旧快照回写盖掉 mark_keep_origin 链路刚写入的内容。
+# First mark then record: record re-reads item latest diagnostics on write,
+    # Prevent old snapshot overwrite. mark_keep_origin Just-written content in the link.
     mark_keep_origin(item)
     record_translation_diagnostics(
         item,

@@ -1,27 +1,27 @@
-# PaddleOCR-VL 官方服务化说明摘录
+# PaddleOCR-VL Excerpt from official service-oriented documentation
 
-来源：
+Source:
 
-- GitHub 官方文档：
+- GitHub Official documentation:
   <https://github.com/PaddlePaddle/PaddleOCR/blob/main/docs/version3.x/pipeline_usage/PaddleOCR-VL.md>
-- 当前仓库早期摘录：
+- Please provide the source text to translate.
   `backend/rust_api/src/ocr_provider/paddle/AsyncParse.md`
 
-这份摘录只保留和本仓库 provider 对接直接相关的内容，不复制整份官方教程。
+This excerpt only retains content related to this repository. provider Đã hiểu. Chỉ dịch phần liên quan trực tiếp đến tích hợp, không sao chép toàn bộ hướng dẫn.  Vui lòng cung cấp nội dung cần dịch.
 
-## 1. 官方返回里存在 Markdown
+## 1. Present in official response. Markdown
 
-官方服务化示例明确展示了如下用法：
+Official service-oriented example shows the following usage:
 
-- 遍历 `result["layoutParsingResults"]`
-- 读取 `res["markdown"]["text"]`
-- 读取 `res["markdown"]["images"]`
+- Iterate `result["layoutParsingResults"]`
+- Read `res["markdown"]["text"]`
+- Read res["markdown"]["images"]
 
-也就是说，Paddle 官方返回不仅有结构化 `prunedResult`，还可以直接得到 Markdown 文本和 Markdown 图片映射。
+That is to say, the Paddle official response includes not only structured prunedResult but also directly obtainable Markdown text and Markdown image mapping.
 
-## 2. 关键响应结构
+## 2. Critical response structure
 
-和本仓库对接最直接相关的结构是：
+The most directly relevant structure for integrating with this repository is:
 
 ```json
 {
@@ -41,53 +41,53 @@
 }
 ```
 
-字段含义：
+Field meanings:
 
-- `prunedResult`: 结构化页面解析结果
-- `markdown.text`: 页面级 Markdown 文本
-- `markdown.images`: Markdown 图片相对路径到图片内容/地址的映射
-- `outputImages`: 可视化或中间图像结果
-- `inputImage`: 输入页图像
+- `prunedResult`: Structured page parsing results
+- markdown.text: page-level Markdown text
+- `markdown.images`: Markdown Relative path to image content/Address mapping
+- `outputImages`: Visualization or intermediate image results
+- `inputImage`: Input page image
 
-这里要特别注意：
+Pay special attention here:
 
-- `markdown.images` 的键不是“建议值”，而是 Markdown/HTML 正文里实际引用的相对路径
-- 如果正文里是 `<img src="imgs/xxx.jpg">`，那 `images` 里的 key 就应该是 `imgs/xxx.jpg`
-- 集成方不能擅自把这段 provider 返回的相对路径固定改写成另一套目录规范，只能在发布阶段做最小的、可逆的包装
+- `markdown.images` The key is not "suggested value", but Markdown/HTML Actual relative path referenced in the body
+- If the body contains <img src="imgs/xxx.jpg">, then the key in images should be imgs/xxx.jpg
+- The integrator must not alter this section without authorization. provider Returned relative paths are rewritten to a different directory specification; minimal reversible wrapping is permitted only at release time.
 
-## 3. 与本仓库当前主链直接相关的请求参数
+## 3. Request params tied to current main branch
 
 - `restructurePages`
-  用于多页 PDF 的重构，影响跨页表格和段落标题级别识别。
+  For multiple pages. PDF Refactoring affects cross-page table and paragraph heading level recognition.
 - `mergeTables`
-  跨页表格合并。
+  Merge tables across pages.
 - `relevelTitles`
-  段落标题级别识别。
+  Identify paragraph heading levels.
 - `showFormulaNumber`
-  控制 Markdown 中是否包含公式编号。
+Controls whether formula numbers are included in Markdown.
 - `prettifyMarkdown`
-  控制是否输出美化后的 Markdown。
+  Prettify output Markdown。
 - `visualize`
-  控制是否返回图像结果。
+  Controls whether to return image results.
 
-## 4. 对我们系统的落地结论
+## 4. System deployment conclusion.
 
-结论很直接：
+The conclusion is straightforward:
 
-1. `markdown_ready = false` 不能再归因于 Paddle 官方不支持 Markdown。
-2. 如果任务 raw 已经拿到了 `markdown.text` / `markdown.images`，就应该在我们产物层导出成 job markdown artifact。
-3. provider adapter / pipeline 需要明确区分：
-   - 结构化文档标准化
-   - Markdown 产物落盘
-   - Markdown 图片落盘
-4. Markdown 图片路径应当遵循 provider 返回值；如果为了多页任务防冲突而增加页面前缀，也只能做这类外层作用域包装，不能把内部相对路径模式写死。
+1. `markdown_ready = false` Not attributable. Paddle Not officially supported. Markdown。
+2. If the task raw Send source. `markdown.text` / `markdown.images`, it should be exported as a job markdown artifact in our artifact layer. job markdown artifact。
+3. provider adapter / pipeline Clearly distinguish:
+   - Structured Document Standardization
+- Write Markdown artifacts to disk
+   - Markdown Save image to disk
+4. Markdown Image paths must follow provider Return value: page prefix added for multi-page task conflict prevention may only serve as outer-scope wrapping; internal relative path patterns must not be hardcoded.
 
-## 5. 更新原则
+## 5. Update principles
 
-以后如果继续补 Paddle 文档，优先补这里：
+If continuing to supplement Paddle Documentation, prioritize filling here:
 
-- 官方入口
-- 与当前仓库强相关的字段和参数
-- 对应到本仓库 artifact / normalized document / provider adapter 的映射
+- Official Entry
+- Fields parameters repository-related
+- Corresponds to this repository. artifact / normalized document / provider adapter Mapping
 
-不要把整份官方部署教程原样搬进来。
+Do not copy the entire official deployment tutorial verbatim.

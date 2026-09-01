@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// 上传弹窗：完成后二选一——直接翻译 / 仅收藏（不自动关窗入库）。
+// Upload dialog: choose one of two after completion ââ Translate directly / Save only (no auto-close to library).
 
 function makeDom(search = "") {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
@@ -35,7 +35,7 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-  assert.fail(`等待超时：${description}`);
+assert.fail(`Timeout waiting: ${description}`);
 }
 
 function click(dom, element) {
@@ -62,55 +62,55 @@ async function bootHomeApp(dom) {
 
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-  await waitFor(() => dom.window.document.getElementById("app-shell"), "HomeApp 首帧渲染");
+await waitFor(() => dom.window.document.getElementById("app-shell"), "HomeApp first frame rendered");
   await wait(0);
   return { services, root, host };
 }
 
-test("上传弹窗：标题提示 + 就绪后出现直接翻译/仅收藏", async () => {
+test("Upload dialog: title hint + direct translation/store only after ready", async () => {
   const dom = makeDom("?mock=parallel");
   const byId = (id) => dom.window.document.getElementById(id);
   const { services, root, host } = await bootHomeApp(dom);
 
   click(dom, byId("library-add-pdf-btn"));
-  await waitFor(() => byId("translation-workflow-dialog") !== null, "添加对话框打开");
-  assert.equal(byId("translation-workflow-title").textContent, "添加 PDF");
-  assert.match(byId("translation-workflow-desc").textContent, /直接翻译|收藏/);
+await waitFor(() => byId("translation-workflow-dialog") !== null, "Add dialog opened");
+assert.equal(byId("translation-workflow-title").textContent, "Add PDF");
+assert.match(byId("translation-workflow-desc").textContent, /direct translation|store/);
 
-  // 模拟上传完成
+// Mock upload complete
   services.uploadViewActions.patch({ ready: true, actionSlotVisible: true });
-  await waitFor(() => byId("store-only-btn") && !byId("store-only-btn").classList.contains("hidden"), "仅收藏可见");
-  await waitFor(() => byId("upload-ready-hint") && !byId("upload-ready-hint").classList.contains("hidden"), "就绪提示可见");
-  assert.ok(byId("submit-btn"), "直接翻译按钮存在");
-  assert.match(byId("submit-btn").textContent, /直接翻译|提交/);
+await waitFor(() => byId("store-only-btn") && !byId("store-only-btn").classList.contains("hidden"), "Store only visible");
+await waitFor(() => byId("upload-ready-hint") && !byId("upload-ready-hint").classList.contains("hidden"), "Ready hint visible");
+assert.ok(byId("submit-btn"), "Direct translation button exists");
+assert.match(byId("submit-btn").textContent, /direct translation|submit/);
 
-  // 对话框仍打开（不自动关）
-  assert.ok(byId("translation-workflow-dialog"), "就绪后不自动关闭");
+// Dialog remains open (no auto-close)
+assert.ok(byId("translation-workflow-dialog"), "Does not auto-close after ready");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("仅收藏：关闭对话框且不提交翻译 job", async () => {
+test("Store only: close dialog and do not submit translation job", async () => {
   const dom = makeDom("?mock=parallel");
   const byId = (id) => dom.window.document.getElementById(id);
   const { services, root, host } = await bootHomeApp(dom);
   const { APP_EVENTS } = await import("../src/js/contracts/app-contract.js");
 
   click(dom, byId("library-add-pdf-btn"));
-  await waitFor(() => byId("translation-workflow-dialog") !== null, "添加对话框打开");
+await waitFor(() => byId("translation-workflow-dialog") !== null, "Add dialog opened");
 
   let jobSubmitted = false;
   dom.window.document.addEventListener(APP_EVENTS.libraryJobCreated, () => { jobSubmitted = true; });
 
   services.uploadViewActions.patch({ ready: true, actionSlotVisible: true });
-  await waitFor(() => byId("store-only-btn") && !byId("store-only-btn").classList.contains("hidden"), "仅收藏可见");
+await waitFor(() => byId("store-only-btn") && !byId("store-only-btn").classList.contains("hidden"), "Store only visible");
   click(dom, byId("store-only-btn"));
 
-  await waitFor(() => byId("translation-workflow-dialog") === null, "仅收藏后关闭对话框");
+await waitFor(() => byId("translation-workflow-dialog") === null, "Close dialog after store only");
   await wait(50);
-  assert.equal(jobSubmitted, false, "仅收藏不提交翻译 job");
+assert.equal(jobSubmitted, false, "Store only does not submit translation job");
 
   root.unmount();
   services.dispose();

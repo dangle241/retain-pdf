@@ -6,7 +6,7 @@ pub(crate) fn build_artifacts_display(
     vec![
         artifact_display_item(
             "output_pdf",
-            "译文 PDF",
+"Translated PDF",
             "pdf",
             artifacts.pdf.ready,
             artifacts.pdf.file_name.clone(),
@@ -24,7 +24,7 @@ pub(crate) fn build_artifacts_display(
         ),
         artifact_display_item(
             "bundle",
-            "任务打包文件",
+            "Task bundle file",
             "zip",
             artifacts.bundle.ready,
             artifacts.bundle.file_name.clone(),
@@ -33,7 +33,7 @@ pub(crate) fn build_artifacts_display(
         ),
         artifact_display_item(
             "normalized_document",
-            "标准化 OCR 文档",
+"Normalized OCR document",
             "json",
             artifacts.normalized_document.ready,
             artifacts.normalized_document.file_name.clone(),
@@ -42,7 +42,7 @@ pub(crate) fn build_artifacts_display(
         ),
         artifact_display_item(
             "normalization_report",
-            "OCR 标准化报告",
+"OCR normalization report",
             "json",
             artifacts.normalization_report.ready,
             artifacts.normalization_report.file_name.clone(),

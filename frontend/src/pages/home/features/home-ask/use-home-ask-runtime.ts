@@ -1,4 +1,4 @@
-// 主页图书馆级 AI 问答：全库 / @ 文档 + 会话列表（侧栏历史）
+// Homepage library-level AI Q&A: Full Library / @ Document + Session list (sidebar history)
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { askLibraryAi, AiAskError } from "../../../../js/api/ai.js";
@@ -56,20 +56,20 @@ function makeId(prefix: string) {
 function describeToolEvent(event: unknown): string {
   const e = event as { tool?: string; name?: string } | null;
   const tool = `${e?.tool || e?.name || ""}`.trim();
-  if (!tool) return "正在检索…";
-  if (tool.includes("search")) return "正在全文检索…";
-  if (tool.includes("read")) return "正在阅读相关段落…";
-  if (tool.includes("list")) return "正在浏览文档库…";
-  if (tool.includes("favorite")) return "正在查阅收藏…";
-  return `正在调用 ${tool}…`;
+if (!tool) return "Retrieving...";
+  if (tool.includes("search")) return "Full-text searching…";
+  if (tool.includes("read")) return "Reading relevant paragraphs.…";
+  if (tool.includes("list")) return "Browsing document library…";
+  if (tool.includes("favorite")) return "Viewing favorites…";
+  return `Calling... ${tool}…`;
 }
 
 function labelScope(s: HomeAskScope): string {
   if (s.kind === "collection") {
-    const n = s.document_count != null ? `（${s.document_count} 篇）` : "";
-    return `合集「${s.title}」${n}`;
+    const n = s.document_count != null ? `（${s.document_count} Chapter)` : "";
+return `Collection ã${s.title}ã${n}`;
   }
-  return `文档「${s.title}」`;
+return `Document ã${s.title}ã`;
 }
 
 function buildScopedQuestion(
@@ -83,7 +83,7 @@ function buildScopedQuestion(
 
   const hasCollection = scopes.some((s) => s.kind === "collection");
   if (!hasCollection && scopes.length === 1 && scopes[0].kind === "document") {
-    return `（范围：文档「${scopes[0].title}」）${q}`;
+    return `(scope: document「${scopes[0].title}」）${q}`;
   }
 
   const scopeLines = scopes.map((s, i) => `${i + 1}. ${labelScope(s)}`).join("\n");
@@ -92,18 +92,18 @@ function buildScopedQuestion(
       .slice(0, 40)
       .map((d, i) => `  ${i + 1}. ${d.title} (document_id=${d.id})`)
       .join("\n");
-    const more = resolvedDocs.length > 40 ? `\n  …共 ${resolvedDocs.length} 篇` : "";
+const more = resolvedDocs.length > 40 ? `\n  ...total ${resolvedDocs.length} articles` : "";
     return (
-      `请仅在下列范围内检索与回答（不要使用范围外的文献）：\n`
-      + `范围选择：\n${scopeLines}\n`
-      + `包含文档：\n${docLines}${more}\n\n`
-      + `问题：${q}`
+      `Search and respond only within the following scope (do not use sources outside it):\n`
+      + `Range Selection:\n${scopeLines}\n`
+      + `Documents:\n${docLines}${more}\n\n`
++ `Question: ${q}`
     );
   }
-  return `请在以下范围内检索并回答：\n${scopeLines}\n\n问题：${q}`;
+return `Please search and answer within the following scope:\n${scopeLines}\n\nQuestion: ${q}`;
 }
 
-/** 展开 scopes → 文档列表；单文档硬 scope 时返回 primary */
+/** Expand scopes → Doc list; single doc hard scope Return on time. primary */
 async function resolveScopesForAsk(scopes: HomeAskScope[]): Promise<{
   primaryDoc: HomeAskDocScope | null;
   resolvedDocs: HomeAskDocScope[];
@@ -132,17 +132,17 @@ async function resolveScopesForAsk(scopes: HomeAskScope[]): Promise<{
         }
       }
     } catch {
-      // 合集展开失败时仍靠 prompt 里的合集名提示模型
+      // When collection expansion fails, still rely on prompt Collection name prompt model
     }
   }
 
-  // 仅一个文档（无论直接 @ 还是合集里只有一篇）→ 硬限定
+  // Single doc (direct or indirect) @ or if the collection has only one)→ Hard limit
   const primaryDoc = docs.length === 1 ? docs[0] : null;
   return { primaryDoc, resolvedDocs: docs };
 }
 
 function recordToSession(c: ConversationRecord): HomeAskSession {
-  const title = `${c.title || ""}`.trim() || "未命名对话";
+const title = `${c.title || ""}`.trim() || "Untitled conversation";
   return {
     id: `${c.conversation_id || ""}`.trim(),
     title,
@@ -195,7 +195,7 @@ export function useHomeAskRuntime() {
   const runningRef = useRef(false);
   const conversationIdRef = useRef(conversationId);
   const abortRef = useRef<AbortController | null>(null);
-  /** 当前流式 assistant 消息 id，停止时用于收尾文案 */
+/** Current streaming assistant message idCleanup on shutdown message */
   const streamingAssistantIdRef = useRef("");
   conversationIdRef.current = conversationId;
 
@@ -212,7 +212,7 @@ export function useHomeAskRuntime() {
         .filter((s) => s.id);
       setSessions(list);
     } catch {
-      // 列表失败不挡主流程
+      // List failure doesn't block main flow.
     } finally {
       setSessionsLoading(false);
     }
@@ -222,7 +222,7 @@ export function useHomeAskRuntime() {
     void refreshSessions();
   }, [refreshSessions]);
 
-  // 启动时若有粘性 conversationId，尝试 hydrate（失败则当新对话）
+  // If sticky on startup conversationIdTry hydrate(Fail → treat as new conversation)
   useEffect(() => {
     const id = loadConversationId();
     if (!id) return;
@@ -258,7 +258,7 @@ export function useHomeAskRuntime() {
   }, []);
 
   const newSession = useCallback(() => {
-    // 新对话时若正在生成，先中止
+    // Abort generation on new chat start.
     if (runningRef.current) {
       try {
         abortRef.current?.abort();
@@ -284,7 +284,7 @@ export function useHomeAskRuntime() {
       saveConversationId(next);
       setMessages(messagesFromDetail(detail));
     } catch {
-      // 切失败保持现状
+      // Cut failure preserves state.
     } finally {
       setSessionBusy(false);
     }
@@ -336,7 +336,7 @@ export function useHomeAskRuntime() {
     const question = `${rawQuestion || ""}`.trim();
     if (!question || runningRef.current) return;
 
-    // 门禁：无 LLM Key 不发起任何检索/会话写，避免「先忙活再报错」
+    // No access control. LLM Key Do not initiate any retrieval./Avoid session writes.「Fail fast. Validate inputs first. Don't waste cycles on doomed operations.」
     const config = resolveReaderAiConfig();
     const apiKey = `${config.apiKey || ""}`.trim();
     if (!apiKey) {
@@ -355,10 +355,10 @@ export function useHomeAskRuntime() {
     const userId = makeId("u");
     const assistantId = makeId("a");
     const displayUser = scopes.length
-      ? `${question}\n\n${scopes.map((s) => (s.kind === "collection" ? `@合集:${s.title}` : `@${s.title}`)).join(" ")}`
+? `${question}\n\n${scopes.map((s) => (s.kind === "collection" ? `@Collection:${s.title}` : `@${s.title}`)).join(" ")}`
       : question;
 
-    // 新请求前中止上一轮
+    // Abort previous round before new request.
     try {
       abortRef.current?.abort();
     } catch {
@@ -377,7 +377,7 @@ export function useHomeAskRuntime() {
         id: assistantId,
         role: "assistant",
         content: "",
-        progress: scopes.some((s) => s.kind === "collection") ? "正在解析合集…" : "正在准备…",
+        progress: scopes.some((s) => s.kind === "collection") ? "Parsing collection…" : "Preparing…",
         status: "streaming",
       },
     ]);
@@ -390,7 +390,7 @@ export function useHomeAskRuntime() {
       if (scopes.some((s) => s.kind === "collection") && resolvedDocs.length === 0) {
         const emptyCol = scopes.find((s) => s.kind === "collection");
         patchMessage(assistantId, {
-          content: `合集「${emptyCol?.title || ""}」里还没有文档，请先往合集加入文献后再问。`,
+content: `Collection ã${emptyCol?.title || ""}ã there are no documents in the collection yet, please add references to the collection before asking.`,
           progress: "",
           status: "error",
           citations: [],
@@ -439,7 +439,7 @@ export function useHomeAskRuntime() {
         ? result.citations
         : []) as HomeAskCitation[];
       const answer = sanitizeAssistantAnswer(
-        `${result?.answer || ""}`.trim() || "没有找到可用回答。",
+        `${result?.answer || ""}`.trim() || "No available answer found.",
         citations,
       );
       const nextConv = `${result?.conversationId || ""}`.trim();
@@ -465,15 +465,15 @@ export function useHomeAskRuntime() {
         || abort.signal.aborted
       );
       if (aborted) {
-        // 保留已流式输出的正文，追加「已停止」
+        // Preserve streamed body. Append.「Stopped」
         setMessages((prev) => prev.map((m) => {
           if (m.id !== assistantId) return m;
           const partial = `${m.content || ""}`.trim();
           return {
             ...m,
             content: partial
-              ? `${partial}\n\n_（已停止生成）_`
-              : "_（已停止生成）_",
+              ? `${partial}\n\n_(generation stopped)_`
+: "_(generation stopped)_",
             progress: "",
             status: "complete" as const,
           };
@@ -483,7 +483,7 @@ export function useHomeAskRuntime() {
           ? error.message
           : error instanceof Error
             ? error.message
-            : "生成回答失败，请重试。";
+            : "Failed to generate answer, please retry.";
         patchMessage(assistantId, {
           content: msg,
           progress: "",
@@ -508,7 +508,7 @@ export function useHomeAskRuntime() {
     sessions,
     sessionsLoading,
     sessionBusy,
-    /** 是否已配置模型 Key（门禁；每次调用现读 storage） */
+    /** Model configured? KeyGate; read fresh each call. storage） */
     hasLlmKey: hasModelApiKey,
     send,
     stop,

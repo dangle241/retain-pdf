@@ -1,5 +1,5 @@
-// 主页内全屏阅读层：iframe 载入 reader.html，主页不卸载。
-// 关闭：子页 postMessage → history.back → popstate 卸层。
+// Homepage fullscreen reading layer:iframe Load reader.htmlUninstall button missing on homepage.
+// Close: Subpage postMessage → history.back → popstate Unload layer.
 
 import { useEffect, useState } from "react";
 import {
@@ -17,7 +17,7 @@ export function SoftReaderHost() {
     function openUrl(nextUrl: string, nonce = Date.now()) {
       const next = `${nextUrl || ""}`.trim();
       if (!next) return;
-      // 强制换 key 重挂 iframe，避免同 URL 二次打开仍空白
+      // Force line break key Re-mount. iframe, to avoid same URL Reopen blank.
       setFrame({ url: next, nonce });
     }
 
@@ -51,7 +51,7 @@ export function SoftReaderHost() {
     window.addEventListener("popstate", onPopState);
     window.addEventListener("message", onMessage);
 
-    // 前进/后退恢复
+    // Forward/Restore on back
     onPopState();
 
     return () => {
@@ -77,16 +77,16 @@ export function SoftReaderHost() {
       className="soft-reader-host"
       role="dialog"
       aria-modal="true"
-      aria-label="阅读器"
+      aria-label="reader"
       data-soft-reader-url={frame.url}
     >
       <iframe
         id="soft-reader-frame"
         key={`${frame.nonce}:${frame.url}`}
         className="soft-reader-frame"
-        title="阅读器"
+title="Reader"
         src={frame.url}
-        // 允许同源脚本；阅读器在 iframe 内跑自己的 bundle
+        // Allow same-origin scripts; reader in iframe Run internal. bundle
       />
     </div>
   );

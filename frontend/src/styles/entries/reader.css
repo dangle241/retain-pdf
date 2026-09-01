@@ -1,11 +1,11 @@
-/* 阅读器 CSS 入口 → dist/css/reader.css
- * 仅 reader.html 加载；默认引擎 react-pdf（ReaderAppReactPdf）。
+/* Reader CSS Entry â dist/css/reader.css
+* Only reader.html Load; default engine react-pdf (ReaderAppReactPdf).
  *
- * 边界：禁止 import library-* / status-* / book-detail / credential-* 等主页域。
- * 共享仅限 tokens / base / dialog-shell / download-toast。
+* Boundary: Forbidden to import library-* / status-* / book-detail / credential-* , and other home page domains.
+* Shared only for tokens / base / dialog-shell / download-toast.
  *
- * Legacy-only（三栏 / 抽屉 / 旧 AI / 框选）见 entries/reader-legacy.css
- * （?engine=legacy 时由 entry.tsx 动态注入）。
+* Legacy-only (Three columns / drawer / old AI / Box selection) see entries/reader-legacy.css
+* (Dynamic injection by entry.tsx when ?engine=legacy).
  */
 @import "tailwindcss";
 @import "../core/tailwind-theme.css";
@@ -26,14 +26,14 @@
 @import "../tokens.css" layer(tokens);
 @import "../shadcn-theme.css" layer(tokens);
 @import "../base.css" layer(base);
-/* 阅读器也吃氛围底（PDF 区仍是自己的 --reader-page） */
+/* Reader also uses ambient background.PDF Region remains self-owned. --reader-page） */
 @import "../core/ambient-surface.css";
 
-/* 阅读器只需最小共享：下载 toast；不用整包主页 components.utilities */
+/* reader only needs minimal sharing: download toastRemove homepage package → skipped: full page, add when needed. components.utilities */
 @import "../core/download-toast.css";
 @import "../dialog-shell.css";
 
-/* —— 默认 react-pdf 路径（无 legacy 残留） —— */
+/* ââ Default react-pdf path (no legacy Residual ââ */
 @import "../reader.utilities.css";
 @import "../reader/layout.css" layer(pages);
 @import "../reader/chrome.css" layer(pages);
@@ -51,5 +51,5 @@
 @import "../reader/float-ai-citations.css" layer(pages);
 @import "../reader/float-ai-composer.css" layer(pages);
 @import "../reader/hud.css" layer(pages);
-/* Markdown 悬浮预览（含 MathJax）；默认引擎与 legacy 共用类名 */
+/* Markdown Hover preview (incl. MathJax); default engine and legacy Shared class names */
 @import "../reader/markdown.css" layer(pages);

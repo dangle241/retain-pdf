@@ -1,11 +1,11 @@
-// AI 问答编排 hook:旧 src/js/reader/ai/chat.js(608 行 DOM 控制器)的 React 化重写。
-// 编排语义原样照搬——提交流程(进度态→流式增量→finalize 富渲染)、502 本地回退、
-// 多轮上下文截断(12 条)、多会话持久化(chat-history-store)、会话栏刷新规则。
-// 气泡骨架由 React 渲染(见 ReaderAiChat.jsx),正文内容经 answer-view 的
-// message view 句柄命令式写入;appendMessage 用 flushSync 确保句柄立即可用。
+// AI Q&A orchestration hook: React rewrite of old src/js/reader/ai/chat.js (608-line DOM controller).
+// Orchestration semantics copied verbatim——Submit flow(progress state→Streaming incremental→finalize Rich rendering)、502 Local rollback.
+// Truncate multi-turn context (12 items). Multi-session persistence (chat-history-store). Session bar refresh rules.
+// Bubble skeleton consists of React rendering (see ReaderAiChat.jsx), and the body content of answer-view.
+// message view handles imperative writes; appendMessage uses flushSync to ensure handle is immediately available.
 //
-// ports 为 null 时(boot 尚未就绪)composer 呈"正在准备…"静默态;ports 到位后
-// 自动 restore(恢复上次会话)→ prepare(连接后端/加载 Markdown)。
+// When ports are null (boot not ready), composer displays "Preparing..." in silent state; ports positioned after.
+// Auto restore (no session history available) â prepare (ts const res = await fetch('/api/endpoint'); if (!res.ok) throw new Error(res.statusText); const data = await res.json();  Skipped: base URL config, retry, auth header â add when needed. Which backend/framework? Give details if this misses. / load Markdown).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
@@ -22,7 +22,7 @@ import {
   streamMessageText,
 } from "./answer-view.js";
 
-// 仅在 AI 服务未运行(反代 502)时回退到本地 Markdown 检索
+// Only when AI Service is not running (reverse proxy 502), fallback to local Markdown retrieval.
 function shouldFallbackToLocal(error) {
   return error?.status === 502 || /\b502\b/.test(`${error?.message || ""}`);
 }
@@ -49,7 +49,7 @@ export function useReaderAiChat(ports) {
   const threadRef = useRef(null);
   const inputRef = useRef("");
   inputRef.current = input;
-  // 多轮上下文与可持久化快照(与旧 chat.js 的 history/turns 同义)
+// Multi-turn context and persistent snapshots (synonymous with history/turns in old chat.js)
   const historyRef = useRef([]);
   const turnsRef = useRef([]);
 
@@ -74,13 +74,13 @@ export function useReaderAiChat(ports) {
     }
   }, []);
 
-  // 追加一条气泡并同步提交 DOM(flushSync),返回带 view 句柄的条目
+  // Add bubble + commit. DOM(flushSync),Return with view Handle entry
   const appendMessage = useCallback(({ role = "assistant", title = "" }: { role?: string; title?: string } = {}) => {
     messageSeq += 1;
     const entry = {
       id: `m-${messageSeq}`,
       role,
-      title: title || (role === "user" ? "你" : "助手"),
+      title: title || (role === "user" ? "you" : "DeepSeek"),
       view: createMessageView(),
     };
     flushSync(() => {
@@ -90,7 +90,7 @@ export function useReaderAiChat(ports) {
     return entry;
   }, [scrollThread]);
 
-  // 清空内存态与线程(不动 storage),供恢复/切换/新建复用
+// Clear in-memory state and threads. (Immobile storage), For recovery/switch/Create reusable
   const resetThread = useCallback(() => {
     turnsRef.current.length = 0;
     historyRef.current.length = 0;
@@ -99,7 +99,7 @@ export function useReaderAiChat(ports) {
     });
   }, []);
 
-  // 刷新对话切换栏:下拉选项、当前会话、按会话数显隐删除按钮
+  // Refresh conversation switcher:Dropdown options, current session, toggle delete button visibility by session count
   const refreshSessionBar = useCallback(() => {
     setSessionBar({
       sessions: historyStore?.listSessions?.() || [],
@@ -112,7 +112,7 @@ export function useReaderAiChat(ports) {
     refreshSessionBar();
   }, [historyStore, refreshSessionBar]);
 
-  // 把一份持久化快照渲染进线程:重渲染气泡 + 回填多轮上下文
+  // Render persistent snapshot into thread.:Re-render bubble. + Backfill multi-turn context
   const renderStored = useCallback(async (stored = { messages: [], history: [] }) => {
     resetThread();
     if (Array.isArray(stored.history)) {
@@ -136,7 +136,7 @@ export function useReaderAiChat(ports) {
     return turnsRef.current.length > 0;
   }, [appendMessage, jumpToCitation, resetThread, scrollThread]);
 
-  // 恢复上次会话(阅读器重开时)
+// Restore last session (Reader reopen.)
   const restore = useCallback(async () => {
     const restored = await renderStored(historyStore?.load?.() || { messages: [], history: [] });
     refreshSessionBar();
@@ -145,21 +145,21 @@ export function useReaderAiChat(ports) {
 
   const prepare = useCallback(async () => {
     try {
-      setComposerState("busy", remoteAnswerer ? "正在连接…" : "正在加载文档…");
+setComposerState("busy", remoteAnswerer ? "Connecting..." : "Loading document...");
       await primaryAnswerer.ensureLoaded?.(jobId);
-      setComposerState("ready", remoteAnswerer ? "可以提问" : "可基于文档内容回答");
+      setComposerState("ready", remoteAnswerer ? "Ready to ask" : "Ready to answer based on document content");
       return true;
     } catch (error) {
       if (!remoteAnswerer) {
-        setComposerState("disabled", error?.message || "文档内容暂不可用");
+        setComposerState("disabled", error?.message || "Document content temporarily unavailable.");
         return false;
       }
       try {
         await localAnswerer.ensureLoaded?.(jobId);
-        setComposerState("ready", "在线问答暂不可用，已用本地检索");
+        setComposerState("ready", "Live Q&A unavailable; local search active.");
         return true;
       } catch (fallbackError) {
-        setComposerState("disabled", fallbackError?.message || error?.message || "问答暂不可用");
+        setComposerState("disabled", fallbackError?.message || error?.message || "Q&A temporarily unavailable");
         return false;
       }
     }
@@ -178,7 +178,7 @@ export function useReaderAiChat(ports) {
       const result = await localAnswerer.answer(options);
       return {
         fallback: true,
-        reason: error?.message || "AI 服务未运行",
+reason: error?.message || "AI service not running",
         result,
       };
     }
@@ -215,14 +215,14 @@ export function useReaderAiChat(ports) {
     let streamed = false;
     const streamRenderer = createStreamingMarkdownRenderer(assistantView);
     try {
-      setComposerState("busy", remoteAnswerer ? "思考中…" : "检索文档中…");
-      showProgress(remoteAnswerer ? "正在检索文档…" : "正在从文档中查找…");
+setComposerState("busy", remoteAnswerer ? "Thinking..." : "Searching documents...");
+showProgress(remoteAnswerer ? "Retrieving documents..." : "searching in the document...");
       const { fallback, reason, result } = await answerWithFallback({
         context: aiContext?.context?.(),
         history: historyRef.current,
         jobId,
         onToolEvent: (event) => showProgress(describeToolEvent(event)),
-        // 流式增量:首个 token 到达即清进度态,逐步把累积文本按 Markdown 渲染(节流)
+// Streaming increment: clear progress state on first token arrival. Gradually render accumulated text as Markdown (throttled)
         onAnswerDelta: (fullText) => {
           streamed = true;
           setMessageProgress(assistantView, false);
@@ -235,32 +235,32 @@ export function useReaderAiChat(ports) {
       setMessageProgress(assistantView, false);
       streamRenderer.stop();
       const answerText = fallback
-        ? `${result.answer}\n\n_在线服务暂不可用，以上来自本地文档检索。_${reason ? `（${reason}）` : ""}`
+? `${result.answer}\n\n_Online service temporarily unavailable; the above is from local document retrieval._${reason ? ` (${reason})` : ""}`
         : result.answer;
-      // 未走流式(本地检索/非流式后端)且无引用时保留字符动画;否则直接 finalize
+      // Not streaming.(Local search/Non-streaming backend.)Retain character animation when unreferenced;Otherwise, directly finalize
       if (!streamed && !hasAgenticCitations(result.citations) && !fallback) {
         await streamMessageText(assistantView, answerText, []);
       }
-      // 最终:Markdown 渲染 + [n] 引用按钮 + 脚注(替换流式期间的纯文本)
+// Final: Markdown rendering + [n] citation buttons + Footnote (Replace plain text during streaming.)
       await renderRichAnswer(assistantView, answerText, result.citations, { jumpToCitation });
       scrollThread();
       remember("assistant", result.answer || answerText);
       turnsRef.current.push({ role: "assistant", text: answerText, citations: result.citations || [] });
       persist();
-      setComposerState("ready", fallback ? "已用本地检索回答" : "可以继续提问");
+setComposerState("ready", fallback ? "Local retrieval used." : "You can continue asking");
       return result;
     } catch (error) {
       streamRenderer.stop();
       setMessageProgress(assistantView, false);
-      renderMessageText(assistantView, error?.message || "生成回答失败，请重试。", []);
-      setComposerState("ready", "失败，可修改问题后重试");
-      // 失败的助手气泡不入 turns/持久化,用户问题已入 turns——补存以保留提问
+      renderMessageText(assistantView, error?.message || "Failed to generate answer, please retry.", []);
+      setComposerState("ready", "Failed. Modify and retry.");
+// Failed assistant bubble excluded. turns/persistence, User issue logged. turnsâBackfill to retain question
       persist();
       return null;
     }
   }, [aiContext, answerWithFallback, appendMessage, jobId, jumpToCitation, persist, primaryAnswerer, remember, remoteAnswerer, scrollThread, setComposerState]);
 
-  // 新建对话:先存当前,再开一条空会话并渲染空线程
+  // New conversation:Save current state first.,Open new empty session and render empty thread.
   const newConversation = useCallback(async () => {
     persist();
     historyStore?.newSession?.();
@@ -268,7 +268,7 @@ export function useReaderAiChat(ports) {
     refreshSessionBar();
   }, [historyStore, persist, refreshSessionBar, renderStored]);
 
-  // 切换到指定历史会话:先存当前,再载入目标会话重渲染
+// Switch to specified history session: save current first, Reload target session to re-render.
   const switchConversation = useCallback(async (id) => {
     persist();
     const stored = historyStore?.switchSession?.(id) || { messages: [], history: [] };
@@ -276,16 +276,16 @@ export function useReaderAiChat(ports) {
     refreshSessionBar();
   }, [historyStore, persist, refreshSessionBar, renderStored]);
 
-  // 删除指定(默认当前)会话,自动切到最近的一条或补一条空会话
+// Delete specified (Default current) session, Auto-switch to latest or append empty session.
   const deleteConversation = useCallback(async (id?: string) => {
     const stored = historyStore?.deleteSession?.(id) || { messages: [], history: [] };
     await renderStored(stored);
     refreshSessionBar();
   }, [historyStore, refreshSessionBar, renderStored]);
 
-  // ports 就绪后:先恢复历史(重开阅读器可见上次对话),再连接后端。
-  // 经 setTimeout(0) 跳出 React 提交期——restore 里的 flushSync 不允许在
-  // lifecycle 内调用(React 会告警且无法同步冲刷)。
+  // ports After ready:Restore history first.(Reopen reader shows last conversation.),Reconnect to backend.
+// Use setTimeout(0) to exit React Submission periodâflushSync in restore is Not allowed in
+  // lifecycle Internal call(React Triggers alert, prevents sync flush.)。
   const bootedRef = useRef(false);
   useEffect(() => {
     if (!ports || bootedRef.current) {
@@ -293,8 +293,8 @@ export function useReaderAiChat(ports) {
     }
     bootedRef.current = true;
     const timer = setTimeout(() => {
-      // 若延迟期间用户已开始对话(实际只有自动化驱动能到这个时序),
-      // 跳过恢复——restore 的 resetThread 会清掉刚产生的气泡。
+      // If user starts conversation during delay(Only automation driver reaches this timing.),
+// Skip restoreâresetThread in restore Clears newly generated bubbles.
       const boot = turnsRef.current.length ? Promise.resolve(false) : restore();
       void boot.finally(() => {
         void prepare();

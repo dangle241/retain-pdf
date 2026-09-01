@@ -533,7 +533,7 @@ class StructuredFailureClassificationTests(unittest.TestCase):
         except requests.HTTPError as exc:
             failure = classify_exception(exc, default_stage="translation", provider="translation")
         self.assertEqual(failure.error_type, "upstream_bad_request")
-        self.assertEqual(failure.summary, "上游服务拒绝请求（400）")
+        self.assertEqual(failure.summary, "Upstream service rejected request.400）")
         self.assertFalse(failure.retryable)
 
     def test_classify_exception_keeps_http_401_as_auth_failed(self):
@@ -545,7 +545,7 @@ class StructuredFailureClassificationTests(unittest.TestCase):
         except requests.HTTPError as exc:
             failure = classify_exception(exc, default_stage="translation", provider="translation")
         self.assertEqual(failure.error_type, "auth_failed")
-        self.assertEqual(failure.summary, "鉴权失败")
+self.assertEqual(failure.summary, "Authentication failed")
         self.assertFalse(failure.retryable)
 
 

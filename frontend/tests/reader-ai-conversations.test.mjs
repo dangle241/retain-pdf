@@ -2,16 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// 多会话对话管理(React 组件版):旧版驱动 src/js/reader/ai/chat.js 的 DOM 控制器,
-// Phase 2b 起 AI 问答 UI 迁入 React(src/pages/reader/legacy/components/ReaderAiChat.jsx)。
-// 断言语义与旧版一致:气泡类名(.reader-ai-message-body-el)、会话下拉选项、
-// historyStore 会话数。另收编旧 reader.test.mjs 的两条 chat 语义:
-// 提交状态流转、502 回退本地检索。
+// Multi-session conversation management (React component version): replaces the old DOM controller driving src/js/reader/ai/chat.js,
+// Since Phase 2b, AI Q&A UI migrated to React (src/pages/reader/legacy/components/ReaderAiChat.jsx).
+// Assertion semantics consistent with old version: bubble class name (.reader-ai-message-body-el), session dropdown options,
+// historyStore session count. Also incorporate two chat semantics from old reader.test.mjs:
+// submit status flow, 502 fallback to local search.
 //
-// 驱动方式:首个挂载用真实 DOM 事件(表单提交/按钮点击,验 React 布线);
-// 后续测试经 controllerRef 直接调编排句柄(等价旧测试调 chat.submit())——
-// node:test 环境下换 key 重挂组件后 React 根事件委托停摆(环境问题,浏览器无此现象),
-// 组件渲染与 flushSync 不受影响,断言仍全部落在真实 DOM 上。
+// Driving approach: first mount uses real DOM events (form submit/button click, test React wiring);
+// subsequent tests call orchestration handlers directly via controllerRef (equivalent to old test calling chat.submit()) —
+// under node:test environment, after remounting component with new key, React root event delegation stalls (environment issue, not in browser),
+// component rendering and flushSync are unaffected, assertions still all hit the real DOM.
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost/" });
 for (const k of ["window", "document", "HTMLElement", "CustomEvent", "Event", "Node", "MutationObserver"]) {
@@ -19,10 +19,10 @@ for (const k of ["window", "document", "HTMLElement", "CustomEvent", "Event", "N
 }
 globalThis.window = dom.window;
 globalThis.requestAnimationFrame = (cb) => setTimeout(() => cb(0), 0);
-// Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
-// (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
-// animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
-// 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。
+// Radix Presence/Tabs (Phase B) require cancelAnimationFrame under jsdom
+// (TabsContent mount animation timer cleanup) and getComputedStyle (Presence reads
+// animation-name to determine if exit animation has ended) — jsdom's window has implementation, but not
+// copied to bare global like requestAnimationFrame, we supplement here.
 globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
 globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
 globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -44,7 +44,7 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-  assert.fail(`等待超时:${description}`);
+assert.fail(`Timeout waiting for: {description});
 }
 
 function memoryStorage() {
@@ -56,8 +56,8 @@ function memoryStorage() {
   };
 }
 
-// 单一 root 全文件复用:node:test 环境下测试内新建的第二个 createRoot
-// 不会被调度冲刷(与 reader-drawers.test.mjs 同一坑),改为换 key 重挂组件。
+// Single root reused across file: under node:test, a second createRoot created inside a test
+// will not be flushed by scheduler (same pit as reader-drawers.test.mjs), so we remount component with new key instead.
 const documentRef = dom.window.document;
 const chatHost = documentRef.createElement("div");
 documentRef.body.appendChild(chatHost);
@@ -77,14 +77,14 @@ async function makeChat({ answer, remoteAnswerer = null, fallbackAnswerer = null
       fallbackAnswerer,
       remoteAnswerer: remoteAnswerer || {
         ensureLoaded: async () => true,
-        answer: answer || (async ({ question }) => ({ answer: `回答:${question}`, citations: [], scope: "document" })),
+answer: answer || (async ({ question }) => ({ answer: Answer: {question}`, citations: [], scope: "document" })),
       },
     },
   }));
-  // 等挂载 + 启动流程(restore→prepare)收尾
+// Wait for mount + startup flow (restore→prepare) to finish
   await waitFor(
-    () => controllerRef.current && !statusText().includes("正在"),
-    "chat 挂载并就绪",
+() => controllerRef.current && !statusText().includes("in progress"),
+"chat mounted and ready",
   );
   return { controller: () => controllerRef.current, historyStore };
 }
@@ -95,77 +95,77 @@ const selectOptions = () =>
   [...documentRef.getElementById("reader-ai-session-select").options].map((o) => o.textContent);
 const statusText = () => documentRef.getElementById("reader-ai-status")?.textContent || "";
 
-test("DOM 布线:表单提交产出问答气泡,新建按钮清空线程", async () => {
+test("DOM Wiring:Form submission generates Q&A bubbles.,Clear threads.", async () => {
   const { historyStore } = await makeChat();
-  // 首个挂载:React 根事件委托可用,走真实 DOM 事件验布线
+// First mount: React root event delegation available, use real DOM events to test wiring
   const input = documentRef.getElementById("reader-ai-input");
   const setter = Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, "value").set;
-  setter.call(input, "会话A问题");
+setter.call(input, "Session A question");
   input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   documentRef.querySelector("[data-reader-ai-composer]")
     .dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true }));
   await waitFor(
-    () => bubbleTexts().some((t) => t.includes("回答:会话A问题")),
-    "DOM 提交产出回答气泡",
+() => bubbleTexts().some((t) => t.includes("Answer: Session A question")),
+    "DOM Submit Generated Response",
   );
-  assert.ok(bubbleTexts().some((t) => t.includes("会话A问题")));
+assert.ok(bubbleTexts().some((t) => t.includes("Session A question")));
 
   documentRef.getElementById("reader-ai-new-btn")
     .dispatchEvent(new dom.window.MouseEvent("click", { bubbles: true }));
-  await waitFor(() => bubbleTexts().length === 0, "新对话线程为空");
+  await waitFor(() => bubbleTexts().length === 0, "new conversation thread is empty");
   assert.equal(historyStore.listSessions().length, 2);
 });
 
-test("切换会话:载回目标会话的气泡", async () => {
+test("Switch Session:Reload target conversation bubbles.", async () => {
   const { controller, historyStore } = await makeChat();
-  await controller().submit("第一段问题");
+await controller().submit("First question");
   const idA = historyStore.activeSessionId();
-  assert.ok(idA, "首次提交后应有 active 会话");
+assert.ok(idA, "Should have active session after first submission.");
 
   await controller().newConversation();
-  assert.equal(bubbleTexts().length, 0, "新对话线程为空");
-  await controller().submit("第二段问题");
-  assert.ok(bubbleTexts().some((t) => t.includes("第二段问题")));
-  assert.ok(!bubbleTexts().some((t) => t.includes("第一段问题")));
+assert.equal(bubbleTexts().length, 0, "New conversation thread is empty");
+await controller().submit("Second question");
+assert.ok(bubbleTexts().some((t) => t.includes("Second question")));
+assert.ok(!bubbleTexts().some((t) => t.includes("First question")));
 
   await controller().switchConversation(idA);
-  assert.ok(bubbleTexts().some((t) => t.includes("第一段问题")), "切回后 A 的气泡恢复");
-  assert.ok(!bubbleTexts().some((t) => t.includes("第二段问题")));
+assert.ok(bubbleTexts().some((t) => t.includes("First question")), "Switch back A bubble restored");
+assert.ok(!bubbleTexts().some((t) => t.includes("Second question")));
 });
 
-test("删除当前对话:移除并切到剩余会话", async () => {
+test("Delete current conversation:Remove & switch to remaining session", async () => {
   const { controller, historyStore } = await makeChat();
-  await controller().submit("留存问题");
+await controller().submit("Retained question");
   await controller().newConversation();
-  await controller().submit("待删问题");
+await controller().submit("Question to delete");
   assert.equal(historyStore.listSessions().length, 2);
 
   await controller().deleteConversation();
   assert.equal(historyStore.listSessions().length, 1);
-  assert.ok(bubbleTexts().some((t) => t.includes("留存问题")), "删除后落到留存会话");
+assert.ok(bubbleTexts().some((t) => t.includes("Retained question")), "After deletion, falls to retained session.");
 });
 
-test("会话切换栏:提交后下拉出现带标题的选项", async () => {
+test("Session Switcher:Submit: dropdown with titled options.", async () => {
   const { controller } = await makeChat();
-  await controller().submit("给会话取名的问题");
+await controller().submit("Question for naming the session");
   await waitFor(
-    () => selectOptions().some((t) => t.includes("给会话取名的问题")),
-    "下拉出现会话标题",
+() => selectOptions().some((t) => t.includes("Question for naming the session")),
+    "Session title appears on dropdown",
   );
 });
 
-test("提交状态流转:完成后状态为「可以继续提问」,输入框清空", async () => {
+test("Submit status flow: after completion, status is 'Ready to ask more', input cleared", async () => {
   const { controller } = await makeChat();
-  await controller().submit("状态流转问题");
-  await waitFor(() => statusText() === "可以继续提问", "终态状态落定");
+await controller().submit("Status flow question");
+await waitFor(() => statusText() === "Ready to ask more", "Final status settled");
   assert.equal(documentRef.getElementById("reader-ai-input").value, "");
   const texts = bubbleTexts();
   assert.equal(texts.length, 2);
-  assert.equal(texts[0], "状态流转问题");
-  assert.equal(texts[1], "回答:状态流转问题");
+assert.equal(texts[0], "Status flow question");
+assert.equal(texts[1], "Answer: Status flow question");
 });
 
-test("后端 502 时回退本地检索:状态与气泡注记", async () => {
+test("Fallback to local search on backend 502: status and bubble annotation", async () => {
   const { controller } = await makeChat({
     fallbackAnswerer: {
       ensureLoaded: async () => true,
@@ -183,9 +183,9 @@ test("后端 502 时回退本地检索:状态与气泡注记", async () => {
   });
   await controller().submit("Explain fallback");
 
-  await waitFor(() => statusText() === "已用本地检索回答", "回退状态落定");
+await waitFor(() => statusText() === "Answered using local search", "Fallback status settled");
   const assistantText = bubbleTexts().at(-1);
   assert.match(assistantText, /Local fallback/);
-  assert.match(assistantText, /引用/);
+assert.match(assistantText, /citation/);
   assert.match(assistantText, /502 provider failed/);
 });

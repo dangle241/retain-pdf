@@ -24,7 +24,7 @@ export function ReaderModeTabs({
 }: ReaderModeTabsProps): JSX.Element {
   return (
     <header className="reader-topbar reader-react-topbar">
-      <div className="reader-tabs" role="tablist" aria-label="阅读模式">
+      <div className="reader-tabs" role="tablist" aria-label="reading mode">
         {MODES.map((item) => {
           if (sourceOnly && item.id !== "source") {
             return null;

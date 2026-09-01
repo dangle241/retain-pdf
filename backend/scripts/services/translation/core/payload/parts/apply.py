@@ -22,7 +22,7 @@ from .result_status import mark_translation_failed
 from .translation_units import refresh_payload_translation_units
 
 SOURCE_TERMINAL_RE = re.compile(r"[.!?。！？；;:：)\]）】”’\"']\s*$")
-TRANSLATION_SENTENCE_START_RE = re.compile(r"(?<=[。！？；])")
+TRANSLATION_SENTENCE_START_RE = re.compile(r"(?<=[.!?;])")
 _split_group_protected_translation = split_group_protected_translation
 
 
@@ -66,7 +66,7 @@ def _sanitize_neighbor_continuation_leak(
 
     first_hit = min(protected_translated_text.find(expr) for expr in leaked_math if protected_translated_text.find(expr) >= 0)
     candidate = protected_translated_text[:first_hit].rstrip()
-    candidate = re.sub(r"[，,、\s]*(?:在|为|是|等于|对于)\s*$", "", candidate).rstrip()
+candidate = re.sub(r"[ï¼,ã\s]*(?:å¨|ä¸º|æ¯|equals|For)\s*$", "", candidate).rstrip()
     if len(candidate) < 8:
         trim_at = _sentence_start_before(protected_translated_text, first_hit)
         candidate = protected_translated_text[:trim_at].rstrip()
@@ -230,10 +230,10 @@ def apply_single_translated_entry(
 
 
 def apply_reconstructed_unit_text(items: list[dict], translated_text: str) -> None:
-    # 乱码重建的整单元替换写入:重建输出是成品显示文本(调用方已完成
-    # reasoning 泄漏清洗与占位符还原),整个单元共用同一段译文,
-    # 六个译文字段同值落盘,group_* 与 translation_unit_* 天然保持同步。
-    # 不做邻段泄漏裁剪与 mixed_literal 拼接——那些针对逐项翻译输出。
+    # Rebuild garbled text via full-cell replacement write.:Rebuild output is final display text.(caller has completed
+    # reasoning Leak scrubbing and placeholder restoration),Entire unit shares one translation.,
+# Persist six identical translation fields to disk, group_* and translation_unit_* sync natively.
+    # No neighbor segment leakage clipping. mixed_literal Concatenate——For item-by-item translation output.
     for item in items:
         item["protected_translated_text"] = translated_text
         item["translated_text"] = translated_text

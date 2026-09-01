@@ -28,7 +28,7 @@ pub(crate) fn job_artifacts_dir(data_root: &Path, job: &JobSnapshot) -> Result<P
     Ok(output_dir)
 }
 
-/// 文档级缓存目录（无 job 时封面/缩略图仍可落盘）。
+/// Doc-level cache dir (none job Timestamp cover/Thumbnails still persisted to disk.
 pub(crate) fn document_artifacts_dir(
     data_root: &Path,
     document_id: &str,

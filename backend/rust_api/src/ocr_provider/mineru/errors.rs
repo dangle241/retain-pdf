@@ -73,189 +73,189 @@ pub fn map_provider_error_code(
             OcrErrorCategory::Unauthorized,
             Some("A0202"),
             message,
-            Some("检查 Token 是否正确，请检查是否有Bearer前缀 或者更换新 Token"),
+Some("Check whether Token is correct, please verify if there is a Bearer prefix or replace with a new Token"),
             trace_id,
         ),
         "A0211" => make_error(
             OcrErrorCategory::CredentialExpired,
             Some("A0211"),
             message,
-            Some("更换新 Token"),
+            Some("Replace with New Token"),
             trace_id,
         ),
         "-500" => make_error(
             OcrErrorCategory::InvalidRequest,
             Some("-500"),
             message,
-            Some("请确保参数类型及Content-Type正确"),
+Some("Please ensure parameter types and Content-Type are correct"),
             trace_id,
         ),
         "-10001" => make_error(
             OcrErrorCategory::ServiceUnavailable,
             Some("-10001"),
             message,
-            Some("请稍后再试"),
+            Some("Please try again later."),
             trace_id,
         ),
         "-10002" => make_error(
             OcrErrorCategory::InvalidRequest,
             Some("-10002"),
             message,
-            Some("检查请求参数格式"),
+            Some("Check request parameter format"),
             trace_id,
         ),
         "-60001" => make_error(
             OcrErrorCategory::UploadLinkRequestFailed,
             Some("-60001"),
             message,
-            Some("请稍后再试"),
+Some("Please try again later"),
             trace_id,
         ),
         "-60002" => make_error(
             OcrErrorCategory::UnsupportedFileFormat,
             Some("-60002"),
             message,
-            Some("检测文件类型失败，请求的文件名及链接中带有正确的后缀名，且文件为 pdf,doc,docx,ppt,pptx,png,jp(e)g 中的一种"),
+            Some("File type detection failed. Requested filename and link contain correct suffix, and file is pdf,doc,docx,ppt,pptx,png,jp(e)g one of"),
             trace_id,
         ),
         "-60003" => make_error(
             OcrErrorCategory::FileReadFailed,
             Some("-60003"),
             message,
-            Some("请检查文件是否损坏并重新上传"),
+            Some("Check file for corruption and re-upload."),
             trace_id,
         ),
         "-60004" => make_error(
             OcrErrorCategory::EmptyFile,
             Some("-60004"),
             message,
-            Some("请上传有效文件"),
+            Some("Upload a valid file."),
             trace_id,
         ),
         "-60005" => make_error(
             OcrErrorCategory::FileTooLarge,
             Some("-60005"),
             message,
-            Some("检查文件大小，最大支持 200MB"),
+            Some("Check file size, max supported. 200MB"),
             trace_id,
         ),
         "-60006" => make_error(
             OcrErrorCategory::TooManyPages,
             Some("-60006"),
             message,
-            Some("请拆分文件后重试"),
+            Some("Split file and retry."),
             trace_id,
         ),
         "-60007" => make_error(
             OcrErrorCategory::ServiceUnavailable,
             Some("-60007"),
             message,
-            Some("请稍后重试或联系技术支持"),
+            Some("Please try again later or contact technical support."),
             trace_id,
         ),
         "-60008" => make_error(
             OcrErrorCategory::RemoteReadTimeout,
             Some("-60008"),
             message,
-            Some("检查 URL 可访问"),
+Some("Check URL accessibility"),
             trace_id,
         ),
         "-60009" => make_error(
             OcrErrorCategory::QueueFull,
             Some("-60009"),
             message,
-            Some("请稍后再试"),
+Some("Please try again later"),
             trace_id,
         ),
         "-60010" => make_error(
             OcrErrorCategory::ParseFailed,
             Some("-60010"),
             message,
-            Some("请稍后再试"),
+Some("Please try again later"),
             trace_id,
         ),
         "-60011" => make_error(
             OcrErrorCategory::UploadedFileMissing,
             Some("-60011"),
             message,
-            Some("请确保文件已上传"),
+            Some("Ensure file uploaded."),
             trace_id,
         ),
         "-60012" => make_error(
             OcrErrorCategory::TaskNotFound,
             Some("-60012"),
             message,
-            Some("请确保task_id有效且未删除"),
+            Some("Ensure.task_idValid and not deleted"),
             trace_id,
         ),
         "-60013" => make_error(
             OcrErrorCategory::PermissionDenied,
             Some("-60013"),
             message,
-            Some("只能访问自己提交的任务"),
+            Some("Access only tasks you submitted."),
             trace_id,
         ),
         "-60014" => make_error(
             OcrErrorCategory::OperationNotAllowed,
             Some("-60014"),
             message,
-            Some("运行中的任务暂不支持删除"),
+            Some("Running tasks cannot be deleted."),
             trace_id,
         ),
         "-60015" => make_error(
             OcrErrorCategory::ConversionFailed,
             Some("-60015"),
             message,
-            Some("可以手动转为pdf再上传"),
+            Some("Can be manually convertedpdfRe-upload"),
             trace_id,
         ),
         "-60016" => make_error(
             OcrErrorCategory::ConversionFailed,
             Some("-60016"),
             message,
-            Some("文件转换为指定格式失败，可以尝试其他格式导出或重试"),
+            Some("File conversion to specified format failed. Try exporting to another format or retry."),
             trace_id,
         ),
         "-60017" => make_error(
             OcrErrorCategory::RetryLimitReached,
             Some("-60017"),
             message,
-            Some("等后续模型升级后重试"),
+            Some("Retry after model upgrade."),
             trace_id,
         ),
         "-60018" => make_error(
             OcrErrorCategory::QuotaExceeded,
             Some("-60018"),
             message,
-            Some("明日再来"),
+            Some("Come back tomorrow"),
             trace_id,
         ),
         "-60019" => make_error(
             OcrErrorCategory::HtmlQuotaExceeded,
             Some("-60019"),
             message,
-            Some("明日再来"),
+Some("Come back tomorrow"),
             trace_id,
         ),
         "-60020" => make_error(
             OcrErrorCategory::FileSplitFailed,
             Some("-60020"),
             message,
-            Some("请稍后重试"),
+            Some("Try again later."),
             trace_id,
         ),
         "-60021" => make_error(
             OcrErrorCategory::PageCountReadFailed,
             Some("-60021"),
             message,
-            Some("请稍后重试"),
+Some("Please retry later"),
             trace_id,
         ),
         "-60022" => make_error(
             OcrErrorCategory::WebReadFailed,
             Some("-60022"),
             message,
-            Some("可能因网络问题或者限频导致读取失败，请稍后重试"),
+            Some("Read failed due to network or rate limiting. Retry later."),
             trace_id,
         ),
         other => make_error(
@@ -289,7 +289,7 @@ pub fn classify_runtime_failure(message: &str, trace_id: Option<&str>) -> OcrPro
             OcrErrorCategory::PollTimeout,
             None,
             provider_message,
-            Some("请检查 MinerU 任务是否长时间卡住，或适当增大轮询超时时间"),
+            Some("Please check MinerU Task stuck long? Increase polling timeout."),
             trace_ref,
         );
     }
@@ -298,7 +298,7 @@ pub fn classify_runtime_failure(message: &str, trace_id: Option<&str>) -> OcrPro
             OcrErrorCategory::UploadFailed,
             None,
             provider_message,
-            Some("请检查上传链接是否有效，或重新申请上传 URL 后再试"),
+            Some("Check if the upload link is valid, or re-apply for upload. URL Try again later"),
             trace_ref,
         );
     }
@@ -307,7 +307,7 @@ pub fn classify_runtime_failure(message: &str, trace_id: Option<&str>) -> OcrPro
             OcrErrorCategory::InvalidProviderResponse,
             None,
             provider_message,
-            Some("请检查 provider 返回结构是否完整，重点确认 full_zip_url 等关键字段"),
+Some("Please check whether the provider return structure is complete; confirm full_zip_url and other key fields"),
             trace_ref,
         );
     }
@@ -315,7 +315,7 @@ pub fn classify_runtime_failure(message: &str, trace_id: Option<&str>) -> OcrPro
         OcrErrorCategory::ProviderFailed,
         None,
         provider_message,
-        Some("请结合 provider 原始 message、trace_id 和任务状态继续排查"),
+Some("Please combine the provider original message, trace_id, and task status to continue troubleshooting."),
         trace_ref,
     )
 }
@@ -328,72 +328,72 @@ mod tests {
     #[test]
     fn maps_readme_codes_60004_to_60022() {
         let cases = [
-            ("-60004", OcrErrorCategory::EmptyFile, "请上传有效文件"),
+("-60004", OcrErrorCategory::EmptyFile, "Please upload a valid file"),
             (
                 "-60005",
                 OcrErrorCategory::FileTooLarge,
-                "检查文件大小，最大支持 200MB",
+"Check file size, max 200MB supported",
             ),
-            ("-60006", OcrErrorCategory::TooManyPages, "请拆分文件后重试"),
+("-60006", OcrErrorCategory::TooManyPages, "Please split the file and retry"),
             (
                 "-60007",
                 OcrErrorCategory::ServiceUnavailable,
-                "请稍后重试或联系技术支持",
+"Please retry later or contact technical support",
             ),
             (
                 "-60008",
                 OcrErrorCategory::RemoteReadTimeout,
-                "检查 URL 可访问",
+"Check URL accessibility",
             ),
-            ("-60009", OcrErrorCategory::QueueFull, "请稍后再试"),
-            ("-60010", OcrErrorCategory::ParseFailed, "请稍后再试"),
+("-60009", OcrErrorCategory::QueueFull, "Please try again later"),
+("-60010", OcrErrorCategory::ParseFailed, "Please try again later"),
             (
                 "-60011",
                 OcrErrorCategory::UploadedFileMissing,
-                "请确保文件已上传",
+"Please ensure the file has been uploaded",
             ),
             (
                 "-60012",
                 OcrErrorCategory::TaskNotFound,
-                "请确保task_id有效且未删除",
+"Please ensure task_id is valid and not deleted",
             ),
             (
                 "-60013",
                 OcrErrorCategory::PermissionDenied,
-                "只能访问自己提交的任务",
+"Only tasks submitted by yourself can be accessed",
             ),
             (
                 "-60014",
                 OcrErrorCategory::OperationNotAllowed,
-                "运行中的任务暂不支持删除",
+"Running tasks are not currently supported for deletion",
             ),
             (
                 "-60015",
                 OcrErrorCategory::ConversionFailed,
-                "可以手动转为pdf再上传",
+"You can manually convert to PDF and upload",
             ),
             (
                 "-60016",
                 OcrErrorCategory::ConversionFailed,
-                "文件转换为指定格式失败，可以尝试其他格式导出或重试",
+"File conversion to specified format failed; try another format or retry",
             ),
             (
                 "-60017",
                 OcrErrorCategory::RetryLimitReached,
-                "等后续模型升级后重试",
+"Wait for subsequent model upgrades and retry",
             ),
-            ("-60018", OcrErrorCategory::QuotaExceeded, "明日再来"),
-            ("-60019", OcrErrorCategory::HtmlQuotaExceeded, "明日再来"),
-            ("-60020", OcrErrorCategory::FileSplitFailed, "请稍后重试"),
+("-60018", OcrErrorCategory::QuotaExceeded, "Come back tomorrow"),
+("-60019", OcrErrorCategory::HtmlQuotaExceeded, "Come back tomorrow"),
+("-60020", OcrErrorCategory::FileSplitFailed, "Please retry later"),
             (
                 "-60021",
                 OcrErrorCategory::PageCountReadFailed,
-                "请稍后重试",
+"Please retry later",
             ),
             (
                 "-60022",
                 OcrErrorCategory::WebReadFailed,
-                "可能因网络问题或者限频导致读取失败，请稍后重试",
+"Possibly due to network issues or rate limiting causing read failure; please retry later",
             ),
         ];
         for (code, category, hint) in cases {
@@ -416,11 +416,11 @@ mod tests {
 
     #[test]
     fn extracts_trace_and_message_from_embedded_json() {
-        let text = r#"requests failed: {"code":-60011,"msg":"获取有效文件失败","trace_id":"trace-xyz","data":null}"#;
+        let text = r#"requests failed: {"code":-60011,"msg":"Failed to get valid file","trace_id":"trace-xyz","data":null}"#;
         let mapped = classify_runtime_failure(text, None);
         assert_eq!(mapped.provider_code.as_deref(), Some("-60011"));
-        assert_eq!(mapped.provider_message.as_deref(), Some("获取有效文件失败"));
+        assert_eq!(mapped.provider_message.as_deref(), Some("Failed to get valid file."));
         assert_eq!(mapped.trace_id.as_deref(), Some("trace-xyz"));
-        assert_eq!(mapped.operator_hint.as_deref(), Some("请确保文件已上传"));
+assert_eq!(mapped.operator_hint.as_deref(), Some("Please ensure the file has been uploaded"));
     }
 }

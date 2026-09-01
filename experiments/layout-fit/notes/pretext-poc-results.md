@@ -1,45 +1,45 @@
 # Pretext PoC Results
 
-日期：
+Date:
 
 - 2026-04-07
 
-环境：
+Environment:
 
-- 本地静态服务：`python3 -m http.server 4173`
-- 浏览器：`chromium --headless --disable-gpu --no-sandbox`
-- 依赖安装：`npm install --registry=https://registry.npmmirror.com`
+- Local static server:`python3 -m http.server 4173`
+- Browser:`chromium --headless --disable-gpu --no-sandbox`
+- Install dependencies:`npm install --registry=https://registry.npmmirror.com`
 
-## 已验证页面
+## Verified page
 
 - `html/index.html`
 - `html/pretext.html`
 
-两页都支持 URL 参数自动运行：
+Both pages support it. URL Auto-run parameters:
 
 - `?autoload=1`
 - `&sample=<sample_id>`
 - `&autorun=1`
 
-例如：
+Example:
 
 - `http://127.0.0.1:4173/html/index.html?autoload=1&sample=20260407033349-ffe2e4:p002-b0002&autorun=1`
 - `http://127.0.0.1:4173/html/pretext.html?autoload=1&sample=20260407033349-ffe2e4:p002-b0002&autorun=1`
 
-## 首个浏览器侧对照结果
+## First browser-side comparison result.
 
-样本：
+Sample:
 
 - `20260407033349-ffe2e4:p002-b0002`
 
-输入参数：
+Parameters:
 
-- 宽度：`447.45pt`
-- 字号：`11.06pt`
-- 行高：约 `6.64pt`
-  这里沿用了当前页面里“用字号乘 Typst 的 `max_leading_em`”的近似方式，仅作为第一轮 PoC 对照输入。
+- Width: `447.45pt`
+- Font size:`11.06pt`
+- Line height: approx. `6.64pt`
+Retains current page's "multiply by font size". Typst `max_leading_em` approximation method used only for first round PoC input check.
 
-结果：
+Results:
 
 - DOM height: `53.16pt`
 - Pretext height: `53.12pt`
@@ -49,23 +49,23 @@
 - DOM maxLineWidth: `597pt`
 - Pretext maxLineWidth: `442.03pt`
 
-## 当前结论
+## Current Conclusion
 
-可以先确认三件事：
+First, confirm three things:
 
-1. `@chenglou/pretext` 已经可以在本实验目录本地安装并被浏览器页面导入。
-2. 在同一批 `fixtures` 上，DOM 和 `pretext` 的块级高度与行数已经可以直接做自动对照。
-3. 至少在样本 `p002-b0002` 上，`pretext` 与 DOM 的高度和行数非常接近。
+1. `@chenglou/pretext` Now installable locally in this experiment directory and importable by browser pages.
+2. Use same batch `fixtures` for DOM and `pretext` to auto-sync block height and line count. Remove manual checks.
+3. At least on sample `p002-b0002`, `pretext` height and line count are very close to DOM.
 
-同时也暴露出一个重要问题：
+This also reveals a critical issue:
 
-- 当前 DOM 页面对 `maxLineWidth` 的读取是 `scrollWidth`，它反映的是整个块盒子的滚动宽度，不一定是“最宽一行文字”的真实宽度。
-- `pretext` 的 `maxLineWidth` 是逐行计算出来的文本宽度，因此两者目前还不是严格同口径。
+- Current DOM Page pair `maxLineWidth` reads `scrollWidth`, which reflects the scroll width of the entire block box, not necessarily the actual width of the widest line of text.
+- `pretext` `maxLineWidth` calculates text width line by line, so the two are not yet strictly comparable in measurement basis.
 
-这意味着下一步应优先统一“最宽行”指标口径，再继续扩展更多样本。
+This means the next step should prioritize unifying the definition of the "widest line" metric, then continue expanding with more samples.
 
-## 下一步建议
+## Next steps
 
-- 把 DOM 基线页的宽度指标从 `scrollWidth` 改成逐行口径，和 `pretext` 对齐。
-- 用当前 5 个样本全量跑一遍 DOM / `pretext` 对照，记录高度差、行数差和最宽行差。
-- 再引入 Typst 对照，判断是 DOM 还是 `pretext` 更接近 Typst 结果。
+- Change DOM Baseline page width metric from `scrollWidth` to a per-line basis, and align `pretext`.
+- Use current. 5 Run all samples DOM / `pretext` Compare. Record height diff, line count diff, widest line diff.
+- Reimport Typst for comparison and confirm whether DOM or `pretext` is closer to Typst results.

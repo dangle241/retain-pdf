@@ -1,5 +1,5 @@
-# 实验性符号素材（默认不用）
+# Experimental symbol assets (disabled by default)
 
-这些 SVG 是早期「贴传统元素」方向的草稿。
-产品默认路径**不加载**它们。
-正确方向见 skins/jiangnan.md：比例 / 留白 / 材质 / 层级 / 用色秩序。
+These SVGs are early drafts for the "Apply Traditional Elements" direction.
+Default product path**Not loaded**Them.
+See correct direction. skins/jiangnan.mdRatio / Whitespace / Material / Level / Color order.

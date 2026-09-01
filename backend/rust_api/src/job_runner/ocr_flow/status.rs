@@ -39,11 +39,11 @@ fn ocr_stage_detail_with_progress(
 ) -> Option<String> {
     match (current, total) {
         (Some(current), Some(total)) if total > 0 => Some(format!(
-            "Paddle 正在解析文件，第 {}/{} 页",
+"Paddle parsing file, page {}/{}",
             current.max(0),
             total
         )),
-        (None, Some(total)) if total > 0 => Some(format!("OCR 正在解析，共 {} 页", total)),
+(None, Some(total)) if total > 0 => Some(format!("OCR Parsing, total {} pages", total)),
         _ => fallback,
     }
 }
@@ -62,16 +62,16 @@ mod tests {
     fn ocr_stage_detail_prefers_page_progress_when_available() {
         assert_eq!(
             ocr_stage_detail_with_progress(
-                Some("Paddle 正在解析文件".to_string()),
+                Some("Paddle Parsing file".to_string()),
                 Some(12),
                 Some(34)
             )
             .as_deref(),
-            Some("Paddle 正在解析文件，第 12/34 页")
+Some("Paddle parsing file, page 12/34")
         );
         assert_eq!(
             ocr_stage_detail_with_progress(None, None, Some(34)).as_deref(),
-            Some("OCR 正在解析，共 34 页")
+Some("OCR parsing, 34 pages total")
         );
     }
 }

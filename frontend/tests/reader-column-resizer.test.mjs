@@ -18,26 +18,26 @@ function memoryStorage(seed) {
   };
 }
 
-test("clampColumnWidth 夹取到区间并取整,非法回退默认", () => {
+test("clampColumnWidth clamps to range and rounds, invalid falls back to default", () => {
   assert.equal(clampColumnWidth(10, READER_COLUMN_LIMITS.left), READER_COLUMN_LIMITS.left.min);
   assert.equal(clampColumnWidth(9999, READER_COLUMN_LIMITS.right), READER_COLUMN_LIMITS.right.max);
   assert.equal(clampColumnWidth(300.6, READER_COLUMN_LIMITS.left), 301);
   assert.equal(clampColumnWidth("abc", READER_COLUMN_LIMITS.left), READER_COLUMN_LIMITS.left.default);
 });
 
-test("宽度持久化:save 后 load 回读,且读取时再夹取", () => {
+test("Width persistence: load after save, and clamp again on read", () => {
   const storage = memoryStorage();
   saveColumnWidths({ left: 320, right: 500 }, storage);
   assert.deepEqual(loadColumnWidths(storage), { left: 320, right: 500 });
 
-  // 越界的持久值读取时被夹回区间
+// Out-of-range persisted value is clamped back to range on read
   storage.setItem("retainpdf-reader-cols-v1", JSON.stringify({ left: 5, right: 9000 }));
   const loaded = loadColumnWidths(storage);
   assert.equal(loaded.left, READER_COLUMN_LIMITS.left.min);
   assert.equal(loaded.right, READER_COLUMN_LIMITS.right.max);
 });
 
-test("无 storage / 脏数据:回退默认宽度不抛", () => {
+test("No storage / dirty data: fallback to default width without throwing", () => {
   assert.deepEqual(loadColumnWidths(null), {
     left: READER_COLUMN_LIMITS.left.default,
     right: READER_COLUMN_LIMITS.right.default,
@@ -50,7 +50,7 @@ test("无 storage / 脏数据:回退默认宽度不抛", () => {
   assert.doesNotThrow(() => saveColumnWidths({ left: 1, right: 1 }, null));
 });
 
-test("applyLeft/applyRight 写入 body CSS 变量并夹取", () => {
+test("applyLeft/applyRight write body CSS variables and clamp", () => {
   const setCalls = [];
   const body = { style: { setProperty: (k, v) => setCalls.push([k, v]) }, classList: { add() {}, remove() {} } };
   const documentRef = {
@@ -68,7 +68,7 @@ test("applyLeft/applyRight 写入 body CSS 变量并夹取", () => {
   assert.ok(setCalls.some(([k, v]) => k === "--reader-right-col" && v === `${READER_COLUMN_LIMITS.right.max}px`));
 });
 
-test("bindEvents 应用持久宽度,并给两个把手绑定 pointerdown", () => {
+test("bindEvents applies persisted width and binds pointerdown to two handles", () => {
   const handles = {
     "reader-col-resizer-left": { listeners: {}, addEventListener(t, fn) { this.listeners[t] = fn; } },
     "reader-col-resizer-right": { listeners: {}, addEventListener(t, fn) { this.listeners[t] = fn; } },

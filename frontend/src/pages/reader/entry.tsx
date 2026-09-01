@@ -1,6 +1,6 @@
-// reader 页 React 入口。默认 react-pdf 引擎（ReaderAppReactPdf）；
-// ?engine=legacy 回退命令式 js/reader 挂载（use-reader-boot）。
-// 打包产物 dist/reader.bundle.js（scripts/build-js-bundle.mjs）。
+// Reader page React entry point. Default react-pdf engine (ReaderAppReactPdf);
+// ?engine=legacy falls back to imperative js/reader mount (use-reader-boot).
+// Build artifacts dist/reader.bundle.js（scripts/build-js-bundle.mjs）。
 
 import { createRoot } from "react-dom/client";
 import { bootTheme } from "../../shared/theme/theme.js";
@@ -11,13 +11,13 @@ import {
 import { ReaderApp } from "./ReaderApp.jsx";
 
 bootTheme();
-// 仅 AI 会话切换锁定期拦截误触；并清掉可能残留的全屏指针遮罩
+// Block accidental touches during session switch lockout; clear any residual fullscreen pointer overlay
 clearReaderAiNavigationLock();
 installReaderWindowOpenGuard();
 
-// 渲染前同步 body class:CSS 的 :has()/body-class 驱动规则(reader-page.css)依赖它们。
-// 主页已改为跳转独立 reader.html，不再用 iframe 嵌入。
-// 若仍有旧书签/测试以 iframe 打开，保留 embedded class 兼容。
+// Sync before render body class: CSS :has()/body-class driving rules (reader-page.css) depend on them.
+// Homepage now redirects to standalone. reader.htmlno longer using iframe Embed.
+// If legacy bookmarks remain/Test starting with iframe Open, keep embedded class Compatible.
 function syncReaderBodyClasses(body = document.body) {
   body.classList.add("reader-body", "reader-mode-compare");
   if (globalThis.window && window.self !== window.top) {
@@ -25,9 +25,9 @@ function syncReaderBodyClasses(body = document.body) {
   }
 }
 
-// 过渡期兜底:探针验证时 reader.html 只换 <script> 入口,旧静态骨架仍在 body 里,
-// 先清掉再挂 React 树,避免两套 DOM(重复 id/固定层)叠加。
-// cutover(2b)后 body 只剩脚本与 #reader-root,此步退化为空操作。
+// Transition fallback: During probe validation, reader.html only changes <script> entry; old static skeleton remains in body.
+// Clear then mount React tree; avoid duplicate DOM sets (duplicate id/Fixed layer) overlay.
+// After cutover(2b), body contains only scripts and #reader-root; this step becomes a no-op.
 function purgeLegacyMarkup(body = document.body) {
   Array.from(body.children).forEach((element) => {
     if (element.tagName !== "SCRIPT" && element.id !== "reader-root") {
@@ -55,9 +55,9 @@ function resolveReaderEngine(search = globalThis.location?.search || "") {
 }
 
 /**
- * Legacy 抽屉/选区/AI 样式已拆到 dist/css/reader-legacy.css。
- * 默认 react-pdf 不加载；仅 ?engine=legacy 时注入。
- * 相对路径对齐 reader.html 里已有的 reader.css link（保留同目录）。
+* Legacy drawer/selection/AI styles extracted to dist/css/reader-legacy.css.
+* Default react-pdf does not load; only inject at runtime via ?engine=legacy.
+ * Align relative paths. reader.html Existing reader.css linkSame directory.
  */
 function ensureLegacyReaderCss() {
   if (typeof document === "undefined") {
@@ -71,7 +71,7 @@ function ensureLegacyReaderCss() {
   ) as HTMLLinkElement | null;
   let href = "./dist/css/reader-legacy.css";
   if (main?.getAttribute("href")) {
-    // ./dist/css/reader.css?v=abc → ./dist/css/reader-legacy.css（去掉主包 hash，避免错绑）
+    // ./dist/css/reader.css?v=abc → ./dist/css/reader-legacy.cssMain package removed. hashAvoid misbinding
     href = main
       .getAttribute("href")!
       .replace(/reader\.css(\?v=[^"']*)?$/i, "reader-legacy.css");

@@ -20,7 +20,7 @@ def _writes(source: str) -> dict[str, list[int]]:
 
 
 def test_detects_subscript_assignment_regardless_of_variable_name() -> None:
-    # 门禁必须与变量名无关:item / metadata / record 都要抓到。
+    # Access control unrelated to variable names.:item / metadata / record must all be captured.
     source = (
         "item[\"final_status\"] = \"translated\"\n"
         "metadata[\"translated_text\"] = output\n"
@@ -62,9 +62,9 @@ def test_ignores_reads_and_ungated_keys() -> None:
 
 
 def test_current_tree_has_no_violations() -> None:
-    # 全量跑真实 translation 目录:allowlist 必须与现状精确一致。
-    # 若此测试失败,要么出现了新的越界写入(修代码),
-    # 要么完成了一次收敛(从 allowlist 删掉对应 frozen-debt 条目)。
+    # Run full suite against real data. translation Table of Contents:allowlist Must match current state exactly.
+    # If this test fails,either a new out-of-bounds write occurred(No code provided. Paste snippet.),
+# Convergence achieved. Review results.(Delete corresponding from allowlist. frozen-debt Entry).
     errors: list[str] = []
 
     check_translation_payload_field_writers(errors)

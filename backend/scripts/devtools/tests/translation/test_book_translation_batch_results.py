@@ -37,14 +37,14 @@ def test_duplicate_plain_items_are_collapsed_and_expanded_with_item_diagnostics(
         {
             "a": {
                 "decision": "translate",
-                "translated_text": "甲",
+"translated_text": "A",
                 "final_status": "translated",
                 "translation_diagnostics": {"item_id": "a", "page_idx": 0, "route_path": ["block_level"]},
             }
         },
         duplicate_items_by_rep_id=duplicates,
     )
-    assert expanded["b"]["translated_text"] == "甲"
+assert expanded["b"]["translated_text"] == "A"
     assert expanded["b"]["translation_diagnostics"]["item_id"] == "b"
     assert expanded["b"]["translation_diagnostics"]["page_idx"] == 1
 

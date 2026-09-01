@@ -1,63 +1,63 @@
-# Services 说明
+# Services description
 
-`scripts/services/` 是具体能力实现层。
+`scripts/services/` Concrete capability implementation layer.
 
-这里放真正执行工作的模块，而不是流程编排：
+Place the actual work module here, not orchestration:
 
 - `ocr_provider/`
-  OCR provider API 接入层的独立约定。这里只定义“第三方 OCR 服务怎么接进来”，不把 provider API 细节耦合到翻译/渲染工作流。
+  OCR provider API Independent conventions for the access layer. Only "third-party" is defined here. OCR "How to connect the service", not... provider API Details coupled to translation./Rendering workflow.
 - `document_schema/`
-  统一中间文档结构版本定义、adapter registry、defaults 收口、schema 校验与 normalization report。
+  Unify intermediate document structure version definition.adapter registry、defaults Closeschema Validation and normalization report。
 - `mineru/`
-  MinerU 这个 provider 的具体实现：提交、轮询、下载、解包、任务产物整理。
+MinerU provider implementation: submit, poll, download, unpack, organize task artifacts.
 - `pipeline_shared/`
-  provider / translate / render 主线共用的阶段协议、summary、统一 `pipeline_events.jsonl` 事件流和 JSON IO，不绑定任何单一 provider。
+provider/translate/render stage protocol shared by main branch summary, unified pipeline_events.jsonl event stream and JSON IO not bound to any single provider.
 - `translation/`
-  OCR 解析、翻译编排元数据、策略过滤、LLM 调用、结果回填。
+  OCR Parse, translate orchestration metadata, policy filter.LLM Call, backfill results.
 - `rendering/`
-  PDF 擦除、背景处理、Typst 生成、公式规整、最终渲染与压缩。
+  PDF Erase, Background Processing,Typst Generation, formula formatting, final rendering, and compression.
 
-设计原则：
+Design principles:
 
-- `services/*` 负责把单项能力做完整
-- `ocr_provider/` 只定义 provider 接入约定，不承担具体 provider 实现
-- `document_schema/` 负责定义统一中间层，不承载 provider 细节
-- OCR provider 原始 JSON 必须先经过 `document_schema/adapters.py` 转成 `document.v1`
-- 需要排查 raw -> normalized 转化时，优先看 `document.v1.report.json` 或 `validate_document_schema.py --adapt`
-- 如果只是消费 provider / defaults / validation 摘要，优先走 `document_schema/reporting.py`
-- `mineru/` 是一个 provider 实现，不是 OCR 总工作流本身
-- `pipeline_shared/` 是中性共享层，不应该再放 provider 私有逻辑
-- `translation/ocr` 主线优先读取 normalized document，而不是直接依赖某个 OCR provider 的原始 JSON
-- `runtime/pipeline` 只负责把这些能力串起来
-- 上层入口优先依赖 `runtime/pipeline`，不要直接跨服务拼流程
-- 公共配置和共享工具继续下沉到 `foundation/`
+- `services/*` responsible for completing single capabilities
+- `ocr_provider/` Define only provider Access agreement, no specific liability. provider implementation
+- document_schema/ defines unified middleware layer; does not carry provider details
+- OCR provider raw JSON must pass through document_schema/adapters.py first to convert to document.v1
+- Need more context. What to troubleshoot? When converting raw -> normalized, prioritize checking document.v1.report.json or validate_document_schema.py --adapt
+- If only consuming. provider / defaults / validation Summary first `document_schema/reporting.py`
+- mineru/ is a provider implementation, not OCR overall workflow itself.
+- `pipeline_shared/` It is a neutral shared layer and should not be placed there. provider Private logic
+- `translation/ocr` Main thread read first normalized documentrather than directly depending on a specific OCR provider Original JSON
+- `runtime/pipeline` Only responsible for orchestrating these capabilities.
+- Top-level entry prioritizes dependency. `runtime/pipeline`Do not directly stitch processes across services.
+- Common configs and shared tools continue sinking down to `foundation/`
 
-## 新 OCR Provider 最短路径
+## New OCR provider shortest path
 
-新 provider 接入时，推荐最短路径是：
+New provider integration: recommended shortest path:
 
-1. 先读 `ocr_provider/README.md`
-2. 再读 `document_schema/README.md`
-3. 准备最小 raw fixture
-4. 写 provider API 接入层和 adapter
-5. 把 fixture 加到 `devtools/tests/document_schema/fixtures/registry.py`
-6. 跑 `devtools/tests/document_schema/regression_check.py`
+1. Read First `ocr_provider/README.md`
+2. Read again `document_schema/README.md`
+3. Prepare minimal raw fixture
+4. Write provider API access layer and adapter
+5. Add fixture to devtools/tests/document_schema/fixtures/registry.py
+6. Run devtools/tests/document_schema/regression_check.py
 
-只有这条链跑通后，provider 才应该进入 translation/rendering 主线。
+Only after this chain runs successfully,provider Should only enter. translation/rendering Main branch.
 
-## 协作规矩
+## Collaboration rules
 
-现在可以按模块拆分负责人，但边界必须按协议来守：
+Now split owners by module; boundaries must follow protocol:
 
-- OCR / provider 负责人主要维护 `ocr_provider/`、`mineru/`、`document_schema/`
-- 翻译负责人主要维护 `translation/`
-- 渲染负责人主要维护 `rendering/`
-- 编排负责人主要维护 `runtime/pipeline/`
+- OCR / provider Owner primarily maintains. `ocr_provider/`、`mineru/`、`document_schema/`
+- Maintained primarily by translation manager. `translation/`
+- Rendering lead maintains. `rendering/`
+- Orchestration owner primarily maintains. `runtime/pipeline/`
 
-默认原则：
+Default principles:
 
-- 每个负责人优先在自己模块内解决问题，不把临时特判扩散到别的模块
-- `document.v1.json`、`translation-manifest.json`、render-only 输入协议属于稳定交接点，不能单边修改
-- 如果必须改交接协议，必须同时更新上下游 README、调用入口、兼容逻辑和测试
-- translation / rendering 主线禁止重新依赖 provider raw JSON
-- pipeline 只负责编排，不负责吸收 provider 特判、翻译细节或渲染补丁
+- Each owner resolves issues within their own module first; do not propagate temporary special-case logic to other modules.
+- `document.v1.json`、`translation-manifest.json`、render-only Input protocol is a stable handoff point. No unilateral changes.
+- If the handover agreement must be changed, update upstream and downstream simultaneously. READMEEntry point handle compatibility logic test
+- translation / rendering Main branch forbids re-dependency. provider raw JSON
+- pipeline Orchestration only, no ingestion. provider Special cases, translation details, or rendering patches.

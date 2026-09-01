@@ -14,8 +14,8 @@ from services.translation.llm.result_canonicalizer import canonicalize_batch_res
 NORMALIZE_CASES = [
     {
         "name": "tight_citation_superscript",
-        "source": "此前研究已有报道$^{[12,13]}$显示活性提升。",
-        "expected": "此前研究已有报道 $^{[12,13]}$ 显示活性提升。",
+        "source": "Previously reported.$^{[12,13]}$Show activity boost.",
+"expected": "Previous studies have reported $^{[12,13]}$ showing activity improvement.",
     },
     {
         "name": "adjacent_inline_math_split",
@@ -24,13 +24,13 @@ NORMALIZE_CASES = [
     },
     {
         "name": "tight_prefix_and_suffix",
-        "source": "速率常数$k = A e^{-E_a/RT}$随温度上升。",
-        "expected": "速率常数 $k = A e^{-E_a/RT}$ 随温度上升。",
+        "source": "Rate constant$k = A e^{-E_a/RT}$As temperature rises.",
+"expected": "The rate constant $k = A e^{-E_a/RT}$ increases with temperature.",
     },
     {
         "name": "double_backslash_command_collapse",
-        "source": r"浓度为 $10 \\mu mol$ 时反应完成。",
-        "expected": r"浓度为 $10 \mu mol$ 时反应完成。",
+        "source": r"Concentration $10 \\mu mol$ Reaction complete.",
+"expected": r"The reaction completes when the concentration is $10 \mu mol$.",
     },
     {
         "name": "left_bracket_no_extra_space",
@@ -39,40 +39,40 @@ NORMALIZE_CASES = [
     },
     {
         "name": "right_punctuation_no_extra_space",
-        "source": "结果为 $x$。",
-        "expected": "结果为 $x$。",
+        "source": "The result is $x$。",
+"expected": "The result is $x$.",
     },
     {
         "name": "already_normalized_untouched",
-        "source": "能量 $E = m c^2$ 保持守恒。",
-        "expected": "能量 $E = m c^2$ 保持守恒。",
+        "source": "Energy $E = m c^2$ Keep conservation.",
+"expected": "Energy $E = m c^2$ is conserved.",
     },
     {
         "name": "newline_inside_inline_math_collapsed",
-        "source": "$k =\nA$ 成立。",
-        "expected": "$k = A$ 成立。",
+        "source": "$k =\nA$ holds.",
+"expected": "$k = A$ holds.",
     },
     {
         "name": "display_math_newline_preserved",
-        "source": "$$a =\nb$$ 成立。",
-        "expected": "$$a =\nb$$ 成立。",
+"source": "$$a =\nb$$ holds.",
+"expected": "$$a =\nb$$ holds.",
     },
     {
         "name": "escaped_dollar_is_literal",
-        "source": r"价格为 \$3.50 且 $x$成立。",
-        "expected": r"价格为 \$3.50 且 $x$ 成立。",
+        "source": r"Price \$3.50 且 $x$成立。",
+"expected": r"Price is \$3.50 and $x$ holds.",
     },
     {
         "name": "no_math_passthrough",
-        "source": "纯正文，没有公式。",
-        "expected": "纯正文，没有公式。",
+        "source": "Pure body text, no formulas.",
+"expected": "Pure body text, no formulas.",
     },
     {
-        # 字面 $ 变量(如 Q-Chem 的 $rem 输入段)会被扫描器误判成公式跨度,
-        # ASCII 相邻时必须原样保留,守护 test_direct_typst_protocol_shell 的契约。
+# Literal $ variable (such as Q-Chem's $rem input section) scanner false positive: formula span.,
+        # ASCII Preserve verbatim when adjacent.,Guard test_direct_typst_protocol_shell contract.
         "name": "literal_dollar_variables_untouched",
-        "source": "要启用该计算，请在 $rem 部分设置 INCDFT = 2，并使用 $active_orbitals 输入段。",
-        "expected": "要启用该计算，请在 $rem 部分设置 INCDFT = 2，并使用 $active_orbitals 输入段。",
+        "source": "To enable this calculation, go to $rem Settings INCDFT = 2and use $active_orbitals Input segment.",
+"expected": "To enable this calculation, set INCDFT = 2 in the $rem section and use the $active_orbitals input segment.",
     },
 ]
 
@@ -89,7 +89,7 @@ def test_normalize_direct_typst_translation_is_idempotent(case) -> None:
 
 
 def test_unbalanced_dollars_returned_unchanged_for_repair_path() -> None:
-    broken = "速率常数$k = A e^{-E_a/RT随温度上升。"
+broken = "rate constant$k = A e^{-E_a/RT rises with temperature."
     assert not has_balanced_unescaped_dollars(broken)
     assert normalize_direct_typst_translation(broken) == broken
 
@@ -103,9 +103,9 @@ def test_canonicalize_batch_result_normalizes_direct_typst_items() -> None:
     }
     result = canonicalize_batch_result(
         [item],
-        {"p001-b001": {"decision": "translate", "translated_text": "此前报道$^{[12,13]}$显示改善。"}},
+        {"p001-b001": {"decision": "translate", "translated_text": "Previous Reports$^{[12,13]}$Improve Display"}},
     )
-    assert result["p001-b001"]["translated_text"] == "此前报道 $^{[12,13]}$ 显示改善。"
+assert result["p001-b001"]["translated_text"] == "Previously reported $^{[12,13]}$ showing improvement."
 
 
 def test_canonicalize_batch_result_leaves_placeholder_mode_untouched() -> None:
@@ -117,6 +117,6 @@ def test_canonicalize_batch_result_leaves_placeholder_mode_untouched() -> None:
     }
     result = canonicalize_batch_result(
         [item],
-        {"p001-b002": {"decision": "translate", "translated_text": "速率常数$k$随温度上升。"}},
+        {"p001-b002": {"decision": "translate", "translated_text": "rate constant$k$Temperature rises."}},
     )
     assert result["p001-b002"]["translated_text"] == "速率常数$k$随温度上升。"

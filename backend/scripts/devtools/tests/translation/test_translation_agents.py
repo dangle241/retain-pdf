@@ -26,8 +26,8 @@ def test_terminology_agent_matches_only_terms_present_in_source_texts() -> None:
     agent = TerminologyAgent(
         [
             GlossaryEntry(source="Hartree-Fock", target="Hartree-Fock", level="preserve", match_mode="case_insensitive"),
-            GlossaryEntry(source="SCF", target="自洽场", level="preferred"),
-            GlossaryEntry(source="DFTB", target="密度泛函紧束缚", level="preferred"),
+GlossaryEntry(source="SCF", target="self-consistent field", level="preferred"),
+GlossaryEntry(source="DFTB", target="density functional tight binding", level="preferred"),
         ]
     )
 
@@ -36,15 +36,15 @@ def test_terminology_agent_matches_only_terms_present_in_source_texts() -> None:
     assert [entry.source for entry in result.entries] == ["Hartree-Fock", "SCF"]
     assert result.matched_entry_count == 2
     assert '"source": "SCF"' in result.guidance
-    assert '"target": "自洽场"' in result.guidance
+assert '"target": "self-consistent field"' in result.guidance
     assert "DFTB" not in result.guidance
 
 
 def test_translation_agent_coordinator_scopes_control_context_terms() -> None:
     context = build_translation_control_context(
         glossary_entries=[
-            GlossaryEntry(source="SCF", target="自洽场", level="preferred"),
-            GlossaryEntry(source="DFTB", target="密度泛函紧束缚", level="preferred"),
+GlossaryEntry(source="SCF", target="self-consistent field", level="preferred"),
+GlossaryEntry(source="DFTB", target="density functional tight binding", level="preferred"),
         ]
     )
 
@@ -55,7 +55,7 @@ def test_translation_agent_coordinator_scopes_control_context_terms() -> None:
 
     assert [entry.source for entry in scoped.glossary_entries] == ["DFTB"]
     assert '"source": "DFTB"' in scoped.merged_guidance
-    assert '"target": "密度泛函紧束缚"' in scoped.merged_guidance
+assert '"target": "density functional tight binding"' in scoped.merged_guidance
     assert "SCF" not in scoped.merged_guidance
 
 
@@ -96,7 +96,7 @@ def test_consistency_reviewer_reports_glossary_term_missing() -> None:
     )
     reviewer = ConsistencyReviewerAgent(
         [
-            GlossaryEntry(source="SCF", target="自洽场", level="preferred"),
+GlossaryEntry(source="SCF", target="self-consistent field", level="preferred"),
             GlossaryEntry(source="Hartree-Fock", target="Hartree-Fock", level="preserve", match_mode="case_insensitive"),
         ]
     )
@@ -105,7 +105,7 @@ def test_consistency_reviewer_reports_glossary_term_missing() -> None:
         item,
         {
             "decision": "translate",
-            "translated_text": "该循环由轨道初始化，然后迭代。",
+            "translated_text": "The loop is initialized by orbitals and then iterates.",
         },
     )
 
@@ -115,13 +115,13 @@ def test_consistency_reviewer_reports_glossary_term_missing() -> None:
 
 def test_translation_agent_coordinator_exposes_reviewer() -> None:
     context = build_translation_control_context(
-        glossary_entries=[GlossaryEntry(source="SCF", target="自洽场", level="preferred")]
+glossary_entries=[GlossaryEntry(source="SCF", target="self-consistent field", level="preferred")]
     )
     item = _body_item("p003-b004", "The SCF cycle is converged before the energy is evaluated.")
 
     review = TranslationAgentCoordinator.from_control_context(context).review_batch(
         [item],
-        {"p003-b004": {"decision": "translate", "translated_text": "该循环在计算能量前收敛。"}},
+        {"p003-b004": {"decision": "translate", "translated_text": "The loop converges before calculating the energy."}},
     )
 
     assert any(issue.kind == "glossary_term_missing" for issue in review.issues)

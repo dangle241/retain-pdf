@@ -81,8 +81,8 @@ export function createStatusDomain({
     dialogStore: statusDetailDialogStore,
   });
 
-  // 阅读已改为跳转独立 reader.html，主页不再挂 iframe 对话框；
-  // isReaderOpen 恒为 false，job-runtime 的 sync/close 钩子成为 no-op。
+  // Reading changed to jump to standalone. reader.htmlHomepage down. Check CDN status. iframe Dialog;
+// isReaderOpen is false, job-runtime sync/close Hook becomes no-op.
   const jobRuntimeShellViewPort = {
     closeDialogs: () => statusDetailDialogStore.close(),
     isReaderOpen: () => false,

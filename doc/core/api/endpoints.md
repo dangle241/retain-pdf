@@ -1,7 +1,7 @@
-# 接口说明
+# Interface description
 
-接口清单已合并到统一入口：
+API list merged into unified entry:
 
-- [RetainPDF 后端 API 总入口](./index.md)
+- RetainPDF backend API entry
 
-保留这个文件是为了兼容旧链接。后续不要在这里维护第二份 endpoint 列表。
+Retain this file for old link compatibility. Do not maintain a second endpoint list here.

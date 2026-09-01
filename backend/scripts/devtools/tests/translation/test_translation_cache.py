@@ -18,7 +18,7 @@ def test_translation_cache_key_includes_translation_style_hint() -> None:
     }
     hinted_item = {
         **base_item,
-        "translation_style_hint": "保持结构化字段名和值。",
+"translation_style_hint": "Keep structured field names and values.",
         "translation_structure_kind": "structured_technical_block",
     }
 
@@ -50,7 +50,7 @@ def test_translation_cache_key_includes_target_language() -> None:
         base_url="https://api.deepseek.com/v1",
         mode="sci",
         target_lang="zh-CN",
-        target_language_name="简体中文",
+        target_language_name="Simplified Chinese",
     )
     en_key = cache_key_for_item(
         item,
@@ -58,7 +58,7 @@ def test_translation_cache_key_includes_target_language() -> None:
         base_url="https://api.deepseek.com/v1",
         mode="sci",
         target_lang="en",
-        target_language_name="英文",
+        target_language_name="English",
     )
 
     assert zh_key != en_key
@@ -102,9 +102,9 @@ def test_translation_cache_sanitizes_reasoning_leak_on_load(monkeypatch, tmp_pat
     path = tmp_path / cache_key[:2] / f"{cache_key}.json"
     path.parent.mkdir(parents=True)
     leaked = (
-        '函数需要加"函数"吗？为保准确，可以译为"时间有序响应（函数）必须与推迟响应函数加以区分"。'
-        '更简洁：直接"时间有序响应必须与推迟响应函数加以区分"。'
-        '我选择："时间有序响应必须与推迟响应函数加以区分，"'
+'Function needs to be added."function"? To be accurate, it can be translated as"Distinguish time-ordered response (function) from deferred response function.".'
+        'More concise: directly"Time-ordered responses must be distinguished from deferred response functions."。'
+        'I choose:"Time-ordered responses must be distinguished from deferred response functions."'
     )
     path.write_text(
         json.dumps({"cache_key": cache_key, "decision": "translate", "translated_text": leaked}, ensure_ascii=False),
@@ -119,8 +119,8 @@ def test_translation_cache_sanitizes_reasoning_leak_on_load(monkeypatch, tmp_pat
     )
     healed = json.loads(path.read_text(encoding="utf-8"))
 
-    assert result["translated_text"] == "时间有序响应必须与推迟响应函数加以区分，"
-    assert healed["translated_text"] == "时间有序响应必须与推迟响应函数加以区分，"
+    assert result["translated_text"] == "Time-ordered responses must be distinguished from deferred response functions."
+assert healed["translated_text"] == "Time-ordered responses must be distinguished from deferred response functions,"
 
 
 def test_unit_cache_prunes_expired_entries_once(tmp_path, monkeypatch) -> None:
@@ -146,7 +146,7 @@ def test_unit_cache_prunes_expired_entries_once(tmp_path, monkeypatch) -> None:
 
     assert not stale.exists()
     assert fresh.exists()
-    # 每进程只清扫一次
+    # Sweep once per process.
     stale.write_text("{}", encoding="utf-8")
     os.utime(stale, (old, old))
     cache_module._prune_expired_cache_entries_once()

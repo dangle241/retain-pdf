@@ -48,7 +48,7 @@ function harness(seed) {
   return { body, left, right, storage, collapse };
 }
 
-test("持久化:save/load 往返,脏数据与无 storage 回退", () => {
+test("Persistence: save/load round trip, dirty data and no storage fallback", () => {
   const storage = memoryStorage();
   saveCollapseState({ left: true, right: false }, storage);
   assert.deepEqual(loadCollapseState(storage), { left: true, right: false });
@@ -57,7 +57,7 @@ test("持久化:save/load 往返,脏数据与无 storage 回退", () => {
   assert.deepEqual(loadCollapseState(bad), { left: false, right: false });
 });
 
-test("toggleLeft/toggleRight 切换 body 折叠类并持久化", () => {
+test("toggleLeft/toggleRight toggle body collapse class and persist", () => {
   const { body, left, storage, collapse } = harness();
   collapse.bindEvents();
   assert.equal(body.classList.has("reader-left-collapsed"), false);
@@ -73,19 +73,19 @@ test("toggleLeft/toggleRight 切换 body 折叠类并持久化", () => {
   assert.equal(left.attrs["aria-expanded"], "true");
 });
 
-test("expandRight 只在右栏折叠时生效(顶栏开工具自动亮出)", () => {
+test("expandRight only takes effect when right column is collapsed (opening tool in topbar automatically reveals)", () => {
   const { body, collapse } = harness({ "retainpdf-reader-collapse-v1": JSON.stringify({ left: false, right: true }) });
   collapse.bindEvents();
   assert.equal(body.classList.has("reader-right-collapsed"), true);
 
   collapse.expandRight();
   assert.equal(body.classList.has("reader-right-collapsed"), false);
-  // 已展开时再调用为幂等,不报错
+// Calling again when already expanded is idempotent, no error
   assert.doesNotThrow(() => collapse.expandRight());
   assert.equal(collapse.state().right, false);
 });
 
-test("bindEvents 恢复持久折叠态并给把手绑 click", () => {
+test("bindEvents restores persisted collapse state and binds click to handles", () => {
   const { body, left, right, collapse } = harness({ "retainpdf-reader-collapse-v1": JSON.stringify({ left: true, right: true }) });
   collapse.bindEvents();
   assert.equal(body.classList.has("reader-left-collapsed"), true);

@@ -1,21 +1,21 @@
-// 图书馆网格的"瞬态视图信号" store(蓝图 §2 features/library/)。
+// Library grid's "Transient view signal" store (Blueprint Â§2 features/library/).
 //
-// 背景(实测核实,非直觉设计):recentJobsStatePort 的 batch() 提交(初次分页/
-// load-more 分页)与 storeDrivenRendering:true 的组合,导致旧 viewPort 契约的
-// renderList/renderEmpty(大多数路径)从不会被引擎实际调用——引擎把渲染权已经
-// 交给 store 本身。本 store 因此只承担两类事情:
-// 1. 引擎仍然"无条件"调用的信号:renderLoading()/setLoadMoreLoading()(loader.js
-//    reset/load-more 两分支开头都会调,不受 storeDrivenRendering 影响);
-// 2. actions.js 里"直接"调用、不经 storeDrivenRendering 闸门的边缘路径:
-//    - deleteJob 成功且清空 → renderEmpty("暂无最近任务")
-//    - deleteJob 失败 / selectJob·openJobReader 缺 job_id → renderError(msg,{reset:false})
-//      (镜像旧 applyRecentJobsErrorState:reset:false 时只隐藏 load-more 按钮,
-//      不展示错误文案——错误提示走别处的 error-box,这里不越权渲染)
+// Background (Verify via testing, non-intuitive design): recentJobsStatePort batch() commit (Initial pagination/
+// load-more pagination) and storeDrivenRendering:true combination, causes legacy viewPort Contractual
+// renderList/renderEmpty(Most paths)Never actually invoked by engine.——Engine has already transferred rendering control.
+// handed to store itself. This store thus handles only two categories:
+// 1. Engine still"Unconditional"call signals:renderLoading()/setLoadMoreLoading()(loader.js
+//    reset/load-more Both branches call at start.,Not accepted storeDrivenRendering Impact);
+// 2. "Direct" calls in actions.js, bypassing storeDrivenRendering Gate edge path:
+//    - deleteJob Success, cleared. → renderEmpty("No recent tasks")
+//    - deleteJob failed / selectJobÂ·openJobReader missing job_id â renderError(msg,{reset:false})
+//      (Mirrors old applyRecentJobsErrorState:reset:false Hide only during time window. load-more button,
+//      Hide error text.——Error message routed elsewhere. error-box,No permission check here. Render bypasses auth.)
 //
-// RecentJobsLibrary.jsx 的最终展示模式**不是**直接读 store.mode,而是
-// "items.length > 0 优先"的派生逻辑(见组件),因为 store.mode 在批量提交路径下
-// 会停留在陈旧值(例如首次成功加载后 mode 仍是 "loading")。本 store 只在
-// items 为空时才被信任为准确来源。
+// RecentJobsLibrary.jsx Final display mode is NOT read directly from store.mode, but
+// "items.length > 0 priority" derivation logic (see component), because store.mode in batch commit path
+// Stale value persists (e.g. after first successful load mode still is "loading"). store only in
+// items Trusted as accurate source only when empty.
 
 import type {
   LibraryViewActions,

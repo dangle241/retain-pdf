@@ -1,17 +1,17 @@
-/* L3 组件形态 token：可选，皮肤只覆盖想改的。
+/* L3 Component form tokenOptional; skins only override desired values.
  *
- * 与颜色契约（_contract.css 必选 20 项）不同，这里全部有默认值——
- * 不覆盖 = 现状观感。皮肤在自己的 [data-theme] 块里覆盖（本文件在
- * index.css 里先于各皮肤 import，同特异性下皮肤后来居上）。
+ * Color contract (_contract.css Required 20 All items differ; here all have defaults.——
+ * No override = Current impression. Skin on own [data-theme] Override in block (this file is in
+ * index.css Skin priority before all. import, skins take precedence under same specificity).
  *
- * v1 清单只收"已有真实消费者"的 token（由 DecorStage 实践反哺）：
- * - --btn-radius        主按钮圆角（app-button；classic 是纯 pill）
- * - --btn-primary-bg/fg 主按钮底/字（默认走 accent/paper）
- * - --panel-radius      对话框壳圆角（dialog-shell）
- * - --stage-veil        主页纸台不透明度（ambient-surface 的 color-mix 百分比）
- * - --ornament-line     装饰件描边（DecorStage 题字横幅金边）
+* v1 accept list items only. Tokens where "real consumer exists" (by DecorStage practice feedback
+* - --btn-radius Primary button border-radius (app-button; classic is pure pill)
+* - --btn-primary-bg/fg Main button background/foreground (default path accent/paper)
+ * - --panel-radius      Dialog shell rounded corners (dialog-shell）
+* - --stage-veil Homepage paper desk opacity (ambient-surface color-mix percentage)
+ * - --ornament-line     Stroke for decorative elements (DecorStage Banner with calligraphy, gold border.
  *
- * 新增 token 前先找到消费者，别囤"以后可能用"的。
+* New tokens: locate consumer first. Avoid hoarding "reserved for future use" tokens.
  */
 
 :root {
@@ -19,15 +19,15 @@
   --btn-primary-bg: var(--accent);
   --btn-primary-fg: var(--paper);
   --panel-radius: 24px;
-  /* 弹窗背板：浅色纸感（night 下随 --bg 自动变深色毛玻璃），全站唯一真值 */
+  /* Modal backdrop: light paper texture (night Follows below --bg Auto dark frosted glass. Site-wide single source of truth. */
   --dialog-scrim: color-mix(in srgb, var(--bg) 62%, transparent);
   --stage-veil: 88%;
   --ornament-line: color-mix(in srgb, var(--gold) 45%, var(--line));
 
-  /* —— 布局密度（原 ambient-surface 的 html[data-theme=…] 特例块收编于此，
-   *    皮肤想要"素纸式"更宽廊道/更窄纸台，只在自己文件里覆盖，不碰 core）—— */
+/* ââ Layout density (original ambient-surface html[data-theme=â¦] edge cases consolidated here.
+   *    Skin requested"Plain paper style"Wider corridor/Narrower paper tray. Override only in own file. Do not touch. core）—— */
   --shell-pad-inline: clamp(18px, 4vw, 56px);
-  /* ≤900px 窄屏值；默认跟随常规值（= 无窄屏特例） */
+  /* ≤900px Narrow screen value; defaults to standard value (= No narrow-screen special case. */
   --shell-pad-inline-narrow: var(--shell-pad-inline);
   --header-width: min(1120px, 100%);
   --header-gap-bottom: 16px;

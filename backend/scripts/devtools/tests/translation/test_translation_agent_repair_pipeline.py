@@ -59,7 +59,7 @@ def test_agent_repair_pipeline_repairs_english_residue_and_applies_result() -> N
     def _fake_request(*_args, **_kwargs):
         return json.dumps(
             {
-                "repaired_text": "自洽场循环保留 <f1-abc/> 于最终能量计算中。",
+                "repaired_text": "self-consistent field loop preserved <f1-abc/> In final energy calculation.",
                 "applied_issue_kinds": ["english_residue"],
                 "confidence": 0.9,
                 "needs_manual_review": False,
@@ -82,8 +82,8 @@ def test_agent_repair_pipeline_repairs_english_residue_and_applies_result() -> N
         "skipped_items": 0,
         "failed_items": 0,
     }
-    assert payload[0]["protected_translated_text"] == "自洽场循环保留 <f1-abc/> 于最终能量计算中。"
-    assert payload[0]["translated_text"] == "自洽场循环保留 $E$ 于最终能量计算中。"
+assert payload[0]["protected_translated_text"] == "SCF loop retains <f1-abc/> in the final energy calculation."
+assert payload[0]["translated_text"] == "SCF loop retains $E$ in the final energy calculation."
     assert payload[0]["translation_diagnostics"]["agent_repaired"] is True
     assert payload[0]["translation_diagnostics"]["applied_issue_kinds"] == ["english_residue"]
 
@@ -112,7 +112,7 @@ def test_agent_repair_pipeline_repairs_empty_translation_and_applies_result() ->
     def _fake_request(*_args, **_kwargs):
         return json.dumps(
             {
-                "repaired_text": "我们只需要对角化矩阵 $ F' $",
+                "repaired_text": "We only need to diagonalize the matrix. $ F' $",
                 "applied_issue_kinds": ["empty_translation"],
                 "confidence": 0.94,
                 "needs_manual_review": False,
@@ -130,7 +130,7 @@ def test_agent_repair_pipeline_repairs_empty_translation_and_applies_result() ->
 
     assert summary.candidate_items == 1
     assert summary.repaired_items == 1
-    assert payload[0]["translated_text"] == "我们只需要对角化矩阵 $ F' $"
+assert payload[0]["translated_text"] == "We only need to diagonalize matrix $ F' $"
     assert payload[0]["final_status"] == "translated"
     assert payload[0]["translation_diagnostics"]["agent_repaired"] is True
     assert payload[0]["translation_diagnostics"]["applied_issue_kinds"] == ["empty_translation"]
@@ -157,7 +157,7 @@ def test_agent_repair_pipeline_accepts_common_repair_response_aliases() -> None:
         return json.dumps(
             {
                 "result": {
-                    "translation": "对每个网格点计算密度泛函近似。",
+                    "translation": "Compute density functional approximation for each grid point.",
                     "applied_issues": ["empty_translation"],
                     "confidence": 0.91,
                     "needs_manual_review": False,
@@ -174,7 +174,7 @@ def test_agent_repair_pipeline_accepts_common_repair_response_aliases() -> None:
     )
 
     assert summary.repaired_items == 1
-    assert payload[0]["translated_text"] == "对每个网格点计算密度泛函近似。"
+    assert payload[0]["translated_text"] == "Compute density functional approximation at each grid point."
     assert payload[0]["final_status"] == "translated"
 
 
@@ -241,7 +241,7 @@ def test_agent_repair_pipeline_runs_candidates_in_parallel() -> None:
         time.sleep(0.05)
         return json.dumps(
             {
-                "repaired_text": "自洽场过程在最终能量前计算分子轨道。",
+                "repaired_text": "The self-consistent field process calculates molecular orbitals before the final energy.",
                 "applied_issue_kinds": ["english_residue"],
                 "confidence": 0.9,
                 "needs_manual_review": False,
@@ -275,7 +275,7 @@ def test_agent_repair_pipeline_skips_placeholder_blocking_issues() -> None:
     translated_results = {
         "p001-b002": {
             "decision": "translate",
-            "translated_text": "最终能量 <f9-bad/> 被报告。",
+            "translated_text": "Final Energy <f9-bad/> Bug reported. Investigate.",
         }
     }
 
@@ -358,7 +358,7 @@ def test_agent_repair_pipeline_skips_policy_keep_origin_display_formula() -> Non
 
 def test_agent_coordinator_respects_glossary_mode_off() -> None:
     context = build_translation_control_context(
-        glossary_entries=[GlossaryEntry(source="SCF", target="自洽场")],
+glossary_entries=[GlossaryEntry(source="SCF", target="self-consistent field")],
         glossary_mode="off",
     )
 

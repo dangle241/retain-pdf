@@ -1,6 +1,6 @@
-/* 状态详情 · 翻译调试 tab（列表/筛选/详情/重放） */
+/* Status details Â· Translation debug tab (List/Filter/Detail/Replay) */
 
-/* 状态详情 / 翻译调试 / 事件时间线工具类（从 components.utilities 拆出） */
+/* Status details / Translation debug / Event timeline utility (split from components.utilities) */
 
 
 @utility translation-debug-content {
@@ -11,7 +11,7 @@
 
 
 @utility translation-debug-column {
-  /* 统计条与筛选行不做卡片,只有列表/详情两栏保留一层浅容器 */
+  /* Stats bar, filter row: no card style.,List only/Keep light container for list/detail columns */
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--paper);
@@ -49,7 +49,7 @@
     overflow-wrap: anywhere;
   }
 
-  /* Provider 是文本型指标(如 deepseek_official),比数字长,降一级字号 */
+/* Provider Text metric(e.g. deepseek_official),Longer than number,One font size smaller. */
   & #translation-provider-family {
     font-size: 14px;
     line-height: 1.6;
@@ -458,7 +458,7 @@
 
 
 @utility detail-info-list {
-  /* 提高特异性:后文的 .detail-info-list 定义了两列,这里要单列扁平键值行 */
+  /* Increase specificity:following .detail-info-list Two columns defined.,Flat key-value rows here. */
   &.translation-detail-grid {
     margin: 0;
     display: grid;
@@ -476,7 +476,7 @@
 
 
 @utility translation-detail-grid {
-  /* 提高特异性:后文的 .detail-info-list 定义了两列,这里要单列扁平键值行 */
+/* Increase specificity: .detail-info-list defined later has two columns, here we need single-column flat key-value rows */
   &.detail-info-list {
     margin: 0;
     display: grid;
@@ -496,7 +496,7 @@
 
 
 @utility info-row {
-  /* 详情字段用扁平键值行,盖掉 .info-row 的卡片样式 */
+  /* Detail fields use flat key-value rows,Override .info-row Card styles */
   &.translation-detail-row {
     grid-template-columns: minmax(120px, auto) 1fr;
     align-items: baseline;
@@ -538,7 +538,7 @@
 
 
 @utility translation-detail-row {
-  /* 详情字段用扁平键值行,盖掉 .info-row 的卡片样式 */
+/* Use flat key-value rows for detail fields, override .info-row card style */
   &.info-row {
     grid-template-columns: minmax(120px, auto) 1fr;
     align-items: baseline;

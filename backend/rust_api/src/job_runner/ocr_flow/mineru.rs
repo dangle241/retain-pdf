@@ -43,7 +43,7 @@ pub(super) async fn run_local_ocr_transport_mineru(
     }
     job.append_log(&format!("batch_id: {}", upload_target.batch_id));
     job.stage = Some("mineru_upload".to_string());
-    job.stage_detail = Some("已获取 OCR provider 上传地址，开始上传文件".to_string());
+    job.stage_detail = Some("Obtained OCR provider Upload URL start file upload".to_string());
     job.updated_at = now_iso();
     save_ocr_job(deps, job, parent_job_id).await?;
 
@@ -53,7 +53,7 @@ pub(super) async fn run_local_ocr_transport_mineru(
         .with_context(|| format!("failed to upload file {}", upload_path.display()))?;
     job.append_log(&format!("upload done: {}", upload_path.display()));
     job.stage = Some("mineru_processing".to_string());
-    job.stage_detail = Some("文件上传完成，等待 OCR provider 解析".to_string());
+job.stage_detail = Some("Upload complete, waiting. OCR provider parsing".to_string());
     job.updated_at = now_iso();
     save_ocr_job(deps, job, parent_job_id).await?;
 
@@ -100,7 +100,7 @@ pub(super) async fn run_remote_ocr_transport_mineru(
     ocr_provider_diagnostics_mut(job).handle.task_id = Some(created.task_id.clone());
     job.append_log(&format!("task_id: {}", created.task_id));
     job.stage = Some("mineru_processing".to_string());
-    job.stage_detail = Some("远程 PDF 已提交到 OCR provider，等待解析".to_string());
+job.stage_detail = Some("Remote PDF submitted to OCR provider, waiting for parsing".to_string());
     job.updated_at = now_iso();
     save_ocr_job(deps, job, parent_job_id).await?;
     poll_remote_task_until_ready(

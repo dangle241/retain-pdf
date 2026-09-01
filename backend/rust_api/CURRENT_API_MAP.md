@@ -1,60 +1,60 @@
 # Current API Map
 
-这份文档只回答一个问题：
+This document only answers one question:
 
-**现在这套 Rust API + Python worker，到底是怎么跑起来的。**
+**Current set Rust API + Python workerhow it actually runs.**
 
-不讲历史，不展开兼容细节，优先看当前正式主链。
+Current mainnet only.
 
-## 快速导航
+## Quick navigation
 
-- 文档总入口：
+- Documentation main entry.
   [`README.md`](/home/wxyhgk/tmp/Code/backend/rust_api/README.md)
-- 只看当前运行主链：
+- Only look at the currently running main chain:
   [`CURRENT_API_MAP.md`](/home/wxyhgk/tmp/Code/backend/rust_api/CURRENT_API_MAP.md)
-- 只看 Rust 模块边界：
+- View only Rust Module boundaries:
   [`RUST_API_ARCHITECTURE.md`](/home/wxyhgk/tmp/Code/backend/rust_api/RUST_API_ARCHITECTURE.md)
-- 只看 OCR provider 边界：
+- OCR provider Boundaries only:
   [`OCR_PROVIDER_CONTRACT.md`](/home/wxyhgk/tmp/Code/backend/rust_api/OCR_PROVIDER_CONTRACT.md)
-- 只看 stage 运行时契约：
+- stage Runtime contract only:
   [`STAGE_EXECUTION_CONTRACT.md`](/home/wxyhgk/tmp/Code/backend/rust_api/STAGE_EXECUTION_CONTRACT.md)
-- 只看外部 API 协议：
+- External only API Protocol:
   [`API_SPEC.md`](/home/wxyhgk/tmp/Code/backend/rust_api/API_SPEC.md)
-- 只看渲染参数规范：
+- View rendering parameter specifications:
   [`RENDER_OPTIONS_CONTRACT.md`](/home/wxyhgk/tmp/Code/backend/rust_api/RENDER_OPTIONS_CONTRACT.md)
 
-## 1. 当前系统分层
+## 1. Current system layering
 
-现在后端分两层：
+Now the backend is split into two layers:
 
-### Rust 层
+### Rust layer
 
-职责：
+Responsibilities:
 
-- 对外 HTTP API
-- 鉴权
-- job 创建 / 排队 / 状态机
-- SQLite 持久化
-- artifact / event 查询
-- 启动 Python worker
+- External HTTP API
+- authentication
+- job Create / Queue / State machine
+- SQLite Persist
+- artifact / event Query
+- Start Python worker
 
-代码主入口：
+Main entry point:
 
 - [`src/routes/jobs/mod.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/routes/jobs/mod.rs)
 - [`src/services/jobs/*`](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs)
 - [`src/job_runner/*`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner)
 
-### Python 层
+### Python layer
 
-职责：
+Responsibilities:
 
-- OCR provider 调用
+- OCR provider calls
 - raw OCR -> normalized `document.v1.json`
-- 翻译
-- 渲染
+- Translation
+- Rendering
 - PDF merge / post-process
 
-代码主入口：
+Main code entry point:
 
 - [`backend/scripts/entrypoints/run_provider_case.py`](/home/wxyhgk/tmp/Code/backend/scripts/entrypoints/run_provider_case.py)
 - [`backend/scripts/entrypoints/run_provider_ocr.py`](/home/wxyhgk/tmp/Code/backend/scripts/entrypoints/run_provider_ocr.py)
@@ -62,64 +62,64 @@
 - [`backend/scripts/entrypoints/run_translate_only.py`](/home/wxyhgk/tmp/Code/backend/scripts/entrypoints/run_translate_only.py)
 - [`backend/scripts/entrypoints/run_render_only.py`](/home/wxyhgk/tmp/Code/backend/scripts/entrypoints/run_render_only.py)
 
-## 2. 当前正式 workflow
+## 2. Current production workflow
 
-现在真正对外可认为稳定的 workflow 只有这几个：
+Now externally stable. workflow Only these:
 
 - `book`
-  含义：provider-backed 全流程
-  链路：OCR -> Normalize -> Translate -> Render
+  Meaning:provider-backed Full Process
+  Link:OCR -> Normalize -> Translate -> Render
 
 - `translate`
-  含义：OCR -> Normalize -> Translate
-  不做 render
+Meaning: OCR -> Normalize -> Translate
+  Do nothing. render
 
 - `render`
-  含义：复用已有翻译产物，只做 render
+  Meaning: Reuse existing translation artifacts, only do render
 
 - `ocr`
-  含义：OCR-only / provider-only 子流程
+Meaning: OCR-only / provider-only Subprocess
 
-注意：
+Note:
 
-- `book` 是现在完整主链路的正式 API 标识
-- **不是** `mineru`
-- OCR provider 选择不靠 workflow，而靠 `ocr.provider`
+- `book` This is the formal version of the current complete main chain. API Identifier
+- **No** `mineru`
+- OCR provider Choose not to rely workflow, but by `ocr.provider`
 
-## 3. 当前 provider 选择方式
+## 3. Current provider Selection method
 
-当前 provider 分发口径：
+Current provider Distribution channel:
 
 - `workflow = book`
 - `ocr.provider = mineru | paddle | local | <configured local_command provider>`
 
-也就是：
+That is:
 
-- `workflow` 决定跑哪条大流程
-- `ocr.provider` 决定 OCR 用哪个 provider
-- `GET /api/v1/providers/ocr` 是前端和外部集成方发现 provider credential/options/capabilities 的入口
-- provider-specific 非密钥参数统一放在 `ocr.options`；multipart helper 使用 JSON 字符串字段 `ocr_options`
+- `workflow` Choose which main process to run.
+- `ocr.provider` determine OCR which to use provider
+- `GET /api/v1/providers/ocr` Discovered by frontend and external integrators. provider credential/options/capabilities Entry
+- provider-specific Non-secret parameters go in `ocr.options`；multipart helper Usage JSON String Field `ocr_options`
 
-关键代码：
+Key code:
 
-- Rust 写 spec：
+- Rust write spec：
   - [`src/worker_command.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/worker_command.rs)
-- Python 按 provider 分发：
+- Python by provider Distribution:
   - [`backend/scripts/services/ocr_provider/provider_pipeline.py`](/home/wxyhgk/tmp/Code/backend/scripts/services/ocr_provider/provider_pipeline.py)
 
-注意：生产主链的 `book` job 不再以 `run_provider_case.py` 作为初始命令。`book` job 创建时只保存
-`book-workflow-rust-orchestrated` 占位命令，真正执行由 Rust `job_runner` 串联 OCR child、normalize、
+Note: Production main chain. `book` job Stopped. `run_provider_case.py` as the initial command.`book` job Save only on creation.
+`book-workflow-rust-orchestrated` Placeholder command, actual execution by Rust `job_runner` Serializes OCR child、normalize、
 translate、render stage。
 
-## 4. 当前正式协议：Stage Spec
+## 4. Current official protocol:Stage Spec
 
-Rust 和 Python worker 之间的正式协议已经不是长 CLI 参数，而是：
+Rust and Python worker Protocol between us already obsolete. CLI parameters, but rather:
 
 ```bash
 python -u <entrypoint> --spec <job_root>/specs/<stage>.spec.json
 ```
 
-当前正式 stage：
+Current official stage：
 
 - `normalize.stage.v1`
 - `translate.stage.v1`
@@ -130,119 +130,119 @@ legacy/local helper stage：
 - `provider.stage.v1`
 - `book.stage.v1`
 
-对应 Python loader：
+Corresponds Python loader：
 
 - [`backend/scripts/foundation/shared/stage_specs.py`](/home/wxyhgk/tmp/Code/backend/scripts/foundation/shared/stage_specs.py)
 
-## 5. Rust 到 Python 的真实执行链
+## 5. Rust to Python Actual execution chain
 
-以最重要的 `book` 为例：
+Most important `book` Example:
 
-### 第一步：前端 / 调用方发请求
+### Step 1: Frontend / Caller sends request
 
-典型入口：
+Typical entry point:
 
 - `POST /api/v1/jobs`
 
-Rust 路由：
+Rust Routing:
 
 - [`src/routes/jobs/create.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/routes/jobs/create.rs)
 - [`src/services/jobs/facade.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs/facade.rs)
 
-### 第二步：Rust 创建 job
+### Step 2:Rust Create job
 
-负责：
+Responsible:
 
-- 校验请求
-- 生成 job snapshot
-- 持久化到 DB
-- 进入队列
+- Validate Request
+- Generate job snapshot
+- Persist to DB
+- Enter Queue
 
-主要代码：
+Main code:
 
 - [`src/services/jobs/creation`](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/jobs/creation)
 - [`src/services/job_snapshot_factory.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/job_snapshot_factory.rs)
 - [`src/services/job_launcher.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/services/job_launcher.rs)
 
-注意：
+Note:
 
-- route 层现在尽量只做 HTTP 适配
-- `jobs` 相关用例已经统一先经过 `JobsFacade`
-- `uploads` / `glossaries` 也分别经过 `upload_api` / `glossary_api`
+- route Layer now tries to only do HTTP Adaptation
+- `jobs` All relevant use cases have been uniformly pre-processed. `JobsFacade`
+- `uploads` / `glossaries` also respectively passed `upload_api` / `glossary_api`
 
-### 第三步：Rust 组装 workflow plan
+### Step 3:Rust Assemble workflow plan
 
-Rust 根据 workflow 选择运行计划：
+Rust According to workflow Select run plan:
 
-- `book` -> Rust 编排 `OCR child -> normalize -> translate -> render`
-- `translate` -> Rust 编排 `OCR child -> normalize -> translate`
-- `render` -> Rust 复用 artifact 后启动 `render`
-- `ocr` -> Rust 编排 `provider transport -> normalize`
+- `book` -> Rust Orchestration `OCR child -> normalize -> translate -> render`
+- `translate` -> Rust orchestrates `OCR child -> normalize -> translate`
+- `render` -> Rust Reuse artifact Delayed start `render`
+- `ocr` -> Rust orchestrates `provider transport -> normalize`
 
-主要代码：
+Main code:
 
 - [`src/job_runner/lifecycle.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/lifecycle.rs)
 - [`src/job_runner/translation_flow.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/translation_flow.rs)
 - [`src/job_runner/ocr_flow/mod.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/ocr_flow/mod.rs)
 - [`src/job_runner/render_flow.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/render_flow.rs)
 
-### 第四步：Rust 按 stage 写 spec 并启动 worker
+### Step 4: Rust writes spec by stage and starts worker spec and start worker
 
-`book` 主链会按阶段写：
+`book` Mainnet phases written.
 
-- OCR child/provider transport：Rust 内部 provider transport，不通过 `provider.stage.v1`
+- OCR child/provider transport：Rust Internal provider transport, not through `provider.stage.v1`
 - `DATA_ROOT/jobs/<job_id>/specs/normalize.spec.json`
 - `DATA_ROOT/jobs/<job_id>/specs/translate.spec.json`
 - `DATA_ROOT/jobs/<job_id>/specs/render.spec.json`
 
-`provider.spec.json` / `provider.stage.v1` 用于 OCR-only provider worker 和 legacy provider-case/local helper。
-当前 `book` orchestrator 仍然走 Rust 内部 OCR child transport，再进入 normalize/translate/render stage。
+`provider.spec.json` / `provider.stage.v1` for OCR-only provider worker and legacy provider-case/local helper.
+Current `book` orchestrator continues Rust internal OCR child transport then enters normalize/translate/render stage.
 
-渲染策略也在 `render` 中集中配置。当前默认：
+Rendering strategy also included. `render` Centralized configuration. Current default:
 
 - `render.source_cleanup_strategy = "pikepdf_text_strip"`
-- 含义：默认先用 pikepdf 按 bbox 删除原 PDF content-stream text-op，再由 Typst 翻译块自带背景色做视觉覆盖
-- 可选值：`typst_fill | pikepdf_text_strip | bbox_text_strip | legacy | redact_restore_formulas`
-- `pikepdf_text_strip` 表示渲染前用 pikepdf 做路径级 content-stream text-op 删除，再由 Typst 背景块做视觉覆盖；`bbox_text_strip`、`legacy`、`redact_restore_formulas` 当前都是兼容别名，行为等同 `pikepdf_text_strip`
+- Meaning: Default first. pikepdf by bbox Delete original PDF content-stream text-opCode duplication. Remove. Typst translation blocks with background color for visual overlay
+- Available values:`typst_fill | pikepdf_text_strip | bbox_text_strip | legacy | redact_restore_formulas`
+- `pikepdf_text_strip` Pre-render hook missing. Implement: `componentDidMount` in React. pikepdf Apply to path level content-stream text-op Delete, then Typst Background block cover visually. Simplify: inline style, add when complex layout needed.`bbox_text_strip`、`legacy`、`redact_restore_formulas` Currently all are compatibility aliases; behavior identical. `pikepdf_text_strip`
 
-### 第五步：job_runner 进入运行时主链
+### Step 5:job_runner Enter runtime main chain.
 
-当前真实入口：
+Current actual entry:
 
 - [`src/app/jobs.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/app/jobs.rs)
-  把 `AppState` 压缩成 `ProcessRuntimeDeps`
+Compress `AppState` into `ProcessRuntimeDeps`
 - [`src/job_runner/lifecycle.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/lifecycle.rs)
-  负责 queued、执行槽位、workflow 分发
+Responsible for queuedSlot executeworkflow Distribution
 
-### 第六步：Rust 启动 Python worker
+### Step 6:Rust Start Python worker
 
-这里会把必要 env 注入进去：
+This will make it necessary. env Inject:
 
 - `RETAIN_TRANSLATION_API_KEY`
 - `RETAIN_MINERU_API_TOKEN`
 - `RETAIN_PADDLE_API_TOKEN`
 
-主要代码：
+Main code:
 
 - [`src/job_runner/process_runner.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/process_runner.rs)
 - [`src/job_runner/process_runner/startup.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/process_runner/startup.rs)
 - [`src/job_runner/process_runner/execution.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/process_runner/execution.rs)
 - [`src/job_runner/worker_process.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/job_runner/worker_process.rs)
 
-### 第七步：Python stage worker 执行
+### Step 7:Python stage worker Execute
 
-当前生产主链使用这些 stage worker：
+Production main chain currently uses these. stage worker：
 
 - `run_normalize_ocr.py --spec specs/normalize.spec.json`
 - `run_translate_only.py --spec specs/translate.spec.json`
 - `run_render_only.py --spec specs/render.spec.json`
 
-`run_provider_case.py` 仍保留为 legacy/local wrapper，用于本地一次性验证 provider-backed 全流程；不要把它当成
-Rust API 生产主链入口。
+`run_provider_case.py` Keep as legacy/local wrapperfor local one-time verification. provider-backed Full process; do not treat it as.
+Rust API Main Production Chain Entry.
 
-## 6. 当前最重要的产物目录
+## 6. Current primary output directory
 
-每个 job 的标准目录：
+Each job Standard directory:
 
 - `DATA_ROOT/jobs/<job_id>/source`
 - `DATA_ROOT/jobs/<job_id>/ocr`
@@ -252,7 +252,7 @@ Rust API 生产主链入口。
 - `DATA_ROOT/jobs/<job_id>/logs`
 - `DATA_ROOT/jobs/<job_id>/specs`
 
-最重要的几个文件：
+Key files:
 
 - `specs/normalize.spec.json`
 - `specs/translate.spec.json`
@@ -265,11 +265,11 @@ Rust API 生产主链入口。
 - `artifacts/pipeline_summary.json`
 - `rendered/*.pdf`
 
-## 7. 当前最重要的数据契约
+## 7. Most critical data contract
 
-现在 translation / rendering 主链真正依赖的是 normalized document。
+Now translation / rendering Main chain depends on normalized document。
 
-正式字段口径：
+Official field definitions:
 
 - `geometry`
 - `content`
@@ -279,7 +279,7 @@ Rust API 生产主链入口。
 - `policy`
 - `provenance`
 
-兼容字段还可能存在：
+Compatibility fields may also exist:
 
 - `type`
 - `sub_type`
@@ -288,43 +288,43 @@ Rust API 生产主链入口。
 - `lines`
 - `segments`
 
-但这些已经不是推荐主契约。
+But these are no longer the recommended primary contract.
 
-## 8. 现在的入口口径
+## 8. Current entry point criteria
 
-生产主链入口：
+Production Main Chain Entry:
 
-- Rust job_runner 按 workflow 编排
-- Python stage worker 只执行单 stage
+- Rust job_runner orchestrates by workflow
+- Python stage worker Execute single only. stage
 
-保留的 local / legacy wrapper：
+Reserved local / legacy wrapper：
 
 - `run_provider_case.py`
 - `run_document_flow.py`
 
-当前原则：
+Current principle:
 
-- 主入口认 Rust `job_runner`
-- 主协议认 `normalize.stage.v1`、`translate.stage.v1`、`render.stage.v1`
-- `provider.stage.v1` 仅作为 legacy provider-case/local helper 契约
-- 主 summary 文件认 `pipeline_summary.json`
+- Entry point authentication Rust `job_runner`
+- Main Protocol Agreement `normalize.stage.v1`、`translate.stage.v1`、`render.stage.v1`
+- `provider.stage.v1` Only as legacy provider-case/local helper Contract
+- main summary File Recognition `pipeline_summary.json`
 
-## 9. 当前事件与失败收口
+## 9. Current event and failure closure
 
-当前正式事件流已经是：
+The current official event stream is already:
 
-- Python worker 写 `DATA_ROOT/jobs/<job_id>/logs/pipeline_events.jsonl`
-- Rust 查询层合并 DB events 和 `pipeline_events.jsonl`
-- 对 `book` / `translate` 这类会创建 OCR child 的主任务，`GET /api/v1/jobs/<job_id>/events` 还会合并 `{job_id}-ocr` 的 OCR 子任务事件
-- OCR 子任务事件会映射成主任务 `job_id`；原始来源放在 `payload.source_job_id` 和 `payload.source_event`
-- Rust detail/list 优先使用 live pipeline stage 快照，而不是陈旧的 DB `job.stage`
+- Python worker writes DATA_ROOT/jobs/<job_id>/logs/pipeline_events.jsonl
+- Rust Merge query layers DB events and pipeline_events.jsonl
+- for book / translate This type creates. OCR child of the main task, GET /api/v1/jobs/<job_id>/events Also merges. OCR Subtask Events of {job_id}-ocr
+- OCR Subtask events map to the main task. Original source job_id is placed in payload.source_job_id and payload.source_event
+- Rust detail/list Use first live pipeline stage Snapshot, not stale DB `job.stage`
 
-前端进度展示的推荐入口：
+Recommended entry for frontend progress display:
 
-- 当前状态只读 `GET /api/v1/jobs/<job_id>` 或 `GET /api/v1/jobs` 里的 `stage_snapshot`
-- `events` 只做历史、时间线和排障，不参与当前阶段判断
-- 不需要额外轮询 `{job_id}-ocr`
-- OCR / 翻译 / 渲染历史事件仍统一看事件里的：
+- Current state read-only GET /api/v1/jobs/<job_id> or GET /api/v1/jobs inside stage_snapshot
+- `events` Only history, timeline, and troubleshooting; no current-phase judgment.
+- No polling needed. `{job_id}-ocr`
+- OCR / Translation / Historical event rendering: still look at events inside:
   - `display_stage`
   - `stage`
   - `substage`
@@ -335,64 +335,64 @@ Rust API 生产主链入口。
   - `progress.current`
   - `progress.total`
 
-当前推荐的进度单位：
+Current recommended progress unit:
 
-- OCR provider 页进度：`display_stage=ocr`, `stage=ocr_processing`, `progress.unit=page`
-- 翻译批次进度：`display_stage=translation`, `stage=translating`, `progress.unit=batch`
-- 翻译页级子阶段：`continuation_review`, `page_policies`, `domain_inference`, `garbled_repair`, `progress.unit=page`
-- 渲染页进度：`display_stage=render`, `stage=rendering`, `progress.unit=page`
-- Typst compile / overlay / saving：无法按页汇报时使用 `progress.unit=step`
+- OCR provider Page progress:`display_stage=ocr`, `stage=ocr_processing`, `progress.unit=page`
+- Translation batch progress:`display_stage=translation`, `stage=translating`, `progress.unit=batch`
+- Page-level sub-stage:`continuation_review`, `page_policies`, `domain_inference`, `garbled_repair`, `progress.unit=page`
+- Rendering page progress:`display_stage=render`, `stage=rendering`, `progress.unit=page`
+- Typst compile / overlay / savingUse when unable to report by page. `progress.unit=step`
 
-当前正式失败口径已经是：
+Current official failure criterion is now:
 
 - `data.failure`
 
-兼容字段仍保留，但角色已经固定：
+Compatibility fields retained; role fixed:
 
 - `data.failure_diagnostic`
-  仅作为 `failure` 的兼容投影
+Only as failure Compatible Projection
 - `events[*].event`
-  兼容旧客户端；新客户端应优先读 `event_type`
+  Compatible with old clients; new clients should read first. `event_type`
 - `events[*].message`
-  调试/兼容文案；正式语义优先看 `stage_detail` + `event_type`
+  Debug/Compatible copy; formal semantics take priority. `stage_detail` + `event_type`
 - `events[*].raw`
-  保存 DB / pipeline jsonl / OCR child 的来源信息；前端展示不要靠它判断阶段
+  Save DB / pipeline jsonl / OCR child source information; frontend display must not rely on it for stage determination.
 
-阶段分层规则也已经固定：
+Stage layering rules are now fixed:
 
-- 当前前端显示阶段放在 `stage_snapshot.display_stage`
-- 机器阶段放在 `stage`
-- `stage_snapshot` 是 current stage and progress 的唯一真理
-- `background_snapshots` 只显示后台辅助进度，例如翻译期间的 `render_prewarm`
-- provider 私有状态放在 `provider_stage`
-- `message` / `stage_detail` 只当文案，不参与阶段判断
+- Current front-end display stage placed at `stage_snapshot.display_stage`
+- Place Machine Stage `stage`
+- `stage_snapshot` is current stage and progress The only truth.
+- `background_snapshots` Show only background auxiliary progress, e.g., during translation. `render_prewarm`
+- provider Private state in `provider_stage`
+- `message` / `stage_detail` Act only as copywriter; do not participate in stage judgment.
 
-## 10. 现在最该记住的三句话
+## 10. Three key takeaways.
 
-1. `workflow=book` 才是 provider-backed 全流程，不再是 `mineru`
-2. OCR provider 选择看 `ocr.provider`，不是看 workflow 名字
-3. Rust 和 Python 的稳定边界是 `--spec <stage>.spec.json`
+1. `workflow=book` Exactly. provider-backed Full process, no longer `mineru`
+2. OCR provider View `ocr.provider`not view workflow DeepSeek
+3. Rust and Python Stability boundary is `--spec <stage>.spec.json`
 
-## 11. 排查时先看哪几个文件
+## 11. Logs, config, entry point. Check logs for errors first.
 
-如果你只想快速定位问题，优先按这个顺序看：
+For quick issue triage, check in this order:
 
-### 看 API 请求长什么样
+### View API What the request looks like
 
 - [`API_SPEC.md`](/home/wxyhgk/tmp/Code/backend/rust_api/API_SPEC.md)
 
-### 看 Rust 到底起了哪个 Python 脚本
+### Look at Rust: which one started? Python Script
 
 - [`src/worker_command.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/worker_command.rs)
 
-### 看 Python provider 总入口怎么分发
+### Look at Python provider: how does the main entry point dispatch?
 
 - [`backend/scripts/services/ocr_provider/provider_pipeline.py`](/home/wxyhgk/tmp/Code/backend/scripts/services/ocr_provider/provider_pipeline.py)
 
-### 看 stage spec 长什么样
+### Check stage spec Looks like you're asking about appearance. Translate to English: "What does it look like?"
 
 - [`backend/scripts/foundation/shared/stage_specs.py`](/home/wxyhgk/tmp/Code/backend/scripts/foundation/shared/stage_specs.py)
 
-### 看最终主链结果
+### Check final main chain result
 
 - `DATA_ROOT/jobs/<job_id>/artifacts/pipeline_summary.json`

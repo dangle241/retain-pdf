@@ -1,9 +1,9 @@
-// 进度区块(蓝图 §2 features/status/;镜像
-// job-status-card-progress-renderer.js 的 renderProgressComponents/
-// renderProgressModel——DOM 契约逐 id/class/CSS 变量保留(蓝图风险 §8.7:
+// elapsed intentionally skip this round. store (blueprint §3.5): resolveLiveDurations changes every second, if following
+// write main snapshot together store, statusCardStore's useStoreSnapshot would be dragged into re-rendering every second
+// entire card; real stopwatch consists of useElapsedTicker.js standalone driver (reads snapshot.job's
 // --status-ring-percent、--status-progress-percent、data-value、
-// aria-valuenow)。renderOptions 来自 useStagedProgressAnimation 的输出,
-// 本组件只管声明式渲染,不持有动画状态。
+// aria-valuenow)。renderOptions From useStagedProgressAnimation output of,
+// Component handles declarative rendering only.,Does not hold animation state.
 
 import type { CSSProperties } from "react";
 import { buildProgressRenderModel, type ProgressRenderModelInput } from "./progress-model.js";
@@ -41,7 +41,7 @@ export function ProgressBlock({ renderOptions }: ProgressBlockProps) {
           id={ids.progressBar}
           className={`status-progress-bar${indeterminate ? " is-indeterminate" : ""}`}
           role="progressbar"
-          aria-label="任务进度"
+export type StatusCardRetryAction = {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={visible ? percent : 0}
@@ -62,12 +62,12 @@ export function ProgressBlock({ renderOptions }: ProgressBlockProps) {
           <span id={ids.progressPercent} className="status-progress-percent">{footPercentText}</span>
         </div>
       </div>
-      <div className="status-progress-ring-wrap" aria-label="任务进度百分比">
+      <div className="status-progress-ring-wrap" aria-label="Task Progress Percentage">
         <div
           id={ids.progressRing}
           className={`status-progress-ring${indeterminate ? " is-indeterminate" : ""}`}
           role="progressbar"
-          aria-label="任务进度"
+label: string;
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={percent}

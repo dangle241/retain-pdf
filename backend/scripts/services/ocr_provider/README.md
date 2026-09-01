@@ -1,72 +1,72 @@
-# OCR Provider API 说明
+# OCR Provider API description
 
-这一层专门描述“外部 OCR 服务怎么接进来”，不和当前翻译、渲染工作流耦合。
+This layer specifically describes "external". OCR "How to integrate the service", without coupling with current translation and rendering workflow.
 
-目标很明确：
+The goal is clear:
 
-- 把第三方 OCR API 当成可替换 provider，而不是主流程的一部分
-- 让 MinerU、后续其他 OCR API、甚至本地 OCR，都走同一套接入思路
-- 把“调用 provider API”和“消费统一 schema”彻底分开
+- Third-party OCR API Treat as replaceable providernot part of main flow
+- Let MinerU and subsequent other OCR API local runs fail; OCR all follow the same integration approach.
+- separate 'calling provider APIUnified consumption schemaCompletely separate
 
-## 设计边界
+## Design boundaries
 
-这一层负责：
+This layer is responsible for:
 
-- 定义 OCR provider 的能力边界
-- 定义 provider API 接入的最小抽象
-- 约定 provider 原始产物如何落盘
-- 约定 raw payload 如何进入 `document_schema` 适配链
+- Define OCR provider capability boundary
+- Define provider API minimal access abstraction
+- Conventions provider How to write the original artifacts to disk.
+- Specify how raw payload accesses the document_schema adapter chain
 
-这一层不负责：
+This layer does not handle:
 
-- 不负责翻译
-- 不负责 PDF 渲染
-- 不负责 Typst
-- 不负责正文块策略
-- 不负责任何 provider 特定 JSON 的业务消费
+- Not responsible translation.
+- Not responsible for PDF rendering.
+- Not responsible for Typst
+- Unsupported text block policy.
+- Not responsible for anything. provider Specific JSON Business Consumption
 
-## 核心原则
+## Core principles
 
-1. 工作流只认统一 schema，不认 provider 原始 JSON
-   - 主链路 OCR 输入始终是 `document.v1.json`
-   - provider 原始 JSON 只能停留在 provider 层、adapter 层、调试层
+1. Workflow only accepts unified schema, does not recognize provider raw JSON
+   - Main chain OCR Input is always `document.v1.json`
+- Provider raw JSON can only stay at provider layer, adapter layer, debug layer
 
-2. provider API 是“采集层”，不是“业务层”
-   - 它的职责是把文件送出去、拿回结果、落盘
-   - 它不应该决定翻译模式、渲染模式、字体、公式保护、块策略
+2. provider API what is
+   - Responsible for sending files, retrieving results, and persisting to disk.
+   - It must not determine translation mode, rendering mode, font, formula protection, or block strategy.
 
-3. raw -> normalized 必须显式经过 adapter
-   - 任何 provider 返回结果，先进入 `services/document_schema/adapters.py`
-   - 不能直接让 `translation/ocr`、`rendering/` 去理解 provider JSON
+3. raw -> normalized Must explicitly go through adapter
+   - Any provider Enter first; return results. `services/document_schema/adapters.py`
+   - Cannot bypass directly. `translation/ocr`、`rendering/` Understand provider JSON
 
-4. provider 能力是可变的，统一 schema 才是稳定契约
-   - provider 可能变接口、变字段、变返回格式
-   - 主链路不要跟着这些变化一起抖
+4. provider Capabilities are variable; unify. schema The stable contract.
+   - provider Interfaces, fields, return formats may change.
+   - Main link do not follow these changes.
 
-## 推荐抽象
+## Abstract recommendation
 
-如果后续要把 OCR API 层真正独立出来，建议最少拆成下面几类接口。
+If later need to OCR API Truly separate layers. Split into at least the following interface types.
 
-### 1. Provider 能力声明
+### 1. Provider Capability declaration
 
-每个 provider 先声明自己的能力边界，例如：
+Each provider first declares its capability boundaries, for example:
 
-- 是否需要 token
-- 是否支持 URL 解析
-- 是否支持本地文件上传
-- 是否支持批量
-- 是否支持回调
-- 是否支持表格/公式开关
-- 文件大小上限
-- 页数上限
-- 支持的输入类型
-- 默认输出类型
+- Required? token
+- whether supports URL parsing
+- Local file upload supported?
+- whether supports batch
+- Support callbacks?
+- Table support?/Formula Toggle
+- Maximum file size
+- Page limit
+- Supported Input Types
+- Default output type
 
-这部分是 provider metadata，不应散落在工作流判断里。
+This part is provider metadataMust not be scattered across workflow conditionals.
 
-### 2. Provider 任务接口
+### 2. Provider Task interface
 
-统一成下面几类动作：
+Unify into the following action types:
 
 - `submit_url_task(...)`
 - `submit_file_task(...)`
@@ -74,189 +74,189 @@
 - `download_result(...)`
 - `unpack_result(...)`
 
-注意这里仍然只是 provider API 语义，不是主流程语义。
+Note: still only. provider API Semantics, not main flow semantics.
 
-比如：
+For example:
 
-- `submit_*` 返回 provider task id / batch id
-- `poll_task` 返回 provider 当前状态
-- `download_result` 返回 zip / markdown / json / html 等原始产物
+- submit_* returns provider task id / batch id
+- poll_task returns provider current status
+- download_result returns zip / markdown / json / html awaiting original artifact.
 
-### 3. Provider 原始产物约定
+### 3. Provider Original artifact convention
 
-provider 层只负责把原始结果整理成稳定落盘结构，例如：
+provider Layer only responsible for organizing raw results into stable disk structure, e.g.:
 
 - `ocr/provider/<provider-name>/...`
 - `ocr/unpacked/...`
 - `ocr/provider_summary.json`
 
-不要在 provider 层直接假设：
+Do not directly assume at provider layer:
 
-- 一定有 `layout.json`
-- 一定有 `full.md`
-- 一定是 zip
-- 一定有表格和公式
+- Must exist. `layout.json`
+- Must have full.md
+- Is zip
+- Must contain tables and formulas
 
-这些都应当是 provider-specific artifact，而不是主流程前提。
+All these should be provider-specific artifactnot the main process prerequisite.
 
-### 4. Raw -> Schema 适配入口
+### 4. Raw -> Schema Adaptation Entry
 
-provider 层产物一旦落盘，下一步只做一件事：
+provider Once the layer artifact is written to disk, the next step does one thing only:
 
-- 调 `document_schema` adapter，产出：
+- Call document_schema adapter to provide source text for translation.
   - `document.v1.json`
   - `document.v1.report.json`
 
-到这里 provider 的职责就结束。
+Up to here provider Responsibilities end here.
 
-## MinerU 作为一个 provider 的结论
+## MinerU As a provider Conclusion
 
-基于当前 MinerU API 文档，可以明确几点：
+Based on current MinerU API Document text missing. Provide points or full source.
 
-1. MinerU 有两类 API
-   - 精准解析 API：token、异步、支持表格/公式、多格式输出、可批量
-   - Agent 轻量 API：免登录、异步、限制更紧、只给 Markdown
+1. MinerU There are two types API
+   - Precise Parsing API：tokenAsync table support/Formulas, multi-format output, batch processing.
+- Agent lightweight API: no login, async, stricter limits, only Markdown
 
-2. 这两类 API 都不应该直接耦合主流程
-   - 它们只是不同的 provider transport / result shape
-   - 不是主链路的 OCR 契约
+2. these two categories API None should directly couple to the main flow.
+   - They are just different. provider transport / result shape
+- Not main flow OCR contract
 
-3. MinerU 真正适合进入主链路的只有两类东西
-   - 原始产物文件
-   - 通过 adapter 产出的 `document.v1`
+3. MinerU Only two types belong in the main path.
+   - Source artifact file
+- Output document.v1 via adapter
 
-4. 不应该耦合进工作流的内容
-   - MinerU 的 task state 字面值
-   - MinerU 的 `layout.json` / `content_list_v2.json` 字段细节
-   - MinerU 的 zip 内部文件命名
-   - MinerU 的特定上传方式、batch 语义、callback 细节
-   - MinerU 的模型版本名直接参与翻译/渲染决策
+4. Uncouple workflow from content.
+- MinerU's task state literal
+- MinerU's layout.json / content_list_v2.json field details
+- MinerU's zip internal file naming
+- MinerU specific upload method, batch semantics, callback details
+   - MinerU Model version names directly participate in translation./Render Decision
 
-## 当前项目里的落位建议
+## Placement suggestions in current project
 
-当前代码里可以按下面理解：
+In the current code, it can be understood as follows:
 
 - `services/ocr_provider/provider_pipeline.py`
-  这是 provider-backed 全流程稳定入口；脚本、测试、兼容 patch 点都以它为边界
+This is the provider-backed full-process stable entry point; scripts, tests, compatibility patches are all bounded by it.
 - `services/ocr_provider/paddle_api.py`
-  这是 Paddle transport / polling / result download
+This is Paddle transport/polling/result download
 - `services/ocr_provider/paddle_markdown.py`
-  这是 Paddle Markdown 和图片产物落盘
+This is Paddle Markdown saving image outputs to disk.
 - `services/ocr_provider/paddle_normalize.py`
-  这是 Paddle normalized document 几何修正等纯实现
+This is Paddle normalized document geometric correction etc. pure implementation.
 - `services/mineru/`
-  这是 MinerU provider 的具体实现，不是“OCR 总入口”
+This is MinerU provider specific implementation, not "OCR Main Entry",
 - `services/document_schema/`
-  这是 OCR 统一契约层
+This is OCR unified contract layer
 - `runtime/pipeline/`
-  这是业务编排层
+  Business orchestration layer.
 
-后续如果接别的 OCR API，建议演进成下面的关系：
+If connecting to others later. OCR APISuggest evolving to the following relationship:
 
 - `services/ocr_provider/`
-  只放 provider 接入规范与共享抽象
+Only place provider integration spec and shared abstractions.
 - `services/mineru/`
-  作为 `ocr_provider` 的一个具体实现
+As a specific implementation of ocr_provider
 - `services/<other_ocr>/`
-  其他 provider 的具体实现
+Other provider specific implementations
 - `services/document_schema/`
-  继续作为统一 normalized contract
+  continues as the unified normalized contract
 
-也就是说：
+That is:
 
-- provider 可替换
-- adapter 可扩展
-- workflow 不需要理解 provider 差异
+- provider Replaceable
+- adapter Extensible
+- workflow No need understand. provider Difference
 
-## 推荐接入步骤
+## Recommended integration steps
 
-新增 OCR provider 时，建议顺序如下：
+When adding a new OCR provider, recommended order:
 
-1. 先写 provider 能力说明
-2. 再写 provider API 调用层
-3. 把 provider 原始产物稳定落盘
-4. 写 `document_schema` adapter
-5. 补 fixture 和回归
-6. 最后才允许进入 translation/rendering 主线
+1. Write first. provider Capabilities
+2. Write more provider API Calling Layer
+3. Persist provider original artifacts stably to disk.
+4. Write document_schema adapter
+5. fill fixture and regression
+6. Entry permitted only at the end. translation/rendering main branch
 
-如果第 4 步之前就让 provider 原始 JSON 进入主流程，后面一定继续耦合。
+If before step 4 you let provider raw JSON enter the main flow, further coupling is guaranteed.
 
-## 对 MinerU 文档的工程化结论
+## Correct MinerU Engineering conclusions for documentation
 
-从当前 MinerU API 文档看，最值得吸收的是这些抽象信息：
+From current MinerU API Document review, the most worthwhile to absorb are these abstract pieces of information:
 
-- 它是异步任务模型
-- 它区分 URL 提交和文件上传
-- 它区分批量和单文件
-- 它有 provider 自己的状态机
-- 它的原始产物不止一种
-- 它的能力上限和限制项非常明确
+- Async task model.
+- It distinguishes. URL Submit and File Upload
+- It distinguishes between batch and single-file.
+- Has provider Own State Machine
+- Its raw output is not limited to one type.
+- Capability ceiling and limitations explicit.
 
-这些应该进入 provider 层设计。
+These should be entered. provider Layer design.
 
-而下面这些不该进入主流程：
+Exclude from main flow:
 
-- 某个具体 HTTP 路径
-- 某个具体 JSON 字段名
-- 某个具体 zip 内文件名
-- 某个具体 provider 独有的模型名字
+- Specific HTTP paths
+- Some specific JSON field name
+- Some specific zip internal file name
+- Some specific provider, e.g., DeepSeek
 
-## 当前建议
+## Current suggestions
 
-短期内不要把 `services/mineru/` 继续扩成“默认 OCR 平台层”。
+Do not include in the short term. `services/mineru/` continue expanding into the "default" OCR Platform layer.
 
-更稳的做法是：
+A more stable approach:
 
-- 把它明确降级为“MinerU provider 实现”
-- 新增这一份 `ocr_provider/README.md` 作为总约定
-- 后续有新 OCR API 时，先对齐这份约定，再决定目录和 adapter
+- explicitly downgrade it toMinerU provider Provide source text to translate.
+- Add this one. `ocr_provider/README.md` General convention.
+- subsequent new OCR API When, first align with this convention, then decide the directory and adapter
 
-这样后续切 OCR provider，不需要再拆翻译/渲染主线。
+Switch this way later. OCR provider, no need to split translation/render mainline again.
 
-## 当前实现约束
+## Current implementation constraints
 
-为了避免继续反复重构，当前 `ocr_provider/` 目录按下面规则维护：
+Current codebase already sufficient. Stop refactoring. `ocr_provider/` Directory maintenance rules below:
 
-- `provider_pipeline.py` 负责 stage/provider 分发和稳定兼容面
-- `drivers.py` 负责 Python provider registry；新增 provider 先挂这里，不要把分发逻辑写回主流程
-- `types.py` 定义 provider driver 的稳定输入/输出契约，`OcrProviderResult.artifact_manifest` 是 provider 产物边界
-- Rust API 侧 provider 产物路径由 `backend/rust_api/src/ocr_provider/catalog.rs` 的 artifact layout 声明，任务编排不要在 workspace 里写 provider 文件名
-- Rust API 侧 provider transport 由 `backend/rust_api/src/job_runner/ocr_flow/provider_transport.rs` 的 transport registry 分发，新增内置 provider 时先注册 transport handler
-- 新增的纯实现优先下沉到独立模块，不直接堆回 `provider_pipeline.py`
-- 如果测试需要 monkeypatch，patch 点应保留在 `provider_pipeline.py`
-- `services/ocr_provider/__init__.py` 必须显式导出 `provider_pipeline`
-- `paddle_api.py` 不处理 normalized schema
-- `paddle_markdown.py` 只处理 Markdown/图片产物，不碰翻译和渲染
-- `paddle_normalize.py` 只处理 normalized document 和几何修正，不碰 provider transport
-- `local_command_driver.py` 是本地 OCR 模型的最小接入口；它不关心模型实现，只校验落盘契约
-- `services/document_schema/adapters.py` 只做 adapter registry，不直接 import `services/mineru/*`；MinerU 走 `services/document_schema/provider_adapters/mineru/`
-- Paddle 默认模型和 alias 配在 `backend/config/ocr_providers.json`，不要在 Python/Rust 里硬编码版本号
+- provider_pipeline.py is responsible for stage/provider distribution and stable compatibility surface.
+- drivers.py is responsible for Python provider registry; add provider and park it here; do not merge the dispatch logic back into the main flow.
+- types.py defines provider driver stable input/output contract; OcrProviderResult.artifact_manifest is the provider artifact boundary.
+- On the Rust API side, provider artifact path backend/rust_api/src/ocr_provider/catalog.rs artifact layout note: task orchestration must not write provider filenames inside the workspace.
+- On the Rust API side, provider transport is distributed by the transport registry in backend/rust_api/src/job_runner/ocr_flow/provider_transport.rs; for new built-in providers, register the transport handler first.
+- Prioritize sinking new pure implementations into independent modules; do not directly cram back. `provider_pipeline.py`
+- If tests require. monkeypatch，patch Point remains at `provider_pipeline.py`
+- `services/ocr_provider/__init__.py` Must explicitly export. `provider_pipeline`
+- `paddle_api.py` No action taken. normalized schema
+- paddle_markdown.py only handles Markdown/image artifacts; no translation or rendering
+- paddle_normalize.py only handles normalized document; leaves geometric correction untouched, provider transport.
+- `local_command_driver.py` Local. OCR Minimal model entry point; ignores implementation, validates only persistence contract.
+- `services/document_schema/adapters.py` Do only adapter registryUnderstood. import `services/mineru/*`；MinerU Go `services/document_schema/provider_adapters/mineru/`
+- Paddle Default model and alias Place in `backend/config/ocr_providers.json`, do not in Python/Rust Hardcoded version number.
 
-这些约束已经进入：
+These constraints have been applied:
 
 - `backend/scripts/devtools/check_pipeline_architecture.py`
 
-也就是说，后面如果有人把 `ocr_provider` 重新连回翻译/渲染层，或者把稳定入口改成隐式导出/深层直连，本地架构检查会直接失败。
+In other words, if later someone... `ocr_provider` re-connect to translation/Rendering layer, or change stable entry to implicit export./Deep direct connection; local architecture check fails immediately.
 
-## 本地 OCR 接入方式
+## Local OCR Integration method
 
-如果别人想接自己的本地 OCR 模型，优先走配置型 `local_command` provider，不要改翻译或渲染代码。
+If others want to connect to their own local. OCR Model, prioritize configuration-driven approach. `local_command` provider, do not modify translation or rendering code.
 
-完整外部接入文档看：
+See the complete external integration documentation:
 
 ```text
-doc/api/03-OCR/04-local-command插件.md
+doc/api/03-OCR/04-local-commandPlugin.md
 ```
 
-这一层的核心设计是：本地 OCR 是一个“命令行 API”。RetainPDF 负责启动命令并通过环境变量传入输入/输出路径；本地 OCR 命令负责读取 PDF，写出 raw payload 或 `document.v1.json`。
+The core design of this layer is: local OCR is a 'command line API'. RetainPDF launches commands and passes input via environment variables and output paths; the local OCR command handles reading PDF, writing out raw payload or document.v1.json.
 
-运行时设置：
+Runtime Settings:
 
 ```bash
 export RETAIN_LOCAL_OCR_COMMAND="python /path/to/my_ocr.py"
 ```
 
-然后提交任务时让 OCR provider 为 `local`。本地命令会收到这些环境变量：
+Then on task submit, let OCR provider be local; local commands receive these environment variables:
 
 ```text
 RETAIN_OCR_SOURCE_PDF
@@ -271,36 +271,36 @@ RETAIN_OCR_RAW_PAYLOAD_JSON
 RETAIN_OCR_RAW_PROVIDER
 ```
 
-最小成功条件：
+Minimum success criteria.
 
-- 读取 `RETAIN_OCR_SOURCE_PDF`
-- 写出 `RETAIN_OCR_NORMALIZED_DOCUMENT_JSON`，内容是 `document.v1.json`
-- 或写出 `RETAIN_OCR_RAW_PAYLOAD_JSON`，让 RetainPDF 通过 `document_schema` adapter 统一生成 `document.v1.json`
-- 成功时退出码为 `0`；失败时退出非 `0`
+- Read RETAIN_OCR_SOURCE_PDF
+- Write `RETAIN_OCR_NORMALIZED_DOCUMENT_JSON`, the content is `document.v1.json`
+- or write RETAIN_OCR_RAW_PAYLOAD_JSON, letting RetainPDF generate unified document.v1.json via the document_schema adapter.
+- Exit code on success: `0`exit non-zero on failure `0`
 
-可选：
+Optional:
 
-- 写 `RETAIN_OCR_PROVIDER_RESULT_JSON` 保存本地 OCR 原始结果
-- 写 `RETAIN_OCR_NORMALIZATION_REPORT_JSON` 保存自己的诊断报告
+- Write RETAIN_OCR_PROVIDER_RESULT_JSON to save local OCR raw results
+- Write RETAIN_OCR_NORMALIZATION_REPORT_JSON to save your diagnostic report.
 
-如果本地命令直接写了 `document.v1.json`，driver 会补一个最小 report/result，并校验 `document.v1.json`。这样后续翻译、渲染、reader API 都只消费统一 schema。
+If local command written directly. `document.v1.json`，driver Will add a minimal one. report/result, and validate `document.v1.json`Skip.reader API All consume only unified. schema。
 
-如果本地 OCR 只能输出自定义 raw JSON，而不能直接输出 `document.v1.json`，推荐走 raw artifact 模式：
+If local. OCR can only output custom raw JSONSource text missing. Provide text to translate. `document.v1.json`Recommended to go. raw artifact Mode:
 
-1. 先把 raw JSON 稳定落到 `RETAIN_OCR_RAW_PAYLOAD_JSON`
-2. 在 `services/document_schema/provider_adapters/` 下新增 adapter
-3. adapter 产出 `document.v1.json`
-4. 通过 `RETAIN_OCR_RAW_PROVIDER` 指定 adapter 名称
-5. 如果要成为内置 provider，再把 provider driver 注册到 `services/ocr_provider/drivers.py`
+1. First, stably land raw JSON to RETAIN_OCR_RAW_PAYLOAD_JSON
+2. Add new adapter in services/document_schema/provider_adapters/
+3. adapter output `document.v1.json`
+4. Specify adapter name via RETAIN_OCR_RAW_PROVIDER
+5. To become a built-in provider, then register the provider driver in services/ocr_provider/drivers.py
 
-最小 raw payload 例子可以先使用内置 `generic_flat_ocr` adapter：
+Minimum raw payload Examples can use built-in first. `generic_flat_ocr` adapter：
 
 ```bash
 export RETAIN_LOCAL_OCR_COMMAND="python /path/to/my_ocr.py"
 export RETAIN_OCR_RAW_PROVIDER=generic_flat_ocr
 ```
 
-外部命令只需要把下面这种结构写入 `RETAIN_OCR_RAW_PAYLOAD_JSON`：
+External commands: write structure below. `RETAIN_OCR_RAW_PAYLOAD_JSON`：
 
 ```json
 {
@@ -326,61 +326,61 @@ export RETAIN_OCR_RAW_PROVIDER=generic_flat_ocr
 }
 ```
 
-如果已经有本地 HTTP OCR 服务，不要让 RetainPDF 直接耦合该服务的私有 API。推荐写一个 wrapper 命令：读取 `RETAIN_OCR_SOURCE_PDF`，请求本地 HTTP 服务，把返回结果转换为 `generic_flat_ocr` 或 `document.v1`，再写到约定路径。
+If you already have a local HTTP OCR service, do not let RetainPDF be directly coupled to the service's private API. Recommend writing a wrapper command: read RETAIN_OCR_SOURCE_PDF, locally request the HTTP service, convert the return result to generic_flat_ocr or document.v1, then write to the agreed path.
 
-## Paddle 模型配置
+## Paddle Model configuration
 
-Paddle 模型版本不要写死在调用层。默认模型和 alias 统一来自：
+Paddle Do not hardcode model version in the call layer. Default model and alias Unified from:
 
 ```text
 backend/config/ocr_providers.json
 ```
 
-当前默认：
+Current default:
 
 ```text
 PaddleOCR-VL-1.6
 ```
 
-可用环境变量覆盖：
+Overridable via environment variables:
 
 ```bash
 export RETAIN_OCR_PROVIDER_CONFIG=/path/to/ocr_providers.json
 export RETAIN_PADDLE_DEFAULT_MODEL=PaddleOCR-VL-1.6
 ```
 
-Rust API 同时支持：
+Rust API Also supports:
 
 ```bash
 export RUST_API_OCR_PROVIDER_CONFIG=/path/to/ocr_providers.json
 export RUST_API_PADDLE_DEFAULT_MODEL=PaddleOCR-VL-1.6
 ```
 
-## Provider Options / Credential Spec / 动态发现
+## Provider Options / Credential Spec / Dynamic discovery
 
-OCR provider 的可见契约统一放在：
+OCR provider All visible contracts are uniformly placed at:
 
 ```text
 backend/config/ocr_providers.json
 ```
 
-前端和外部集成方不要硬编码“某个 provider 需要填哪些字段”，而是读取：
+Frontend and external integrators do not hard-code "some". provider "Which fields need to be filled in", but read:
 
 ```http
 GET /api/v1/providers/ocr
 ```
 
-返回的每个 provider 都包含：
+Each returned provider All include:
 
-- `key`：提交任务时使用的 provider 名
-- `display_name`：展示名
-- `provider_kind`：`remote`、`local_command` 或 `remote_command`
-- `credential`：凭据字段和环境变量约定；本地 provider 可以是 `null`
-- `options`：provider 参数定义，包括 `type/default/env/aliases/choices/required`
-- `capabilities`：是否支持 URL、本地文件、轮询、bundle、公式/表格开关
-- `artifact_layout`：provider 原始产物的稳定落盘位置
+- key is used when submitting a task; provider name.
+- `display_name`Display Name
+- provider_kind: remote, local_command, or remote_command
+- `credential`Credential fields and environment variable conventions; local. provider Can be `null`
+- `options`：provider Parameter definitions, including `type/default/env/aliases/choices/required`
+- `capabilities`Supported? URLLocal file pollingbundleformula/Table Toggle
+- `artifact_layout`：provider Stable disk location for the original artifact.
 
-典型响应结构：
+Typical response structure:
 
 ```json
 {
@@ -404,7 +404,7 @@ GET /api/v1/providers/ocr
 }
 ```
 
-如果要新增一个本地 OCR provider，不需要修改翻译/渲染主流程。先在配置里增加：
+If you want to add a local... OCR provider, no need to modify translation/Main rendering process. First, add to configuration:
 
 ```json
 {
@@ -428,7 +428,7 @@ GET /api/v1/providers/ocr
 }
 ```
 
-如果要新增一个远程 OCR provider，也优先走 `remote_command`，不要先把第三方 submit/poll/download 状态机写进 Rust 主流程。配置示例：
+To add a remote OCR provideralso prioritize `remote_command`, do not first third-party submit/poll/download Write state machine into Rust Main flow. Config example:
 
 ```json
 {
@@ -456,12 +456,12 @@ GET /api/v1/providers/ocr
 }
 ```
 
-Python provider registry 会动态发现 `kind=local_command|remote_command` 的 provider，并用同一个 command driver 执行。`command/raw_provider` 的读取顺序是：
+Python provider registry dynamically discovers providers with kind=local_command|remote_command, and uses the same command driver to execute. command/raw_provider read order:
 
-1. stage spec 或运行参数里的 provider options
+1. stage spec Or in run parameters. provider options
 2. `RETAIN_LOCAL_OCR_COMMAND` / `RETAIN_OCR_RAW_PROVIDER`
 
-command provider 会收到这些稳定环境变量：
+command provider Will receive these stable environment variables:
 
 ```text
 RETAIN_OCR_PROVIDER
@@ -480,11 +480,11 @@ RETAIN_OCR_RAW_PAYLOAD_JSON
 RETAIN_OCR_RAW_PROVIDER
 ```
 
-`remote_command` 的关键契约：
+`remote_command` Key contract:
 
-- 插件命令自己负责第三方 API 的 submit / poll / download / retry。
-- 如果输入来自 `source.file_url`，插件必须把最终源 PDF 写入 `RETAIN_OCR_SOURCE_DIR`。
-- 插件可以直接写 `RETAIN_OCR_NORMALIZED_DOCUMENT_JSON`。
-- 插件也可以写 `RETAIN_OCR_RAW_PAYLOAD_JSON`，然后由 `raw_provider` 对应 adapter 转成 `document.v1.json`。
-- 凭据优先由后端解析 `ocr.credential_ref` 后写入 `RETAIN_OCR_CREDENTIAL`，同时也可通过配置里的 `credential.env` 让插件读取自己的环境变量。
-- 主 workflow 只消费 `document.v1.json`，不理解远程服务自己的状态机。
+- Plugin commands handle third-party API submit/poll/download/retry themselves.
+- If input comes from source.file_url, the plugin must write the final source PDF to RETAIN_OCR_SOURCE_DIR.
+- Plugin can be written directly. `RETAIN_OCR_NORMALIZED_DOCUMENT_JSON`。
+- You can also write plugins to RETAIN_OCR_RAW_PAYLOAD_JSON, and then the corresponding adapter via raw_provider converts it to document.v1.json.
+- Credentials parsed by backend first. `ocr.credential_ref` Write after `RETAIN_OCR_CREDENTIAL`Also via configuration. `credential.env` Have the plugin read its own environment variables.
+- The main workflow only consumes document.v1.json; it does not understand the remote service's own state machine.

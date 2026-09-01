@@ -21,8 +21,8 @@ from services.translation.llm.shared.orchestration import segment_routing
 
 def test_single_item_extractor_returns_plain_text_when_not_json() -> None:
     assert (
-        deepseek_client.extract_single_item_translation_text("这是直接返回的中文译文。", "p001-b019")
-        == "这是直接返回的中文译文。"
+        deepseek_client.extract_single_item_translation_text("Direct return Chinese translation.", "p001-b019")
+        == "This is the Chinese translation returned directly."
     )
 
 
@@ -33,7 +33,7 @@ def test_single_item_extractor_unwraps_nested_batch_json_shell() -> None:
                 "translations": [
                     {
                         "item_id": "p030-b010",
-                        "translated_text": "计算效率、成本与精度。",
+"translated_text": "Computational efficiency, cost, and accuracy.",
                     }
                 ]
             },
@@ -42,19 +42,19 @@ def test_single_item_extractor_unwraps_nested_batch_json_shell() -> None:
     }
     assert (
         deepseek_client.extract_single_item_translation_text(json.dumps(nested, ensure_ascii=False), "p030-b010")
-        == "计算效率、成本与精度。"
+        == "Computational efficiency, cost, and accuracy."
     )
 
 
 def test_single_item_extractor_rejects_broken_protocol_shell() -> None:
-    broken = '{"translations":[{"item_id":"p001-b019","translated_text":"未闭合协议外壳"'
+    broken = '{"translations":[{"item_id":"p001-b019","translated_text":"Unclosed protocol envelope."'
 
     with pytest.raises(Exception):
         deepseek_client.extract_single_item_translation_text(broken, "p001-b019")
 
 
 def test_single_item_extractor_allows_plain_text_with_references() -> None:
-    text = "该结论可由 Lehmann 表示推出 [94, 95]。"
+    text = "This conclusion can be derived from Lehmann denotes [94, 95]。"
 
     assert deepseek_client.extract_single_item_translation_text(text, "p001-b019") == text
 
@@ -88,9 +88,9 @@ def test_english_residue_detector_only_warns_for_mixed_output_with_english_span(
         ),
     }
     translated = (
-        "这是一个重要优势。 Olefins offer the unique benefit of starting from prochiral carbons rather than "
+        "This is an important advantage. Olefins offer the unique benefit of starting from prochiral carbons rather than "
         "preformed tetrasubstituted carbons like tertiary alkyl bromides, which can be laborious to synthesize or unstable. "
-        "后续底物也可以顺利偶联。"
+        "Subsequent substrates also couple smoothly."
     )
     assert not placeholder_guard.looks_like_untranslated_english_output(item, translated)
     assert placeholder_guard.looks_like_mixed_english_residue_output(item, translated)
@@ -128,7 +128,7 @@ def test_english_residue_guard_ignores_reference_like_entries() -> None:
         ),
     }
     translated = (
-        "Gregor Bachmann and Vaishnavh Nagarajan. 下一个词预测的陷阱. "
+        "Gregor Bachmann and Vaishnavh Nagarajan. Next-word prediction pitfalls.. "
         "In Forty-first International Conference on Machine Learning, ICML, 2024."
     )
     assert not placeholder_guard.looks_like_untranslated_english_output(item, translated)
@@ -148,8 +148,8 @@ def test_formula_dense_body_with_partial_chinese_is_not_treated_as_english_resid
         "translation_unit_formula_map": [{"placeholder": "<f1-a11/>"}],
     }
     translated = (
-        "对于扩散过程 <f1-a11/>，transition matrix <f2-b22/> 控制 token 更新，"
-        "而 marginal probability <f3-c33/> 与 posterior estimator <f4-d44/> 共同稳定训练。"
+"For the diffusion process <f1-a11/>, transition matrix <f2-b22/> controls token Update, (with comma). I'll output exactly that.Update,"
+"and marginal probability <f3-c33/> and posterior estimator <f4-d44/> joint stable training."
     )
     assert not placeholder_guard.looks_like_predominantly_english_output(item, translated)
     assert not placeholder_guard.looks_like_mixed_english_residue_output(item, translated)
@@ -168,8 +168,8 @@ def test_term_preserving_formula_body_is_not_treated_as_english_residue() -> Non
         "translation_unit_formula_map": [{"placeholder": "<f1-a11/>"}, {"placeholder": "<f2-b22/>"}],
     }
     translated = (
-        "B3LYP/6-311G** 计算给出的势垒为 <f1-a11/>，而 GC-FID 与 MP2/6-311G 测量结果提供了 "
-        "<f2-b22/> 用于比较。"
+"B3LYP/6-311G** calculated barrier is <f1-a11/>while GC-FID and MP2/6-311G measurement results provided. "
+        "<f2-b22/> For comparison."
     )
     assert not placeholder_guard.looks_like_predominantly_english_output(item, translated)
     assert not placeholder_guard.looks_like_mixed_english_residue_output(item, translated)
@@ -203,13 +203,13 @@ def test_domain_context_parser_salvages_fields_from_malformed_json() -> None:
     {
       "domain": "computational chemistry",
       "summary": "A materials-modeling paper with equation-heavy prose."
-      "translation_guidance": "保留术语、缩写和公式记号，不要意译。"
+      "translation_guidance": "Keep terms, abbreviations, and formula notations; do not paraphrase."
     }
     """
     result = structured_parsers.parse_domain_context_response(content, preview_text="preview")
     assert result["domain"] == "computational chemistry"
     assert result["summary"] == "A materials-modeling paper with equation-heavy prose."
-    assert result["translation_guidance"] == "保留术语、缩写和公式记号，不要意译。"
+assert result["translation_guidance"] == "Keep terminology, abbreviations, and formula notation; do not paraphrase."
 
 
 def test_placeholder_guard_canonicalizes_nested_json_shell() -> None:
@@ -223,7 +223,7 @@ def test_placeholder_guard_canonicalizes_nested_json_shell() -> None:
                         "translations": [
                             {
                                 "item_id": "p030-b010",
-                                "translated_text": "计算效率、成本与精度。",
+"translated_text": "Computational efficiency, cost, and accuracy.",
                             }
                         ]
                     },
@@ -232,7 +232,7 @@ def test_placeholder_guard_canonicalizes_nested_json_shell() -> None:
             }
         },
     )
-    assert result["p030-b010"]["translated_text"] == "计算效率、成本与精度。"
+assert result["p030-b010"]["translated_text"] == "Computational efficiency, cost, and accuracy."
 
 
 def test_placeholder_guard_rejects_protocol_shell_output() -> None:
@@ -242,7 +242,7 @@ def test_placeholder_guard_rejects_protocol_shell_output() -> None:
             {
                 "p030-b010": {
                     "decision": "translate",
-                    "translated_text": '{ "translations": [{"item_id":"p030-b010","translated_text":"计算效率"}] }',
+                    "translated_text": '{ "translations": [{"item_id":"p030-b010","translated_text":"computational efficiency"}] }',
                 }
             },
         )
@@ -261,7 +261,7 @@ def test_placeholder_guard_rejects_unbalanced_direct_typst_math_delimiters() -> 
             {
                 "p021-b005": {
                     "decision": "translate",
-                    "translated_text": "含有被破坏的 $ m' 数学片段。",
+                    "translated_text": "Contains corrupted $ m' Math snippet.",
                 }
             },
         )
@@ -284,7 +284,7 @@ def test_placeholder_guard_rejects_direct_typst_following_context_math_bleed() -
             {
                 "p125-b018": {
                     "decision": "translate",
-                    "translated_text": r"为简化起见，考虑一个同核中性双原子分子AB。我们欲证明结合能在$ \lambda = 1 $时为正。",
+                    "translated_text": r"For simplicity, consider a homonuclear neutral diatomic molecule.ABWe want to prove that binding energy can$ \lambda = 1 $Current time.",
                 }
             },
         )
@@ -303,7 +303,7 @@ def test_placeholder_guard_rejects_model_request_prompt_output() -> None:
             {
                 "p014-b014": {
                     "decision": "translate",
-                    "translated_text": "请提供待翻译的原文。",
+                    "translated_text": "Please provide the original text to be translated.",
                 }
             },
         )
@@ -321,7 +321,7 @@ def test_placeholder_guard_allows_legitimate_source_text_request_sentence() -> N
         {
             "p014-b015": {
                 "decision": "translate",
-                "translated_text": "该表单要求用户在提交前提供原文。",
+                "translated_text": "This form requires the user to provide the original text before submitting.",
             }
         },
     )
@@ -340,10 +340,10 @@ def test_translation_and_formula_outputs_use_strict_json_schema_format() -> None
 
 def test_formula_segment_parser_accepts_schema_json_payload() -> None:
     result = segment_routing.parse_segment_translation_payload(
-        '{"segments":[{"segment_id":"1","translated_text":"第一段"},{"segment_id":"2","translated_text":"第二段"}]}',
+        '{"segments":[{"segment_id":"1","translated_text":"First paragraph"},{"segment_id":"2","translated_text":"Second paragraph"}]}',
         expected_segments=[
             {"segment_id": "1", "source_text": "first"},
             {"segment_id": "2", "source_text": "second"},
         ],
     )
-    assert result == {"1": "第一段", "2": "第二段"}
+    assert result == {"1": "Paragraph 1", "2": "Second paragraph"}

@@ -31,14 +31,14 @@ def _item(item_id: str, source_text: str, translated_text: str) -> dict:
 
 def test_build_translation_review_collects_issue_summary() -> None:
     context = build_translation_control_context(
-        glossary_entries=[GlossaryEntry(source="SCF", target="自洽场", level="preferred")]
+glossary_entries=[GlossaryEntry(source="SCF", target="self-consistent field", level="preferred")]
     )
     payload = {
         0: [
             _item(
                 "p001-b001",
                 "The SCF cycle is converged before the energy is evaluated.",
-                "该循环在计算能量前收敛。",
+                "This loop converges before calculating energy.",
             )
         ]
     }
@@ -60,7 +60,7 @@ def test_review_error_items_are_diagnostic_not_export_gate() -> None:
             _item(
                 "p001-b003",
                 "The final energy <f1-abc/> is reported for the system.",
-                "最终能量 <f2-def/> 被报告。",
+"The final energy <f2-def/> is reported.",
             )
         ]
     }
@@ -103,7 +103,7 @@ def test_write_translation_review_round_trips_json() -> None:
             _item(
                 "p001-b002",
                 "The final energy <f1-abc/> is reported for the system.",
-                "最终能量 <f2-def/> 被报告。",
+"The final energy <f2-def/> is reported.",
             )
         ]
     }

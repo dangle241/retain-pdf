@@ -1,5 +1,5 @@
-// dialog-store(createDialogStore)→ React 订阅 hook。state 对象引用只在
-// open()/close() 时更新,直接喂 useSyncExternalStore(镜像 reader 的
+// dialog-store(createDialogStore) â React subscription hook. state object reference only
+// open()/close() update timestamp, feed directly. useSyncExternalStore (mirrors reader's
 // use-drawer-active.js)。
 
 import { useSyncExternalStore } from "react";

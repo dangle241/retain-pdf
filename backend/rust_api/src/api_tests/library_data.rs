@@ -29,7 +29,7 @@ fn seed_document(state: &crate::AppState, content: &[u8]) -> String {
     fs::write(&absolute, &file_bytes).expect("write source pdf");
     let upload = UploadRecord {
         upload_id,
-        filename: "光谱综述.pdf".to_string(),
+        filename: "Spectral Overview.pdf".to_string(),
         stored_path: absolute.to_string_lossy().to_string(),
         bytes: file_bytes.len() as u64,
         page_count: 12,
@@ -96,7 +96,7 @@ async fn documents_list_and_patch_roundtrip() {
                 .body(Body::from(
                     serde_json::json!({
                         "reading_status": "reading",
-                        "tags": ["化学", "光谱"]
+"tags": ["Chemistry", "Spectroscopy"]
                     })
                     .to_string(),
                 ))
@@ -112,7 +112,7 @@ async fn documents_list_and_patch_roundtrip() {
         .unwrap_or("")
         .contains("/source.pdf"));
 
-    // 非法状态被拒绝
+    // Invalid state rejected
     let response = app
         .clone()
         .oneshot(
@@ -155,7 +155,7 @@ async fn favorites_crud_and_job_reference_guard() {
                         "page_idx": 4,
                         "block_id": "p005-b0008",
                         "quote_text": "reaction rate increases",
-                        "translated_quote_text": "反应速率随温度上升"
+                        "translated_quote_text": "Reaction rate rises with temperature."
                     })
                     .to_string(),
                 ))
@@ -165,7 +165,7 @@ async fn favorites_crud_and_job_reference_guard() {
         .expect("create response");
     assert_eq!(response.status(), StatusCode::OK);
     let payload = json_response(response).await;
-    // 未显式给 job_id 时锚定到 active_job_id
+    // Not explicitly provided. job_id Anchor to active_job_id
     assert_eq!(payload["data"]["job_id"], "job-active");
     let favorite_id = payload["data"]["favorite_id"]
         .as_str()
@@ -210,7 +210,7 @@ async fn search_returns_anchored_hits() {
                 page_idx: 7,
                 block_id: "p008-b0002".to_string(),
                 source_text: "halogen lithium exchange selectivity".to_string(),
-                translated_text: "卤素锂交换的选择性研究".to_string(),
+                translated_text: "Halogen-Lithium Exchange Selectivity Study".to_string(),
             }],
         )
         .expect("seed fts");
@@ -237,7 +237,7 @@ async fn search_returns_anchored_hits() {
 
 #[tokio::test]
 async fn ai_proxy_returns_bad_gateway_when_upstream_is_down() {
-    // 指向必死端口:代理应干净地报 502,而不是挂起或 500
+    // Point to dead port.:Proxy should report cleanly 502,Instead of suspending or 500
     std::env::set_var("RUST_API_AI_SERVICE_BASE", "http://127.0.0.1:9");
     let state = test_state("ai-proxy-down");
     let app = build_app(state);
@@ -262,7 +262,7 @@ async fn document_lookup_by_historical_job_id() {
     let state = test_state("library-job-lookup");
     let app = build_app(state.clone());
     let document_id = seed_document(&state, b"doc job lookup");
-    // 历史 job:归属该文档但不是 active run
+// Historical job: belongs to this document but is not active run
     state
         .db
         .set_document_active_job(&document_id, "job-new", None)
@@ -292,7 +292,7 @@ async fn document_lookup_by_historical_job_id() {
     let payload = json_response(response).await;
     assert_eq!(payload["data"]["documents"][0]["document_id"], document_id);
 
-    // 只带 job_id 创建收藏:锚定到历史 run 的块空间,文档由后端解析
+    // Only carry job_id Create favorite:Pin to history run block space,Backend parses docs.
     let response = app
         .clone()
         .oneshot(
@@ -363,16 +363,16 @@ async fn favorite_note_patch_updates_in_place() {
                 .uri(format!("/api/v1/favorites/{favorite_id}"))
                 .header("X-API-Key", "test-key")
                 .header("content-type", "application/json")
-                .body(Body::from(serde_json::json!({"note": "改后的笔记"}).to_string()))
+                .body(Body::from(serde_json::json!({"note": "Revised Notes"}).to_string()))
                 .expect("request"),
         )
         .await
         .expect("patch");
     assert_eq!(response.status(), StatusCode::OK);
     let favorites = state.db.list_favorites(Some(&document_id)).expect("list");
-    // favorite_id 不变,note 原子更新
+    // favorite_id Immutable,note Atomic update
     assert_eq!(favorites[0].favorite_id, favorite_id);
-    assert_eq!(favorites[0].note, "改后的笔记");
+assert_eq!(favorites[0].note, "Updated note");
 }
 
 #[tokio::test]
@@ -413,7 +413,7 @@ async fn asset_upload_dedupes_and_serves_immutable() {
 
     let first = json_response(upload(app.clone()).await).await;
     let second = json_response(upload(app.clone()).await).await;
-    // 内容寻址:同字节两次上传同一 asset_id
+    // Content-addressable:Upload same bytes twice asset_id
     assert_eq!(first["data"]["asset_id"], second["data"]["asset_id"]);
     let asset_id = first["data"]["asset_id"].as_str().expect("asset id");
 
@@ -441,7 +441,7 @@ async fn asset_upload_dedupes_and_serves_immutable() {
         .unwrap()
         .contains("immutable"));
 
-    // 收藏挂图:kind=figure + asset_id + rect_json
+    // Favorite chart:kind=figure + asset_id + rect_json
     let document_id = seed_document(&state, b"doc with figure");
     state
         .db
@@ -476,7 +476,7 @@ async fn asset_upload_dedupes_and_serves_immutable() {
     assert_eq!(payload["data"]["asset_id"], asset_id);
     assert!(payload["data"]["rect_json"].as_str().unwrap().contains("300"));
 
-    // 未上传的 asset_id 被拒绝
+    // Not uploaded asset_id Rejected
     let response = app
         .clone()
         .oneshot(
@@ -529,7 +529,7 @@ async fn conversation_lifecycle_and_message_appending() {
         .expect("id")
         .to_string();
 
-    for (role, content) in [("user", "溴锂交换的选择性由什么决定?"), ("assistant", "由共轭效应决定 [1]。")] {
+    for (role, content) in [("user", "What determines the selectivity of bromine‑lithium exchange??"), ("assistant", "Determined by conjugation effect. [1]。")] {
         let response = app
             .clone()
             .oneshot(
@@ -564,8 +564,8 @@ async fn conversation_lifecycle_and_message_appending() {
         .await
         .expect("detail");
     let payload = json_response(response).await;
-    // 标题自动取首问前缀;消息按 seq 正序;引用快照原样保存
-    assert!(payload["data"]["title"].as_str().unwrap().contains("溴锂交换"));
+    // Title auto-extracts first question prefix.;Message press seq Ascending order;Save snapshot as-is.
+    assert!(payload["data"]["title"].as_str().unwrap().contains("bromine-lithium exchange"));
     assert_eq!(payload["data"]["message_count"], 2);
     assert_eq!(payload["data"]["messages"][0]["role"], "user");
     assert_eq!(payload["data"]["messages"][1]["seq"], 2);
@@ -573,7 +573,7 @@ async fn conversation_lifecycle_and_message_appending() {
         .as_str()
         .unwrap()
         .contains("ref"));
-    // head 落在最后一条;assistant 的 parent 为 user
+// head lands on the last one; assistant's parent as user
     assert_eq!(
         payload["data"]["head_id"].as_str().unwrap(),
         payload["data"]["messages"][1]["message_id"].as_str().unwrap()
@@ -587,7 +587,7 @@ async fn conversation_lifecycle_and_message_appending() {
         user_id
     );
 
-    // 分支:同 parent 再挂一条 assistant,并 PATCH head 切回第一条
+    // Branch:same parent Hang another one assistant,and PATCH head Switch back to the first entry.
     let response = app
         .clone()
         .oneshot(
@@ -599,7 +599,7 @@ async fn conversation_lifecycle_and_message_appending() {
                 .body(Body::from(
                     serde_json::json!({
                         "role": "assistant",
-                        "content": "分支回答 B",
+                        "content": "Branch reply B",
                         "parent_id": user_id,
                         "message_id": "msg-branch-b",
                     })
@@ -628,10 +628,10 @@ async fn conversation_lifecycle_and_message_appending() {
         )
         .await
         .expect("patch head");
-    // head 不能指向 user 若我们允许任何消息——我们允许任意 message_id 在会话内
+    // head Cannot point to user If we allow any message——Allow any message_id Within session
     assert_eq!(response.status(), StatusCode::OK);
 
-    // 非法 role 被拒
+    // Invalid role Rejected
     let response = app
         .clone()
         .oneshot(
@@ -647,7 +647,7 @@ async fn conversation_lifecycle_and_message_appending() {
         .expect("bad role");
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 
-    // 删除级联清消息
+    // Cascade delete messages.
     let response = app
         .clone()
         .oneshot(
@@ -674,7 +674,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
     let app = build_app(state.clone());
     let document_id = seed_document(&state, b"collections doc one");
 
-    // 创建
+// Create
     let response = app
         .clone()
         .oneshot(
@@ -692,14 +692,14 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("create response");
     assert_eq!(response.status(), StatusCode::OK);
     let payload = json_response(response).await;
-    assert_eq!(payload["data"]["name"], "化学");
+assert_eq!(payload["data"]["name"], "Chemistry");
     assert_eq!(payload["data"]["document_count"], 0);
     let collection_id = payload["data"]["collection_id"]
         .as_str()
         .expect("collection_id")
         .to_string();
 
-    // 空名字被拒绝
+    // Empty names rejected
     let response = app
         .clone()
         .oneshot(
@@ -715,7 +715,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("empty name response");
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 
-    // 列表能看到刚创建的文件夹
+    // List shows newly created folder
     let response = app
         .clone()
         .oneshot(
@@ -731,7 +731,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
     let payload = json_response(response).await;
     assert_eq!(payload["data"]["collections"][0]["collection_id"], collection_id);
 
-    // 改名
+    // Rename.
     let response = app
         .clone()
         .oneshot(
@@ -741,7 +741,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
                 .header("X-API-Key", "test-key")
                 .header("content-type", "application/json")
                 .body(Body::from(
-                    serde_json::json!({"name": "有机化学"}).to_string(),
+                    serde_json::json!({"name": "Organic chemistry"}).to_string(),
                 ))
                 .expect("request"),
         )
@@ -749,9 +749,9 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("patch response");
     assert_eq!(response.status(), StatusCode::OK);
     let payload = json_response(response).await;
-    assert_eq!(payload["data"]["name"], "有机化学");
+assert_eq!(payload["data"]["name"], "Organic Chemistry");
 
-    // 加入文档,document_count 同步更新
+    // Add to docs.,document_count Sync update.
     let response = app
         .clone()
         .oneshot(
@@ -771,7 +771,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
     let payload = json_response(response).await;
     assert_eq!(payload["data"]["document_count"], 1);
 
-    // 不存在的文档被拒绝
+    // Reject nonexistent document.
     let response = app
         .clone()
         .oneshot(
@@ -789,7 +789,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("add missing document response");
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
 
-    // GET /api/v1/documents?collection_id= 能过滤出这篇文档
+    // GET /api/v1/documents?collection_id= Filter this doc.
     let response = app
         .clone()
         .oneshot(
@@ -805,7 +805,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
     let payload = json_response(response).await;
     assert_eq!(payload["data"]["documents"][0]["document_id"], document_id);
 
-    // 移除文档
+    // Remove docs
     let response = app
         .clone()
         .oneshot(
@@ -822,7 +822,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("remove document response");
     assert_eq!(response.status(), StatusCode::OK);
 
-    // 重复移除报 404
+    // Duplicate removal report 404
     let response = app
         .clone()
         .oneshot(
@@ -839,7 +839,7 @@ async fn collections_crud_and_document_membership_roundtrip() {
         .expect("remove again response");
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
 
-    // 删除文件夹本身
+    // Delete folder itself
     let response = app
         .clone()
         .oneshot(
@@ -910,7 +910,7 @@ async fn library_books_job_ids_filter_returns_only_requested_jobs() {
     assert!(ids.contains(&"job-gamma"));
     assert!(!ids.contains(&"job-beta"));
 
-    // 不传 job_ids 时行为不变:三个 job 都在
+    // Omit job_ids Behavior unchanged:three job All present
     let response = app
         .clone()
         .oneshot(
@@ -1063,7 +1063,7 @@ async fn document_translate_rejects_ocr_only_workflow() {
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 }
 
-// P0-2:删单个 job 后,悬空的 active_job_id 被 reconcile(重指剩余 job 或 NULL)
+// P0-2: Delete single job; dangling active_job_id reconciled (re-point to remaining job or NULL)
 #[tokio::test]
 async fn deleting_a_job_reconciles_document_active_job() {
     use crate::models::{CreateJobInput, JobSnapshot, JobStatusKind};
@@ -1087,13 +1087,13 @@ async fn deleting_a_job_reconciles_document_active_job() {
         )
         .expect("link job to document");
     }
-    // active 指向 job-b(finished_at 更晚)
+    // active Points to job-b(finished_at later)
     state
         .db
         .set_document_active_job(&document_id, "job-b", None)
         .expect("set active");
 
-    // 删 job-b —— reconcile 应把 active 重指到剩余的 job-a
+    // Delete job-b —— reconcile should repoint active to remaining job-a job-b —— reconcile Should active Redirect to remaining job-a
     let response = app
         .clone()
         .oneshot(
@@ -1110,7 +1110,7 @@ async fn deleting_a_job_reconciles_document_active_job() {
     let doc = state.db.get_document(&document_id).expect("doc still exists");
     assert_eq!(doc.active_job_id.as_deref(), Some("job-a"));
 
-    // 再删 job-a —— 没有剩余 book job,active 降级为 NULL(干净馆藏,非僵尸)
+    // Delete again job-a —— No remaining book job,active downgrade to NULL(Clean collection,Not zombie.)
     let response = app
         .clone()
         .oneshot(
@@ -1128,7 +1128,7 @@ async fn deleting_a_job_reconciles_document_active_job() {
     assert_eq!(doc.active_job_id, None);
 }
 
-// P0-1:DELETE /documents/:id 删除文档行 + jobs + uploads + 文件;收藏引用 → 409
+// P0-1:DELETE /documents/:id Remove doc line. + jobs + uploads + File;Favorite reference → 409
 #[tokio::test]
 async fn delete_document_removes_everything_and_guards_favorites() {
     use crate::models::{CreateJobInput, JobSnapshot, JobStatusKind};
@@ -1157,7 +1157,7 @@ async fn delete_document_removes_everything_and_guards_favorites() {
         .set_document_active_job(&document_id, "job-x", None)
         .expect("set active");
 
-    // 先挂一条收藏 → 删文档应 409
+    // Add a favorite first → Delete docs should 409
     let response = app
         .clone()
         .oneshot(
@@ -1198,7 +1198,7 @@ async fn delete_document_removes_everything_and_guards_favorites() {
         .expect("delete blocked");
     assert_eq!(response.status(), StatusCode::CONFLICT);
 
-    // 移除收藏后可删
+    // Deletable after removing from favorites.
     app.clone()
         .oneshot(
             Request::builder()
@@ -1232,7 +1232,7 @@ async fn delete_document_removes_everything_and_guards_favorites() {
         .iter()
         .any(|v| v == "job-x"));
 
-    // 文档行、job 行、upload 行都没了
+// Doc line, job row, upload lines gone.
     assert!(state.db.get_document(&document_id).is_err());
     assert!(state.db.get_job("job-x").is_err());
     assert!(state
@@ -1241,7 +1241,7 @@ async fn delete_document_removes_everything_and_guards_favorites() {
         .expect("uploads query")
         .is_empty());
 
-    // 删不存在的文档 → 404
+    // Delete nonexistent doc → 404
     let response = app
         .oneshot(
             Request::builder()
@@ -1256,15 +1256,15 @@ async fn delete_document_removes_everything_and_guards_favorites() {
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
 }
 
-// 孤儿治理:root-cause(retention 保护)+ 列表过滤 + 启动清理
+// Orphan governance:root-cause(retention Protect)+ Filter list + Start cleanup
 #[tokio::test]
 async fn ingest_only_document_survives_and_orphans_are_hidden() {
     let state = test_state("library-orphan");
     let app = build_app(state.clone());
 
-    // 一篇"只入库"文档:有 upload、无 job(合法,必须保留可见)
+    // One"Persist only"Documentation:has uploadNone job(Valid,Must remain visible)
     let ingest_only = seed_document(&state, b"ingest only doc");
-    // 一个孤儿文档:直接建 documents 行,不建任何 upload(源文件已丢)
+    // Orphan doc:Create directly documents row,Create none. upload(Source file lost.)
     {
         let conn = rusqlite::Connection::open(state.config.jobs_db_path.clone()).expect("open db");
         conn.execute(
@@ -1275,7 +1275,7 @@ async fn ingest_only_document_survives_and_orphans_are_hidden() {
         .expect("insert orphan");
     }
 
-    // 列表:只入库文档在,孤儿被过滤掉
+    // List:Only documents in DB,Orphans filtered out
     let response = app
         .clone()
         .oneshot(
@@ -1303,7 +1303,7 @@ async fn retention_preserves_document_backed_uploads() {
     use crate::models::domain::UploadRecord;
 
     let state = test_state("library-retention-guard");
-    // 一个陈旧的、无 job 引用、但被 document 支撑的 upload(只入库场景)
+    // Stale, unused job Referenced, but document supported upload(DB insert only)
     let hash = crate::db::documents::sha256_hex(b"retained ingest doc");
     let upload = UploadRecord {
         upload_id: "up-old-ingest".to_string(),
@@ -1311,14 +1311,14 @@ async fn retention_preserves_document_backed_uploads() {
         stored_path: "uploads/up-old-ingest/keep.pdf".to_string(),
         bytes: 3,
         page_count: 1,
-        uploaded_at: "2020-01-01T00:00:00Z".to_string(), // 远早于任何保留期
+        uploaded_at: "2020-01-01T00:00:00Z".to_string(), // Long before any retention period.
         developer_mode: false,
         content_hash: hash.clone(),
     };
     state.db.save_upload(&upload).expect("save upload");
     state.db.upsert_document_from_upload(&upload).expect("upsert doc");
 
-    // 一个陈旧、无 job、也无 document 支撑的 upload(真正的废上传,应被 GC)
+// Stale upload with no job nor document backing it (truly useless upload, should be GC)
     let junk = UploadRecord {
         upload_id: "up-old-junk".to_string(),
         filename: "junk.pdf".to_string(),
@@ -1336,7 +1336,7 @@ async fn retention_preserves_document_backed_uploads() {
         .cleanup_orphaned_uploads(48)
         .expect("cleanup orphaned uploads");
     let removed_ids: Vec<&str> = removed.iter().map(|u| u.upload_id.as_str()).collect();
-    // 废上传被清,document-backed 的被保护
+    // Stale uploads purged.,document-backed protected
     assert!(removed_ids.contains(&"up-old-junk"));
     assert!(!removed_ids.contains(&"up-old-ingest"));
     assert!(state.db.get_upload("up-old-ingest").is_ok());

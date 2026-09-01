@@ -13,7 +13,7 @@ from services.rendering.layout.payload.capacity import formula_estimate_discount
 
 
 def test_formula_estimate_discount_keeps_plain_text_unchanged() -> None:
-    assert formula_estimate_discount("这是一段普通正文。", []) == 1.0
+    assert formula_estimate_discount("This is ordinary text.", []) == 1.0
 
 
 def test_formula_estimate_discount_is_continuous_and_bounded() -> None:
@@ -24,7 +24,7 @@ def test_formula_estimate_discount_is_continuous_and_bounded() -> None:
     ]
 
     discount = formula_estimate_discount(
-        "[[FORMULA_1]] 与 [[FORMULA_2]] 以及 [[FORMULA_3]] 共同决定结果。",
+"[[FORMULA_1]], [[FORMULA_2]] and [[FORMULA_3]] jointly decide the outcome.",
         formula_map,
     )
 
@@ -33,7 +33,7 @@ def test_formula_estimate_discount_is_continuous_and_bounded() -> None:
 
 def test_dollar_inline_math_contributes_to_formula_discount() -> None:
     discount = formula_estimate_discount(
-        r"沿 $g-h(\mathbf{R}_x)$ 和 $\\frac{\\partial E}{\\partial R}$ 路径变化。",
+r"along $g-h(\mathbf{R}_x)$ and $\\frac{\\partial E}{\\partial R}$ path changed.",
         [],
     )
 
@@ -47,8 +47,8 @@ def test_formula_heavy_height_estimate_is_less_aggressive_than_plain_line_count(
         {"placeholder": "[[FORMULA_2]]", "formula_text": r"\\frac{\\partial E}{\\partial R}"},
         {"placeholder": "[[FORMULA_3]]", "formula_text": r"\\sqrt{\\delta R}"},
     ]
-    formula_text = "[[FORMULA_1]] 与 [[FORMULA_2]] 以及 [[FORMULA_3]] 共同决定结果。"
-    plain_text = "变量一与偏导能量以及平方根扰动共同决定结果。"
+formula_text = "[[FORMULA_1]], [[FORMULA_2]] and [[FORMULA_3]] jointly decide outcome"
+    plain_text = "Variable one, partial derivative energy, and square-root perturbation jointly determine the result."
 
     formula_height = estimated_render_height_pt(inner, formula_text, formula_map, 10.4, 0.6)
     plain_height = estimated_render_height_pt(inner, plain_text, [], 10.4, 0.6)

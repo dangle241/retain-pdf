@@ -1,5 +1,5 @@
-// 书架卡片右上角终态徽标。
-// 进行中（排队/OCR/翻译/渲染）不在角标写文案（易截断），改由封面中央加载动画表达。
+// Final state badge, top-right corner of bookshelf card.
+// In Progress (Queued)/OCR/Translation/Render: move text from badge (truncation risk) to center cover loading animation.
 
 import type { LibraryCardBadge, LibraryCardItem } from "../types.js";
 import {
@@ -9,12 +9,12 @@ import {
 } from "../../../composition/external.js";
 
 /**
- * @returns 终态/馆藏徽标；进行中返回 null（用中央 loading 代替）
+* @returns Final state/Collection badge; if in progress, return null (use central loading replacement)
  */
 export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge | null {
   if (isLibraryOnlyItem(item)) {
     return {
-      label: "馆藏",
+label: "Holdings",
       icon: "archive",
       cls: "border border-border bg-white/95 text-muted-foreground",
     };
@@ -25,42 +25,42 @@ export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge |
 
   if (status === "failed" || stageKey === "failed") {
     return {
-      label: "失败",
+label: "Failed",
       icon: "alert",
       cls: "bg-destructive/12 text-destructive",
     };
   }
   if (status === "canceled" || status === "cancelled" || stageKey === "canceled") {
     return {
-      label: "已取消",
+label: "Canceled",
       icon: "clock",
       cls: "bg-muted text-muted-foreground",
     };
   }
 
-  // 进行中（含重试）：不角标，封面中央 loading
+  // In progress (including retries): no superscript, center of cover loading
   if (isLibraryCardProcessing(item)) {
     return null;
   }
 
-  // 已完成
+// Completed
   if (status === "succeeded" || stageKey === "done") {
     return {
-      label: "已翻译",
+label: "Translated",
       icon: "languages",
       cls: "bg-primary text-primary-foreground",
     };
   }
 
-  // 排队 / 运行中（兜底）
+// Queued / Running (fallback)
   if (isRecentJobActive(item) || status === "queued" || status === "running") {
     return null;
   }
 
-  // 兜底：有 done 阶段
+// Fallback: present done stage
   if (stageKey === "done") {
     return {
-      label: "已翻译",
+label: "Translated",
       icon: "languages",
       cls: "bg-primary text-primary-foreground",
     };
@@ -69,21 +69,21 @@ export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge |
   return null;
 }
 
-/** 是否应在封面中央显示处理中加载动画 */
+/** Should the processing loading animation be displayed in the center of the cover? */
 export function isLibraryCardProcessing(item: LibraryCardItem = {}): boolean {
   if (isLibraryOnlyItem(item)) return false;
   const status = `${item.status || ""}`.trim().toLowerCase();
   if (status === "failed" || status === "canceled" || status === "cancelled") {
     return false;
   }
-  // 明确运行中
+  // Running
   if (status === "queued" || status === "running" || status === "pending") {
     return true;
   }
-  // 重试后偶发 status 未及时变、但 stage 已回到 ocr/翻译/渲染
+// occasionally after retry status is not updated in time, but stage returned ocr/translation/render
   const stage = stageKeyForRecentJobLabel(item);
   if (["ocr", "translate", "render", "queued"].includes(stage)) {
-    // succeeded + stage=done 是真完成；succeeded + stage=ocr 视为重试脏态 → 仍转圈
+    // succeeded + stage=done Actually complete;succeeded + stage=ocr treated as retry dirty state → Spinner stuck. Check async handler. Ensure loading state resets on error/complete.
     if (status === "succeeded" && stage === "done") return false;
     if (status === "succeeded" || status === "") return true;
   }

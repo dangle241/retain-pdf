@@ -42,21 +42,21 @@ function truncatePreview(value, maxChars = 4000) {
   if (text.length <= maxChars) {
     return text;
   }
-  return `${text.slice(0, maxChars)}\n\n...（预览已截断）`;
+  return `${text.slice(0, maxChars)}\n\n...(preview truncated)`;
 }
 
 function summarizeArtifactLabel(key) {
   switch (`${key || ""}`.trim()) {
     case "source_pdf":
-      return "源 PDF";
+return "Source PDF";
     case "translated_pdf":
-      return "译后 PDF";
+      return "post-translation PDF";
     case "typst_render_pdf":
-      return "Typst 渲染 PDF";
+return "Typst Rendered PDF";
     case "markdown_raw":
       return "Markdown Raw";
     case "markdown_images_dir":
-      return "Markdown 图片目录";
+return "Markdown Image Directory";
     case "markdown_bundle_zip":
       return "Markdown Bundle";
     case "normalized_document_json":
@@ -102,9 +102,9 @@ export function renderArtifactsManifest(manifestPayload) {
     return;
   }
   const items = Array.isArray(manifestPayload?.items) ? [...manifestPayload.items] : [];
-  summary.textContent = items.length > 0 ? `共 ${items.length} 项` : "暂无已登记产物";
+summary.textContent = items.length > 0 ? `Total ${items.length} items` : "No products registered.";
   if (items.length === 0) {
-    container.innerHTML = '<div class="detail-empty">暂无产物清单</div>';
+    container.innerHTML = '<div class="detail-empty">No artifacts</div>';
     return;
   }
   const preferredOrder = [
@@ -210,7 +210,7 @@ export function renderMarkdownContract({
   setActionLink("detail-markdown-raw-btn", rawUrl, contract.ready && !!rawUrl);
   if (!contract.ready) {
     revokeMarkdownImageUrls(markdownImageUrls);
-    setText("detail-markdown-status", "当前任务没有已发布 Markdown");
+    setText("detail-markdown-status", "Current task not published Markdown");
     setText("detail-markdown-image-count", "0");
     setText("detail-markdown-preview", "-");
     const grid = $("detail-markdown-image-grid");
@@ -222,7 +222,7 @@ export function renderMarkdownContract({
     return;
   }
   if (!markdownPayload) {
-    setText("detail-markdown-status", "已发布，正在读取内容…");
+    setText("detail-markdown-status", "Published, reading content…");
     return;
   }
   const refs = Array.isArray(markdownPayload?.images) && markdownPayload.images.length > 0
@@ -230,7 +230,7 @@ export function renderMarkdownContract({
     : collectMarkdownImageRefs(previewContent);
   const fileName = firstNonEmptyText(markdownPayload?.file_name, markdownArtifact.file_name);
   const sizeText = formatSizeBytes(markdownPayload?.size_bytes ?? markdownArtifact.size_bytes);
-  const statusBits = [markdownPayload?.content_with_absolute_image_urls ? "已加载 /markdown/document" : "已加载 /markdown JSON"];
+const statusBits = [markdownPayload?.content_with_absolute_image_urls ? "Loaded /markdown/document" : "Loaded /markdown JSON"];
   if (fileName) {
     statusBits.push(fileName);
   }
@@ -267,7 +267,7 @@ export async function renderMarkdownImagePreview({
   const previews = await Promise.all(previewRefs.map(async (ref) => {
     const absoluteUrl = resolveMarkdownAssetUrl(imagesBaseUrl, ref);
     if (!absoluteUrl) {
-      return { ref, absoluteUrl: "", objectUrl: "", error: "无法解析图片地址" };
+      return { ref, absoluteUrl: "", objectUrl: "", error: "Cannot resolve image address." };
     }
     try {
       const resp = await fetchProtected(absoluteUrl);
@@ -279,7 +279,7 @@ export async function renderMarkdownImagePreview({
       markdownImageUrls.push(objectUrl);
       return { ref, absoluteUrl, objectUrl, error: "" };
     } catch (error) {
-      return { ref, absoluteUrl, objectUrl: "", error: error.message || "图片读取失败" };
+      return { ref, absoluteUrl, objectUrl: "", error: error.message || "Failed to read image" };
     }
   }));
   grid.innerHTML = previews.map((item) => `
@@ -287,7 +287,7 @@ export async function renderMarkdownImagePreview({
       <div class="detail-artifact-meta mono">${escapeHtml(item.ref)}</div>
       ${item.objectUrl
         ? `<img class="detail-markdown-image" src="${escapeHtml(item.objectUrl)}" alt="${escapeHtml(item.ref)}" />`
-        : `<div class="detail-empty">${escapeHtml(item.error || "图片不可用")}</div>`}
+        : `<div class="detail-empty">${escapeHtml(item.error || "Image unavailable")}</div>`}
       <div class="detail-artifact-meta mono">${escapeHtml(item.absoluteUrl || "-")}</div>
     </article>
   `).join("");

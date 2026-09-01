@@ -1,9 +1,9 @@
-"""工具注册表:name + JSON Schema + handler 的标准形状。
+"""Tool registry: name + JSON Schema + handler standard shape.
 
-约定与主流 agent 框架同构——将来若迁移到某个 SDK,工具定义原样搬走,
-只换循环外壳。每个工具返回可 JSON 序列化的 dict;检索类结果统一带
-(document_id, job_id, page_idx, block_id) 锚点,并由 agent 层编号成
-可引用的 ref。
+Conventions & Mainstream agent isomorphic framework——If migrating to a certain SDK,Copy tool definitions verbatim.,
+Only replace the loop shell. Each tool returns OK. JSON serialized dict;Retrieval results uniformly include.
+(document_id, job_id, page_idx, block_id) anchor, and numbered by agent layer
+Referenceable ref。
 """
 
 from __future__ import annotations
@@ -18,23 +18,23 @@ from .blocks import read_page_blocks
 from .config import Settings
 from .rust_client import RustApiClient
 
-# job_id 白名单：字母数字开头 + [-._] 组成，禁止路径分隔符/..。
-# 关键安全边界——job_id 来自模型工具参数（上下文含文档内容 = 提示注入面），
-# 直接拼进 data_root/jobs/<job_id> 前必须过这道闸，否则可目录穿越。
+# job_id Whitelist: starts with alphanumeric + [-._] Compose; forbid path separators/..。
+# Critical security boundary——job_id From model tool params (context includes doc content = Prompt injection surface
+# Concatenate directly. data_root/jobs/<job_id> Gate check mandatory. Prevents directory traversal.
 _SAFE_JOB_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 
 
 def _safe_job_root(settings: Settings, job_id: str) -> Path | None:
-    """job_id 合法则返回 jobs 根下的目录，否则 None（调用方按任务不存在处理）。"""
+    """job_id Return if valid. jobs directory under root, otherwise None(Caller handles as task not found)."""
     if not _SAFE_JOB_ID_RE.fullmatch(job_id) or ".." in job_id:
         return None
     return settings.data_root / "jobs" / job_id
 
 
 def _list_markdown_image_urls(job_root: Path, job_id: str, page_idx: int, *, limit: int = 8) -> list[str]:
-    """列出该页 OCR Markdown 图片,返回可鉴权拉取的 API 相对路径。
+    """List This Page OCR Markdown Image,Return pullable with authentication. API Relative path.
 
-    磁盘: jobs/<job>/md/images/page-<1-based>/...
+    Disk: jobs/<job>/md/images/page-<1-based>/...
     API:  /api/v1/jobs/<job>/markdown/images/<rel-without-images-prefix>
     """
     page_dir = job_root / "md" / "images" / f"page-{int(page_idx) + 1}"
@@ -88,7 +88,7 @@ class ToolRegistry:
             return {"error": f"unknown tool: {name}"}
         try:
             return tool.handler(arguments)
-        except Exception as exc:  # 工具失败作为结果反馈给模型,不中断循环
+        except Exception as exc:  # Return tool failure to model as result.,Don't break loop
             return {"error": f"{type(exc).__name__}: {exc}"}
 
 
@@ -104,7 +104,7 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
             limit=max(1, min(limit, 30)),
             document_id=document_id,
         )
-        # 给命中页挂上 Markdown 图路径,便于模型在回答里用 ![alt](url) 插图
+        # Attach to hit page. Markdown Graph path,Facilitate model usage in responses. ![alt](url) Illustration
         enriched_hits: list[dict[str, Any]] = []
         for hit in hits:
             if not isinstance(hit, dict):
@@ -127,13 +127,13 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
             payload["document_id"] = document_id
         if document_id and not enriched_hits:
             payload["hint"] = (
-                "该文档全文索引无命中：可能尚未建立 blocks_fts，"
-                "或关键词不在原文/译文中。可换关键词，或说明暂无证据。"
+                "Full-text index no hits: may not be built. blocks_fts，"
+                "or keyword not in original/Translating. Adjust keywords or state no evidence yet."
             )
         return payload
 
     def list_documents(arguments: dict[str, Any]) -> dict[str, Any]:
-        # 整本问答会话会注入 document_id：只返回当前文档，避免跨库噪声
+        # Entire Q&A session injected document_idReturn current document only to avoid cross-library noise.
         scoped_id = str(arguments.get("document_id") or "").strip()
         if scoped_id:
             try:
@@ -156,7 +156,7 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
             reading_status=str(arguments.get("reading_status") or ""),
             limit=int(arguments.get("limit") or 50),
         )
-        # 只回模型需要的字段,别把整条记录灌进上下文
+        # Return only fields required by model,Don't dump the entire record into context.
         return {
             "documents": [
                 {
@@ -175,7 +175,7 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
         page_idx = arguments.get("page_idx")
         if not document_id or page_idx is None:
             return {"error": "document_id and page_idx are required"}
-        # 优先请求里的 job_id（当前阅读任务，含历史 run），再回退 active_job_id
+        # Prioritize in request. job_id(current reading task, including history) run), then fallback to active_job_id
         job_id = str(arguments.get("job_id") or "").strip()
         if not job_id:
             document = rust.get_document(document_id)
@@ -240,15 +240,15 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
         [
             Tool(
                 name="list_documents",
-                description="列出图书馆中的文档(标题、标签、阅读状态)。回答涉及'哪篇文档/我的库里'时先用它确认范围。",
+                description="List documents in the library(Title, Tags, Read Status)No input.'Which document?/My Library'First use it to confirm the scope.",
                 parameters={
                     "type": "object",
                     "properties": {
-                        "tag": {"type": "string", "description": "按标签过滤,可选"},
+                        "tag": {"type": "string", "description": "Filter by tag,可选"},
                         "reading_status": {
                             "type": "string",
                             "enum": ["unread", "reading", "done"],
-                            "description": "按阅读状态过滤,可选",
+"description": "Filter by read status, optional",
                         },
                         "limit": {"type": "integer", "minimum": 1, "maximum": 200},
                     },
@@ -258,18 +258,18 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
             Tool(
                 name="search_fulltext",
                 description=(
-                    "全文检索(中英文均可),返回带 (document_id, job_id, page_idx, block_id) 锚点的命中片段;"
-                    "命中页若有 OCR 图会附 image_urls(可嵌入回答的 Markdown 图片路径)。"
-                    "这是找证据的主要工具,可多次换关键词调用。"
-                    "若会话已限定文档,请务必传 document_id,只在该文档内检索。"
+                    "Full-text search(English.),Return with (document_id, job_id, page_idx, block_id) Anchor match snippet;"
+                    "If hit page exists OCR Figure attached. image_urls(Embeddable in answers Markdown Image path)。"
+                    "Primary tool for finding evidence.,Call multiple times with different keywords."
+                    "If session is restricted to documents.,Be sure to pass. document_id,Search only within this document."
                 ),
                 parameters={
                     "type": "object",
                     "properties": {
-                        "query": {"type": "string", "description": "检索关键词或短语"},
+                        "query": {"type": "string", "description": "Search keywords or phrases"},
                         "document_id": {
                             "type": "string",
-                            "description": "限定单文档;整本问答时必传当前 document_id",
+                            "description": "Single document only;Current must be passed for full Q&A. document_id",
                         },
                         "limit": {"type": "integer", "minimum": 1, "maximum": 30},
                     },
@@ -280,9 +280,9 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
             Tool(
                 name="read_blocks",
                 description=(
-                    "读取某文档某页的原文与译文块,并附带该页 Markdown 图片 image_urls。"
-                    "用于查看检索命中处的完整上下文(传 around_block_id 以命中块为中心取窗口);"
-                    "回答图表相关问题时用 image_urls 嵌入 Markdown 图片。"
+"Read source and translation blocks for a given document page, and include that page's Markdown image image_urls."
+                    "View full context of the retrieval hit.(pass around_block_id Get window centered on hit block.);"
+                    "Use for chart-related questions. image_urls Embed Markdown Image."
                 ),
                 parameters={
                     "type": "object",
@@ -291,9 +291,9 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
                         "page_idx": {"type": "integer", "minimum": 0},
                         "job_id": {
                             "type": "string",
-                            "description": "优先读该任务产物;缺省用文档 active_job_id",
+                            "description": "Prioritize reading this task artifact.;Use documentation as default. active_job_id",
                         },
-                        "around_block_id": {"type": "string", "description": "以此块为中心取上下文,可选"},
+                        "around_block_id": {"type": "string", "description": "Get context centered on this block.,可选"},
                         "max_blocks": {"type": "integer", "minimum": 1, "maximum": 30},
                     },
                     "required": ["document_id", "page_idx"],
@@ -302,12 +302,12 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
             ),
             Tool(
                 name="search_favorites",
-                description="检索用户收藏过的句子/数据(可按关键词与文档过滤)。问题涉及'我收藏的/我标记过的'内容时使用。",
+                description="Retrieve user's bookmarked sentences./Data(Filter by keyword and document.)Bug in auth middleware. Token expiry check use `<` not `<=`. Fix:  ```python if token_expiry < now:  # ponytail: ceiling is millisecond precision; add when sub-second expiry required     raise AuthError("Token expired") ```'Favorites/Marked by me'Use with content.",
                 parameters={
                     "type": "object",
                     "properties": {
-                        "keyword": {"type": "string", "description": "在引文与备注里做关键词过滤,可选"},
-                        "document_id": {"type": "string", "description": "限定某文档,可选"},
+                        "keyword": {"type": "string", "description": "Filter keywords in citations and notes.,可选"},
+                        "document_id": {"type": "string", "description": "Restrict document,可选"},
                     },
                 },
                 handler=search_favorites,

@@ -1,6 +1,6 @@
-// 失败 tab 的"从断点恢复/重新运行"按钮绑定(蓝图 §1.2)。resume-actions.js
-// (kept)已经把 enabled/status 算好写进 overview.rerun,这里只做
-// disabled = !enabled || rerunPending 的组合与点击派发,不重复计算。
+// canonical stores recalculate entire system. optimize first. write back snapshot statusCardStore (blueprint risk 10:
+// (kept)already enabled/status Calculated and written into overview.rerun,here only do
+// disabled = !enabled || rerunPending Combination and click dispatch,Avoid redundant calculation.
 
 export function useRerunAction({ overview, rerunPending, controller }) {
   const rerun = overview.rerun || { enabled: false, status: "" };

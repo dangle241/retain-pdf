@@ -1,4 +1,4 @@
-/* react-pdf 引擎：滚动壳 / 双栏网格 / 页槽 / 文本层 / 空态错误 */
+/* react-pdf Engine: scroll shell / Two-column grid / Page slot / Text layer / Empty state error */
 
 /* —— react-pdf engine (R1) —— */
 .reader-react-root {
@@ -33,7 +33,7 @@
   pointer-events: none;
 }
 
-/* 对齐旧 #reader-scroll-shell：唯一纵向滚动容器；双栏不各自 overflow */
+/* Align legacy #reader-scroll-shellAlign with old #reader-scroll-shell: sole vertical scroll container; dual columns do not overflow individually overflow */
 .reader-react-scroll-shell {
   position: absolute;
   inset: 0;
@@ -48,7 +48,7 @@
   display: none;
 }
 
-/* 对齐旧 .reader-grid：两列并排、内容撑高、由 shell 统一滚 */
+/* Align with old .reader-grid: two columns side-by-side, content-driven height, shell-managed scrolling shell Unified scroll */
 .reader-react-grid {
   position: relative;
   display: grid;
@@ -61,13 +61,13 @@
   box-sizing: border-box;
 }
 
-/* 对照：左右各占半屏，用满 shell 宽度 */
+/* Side-by-side: 50% width each, full height. shell width */
 .reader-react-grid.reader-mode-compare {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   width: 100%;
 }
 
-/* 原文/译文：单栏铺满可视区域，不再卡在中间 1040px 窄条 */
+/* Original/body width 100vw â skipped: margin, add when responsive layout needed. 1040px Narrow strip */
 .reader-react-grid.reader-mode-source,
 .reader-react-grid.reader-mode-translated {
   grid-template-columns: minmax(0, 1fr);
@@ -76,7 +76,7 @@
   padding-inline: 0;
 }
 
-/* 模式切换：隐藏栏不卸载 */
+/* Mode switch: hidden bar stays mounted */
 .reader-react-pdf-pane.is-hidden {
   display: none !important;
 }
@@ -85,7 +85,7 @@
   min-width: 0;
   width: 100%;
   height: auto;
-  /* 放大超出栏宽时栏内横向滚；100% 适应时铺满整栏 */
+  /* Horizontal scroll inside column when zoom exceeds width.100% Fills full column when adapting. */
   overflow-x: auto;
   overflow-y: visible;
   background: var(--bg, var(--reader-page-bg));
@@ -107,7 +107,7 @@
   border-left: 1px solid var(--line);
 }
 
-/* 页槽：父级 flex 居中；只留底边距做页间距 */
+/* Slot: parent flex Center. Keep bottom margin for page spacing. */
 .reader-react-pdf-page-slot {
   display: block;
   margin: 0 0 12px;
@@ -123,7 +123,7 @@
 }
 
 .reader-react-pdf-wrap {
-  /* 对齐旧 .reader-viewer-host padding；随内容变宽，至少铺满栏宽以便居中 */
+/* Align with old .reader-viewer-host padding width: 100%; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -146,14 +146,14 @@
   background: var(--paper);
 }
 
-/* 不要覆盖 canvas 的 width/height：react-pdf 已按 DPR 设置 CSS 尺寸，
-   max-width:100% 会把高清 canvas 压扁拉伸 → 发糊 */
+/* Do not override canvas width/height: react-pdf uses DPR to set CSS Dimensions. max-width:100% renders HD canvas, flattening/stretching causes blur */
+   max-width:100% Renders HD canvas Flatten stretch → Blur */
 .reader-react-pdf-page canvas {
   display: block;
   max-width: none !important;
 }
 
-/* react-pdf 文本层：透明字可选中 */
+/* react-pdf Text layer: transparent text selectable */
 .reader-react-pdf-page {
   position: relative;
 }
@@ -174,7 +174,7 @@
   cursor: text;
   transform-origin: 0 0;
 }
-/* 选区高亮：暖黄荧光笔感，比冷蓝更像「批注」 */
+/* Selection highlight: warm yellow highlighter feel, more like "annotation" than cold blue "highlight" */
 .reader-react-pdf-page .textLayer ::selection {
   background: color-mix(in srgb, var(--warn) 45%, transparent);
   color: transparent;

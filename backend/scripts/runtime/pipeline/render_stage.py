@@ -157,7 +157,7 @@ def run_render_stage(
     reset_render_page_progress()
     emit_stage_transition(
         stage="rendering",
-        message="开始渲染翻译 PDF",
+        message="Start rendering translation PDF",
         progress_current=0,
         progress_total=render_plan.render_total,
         payload={"effective_render_mode": render_plan.effective_render_mode},
@@ -186,7 +186,7 @@ def run_render_stage(
     )
     emit_stage_progress(
         stage="rendering",
-        message="渲染页面完成",
+        message="Page rendered.",
         progress_current=pages_rendered,
         progress_total=render_plan.render_total or pages_rendered,
         payload={"effective_render_mode": render_plan.effective_render_mode},

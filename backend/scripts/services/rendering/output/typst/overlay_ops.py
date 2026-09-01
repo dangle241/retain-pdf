@@ -216,7 +216,7 @@ def overlay_translated_pages_on_doc(
         emit_render_compile_progress(
             current=1,
             total=4,
-            message=f"正在编译整本 Typst overlay，共 {len(ordered_page_indices)} 页",
+message=f"Compiling full Typst overlay, total {len(ordered_page_indices)} pages",
             payload={"render_stage": "typst_book_compile_start"},
         )
         if use_chunked_overlay_compile:
@@ -234,7 +234,7 @@ def overlay_translated_pages_on_doc(
             emit_render_compile_progress(
                 current=4,
                 total=4,
-                message=f"分片 Typst overlay 编译完成，共 {len(ordered_page_indices)} 页",
+message=f"Chunked Typst overlay compilation complete, total {len(ordered_page_indices)} pages",
                 payload={
                     "render_stage": "typst_chunked_book_compile_done",
                     "chunk_count": chunk_result.chunk_count,
@@ -293,7 +293,7 @@ def overlay_translated_pages_on_doc(
         emit_render_compile_progress(
             current=4,
             total=4,
-            message=f"整本 Typst overlay 编译完成，共 {len(ordered_page_indices)} 页",
+message=f"Full Typst overlay compilation complete, total {len(ordered_page_indices)} pages",
             payload={"render_stage": "typst_book_compile_done"},
         )
         page_size_mismatches = overlay_pdf_size_mismatches(doc, ordered_page_indices, overlay_pdf)
@@ -411,7 +411,7 @@ def overlay_translated_pages_on_doc(
             emit_render_compile_progress(
                 current=1,
                 total=max(len(failed_overlay_indices), 1),
-                message=f"整本 Typst 编译失败，优先修复不兼容页面：第 {failed_pages_text} 页",
+message=f"Full Typst compilation failed, prioritizing fix for incompatible pages: page {failed_pages_text}",
                 payload={
                     "render_stage": "typst_targeted_sanitize",
                     "candidate_pages": [page_specs[index][0] for index in sorted(failed_overlay_indices)],
@@ -422,7 +422,7 @@ def overlay_translated_pages_on_doc(
         emit_render_compile_progress(
             current=2,
             total=4,
-            message="整本 Typst 编译失败，开始检查不兼容页面",
+message="Full Typst compilation failed, checking for incompatible pages",
             payload={"render_stage": "typst_book_compile_failed"},
         )
         compile_errors = [exc.to_dict() if isinstance(exc, TypstCompileError) else str(exc)]
@@ -444,7 +444,7 @@ def overlay_translated_pages_on_doc(
     emit_render_compile_progress(
         current=3,
         total=4,
-        message="Typst 不兼容页面检查完成",
+message="Typst incompatible page check complete",
         payload={"render_stage": "typst_sanitize_done"},
     )
     sanitized_compile_started = time.perf_counter()
@@ -455,7 +455,7 @@ def overlay_translated_pages_on_doc(
             emit_render_compile_progress(
                 current=3,
                 total=4,
-                message="正在重新编译修复后的整本 Typst overlay",
+message="Recompiling fixed full Typst overlay",
                 payload={"render_stage": "typst_sanitized_book_compile_start"},
             )
             overlay_pdf = compile_book_overlay_pdf(
@@ -470,7 +470,7 @@ def overlay_translated_pages_on_doc(
             emit_render_compile_progress(
                 current=4,
                 total=4,
-                message=f"修复后的整本 Typst overlay 编译完成，共 {len(ordered_page_indices)} 页",
+message=f"Fixed full Typst overlay compilation complete, total {len(ordered_page_indices)} pages",
                 payload={"render_stage": "typst_sanitized_book_compile_done"},
             )
             if (
@@ -558,7 +558,7 @@ def overlay_translated_pages_on_doc(
         emit_render_page_progress(
             current=0,
             total=len(ordered_page_indices),
-            message=f"大文档跳过整本重编译，改为逐页编译 {len(ordered_page_indices)} 页",
+message=f"Large document skipping full recompilation; switching to page-by-page compilation for {len(ordered_page_indices)} pages",
             payload={"render_stage": "large_doc_page_overlay_compile"},
         )
 

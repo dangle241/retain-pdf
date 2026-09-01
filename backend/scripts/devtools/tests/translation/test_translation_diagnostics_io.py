@@ -17,7 +17,7 @@ def test_aggregate_payload_diagnostics_keeps_items_with_final_status_only() -> N
             {
                 "item_id": "p004-b030",
                 "final_status": "translated",
-                "translated_text": "译文",
+"translated_text": "Translation",
             }
         ]
     }
@@ -136,7 +136,7 @@ def test_repaired_item_translation_artifact_overrides_stale_failed_diagnostics()
             {
                 "item_id": "p002-b003",
                 "final_status": "translated",
-                "translated_text": "已经修复的译文",
+                "translated_text": "Fixed translation",
                 "translation_diagnostics": {
                     "route_path": ["block_level", "direct_typst", "failed"],
                     "degradation_reason": "protocol_shell_repeated",
@@ -161,7 +161,7 @@ def test_garbled_reconstructed_item_with_stale_failed_item_status_is_not_blockin
             {
                 "item_id": "p002-b004",
                 "final_status": "failed",
-                "translated_text": "乱码重建后的译文",
+                "translated_text": "Rebuilt translation",
                 "classification_label": "llm_reconstructed_garbled",
                 "translation_diagnostics": {
                     "route_path": ["block_level", "direct_typst", "validation", "failed"],

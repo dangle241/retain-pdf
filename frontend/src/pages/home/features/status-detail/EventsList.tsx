@@ -1,10 +1,10 @@
-// 事件流列表:src/js/status-detail/events.js 的 buildEventsPresentation
-// (字符串模板拼接)的 JSX 重写,类名/结构照搬(蓝图 §1.1 判决表:events.js
-// markup 拼接部分不用,改读原始数据数组;逐条断言取代 markup 断言)。
+// Event Stream List: buildEventsPresentation in src/js/status-detail/events.js
+// JSX rewrite of (String template concatenation), copy class names/structure (Blueprint Â§1.1 Verdict table: events.js
+// markup Concatenation unused.,Read raw data array;Replace with individual assertions. markup assertions).
 //
-// tone 判定 + 排序规则从 events.js 原样照搬(与 detail 页 EventsTimeline.jsx
-// 的 formatEventPayload 先例一致,小函数直接拷贝进组件文件,不新增一层
-// model.js——旧文件本身不可 import,拷贝面很小)。
+// tone Determine + Sort order from events.js Copy as-is (consistent with detail page EventsTimeline.jsx
+// formatEventPayload precedent, Inline small functions into component file, No new layer
+// model.js——Old file unusable. import,Copy area small)。
 
 import { useState } from "react";
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
@@ -55,7 +55,7 @@ function EventItem({ item }) {
       {showProgress ? <div className="event-progress">{record.progressText}</div> : null}
       {payloadText ? (
         <details className="event-payload-wrap" open={payloadOpen} onToggle={(event) => setPayloadOpen(event.currentTarget.open)}>
-          <summary className="event-payload-toggle">查看 payload</summary>
+<summary className="event-payload-toggle">View payload</summary>
           <pre className="event-payload">{payloadText}</pre>
         </details>
       ) : null}
@@ -65,7 +65,7 @@ function EventItem({ item }) {
 
 export function EventsList({ eventsPayload }) {
   const items = Array.isArray(eventsPayload?.items) ? eventsPayload.items : [];
-  // 文案承诺"按时间倒序",这里显式排序,不依赖后端返回顺序(照搬 events.js)
+// Copy commitment "reverse chronological order", explicit sort here, do not rely on backend order (copy events.js)
   const entries = items
     .map((item) => ({ item, record: normalizedStageEventRecord(item) }))
     .sort((a, b) => (Date.parse(b.record.timestamp) || 0) - (Date.parse(a.record.timestamp) || 0));
@@ -73,11 +73,11 @@ export function EventsList({ eventsPayload }) {
   const ids = STATUS_DETAIL_DIALOG_IDS.events;
   return (
     <>
-      <div id={ids.empty} className={hasItems ? "events-empty hidden" : "events-empty"}>暂无事件</div>
+<div id={ids.empty} className={hasItems ? "events-empty hidden" : "events-empty"}>No events</div>
       <div id={ids.list} className={hasItems ? "events-list" : "events-list hidden"}>
         {entries.map(({ item }, index) => (
-          // 排序后位次前缀保证唯一——不能只用 item.seq/event_id(mock/真实数据都
-          // 观测到部分事件缺这两个字段,退回 index 会和"确实带 seq"的条目撞键)。
+          // Ensure unique rank prefix after sorting.——Cannot use only item.seq/event_id(mock/Real data
+          // Observed some events missing these two fields,Go back index Will"Confirmed seq"Entry key collision)。
           <EventItem key={`${index}-${item?.seq ?? item?.event_id ?? ""}`} item={item} />
         ))}
       </div>
@@ -87,5 +87,5 @@ export function EventsList({ eventsPayload }) {
 
 export function eventsStatusText(eventsPayload) {
   const items = Array.isArray(eventsPayload?.items) ? eventsPayload.items : [];
-  return items.length > 0 ? `最近 ${items.length} 条` : "暂无事件";
+return items.length > 0 ? `Last ${items.length} items` : "No events";
 }

@@ -2,11 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// CredentialsDialog(Phase 3 dialogs 群,蓝图 §2)组件级测试。
-// 校验:契约 id、openBrowserCredentials 事件打开(含 setupMode 首次配置态)、
-// OCR/DeepSeek 校验三态、保存两分支(浏览器/桌面)、隐藏 input 与
-// credentialsStatePort 双向同步、SettingsHubDialog 的 #credentials-btn 触发点、
-// 词表/更新两个 tab 的占位 id 契约。
+// CredentialsDialog (Phase 3 dialogs group, Blueprint Â§2) component test.
+// Verify: contract id, openBrowserCredentials Event open (including setupMode first-run setup state),
+// OCR/DeepSeek Validate tri-state; save two branches (browser/desktop). Hide input and
+// credentialsStatePort two-way sync. SettingsHubDialog #credentials-btn trigger points,
+// Glossary/Update two tabs placeholder id contract.
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost/index.html" });
 for (const key of ["window", "document", "HTMLElement", "HTMLInputElement", "CustomEvent", "Event", "KeyboardEvent", "MouseEvent", "Node", "MutationObserver", "NodeFilter"]) {
@@ -19,10 +19,10 @@ for (const key of ["window", "document", "HTMLElement", "HTMLInputElement", "Cus
 globalThis.window = dom.window;
 globalThis.localStorage = dom.window.localStorage;
 globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
-// Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
-// (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
-// animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
-// 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。
+// Radix Presence/Tabs (introduced in Phase B) requires cancelAnimationFrame under jsdom
+// (TabsContent mount animation timer cleanup) and getComputedStyle (Presence reads
+// animation-name to determine if exit animation ended) ââ implemented on jsdom window, but not
+// copied to bare global like requestAnimationFrame; adding it here.
 globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
 globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
 globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -46,7 +46,7 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-  assert.fail(`等待超时：${description}`);
+assert.fail(`Timeout waiting for: ${description}`);
 }
 
 function byId(id) {
@@ -54,11 +54,11 @@ function byId(id) {
 }
 
 function click(element) {
-  // Radix Tabs 的 Trigger 激活逻辑挂在 onMouseDown(不是 onClick)上——阶段 B
-  // 迁移到 Radix Tabs 后(CredentialsDialog/SettingsHubDialog 的 tab),只
-  // dispatch "click" 不会触发 tab 切换。真实浏览器点击本来就是
-  // mousedown→mouseup→click 全套,这里补上 mousedown 让模拟点击更贴近真实
-  // 交互,而不是放宽任何断言。
+// Radix Tabs Trigger activation logic is on onMouseDown (not onClick) ââ Phase B
+// After migrating to Radix Tabs (CredentialsDialog/SettingsHubDialog tabs), only
+// dispatching "click" does not trigger tab switching. Real browser clicks are
+// a full mousedownâmouseupâclick sequence; adding mousedown to make simulated click more realistic
+// interaction, rather than relaxing any assertions.
   element.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
   element.dispatchEvent(new dom.window.MouseEvent("click", { bubbles: true }));
 }
@@ -76,18 +76,18 @@ function mockValidators(overrides = {}) {
         return { ok: false, status: "unauthorized", summary: "缺少 token" };
       }
       if (token === "bad-token") {
-        return { ok: false, status: "unauthorized", summary: "Token 无效" };
+        return { ok: false, status: "unauthorized", summary: "Token Invalid" };
       }
-      return { ok: true, status: "valid", summary: "Token 有效" };
+      return { ok: true, status: "valid", summary: "Token Valid" };
     },
     validateDeepSeekToken: async (_apiPrefix, payload) => {
       if (!payload?.api_key) {
         return { ok: false, status: 0 };
       }
       if (payload.api_key === "bad-key") {
-        return { ok: false, status: 401, summary: "DeepSeek Key 无效或已过期。" };
+        return { ok: false, status: 401, summary: "DeepSeek Key Invalid or expired." };
       }
-      return { ok: true, status: 200, summary: "DeepSeek 接口连接成功。" };
+      return { ok: true, status: 200, summary: "DeepSeek Connected." };
     },
     queryDeepSeekBalance: async () => ({
       ok: true,
@@ -119,35 +119,35 @@ async function mountHome(services) {
   services.initialize();
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-  await waitFor(() => byId("app-shell"), "HomeApp 首帧渲染");
+await waitFor(() => byId("app-shell"), "HomeApp first frame rendered");
   await wait(0);
   return { host, root };
 }
 
-test("CredentialsDialog：常规入口走设置 API；setupMode 仍开独立首次配置门", async () => {
+test("CredentialsDialog: Normal entry goes through Settings API; setupMode still opens the independent first-time configuration dialog API；setupMode Keep first-time setup independent", async () => {
   const services = createServices();
   const { host, root } = await mountHome(services);
 
-  // 阶段 C(shadcn 改造):CredentialsDialog 换成 Radix Dialog 后不 forceMount
-  // Content——对话框关闭时整个内容(含下面这批契约 id)都不挂载。
-  assert.equal(byId("browser-credentials-dialog"), null, "初始未打开时不挂载");
+// Phase C (shadcn refactor): CredentialsDialog no longer forceMounts after switching to Radix Dialog
+  // Content——Entire content on dialog close(Contains following contracts id)Do not mount.
+  assert.equal(byId("browser-credentials-dialog"), null, "Skip mount if initially closed.");
 
-  // 常规：openBrowserCredentials → 设置中心 API 区（唯一日常入口）
+// Regular: openBrowserCredentials â Settings Center API District (sole daily entry)
   dom.window.document.dispatchEvent(new dom.window.CustomEvent(APP_EVENTS.openBrowserCredentials));
-  await waitFor(() => byId("app-settings-dialog") !== null, "常规打开设置中心");
-  await waitFor(() => byId("browser-api-key") !== null, "API 区内嵌工作台");
-  assert.equal(byId("browser-credentials-dialog"), null, "常规不再弹独立接口设置窗");
-  assert.ok(byId("browser-credentials-save-btn"), "内嵌工作台有保存");
+  await waitFor(() => byId("app-settings-dialog") !== null, "Open Settings Center");
+  await waitFor(() => byId("browser-api-key") !== null, "API In-Area Embedded Workbench");
+assert.equal(byId("browser-credentials-dialog"), null, "No longer pops independent interface settings window");
+  assert.ok(byId("browser-credentials-save-btn"), "Embedded workspace saved.");
 
   services.settingsHub.dialogStore.close();
-  await waitFor(() => byId("app-settings-dialog") === null, "关闭设置");
+  await waitFor(() => byId("app-settings-dialog") === null, "Close Settings");
 
-  // ---- setupMode 首次配置态:独立弹窗，tabs 隐藏,标题/保存文案切换 ----
+// ---- setupMode first-time config: Standalone modal tabs hidden, title/Save copy toggle ----
   dom.window.document.dispatchEvent(new dom.window.CustomEvent(APP_EVENTS.openBrowserCredentials, {
     detail: { setupMode: true },
   }));
-  await waitFor(() => byId("browser-credentials-dialog") !== null, "setupMode 打开独立弹窗");
-  await waitFor(() => byId("browser-credentials-title")?.textContent === "首次配置", "setupMode 标题切换");
+  await waitFor(() => byId("browser-credentials-dialog") !== null, "setupMode Open Standalone Popup");
+await waitFor(() => byId("browser-credentials-title")?.textContent === "First-time Configuration", "setupMode Toggle Title");
 
   for (const id of [
     "browser-credentials-title", "browser-credentials-close-btn", "browser-credentials-status",
@@ -156,10 +156,10 @@ test("CredentialsDialog：常规入口走设置 API；setupMode 仍开独立首�
     "browser-paddle-validation", "browser-api-key", "browser-deepseek-validate-btn",
     "browser-deepseek-validation", "browser-deepseek-top-up-link", "browser-job-math-mode",
   ]) {
-    assert.ok(byId(id), `契约 id 缺失：#${id}`);
+assert.ok(byId(id), `Contract id missing: #${id}`);
   }
 
-  assert.equal(byId("browser-credentials-save-btn").textContent, "保存并启动");
+assert.equal(byId("browser-credentials-save-btn").textContent, "Save and Start");
   assert.equal(byId("browser-credentials-tabs").classList.contains("hidden"), true);
   assert.equal(byId("browser-credentials-dialog").dataset.setupMode, "1");
 
@@ -168,103 +168,103 @@ test("CredentialsDialog：常规入口走设置 API；setupMode 仍开独立首�
   host.remove();
 });
 
-test("凭据入口：设置 API 区内嵌工作台；#credential-gate-action 也打开设置 API", async () => {
+test("Credentials entry: Settings API Inline workbench in zone.#credential-gate-action Also open settings API", async () => {
   const services = createServices();
   const { host, root } = await mountHome(services);
 
-  // 设置 → API 区：CredentialsWorkbench 直接内嵌(v2 大改,门厅按钮
-  // #credentials-btn 退役),不再弹 browser-credentials-dialog。
+// Settings â API Zone: CredentialsWorkbench embedded directly. (v2 major refactor, Lobby button
+  // #credentials-btn User request retire. Remove code. Test.),Don't show again browser-credentials-dialog。
   click(byId("app-settings-btn"));
-  await waitFor(() => byId("app-settings-dialog") !== null, "设置对话框打开");
-  await waitFor(() => byId("browser-credentials-tabs") !== null, "API 区内嵌凭据工作台(tabs 挂载)");
-  assert.ok(byId("browser-credentials-save-btn"), "内嵌工作台带保存按钮");
-  assert.equal(byId("credentials-btn"), null, "门厅按钮已退役");
-  assert.equal(byId("browser-credentials-dialog"), null, "设置内不再弹二层凭据对话框");
+await waitFor(() => byId("app-settings-dialog") !== null, "Settings dialog opened");
+await waitFor(() => byId("browser-credentials-tabs") !== null, "Credentials workbench embedded in API zone (tabs mounted)");
+  assert.ok(byId("browser-credentials-save-btn"), "Embedded workbench with Save button.");
+  assert.equal(byId("credentials-btn"), null, "Lobby button retired");
+  assert.equal(byId("browser-credentials-dialog"), null, "no longer pop up second-layer credential dialog in settings");
 
   services.settingsHub.dialogStore.close();
-  await waitFor(() => byId("app-settings-dialog") === null, "关闭设置对话框");
+  await waitFor(() => byId("app-settings-dialog") === null, "Close Settings");
 
-  // 阶段 C(shadcn 改造):credential-gate-action 挂在 TranslationWorkflowDialog
-  // 内部(HeroUpload 的上传引导区),该对话框换成 Radix Dialog 后不 forceMount
-  // Content——需要先打开一次才会挂载(同其余阶段 C 对话框的先例)。
+// Phase C (shadcn refactor): credential-gate-action is attached to TranslationWorkflowDialog
+// Inside (HeroUpload upload guidance area), this dialog no longer forceMounts after switching to Radix Dialog
+// Content ââ First open required before mount (following Phase C dialog precedents).
   services.workflowDialog.openUpload();
-  await waitFor(() => byId("credential-gate-action"), "工作流对话框打开后 credential-gate-action 挂载");
+await waitFor(() => byId("credential-gate-action"), "credential-gate-action mounted after workflow dialog opens");
   click(byId("credential-gate-action"));
-  await waitFor(() => byId("app-settings-dialog") !== null, "credential-gate-action 打开设置中心");
-  await waitFor(() => byId("browser-api-key") !== null, "落到 API 设置工作台");
-  assert.equal(byId("browser-credentials-dialog"), null, "常规门禁不弹独立接口窗");
+  await waitFor(() => byId("app-settings-dialog") !== null, "credential-gate-action Open Settings");
+await waitFor(() => byId("browser-api-key") !== null, "Land on API settings workbench");
+  assert.equal(byId("browser-credentials-dialog"), null, "Regular access control: no separate pop-up window.");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("CredentialsDialog：OCR/DeepSeek 校验三态(缺失/错误/通过)", async () => {
+test("CredentialsDialog: OCR/DeepSeek Tri-state Validation (Missing/Error/Pass)", async () => {
   const services = createServices();
   const { host, root } = await mountHome(services);
 
-  // 校验走设置内嵌工作台（与日常入口一致）
+  // Validation uses embedded workbench in settings (consistent with daily entry).
   dom.window.document.dispatchEvent(new dom.window.CustomEvent(APP_EVENTS.openBrowserCredentials));
-  await waitFor(() => byId("app-settings-dialog") !== null, "打开设置");
-  await waitFor(() => byId("browser-paddle-validate-btn") !== null, "API 工作台就绪");
+  await waitFor(() => byId("app-settings-dialog") !== null, "Open Settings");
+  await waitFor(() => byId("browser-paddle-validate-btn") !== null, "API Workspace ready");
 
-  // ---- OCR(paddle):缺失 → 错误 → 通过 ----
+// ---- OCR(paddle): Missing â Error â Pass ----
   click(byId("browser-paddle-validate-btn"));
-  await waitFor(() => byId("browser-paddle-validation").title === "请先填写 Paddle Access Token。", "OCR 缺失态");
+await waitFor(() => byId("browser-paddle-validation").title === "Please fill in the Paddle Access Token first.", "OCR Missing state");
   assert.equal(byId("browser-paddle-validation").classList.contains("is-error"), true);
 
   typeInput(byId("browser-paddle-token"), "bad-token");
   click(byId("browser-paddle-validate-btn"));
-  await waitFor(() => byId("browser-paddle-validation").title === "Token 无效", "OCR 错误态");
+await waitFor(() => byId("browser-paddle-validation").title === "Invalid Token", "OCR error state");
   assert.equal(byId("browser-paddle-validation").classList.contains("is-error"), true);
 
   typeInput(byId("browser-paddle-token"), "good-token");
   click(byId("browser-paddle-validate-btn"));
-  await waitFor(() => byId("browser-paddle-validation").title === "Token 有效", "OCR 通过态");
+await waitFor(() => byId("browser-paddle-validation").title === "Token Valid", "OCR pass state");
   assert.equal(byId("browser-paddle-validation").classList.contains("is-valid"), true);
 
-  // ---- DeepSeek:缺失 → 错误 → 通过(含充值提示,余额 < 2 元时才出现——
-  //      mock 返回 88 元,不应显示充值链接) ----
-  // 缺失态:deepseek-flow.js(kept)的 handleBrowserDeepSeekValidate 对"缺少
-  // Key"分支直接 return,不写校验徽标(与 OCR 分支的语义不同,这是既有
-  // 业务逻辑,不是本域重写的行为)——缺失态改由保存按钮的守卫触发验证。
+// ---- DeepSeek: Missing â Error â Pass (Includes recharge prompt, balance < 2 only appears at Yuan time.ââ
+//      mock returns 88 Yuan, Hide recharge link.) ----
+// Missing state: handleBrowserDeepSeekValidate in deepseek-flow.js(kept) for "Missing
+// Key" direct branch return, Skip logo validation. YAGNI. (Differs from OCR Branch semantics, Existing.
+  // Business logic,Non-origin rewrite behavior)——Missing state validation triggered by save button guard.
   click(byId("browser-credentials-save-btn"));
-  await waitFor(() => byId("browser-deepseek-validation").title === "请先填写 DeepSeek Key。", "DeepSeek 缺失态(经保存守卫触发)");
+await waitFor(() => byId("browser-deepseek-validation").title === "Please fill in the DeepSeek Key first.", "DeepSeek missing state (triggered by save guard)");
   assert.equal(byId("browser-deepseek-validation").classList.contains("is-error"), true);
-  assert.notEqual(byId("app-settings-dialog"), null, "缺字段时保存应被拦截,设置对话框不关闭");
+  assert.notEqual(byId("app-settings-dialog"), null, "Validation failed. Missing fields. Fix: Add field checks before save.,dialog.showModal() → skipped: close event, add when modal needs closing");
 
   typeInput(byId("browser-api-key"), "bad-key");
   click(byId("browser-deepseek-validate-btn"));
-  await waitFor(() => byId("browser-deepseek-validation").title === "DeepSeek Key 无效或已过期。", "DeepSeek 错误态");
+await waitFor(() => byId("browser-deepseek-validation").title === "DeepSeek Key is invalid or expired.", "DeepSeek error state");
   assert.equal(byId("browser-deepseek-validation").classList.contains("is-error"), true);
   assert.equal(byId("browser-deepseek-top-up-link").classList.contains("hidden"), true);
 
   typeInput(byId("browser-api-key"), "good-key");
   click(byId("browser-deepseek-validate-btn"));
-  await waitFor(() => byId("browser-deepseek-validation").classList.contains("is-valid"), "DeepSeek 通过态");
-  assert.match(byId("browser-deepseek-validation").title, /余额 CNY 88\.00/);
-  assert.equal(byId("browser-deepseek-top-up-link").classList.contains("hidden"), true, "余额充足不提示充值");
+  await waitFor(() => byId("browser-deepseek-validation").classList.contains("is-valid"), "DeepSeek Passed");
+assert.match(byId("browser-deepseek-validation").title, /ä½é¢ CNY 88\.00/);
+  assert.equal(byId("browser-deepseek-top-up-link").classList.contains("hidden"), true, "No recharge prompt when balance sufficient.");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("CredentialsDialog：保存(浏览器模式)——写隐藏 input、同步 credentialsStatePort", async () => {
+test("CredentialsDialog: Save(browser mode)——Write Hidden inputSync credentialsStatePort", async () => {
   const services = createServices();
   const { host, root } = await mountHome(services);
 
-  // 阶段 C(shadcn 改造):paddle_token/api_key/ocr_provider 等隐藏 input
-  // (HiddenCredentialInputs)挂在 TranslationWorkflowDialog 内部(job-form),
-  // 该对话框换成 Radix Dialog 后不 forceMount Content——需要先打开一次才会
-  // 挂载(同其余阶段 C 对话框的先例)。
+// Phase C (shadcn refactor): hide inputs like paddle_token/api_key/ocr_provider
+// (HiddenCredentialInputs) mounted inside TranslationWorkflowDialog (job-form),
+// After switching this dialog to Radix Dialog, Content is not forceMountedâmust open once to
+// mount (following precedents of other Phase C dialogs).
   services.workflowDialog.openUpload();
-  await waitFor(() => byId("paddle_token"), "工作流对话框打开后隐藏 input 挂载");
+await waitFor(() => byId("paddle_token"), "Hide after workflow dialog opens. input mounted");
 
-  // 常规保存入口：设置 → API
+// Regular save entry: Settings â API
   dom.window.document.dispatchEvent(new dom.window.CustomEvent(APP_EVENTS.openBrowserCredentials));
-  await waitFor(() => byId("app-settings-dialog") !== null, "打开设置");
-  await waitFor(() => byId("browser-api-key") !== null, "API 工作台就绪");
+await waitFor(() => byId("app-settings-dialog") !== null, "Open settings");
+await waitFor(() => byId("browser-api-key") !== null, "API workbench ready");
 
   typeInput(byId("browser-paddle-token"), "paddle-secret");
   typeInput(byId("browser-api-key"), "deepseek-secret");
@@ -272,11 +272,11 @@ test("CredentialsDialog：保存(浏览器模式)——写隐藏 input、同步 
   click(byId("browser-credentials-save-btn"));
   await waitFor(
     () => defaultCredentialsStatePort.getCredentials().modelApiKey === "deepseek-secret",
-    "保存后 credentialsStatePort 更新",
+"After saving. credentialsStatePort updated",
   );
 
-  assert.equal(byId("paddle_token").value, "paddle-secret", "隐藏 input 桥接:paddle_token");
-  assert.equal(byId("api_key").value, "deepseek-secret", "隐藏 input 桥接:api_key");
+  assert.equal(byId("paddle_token").value, "paddle-secret", "Hide input Bridge:paddle_token");
+assert.equal(byId("api_key").value, "deepseek-secret", "Hidden input bridge:api_key");
   assert.equal(byId("ocr_provider").value, "paddle");
 
   const credentials = defaultCredentialsStatePort.getCredentials();
@@ -288,7 +288,7 @@ test("CredentialsDialog：保存(浏览器模式)——写隐藏 input、同步 
   host.remove();
 });
 
-test("CredentialsDialog：保存(桌面模式)——走 saveDesktopConfig 分支", async () => {
+test("CredentialsDialog: Save (Desktop Mode) â use saveDesktopConfig branch", async () => {
   const desktopCalls = [];
   const services = createServices({
     initialDesktopMode: true,
@@ -300,122 +300,122 @@ test("CredentialsDialog：保存(桌面模式)——走 saveDesktopConfig 分支
   });
   const { host, root } = await mountHome(services);
 
-  // 阶段 C(shadcn 改造):saveDesktopConfig 分支同样会读 HiddenCredentialInputs
-  // 挂在 TranslationWorkflowDialog 内部的隐藏 input(paddle_token 等),需要先
-  // 打开一次工作流对话框才会挂载。
+// Phase C (shadcn refactor): saveDesktopConfig branch also reads HiddenCredentialInputs
+// Hidden inputs (paddle_token etc.) inside TranslationWorkflowDialog require
+// the workflow dialog to be opened once before they are mounted.
   services.workflowDialog.openUpload();
-  await waitFor(() => byId("paddle_token"), "工作流对话框打开后隐藏 input 挂载");
+await waitFor(() => byId("paddle_token"), "Hidden input mounted after workflow dialog opens");
 
   dom.window.document.dispatchEvent(new dom.window.CustomEvent(APP_EVENTS.openBrowserCredentials, {
     detail: { setupMode: true },
   }));
-  await waitFor(() => byId("browser-credentials-dialog") !== null, "打开对话框(setupMode)");
+  await waitFor(() => byId("browser-credentials-dialog") !== null, "Open Dialog(setupMode)");
 
   typeInput(byId("browser-paddle-token"), "paddle-desktop");
   typeInput(byId("browser-api-key"), "deepseek-desktop");
 
   click(byId("browser-credentials-save-btn"));
-  await waitFor(() => desktopCalls.length === 1, "saveDesktopConfig 被调用");
+  await waitFor(() => desktopCalls.length === 1, "saveDesktopConfig Called");
   assert.equal(desktopCalls[0].browserConfig.modelApiKey, "deepseek-desktop");
   assert.equal(desktopCalls[0].browserConfig.paddleToken, "paddle-desktop");
-  assert.equal(desktopCalls[0].browserConfig.markConfigured, true, "setupMode 下应标记首次配置完成");
-  await waitFor(() => byId("browser-credentials-dialog") === null, "保存成功后对话框关闭");
+  assert.equal(desktopCalls[0].browserConfig.markConfigured, true, "setupMode Mark first configuration complete");
+  await waitFor(() => byId("browser-credentials-dialog") === null, "Dialog closes after successful save.");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("CredentialsDialog：隐藏 input 与 credentialsStatePort 单向受控同步(蓝图风险 1)", async () => {
-  // 实现调整说明(见 HiddenCredentialInputs.jsx 头注释):隐藏 input 改走
-  // 受控渲染(value 直接订阅 credentialsStatePort.store),不是蓝图原计划的
-  // "非受控 ref + mirrorCredentialsToHiddenInputs 双向同步"——实测证实那套
-  // 组合在任何兄弟组件重渲染时都会被 React 的表单元素受控态回收逻辑悄悄清空
-  // (上传进行中 HeroUpload 高频重渲染,会把刚保存的 token 冲掉),受控是唯一
-  // 不会被 React 自己吃掉的写法。store 是唯一真值,DOM 是纯投影,因此这里只
-  // 断言"store → 隐藏 input"单向同步,并确认"外部直接改 DOM"不会被采纳
-  // (证明真值确实是 store,不是可以被绕过的 DOM)。
+test("CredentialsDialog: Hidden input and credentialsStatePort One-way controlled sync (Blueprint Risk 1)", async () => {
+// Implementation adjustment (see HiddenCredentialInputs.jsx header): hidden inputs now use
+// controlled rendering (value directly subscribes to credentialsStatePort.store), not the blueprint's original
+// "uncontrolled ref + mirrorCredentialsToHiddenInputs bidirectional sync" â testing proved that
+// combination is silently cleared by React's form element controlled-state recovery logic whenever any sibling component re-renders
+// (HeroUpload re-renders frequently during upload, wiping out recently saved tokens). Controlled is the only
+// way to prevent React from eating the values. Store is the single source of truth, DOM is a pure projection, so we only
+// assert "store â hidden input" one-way sync, and confirm "direct DOM modification" is not adopted
+// (proving the truth is indeed the store, not a bypassable DOM).
   const services = createServices();
   const { host, root } = await mountHome(services);
 
-  // 阶段 C(shadcn 改造):隐藏 input 挂在 TranslationWorkflowDialog 内部
-  // (job-form),该对话框换成 Radix Dialog 后不 forceMount Content——需要先
-  // 打开一次才会挂载(同其余阶段 C 对话框的先例)。
+// Phase C (shadcn refactor): hidden inputs are inside TranslationWorkflowDialog
+// (job-form). After switching to Radix Dialog without forceMount Content, it requires
+// opening once to mount (consistent with other Phase C dialogs).
   services.workflowDialog.openUpload();
-  await waitFor(() => byId("paddle_token"), "工作流对话框打开后隐藏 input 挂载");
+await waitFor(() => byId("paddle_token"), "Hidden input mounted after workflow dialog opens");
 
-  // composition 初始化时 credentialsStatePort 已经写入过持久化配置;
-  // HiddenCredentialInputs 应把当前 store 状态实时投影进隐藏 input。
+// credentialsStatePort already wrote persistent config during composition initialization;
+// HiddenCredentialInputs should project current store state into hidden inputs in real-time.
   defaultCredentialsStatePort.setCredentials({
     ocrProvider: "paddle",
     paddleToken: "from-store",
     modelApiKey: "from-store-key",
   });
-  await waitFor(() => byId("paddle_token").value === "from-store", "store → 隐藏 input 投影");
+await waitFor(() => byId("paddle_token").value === "from-store", "store â hidden input projection");
   assert.equal(byId("api_key").value, "from-store-key");
 
-  // 外部直接改 DOM(模拟浏览器自动填充等非受控写入路径)不经过 store,
-  // 不会被采纳为"真值"——下一次任意 credentials 变更触发的重渲染都会把
-  // DOM 拉回 store 的值,证明 store 才是唯一真值,不存在"DOM 悄悄漂移、
-  // 表单提交读到脏值"的风险(这正是蓝图风险 1 要防的静默失败)。
+// Direct DOM modification (simulating browser autofill or other uncontrolled write paths) bypasses the store,
+// and will not be adopted as the "truth" â any subsequent re-render triggered by a credentials change will
+// pull the DOM back to the store value, proving the store is the sole truth and eliminating the risk of "silent DOM drift,
+// or reading dirty values on form submission" (which is the silent failure Blueprint Risk 1 prevents).
   typeInput(byId("paddle_token"), "from-dom");
-  assert.equal(byId("paddle_token").value, "from-dom", "原生 setter 写入本身会生效(没有 onChange 拦截)");
-  // 触发一次(哪怕内容不变的)credentials 更新,验证下一次渲染把 DOM 拉回 store
+assert.equal(byId("paddle_token").value, "from-dom", "Native setter Write itself takes effect.(no onChange interception)");
+// Trigger a credentials update (even if content is unchanged) to verify the next render pulls DOM back to store
   defaultCredentialsStatePort.patchCredentials({});
-  await waitFor(() => byId("paddle_token").value === "from-store", "重渲染后 DOM 被拉回 store 真值,外部写入未被采纳");
-  assert.equal(defaultCredentialsStatePort.getCredentials().paddleToken, "from-store", "store 未被 DOM 写入污染");
+  await waitFor(() => byId("paddle_token").value === "from-store", "after re-render DOM Pulled back store truth value,External write not accepted.");
+  assert.equal(defaultCredentialsStatePort.getCredentials().paddleToken, "from-store", "store Unassigned DOM Write Pollution");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("SettingsHubDialog：词表/外观/更新 tab 契约", async () => {
+test("SettingsHubDialog: Glossary/Appearance/Update tab contract", async () => {
   const services = createServices();
   const { host, root } = await mountHome(services);
 
   click(byId("app-settings-btn"));
-  await waitFor(() => byId("app-settings-dialog") !== null, "设置对话框打开");
+await waitFor(() => byId("app-settings-dialog") !== null, "Settings dialog opened");
 
   const glossaryTab = dom.window.document.querySelector('[data-settings-tab="glossary"]');
   click(glossaryTab);
-  await waitFor(() => byId("glossary-btn"), "词表 tab 占位按钮存在");
+  await waitFor(() => byId("glossary-btn"), "Glossary tab Placeholder button exists.");
   assert.equal(dom.window.document.querySelector('[data-settings-panel="glossary"]').hidden, false);
 
   const appearanceTab = dom.window.document.querySelector('[data-settings-tab="appearance"]');
-  assert.ok(appearanceTab, "外观 tab 存在");
+assert.ok(appearanceTab, "Appearance tab exists");
   click(appearanceTab);
-  await waitFor(() => byId("theme-appearance-panel"), "外观面板挂载");
+  await waitFor(() => byId("theme-appearance-panel"), "Mount Appearance Panel");
   assert.equal(dom.window.document.querySelector('[data-settings-panel="appearance"]').hidden, false);
-  assert.ok(byId("theme-option-classic"), "经典皮肤选项");
-  assert.ok(byId("theme-option-jiangnan"), "江南院落选项");
-  assert.ok(byId("theme-option-seacliff"), "海岬选项");
-  assert.ok(byId("theme-option-night"), "黛瓦夜色选项");
+  assert.ok(byId("theme-option-classic"), "Classic Skin");
+  assert.ok(byId("theme-option-jiangnan"), "Jiangnan Courtyard");
+  assert.ok(byId("theme-option-seacliff"), "Cape Options");
+  assert.ok(byId("theme-option-night"), "Dark Tile Night Option");
 
-  // 切换皮肤应写入 data-theme
+// Switching skin should write to data-theme
   click(byId("theme-option-jiangnan"));
   await waitFor(
     () => dom.window.document.documentElement.dataset.theme === "jiangnan",
-    "选中江南院落后 html[data-theme=jiangnan]",
+    "After selecting Jiangnan Courtyard html[data-theme=jiangnan]",
   );
   click(byId("theme-option-night"));
   await waitFor(
     () =>
       dom.window.document.documentElement.dataset.theme === "night"
       && dom.window.document.documentElement.classList.contains("theme-dark"),
-    "黛瓦夜色 + theme-dark class",
+"Daiwa Night + theme-dark class",
   );
   click(byId("theme-option-classic"));
   await waitFor(
     () =>
       dom.window.document.documentElement.dataset.theme === "classic"
       && !dom.window.document.documentElement.classList.contains("theme-dark"),
-    "切回经典并去掉 theme-dark",
+    "Switch back to classic and remove. theme-dark",
   );
 
   const updateTab = dom.window.document.querySelector('[data-settings-tab="update"]');
   click(updateTab);
-  await waitFor(() => byId("app-update-btn"), "更新 tab 占位按钮存在");
+await waitFor(() => byId("app-update-btn"), "Update tab placeholder button exists");
   assert.equal(dom.window.document.querySelector('[data-settings-panel="update"]').hidden, false);
 
   root.unmount();

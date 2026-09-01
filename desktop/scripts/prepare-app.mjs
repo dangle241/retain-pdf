@@ -684,7 +684,7 @@ if (!frontendOnly) {
     recursive: true,
     force: true,
   });
-  // retainpdf-ai：桌面端由 main 进程拉起，Rust 反代 41100
+  // retainpdf-aiIt seems like your message got cut off. Could you clarify what you'd like help with? For example:  - Are you asking about desktop app development (Electron, Tauri, etc.)? - Do you want help with a specific codebase or framework? - Are you looking for an introduction to "CodeBuddy Code" or want me to act as it?  Please share more context or your full question, and I'll be happy to help! main Process spawn.Rust Reverse proxy 41100
   const aiServiceSrc = path.join(backendRoot, "ai_service");
   const aiServiceDst = path.join(outputBackendRoot, "ai_service");
   if (!fs.existsSync(aiServiceSrc)) {

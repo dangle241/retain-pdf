@@ -1,10 +1,10 @@
 # rendering/layout
 
-## 负责什么
+## Responsibilities
 
-排版层。这里把翻译后的 payload 转成可渲染块，计算字体、行距、bbox 适配和正文块布局。
+Layout layer. Here, the translated payload Convert to renderable block, calculate font, line spacing.bbox Adaptive and body block layout.
 
-## 对外入口
+## Public entry point
 
 - `page_specs.py`
 - `font_fit.py`
@@ -14,27 +14,27 @@
 - `payload/`
 - `typography/`
 - `typography_memory/`
-  跨书字体/行距经验库。只缓存量化几何特征对应的 `font_size_pt`、`leading_em` 统计值，用作渲染 seed 的快速先验。
+  Cross-book font/Line spacing experience library. Cache only those corresponding to quantized geometric features. `font_size_pt`、`leading_em` Statistic value for rendering. seed Fast prior.
 
-## 不该做什么
+## What not to do
 
-- 不操作 PDF 原始页面。
-- 不删除英文原文。
-- 不调用 OCR provider 或翻译模型。
-- 不决定整页 redaction/background 路线。
+- Do not manipulate PDF original page.
+- Do not delete original English text.
+- No call. OCR provider or translation models.
+- No page decision. redaction/background Route.
 
 ## typography memory
 
-`typography_memory/` 是全局、增量学习的排版标量库，默认存放在 `data/_render_typography_memory/typography_memory.sqlite3`。
+`typography_memory/` A global, incrementally-learned typesetting scalar library, stored by default in `data/_render_typography_memory/typography_memory.sqlite3`。
 
-边界：
+Boundaries:
 
-- 只允许记录字体大小、行间距这类标量决策。
-- key 只能由量化后的 bbox、页面尺寸、角色、行数、公式比例、译文密度等结构特征生成。
-- 不缓存原文、译文、公式内容、颜色、删除策略、page spec 或 PDF 对象。
-- 命中条件必须保守；样本数不足或方差过大时回退原算法。
+- Allow only scalar decisions like font size and line spacing.
+- key Only by quantized bboxPage dimensions, roles, line counts, formula ratios, translation density structure generated.
+- Do not cache original text, translation, formulas, colors, deletion policy, page spec, or PDF objects.
+- Hit conditions conservative. Insufficient samples or excessive variance: fall back original algorithm.
 
-开关：
+Switch:
 
-- `RETAIN_RENDER_TYPOGRAPHY_MEMORY=0` 可关闭读写。
-- `RETAIN_RENDER_TYPOGRAPHY_MEMORY_MIN_OBS` 可调命中所需最小样本数。
+- `RETAIN_RENDER_TYPOGRAPHY_MEMORY=0` Read/write can be closed.
+- `RETAIN_RENDER_TYPOGRAPHY_MEMORY_MIN_OBS` Adjustable minimum sample count for hit.

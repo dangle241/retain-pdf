@@ -16,7 +16,7 @@ export async function fetchJobEvents(jobId, apiPrefix, limit = 50, offset = 0) {
     if (resp.status === 404) {
       return { items: [], limit, offset };
     }
-    throw new Error(`读取事件流失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Failed to read event stream, please try again later.(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json()) as {
     items?: unknown[];

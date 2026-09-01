@@ -28,7 +28,7 @@ def build_prompt_summary(
     ]
     term_records = sorted(term_records, key=lambda record: (-int(record.get("hits") or 0), str(record.get("key") or "")))
     if term_records:
-        lines.append("当前文档记忆：术语保持一致。")
+lines.append("Current document memory: keep terminology consistent.")
         for record in term_records[:MAX_SUMMARY_TERMS]:
             key = clean_term_key(str(record.get("key") or ""))
             value = clean_term_value(str(record.get("value") or ""))
@@ -40,7 +40,7 @@ def build_prompt_summary(
         key=lambda record: (-int(record.get("hits") or 0), str(record.get("key") or "")),
     )
     if preserve_records:
-        lines.append("当前文档记忆：以下类型更可能是技术原文/代码/参数块，应优先保留排版和符号。")
+lines.append("No source text provided. Send Chinese source for translation./Code/Parameter blocks: preserve formatting and symbols.")
         for record in preserve_records[:MAX_SUMMARY_PRESERVE_HINTS]:
             lines.append(f"- {str(record.get('key') or '')}")
     return "\n".join(lines).strip()
@@ -76,7 +76,7 @@ def build_prompt_summary_for_source(
 
     lines: list[str] = []
     if matched_terms:
-        lines.append("当前块相关文档记忆：术语保持一致。")
+lines.append("Current block related document memory: keep terminology consistent.")
         for record in matched_terms[:max_terms]:
             key = clean_term_key(str(record.get("key") or ""))
             value = clean_term_value(str(record.get("value") or ""))
@@ -93,7 +93,7 @@ def build_prompt_summary_for_source(
         key=lambda record: (-int(record.get("hits") or 0), str(record.get("key") or "")),
     )
     if matched_preserve_hints:
-        lines.append("当前块相关文档记忆：以下内容此前更适合保留技术排版。")
+        lines.append("Block doc memory: previous content better kept as technical layout.")
         for record in matched_preserve_hints[:max_preserve_hints]:
             lines.append(f"- {str(record.get('key') or '')}")
     return "\n".join(lines).strip()

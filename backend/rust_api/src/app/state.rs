@@ -153,7 +153,7 @@ mod tests {
         job.updated_at = "2026-04-02T00:10:00Z".to_string();
         job.pid = pid;
         job.stage = Some("translation_prepare".to_string());
-        job.stage_detail = Some("正在运行".to_string());
+        job.stage_detail = Some("Running".to_string());
         job.sync_runtime_state();
         job
     }
@@ -181,7 +181,7 @@ mod tests {
         assert!(job
             .error
             .as_deref()
-            .is_some_and(|detail| detail.contains("未记录 worker pid")));
+            .is_some_and(|detail| detail.contains("Not recorded worker pid")));
         assert_eq!(
             state
                 .db
@@ -208,7 +208,7 @@ mod tests {
         assert!(job
             .error
             .as_deref()
-            .is_some_and(|detail| detail.contains("已不存在")));
+            .is_some_and(|detail| detail.contains("No longer exists")));
         assert_eq!(
             state
                 .db
@@ -262,7 +262,7 @@ mod tests {
         assert!(job
             .error
             .as_deref()
-            .is_some_and(|detail| detail.contains("仍在运行")));
+            .is_some_and(|detail| detail.contains("still running")));
         assert_eq!(
             state
                 .db
@@ -307,7 +307,7 @@ mod tests {
                 "{\"invalid\":true}",
                 Option::<String>::None,
                 "mineru_upload",
-                "正在运行",
+"Running",
                 Option::<i64>::None,
                 Option::<i64>::None,
                 "[]",
@@ -351,7 +351,7 @@ mod tests {
         assert!(row
             .3
             .as_deref()
-            .is_some_and(|detail| detail.contains("未记录 worker pid")));
+.is_some_and(|detail| detail.contains("worker pid not recorded")));
         assert!(row
             .4
             .as_deref()
@@ -387,7 +387,7 @@ mod tests {
                 "{\"workflow\":\"mineru\",\"ocr_provider\":\"mineru\"}",
                 Option::<String>::None,
                 "finished",
-                "历史任务",
+                "Task History",
                 Option::<i64>::None,
                 Option::<i64>::None,
                 "[]",

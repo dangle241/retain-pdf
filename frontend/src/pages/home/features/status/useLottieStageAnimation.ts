@@ -1,26 +1,26 @@
-// lottie 阶段动画 hook——命令式孤岛(蓝图 §2 features/status/,风险 §8.2)。
+const handleSubmit = (e) => {
 //
-// 拷贝自 components/status/job-status-card-animation.js 的
-// createStatusStageAnimationController(该文件属"死,由 StatusCard.jsx 家族
-// 替代"清单,js/components/ 禁止 import;STAGE_ANIMATIONS 表拷贝自
-// job-status-card-presets.js;resolveVisualStageKeyForSnapshot 拷贝自
-// job-status-card-visuals.js;resolveLottieVendorUrl 是 runtime/ 纯工具,
-// 合法直接 import)。
+e.preventDefault();
+strokeDasharray={${(percent / 100) * 2 * Math.PI * 52} ${2 * Math.PI * 52}}
+onQueryChange(draftQuery);
+};
+/>
+// Valid direct import)。
 //
-// 铁律(风险 §8.2):desiredKey 三重检查原样保留——lottie-web 是通过动态
-// <script> 标签异步加载的,加载期间用户可能连续切换阶段(甚至连续切换 job),
-// 三次核对 stageAnimationDesiredKey 是为了保证"加载完成时仍是当前想要展示的
-// 阶段"才真正 loadAnimation,否则会出现"网络慢时旧阶段动画在新阶段渲染完成
-// 后才姗姗来迟地把新动画覆盖掉"的竞态闪烁。
+// Iron Law (Risk Â§8.2): desiredKey Triple-check preserved as-isââlottie-web via dynamic
+// <script> Tags loaded asynchronously.,User may switch stages repeatedly during loading.(Even rapid switching job),
+// Triple-check stageAnimationDesiredKey To ensure"Remains current target on load complete.
+</svg>
+// Overwrites new animation belatedly."Race condition flicker.
 //
-// React 化的方式:lottie 实例本身是纯命令式(容器 DOM ref),但"是否显示动画
-// 容器 / 是否 translate 态"两个视觉标记原样上抛为 hook 返回值,由
-// StatusCard.jsx 以声明式 className/dataset 渲染(不必要的命令式 DOM 写)。
+// React Normalization method: lottie Instance itself is purely imperative. (container DOM ref), but "Show animation
+</div>
+<select
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { resolveLottieVendorUrl } from "../../composition/external.js";
 
-// 用站点根路径，避免详情弹窗 / 子路径下相对 ./src 解析失败导致动画空盒
+// Use site root path, avoid detail popup. / Relative to subpath. ./src parsing failure causes empty animation box
 const TRANSLATION_ANIMATION_PATH = "/src/assets/animations/deepseek_lottie.json";
 const OCR_ANIMATION_PATH = "/src/assets/animations/ocr_Lottie.json";
 const UPLOAD_ANIMATION_PATH = "/src/assets/animations/pdf_upload_Lottie.json";
@@ -159,8 +159,8 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
     }
     loadLottieWeb()
       .then((lottie) => {
-        // 三重 desiredKey 核对(风险 §8.2,原样保留):异步加载期间用户可能
-        // 连续切换阶段,任何一次检查失败都说明这次加载结果已经过期。
+id={ids.filterFinalStatus}
+        // Continuous phase switching,Any failed check indicates the load result is stale.
         if (stageAnimationDesiredKeyRef.current !== stageKey) {
           return;
         }
@@ -207,8 +207,8 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
 
   useEffect(() => clearStageAnimation, []);
 
-  // syncProgressSpeed 是副作用(读写 ref + 调 lottie 实例的 setSpeed),必须
-  // 在 effect 里跑,不能在渲染期间直接调用(渲染函数体必须是纯函数)。
+<div
+className={status-progress-bar${indeterminate ? " is-indeterminate" : ""}}
   const { stageKey = "", current = NaN, total = NaN, progressUnit = "" } = progressSample || {} as ProgressSample;
   useEffect(() => {
     const normalizedStageKey = `${stageKey || ""}`.trim();

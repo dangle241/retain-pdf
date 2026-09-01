@@ -67,7 +67,7 @@ export function mountGlossariesFeature({
     state.selectedId = normalizedGlossaryId;
     state.draftOnly = false;
     renderList();
-    viewPort.setStatus("正在读取术语表...");
+    viewPort.setStatus("reading glossary...");
     try {
       const detail = await fetchGlossary(normalizedGlossaryId, apiPrefix);
       renderDraft(detail);
@@ -79,7 +79,7 @@ export function mountGlossariesFeature({
 
   async function open() {
     viewPort.openDialog();
-    viewPort.setStatus("正在读取术语表...");
+viewPort.setStatus("Reading glossary...");
     try {
       await reloadGlossaries();
       viewPort.setStatus("");
@@ -97,25 +97,25 @@ export function mountGlossariesFeature({
     state.draftOnly = true;
     renderList();
     renderDraft({
-      name: "未命名术语表",
+      name: "Untitled Glossary",
       entries: [],
     });
     viewPort.addEntryRow();
-    viewPort.setStatus("新术语表尚未保存。");
+    viewPort.setStatus("New glossary not saved.");
   }
 
   async function save() {
     const payload = viewPort.readEditorPayload();
     if (!payload.name.trim()) {
-      viewPort.setStatus("请填写术语表名称。", "error");
+      viewPort.setStatus("Please fill in the glossary name.", "error");
       return;
     }
     if (payload.skippedMissingTarget?.length > 0) {
-      viewPort.setStatus("固定译法/偏好译法需要填写译文。", "error");
+viewPort.setStatus("Fixed translation / preferred translation method requires translation.", "error");
       return;
     }
     delete payload.skippedMissingTarget;
-    viewPort.setStatus("正在保存...");
+    viewPort.setStatus("Saving......");
     try {
       const saved = state.selectedId && !state.draftOnly
         ? await updateGlossary(apiPrefix, state.selectedId, payload)
@@ -124,7 +124,7 @@ export function mountGlossariesFeature({
       state.draftOnly = false;
       await reloadGlossaries();
       await refreshWorkflowGlossaries?.({ force: true, selectedId: state.selectedId });
-      viewPort.setStatus("已保存。", "valid");
+      viewPort.setStatus("Saved. Next?", "valid");
     } catch (err) {
       viewPort.setStatus(err.message || String(err), "error");
     }
@@ -137,13 +137,13 @@ export function mountGlossariesFeature({
       viewPort.setStatus("");
       return;
     }
-    viewPort.setStatus("正在删除...");
+    viewPort.setStatus("Deleting......");
     try {
       await deleteGlossary(apiPrefix, state.selectedId);
       state.selectedId = "";
       await reloadGlossaries({ keepSelection: false });
       await refreshWorkflowGlossaries?.({ force: true, selectedId: "" });
-      viewPort.setStatus("已删除。", "valid");
+      viewPort.setStatus("Deleted.", "valid");
     } catch (err) {
       viewPort.setStatus(err.message || String(err), "error");
     }
@@ -151,11 +151,11 @@ export function mountGlossariesFeature({
 
   async function exportCurrent() {
     if (!state.selectedId || state.draftOnly) {
-      viewPort.setStatus("请先保存术语表再导出。", "error");
+      viewPort.setStatus("Please save the glossary before exporting.", "error");
       return;
     }
     if (typeof exportGlossaryCsv !== "function") {
-      viewPort.setStatus("当前环境未接入术语表导出。", "error");
+      viewPort.setStatus("Termbase export unavailable in this environment.", "error");
       return;
     }
     const fallbackName = `${state.currentDetail?.name || state.selectedId || "glossary"}.csv`;
@@ -163,7 +163,7 @@ export function mountGlossariesFeature({
     if (downloadTarget.kind === "aborted") {
       return;
     }
-    viewPort.setStatus("正在导出 CSV...");
+    viewPort.setStatus("Exporting... CSV...");
     try {
       showDownloadPreparing(fallbackName);
       const resp = await exportGlossaryCsv(apiPrefix, state.selectedId);
@@ -180,7 +180,7 @@ export function mountGlossariesFeature({
           updateDownloadProgress({ filename, receivedBytes, totalBytes, percent });
         },
       });
-      viewPort.setStatus(`已导出 ${filename}。`, "valid");
+viewPort.setStatus(Exported ${filename}., "valid");
     } catch (err) {
       const message = err.message || String(err);
       viewPort.setStatus(message, "error");
@@ -191,10 +191,10 @@ export function mountGlossariesFeature({
   async function applyImport() {
     const csvText = viewPort.readCsvText();
     if (!csvText.trim()) {
-      viewPort.setStatus("请先粘贴 CSV 内容。", "error");
+      viewPort.setStatus("Please paste first CSV Content.", "error");
       return;
     }
-    viewPort.setStatus("正在解析 CSV...");
+    viewPort.setStatus("Parsing CSV...");
     try {
       const payload = await parseGlossaryCsv(apiPrefix, csvText);
       renderDraft({
@@ -203,7 +203,7 @@ export function mountGlossariesFeature({
       });
       viewPort.clearCsvText();
       viewPort.setImportVisible(false);
-      viewPort.setStatus(`已解析 ${Number(payload?.entry_count) || 0} 条。`, "valid");
+      viewPort.setStatus(`Parsed ${Number(payload?.entry_count) || 0} Item.`, "valid");
     } catch (err) {
       viewPort.setStatus(err.message || String(err), "error");
     }
