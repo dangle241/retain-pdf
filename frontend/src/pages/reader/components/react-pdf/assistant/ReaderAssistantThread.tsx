@@ -685,7 +685,7 @@ export function ReaderAssistantThread({
         {missingLlmKey ? (
           <div className="aui-composer aui-composer-locked" role="alert">
             <p className="aui-llm-lock-msg">{MISSING_MODEL_API_KEY_MESSAGE}</p>
-            <p className="aui-hint">Open Settings -> API Settings on the home page and enter a model key to ask questions.</p>
+            <p className="aui-hint">Open Settings → API Settings on the home page and enter a model key to ask questions.</p>
           </div>
         ) : (
           <ComposerPrimitive.Root className="aui-composer" compact>
