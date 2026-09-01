@@ -32,8 +32,8 @@ export function formatReaderRegionMarkdownPayload(payload) {
   const source = firstText(payload?.source?.text, payload?.source_text, item.source_text, item.text, item.raw_text);
   return {
     title: firstText(payload?.item_id, item.item_id, "translation item"),
-primaryLabel: markdown ? "Markdown" : (translated ? "Translation" : "Original"),
-    primaryText: markdown || translated || source || "this area currently has no text to display",
+    primaryLabel: markdown ? "Markdown" : (translated ? "译文" : "原文"),
+    primaryText: markdown || translated || source || "该区域暂无可显示文本",
     source,
     translated,
   };
@@ -48,7 +48,7 @@ function renderReaderTextBlock(label, text) {
     <section class="reader-region-markdown-section">
       <div class="reader-region-markdown-label-row">
         <span class="reader-region-markdown-label">${escapeHtml(label)}</span>
-        <button type="button" class="reader-region-copy-btn" data-copy-text="${escapeHtml(normalized)}">Copy</button>
+        <button type="button" class="reader-region-copy-btn" data-copy-text="${escapeHtml(normalized)}">复制</button>
       </div>
       <pre>${escapeHtml(normalized)}</pre>
     </section>
@@ -63,14 +63,14 @@ async function copyReaderRegionText(button) {
   try {
     await copyTextToClipboard(text);
     const previous = button.textContent;
-button.textContent = "Copied";
+    button.textContent = "已复制";
     window.setTimeout(() => {
-button.textContent = previous || "Copy";
+      button.textContent = previous || "复制";
     }, 900);
   } catch {
-button.textContent = "Copy failed";
+    button.textContent = "复制失败";
     window.setTimeout(() => {
-button.textContent = "Copy";
+      button.textContent = "复制";
     }, 900);
   }
 }
@@ -90,8 +90,8 @@ export function renderReaderMarkdownPopover(event, region, state) {
   popover.className = "reader-region-markdown-popover";
   popover.innerHTML = `
     <div class="reader-region-markdown-head">
-      <span>${escapeHtml(region?.itemId || "Region Text")}</span>
-<button type="button" class="reader-region-markdown-close" aria-label="Close">Ã</button>
+      <span>${escapeHtml(region?.itemId || "区域文本")}</span>
+      <button type="button" class="reader-region-markdown-close" aria-label="关闭">×</button>
     </div>
     <div class="reader-region-markdown-body">${escapeHtml(state?.message || "正在读取...")}</div>
   `;

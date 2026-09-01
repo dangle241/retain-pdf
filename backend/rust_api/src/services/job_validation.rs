@@ -188,19 +188,19 @@ fn validate_upload_limit(
     };
     if too_large {
         let relation = if bytes_inclusive {
-            "not exceed"
+            "不超过"
         } else {
-            "less than"
+            "小于"
         };
         return Err(AppError::bad_request(format!(
-            "{provider_name} API Limits:PDF File size must{relation} {:.0}MB; the current file is {:.2}MB",
+            "{provider_name} API 限制：PDF 文件大小必须{relation} {:.0}MB；当前文件为 {:.2}MB",
             max_bytes as f64 / 1024.0 / 1024.0,
             upload.bytes as f64 / 1024.0 / 1024.0
         )));
     }
     if upload.page_count > max_pages {
         return Err(AppError::bad_request(format!(
-"{provider_name} API limit: PDF Page count must not exceed {max_pages} Page; current file is {} pages",
+            "{provider_name} API 限制：PDF 页数必须不超过 {max_pages} 页；当前文件为 {} 页",
             upload.page_count
         )));
     }
@@ -314,7 +314,7 @@ mod tests {
             &default_limits(),
         )
         .expect_err("1000 pages should exceed Paddle limit");
-assert!(err.to_string().contains("must not exceed 999 pages"));
+        assert!(err.to_string().contains("不超过 999 页"));
     }
 
     #[test]

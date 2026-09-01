@@ -1,12 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-// cutover note: Legacy dialog HTML Template file(reader/ai-assistant/app-settings/
-// status-detail/glossary-manager's *-dialog-template.js), features/developer/*,
-// features/reader-dialog/{view.js,legacy-dom-adapter.js} Done. home page cutover deleted
-// (React Component tree replacement)Original to this file."Template markup Contractual id"Delete class test cases accordingly.;
-// Retained 3 Test cases: pure logic only.(reader-dialog-contract.js's readerDialogLinkOpenState,
-// reader-dialog/config-port.js's URL/message credibility parsing), DOM Template-agnostic, Keepalive enabled.
+// cutover 说明:旧世界的对话框 HTML 模板文件(reader/ai-assistant/app-settings/
+// status-detail/glossary-manager 的 *-dialog-template.js)、features/developer/*、
+// features/reader-dialog/{view.js,legacy-dom-adapter.js} 已随 home 页 cutover 删除
+// (React 组件树取代)。本文件原有的"模板 markup 含契约 id"类用例随之删除;
+// 保留的 3 个用例测的是纯逻辑(reader-dialog-contract.js 的 readerDialogLinkOpenState、
+// reader-dialog/config-port.js 的 URL/消息可信度解析),与 DOM 模板无关,继续保活。
 
 import {
   READER_DIALOG_CLASSES,

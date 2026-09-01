@@ -1,4 +1,4 @@
-// Annotation tooltip: list / note / delete / export / position
+// 批注悬浮窗：列表 / 笔记 / 删除 / 导出 / 定位
 
 import { useEffect, useState } from "react";
 import { StickyNote } from "lucide-react";
@@ -44,10 +44,10 @@ function NoteItem({
         </span>
         <div className="reader-notes-item-actions">
           <button type="button" className="reader-notes-link" onClick={() => onJump(note)}>
-Locate
+            定位
           </button>
           <button type="button" className="reader-notes-danger" onClick={() => onRemove(note.id)}>
-Delete
+            删除
           </button>
         </div>
       </div>
@@ -57,7 +57,7 @@ Delete
           <textarea
             className="reader-notes-textarea"
             value={draft}
-placeholder="Write some thoughts..."
+            placeholder="写点想法…"
             rows={3}
             onChange={(e) => setDraft(e.target.value)}
           />
@@ -70,10 +70,10 @@ placeholder="Write some thoughts..."
                 setEditing(false);
               }}
             >
-Save
+              保存
             </button>
             <button type="button" className="reader-notes-link" onClick={() => setEditing(false)}>
-Cancel
+              取消
             </button>
           </div>
         </div>
@@ -82,13 +82,13 @@ Cancel
           type="button"
           className="reader-notes-note"
           onClick={() => setEditing(true)}
-          title="Click to edit"
+          title="点击编辑"
         >
           {note.note}
         </button>
       ) : (
         <button type="button" className="reader-notes-add-note" onClick={() => setEditing(true)}>
-Add Note
+          添加笔记
         </button>
       )}
     </article>
@@ -111,15 +111,15 @@ export function ReaderNotesPanel({
     <ReaderFloatShell
       id="reader-notes-panel"
       open={open}
-title="Annotations"
-subtitle="selected PDF Add after text Â· local save"
+      title="批注"
+      subtitle="选中 PDF 文字后可添加 · 本地保存"
       titleIcon={<StickyNote size={14} strokeWidth={2.25} aria-hidden />}
       storageKey="retainpdf.reader.notes-float.pos.v1"
-ariaLabel="Annotations"
+      ariaLabel="批注"
       onClose={onClose}
       toolbar={(
         <>
-<span className="reader-notes-count">{count} items</span>
+          <span className="reader-notes-count">{count} 条</span>
           <button
             type="button"
             className="reader-notes-export"
@@ -139,12 +139,12 @@ ariaLabel="Annotations"
     >
       {count === 0 ? (
         <p className="reader-notes-empty">
-          No comments. In PDF Drag text to select.「Add Comment」。
+          暂无批注。在 PDF 上拖选文字，点「添加批注」。
         </p>
       ) : (
         groups.map((group) => (
           <section key={group.page} className="reader-notes-group">
-<h3 className="reader-notes-group-title">Page {group.page}</h3>
+            <h3 className="reader-notes-group-title">第 {group.page} 页</h3>
             {group.items.map((note) => (
               <NoteItem
                 key={note.id}

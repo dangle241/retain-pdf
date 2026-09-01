@@ -194,7 +194,7 @@ def test_sanitize_items_uses_math_token_fallback_for_math_blocks(monkeypatch) ->
     item = {
         "item_id": "b1",
         "bbox": [0, 0, 120, 40],
-        "protected_translated_text": r"matrix element $ \broken{A} $ Compilation failed.",
+        "protected_translated_text": r"矩阵元 $ \broken{A} $ 导致编译失败。",
     }
 
     def _fake_compile(*args, **kwargs):

@@ -53,19 +53,19 @@ fn representative_summary_chunks(chunks: &[MarkdownChunk], limit: usize) -> Vec<
     let mut selected = Vec::new();
     for section in [
         "abstract",
-"Abstract",
+        "摘要",
         "introduction",
-        "Introduction",
+        "引言",
         "method",
-        "Method",
+        "方法",
         "result",
-        "Result",
+        "结果",
         "discussion",
-        "discussion",
+        "讨论",
         "conclusion",
         "summary",
-"Conclusion",
-        "Summary",
+        "结论",
+        "总结",
     ] {
         if selected.len() >= limit {
             break;
@@ -115,15 +115,15 @@ fn uniform_indices(len: usize, limit: usize) -> Vec<usize> {
 fn is_summary_query(query: &str) -> bool {
     let normalized = query.to_lowercase();
     [
-"Summary",
-        "Summarize",
-        "Full text",
-        "whole article",
-        "this article",
-        "what it says",
-        "Core Contributions",
-        "main contributions",
-        "Main content",
+        "总结",
+        "概括",
+        "全文",
+        "整篇",
+        "这篇文章",
+        "讲了什么",
+        "核心贡献",
+        "主要贡献",
+        "主要内容",
         "summary",
         "summarize",
         "overview",
@@ -221,7 +221,7 @@ mod tests {
                 text: format!("content {index}"),
             })
             .collect::<Vec<_>>();
-        let ranked = retrieve_chunks(&chunks, "Summarize the full text", None, 8);
+        let ranked = retrieve_chunks(&chunks, "总结全文", None, 8);
         let pages = ranked
             .iter()
             .filter_map(|item| item.chunk.page)
@@ -250,7 +250,7 @@ mod tests {
                 text: "done".to_string(),
             },
         ];
-        let ranked = retrieve_chunks(&chunks, "What does this article say", None, 8);
+        let ranked = retrieve_chunks(&chunks, "这篇文章讲了什么", None, 8);
 
         assert_eq!(ranked[0].chunk.title, "Introduction");
         assert!(ranked.iter().any(|item| item.chunk.title == "Conclusion"));

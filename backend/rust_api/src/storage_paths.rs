@@ -65,11 +65,11 @@ mod tests {
 
     #[test]
     fn to_relative_handles_relative_data_root() {
-// Regression: when DATA_ROOT configured as relative value (dev env RUST_API_DATA_ROOT=../../data),
-        // resolve_typst_source Concatenates to `../../data/jobs/x/...book-overlay.typ`
-        // with `..` relative path,Feed back again. to_relative_data_path Make relative. Legacy impl
-        // Absolute paths only. strip_prefix,Here it falls to `..` Validation rejected,Generate artifact manifest
-        // Interface 500Reader error"Failed to load comparison view"Strip unconditionally first. data_root Prefix.
+        // 回归:DATA_ROOT 配成相对值(dev 环境 RUST_API_DATA_ROOT=../../data)时,
+        // resolve_typst_source 之类会拼出 `../../data/jobs/x/...book-overlay.typ`
+        // 这种带 `..` 的相对路径,再喂回 to_relative_data_path 做相对化。旧实现
+        // 只对绝对路径 strip_prefix,这里会落到 `..` 校验被拒,导致产物清单
+        // 接口 500、阅读器报"对照阅读加载失败"。现在无条件先剥 data_root 前缀。
         let data_root = Path::new("../../data");
         let joined = data_root.join("jobs/job-1/rendered/typst/book-overlays/book-overlay.typ");
         assert_eq!(
@@ -80,8 +80,8 @@ mod tests {
 
     #[test]
     fn to_relative_passes_through_already_job_relative_path() {
-        // Path already relative.(such as job stored in the record source_pdf)Unstrippable data_root
-        // Prefix,Normalize return as-is.,Unaffected by above changes.
+        // 已经是作业相对路径的情形(如 job 记录里存的 source_pdf)剥不掉 data_root
+        // 前缀,应原样规范化返回,不受上面改动影响。
         let data_root = Path::new("../../data");
         assert_eq!(
             to_relative_data_path(data_root, Path::new("jobs/job-1/source/in.pdf"))
@@ -92,7 +92,7 @@ mod tests {
 
     #[test]
     fn to_relative_rejects_absolute_path_outside_data_root() {
-        // Absolute path but not in DATA_ROOT Absolute path outside DATA_ROOT; should still error (maintain legacy behavior).,Should still error.(Preserve legacy behavior)。
+        // 绝对路径但不在 DATA_ROOT 下,仍应报错(保持旧行为)。
         let data_root = Path::new("/tmp/data-root");
         assert!(to_relative_data_path(data_root, Path::new("/etc/passwd")).is_err());
     }

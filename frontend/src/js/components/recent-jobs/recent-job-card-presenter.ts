@@ -9,16 +9,16 @@ import { escapeAttribute, truncateDisplayName } from "../../utils/html-formattin
 export function recentJobStatusLabel(status) {
   switch (`${status || ""}`.trim()) {
     case "queued":
-return "Queued";
+      return "排队中";
     case "running":
-return "In progress";
+      return "进行中";
     case "succeeded":
-return "Completed";
+      return "已完成";
     case "failed":
-return "Failed";
+      return "失败";
     case "canceled":
     case "cancelled":
-      return "Cancelled";
+      return "已取消";
     default:
       return status || "-";
   }
@@ -69,19 +69,19 @@ export function stageKeyForRecentJobLabel(item: any = {}) {
 export function recentJobStageLabel(item) {
   switch (stageKeyForRecentJobLabel(item)) {
     case "ocr":
-return "OCR in progress";
+      return "OCR 中";
     case "translate":
-return "Translating";
+      return "翻译中";
     case "render":
-return "Rendering";
+      return "渲染中";
     case "done":
-return "Completed";
+      return "已完成";
     case "queued":
-return "Queued";
+      return "排队中";
     case "failed":
-return "Failed";
+      return "失败";
     case "canceled":
-return "Canceled";
+      return "已取消";
     default:
       return `${item?.status || ""}`.trim() === "queued" ? "排队中" : "处理中";
   }

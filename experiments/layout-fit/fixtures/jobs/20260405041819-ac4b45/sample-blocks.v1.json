@@ -84,7 +84,7 @@
         "unit": "pt"
       },
       "source_text": "† Departamento de Química, Facultad de Ciencias, Universidad de Chile, Casilla 653, Santiago, Chile",
-      "translated_text": "† Department of Chemistry, Faculty of Sciences, University of ChileCasilla 653Santiago Chile",
+      "translated_text": "† 智利大学理学院化学系，Casilla 653，圣地亚哥，智利",
       "translation_unit_text": "† 智利大学理学院化学系，Casilla 653，圣地亚哥，智利",
       "fit_text": "† 智利大学理学院化学系，Casilla 653，圣地亚哥，智利",
       "text_source": "translated_json",
@@ -94,7 +94,7 @@
       "typst": {
         "body_name": "p0_item_3_1_body",
         "body_expr": "block(width: 481.65000000000003pt, height: 21.620000000000005pt)[#{ pdftr_fit_markdown(p0_item_3_1_md, max_size: 9.82pt, min_size: 9.32pt, max_leading: 0.6em, min_leading: 0.57em, fit_height: 21.62pt) }]",
-        "markdown_text": "‡ Institute for Chemistry and Supercomputing, University of Minnesota,207 Pleasant Street SEMinneapolis Minnesota 55455，United States",
+        "markdown_text": "‡ 化学与超级计算研究所，明尼苏达大学，207 Pleasant Street SE，明尼阿波利斯，明尼苏达州 55455，美国",
         "width_pt": 481.65000000000003,
         "height_pt": 21.620000000000005,
         "fit_height_pt": 21.62,
@@ -154,7 +154,7 @@
         "unit": "pt"
       },
       "source_text": "S Supporting Information",
-      "translated_text": "S Support Info",
+      "translated_text": "S 支持信息",
       "translation_unit_text": "S 支持信息",
       "fit_text": "S 支持信息",
       "text_source": "translated_json",
@@ -183,7 +183,7 @@
         "unit": "pt"
       },
       "source_text": "ABSTRACT: The quantum mechanical SMD continuum universal solvation model can be applied to predict the free energy of solvation of any solute in any solvent following specification of various macroscopic solvent parameters. For three ionic liquids where these descriptors are readily available, the SMD solvation model exhibits a mean unsigned error of 0 . 4 8 \\mathrm { \\ k c a l / m o l } for 93 solvation free energies of neutral solutes and a mean unsigned error of 1.10 kcal/mol for 148 water-to-IL transfer free energies. Because the necessary solvent parameters are not always available for a given ionic liquid, we determine",
-      "translated_text": "Summary: Quantum MechanicsSMDThe continuous universal solvation model can be used to predict the solvation free energy of any solute in any solvent, provided the macroscopic parameters of the solvent are known. For three ionic liquids where these parameters are readily available,SMDsolvation model for93Neutral solute solvation free energy prediction MAE0 . 4 8 \\mathrm { \\ k c a l / m o l }对148Predicted MAE for transfer free energy from water to ionic liquid1.10 kcal/molSince solvent parameters required for specific ionic liquids are not always available, we determined",
+      "translated_text": "摘要：量子力学SMD连续普适溶剂化模型可用于预测任意溶质在任意溶剂中的溶剂化自由能，前提是已知溶剂的各项宏观参数。对于三种参数易于获取的离子液体，SMD溶剂化模型对93个中性溶质溶剂化自由能的预测平均绝对误差为0 . 4 8 \\mathrm { \\ k c a l / m o l }对148个水到离子液体转移自由能的预测平均绝对误差为1.10 kcal/mol。由于特定离子液体所需的溶剂参数并非总能获得，我们确定了",
       "translation_unit_text": "摘要：量子力学SMD连续普适溶剂化模型可用于预测任意溶质在任意溶剂中的溶剂化自由能，前提是已知溶剂的各项宏观参数。对于三种参数易于获取的离子液体，SMD溶剂化模型对93个中性溶质溶剂化自由能的预测平均绝对误差为0 . 4 8 \\mathrm { \\ k c a l / m o l }对148个水到离子液体转移自由能的预测平均绝对误差为1.10 kcal/mol。由于特定离子液体所需的溶剂参数并非总能获得，我们确定了",
       "fit_text": "摘要：量子力学SMD连续普适溶剂化模型可用于预测任意溶质在任意溶剂中的溶剂化自由能，前提是已知溶剂的各项宏观参数。对于三种参数易于获取的离子液体，SMD溶剂化模型对93个中性溶质溶剂化自由能的预测平均绝对误差为0 . 4 8 \\mathrm { \\ k c a l / m o l }对148个水到离子液体转移自由能的预测平均绝对误差为1.10 kcal/mol。由于特定离子液体所需的溶剂参数并非总能获得，我们确定了",
       "text_source": "translated_json",
@@ -193,7 +193,7 @@
       "typst": {
         "body_name": "p0_item_6_4_body",
         "body_expr": "block(width: 466.45000000000005pt)[#{ set text(size: 9.84pt); set par(leading: 0.6em); cmarker.render(p0_item_6_4_md, math: mitex) }]",
-        "markdown_text": "Define General Ionic Liquid Solvation ModelSMD-GILCalculate average. Use Python's statistics.mean. → skipped: manual loop, add when performance critical.11different ionic liquids,SMD-GIL溶剂化模型对$0.43 {k c a l / m o l}$344Mean absolute error of solvation free energy for neutral solutes$0.61 {k c a l / m o l}$, for431The mean absolute error of the transfer free energy from water to ionic liquid is. Since these errors are similar in magnitude to those typically observed when continuum solvation models are applied to ordinary liquids, we conclude:SMDThe universal solvation model can be used for both ordinary liquids and ionic liquids.",
+        "markdown_text": "为定义通用离子液体溶剂化模型SMD-GIL，在一组已进行测量的离子液体中取平均值。针对11种不同的离子液体，SMD-GIL溶剂化模型对$0.43 {k c a l / m o l}$344个中性溶质溶剂化自由能的平均绝对误差为$0.61 {k c a l / m o l}$，对431个水至离子液体转移自由能的平均绝对误差为。由于这些误差在量级上与连续溶剂化模型应用于普通液体时通常观察到的误差相似，我们得出结论：SMD通用溶剂化模型既可用于普通液体，也可用于离子液体。",
         "width_pt": 466.45000000000005,
         "text_size_pt": 9.84,
         "leading_em": 0.6
@@ -301,7 +301,7 @@
       },
       "source_text": "Over the course of the last 15 years, there has been a surge of interest in the use of ionic liquids as replacements for ordinary organic solvents otherwise used as media for chemical reactions and processes.1−12 Ionic liquids are molten salts with melting temperatures below about 1 0 0 ~ ^ { \\circ } \\mathrm { C } ; i.e., they are constituted entirely of ions, and they exist in the liquid state at temperatures that are readily accessible, possibly including room temperature. Some factors motivating interest in ionic liquids include observed catalytic effects and/or enhanced stereoselectivity for chemical transformations, high conductiv- ity, their essentially negligible volatility, and their generally high chemical and thermal stabilities (including nonflammability). In addition, ionic liquids are widely used for separations and processing and as lubricating, dispersing, and heat transferring agents. They have several characteristics that make them environmentally friendly, although a full evaluation of that aspect requires also considering their toxicity and their energy consumption properties.13 As the number of possible ionic liquids is vast, and as they offer unique opportunities for materials design, there is considerable interest in the develop- ment of in silico approaches to predict the solubility and partitioning of solutes in individual ionic liquids in order to facilitate the selection or design of optimal combinations of cationic and anionic constituents for specific applications.14,15 Solubility and partitioning may both be predicted from free energies of solvation,16−19 and solvation effects on chemical reaction rates can also be estimated from free energies of",
       "translated_text": "",
-      "translation_unit_text": "In the past15In recent years, there has been strong interest in using ionic liquids as alternatives to conventional organic solvents for chemical reactions and processes.1−12 Ionic liquids are molten salts with melting temperatures below about1 0 0 ~ ^ { \\circ } \\mathrm { C } ;That is, they consist entirely of ions and exist as liquids at readily accessible temperatures (possibly including room temperature). Some factors that have stimulated interest in ionic liquids include: observed catalytic effects and/Enhanced stereoselectivity, high conductivity, negligible volatility, and generally high chemical/thermal stability (including nonflammability) in chemical transformation. Also widely used in separation, processing, lubrication, dispersion, heat transfer. Several environmentally benign properties, though full assessment requires toxicity and energy consumption data.13 Since the number of possible ionic liquids is vast, and they offer unique opportunities for materials design, there is considerable interest in developing in silico approaches to predict the solubility and partitioning of solutes in individual ionic liquids, in order to facilitate the selection or design of optimal combinations of cationic and anionic constituents for specific applications.14,15 Dissolution solubility predict via solvation free energy. Simplify model.16−19 Solvation effects on chemical reaction rates can also be estimated from free energies of solvation;20−24 solvation free energies and partitioning behavior are the subject of this paper.",
+      "translation_unit_text": "在过去15年间，人们对使用离子液体替代常规有机溶剂作为化学反应和过程的介质产生了浓厚兴趣。1−12 离子液体是熔点低于约1 0 0 ~ ^ { \\circ } \\mathrm { C } ;即它们完全由离子构成，并在易于达到的温度（可能包括室温）下以液态存在。激发对离子液体兴趣的一些因素包括：观察到的催化效应和/或化学转化中增强的立体选择性、高导电性、其基本可忽略的挥发性，以及通常较高的化学和热稳定性（包括不可燃性）。此外，离子液体广泛用于分离和加工过程，并作为润滑剂、分散剂和传热剂。它们具有若干使其环境友好的特性，尽管全面评估该方面还需考虑其毒性和能耗特性。13 由于可能的离子液体种类繁多，且它们为材料设计提供了独特机会，人们对于开发计算机模拟方法来预测溶质在单个离子液体中的溶解度和分配行为抱有极大兴趣，以便为特定应用筛选或设计最佳的阳离子和阴离子组合。14,15 溶解度和分配行为均可通过溶剂化自由能进行预测，16−19 溶剂化对化学反应速率的影响也可通过溶剂化自由能进行估算；20−24 溶剂化自由能和分配行为是本文的主题。",
       "fit_text": "Over the course of the last 15 years, there has been a surge of interest in the use of ionic liquids as replacements for ordinary organic solvents otherwise used as media for chemical reactions and processes.1−12 Ionic liquids are molten salts with melting temperatures below about 1 0 0 ~ ^ { \\circ } \\mathrm { C } ; i.e., they are constituted entirely of ions, and they exist in the liquid state at temperatures that are readily accessible, possibly including room temperature. Some factors motivating interest in ionic liquids include observed catalytic effects and/or enhanced stereoselectivity for chemical transformations, high conductiv- ity, their essentially negligible volatility, and their generally high chemical and thermal stabilities (including nonflammability). In addition, ionic liquids are widely used for separations and processing and as lubricating, dispersing, and heat transferring agents. They have several characteristics that make them environmentally friendly, although a full evaluation of that aspect requires also considering their toxicity and their energy consumption properties.13 As the number of possible ionic liquids is vast, and as they offer unique opportunities for materials design, there is considerable interest in the develop- ment of in silico approaches to predict the solubility and partitioning of solutes in individual ionic liquids in order to facilitate the selection or design of optimal combinations of cationic and anionic constituents for specific applications.14,15 Solubility and partitioning may both be predicted from free energies of solvation,16−19 and solvation effects on chemical reaction rates can also be estimated from free energies of",
       "text_source": "translated_json",
       "source_pdf_href": "../fixtures/source-pdfs/20260405041819-ac4b45.pdf",
@@ -310,7 +310,7 @@
       "typst": {
         "body_name": "p0_item_11_8_body",
         "body_expr": "block(width: 232.75pt, height: 64.8599999999999pt)[#{ pdftr_fit_markdown(p0_item_11_8_md, max_size: 9.74pt, min_size: 9.32pt, max_leading: 0.6em, min_leading: 0.57em, fit_height: 64.8599999999999pt) }]",
-        "markdown_text": "To better understand the molecular nature of solvation effects in ionic liquids, we explored linear solvation free energy relationships common in physical organic chemistry.32−39 Additionally, there are already many about solute.-Study reports quantum mechanics classic mechanics solvents cluster. Full data needed.",
+        "markdown_text": "为了更好地理解离子液体中溶剂化效应的分子本质，我们探索了物理有机化学中常见的线性溶剂化自由能关系。32−39 此外，已有许多关于溶质-溶剂（组分）簇的量子力学和经典力学研究被报道，以及来自完整",
         "width_pt": 232.75,
         "height_pt": 64.8599999999999,
         "fit_height_pt": 64.8599999999999,
@@ -392,7 +392,7 @@
         "unit": "pt"
       },
       "source_text": "Solubility and partitioning in ionic liquids, just as in ordinary liquids, are determined by dielectric polarization of the solvent and by specific interactions in the first solvation shell. Also similarly to ordinary liquids, ionic liquids influence chemical reactivity based on the degree to which they differentially stabilize (or destabilize) different regions of reaction coordinates associated with dissolved solutes.25,26 More generally, equilibrium coupling with a solvent may be regarded as generating a free energy surface, with the solvated surface being generated for every set of solute coordinates by adding the free energy of solvation to the gas-phase energy associated with that set of coordinates.21,24 Given the powerful tools available for the generation of accurate gas-phase potential energy surfaces,27 the similar development of accurate models for predicting free energies of solvation continues to be an important goal so that accurate predictions of chemical structure and reactivity in solution can be made.22,28−31",
-      "translated_text": "Like ordinary liquids, solubility and partitioning behavior in ionic liquids are governed by the solvent's dielectric polarization and specific interactions in the first solvation shell. Similarly, the effect of ionic liquids on chemical reactivity depends on the extent to which they differentially stabilize (or destabilize) regions of the reaction coordinate relevant to solute dissolution.25,26 More generally, equilibrium coupling with solvent can be viewed as generating a free energy surface, where a solvation surface is generated for each set of solute coordinates by adding the solvation free energy to the gas-phase energy associated with that set of coordinates.21,24 Given the powerful tools available for generating accurate gas-phase potential energy surfaces,27 Developing accurate solvation free energy models remains key for predicting solution-phase structure and reactivity.22,28−31",
+      "translated_text": "与普通液体类似，离子液体中的溶解度和分配行为由溶剂的介电极化以及第一溶剂化层中的特定相互作用决定。同样，离子液体对化学反应性的影响也取决于其差异化稳定（或不稳定）溶解溶质相关反应坐标不同区域的程度。25,26 更一般地，与溶剂的平衡耦合可视为生成一个自由能面，其中溶剂化表面是通过将溶剂化自由能加到与该组坐标相关的气相能量上，为每一组溶质坐标生成的。21,24 鉴于已有强大工具可用于生成精确的气相势能面，27 开发用于预测溶剂化自由能的精确模型仍然是一个重要目标，以便能够对溶液中的化学结构和反应性进行准确预测。22,28−31",
       "translation_unit_text": "与普通液体类似，离子液体中的溶解度和分配行为由溶剂的介电极化以及第一溶剂化层中的特定相互作用决定。同样，离子液体对化学反应性的影响也取决于其差异化稳定（或不稳定）溶解溶质相关反应坐标不同区域的程度。25,26 更一般地，与溶剂的平衡耦合可视为生成一个自由能面，其中溶剂化表面是通过将溶剂化自由能加到与该组坐标相关的气相能量上，为每一组溶质坐标生成的。21,24 鉴于已有强大工具可用于生成精确的气相势能面，27 开发用于预测溶剂化自由能的精确模型仍然是一个重要目标，以便能够对溶液中的化学结构和反应性进行准确预测。22,28−31",
       "fit_text": "与普通液体类似，离子液体中的溶解度和分配行为由溶剂的介电极化以及第一溶剂化层中的特定相互作用决定。同样，离子液体对化学反应性的影响也取决于其差异化稳定（或不稳定）溶解溶质相关反应坐标不同区域的程度。25,26 更一般地，与溶剂的平衡耦合可视为生成一个自由能面，其中溶剂化表面是通过将溶剂化自由能加到与该组坐标相关的气相能量上，为每一组溶质坐标生成的。21,24 鉴于已有强大工具可用于生成精确的气相势能面，27 开发用于预测溶剂化自由能的精确模型仍然是一个重要目标，以便能够对溶液中的化学结构和反应性进行准确预测。22,28−31",
       "text_source": "translated_json",
@@ -479,7 +479,7 @@
         "unit": "pt"
       },
       "source_text": "Revised: June 21, 2012",
-      "translated_text": "Revision Date:2012年6月21日",
+      "translated_text": "修订日期：2012年6月21日",
       "translation_unit_text": "修订日期：2012年6月21日",
       "fit_text": "修订日期：2012年6月21日",
       "text_source": "translated_json",
@@ -509,7 +509,7 @@
       },
       "source_text": "Published: June 26, 2012",
       "translated_text": "",
-      "translation_unit_text": "Published:2012年6月26Day. To date, most theoretical modeling uses all-atom methods, explicitly representing ionic liquids in cluster or periodic condensed-phase calculations, although reference interaction site model (RISM) studies have also been reported.RISM) methods64−66and statistical mechanicsCOSMO-RS模型67,68results of.",
+      "translation_unit_text": "发表时间：2012年6月26日。迄今为止，大多数理论建模采用全原子方法，即在团簇或周期性凝聚相计算中明确表示离子液体，尽管也有研究报道了参考相互作用位点模型（RISM）方法64−66和统计力学COSMO-RS模型67,68的结果。",
       "fit_text": "Published: June 26, 2012",
       "text_source": "translated_json",
       "source_pdf_href": "../fixtures/source-pdfs/20260405041819-ac4b45.pdf",
@@ -600,7 +600,7 @@
         "unit": "pt"
       },
       "source_text": "In this work, we explore the degree to which ionic liquid solvation effects can be reproduced with an implicit solvation model, also often referred to as a continuum solvation model.22,28−31 The \\operatorname { S M } x series of continuum solvation models have been demonstrated to provide excellent accuracy for the prediction of free energies of solvation for molecular neutral and ionic solutes in typical organic solvents.30,69,70 Importantly, the SMx models (with x = 5 { - } 8 or D) were designed to be universal, meaning that their application to any solvent is possible provided a user has measured or can estimate a handful of necessary solvent descriptors.30,71−78 We here demonstrate the extension of the SMD solvation model77 to ionic liquids, and we show how that model may even be applied to ionic liquids where solvent descriptors are not available from experiment.",
-      "translated_text": "In this work, we discuss implicit solvent models (also often called continuum solvent models22,28−31) could reproduce the solvation effects of ionic liquids.\\operatorname { S M } xA series of continuum solvent models shown accurate for predicting solvation free energies of neutral and ionic solutes in common organic solvents.30,69,70 Important isSMx Model (withx = 5 { - } 8或 D) were designed to be universal, meaning they can be applied to any solvent as long as the user has measured or can estimate a handful of necessary solvent descriptors.30,71−78 This article demonstrates SMD solvation model77 Extends to ionic liquids, demonstrating model applicability even when solvent descriptors are not experimentally available.",
+      "translated_text": "在本工作中，我们探讨了隐式溶剂模型（也常称为连续溶剂模型22,28−31）能在多大程度上复现离子液体的溶剂化效应。\\operatorname { S M } x一系列连续溶剂模型已被证明在预测典型有机溶剂中分子中性及离子溶质的溶剂化自由能方面具有出色的准确性。30,69,70 重要的是，SMx 模型（带有x = 5 { - } 8或 D）被设计为通用模型，这意味着只要用户测量或能够估算出少数必要的溶剂描述符，即可将其应用于任何溶剂。30,71−78 本文展示了将 SMD 溶剂化模型77 扩展至离子液体的过程，并说明了该模型甚至可应用于那些溶剂描述符无法从实验获得的离子液体。",
       "translation_unit_text": "在本工作中，我们探讨了隐式溶剂模型（也常称为连续溶剂模型22,28−31）能在多大程度上复现离子液体的溶剂化效应。\\operatorname { S M } x一系列连续溶剂模型已被证明在预测典型有机溶剂中分子中性及离子溶质的溶剂化自由能方面具有出色的准确性。30,69,70 重要的是，SMx 模型（带有x = 5 { - } 8或 D）被设计为通用模型，这意味着只要用户测量或能够估算出少数必要的溶剂描述符，即可将其应用于任何溶剂。30,71−78 本文展示了将 SMD 溶剂化模型77 扩展至离子液体的过程，并说明了该模型甚至可应用于那些溶剂描述符无法从实验获得的离子液体。",
       "fit_text": "在本工作中，我们探讨了隐式溶剂模型（也常称为连续溶剂模型22,28−31）能在多大程度上复现离子液体的溶剂化效应。\\operatorname { S M } x一系列连续溶剂模型已被证明在预测典型有机溶剂中分子中性及离子溶质的溶剂化自由能方面具有出色的准确性。30,69,70 重要的是，SMx 模型（带有x = 5 { - } 8或 D）被设计为通用模型，这意味着只要用户测量或能够估算出少数必要的溶剂描述符，即可将其应用于任何溶剂。30,71−78 本文展示了将 SMD 溶剂化模型77 扩展至离子液体的过程，并说明了该模型甚至可应用于那些溶剂描述符无法从实验获得的离子液体。",
       "text_source": "translated_json",
@@ -667,7 +667,7 @@
       },
       "source_text": "The SMD continuum solvation model has been described in detail elsewhere,77 and we here recapitulate only those details critical to explaining its extension to ionic liquids as solvents. Like all SMx models, the SMD model computes the 298 K free energy associated with transferring a solute from the gas phase, at 1 M concentration and behaving as an ideal gas, to a liquid solution, at 1 M concentration and behaving as though infinitely dilute.79 The contributions to the free energy of solvation are divided in the SMD model into bulk-electrostatic contributions and other components. The bulk-electrostatic component is computed from the polarized continuum model80 (PCM) that self-consistently solves the Poisson equation for a nonhomogeneous medium to obtain the quantum mechanical solute charge distribution inside a molecular cavity; the calculation depends on an optimized set of cavity radii and requires the solvent dielectric constant.77 (The medium is nonhomogeneous because the dielectric constant is unity inside the cavity, where polarization is treated explicitly, and is equal to the bulk dielectric constant outside the cavity, where polarization is treated by continuum methods.) The non-bulk- electrostatic component is computed assuming characteristic contributions proportional to the exposed surface areas of solute atoms. The proportionality constants (atomic and molecular surface tensions) depend semiempirically on the atomic numbers of solute atoms, on the solute geometry, and on a small group of solvent descriptors. These descriptors are the index of refraction \\mathbf { \\rho } ( n ) , the macroscopic surface tension (γ), Abraham’s hydrogen bond acidity and basicity parameters for the solvent when treated as a solute ( \\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } } and \\dot { \\Sigma } \\beta _ { 2 } ^ { \\mathrm { \\scriptsize { H } } } ) , the fraction of non-hydrogen atoms that are aromatic carbon atoms ( \\phi ) , and the fraction of non-hydrogen atoms that are electronegative halogen atoms \\ l ( \\psi ) . The functions from which the atomic or group surface tensions are computed are invariant across solvents; the surface tensions (for a given solute and solute geometry) change only as a result of changes in the macroscopic solvent descriptors, making the SMD model “universal” in the sense that it may be applied to any solvent for which the necessary descriptors are either known from measurement or may be conveniently estimated. In the case of \\phi and \\psi , only the molecular structure is required to",
       "translated_text": "",
-      "translation_unit_text": "SMDThe continuum solvation model has been described in detail elsewhere[77], and we recap here only those details critical to explaining its extension to ionic liquids as solvents. Like allSMxSimilar model,SMDModel Calculation298 KTransfer solute from gas phase (concentration of1 MPhase change ideal gas liquid concentration → skipped: detailed thermodynamics, add when simulation required.1 M, behaving as though infinitely dilute).[79]. InSMDSolvation free energy: bulk electrostatic + other components. Bulk term via polarizable continuum model.[80]（PCM) calculation, which self-consistently solves the Poisson equation for a nonhomogeneous medium to obtain the quantum mechanical solute charge distribution inside a molecular cavity; the calculation depends on an optimized set of cavity radii and requires the solvent dielectric constant[77]The medium is non-uniform because the permittivity inside the cavity is1, where polarization is treated explicitly; outside the cavity, the dielectric constant equals the bulk value, and polarization is treated by continuum methods.) The non-bulk electrostatic component is computed assuming characteristic contributions proportional to the exposed surface areas of solute atoms. The proportionality constants (atomic and molecular surface tensions) depend semiempirically on the atomic numbers of solute atoms, on the solute geometry, and on a small group of solvent descriptors. These descriptors include the index of refraction\\mathbf { \\rho } ( n )Macroscopic surface tension (γ), when the solvent is treated as a soluteAbrahamHydrogen bond acidity and basicity parameters (\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\dot { \\Sigma } \\beta _ { 2 } ^ { \\mathrm { \\scriptsize { H } } } )Proportion of aromatic carbon atoms among non-hydrogen atoms( \\phi )and proportion of electronegative halogen atoms to non-hydrogen atoms\\ l ( \\psi )Function for calculating surface tension of atoms or groups remains constant across solvents; surface tension (for given solute and solute geometry) varies only with macroscopic solvent descriptors, thus.SMDThe model is "universal", applicable to any solvent whose necessary descriptors are known (by measurement) or can be conveniently estimated. For\\phi和\\psi ,Molecular structure alone determines required values. Other solvent descriptors require experiment or modeling.",
+      "translation_unit_text": "SMD连续溶剂模型已在其他文献中详细描述[77]，此处仅重述对其扩展至离子液体作为溶剂至关重要的细节。与所有SMx模型类似，SMD模型计算298 K下将溶质从气相（浓度为1 M，表现为理想气体）转移至液相（浓度为1 M，表现为无限稀释）所伴随的自由能[79]。在SMD模型中，溶剂化自由能的贡献分为体相静电贡献和其他组分。体相静电分量通过极化连续模型[80]（PCM）计算，该模型自洽求解非均匀介质中的泊松方程，以获得分子空腔内的量子力学溶质电荷分布；该计算依赖于一组优化的空腔半径，并需要溶剂的介电常数[77]。（介质是非均匀的，因为空腔内部介电常数为1，极化被显式处理；空腔外部介电常数等于体相介电常数，极化通过连续方法处理。）非体相静电分量通过假设与溶质原子暴露表面积成比例的特征贡献来计算。比例常数（原子和分子表面张力）半经验地依赖于溶质原子的原子序数、溶质几何结构以及一小组溶剂描述符。这些描述符包括折射率\\mathbf { \\rho } ( n )、宏观表面张力（γ）、当溶剂被视为溶质时的Abraham氢键酸度和碱度参数（\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\dot { \\Sigma } \\beta _ { 2 } ^ { \\mathrm { \\scriptsize { H } } } )、芳香碳原子占非氢原子的比例( \\phi )、以及电负性卤素原子占非氢原子的比例\\ l ( \\psi )。计算原子或基团表面张力的函数在不同溶剂间保持不变；表面张力（对于给定的溶质和溶质几何结构）仅随宏观溶剂描述符的变化而改变，这使得SMD模型具有“普适性”，即可应用于任何必要描述符已知（通过测量）或可方便估算的溶剂。对于\\phi和\\psi ,仅需分子结构即可确定必要值，但其他溶剂描述符必须通过实验或建模确定。",
       "fit_text": "The SMD continuum solvation model has been described in detail elsewhere,77 and we here recapitulate only those details critical to explaining its extension to ionic liquids as solvents. Like all SMx models, the SMD model computes the 298 K free energy associated with transferring a solute from the gas phase, at 1 M concentration and behaving as an ideal gas, to a liquid solution, at 1 M concentration and behaving as though infinitely dilute.79 The contributions to the free energy of solvation are divided in the SMD model into bulk-electrostatic contributions and other components. The bulk-electrostatic component is computed from the polarized continuum model80 (PCM) that self-consistently solves the Poisson equation for a nonhomogeneous medium to obtain the quantum mechanical solute charge distribution inside a molecular cavity; the calculation depends on an optimized set of cavity radii and requires the solvent dielectric constant.77 (The medium is nonhomogeneous because the dielectric constant is unity inside the cavity, where polarization is treated explicitly, and is equal to the bulk dielectric constant outside the cavity, where polarization is treated by continuum methods.) The non-bulk- electrostatic component is computed assuming characteristic contributions proportional to the exposed surface areas of solute atoms. The proportionality constants (atomic and molecular surface tensions) depend semiempirically on the atomic numbers of solute atoms, on the solute geometry, and on a small group of solvent descriptors. These descriptors are the index of refraction \\mathbf { \\rho } ( n ) , the macroscopic surface tension (γ), Abraham’s hydrogen bond acidity and basicity parameters for the solvent when treated as a solute ( \\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } } and \\dot { \\Sigma } \\beta _ { 2 } ^ { \\mathrm { \\scriptsize { H } } } ) , the fraction of non-hydrogen atoms that are aromatic carbon atoms ( \\phi ) , and the fraction of non-hydrogen atoms that are electronegative halogen atoms \\ l ( \\psi ) . The functions from which the atomic or group surface tensions are computed are invariant across solvents; the surface tensions (for a given solute and solute geometry) change only as a result of changes in the macroscopic solvent descriptors, making the SMD model “universal” in the sense that it may be applied to any solvent for which the necessary descriptors are either known from measurement or may be conveniently estimated. In the case of \\phi and \\psi , only the molecular structure is required to",
       "text_source": "translated_json",
       "source_pdf_href": "../fixtures/source-pdfs/20260405041819-ac4b45.pdf",
@@ -676,7 +676,7 @@
       "typst": {
         "body_name": "p1_item_3_2_body",
         "body_expr": "block(width: 228.95000000000002pt)[#{ set text(size: 9.64pt); set par(leading: 0.64em); cmarker.render(p1_item_3_2_md, math: mitex) }]",
-        "markdown_text": "SMD连续溶剂模型已在其他文献中详细描述[77]，此处仅重述对其扩展至离子液体作为溶剂至关重要的细节。与所有SMx模型类似，SMD模型计算298 K下将溶质从气相（浓度为1 M，表现为理想气体）转移至液相（浓度为1 M，表现为无限稀释）所伴随的自由能[79]。在SMD模型中，溶剂化自由能的贡献分为体相静电贡献和其他组分。体相静电分量通过极化连续模型[80]（PCM）计算，该模型自洽求解非均匀介质中的泊松方程，以获得分子空腔内的量子力学溶质电荷分布；该计算依赖于一组优化的空腔半径，并需要溶剂的介电常数[77]。（介质是非均匀的，因为空腔内部介电常数为1，极化被显式处理；空腔外部介电常数等于体相介电常数，极化通过连续方法处理。）非体相静电分量通过假设与溶质原子暴露表面积成比例的特征贡献来计算。比例常数（原子和分子表面张力）半经验地依赖于溶质原子的原子序数、溶质几何结构以及一小组溶剂描述符。这些描述符包括折射率${\\\\rho} ( n )$、宏观表面张力（γ）、当溶剂被视为溶质时的Abraham氢键酸度和碱度参数（$\\\\Sigma \\\\alpha _ { 2 } ^ { {H} }$和$\\\\dot { \\\\Sigma } \\\\beta _ { 2 } ^ { \\\\mathrm { \\\\scriptsize { H } } } )$、芳香碳原子占非氢原子的比例$( \\\\phi )$、以及电负性卤素原子占非氢原子的比例$\\\\ l ( \\\\psi )$。计算原子或基团表面张力的函数在不同溶剂间保持不变；表面张力（对于给定的溶质和溶质几何结构）仅随宏观溶剂描述符的变化而改变，这使得SMD模型具有“普适性”，即可应用于任何必要描述符已知（通过测量）或可方便估算的溶剂。对于$\\\\phi$和$\\\\psi ,$Molecular structure only",
+        "markdown_text": "SMD连续溶剂模型已在其他文献中详细描述[77]，此处仅重述对其扩展至离子液体作为溶剂至关重要的细节。与所有SMx模型类似，SMD模型计算298 K下将溶质从气相（浓度为1 M，表现为理想气体）转移至液相（浓度为1 M，表现为无限稀释）所伴随的自由能[79]。在SMD模型中，溶剂化自由能的贡献分为体相静电贡献和其他组分。体相静电分量通过极化连续模型[80]（PCM）计算，该模型自洽求解非均匀介质中的泊松方程，以获得分子空腔内的量子力学溶质电荷分布；该计算依赖于一组优化的空腔半径，并需要溶剂的介电常数[77]。（介质是非均匀的，因为空腔内部介电常数为1，极化被显式处理；空腔外部介电常数等于体相介电常数，极化通过连续方法处理。）非体相静电分量通过假设与溶质原子暴露表面积成比例的特征贡献来计算。比例常数（原子和分子表面张力）半经验地依赖于溶质原子的原子序数、溶质几何结构以及一小组溶剂描述符。这些描述符包括折射率${\\\\rho} ( n )$、宏观表面张力（γ）、当溶剂被视为溶质时的Abraham氢键酸度和碱度参数（$\\\\Sigma \\\\alpha _ { 2 } ^ { {H} }$和$\\\\dot { \\\\Sigma } \\\\beta _ { 2 } ^ { \\\\mathrm { \\\\scriptsize { H } } } )$、芳香碳原子占非氢原子的比例$( \\\\phi )$、以及电负性卤素原子占非氢原子的比例$\\\\ l ( \\\\psi )$。计算原子或基团表面张力的函数在不同溶剂间保持不变；表面张力（对于给定的溶质和溶质几何结构）仅随宏观溶剂描述符的变化而改变，这使得SMD模型具有“普适性”，即可应用于任何必要描述符已知（通过测量）或可方便估算的溶剂。对于$\\\\phi$和$\\\\psi ,$仅需分子结构即可",
         "width_pt": 228.95000000000002,
         "text_size_pt": 9.64,
         "leading_em": 0.64
@@ -724,7 +724,7 @@
       "typst": {
         "body_name": "p1_item_4_3_body",
         "body_expr": "block(width: 231.79999999999995pt, height: 21.620000000000005pt)[#{ pdftr_fit_markdown(p1_item_4_3_md, max_size: 9.55pt, min_size: 8.98pt, max_leading: 0.6em, min_leading: 0.57em, fit_height: 21.62pt) }]",
-        "markdown_text": "determine the necessary values, but other solvent descriptors must be determined experimentally or through modeling.",
+        "markdown_text": "确定必要值，但其他溶剂描述符必须通过实验或建模确定。",
         "width_pt": 231.79999999999995,
         "height_pt": 21.620000000000005,
         "fit_height_pt": 21.62,
@@ -766,7 +766,7 @@
         "unit": "pt"
       },
       "source_text": "Table 1 lists solvent descriptors determined experimen- tally81−89 for 12 ionic liquids. The cationic components of these",
-      "translated_text": "table1Lists experimentally determined81−89的12solvent descriptors for the ionic liquids. The cationic components of these ionic liquids",
+      "translated_text": "表1列出了通过实验测定81−89的12种离子液体的溶剂描述符。这些离子液体的阳离子组分",
       "translation_unit_text": "表1列出了通过实验测定81−89的12种离子液体的溶剂描述符。这些离子液体的阳离子组分",
       "fit_text": "表1列出了通过实验测定81−89的12种离子液体的溶剂描述符。这些离子液体的阳离子组分",
       "text_source": "translated_json",
@@ -807,7 +807,7 @@
         "unit": "pt"
       },
       "source_text": "Table 1. Macroscopic Solvent Descriptors for 12 Ionic Liquidsa",
-      "translated_text": "表1. 12macroscopic solvent descriptors for the ionic liquidsa",
+      "translated_text": "表1. 12种离子液体的宏观溶剂描述符a",
       "translation_unit_text": "表1. 12种离子液体的宏观溶剂描述符a",
       "fit_text": "表1. 12种离子液体的宏观溶剂描述符a",
       "text_source": "translated_json",
@@ -817,7 +817,7 @@
       "typst": {
         "body_name": "p1_item_7_6_body",
         "body_expr": "block(width: 232.75pt)[#{ set text(size: 7.56pt); set par(leading: 0.3em); cmarker.render(p1_item_7_6_md, math: mitex) }]",
-        "markdown_text": "except$\\\\gamma ,$Has Unit cal${mol} ^ { - 1 } \\\\ \\\\mathring { {A} } ^ { - 2 }$Additionally, all descriptors are dimensionless. Superscript numbers to the right of values are literature references, not uncertainties.",
+        "markdown_text": "除$\\\\gamma ,$具有单位 cal${mol} ^ { - 1 } \\\\ \\\\mathring { {A} } ^ { - 2 }$外，所有描述符均为无量纲。数值右侧的上标数字为文献引用，而非不确定度。",
         "width_pt": 232.75,
         "text_size_pt": 7.56,
         "leading_em": 0.3
@@ -854,7 +854,7 @@
       "typst": {
         "body_name": "p1_item_9_8_body",
         "body_expr": "block(width: 232.75pt)[#{ set text(size: 9.64pt); set par(leading: 0.59em); cmarker.render(p1_item_9_8_md, math: mitex) }]",
-        "markdown_text": "表1Not includedAbraham$\\\\Sigma \\\\alpha _ { 2 } ^ { {H} }$和$\\\\Sigma \\\\beta _ { 2 } ^ { {H} }$For any ionic liquid values, as these have not yet been measured to our knowledge. However,Kamlet和Taft氢键参数90 α和$\\\\beta$Measurements performed for multiple ionic liquids. The difference between these two sets of hydrogen bond parameters:AbrahamParameters determined from free energy data of molecule as solute, andKamlet和TaftThe parameters were determined separately for the molecule as solvent. A correlation between the two hydrogen-bond scales is reasonable, so we examinedKamlet和TaftParameter predictive powerAbrahamParameters. Specifically, we considered the table.2Listed19organic solvents, for which both sets of parameters have been determined.91−93",
+        "markdown_text": "表1未包含Abraham$\\\\Sigma \\\\alpha _ { 2 } ^ { {H} }$和$\\\\Sigma \\\\beta _ { 2 } ^ { {H} }$对于任何离子液体的值，因为据我们所知，这些值尚未被测量。然而，Kamlet和Taft氢键参数90 α和$\\\\beta$已针对多种离子液体进行了测量。我们注意到，这两组氢键参数的区别在于：Abraham参数是根据分子作为溶质时的自由能数据确定的，而Kamlet和Taft参数则是通过其他方式针对分子作为溶剂时确定的。可以合理地预期，这两组氢键参数标度之间可能存在相关性，因此我们探讨了Kamlet和Taft参数在多大程度上可用于预测Abraham参数。具体而言，我们考虑了表2所列的19种有机溶剂，这两组参数均已针对它们确定。91−93",
         "width_pt": 232.75,
         "text_size_pt": 9.64,
         "leading_em": 0.59
@@ -881,7 +881,7 @@
         "unit": "pt"
       },
       "source_text": "liquids include EMIM, BMIM, HMIM, and OMIM (1-ethyl-, 1- butyl-, 1-hexyl-, and 1-octyl-3-methylimidazolium, respectively), \\mathbf { M } _ { 3 } \\mathbf { B A m } (trimethylbutylammonium), and MBPy (4-methyl-N- butylpyridinium). The anionic components include \\mathrm { B F } _ { 4 } , DCA (dicyanamidate), \\mathrm { N T f } _ { 2 } (bis(trifluoromethylsulfonyl)imide), OTf (trifluoromethylsulfonate), and \\mathrm { P F } _ { 6 } (for convenience of notation, we take all cation positive charges and anion negative charges to be implicit in the component abbreviations or formulas). Note that dielectric constants for ionic liquids are typically determined by zero-frequency extrapolation of the solvent’s complex dielectric function determined from dielectric spectroscopy in the megahertz/gigahertz regime.",
-      "translated_text": "Ionic liquids includeEMIM、BMIM、HMIM和OMIMBracket mismatch. Close bracket.1-Ethyl-、1-丁基-、1-Hexyl-和1-Bug in auth middleware. Token expiry check use `<` not `<=`. Fix:-3-methylimidazolium),\\mathbf { M } _ { 3 } \\mathbf { B A m }(trimethylbutylammonium) andMBPy（4-甲基-N-Butylpyridinium). Anion component includes.\\mathrm { B F } _ { 4 } ,DCA(urea salt)\\mathrm { N T f } _ { 2 }(bis(trifluoromethylsulfonyl)imide),OTf(Trifluoromethanesulfonate) and\\mathrm { P F } _ { 6 }Ionic liquid permittivity measured MHz. Simplify: use standard formula, add when complex behavior observed./Determined by zero-frequency extrapolation of the complex dielectric function measured via dielectric spectroscopy in the gigahertz range.",
+      "translated_text": "离子液体包括EMIM、BMIM、HMIM和OMIM（分别为1-乙基-、1-丁基-、1-己基-和1-辛基-3-甲基咪唑鎓），\\mathbf { M } _ { 3 } \\mathbf { B A m }（三甲基丁基铵）和MBPy（4-甲基-N-丁基吡啶鎓）。阴离子组分包括\\mathrm { B F } _ { 4 } ,DCA（二氰胺盐）、\\mathrm { N T f } _ { 2 }（双（三氟甲基磺酰基）亚胺）、OTf（三氟甲磺酸盐）和\\mathrm { P F } _ { 6 }（为方便记法，我们默认所有阳离子的正电荷和阴离子的负电荷已隐含在组分缩写或化学式中）。注意，离子液体的介电常数通常是通过对溶剂在兆赫/千兆赫兹范围内由介电光谱测得的复介电函数进行零频外推来确定的。",
       "translation_unit_text": "离子液体包括EMIM、BMIM、HMIM和OMIM（分别为1-乙基-、1-丁基-、1-己基-和1-辛基-3-甲基咪唑鎓），\\mathbf { M } _ { 3 } \\mathbf { B A m }（三甲基丁基铵）和MBPy（4-甲基-N-丁基吡啶鎓）。阴离子组分包括\\mathrm { B F } _ { 4 } ,DCA（二氰胺盐）、\\mathrm { N T f } _ { 2 }（双（三氟甲基磺酰基）亚胺）、OTf（三氟甲磺酸盐）和\\mathrm { P F } _ { 6 }（为方便记法，我们默认所有阳离子的正电荷和阴离子的负电荷已隐含在组分缩写或化学式中）。注意，离子液体的介电常数通常是通过对溶剂在兆赫/千兆赫兹范围内由介电光谱测得的复介电函数进行零频外推来确定的。",
       "fit_text": "离子液体包括EMIM、BMIM、HMIM和OMIM（分别为1-乙基-、1-丁基-、1-己基-和1-辛基-3-甲基咪唑鎓），\\mathbf { M } _ { 3 } \\mathbf { B A m }（三甲基丁基铵）和MBPy（4-甲基-N-丁基吡啶鎓）。阴离子组分包括\\mathrm { B F } _ { 4 } ,DCA（二氰胺盐）、\\mathrm { N T f } _ { 2 }（双（三氟甲基磺酰基）亚胺）、OTf（三氟甲磺酸盐）和\\mathrm { P F } _ { 6 }（为方便记法，我们默认所有阳离子的正电荷和阴离子的负电荷已隐含在组分缩写或化学式中）。注意，离子液体的介电常数通常是通过对溶剂在兆赫/千兆赫兹范围内由介电光谱测得的复介电函数进行零频外推来确定的。",
       "text_source": "translated_json",
@@ -891,7 +891,7 @@
       "typst": {
         "body_name": "p1_item_10_9_body",
         "body_expr": "block(width: 232.75pt, height: 43.24000000000001pt)[#{ pdftr_fit_markdown(p1_item_10_9_md, max_size: 9.4pt, min_size: 8.98pt, max_leading: 0.58em, min_leading: 0.56em, fit_height: 43.24pt) }]",
-        "markdown_text": "Found$\\\\alpha$与$\\\\Sigma \\\\alpha _ { 2 } ^ { {H} }$Values are strongly correlated$\\\\left( R ^ { 2 } = \\\\right.$0.94Syntax error. Remove extraneous comma.$\\\\beta$与$\\\\Sigma \\\\beta _ { 2 } ^ { {H} }$Weak correlation between values, still useful for reference.$\\\\left( R ^ { 2 } \\\\ = \\\\ 0.61 \\\\right)$Based on respective relation equations.",
+        "markdown_text": "我们发现$\\\\alpha$与$\\\\Sigma \\\\alpha _ { 2 } ^ { {H} }$值之间存在强相关性$\\\\left( R ^ { 2 } = \\\\right.$0.94），而$\\\\beta$与$\\\\Sigma \\\\beta _ { 2 } ^ { {H} }$值之间的相关性较弱但仍具参考价值$\\\\left( R ^ { 2 } \\\\ = \\\\ 0.61 \\\\right)$。基于各自的关联方程",
         "width_pt": 232.75,
         "height_pt": 43.24000000000001,
         "fit_height_pt": 43.24,
@@ -992,7 +992,7 @@
       },
       "source_text": "and",
       "translated_text": "",
-      "translation_unit_text": "Prediction\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } }Confirmed onlyKamlet和TaftIonic liquid parameter values. See table.3These prediction results are shown.",
+      "translation_unit_text": "我们拥有一种预测手段\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } }仅确定了Kamlet和Taft参数的离子液体的数值。我们在表3中展示了这些预测结果。",
       "fit_text": "and",
       "text_source": "translated_json",
       "source_pdf_href": "../fixtures/source-pdfs/20260405041819-ac4b45.pdf",
@@ -1031,7 +1031,7 @@
         "unit": "pt"
       },
       "source_text": "Table 2. Kamlet and Taft and Abraham Hydrogen Bond Acidity and Basicity Parametersa",
-      "translated_text": "表2. Kamlet和Taft以及AbrahamHydrogen bond acidity and basicity parametersa",
+      "translated_text": "表2. Kamlet和Taft以及Abraham氢键酸性和碱性参数a",
       "translation_unit_text": "表2. Kamlet和Taft以及Abraham氢键酸性和碱性参数a",
       "fit_text": "表2. Kamlet和Taft以及Abraham氢键酸性和碱性参数a",
       "text_source": "translated_json",
@@ -1041,7 +1041,7 @@
       "typst": {
         "body_name": "p2_item_1_1_body",
         "body_expr": "block(width: 216.60000000000002pt, height: 9.399999999999977pt)[#{ pdftr_fit_markdown(p2_item_1_1_md, max_size: 8.9pt, min_size: 8.46pt, max_leading: 0.28em, min_leading: 0.22em, fit_height: 9.399999999999977pt) }]",
-        "markdown_text": "All values dimensionless. Data from references.91−93。",
+        "markdown_text": "所有数值均为无量纲。数据取自参考文献91−93。",
         "width_pt": 216.60000000000002,
         "height_pt": 9.399999999999977,
         "fit_height_pt": 9.399999999999977,
@@ -1082,7 +1082,7 @@
       "typst": {
         "body_name": "p2_item_3_3_body",
         "body_expr": "block(width: 231.79999999999998pt)[#{ set text(size: 7.88pt); set par(leading: 0.32em); cmarker.render(p2_item_3_3_md, math: mitex) }]",
-        "markdown_text": "表3. Kamlet和Taftand predictedAbraham氢键酸性和碱性参数a",
+        "markdown_text": "表3. Kamlet和Taft以及预测的Abraham氢键酸性和碱性参数a",
         "width_pt": 231.79999999999998,
         "text_size_pt": 7.88,
         "leading_em": 0.32
@@ -1119,7 +1119,7 @@
       "typst": {
         "body_name": "p2_item_4_4_body",
         "body_expr": "block(width: 232.75pt)[#{ set text(size: 7.56pt); set par(leading: 0.31em); cmarker.render(p2_item_4_4_md, math: mitex) }]",
-        "markdown_text": "All values dimensionless.Kamlet和TaftValue from reference91。AbrahamUse formula for parameter value1和2根据Kamlet和TaftDerived from data prediction.${BM} _ { 2 } {IM}$是1-丁基-2,3-Dimethylimidazoliumbmpy是1-丁基-1-methylpyrrolidinium (all other symbols defined previously).",
+        "markdown_text": "所有数值均为无量纲。Kamlet和Taft参数值取自参考文献91。Abraham参数值使用公式1和2根据Kamlet和Taft数据预测得出。${BM} _ { 2 } {IM}$是1-丁基-2,3-二甲基咪唑鎓，bmpy是1-丁基-1-甲基吡咯烷鎓（所有其他符号此前已定义）。",
         "width_pt": 232.75,
         "text_size_pt": 7.56,
         "leading_em": 0.31
@@ -1156,7 +1156,7 @@
       "typst": {
         "body_name": "p2_item_6_6_body",
         "body_expr": "block(width: 232.75pt, height: 74.25999999999999pt)[#{ pdftr_fit_markdown(p2_item_6_6_md, max_size: 9.31pt, min_size: 8.91pt, max_leading: 0.6em, min_leading: 0.57em, fit_height: 74.25999999999999pt) }]",
-        "markdown_text": "Table1Summary Table3All other ionic liquids either lack a table.1Some solvent descriptors missing.Kamlet和TaftHydrogen bond parameters. To solve this situation, we defined solvent-independent universal values for all solvent descriptors by averaging the descriptors of all ionic liquids for which measurement data are available. Therefore, for$\\\\varepsilon$, the average is10is over the ionic liquids11.50；",
+        "markdown_text": "对于表1和表3中所有其他离子液体，要么缺少表1中的某些溶剂描述符，要么缺少Kamlet和Taft氢键参数。为解决此类情况，我们通过对所有可获得测量数据的离子液体的各描述符取平均值，为所有溶剂描述符定义了与溶剂无关的通用值。因此，对于$\\\\varepsilon$，其平均值在10种离子液体中为11.50；",
         "width_pt": 232.75,
         "height_pt": 74.25999999999999,
         "fit_height_pt": 74.25999999999999,
@@ -1197,7 +1197,7 @@
       "typst": {
         "body_name": "p2_item_8_8_body",
         "body_expr": "block(width: 232.75pt)[#{ set text(size: 9.57pt); set par(leading: 0.58em); cmarker.render(p2_item_8_8_md, math: mitex) }]",
-        "markdown_text": "In this study, we tested three based onSMDcomputational protocols based on the SMD solvation model. When all necessary solvent descriptors for the ionic liquid under consideration are available from experiment (noting that, for any ionic liquid studied here, we derive "experimental" values from correlations with measuredKamlet−TaftParameter association implies 'Experimental'.$\\\\Sigma \\\\alpha _ { 2 } ^ { {H} }$和$\\\\Sigma \\\\beta _ { 2 } ^ { {H} }$Value and apply formula1和2(see above) calculate$\\\\alpha$和$\\\\beta$value), we can execute the "real"SMDCalculation. In such calculations, ionic liquids in applying the universalSMDModel-wise, no different from any other liquid. Such calculations are marked in this paper asSMDAlso test another model, except$\\\\phi$和$\\\\psi$All solvent descriptors are set to the above average ("universal") values; such calculations will be referred to asSMD-GIL，其中GILRepresent general ionic liquids. Test practical compromise method using available solvent descriptors of considered ionic liquids replace missing descriptors with generic parameters consider as standardSMDa practical approximation for calculation; in this paper, results obtained in this way will be labeled asSMD-PGP，其中PGPindicates that we used some generic parameters.SMD-PGPModel principle: for any solvent descriptor lacking experimental measurement, use the average of that descriptor across all ionic liquids with measured data.",
+        "markdown_text": "在本研究中，我们测试了三种基于SMD溶剂化模型的计算方案。当所考虑的离子液体的所有必要溶剂描述符均可从实验中获得时（需注意，对于本文研究的任何离子液体，我们通过其与实测Kamlet−Taft参数的关联推导出“实验性”$\\\\Sigma \\\\alpha _ { 2 } ^ { {H} }$和$\\\\Sigma \\\\beta _ { 2 } ^ { {H} }$值，并利用公式1和2（见上文）计算$\\\\alpha$和$\\\\beta$值），我们即可执行“真实”的SMD计算。在此类计算中，离子液体在适用通用SMD模型方面与其他任何液体并无区别。此类计算在本文中标记为SMD。我们还将测试另一种模型，其中除$\\\\phi$和$\\\\psi$外的所有溶剂描述符均设置为上述平均（“通用”）值；此类计算将称为SMD-GIL，其中GIL表示通用离子液体。最后，我们测试一种实用的折衷方法，即使用所考虑离子液体可用的任何溶剂描述符，并用通用参数替换任何缺失的描述符；这可视为对标准SMD计算的一种实用近似，在本文中，以此方式获得的结果将标记为SMD-PGP，其中PGP表示我们使用了部分通用参数。SMD-PGP模型的理念是：任何无法从实验测量中获得的溶剂描述符，均应取所有已有测量数据的离子液体中该描述符的平均值。",
         "width_pt": 232.75,
         "text_size_pt": 9.57,
         "leading_em": 0.58
@@ -1224,7 +1224,7 @@
         "unit": "pt"
       },
       "source_text": "There are three ionic liquids in Table 3 for which all properties other than \\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } } and \\Sigma \\beta _ { 2 } ^ { \\mathrm { H } } have been measured and are tabulated in Table 1, namely, [BMIM] \\left[ \\mathrm { B F _ { 4 } } \\right] _ { i } , [BMIM] \\left[ \\mathrm { N T f } _ { 2 } \\right] , and \\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { P F } _ { 6 } \\big ] . Thus, the SMD universal solvation model can be applied without further consideration to make predictions for these three solvents using eqs 1 and 2 and the available Kamlet and Taft parameters.",
-      "translated_text": "表3Contains three ionic liquids, except\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } }Additionally, all properties measured and listed in table.1Medium[BMIM]\\left[ \\mathrm { B F _ { 4 } } \\right] _ { i }、[BMIM]\\left[ \\mathrm { N T f } _ { 2 } \\right]和\\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { P F } _ { 6 } \\big ]Apply without further consideration.SMDUniversal solvation model, using formula1和2And availableKamlet和TaftPredict parameters for these three solvents.",
+      "translated_text": "表3中有三种离子液体，除\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } }外，所有性质均已测量并列于表1中，即[BMIM]\\left[ \\mathrm { B F _ { 4 } } \\right] _ { i }、[BMIM]\\left[ \\mathrm { N T f } _ { 2 } \\right]和\\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { P F } _ { 6 } \\big ]。因此，无需进一步考虑即可应用SMD普适溶剂化模型，利用公式1和2以及可用的Kamlet和Taft参数对这些三种溶剂进行预测。",
       "translation_unit_text": "表3中有三种离子液体，除\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } }外，所有性质均已测量并列于表1中，即[BMIM]\\left[ \\mathrm { B F _ { 4 } } \\right] _ { i }、[BMIM]\\left[ \\mathrm { N T f } _ { 2 } \\right]和\\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { P F } _ { 6 } \\big ]。因此，无需进一步考虑即可应用SMD普适溶剂化模型，利用公式1和2以及可用的Kamlet和Taft参数对这些三种溶剂进行预测。",
       "fit_text": "表3中有三种离子液体，除\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } }外，所有性质均已测量并列于表1中，即[BMIM]\\left[ \\mathrm { B F _ { 4 } } \\right] _ { i }、[BMIM]\\left[ \\mathrm { N T f } _ { 2 } \\right]和\\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { P F } _ { 6 } \\big ]。因此，无需进一步考虑即可应用SMD普适溶剂化模型，利用公式1和2以及可用的Kamlet和Taft参数对这些三种溶剂进行预测。",
       "text_source": "translated_json",
@@ -1234,7 +1234,7 @@
       "typst": {
         "body_name": "p2_item_9_9_body",
         "body_expr": "block(width: 232.75pt)[#{ set text(size: 9.57pt); set par(leading: 0.59em); cmarker.render(p2_item_9_9_md, math: mitex) }]",
-        "markdown_text": "Solvent geometry structure use. Solvent electron structure use. Simplify: Use standard library functions. Add when complex calculations required.Gaussianoptimize${ 09 } ^ { 98 }$采用${M} 06 { - } 2 {X} ^ { 99 }$Density Functional and$\\\\mathrm { \\\\check { M } G } 3 { \\\\mathcal{S} } ^ { 100 }$Basis set, applicable to all molecules except one iodine-containing molecule (methyl iodide); for methyl iodide, all atoms useMIDI!Base GroupSMDSMD solvation free energies at${M} 05 { - } 2 {X} ^ { 102 } / 6 { - } 31 {G} ( {d} , {p} ) ^ { 103 }$at the theoretical level usingGaussian${ 03 } ^ { 104 }$和GESOLprogram calculation. The latter usesGaussian 03external options of, in order toSMDIntegrate model intoGaussian 03Medium. These results can be easily reproduced (see supporting information), using integrated inGaussian 09InSMDModel only. Support info provides applicable.SMD计算的Gaussian 09save after inputSMD/${B} 3 {LYP} ^ { 106 - 109 } / 6 { - } 31 {G} ( {d} , {p} )$,${S M D / M 0} 6 { \\\\cdot } 2 {X} / 6 { \\\\cdot } 3 {1 G} ( {d} , {p} )$、SMD/M06-2X/MG3S以及$\\\\mathrm { S M 8 ^ { 76 } / M 06 - 2 X } / 6 { - } 31 {G} ( {d} , \\\\mathrm { \\\\bar { p } } )$results of additional solvation energy calculations. It should be noted thatSM8solvation model (tested here using a locally modified version ofGaussian 09tested) is a self-consistent reaction field continuum solvation model based on the generalized Born approximation, used to calculate the bulk electrostatic contribution to the solvation free energy (see reference76and its citations), andSMDModel uses continuous charge density of solute molecules.",
+        "markdown_text": "溶质几何结构和电子结构使用Gaussian进行优化${ 09 } ^ { 98 }$采用${M} 06 { - } 2 {X} ^ { 99 }$密度泛函和$\\\\mathrm { \\\\check { M } G } 3 { \\\\mathcal{S} } ^ { 100 }$基组，适用于除一种含碘分子（碘甲烷）外的所有分子；对于碘甲烷，所有原子均采用MIDI!基组。SMD溶剂化自由能在${M} 05 { - } 2 {X} ^ { 102 } / 6 { - } 31 {G} ( {d} , {p} ) ^ { 103 }$理论水平下使用Gaussian${ 03 } ^ { 104 }$和GESOL程序计算。后者利用Gaussian 03的外部选项，以便将SMD模型整合到Gaussian 03中。这些结果可以很容易地复现（参见支持信息），使用整合在Gaussian 09中的SMD模型即可。支持信息中提供了适用于SMD计算的Gaussian 09输入文件示例。支持信息还展示了使用SMD/${B} 3 {LYP} ^ { 106 - 109 } / 6 { - } 31 {G} ( {d} , {p} )$,${S M D / M 0} 6 { \\\\cdot } 2 {X} / 6 { \\\\cdot } 3 {1 G} ( {d} , {p} )$、SMD/M06-2X/MG3S以及$\\\\mathrm { S M 8 ^ { 76 } / M 06 - 2 X } / 6 { - } 31 {G} ( {d} , \\\\mathrm { \\\\bar { p } } )$进行额外溶剂化能量计算的结果。需要注意的是，SM8溶剂化模型（此处通过使用本地修改版的Gaussian 09进行测试）是一种基于广义玻恩近似的自洽反应场连续溶剂化模型，用于计算溶剂化自由能的主体静电贡献（参见文献76及其引文），而SMD模型则利用溶质分子的连续电荷密度。",
         "width_pt": 232.75,
         "text_size_pt": 9.57,
         "leading_em": 0.59
@@ -1262,7 +1262,7 @@
       },
       "source_text": "For all of the other ionic liquids in Tables 1 and 3, either some solvent descriptor in Table 1 or the Kamlet and Taft hydrogen bonding parameters are missing. To address such cases, we define solvent-independent generic values for all of the solvent descriptors by averaging the various descriptors over all ionic liquids for which measurements are available. Thus, for \\varepsilon , the average is 11.50 over 10 ionic liquids, for n , the",
       "translated_text": "",
-      "translation_unit_text": "对于表1和表3中所有其他离子液体，要么缺少表1中的某些溶剂描述符，要么缺少Kamlet和Taft氢键参数。为解决此类情况，我们通过对所有可获得测量数据的离子液体的各描述符取平均值，为所有溶剂描述符定义了与溶剂无关的通用值。因此，对于\\varepsilon，其平均值在10种离子液体中为11.50；对于n，其平均值在9种离子液体中为1.4300；对于γ，其平均值在10种离子液体中为61.24 cal\\mathrm { m o l } ^ { - 1 } \\mathring { \\mathrm { A } } ^ { - 2 }；对于\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } }，其平均值在8are respectively over the ionic liquids0.229和0.265(see Table for specific data1和表3Existing research associates macroionic liquid descriptors various measured properties. Simplify: direct correlation needed.94−97 These methods may provide useful alternatives for estimating missing values in some cases, but they are not explored in this paper.",
+      "translation_unit_text": "对于表1和表3中所有其他离子液体，要么缺少表1中的某些溶剂描述符，要么缺少Kamlet和Taft氢键参数。为解决此类情况，我们通过对所有可获得测量数据的离子液体的各描述符取平均值，为所有溶剂描述符定义了与溶剂无关的通用值。因此，对于\\varepsilon，其平均值在10种离子液体中为11.50；对于n，其平均值在9种离子液体中为1.4300；对于γ，其平均值在10种离子液体中为61.24 cal\\mathrm { m o l } ^ { - 1 } \\mathring { \\mathrm { A } } ^ { - 2 }；对于\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } }，其平均值在8种离子液体中分别为0.229和0.265（具体数据参见表1和表3）。我们注意到，已有其他研究尝试将宏观离子液体描述符与各种测量性质相关联，94−97 这些方法在某些情况下可能为估算缺失值提供有用的替代方案，但本文不探讨这些方法。",
       "fit_text": "For all of the other ionic liquids in Tables 1 and 3, either some solvent descriptor in Table 1 or the Kamlet and Taft hydrogen bonding parameters are missing. To address such cases, we define solvent-independent generic values for all of the solvent descriptors by averaging the various descriptors over all ionic liquids for which measurements are available. Thus, for \\varepsilon , the average is 11.50 over 10 ionic liquids, for n , the",
       "text_source": "translated_json",
       "source_pdf_href": "../fixtures/source-pdfs/20260405041819-ac4b45.pdf",
@@ -1271,7 +1271,7 @@
       "typst": {
         "body_name": "p2_item_10_10_body",
         "body_expr": "block(width: 232.75pt)[#{ set text(size: 9.51pt); set par(leading: 0.6em); cmarker.render(p2_item_10_10_md, math: mitex) }]",
-        "markdown_text": "Next: SummarizeSMD、SMD-PGP和SMD-GILModel Result",
+        "markdown_text": "接下来，我们总结SMD、SMD-PGP和SMD-GIL模型的结果。",
         "width_pt": 232.75,
         "text_size_pt": 9.51,
         "leading_em": 0.6
@@ -1359,7 +1359,7 @@
       "typst": {
         "body_name": "p2_item_12_11_body",
         "body_expr": "block(width: 232.75pt, height: 22.559999999999945pt)[#{ pdftr_fit_markdown(p2_item_12_11_md, max_size: 9.33pt, min_size: 8.59pt, max_leading: 0.58em, min_leading: 0.52em, fit_height: 22.559999999999945pt) }]",
-        "markdown_text": "Existing experimental data related to ionic liquids mainly include various solutes in ionic liquids and water.",
+        "markdown_text": "与离子液体相关的现有实验数据主要包括各种溶质在离子液体与水之",
         "width_pt": 232.75,
         "height_pt": 22.559999999999945,
         "fit_height_pt": 22.559999999999945,
@@ -1478,7 +1478,7 @@
       },
       "source_text": "The available experimental data relevant to ionic liquids consist of partition coefficient measurements corresponding to free",
       "translated_text": "",
-      "translation_unit_text": "Existing experimental data on ionic liquids: partition coefficient measurements for solute transfer free energy between ionic liquid and water. Specifically, we have431Individual &11different ionic liquids (Table1Listed12in the ionic liquids11and water-related transfer free energy data. In these431In the case, there is344Solvent hydration free energies of individual cases have also been experimentally determined. Therefore, the solvation free energy of the solute from gas phase to ionic liquid can be calculated as:",
+      "translation_unit_text": "与离子液体相关的现有实验数据主要包括各种溶质在离子液体与水之间转移的自由能所对应的分配系数测量值。具体而言，我们拥有431个与11种不同离子液体（表1所列12种离子液体中的11种）和水相关的转移自由能数据。在这431个案例中，有344个案例的溶质水合自由能也已通过实验测定。因此，可以计算溶质从气相到离子液体的溶剂化自由能，其表达式为：",
       "fit_text": "与离子液体相关的现有实验数据主要包括各种溶质在离子液体与水之间转移的自由能所对应的分配系数测量值。具体而言，我们拥有431个与11种不同离子液体（表1所列12种离子液体中的11种）和水相关的转移自由能数据。在这431个案例中，有344个案例的溶质水合自由能也已通过实验测定。因此，可以计算溶质从气相到离子液体的溶剂化自由能，其表达式为：",
       "text_source": "translated_json",
       "source_pdf_href": "../fixtures/source-pdfs/20260405041819-ac4b45.pdf",
@@ -1506,7 +1506,7 @@
         "unit": "pt"
       },
       "source_text": "Table 4. Errors in Predicted Ionic Liquid Solvation Free Energies ( \\mathbf { k c a l } / \\mathbf { m o l } ) ^ { a }",
-      "translated_text": "表4. Ionic liquid solvation free energy prediction errors( \\mathbf { k c a l } / \\mathbf { m o l } ) ^ { a }",
+      "translated_text": "表4. 离子液体溶剂化自由能预测误差( \\mathbf { k c a l } / \\mathbf { m o l } ) ^ { a }",
       "translation_unit_text": "表4. 离子液体溶剂化自由能预测误差( \\mathbf { k c a l } / \\mathbf { m o l } ) ^ { a }",
       "fit_text": "表4. 离子液体溶剂化自由能预测误差( \\mathbf { k c a l } / \\mathbf { m o l } ) ^ { a }",
       "text_source": "translated_json",
@@ -1516,7 +1516,7 @@
       "typst": {
         "body_name": "p3_item_1_1_body",
         "body_expr": "block(width: 479.75pt)[#{ set text(size: 7.56pt); set par(leading: 0.31em); cmarker.render(p3_item_1_1_md, math: mitex) }]",
-        "markdown_text": "${} ^ a N$Data count per ionic liquid,MSEAvg Symbol ErrorMUEAverage unsigned error.b Based on93个SMDData and251个SMD-PGPData Combination.",
+        "markdown_text": "${} ^ a N$为每种离子液体中的数据数量，MSE为平均符号误差，MUE为平均无符号误差。b 基于93个SMD数据和251个SMD-PGP数据的组合。",
         "width_pt": 479.75,
         "text_size_pt": 7.56,
         "leading_em": 0.31
@@ -1553,7 +1553,7 @@
       "typst": {
         "body_name": "p3_item_3_3_body",
         "body_expr": "block(width: 354.35pt, height: 9.399999999999977pt)[#{ pdftr_fit_markdown(p3_item_3_3_md, max_size: 8.9pt, min_size: 8.46pt, max_leading: 0.28em, min_leading: 0.22em, fit_height: 9.399999999999977pt) }]",
-        "markdown_text": "a See table5Corresponding footnoteb 基于148个SMD数据和283个SMD-PGP数据的组合。",
+        "markdown_text": "a 参见表5中的相应脚注。b 基于148个SMD数据和283个SMD-PGP数据的组合。",
         "width_pt": 354.35,
         "height_pt": 9.399999999999977,
         "fit_height_pt": 9.399999999999977,
@@ -1584,7 +1584,7 @@
         "unit": "pt"
       },
       "source_text": "Table 5. Errors in Predicted Water-to-Ionic-Liquid Transfer Free Energies (kcal/mol)a",
-      "translated_text": "表5. Water-to-ionic liquid transfer free energy prediction error (kcal/mol）a",
+      "translated_text": "表5. 水至离子液体转移自由能预测误差（kcal/mol）a",
       "translation_unit_text": "表5. 水至离子液体转移自由能预测误差（kcal/mol）a",
       "fit_text": "表5. 水至离子液体转移自由能预测误差（kcal/mol）a",
       "text_source": "translated_json",
@@ -1594,7 +1594,7 @@
       "typst": {
         "body_name": "p3_item_5_5_body",
         "body_expr": "block(width: 232.75pt, height: 94.0pt)[#{ pdftr_fit_markdown(p3_item_5_5_md, max_size: 9.49pt, min_size: 9.0pt, max_leading: 0.6em, min_leading: 0.58em, fit_height: 94.0pt) }]",
-        "markdown_text": "其中$\\\\Delta G _ { {s o l v , X} } ^ { \\\\circ }$Solute in ionic liquid.$1 {M}$Or common solvent${ \\\\left( {X} = \\\\mathbb { L } \\\\right) , }$Standard-state solvation free energy,${\\\\Psi} ( {X} = S _ { , }$Respectively,RUniversal gas constant,Tis temperature (in kelvin), and$P _ { {I L / S} }$Partition coefficient. Solute concentration in ionic liquid divided by concentration in ordinary solvent.18 All data and references are provided in the Supporting Information. In this work, common solventsSAlways water. Theory general enough for future organic liquid research.",
+        "markdown_text": "其中$\\\\Delta G _ { {s o l v , X} } ^ { \\\\circ }$是溶质在离子液体$1 {M}$或普通溶剂${ \\\\left( {X} = \\\\mathbb { L } \\\\right) , }$中的标准态溶剂化自由能，${\\\\Psi} ( {X} = S _ { , }$分别为，R是通用气体常数，T是温度（单位：开尔文），而$P _ { {I L / S} }$是分配系数，定义为溶质在离子液体中的浓度除以其在普通溶剂中的浓度。18 所有数据和参考文献均在支持信息中提供。在本工作中，普通溶剂S始终为水，但该理论具有足够的普适性，可应用于未来的有机液体研究。",
         "width_pt": 232.75,
         "height_pt": 94.0,
         "fit_height_pt": 94.0,
@@ -1664,7 +1664,7 @@
       "typst": {
         "body_name": "p3_item_8_8_body",
         "body_expr": "block(width: 232.75pt, height: 21.61999999999989pt)[#{ pdftr_fit_markdown(p3_item_8_8_md, max_size: 9.42pt, min_size: 8.86pt, max_leading: 0.6em, min_leading: 0.58em, fit_height: 21.61999999999989pt) }]",
-        "markdown_text": "Interestingly, willSMDApply model${\\\\big [ B M M \\\\big ]} \\\\big [ {BF} _ { 4 } \\\\big ] _ { i }$、[BMIM][NTf2]",
+        "markdown_text": "有趣的是，将SMD模型应用于${\\\\big [ B M M \\\\big ]} \\\\big [ {BF} _ { 4 } \\\\big ] _ { i }$、[BMIM][NTf2]",
         "width_pt": 232.75,
         "height_pt": 21.61999999999989,
         "fit_height_pt": 21.61999999999989,
@@ -1746,7 +1746,7 @@
         "unit": "pt"
       },
       "source_text": "We present in Table 4 the predictions of the SMD, SMD- PGP, and SMD-GIL models for the 344 derived gas-to-IL solvation free energies. Again, the distinction is that, for the",
-      "translated_text": "We are in the form4Listed inSMD、SMD-PGP和SMD-GILModel correct344Derived Gas-prediction results for ionic liquid solvation free energies. Similarly, the difference is that for",
+      "translated_text": "我们在表4中列出了SMD、SMD-PGP和SMD-GIL模型对344个推导出的气-离子液体溶剂化自由能的预测结果。同样，区别在于，对于",
       "translation_unit_text": "我们在表4中列出了SMD、SMD-PGP和SMD-GIL模型对344个推导出的气-离子液体溶剂化自由能的预测结果。同样，区别在于，对于",
       "fit_text": "我们在表4中列出了SMD、SMD-PGP和SMD-GIL模型对344个推导出的气-离子液体溶剂化自由能的预测结果。同样，区别在于，对于",
       "text_source": "translated_json",
@@ -1775,7 +1775,7 @@
         "unit": "pt"
       },
       "source_text": "SMD predictions, all of the necessary solvent descriptors for the ionic liquids involved are available from experiment (noting that, for any ionic liquid studied here, we derive “experimental” \\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } } and \\dot { \\Sigma } \\beta _ { 2 } ^ { \\mathrm { H } } values from the correlations with measured Kamlet and Taft \\alpha and \\beta values using eqs 1 and 2). Thus, the ionic liquid is treated no differently than any other liquid in terms of being amenable to application of the universal SMD model. There are three ILs for which a standard SMD calculation can be performed. For the remaining ionic liquids, for which at least one solvent descriptor is not available, we utilize the SMD-PGP protocol where any missing descriptors are replaced by the average values already noted above. Finally, the SMD-GIL protocol is applied to each ionic liquid in the table, irrespective of the availability of some solvent descriptors. SMD-PGP and SMD-GIL calculations are identical for the cases of [ \\mathbf { M } _ { 3 } \\mathbf { B } \\mathbf { A m } ] [ \\mathbf { N T f } _ { 2 } ] and \\mathrm { [ M B P y ] [ B F _ { 4 } ] } because for these ionic liquids there are no measured values for any solvent descriptors other than \\phi and \\psi ; i.e., we must use entirely generic values. The corresponding water-to-IL transfer free energy data are presented in Table 5.",
-      "translated_text": "SMDIn the predictions, all necessary solvent descriptors for the ionic liquids involved are available from experiment (noting that for any ionic liquid studied here, we derive "experimental"\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\dot { \\Sigma } \\beta _ { 2 } ^ { \\mathrm { H } }Values, these correlations and measurementsKamlet和Taft\\alpha和\\betaValue-related, uses formula1和2). Therefore, in applying the universalSMDModel-wise, ionic liquids are handled no differently from any other liquid. Three ionic liquids can undergo standardSMDCalculation. For the remaining ionic liquids, if at least one solvent descriptor is unavailable, we adoptSMD-PGPProtocol, where any missing descriptors are replaced with the average mentioned above. Finally, regardless of whether certain solvent descriptors are available,SMD-GILProtocols apply to each ionic liquid in the table. For[ \\mathbf { M } _ { 3 } \\mathbf { B } \\mathbf { A m } ] [ \\mathbf { N T f } _ { 2 } ]和\\mathrm { [ M B P y ] [ B F _ { 4 } ] }cases,SMD-PGP和SMD-GILcalculations are the same, because these ionic liquids except\\phi和\\psi ;No measured solvent descriptor values; use only general values. Corresponding water-to-ionic liquid transfer free energy data listed in table.5。",
+      "translated_text": "SMD预测中，所有涉及的离子液体所需的溶剂描述符均可从实验获得（需注意，对于本文研究的任何离子液体，我们通过相关性推导出“实验”的\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\dot { \\Sigma } \\beta _ { 2 } ^ { \\mathrm { H } }值，这些相关性与测量的Kamlet和Taft\\alpha和\\beta值相关，使用了公式1和2）。因此，在适用通用SMD模型方面，离子液体的处理方式与其他任何液体并无不同。有三种离子液体可以进行标准的SMD计算。对于剩余的离子液体，若至少有一个溶剂描述符不可用，我们采用SMD-PGP协议，其中任何缺失的描述符均用上文已提及的平均值替代。最后，无论某些溶剂描述符是否可用，SMD-GIL协议均应用于表中的每种离子液体。对于[ \\mathbf { M } _ { 3 } \\mathbf { B } \\mathbf { A m } ] [ \\mathbf { N T f } _ { 2 } ]和\\mathrm { [ M B P y ] [ B F _ { 4 } ] }的情况，SMD-PGP和SMD-GIL计算是相同的，因为这些离子液体除了\\phi和\\psi ;外，没有任何溶剂描述符的测量值，即我们必须完全使用通用值。相应的水到离子液体转移自由能数据列于表5。",
       "translation_unit_text": "SMD预测中，所有涉及的离子液体所需的溶剂描述符均可从实验获得（需注意，对于本文研究的任何离子液体，我们通过相关性推导出“实验”的\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\dot { \\Sigma } \\beta _ { 2 } ^ { \\mathrm { H } }值，这些相关性与测量的Kamlet和Taft\\alpha和\\beta值相关，使用了公式1和2）。因此，在适用通用SMD模型方面，离子液体的处理方式与其他任何液体并无不同。有三种离子液体可以进行标准的SMD计算。对于剩余的离子液体，若至少有一个溶剂描述符不可用，我们采用SMD-PGP协议，其中任何缺失的描述符均用上文已提及的平均值替代。最后，无论某些溶剂描述符是否可用，SMD-GIL协议均应用于表中的每种离子液体。对于[ \\mathbf { M } _ { 3 } \\mathbf { B } \\mathbf { A m } ] [ \\mathbf { N T f } _ { 2 } ]和\\mathrm { [ M B P y ] [ B F _ { 4 } ] }的情况，SMD-PGP和SMD-GIL计算是相同的，因为这些离子液体除了\\phi和\\psi ;外，没有任何溶剂描述符的测量值，即我们必须完全使用通用值。相应的水到离子液体转移自由能数据列于表5。",
       "fit_text": "SMD预测中，所有涉及的离子液体所需的溶剂描述符均可从实验获得（需注意，对于本文研究的任何离子液体，我们通过相关性推导出“实验”的\\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } }和\\dot { \\Sigma } \\beta _ { 2 } ^ { \\mathrm { H } }值，这些相关性与测量的Kamlet和Taft\\alpha和\\beta值相关，使用了公式1和2）。因此，在适用通用SMD模型方面，离子液体的处理方式与其他任何液体并无不同。有三种离子液体可以进行标准的SMD计算。对于剩余的离子液体，若至少有一个溶剂描述符不可用，我们采用SMD-PGP协议，其中任何缺失的描述符均用上文已提及的平均值替代。最后，无论某些溶剂描述符是否可用，SMD-GIL协议均应用于表中的每种离子液体。对于[ \\mathbf { M } _ { 3 } \\mathbf { B } \\mathbf { A m } ] [ \\mathbf { N T f } _ { 2 } ]和\\mathrm { [ M B P y ] [ B F _ { 4 } ] }的情况，SMD-PGP和SMD-GIL计算是相同的，因为这些离子液体除了\\phi和\\psi ;外，没有任何溶剂描述符的测量值，即我们必须完全使用通用值。相应的水到离子液体转移自由能数据列于表5。",
       "text_source": "translated_json",
@@ -1805,7 +1805,7 @@
       },
       "source_text": "Interestingly, the SMD model applied to \\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { B F } _ { 4 } \\big ] _ { i } , [BMIM][NTf ], and \\left[ \\mathrm { B M M M } \\right] \\left[ \\mathrm { P F } _ { 6 } \\right] leads to errors of about the",
       "translated_text": "",
-      "translation_unit_text": "有趣的是，将SMD模型应用于\\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { B F } _ { 4 } \\big ] _ { i }、[BMIM][NTf2]和\\left[ \\mathrm { B M M M } \\right] \\left[ \\mathrm { P F } _ { 6 } \\right]When, the magnitude of the generated error is related toSMDErrors achieved in common solvents are roughly the same (Table4Solute model applicability unaffected. Ionic liquid properties similar. Close solvent descriptors.SMD-GILModel performance andSMD和SMD-PGPvery similar, except\\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { B F } _ { 4 } \\big ], for which there are only two available data points.",
+      "translation_unit_text": "有趣的是，将SMD模型应用于\\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { B F } _ { 4 } \\big ] _ { i }、[BMIM][NTf2]和\\left[ \\mathrm { B M M M } \\right] \\left[ \\mathrm { P F } _ { 6 } \\right]时，产生的误差大小与SMD在普通溶剂中达到的误差大致相同（表4）。也就是说，溶剂模型的普适性并未受到离子液体熔盐性质的不利影响。由于离子液体的平均溶剂描述符与这三种溶剂的测量值非常接近，SMD-GIL模型的表现与SMD和SMD-PGP非常相似，除了\\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { B F } _ { 4 } \\big ]，对于该溶剂仅有两个可用数据点。",
       "fit_text": "Interestingly, the SMD model applied to \\mathrm { \\big [ B M M \\big ] } \\big [ \\mathrm { B F } _ { 4 } \\big ] _ { i } , [BMIM][NTf ], and \\left[ \\mathrm { B M M M } \\right] \\left[ \\mathrm { P F } _ { 6 } \\right] leads to errors of about the",
       "text_source": "translated_json",
       "source_pdf_href": "../fixtures/source-pdfs/20260405041819-ac4b45.pdf",
@@ -1896,7 +1896,7 @@
         "unit": "pt"
       },
       "source_text": "With respect to the remaining eight ionic liquids in Table 4, the errors are quite similar to those for the three already discussed. Interestingly, the results from the SMD-GIL model are better than those from the SMD-PGP model. One way to interpret this point would be to say that all of the ionic liquids considered here are more similar to one another than is consistent with the variation in their macroscopic descriptors. However, the MUE difference between the two models over all 11 ILs is less than 0 . 1 \\ \\mathrm { k c a l / m o l } , so it is difficult to assess this point in the absence of a collection of ionic liquids showing substantially greater variation from the average in one or more solvent descriptors.",
-      "translated_text": "对于表4The remaining eight ionic liquids show errors very similar to the three already discussed. Interestingly,SMD-GILModel results superiorSMD-PGPModel. One possible explanation is that all ionic liquids considered here are more similar to each other than changes in their macroscopic descriptors can reflect. However, the two models in all...11difference in mean absolute error over the ionic liquids is less than0 . 1 \\ \\mathrm { k c a l / m o l }, it is difficult to assess this point without a collection of ionic liquids showing substantially greater variation from the average in one or more solvent descriptors.",
+      "translated_text": "对于表4中剩余的八种离子液体，其误差与已讨论的三种离子液体非常相似。有趣的是，SMD-GIL模型的结果优于SMD-PGP模型。一种可能的解释是，此处考虑的所有离子液体彼此之间的相似性，超过了其宏观描述符变化所能反映的程度。然而，两种模型在所有11种离子液体上的平均绝对误差差异小于0 . 1 \\ \\mathrm { k c a l / m o l }，因此在缺乏一组离子液体（其一个或多个溶剂描述符与平均值存在显著差异）的情况下，很难对此点进行评估。",
       "translation_unit_text": "对于表4中剩余的八种离子液体，其误差与已讨论的三种离子液体非常相似。有趣的是，SMD-GIL模型的结果优于SMD-PGP模型。一种可能的解释是，此处考虑的所有离子液体彼此之间的相似性，超过了其宏观描述符变化所能反映的程度。然而，两种模型在所有11种离子液体上的平均绝对误差差异小于0 . 1 \\ \\mathrm { k c a l / m o l }，因此在缺乏一组离子液体（其一个或多个溶剂描述符与平均值存在显著差异）的情况下，很难对此点进行评估。",
       "fit_text": "对于表4中剩余的八种离子液体，其误差与已讨论的三种离子液体非常相似。有趣的是，SMD-GIL模型的结果优于SMD-PGP模型。一种可能的解释是，此处考虑的所有离子液体彼此之间的相似性，超过了其宏观描述符变化所能反映的程度。然而，两种模型在所有11种离子液体上的平均绝对误差差异小于0 . 1 \\ \\mathrm { k c a l / m o l }，因此在缺乏一组离子液体（其一个或多个溶剂描述符与平均值存在显著差异）的情况下，很难对此点进行评估。",
       "text_source": "translated_json",
@@ -1933,7 +1933,7 @@
         "unit": "pt"
       },
       "source_text": "There are some systematic trends that are worthy of note. For instance, when \\mathrm { B F } _ { 4 } is the anion, in two cases out of three, the MUE is equal in magnitude to the MSE, meaning that every single prediction is in error in the same direction (in this case, predicting too favorable a solvation free energy in the ionic liquid). When \\mathrm { P F } _ { 6 } is the anion, the error seems to be systematically in the positive free energy direction, although it is somewhat speculative to put too much weight on the only two data points measured for \\mathrm { \\left[ H M M \\right] } \\left[ \\mathrm { P F } _ { 6 } \\right] . Should more data be acquired in the relevant ionic liquids, it may be possible to explore these points more closely.",
-      "translated_text": "Notable systemic trends exist. For example, when\\mathrm { B F } _ { 4 }As an anion, in two-thirds of cases, the mean absolute error (MUE）compare average errorMSE) are equal in magnitude to the MSE, meaning every single prediction error is in the same direction (in this case, predicting too favorable a solvation free energy in the ionic liquid). When\\mathrm { P F } _ { 6 }As an anion, the error appears systematically biased toward positive free energy, although based only on\\mathrm { \\left[ H M M \\right] } \\left[ \\mathrm { P F } _ { 6 } \\right]drawing conclusions from only two data points, which is somewhat speculative. If more data can be acquired in the relevant ionic liquids, these points can perhaps be explored more deeply.",
+      "translated_text": "存在一些值得注意的系统性趋势。例如，当\\mathrm { B F } _ { 4 }作为阴离子时，在三分之二的情况下，平均绝对误差（MUE）与平均误差（MSE）在数值上相等，这意味着每一个预测的误差方向都相同（在此情况下，即预测的离子液体中溶剂化自由能过于有利）。当\\mathrm { P F } _ { 6 }作为阴离子时，误差似乎系统地偏向正自由能方向，尽管仅基于针对\\mathrm { \\left[ H M M \\right] } \\left[ \\mathrm { P F } _ { 6 } \\right]测量的两个数据点就下结论，其推测性较强。若能在相关离子液体中获得更多数据，或许可以更深入地探讨这些要点。",
       "translation_unit_text": "存在一些值得注意的系统性趋势。例如，当\\mathrm { B F } _ { 4 }作为阴离子时，在三分之二的情况下，平均绝对误差（MUE）与平均误差（MSE）在数值上相等，这意味着每一个预测的误差方向都相同（在此情况下，即预测的离子液体中溶剂化自由能过于有利）。当\\mathrm { P F } _ { 6 }作为阴离子时，误差似乎系统地偏向正自由能方向，尽管仅基于针对\\mathrm { \\left[ H M M \\right] } \\left[ \\mathrm { P F } _ { 6 } \\right]测量的两个数据点就下结论，其推测性较强。若能在相关离子液体中获得更多数据，或许可以更深入地探讨这些要点。",
       "fit_text": "存在一些值得注意的系统性趋势。例如，当\\mathrm { B F } _ { 4 }作为阴离子时，在三分之二的情况下，平均绝对误差（MUE）与平均误差（MSE）在数值上相等，这意味着每一个预测的误差方向都相同（在此情况下，即预测的离子液体中溶剂化自由能过于有利）。当\\mathrm { P F } _ { 6 }作为阴离子时，误差似乎系统地偏向正自由能方向，尽管仅基于针对\\mathrm { \\left[ H M M \\right] } \\left[ \\mathrm { P F } _ { 6 } \\right]测量的两个数据点就下结论，其推测性较强。若能在相关离子液体中获得更多数据，或许可以更深入地探讨这些要点。",
       "text_source": "translated_json",
@@ -1974,7 +1974,7 @@
         "unit": "pt"
       },
       "source_text": "Turning to the case of transfer free energies, we see essentially the same trends and systematic errors as those noted above for the solvation free energies. The predicted MUEs for the water-to-IL transfer free energies are somewhat larger than are those for the directly predicted solvation free energies, but they are still within the range of typical SMD errors. The increase in magnitude may reflect increasing diversity in the larger data set of transfer free energies.",
-      "translated_text": "turns into support.SMDwithin the error range. The increase in magnitude may reflect increasing diversity in the larger data set of transfer free energies.",
+      "translated_text": "转向转移自由能的情况，我们观察到与上述溶剂化自由能基本相同的趋势和系统误差。水到离子液体转移自由能的预测平均绝对误差略大于直接预测的溶剂化自由能，但仍处于典型SMD误差范围内。误差幅度的增加可能反映了更大转移自由能数据集中多样性的增加。",
       "translation_unit_text": "转向转移自由能的情况，我们观察到与上述溶剂化自由能基本相同的趋势和系统误差。水到离子液体转移自由能的预测平均绝对误差略大于直接预测的溶剂化自由能，但仍处于典型SMD误差范围内。误差幅度的增加可能反映了更大转移自由能数据集中多样性的增加。",
       "fit_text": "转向转移自由能的情况，我们观察到与上述溶剂化自由能基本相同的趋势和系统误差。水到离子液体转移自由能的预测平均绝对误差略大于直接预测的溶剂化自由能，但仍处于典型SMD误差范围内。误差幅度的增加可能反映了更大转移自由能数据集中多样性的增加。",
       "text_source": "translated_json",
@@ -2015,7 +2015,7 @@
         "unit": "pt"
       },
       "source_text": "Paulechka et al.110 measured the vapor pressure of \\left[ \\mathrm { B M M } \\right] \\left[ \\mathrm { N T f } _ { 2 } \\right] from 458 to 517 K and derived an equation relating vapor pressure to temperature. If we extrapolate their equation to 2 9 8 \\ \\mathrm { K } and convert vapor pressure to free energy of (self) solvation according to18",
-      "translated_text": "Paulechkaet al.110measured\\left[ \\mathrm { B M M } \\right] \\left[ \\mathrm { N T f } _ { 2 } \\right]在458至517 Kvapor pressure from 458 to 517 K and derived an equation relating vapor pressure to temperature. If we extrapolate their equation to2 9 8 \\ \\mathrm { K }and per literature18Convert vapor pressure to (self) solvation free energy",
+      "translated_text": "Paulechka等人110测量了\\left[ \\mathrm { B M M } \\right] \\left[ \\mathrm { N T f } _ { 2 } \\right]在458至517 K温度范围内的蒸气压，并推导出蒸气压与温度的关系方程。若将其方程外推至2 9 8 \\ \\mathrm { K }并根据文献18将蒸气压转换为（自）溶剂化自由能",
       "translation_unit_text": "Paulechka等人110测量了\\left[ \\mathrm { B M M } \\right] \\left[ \\mathrm { N T f } _ { 2 } \\right]在458至517 K温度范围内的蒸气压，并推导出蒸气压与温度的关系方程。若将其方程外推至2 9 8 \\ \\mathrm { K }并根据文献18将蒸气压转换为（自）溶剂化自由能",
       "fit_text": "Paulechka等人110测量了\\left[ \\mathrm { B M M } \\right] \\left[ \\mathrm { N T f } _ { 2 } \\right]在458至517 K温度范围内的蒸气压，并推导出蒸气压与温度的关系方程。若将其方程外推至2 9 8 \\ \\mathrm { K }并根据文献18将蒸气压转换为（自）溶剂化自由能",
       "text_source": "translated_json",
@@ -2067,7 +2067,7 @@
         "unit": "pt"
       },
       "source_text": "where M _ { \\mathrm { { L } } } is the molarity of the ionic liquid (derived from its molecular weight and its density87), P _ { \\mathrm { I L } } is its vapor pressure, and M ^ { \\circ } and P ^ { \\circ } are the relevant standard state quantities, in this case 1 \\ \\mathrm { m o l / L } and 1 bar, respectively, we arrive at a self- solvation free energy of - 2 2 . 0 \\mathrm { k c a l / m o l } . With the SMD solvation model at the \\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) } level of theory, we compute a value of −19.1, which seems in quite reasonable agreement given the use of a tight-ion-pair gas-phase structure in this instance. The gas-phase M06-2X/MG3S optimized molecular geometry of \\left[ \\bar { \\mathbf { B } } \\mathbf { M I M } \\right] \\left[ \\mathbf { N T f } _ { 2 } \\right] used in this calculation is given in the Supporting Information.",
-      "translated_text": "其中M _ { \\mathrm { { L } } }is the molar concentration of the ionic liquid (from molecular weight and density)87calculated),P _ { \\mathrm { I L } }is its vapor pressure, andM ^ { \\circ }和P ^ { \\circ }Relevant standard state quantities, respectively in this example.1 \\ \\mathrm { m o l / L }和 1 bar, we arrive at a self-solvation free energy of- 2 2 . 0 \\mathrm { k c a l / m o l } .在\\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) }理论水平下使用SMDsolvation model, we compute a value of−19.1, which seems in quite reasonable agreement given the use of a tight-ion-pair gas-phase structure in this instance. The\\left[ \\bar { \\mathbf { B } } \\mathbf { M I M } \\right] \\left[ \\mathbf { N T f } _ { 2 } \\right]的气相M06-2X/MG3SSee Supporting Information for optimized molecular geometries.",
+      "translated_text": "其中M _ { \\mathrm { { L } } }是离子液体的摩尔浓度（由其分子量和密度87计算得出），P _ { \\mathrm { I L } }是其蒸气压，而M ^ { \\circ }和P ^ { \\circ }是相关的标准态量，在本例中分别为1 \\ \\mathrm { m o l / L }和 1 bar，我们得到自溶剂化自由能为- 2 2 . 0 \\mathrm { k c a l / m o l } .在\\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) }理论水平下使用SMD溶剂化模型，我们计算得到的值为−19.1，考虑到本例中使用了紧密离子对的气相结构，该结果似乎具有相当合理的吻合度。本次计算中使用的\\left[ \\bar { \\mathbf { B } } \\mathbf { M I M } \\right] \\left[ \\mathbf { N T f } _ { 2 } \\right]的气相M06-2X/MG3S优化分子几何结构见支持信息。",
       "translation_unit_text": "其中M _ { \\mathrm { { L } } }是离子液体的摩尔浓度（由其分子量和密度87计算得出），P _ { \\mathrm { I L } }是其蒸气压，而M ^ { \\circ }和P ^ { \\circ }是相关的标准态量，在本例中分别为1 \\ \\mathrm { m o l / L }和 1 bar，我们得到自溶剂化自由能为- 2 2 . 0 \\mathrm { k c a l / m o l } .在\\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) }理论水平下使用SMD溶剂化模型，我们计算得到的值为−19.1，考虑到本例中使用了紧密离子对的气相结构，该结果似乎具有相当合理的吻合度。本次计算中使用的\\left[ \\bar { \\mathbf { B } } \\mathbf { M I M } \\right] \\left[ \\mathbf { N T f } _ { 2 } \\right]的气相M06-2X/MG3S优化分子几何结构见支持信息。",
       "fit_text": "其中M _ { \\mathrm { { L } } }是离子液体的摩尔浓度（由其分子量和密度87计算得出），P _ { \\mathrm { I L } }是其蒸气压，而M ^ { \\circ }和P ^ { \\circ }是相关的标准态量，在本例中分别为1 \\ \\mathrm { m o l / L }和 1 bar，我们得到自溶剂化自由能为- 2 2 . 0 \\mathrm { k c a l / m o l } .在\\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) }理论水平下使用SMD溶剂化模型，我们计算得到的值为−19.1，考虑到本例中使用了紧密离子对的气相结构，该结果似乎具有相当合理的吻合度。本次计算中使用的\\left[ \\bar { \\mathbf { B } } \\mathbf { M I M } \\right] \\left[ \\mathbf { N T f } _ { 2 } \\right]的气相M06-2X/MG3S优化分子几何结构见支持信息。",
       "text_source": "translated_json",
@@ -2077,7 +2077,7 @@
       "typst": {
         "body_name": "p4_item_6_6_body",
         "body_expr": "block(width: 232.75pt, height: 41.3599999999999pt)[#{ pdftr_fit_markdown(p4_item_6_6_md, max_size: 9.21pt, min_size: 8.85pt, max_leading: 0.58em, min_leading: 0.54em, fit_height: 41.3599999999999pt) }]",
-        "markdown_text": "Also examined three steroid derivatives.——Dexamethasone,5-DHT level check. Use stdlib. → skipped: external library, add when complex calculations required.DHEA) and progesterone——Transfer free energy between ionic liquid and water (these solutes are the above149in addition to the solutes",
+        "markdown_text": "我们还考察了三种甾体衍生物——地塞米松、5-脱氢表雄酮（DHEA）和黄体酮——在离子液体与水之间的转移自由能（这些溶质是上述149种溶质之外的补充",
         "width_pt": 232.75,
         "height_pt": 41.3599999999999,
         "fit_height_pt": 41.3599999999999,
@@ -2120,7 +2120,7 @@
       },
       "source_text": "We also examined the free energies of transfer between ionic liquids and water of three steroid derivatives, namely, dexamethasone, 5-dehydroepiandrosterone (DHEA), and progesterone (these solutes are in addition to the 149 solutes",
       "translated_text": "",
-      "translation_unit_text": "我们还考察了三种甾体衍生物——地塞米松、5-脱氢表雄酮（DHEA）和黄体酮——在离子液体与水之间的转移自由能（这些溶质是上述149in addition to the solutes). Their molecular structures are shown in Figure1Table as shown.6Computed results listed.\\log { P _ { \\mathrm { I L / w } } }",
+      "translation_unit_text": "我们还考察了三种甾体衍生物——地塞米松、5-脱氢表雄酮（DHEA）和黄体酮——在离子液体与水之间的转移自由能（这些溶质是上述149种溶质之外的补充）。它们的分子结构如图1所示。表6列出了计算得到的\\log { P _ { \\mathrm { I L / w } } }",
       "fit_text": "We also examined the free energies of transfer between ionic liquids and water of three steroid derivatives, namely, dexamethasone, 5-dehydroepiandrosterone (DHEA), and progesterone (these solutes are in addition to the 149 solutes",
       "text_source": "translated_json",
       "source_pdf_href": "../fixtures/source-pdfs/20260405041819-ac4b45.pdf",
@@ -2129,7 +2129,7 @@
       "typst": {
         "body_name": "p4_item_7_7_body",
         "body_expr": "block(width: 232.75pt, height: 21.620000000000005pt)[#{ pdftr_fit_markdown(p4_item_7_7_md, max_size: 9.31pt, min_size: 8.85pt, max_leading: 0.6em, min_leading: 0.58em, fit_height: 21.62pt) }]",
-        "markdown_text": "). Their molecular structures are shown in1所示。表6列出了计算得到的$\\\\log { P _ { {I L / w} } }$",
+        "markdown_text": "）。它们的分子结构如图1所示。表6列出了计算得到的$\\\\log { P _ { {I L / w} } }$",
         "width_pt": 232.75,
         "height_pt": 21.620000000000005,
         "fit_height_pt": 21.62,
@@ -2181,7 +2181,7 @@
       "typst": {
         "body_name": "p4_item_8_8_body",
         "body_expr": "block(width: 232.75pt, height: 21.620000000000005pt)[#{ pdftr_fit_markdown(p4_item_8_8_md, max_size: 8.9pt, min_size: 8.46pt, max_leading: 0.32em, min_leading: 0.26em, fit_height: 21.62pt) }]",
-        "markdown_text": "图1. Molecular structures of three steroid derivatives. Hydrogen white, carbon gray, fluorine cyan, oxygen red.",
+        "markdown_text": "图1. 三种甾体衍生物的分子结构。氢原子为白色，碳原子为灰色，氟原子为青色，氧原子为红色。",
         "width_pt": 232.75,
         "height_pt": 21.620000000000005,
         "fit_height_pt": 21.62,
@@ -2252,7 +2252,7 @@
         "unit": "pt"
       },
       "source_text": "corresponding to the free energy of transfer from water (w) to the ionic liquids [BMIM] \\left[ \\mathrm { P F } _ { 6 } \\right] . , \\begin{array} { r } { \\big [ \\mathrm { H M I M } \\big ] \\big [ \\mathrm { P F } _ { 6 } \\big ] , } \\end{array} o r [ \\mathrm { O M M M } ] [ \\mathrm { P F } _ { 6 } ] and compares to available experimental data.89 We employed the SMD and SMD-GIL computational protocols at the \\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) } level of theory as well as \\mathrm { S M 8 / M 0 } 6 { \\cdot } 2 \\mathrm { X } / 6 { \\cdot } 3 1 \\mathrm { G } ( \\mathrm { d } , \\mathrm { p } ) . We note that the values of log P _ { \\mathrm { I L / w } } predicted for DHEA and progesterone are in satisfactory agreement with available experimental data, but the \\log { P _ { \\mathrm { I L / w } } } values for dexamethasone predict this steroid to favor water strongly over any of the tested ionic liquids, which is not consistent with experiment, where small preferences for the ionic liquids are measured. The absolute solvation free energies predicted for dexamethasone in any of the ionic liquids or water are much more negative than are corresponding solvation free energies predicted for DHEA and progesterone. The SM8 solvation model predicts a \\log { P _ { \\mathrm { I L / w } } } value for dexamethasone in somewhat better agreement with experiment than do SMD or SMD-GIL (see Table 6) because all SM8 predictions are between 1 and 2 \\ \\log units more positive than the SMD predictions. Table 6 also presents the computed octanol−water \\log { P } values which are in better agreement with available experimental data111 (within 0.5 log units) than the corresponding IL−water \\log { P } values. For solvation calculations in octanol, we used the following values of octanol’s descriptors: \\varepsilon = 9 . 8 6 2 9 , n = 1 . 4 2 9 5 , \\gamma = 3 9 . 0 1 , \\varphi = \\psi = 0 , \\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } } = 0 . 3 7 . , and \\Sigma \\beta _ { 2 } ^ { \\mathrm { H } } = 0 . 4 8 (these values can be compared to those for the studied ionic liquids given in Table 1 and the text).",
-      "translated_text": "Corresponds to from water(w)To Ionic Liquid[BMIM]Free energy transfer calculation needed. Simplify using existing libraries. → skipped: custom implementation, add when standard libraries fail.\\left[ \\mathrm { P F } _ { 6 } \\right] ., \\begin{array} { r } { \\big [ \\mathrm { H M I M } \\big ] \\big [ \\mathrm { P F } _ { 6 } \\big ] , } \\end{array}或[ \\mathrm { O M M M } ] [ \\mathrm { P F } _ { 6 } ]Compare with existing experimental data.89 We are\\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) }at the theoretical level, as well as\\mathrm { S M 8 / M 0 } 6 { \\cdot } 2 \\mathrm { X } / 6 { \\cdot } 3 1 \\mathrm { G } ( \\mathrm { d } , \\mathrm { p } )Applied belowSMD和SMD-GILcalculation scheme. We note that the predictedDHEA和孕酮的logP _ { \\mathrm { I L / w } }Values agree well with existing experimental data, but\\log { P _ { \\mathrm { I L / w } } }For dexamethasone, predicted values show strong water preference over any tested ionic liquid, inconsistent with experiment where weak ionic liquid preference is measured. Predicted absolute solvation free energy in any ionic liquid or water is greater than predictedDHEASolvation free energy much more negative than progesterone's.SM8solvation model predicted for dexamethasone\\log { P _ { \\mathrm { I L / w } } }Slightly better agreement with experimentSMD或SMD-GIL(See table6), because allSM8predicted values are allSMDpredicted values positive1到2 \\ \\logUnits. Table6also lists the calculated octanol-水\\log { P }Value vs existing experimental data111Trong0.5个logWithin-unit fit superior to corresponding.IL-水\\log { P }Value. For solvation calculations in octanol, used these octanol descriptor values:\\varepsilon = 9 . 8 6 2 9, n = 1 . 4 2 9 5, \\gamma = 3 9 . 0 1, \\varphi = \\psi = 0, \\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } } = 0 . 3 7 .和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } } = 0 . 4 8(these values can be compared with Table1Compare with corresponding values of studied ionic liquid in main text).",
+      "translated_text": "对应于从水(w)到离子液体[BMIM]的转移自由能\\left[ \\mathrm { P F } _ { 6 } \\right] ., \\begin{array} { r } { \\big [ \\mathrm { H M I M } \\big ] \\big [ \\mathrm { P F } _ { 6 } \\big ] , } \\end{array}或[ \\mathrm { O M M M } ] [ \\mathrm { P F } _ { 6 } ]并与现有实验数据进行比较。89 我们在\\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) }理论水平以及\\mathrm { S M 8 / M 0 } 6 { \\cdot } 2 \\mathrm { X } / 6 { \\cdot } 3 1 \\mathrm { G } ( \\mathrm { d } , \\mathrm { p } )下采用了SMD和SMD-GIL计算方案。我们注意到，预测的DHEA和孕酮的logP _ { \\mathrm { I L / w } }值与现有实验数据吻合良好，但\\log { P _ { \\mathrm { I L / w } } }对于地塞米松的预测值表明该甾体强烈倾向于水而非任何测试的离子液体，这与实验不一致，实验中测得其对离子液体有微弱的偏好。预测的地塞米松在任何离子液体或水中的绝对溶剂化自由能比预测的DHEA和孕酮的相应溶剂化自由能负得多。SM8溶剂化模型预测的地塞米松\\log { P _ { \\mathrm { I L / w } } }值与实验的吻合度略优于SMD或SMD-GIL（见表6），因为所有SM8预测值都比SMD预测值正1到2 \\ \\log个单位。表6还列出了计算得到的辛醇-水\\log { P }值，其与现有实验数据111（在0.5个log单位内）的吻合度优于相应的IL-水\\log { P }值。对于辛醇中的溶剂化计算，我们使用了辛醇描述符的以下值：\\varepsilon = 9 . 8 6 2 9, n = 1 . 4 2 9 5, \\gamma = 3 9 . 0 1, \\varphi = \\psi = 0, \\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } } = 0 . 3 7 .和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } } = 0 . 4 8（这些值可与表1和正文中给出的所研究离子液体的相应值进行比较）。",
       "translation_unit_text": "对应于从水(w)到离子液体[BMIM]的转移自由能\\left[ \\mathrm { P F } _ { 6 } \\right] ., \\begin{array} { r } { \\big [ \\mathrm { H M I M } \\big ] \\big [ \\mathrm { P F } _ { 6 } \\big ] , } \\end{array}或[ \\mathrm { O M M M } ] [ \\mathrm { P F } _ { 6 } ]并与现有实验数据进行比较。89 我们在\\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) }理论水平以及\\mathrm { S M 8 / M 0 } 6 { \\cdot } 2 \\mathrm { X } / 6 { \\cdot } 3 1 \\mathrm { G } ( \\mathrm { d } , \\mathrm { p } )下采用了SMD和SMD-GIL计算方案。我们注意到，预测的DHEA和孕酮的logP _ { \\mathrm { I L / w } }值与现有实验数据吻合良好，但\\log { P _ { \\mathrm { I L / w } } }对于地塞米松的预测值表明该甾体强烈倾向于水而非任何测试的离子液体，这与实验不一致，实验中测得其对离子液体有微弱的偏好。预测的地塞米松在任何离子液体或水中的绝对溶剂化自由能比预测的DHEA和孕酮的相应溶剂化自由能负得多。SM8溶剂化模型预测的地塞米松\\log { P _ { \\mathrm { I L / w } } }值与实验的吻合度略优于SMD或SMD-GIL（见表6），因为所有SM8预测值都比SMD预测值正1到2 \\ \\log个单位。表6还列出了计算得到的辛醇-水\\log { P }值，其与现有实验数据111（在0.5个log单位内）的吻合度优于相应的IL-水\\log { P }值。对于辛醇中的溶剂化计算，我们使用了辛醇描述符的以下值：\\varepsilon = 9 . 8 6 2 9, n = 1 . 4 2 9 5, \\gamma = 3 9 . 0 1, \\varphi = \\psi = 0, \\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } } = 0 . 3 7 .和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } } = 0 . 4 8（这些值可与表1和正文中给出的所研究离子液体的相应值进行比较）。",
       "fit_text": "对应于从水(w)到离子液体[BMIM]的转移自由能\\left[ \\mathrm { P F } _ { 6 } \\right] ., \\begin{array} { r } { \\big [ \\mathrm { H M I M } \\big ] \\big [ \\mathrm { P F } _ { 6 } \\big ] , } \\end{array}或[ \\mathrm { O M M M } ] [ \\mathrm { P F } _ { 6 } ]并与现有实验数据进行比较。89 我们在\\mathrm { M 0 5 { - } 2 X / 6 { - } 3 1 G ( d , p ) }理论水平以及\\mathrm { S M 8 / M 0 } 6 { \\cdot } 2 \\mathrm { X } / 6 { \\cdot } 3 1 \\mathrm { G } ( \\mathrm { d } , \\mathrm { p } )下采用了SMD和SMD-GIL计算方案。我们注意到，预测的DHEA和孕酮的logP _ { \\mathrm { I L / w } }值与现有实验数据吻合良好，但\\log { P _ { \\mathrm { I L / w } } }对于地塞米松的预测值表明该甾体强烈倾向于水而非任何测试的离子液体，这与实验不一致，实验中测得其对离子液体有微弱的偏好。预测的地塞米松在任何离子液体或水中的绝对溶剂化自由能比预测的DHEA和孕酮的相应溶剂化自由能负得多。SM8溶剂化模型预测的地塞米松\\log { P _ { \\mathrm { I L / w } } }值与实验的吻合度略优于SMD或SMD-GIL（见表6），因为所有SM8预测值都比SMD预测值正1到2 \\ \\log个单位。表6还列出了计算得到的辛醇-水\\log { P }值，其与现有实验数据111（在0.5个log单位内）的吻合度优于相应的IL-水\\log { P }值。对于辛醇中的溶剂化计算，我们使用了辛醇描述符的以下值：\\varepsilon = 9 . 8 6 2 9, n = 1 . 4 2 9 5, \\gamma = 3 9 . 0 1, \\varphi = \\psi = 0, \\Sigma \\alpha _ { 2 } ^ { \\mathrm { H } } = 0 . 3 7 .和\\Sigma \\beta _ { 2 } ^ { \\mathrm { H } } = 0 . 4 8（这些值可与表1和正文中给出的所研究离子液体的相应值进行比较）。",
       "text_source": "translated_json",
@@ -2282,7 +2282,7 @@
       },
       "source_text": "The SMD-GIL model is able qualitatively to predict the experimentally observed trends in Table 6 associated with",
       "translated_text": "",
-      "translation_unit_text": "SMD-GILModel qualitatively predicts table.6Experimental trends observed with increasing alkyl chain length of the imidazolium component in ionic liquids. For example, fromBMIM到HMIMAgainOMIM，DHEAObserved and calculated partition coefficients for progesteroneSMD-GILAll values decreased. More experimental data will enable exploration of cross-ionic-liquid trends for further continuum solvent model optimization.",
+      "translation_unit_text": "SMD-GIL模型能够定性地预测表6中与离子液体咪唑组分烷基链长度增加相关的实验观测趋势。例如，从BMIM到HMIM再到OMIM，DHEA和孕酮的观测分配系数及计算的SMD-GIL值均有所下降。随着更多实验数据的获得，探索此类跨多种离子液体的趋势是否可用于进一步优化连续溶剂模型将是有意义的。",
       "fit_text": "SMD-GIL模型能够定性地预测表6中与离子液体咪唑组分烷基链长度增加相关的实验观测趋势。例如，从BMIM到HMIM再到OMIM，DHEA和孕酮的观测分配系数及计算的SMD-GIL值均有所下降。随着更多实验数据的获得，探索此类跨多种离子液体的趋势是否可用于进一步优化连续溶剂模型将是有意义的。",
       "text_source": "translated_json",
       "source_pdf_href": "../fixtures/source-pdfs/20260405041819-ac4b45.pdf",
@@ -2310,7 +2310,7 @@
         "unit": "pt"
       },
       "source_text": "Table 6. Values of \\scriptstyle \\log { P _ { \\mathrm { I L } / \\mathrm { w } } } for Three Steroid Derivativesa",
-      "translated_text": "表6.\\scriptstyle \\log { P _ { \\mathrm { I L } / \\mathrm { w } } }Three steroid derivative valuesa",
+      "translated_text": "表6.\\scriptstyle \\log { P _ { \\mathrm { I L } / \\mathrm { w } } }三种甾体衍生物的数值a",
       "translation_unit_text": "表6.\\scriptstyle \\log { P _ { \\mathrm { I L } / \\mathrm { w } } }三种甾体衍生物的数值a",
       "fit_text": "表6.\\scriptstyle \\log { P _ { \\mathrm { I L } / \\mathrm { w } } }三种甾体衍生物的数值a",
       "text_source": "translated_json",
@@ -2320,7 +2320,7 @@
       "typst": {
         "body_name": "p5_item_1_1_body",
         "body_expr": "block(width: 231.79999999999998pt)[#{ set text(size: 7.63pt); set par(leading: 0.32em); cmarker.render(p5_item_1_1_md, math: mitex) }]",
-        "markdown_text": "Calculate difference. Subtract experimental value.(Exp)Mean symbol error calculate average difference between predicted and actual symbols. Mean absolute error calculate average absolute difference between predicted and actual values. Simplify: Use mean absolute error for general error measurement. ponytail: Mean symbol error for symbol-specific tasks, add when needed.$\\\\log P$In nineSMD-GILCalculated from data$- 0.25$和0.87Log units.",
+        "markdown_text": "相对于实验值(Exp)的平均符号误差与平均绝对误差$\\\\log P$在九个SMD-GIL数据上计算得到的$- 0.25$和0.87个对数单位。",
         "width_pt": 231.79999999999998,
         "text_size_pt": 7.63,
         "leading_em": 0.32
@@ -2386,7 +2386,7 @@
       "typst": {
         "body_name": "p5_item_4_3_body",
         "body_expr": "block(width: 232.75pt)[#{ set text(size: 9.18pt); set par(leading: 0.6em); cmarker.render(p5_item_4_3_md, math: mitex) }]",
-        "markdown_text": "Previously developed solvation models predict solvation and transfer free energies in water and molecular (nonionic) organic solvents. Distinctive: consistently optimized first solvation shell parameters and bulk electrostatic treatment.30,70, and are universal.71−73 The universality of these solvation models is reflected in that they can be applied to any solvent with a small set of solvent descriptors, especially the dielectric constant, refractive index, macroscopic surface tension, andAbrahamType acidity and basicity parameters. This study demonstrates successful application to ionic liquids. Additionally, derived a universal parameter set. Yields high-accuracy solvation free energy predictions for all tested ionic liquids, even those without existing solvent descriptors. The latter reveals previously unrecognized universality in ionic liquid solvation properties, at least within this study's scope.",
+        "markdown_text": "我们先前已开发了用于预测溶质在水和分子（非离子）有机溶剂中溶剂化自由能及转移自由能的溶剂化模型。这些模型与大多数其他溶剂化模型的不同之处在于，它们包含了一致优化的第一溶剂化壳层参数以及体相静电处理30,70，并且具有普适性。71−73 这些溶剂化模型的普适性体现在，它们可应用于任何具备一小套溶剂描述符的溶剂，特别是介电常数、折射率、宏观表面张力以及Abraham型酸性和碱性参数。本研究表明，这些模型可成功应用于离子液体。此外，我们获得了一套通用参数，即使对于目前尚未获得实际溶剂描述符的离子液体，该参数集也能对所有测试离子液体的溶剂化自由能给出高精度预测。后一结果揭示了离子液体溶剂化特性中一个先前未被认识的普适性，至少在本研究涵盖的范围内如此。",
         "width_pt": 232.75,
         "text_size_pt": 9.18,
         "leading_em": 0.6
@@ -2529,7 +2529,7 @@
         "unit": "pt"
       },
       "source_text": "Reference data for water/ionic-liquid partitioning data and associated literature references, an extended table with errors in solvation and transfer free energies calculated by various methods, and Cartesian coordinates of tested solute molecules. This material is available free of charge via the Internet at http://pubs.acs.org.",
-      "translated_text": "水/Reference data for water/ionic-liquid partitioning data and associated literature references, an extended table with errors in solvation and transfer free energies calculated by various methods, and Cartesian coordinates of tested solute molecules. This material is available free of charge via the Internet at </span><a href="http://pubs.acs.org." target="_blank" rel="noreferrer"><span class="">http://pubs.acs.org.</span></a><span class=""> http://pubs.acs.org Get free.",
+      "translated_text": "水/离子液体分配数据及相关文献引用的参考数据、不同方法计算的溶剂化和转移自由能误差扩展表，以及测试溶质分子的笛卡尔坐标。该补充材料可通过互联网在 http://pubs.acs.org 免费获取。",
       "translation_unit_text": "水/离子液体分配数据及相关文献引用的参考数据、不同方法计算的溶剂化和转移自由能误差扩展表，以及测试溶质分子的笛卡尔坐标。该补充材料可通过互联网在 http://pubs.acs.org 免费获取。",
       "fit_text": "水/离子液体分配数据及相关文献引用的参考数据、不同方法计算的溶剂化和转移自由能误差扩展表，以及测试溶质分子的笛卡尔坐标。该补充材料可通过互联网在 http://pubs.acs.org 免费获取。",
       "text_source": "translated_json",
@@ -2616,7 +2616,7 @@
         "unit": "pt"
       },
       "source_text": "^ { * } \\mathrm { E } -mail: rcontrer@uchile.cl (R.C.); cramer@umn.edu (C.J.C.); truhlar@umn.edu (D.G.T.).",
-      "translated_text": "^ { * } \\mathrm { E }Email:rcontrer@uchile.cl (R.C.)；cramer@umn.edu (C.J.C.)；truhlar@umn.edu (D.G.T.)。",
+      "translated_text": "^ { * } \\mathrm { E }电子邮件：rcontrer@uchile.cl (R.C.)；cramer@umn.edu (C.J.C.)；truhlar@umn.edu (D.G.T.)。",
       "translation_unit_text": "^ { * } \\mathrm { E }电子邮件：rcontrer@uchile.cl (R.C.)；cramer@umn.edu (C.J.C.)；truhlar@umn.edu (D.G.T.)。",
       "fit_text": "^ { * } \\mathrm { E }电子邮件：rcontrer@uchile.cl (R.C.)；cramer@umn.edu (C.J.C.)；truhlar@umn.edu (D.G.T.)。",
       "text_source": "translated_json",
@@ -2626,7 +2626,7 @@
       "typst": {
         "body_name": "p5_item_12_6_body",
         "body_expr": "block(width: 194.75pt, height: 11.279999999999973pt)[#{ pdftr_fit_markdown(p5_item_12_6_md, max_size: 9.3pt, min_size: 8.54pt, max_leading: 0.6em, min_leading: 0.54em, fit_height: 11.279999999999973pt) }]",
-        "markdown_text": "The author declares no competing financial interests.",
+        "markdown_text": "作者声明无竞争性经济利益。",
         "width_pt": 194.75,
         "height_pt": 11.279999999999973,
         "fit_height_pt": 11.279999999999973,
@@ -2696,7 +2696,7 @@
       "typst": {
         "body_name": "p5_item_14_7_body",
         "body_expr": "block(width: 232.75pt, height: 104.34000000000003pt)[#{ pdftr_fit_markdown(p5_item_14_7_md, max_size: 9.1pt, min_size: 8.85pt, max_leading: 0.6em, min_leading: 0.57em, fit_height: 104.34pt) }]",
-        "markdown_text": "This research was partially supported by the U.S. Army Research Laboratory (Grant No.:W911NF09-100377) and the National Science Foundation (grant numbers:CHE09-56776和CHE09-52054Funding provided. Additionally research supported by Competitiveness Innovation Fund project Chile Ministry of Economy Development Tourism → skipped: detailed funding breakdown, add when required.ICM-P10-003-F CILIS(fundedV.S.B.visit to the University of Minnesota) and the National Institutes of Health high-end instrumentation grant (award:CON000000026578; reference award number:1S10RR029467-01) partial support.",
+        "markdown_text": "本研究部分由美国陆军研究实验室（资助号：W911NF09-100377）和美国国家科学基金会（资助号：CHE09-56776和CHE09-52054）资助。此外，本研究还得到了智利经济、发展与旅游部竞争力创新基金项目ICM-P10-003-F CILIS（资助了V.S.B.访问明尼苏达大学）以及美国国立卫生研究院高端仪器资助（奖项：CON000000026578；参考奖项号：1S10RR029467-01）的部分支持。",
         "width_pt": 232.75,
         "height_pt": 104.34000000000003,
         "fit_height_pt": 104.34,

@@ -2,13 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// StatusCard (Phase 3b job-runtime domain) component-level tests. Covers blueprint Â§6 new tests â¤â¥:
-// â¤ StatusCard contract (stage flow/substage/retry/result actions/data-status/
-//    ring ids); â¥ Stage selection semantics (clicking early stages not reset by subsequent unrelated renders).
-// Use real mountJobRuntimeFeature polling chain (?mock=translate), do not mock fetchâ
-// Directly verify statusCardPresenter writes to store within startPolling synchronous chain (blueprint risk 6:
-// first frame placeholder, otherwise empty card flashes on open) and whether renderPatch three-source convergence actually
-// works end-to-end.
+// StatusCard(Phase 3b job-runtime 域)组件级测试。覆盖蓝图 §6 新增测试⑤⑥:
+// ⑤ StatusCard 契约(stage flow/substage/retry/result actions/data-status/
+//    ring ids);⑥ 阶段选择语义(点击早期阶段不被后续无关渲染重置)。
+// 走真实 mountJobRuntimeFeature 轮询链路(?mock=translate),不 mock fetch——
+// 直接验证 statusCardPresenter 在 startPolling 同步链内写 store(蓝图风险 6:
+// 首帧 placeholder,否则打开时闪空卡)与 renderPatch 三 source 收敛是否真的
+// 端到端工作。
 
 function makeDom(search) {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
@@ -23,12 +23,12 @@ function makeDom(search) {
   }
   globalThis.window = dom.window;
   globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
-// Radix Presence/Tabs (introduced in Phase B) requires cancelAnimationFrame under jsdom
-// (TabsContent mount animation timer cleanup) and getComputedStyle (Presence reads
-// animation-name to determine if exit animation ended)âimplemented on jsdom window, but not
-// copied to bare global like requestAnimationFrame; adding them here. NodeFilter
-// is a new requirement for Phase C (TranslationWorkflowDialog replaced by Radix Dialog)â
-// Dialog.Content's FocusScope uses it for focusable element tree traversal.
+  // Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
+  // (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
+  // animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
+  // 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。NodeFilter
+  // 是阶段 C(TranslationWorkflowDialog 换 Radix Dialog)新增的需要——
+  // Dialog.Content 的 FocusScope 用它做可聚焦元素树遍历。
   globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
   globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -47,7 +47,7 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-assert.fail(`Timeout waiting: ${description}`);
+  assert.fail(`等待超时：${description}`);
 }
 
 function click(dom, element) {
@@ -77,21 +77,21 @@ async function bootHomeApp(dom) {
 
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-await waitFor(() => byId(dom, "library-add-pdf-btn"), "HomeApp first frame render");
-// Phase C (shadcn refactor): TranslationWorkflowDialog replaced by Radix Dialog, so no
-// forceMount ContentâStatusCard/#job-status-card is embedded in this dialog, only
-// mounts after dialog opens (following Phase C first-batch dialog precedents like CredentialsDialog:
-// Not mounted when closed). Call workflowDialog.openUpload() directly (instead of simulating click on "Add"
-// button) to mount it, avoiding impact on polling/rendering assertions after startPollingâin real user flows,
-// "Open dialog â Submit/Resume task" naturally starts with opening the dialog.
+  await waitFor(() => byId(dom, "library-add-pdf-btn"), "HomeApp 首帧渲染");
+  // 阶段 C(shadcn 改造):TranslationWorkflowDialog 换成 Radix Dialog 后不
+  // forceMount Content——StatusCard/#job-status-card 嵌在这个对话框内部,只有
+  // 对话框打开过才会挂载(同 CredentialsDialog 等阶段 C 第一批对话框的先例：
+  // 关闭态不挂载)。这里直接调 workflowDialog.openUpload()(而非模拟点击"添加"
+  // 按钮)让它挂载，不影响 startPolling 之后的轮询/渲染断言——真实用户流程里
+  // "打开对话框→提交/恢复任务"本来就是先有对话框打开这一步。
   services.workflowDialog.openUpload();
-await waitFor(() => byId(dom, "job-status-card"), "job-status-card mounted after workflow dialog opens");
+  await waitFor(() => byId(dom, "job-status-card"), "工作流对话框打开后 job-status-card 挂载");
   await wait(0);
 
   return { services, root, host };
 }
 
-test("StatusCard: DOM contract IDs exist one by one (hidden area + ring + stage flow)", async () => {
+test("StatusCard：DOM 契约 id 逐一存在(隐藏区 + ring + 阶段流)", async () => {
   const dom = makeDom("?mock=translate");
   const { services, root, host } = await bootHomeApp(dom);
 
@@ -104,7 +104,7 @@ test("StatusCard: DOM contract IDs exist one by one (hidden area + ring + stage 
     "job-id", "job-status", "job-stage-detail", "query-job-duration", "job-finished-at",
   ];
   for (const id of contractIds) {
-assert.ok(byId(dom, id), `Contract ID missing: #${id}`);
+    assert.ok(byId(dom, id), `契约 id 缺失：#${id}`);
   }
   assert.equal(byId(dom, "job-status-card").querySelectorAll(".status-stage-step[data-stage-key]").length, 4);
 
@@ -113,34 +113,34 @@ assert.ok(byId(dom, id), `Contract ID missing: #${id}`);
   host.remove();
 });
 
-test("StatusCard: Real polling (mock=translate) drives ring/progress/stage flow (no empty card flash on first frame)", async () => {
+test("StatusCard：真实轮询(mock=translate)驱动 ring/进度/阶段流(首帧不闪空卡)", async () => {
   const dom = makeDom("?mock=translate");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockJobId } = await import("../src/js/mock/index.js");
 
   services.features.jobRuntimeFeature.startPolling(getMockJobId());
 
-// startPolling synchronous chain already called renderJob(placeholder), should
-// see non-empty placeholder value (Blueprint Risk 6).
+  // startPolling 同步链内已经 renderJob(placeholder),不等待任何 await 就应
+  // 该看到非空占位值(蓝图风险 6)。
   assert.notEqual(byId(dom, "status-ring-label").textContent.trim(), "");
 
-await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "Preparing", "Ring value updates after real task data arrives");
+  await waitFor(() => byId(dom, "status-ring-value").textContent.trim() !== "准备中", "真实任务数据到达后 ring value 更新");
   await waitFor(() => {
     const activeStep = byId(dom, "status-stage-flow").querySelector('.status-stage-step[data-stage-key="translate"]');
     return activeStep?.classList.contains("is-active");
-}, "translate stage highlighted on flow bar");
+  }, "translate 阶段在流程条上高亮");
 
   const progressBlock = byId(dom, "job-status-card").querySelector(".status-progress-block");
-assert.equal(progressBlock.classList.contains("hidden"), false, "Translate stage progress block should be visible");
+  assert.equal(progressBlock.classList.contains("hidden"), false, "translate 阶段进度区块应可见");
 
-await waitFor(() => byId(dom, "job-status").textContent.trim() !== "idle", "Hidden area job-status summary updated (parallel smoke dependency)");
+  await waitFor(() => byId(dom, "job-status").textContent.trim() !== "idle", "隐藏区 job-status 摘要已更新(parallel smoke 依赖)");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("StatusCard: Stage selection semantics + Retry + Cancel", async () => {
+test("StatusCard：阶段选择语义 + 重试 + 取消", async () => {
   const dom = makeDom("?mock=translate");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockJobId } = await import("../src/js/mock/index.js");
@@ -149,25 +149,25 @@ test("StatusCard: Stage selection semantics + Retry + Cancel", async () => {
   await waitFor(() => {
     const activeStep = byId(dom, "status-stage-flow").querySelector('.status-stage-step[data-stage-key="translate"]');
     return activeStep?.classList.contains("is-active");
-}, "Translation stage ready");
+  }, "翻译阶段就位");
 
-// ---- Stage Selection: Click ocr (index < translate, optional) â Selection state switch ----
+  // ---- 阶段选择:点击 ocr(index < translate,可选) → 选中态切换 ----
   const ocrStep = byId(dom, "status-stage-flow").querySelector('.status-stage-step[data-stage-key="ocr"]');
-assert.equal(ocrStep.disabled, false, "OCR stage reached, should be selectable");
+  assert.equal(ocrStep.disabled, false, "ocr 阶段已到达,应可选");
   click(dom, ocrStep);
-await waitFor(() => ocrStep.getAttribute("aria-selected") === "true", "Selection state switches after clicking OCR");
+  await waitFor(() => ocrStep.getAttribute("aria-selected") === "true", "点击 ocr 后选中态切换");
   assert.equal(byId(dom, "status-ring-label").textContent.trim(), "OCR");
 
-// ---- Stage Selection Semantics: Irrelevant renders under same job/currentStageKey should not clear manual selection ----
+  // ---- 阶段选择语义:同一 job/同一 currentStageKey 下的无关渲染不应清掉手动选择 ----
   services.statusCard.store.actions.setCancelDisabled(false);
   await wait(30);
-assert.equal(ocrStep.getAttribute("aria-selected"), "true", "Irrelevant store notifications should not reset manual selection");
+  assert.equal(ocrStep.getAttribute("aria-selected"), "true", "无关的 store 通知不应重置手动选择");
 
-// ---- Cancel: Button should be grayed out immediately after click (shellViewPort.setCancelDisabled takes effect synchronously) ----
+  // ---- 取消:点击后按钮应立即置灰(shellViewPort.setCancelDisabled 同步生效) ----
   const cancelButton = byId(dom, "cancel-btn");
   if (!cancelButton.disabled) {
     click(dom, cancelButton);
-await waitFor(() => cancelButton.disabled === true, "Cancel button disabled immediately after click");
+    await waitFor(() => cancelButton.disabled === true, "取消按钮点击后立即禁用");
   }
 
   root.unmount();
@@ -175,7 +175,7 @@ await waitFor(() => cancelButton.disabled === true, "Cancel button disabled imme
   host.remove();
 });
 
-test("StatusCard: Retry button (clickable and triggers new polling after mock stage-actions data arrives)", async () => {
+test("StatusCard：重试按钮(mock stage-actions 数据到达后可点击并触发新一轮轮询)", async () => {
   const dom = makeDom("?mock=translate");
   const { services, root, host } = await bootHomeApp(dom);
   const { getMockJobId } = await import("../src/js/mock/index.js");
@@ -185,10 +185,10 @@ test("StatusCard: Retry button (clickable and triggers new polling after mock st
   await waitFor(() => {
     const retryContainer = byId(dom, "status-stage-retry");
     return retryContainer && !retryContainer.classList.contains("is-empty");
-}, "Translate stage retry button ready (mock fetchJobStageActions always returns translation as retryable)");
+  }, "translate 阶段的重试按钮就位(mock fetchJobStageActions 恒返回 translation 可重试)");
 
   const retryButton = byId(dom, "status-stage-retry").querySelector(".status-stage-retry-btn");
-assert.ok(retryButton, "Retry button should exist");
+  assert.ok(retryButton, "重试按钮应存在");
   assert.equal(retryButton.disabled, false);
   assert.equal(retryButton.dataset.retryStage, "translation");
 
@@ -199,7 +199,7 @@ assert.ok(retryButton, "Retry button should exist");
 
   const previousJobId = services.features.jobRuntimeFeature.currentJobId();
   click(dom, retryButton);
-await waitFor(() => retryEventSeen, "Clicking retry button dispatches retryStage event (Blueprint Â§5 Event Contract)");
+  await waitFor(() => retryEventSeen, "点击重试按钮 dispatch retryStage 事件(蓝图 §5 事件契约)");
   await waitFor(
     () => services.features.jobRuntimeFeature.currentJobId() !== previousJobId,
     "job-runtime 引擎消费 retryStage 后切换到新 job(mock retryJobStage 返回新 job_id)",

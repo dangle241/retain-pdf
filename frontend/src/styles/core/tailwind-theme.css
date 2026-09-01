@@ -1,36 +1,36 @@
-/* Tailwind Theme/Variants (per page entry in @import tailwindcss Import later. @source Written in entry) */
+/* Tailwind 主题/变体（各页 entry 在 @import tailwindcss 之后引入；@source 写在 entry） */
 
 /*
-Many class names in shadcn component source have `dark:` prefix (e.g., in button.jsx
-`dark:bg-destructive/60`). Tailwind v4 `dark:` variant defaults to
-`prefers-color-scheme: dark` media query, not "element has .dark
-class" ââ project tokens.css has only a single :root, no dark mode design. If a
-visitor's system is in dark mode, these dark: classes activate in a half-finished state (no matching dark
-token, visuals become inconsistently faded/darkened). This is a confirmed real issue (verified Button
-where destructive variant rendered as 60% opacity instead of solid red; root cause is
-headless browser prefers-color-scheme detected as dark, hitting dark:bg-destructive/60).
-Rebind dark variant detection to `.dark` class selector ââ no element in project will ever have this class,
-so dark: prefix classes never activate, equivalent to "fixed light theme", preventing drift from visitor system
-settings.
+  shadcn 组件源码里大量类名带 `dark:` 前缀(如 button.jsx 的
+  `dark:bg-destructive/60`)。Tailwind v4 的 `dark:` 变体默认按
+  `prefers-color-scheme: dark` 媒体查询生效,而不是"某个元素带 .dark
+  类"——项目 tokens.css 只有单一 :root,压根没有暗色模式设计,一旦某个
+  访客系统开着深色模式,这些 dark: 类会在半成品状态下被激活(没有配套的暗色
+  token,画面会不上不下地变淡/变暗),这是实测确认过的真实问题(验证 Button
+  时 destructive 变体在此环境下渲染成了 60% 透明度而非实心红,根源就是
+  headless 浏览器 prefers-color-scheme 探测为 dark 命中了 dark:bg-destructive/60)。
+  把 dark 变体的判定改绑到 `.dark` 类选择器——项目里永远不会有元素带这个类,
+  于是 dark: 前缀的类名永久不生效,行为等价于"固定浅色主题",不随访客系统
+  设置漂移。
 */
 @custom-variant dark (&:is(.dark *));
 
 /*
-Explicitly declare content sources (corresponding to content array in original tailwind.config.js),
-not relying on v4 auto-detection ââ paths resolved relative to this file (src/styles/).
+  显式声明 content 来源(对应原 tailwind.config.js 的 content 数组),
+  不依赖 v4 的自动探测——路径相对本文件(src/styles/)解析。
 */
 
 /*
-Danger zone fix (Tailwind v4 migration): v4 content scanning is plain text token extraction, does not understand JS
-syntax. Many JSX in project use template literals like `` `class-name${cond ? " x" : ""}` `` to compose class names. When no separator exists between class name and `${`,
-the scanner treats "class-name${cond" as a single token, failing to extract "class-name" itself. Custom classes for these names were migrated
-via tools to `@utility <name> {}` (in v4, @utility is generated on-demand like built-in utilities,
-unlike v3 hand-written CSS which compiled unconditionally), so their styles are silently
-lost in v4 (class remains on DOM, but corresponding CSS rule disappears without error).
-Explicitly safelist these class names below (confirmed individually by comparing v3 build artifacts: content exists in v3,
-but bare selector rules disappear in v4 build) ââ fix on CSS side without changing JSX source, keeping it consistent with the
-current scope of "Tailwind upgrade only".
-scope of "Tailwind upgrade only".
+  危险区修复(Tailwind v4 迁移):v4 的内容扫描是纯文本 token 提取,不理解 JS
+  语法。项目里大量 JSX 用 `` `class-name${cond ? " x" : ""}` `` 这种模板字符
+  串拼类名,类名和 `${` 之间没有分隔符时,扫描器会把 "class-name${cond" 当成
+  一个整体 token,提取不出 "class-name" 本身。这些类名对应的自定义类被迁移
+  工具转成了 `@utility <name> {}`(v4 里 @utility 和内置工具类一样按需生成,
+  不再像 v3 的手写 CSS 那样无条件编译进产物),于是它们的样式在 v4 下静默
+  丢失(class 还在 DOM 上,但对应 CSS 规则整条消失,不报错)。
+  下面显式 safelist 这些类名(经比对 v3 编译产物逐个确认:v3 下确有内容,
+  v4 编译产物里裸选择器规则消失)——不改 JSX 源码,把修复收在 CSS 侧,和本
+  阶段"只做 Tailwind 升级"的范围保持一致。
 */
 
 @theme inline {
@@ -52,20 +52,20 @@ scope of "Tailwind upgrade only".
   --color-gold-weak: var(--gold-weak);
   --color-chrome: var(--chrome);
   --color-reader-page: var(--reader-page);
-  /* Mask base color follows skin contract. --shadow-color（night Pure black / classic cold slate（ bg-scrim/50 Reserved for future use. */
+  /* 遮罩基色走皮肤契约 --shadow-color（night 纯黑 / classic 冷 slate），供 bg-scrim/50 等用 */
   --color-scrim: var(--shadow-color);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 
-  /* Shadow base color follows skin contract. --shadow-color（night Switch to pure black. Remove hardcoded warm brown. */
+  /* 阴影基色走皮肤契约 --shadow-color（night 换纯黑），不再写死暖棕 */
   --shadow-soft: 0 10px 30px color-mix(in srgb, var(--shadow-color) 8%, transparent);
   --shadow-panel: 0 18px 48px color-mix(in srgb, var(--shadow-color) 22%, transparent);
 
   /*
-Standard variable names consumed by shadcn/ui components (Phase A, shadcn toolchain implementation). Mapping
-reasons and "naming pitfalls" are in src/styles/shadcn-theme.css top comments ââ here
-only perform "@theme name â runtime variable" registration required by Tailwind v4, without repeating reasons.
+    shadcn/ui 组件消费的标准变量名(阶段 A,shadcn 工具链落地)。实际值的
+    映射理由和"命名避坑"说明见 src/styles/shadcn-theme.css 顶部注释——这里
+    只做 Tailwind v4 要求的"@theme 名字 → 运行时变量"登记,不重复写理由。
   */
   --color-background: var(--background);
   --color-foreground: var(--foreground);

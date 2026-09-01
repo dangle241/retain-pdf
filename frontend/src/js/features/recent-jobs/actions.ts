@@ -34,22 +34,22 @@ export function createRecentJobActions({
   function selectJob(jobId) {
     const normalizedJobId = `${jobId || ""}`.trim();
     if (!normalizedJobId) {
-renderRecentJobsError("This task is missing job_id; cannot open.", { reset: false });
+      renderRecentJobsError("该任务缺少 job_id，无法打开。", { reset: false });
       return;
     }
     navigationPort.openJob(normalizedJobId);
   }
 
-// 409 = delete protection: this job is referenced by favorites, cannot auto-force; user must process favorites first.
+  // 409 = 删除保护:该 job 被收藏引用,不能自动 force,必须让用户先处理收藏
   function friendlyDeleteError(error) {
     const message = `${error?.message || error || ""}`;
     if (error?.status === 409 || message.includes("(409)")) {
       const count = message.match(/\d+/)?.[0];
       return count
-? This document has ${count} collection references; delete collection before deleting document.
-        : "Document has collection references. Delete related collections first.";
+        ? `该文档有 ${count} 条收藏，请先删除收藏后再删除文档。`
+        : "该文档存在收藏引用，请先删除相关收藏后再删除文档。";
     }
-return message || "Delete failed";
+    return message || "删除失败";
   }
 
   async function deleteJob(jobId) {
@@ -66,7 +66,7 @@ return message || "Delete failed";
     statePort.removeJobFamily(normalizedJobId);
     const nextItems = statePort.getSnapshot().items;
     if (nextItems.length === 0) {
-renderRecentJobsEmpty("No recent tasks");
+      renderRecentJobsEmpty("暂无最近任务");
       return;
     }
     renderCurrentRecentJobs({ reset: true });
@@ -75,7 +75,7 @@ renderRecentJobsEmpty("No recent tasks");
   function openJobReader(jobId) {
     const normalizedJobId = `${jobId || ""}`.trim();
     if (!normalizedJobId) {
-renderRecentJobsError("This task is missing job_id, cannot open side-by-side reading.", { reset: false });
+      renderRecentJobsError("该任务缺少 job_id，无法打开对照阅读。", { reset: false });
       return;
     }
     navigationPort.openReader(normalizedJobId);

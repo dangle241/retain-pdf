@@ -27,8 +27,8 @@
     min-height: 168px;
     aspect-ratio: auto;
     padding: 16px 14px;
-    /* Drop zone: white bg, large radius (original gray block in white modal resembles unloaded placeholder),
-Dashed border muted.hover just used as accent to enhance "interactive" feel */
+    /* 拖放区：白底大圆角（原灰底大块在白弹窗里像未加载的占位），
+       虚线安静，hover 才用 accent 撑起"可交互"感 */
     border: 1.5px dashed color-mix(in srgb, var(--muted) 40%, var(--line));
     border-radius: 18px;
     background: var(--paper);
@@ -54,7 +54,7 @@ Dashed border muted.hover just used as accent to enhance "interactive" feel */
 
   & #file-label {
     font-size: 0.92rem;
-    /* File list single-line ellipsis. Prevent card height growth. Avoid vertical scrollbar. */
+    /* 长文件名单行省略，避免撑高卡片出现纵向滚动条 */
     display: block;
     width: 100%;
     max-width: 100%;
@@ -110,8 +110,8 @@ Dashed border muted.hover just used as accent to enhance "interactive" feel */
     min-height: 168px;
     aspect-ratio: auto;
     padding: 16px 14px;
-/* Drop zone: white background, large radius (original gray block in white modal looked like an unloaded placeholder),
-quiet dashed border, use accent on hover to create "interactive" feel */
+    /* 拖放区：白底大圆角（原灰底大块在白弹窗里像未加载的占位），
+       虚线安静，hover 才用 accent 撑起"可交互"感 */
     border: 1.5px dashed color-mix(in srgb, var(--muted) 40%, var(--line));
     border-radius: 18px;
     background: var(--paper);
@@ -220,7 +220,7 @@ quiet dashed border, use accent on hover to create "interactive" feel */
     font-size: 1.18rem;
     font-weight: 600;
     letter-spacing: -0.03em;
-    /* grid Default child item min-contentGrid items default to min-content; no truncation expands card height. */
+    /* grid 子项默认 min-content，不截断会把卡片撑高 */
     justify-self: stretch;
     text-align: center;
   }

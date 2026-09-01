@@ -1,4 +1,4 @@
-"""Rust API client: data plane only Rust manages, this service reads via HTTP."""
+"""Rust API 客户端:数据面只归 Rust 管,本服务经 HTTP 读。"""
 
 from __future__ import annotations
 
@@ -58,7 +58,7 @@ class RustApiClient:
         return self._get(f"/api/v1/documents/{document_id}")
 
     def get_document_by_job(self, job_id: str) -> dict[str, Any] | None:
-        """Any job_id(Includes history. run)→ Parent Document;Return if not found. None。"""
+        """任意 job_id(含历史 run)→ 所属文档;查不到返回 None。"""
         data = self._get("/api/v1/documents", {"job_id": job_id})
         documents = list(data.get("documents") or [])
         return documents[0] if documents else None
@@ -98,7 +98,7 @@ class RustApiClient:
         title: str = "",
         document_id: str = "",
     ) -> dict[str, Any]:
-        """Create Session;document_id Nullable(Global DB Session)Return only: Contains conversation_id Records."""
+        """创建会话;document_id 可空(全库会话)。返回含 conversation_id 的记录。"""
         payload: dict[str, Any] = {"title": (title or "").strip()}
         doc = (document_id or "").strip()
         if doc:

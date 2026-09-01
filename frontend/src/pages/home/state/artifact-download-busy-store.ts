@@ -1,26 +1,26 @@
-// artifact-downloads busy state store (dialogs blueprint Â§7.5 Option 2).
+// artifact-downloads busy 态 store(dialogs 蓝图 §7.5 方案二)。
 //
-// Background (blueprint Â§0.5): artifact-downloads uses document-level delegated clicks + imperative
-// setLinkBusy (Modify old world directly. DOM text/class) Button hosts distributed across recent-jobs'
-// ResultActions.jsx With this domain StatusDetailDialog.jsx——Common ancestor(StatusCard/
-// StatusDetailDialog Itself)are all mounted on high-frequency polling/store Update Link,If the parent component during download
-// Rerender on unrelated field change, virtual DOM diff writes imperatively. "Downloading.../37%" copy
-// Accept, Reject label. Plan two:setLinkBusy no longer directly modify DOM,only write this store;
-// Each button component subscribes to its own actionId slice (use-artifact-download-busy.js),
-// label All from React state, re-render will not overwrite (because state is already up to date).
+// 背景(蓝图 §0.5):artifact-downloads 是 document 级委托点击 + 命令式
+// setLinkBusy(旧世界直改 DOM 文本/class)。按钮宿主分布在 recent-jobs 的
+// ResultActions.jsx 与本域 StatusDetailDialog.jsx——两者的祖先(StatusCard/
+// StatusDetailDialog 本身)都挂在高频轮询/store 更新链路上,若下载中途父组件
+// 因无关字段变化重渲染,虚拟 DOM diff 会把命令式写入的"下载中.../37%"文案
+// 吃掉、打回按钮原始 label。方案二:setLinkBusy 不再直改 DOM,只写这个 store;
+// 按钮组件各自订阅自己的 actionId 分片(use-artifact-download-busy.js),
+// label 完全来自 React state,重渲染不会覆盖(因为 state 本身就是最新值)。
 //
-// Relationship with legacy world src/js/features/artifact-downloads/download-view-port.js:
-// Keep legacy files unchanged. (Used by dist/app.bundle.js still pending cutover, default DOM version
-// setLinkBusy directly modifies real <a> text)ââcomposition.js for React Duplicate world instance.
-// viewPort Instance, literal direct implementation 3 Method (do not import legacy view-port.js/view.js:
-// Both filenames match respectively architecture-boundaries.test.mjs Debounce regex.,
-// src/pages/** Prohibit imports.),setLinkBusy Drop this store。
+// 与旧世界 src/js/features/artifact-downloads/download-view-port.js 的关系:
+// 旧文件保持不动(仍供尚未 cutover 的 dist/app.bundle.js 使用,默认 DOM 版
+// setLinkBusy 直改真实 <a> 文本)——composition.js 给 React 世界另挂一份
+// viewPort 实例,字面量直接实现 3 个方法(不 import 旧 view-port.js/view.js:
+// 两者文件名分别匹配 architecture-boundaries.test.mjs 的防回弹正则,
+// src/pages/** 禁止导入),setLinkBusy 落这个 store。
 //
-// state shape: { [actionId]: { busy: true, label } }; Absence of actionId indicates not current
-// not busy. getState() swaps top-level ref only on actual change. (Same as
-// src/pages/home/state/dialog-store.js same minimalist pub-sub),Feed directly
-// useSyncExternalStore prevents infinite re-renders. (app-framework/store.js does not exist)
-// getSnapshot pain points on each clone).
+// state 形状:{ [actionId]: { busy: true, label } };不含某 actionId 表示当前
+// 非 busy。getState() 只在真正发生变化时才换新的顶层引用(与
+// src/pages/home/state/dialog-store.js 同款极简 pub-sub),可直接喂
+// useSyncExternalStore 而不会触发无限重渲染(不存在 app-framework/store.js
+// 的 getSnapshot 每次克隆雷点)。
 
 export type ArtifactBusySlice = {
   busy: boolean;
@@ -48,7 +48,7 @@ export function createArtifactDownloadBusyStore(): ArtifactDownloadBusyStore {
   }
 
   return {
-// useSyncExternalStore compatibility: subscribe returns unsubscribe function
+    // useSyncExternalStore 兼容:subscribe 返回退订函数
     subscribe(listener) {
       listeners.add(listener);
       return () => {
@@ -56,9 +56,9 @@ export function createArtifactDownloadBusyStore(): ArtifactDownloadBusyStore {
       };
     },
     getState: () => state,
-// Fetch shard by actionId; return same object if same actionId and unchanged.
-// Reference (setBusy for unrelated actionId uses pure shallow spread, no other keys touched
-    // Value reference)——cooperate use-artifact-download-busy.js Button-level precise re-rendering.
+    // 按 actionId 取一个分片;命中同一 actionId 且未变化时返回同一个对象
+    // 引用(setBusy 对不相关的 actionId 是纯粹的浅 spread,不触碰其他键的
+    // 值引用)——配合 use-artifact-download-busy.js 做到按钮级精确重渲染。
     getActionState(actionId) {
       return state[`${actionId || ""}`.trim()] || IDLE;
     },

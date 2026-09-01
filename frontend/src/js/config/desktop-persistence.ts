@@ -160,14 +160,14 @@ export async function savePersistedDeveloperConfig(nextDeveloperConfig) {
 
 export async function desktopInvoke(command, args = {}) {
   if (!desktopBridge) {
-    throw new Error("Desktop interface unavailable.");
+    throw new Error("桌面接口不可用");
   }
   return desktopBridge.invoke(command, args);
 }
 
 export async function openDesktopOutputDirectory() {
   if (!desktopBridge) {
-throw new Error("Desktop interface unavailable");
+    throw new Error("桌面接口不可用");
   }
   return desktopBridge.openOutputDirectory();
 }

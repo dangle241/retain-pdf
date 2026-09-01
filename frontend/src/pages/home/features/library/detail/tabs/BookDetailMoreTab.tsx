@@ -1,20 +1,20 @@
-// Tab "Other actions" ââ read status / collections / placeholder / Deleted.
-// Handle export, rename in this component; no other changes needed. tab。
+// Tab「其他操作」——阅读状态 / 合集 / 占位 / 删除。
+// 后续导出、重命名等接在本组件内，不必动其他 tab。
 
 import { ReadingStatusPanel } from "../panels/ReadingStatusPanel.jsx";
 import { CollectionsPanel } from "../panels/CollectionsPanel.jsx";
 import { DeleteFooterPanel } from "../panels/DeleteFooterPanel.jsx";
 
-/** Placeholder: append export logic / Share, etc. */
+/** 占位：后续接导出 / 分享等。 */
 export function BookDetailMorePlaceholder() {
   return (
     <div
       id="book-detail-more-placeholder"
       className="rounded-lg border border-dashed border-border/70 bg-muted/20 px-4 py-6 text-center"
     >
-      <p className="text-sm font-medium text-foreground">Other</p>
+      <p className="text-sm font-medium text-foreground">其他操作</p>
       <p className="mt-1 text-xs text-muted-foreground">
-        More capabilities coming soon. Placeholder.
+        更多能力即将接入，这里先占位。
       </p>
     </div>
   );

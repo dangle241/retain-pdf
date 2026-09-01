@@ -45,7 +45,7 @@ pub fn delete_library_book(
     }
     for job in &jobs {
         ensure_deletable(job, force)?;
-// Anchor block space protection: referenced by bookmarks. Running all anchors broken after deletion, deletion denied.
+        // 锚点块空间保护:被收藏引用的 run 删除后所有锚点断链,拒绝删除
         let referencing = deps
             .db
             .favorites_referencing_job(&job.job_id)
@@ -58,8 +58,8 @@ pub fn delete_library_book(
         }
     }
 
-// Delete job. Store parent doc first, after deletion reconcile its active_job_id,
-    // Else doc lines dangle pointing to deleted job,Frontend join Render zombie card on timeout.
+    // 删 job 前先记住它所属文档,删后 reconcile 其 active_job_id,
+    // 否则文档行会悬空指向已删 job,前端 join 不到而渲染成僵尸卡。
     let affected_document = deps
         .db
         .get_document_by_job_id(job_id)
@@ -78,8 +78,8 @@ pub fn delete_library_book(
     }
 
     if let Some(document_id) = affected_document {
-        // reconcile Failure doesn't block deletion(job Deleted),Log only.——Docs worst-case keep dangling.,
-        // Any next time job Delete or start backfill. Fix later.
+        // reconcile 失败不阻断删除(job 已删),仅记录——文档最坏保持悬空,
+        // 下次任一 job 删除或启动回填会再修。
         if let Err(error) = deps.db.reconcile_document_active_job(&document_id) {
             eprintln!(
                 "[library] reconcile active_job for {document_id} after deleting {job_id} failed: {error}"

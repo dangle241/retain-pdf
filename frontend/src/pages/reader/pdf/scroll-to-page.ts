@@ -1,5 +1,5 @@
-// Shared scroll shell positioning: restore reading position by "page + in-page ratio".
-// Use pre-switch lock state on mode toggle. progressReject during restore. measure(floats to last page).
+// 共享滚动壳定位：按「页 + 页内比例」恢复阅读位置。
+// 模式切换时必须用切换前锁定的 progress，禁止在恢复过程中重新 measure（会漂到末页）。
 
 import {
   getPageAttr,
@@ -12,7 +12,7 @@ export type PageScrollProgress = {
   fraction: number;
 };
 
-/** Viewport contains element. Optimize rendering.「reading line」Offset from top of scroll container (vs measure/apply / HUD Current page must match */
+/** 视口内「阅读线」相对滚动容器顶的偏移（与 measure/apply / HUD 当前页必须一致） */
 export const READER_SCROLL_FOCUS_PX = 48;
 
 /** Y coordinate of reading focus line in viewport coords */
@@ -39,7 +39,7 @@ export function pickPageAtFocus(
   let bestTop = -Infinity;
   for (const el of pages) {
     const rect = el.getBoundingClientRect();
-    // Hidden column / Unlaid out: skip, avoid measurement 0 High value causes false last-page detection.
+    // 隐藏栏 / 未布局：跳过，避免量到 0 高导致误判末页
     if (rect.height < 8 || rect.width < 8) {
       continue;
     }
@@ -50,7 +50,7 @@ export function pickPageAtFocus(
   }
 
   if (!best) {
-    // All below read line → Page 1; all above → Last page
+    // 全部在阅读线下方 → 第一页；全部在上方 → 最后一页
     const first = pages.find((el) => {
       const r = el.getBoundingClientRect();
       return r.height >= 8 && r.width >= 8;
@@ -134,7 +134,7 @@ export function applyPageScrollProgress(
   }
   const rootRect = root.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
-  // Page not laid out: failed, wait next round.
+  // 页尚未布局：失败，等下一轮
   if (rootRect.height <= 0 || (elRect.height < 8 && el.offsetHeight < 8)) {
     return false;
   }
@@ -163,7 +163,7 @@ export function scrollShellToPage(
   );
 }
 
-/** @deprecated Backward compatibility for legacy name. */
+/** @deprecated 兼容旧名 */
 export function scrollPaneToPage(
   root: HTMLElement | null | undefined,
   pageNumber: number,
@@ -173,8 +173,8 @@ export function scrollPaneToPage(
 }
 
 /**
- * Use locked. progress Restore position.
- * Retry on unstable layout; same progress Repeat apply Idempotent (won't drift further).
+ * 用锁定的 progress 恢复位置。
+ * 布局未稳时重试；同一 progress 反复 apply 是幂等的（不会越滚越远）。
  */
 export function alignShellToProgress(
   getRoot: () => HTMLElement | null | undefined,
@@ -187,7 +187,7 @@ export function alignShellToProgress(
   },
 ): () => void {
   const behavior = options?.behavior ?? "auto";
-  // Equal column widths/Anchor same point a few more times after page height settles.
+  // 少而稳：等栏宽/页高落稳后再钉几次同一锚点
   const delays = options?.delaysMs ?? [0, 32, 120, 280];
   let cancelled = false;
   let done = false;
@@ -247,7 +247,7 @@ export function clampPageNumber(page: number, numPages: number): number {
     return 1;
   }
   const target = Math.max(1, Math.floor(page));
-  // Do not clamp when total pages unknown. 1（AI Reference redirects will all fail as a result. 1 Page)
+  // 总页未知时不要钳到 1（AI 引用跳转会因此全落第 1 页）
   if (!Number.isFinite(numPages) || numPages <= 0) {
     return target;
   }

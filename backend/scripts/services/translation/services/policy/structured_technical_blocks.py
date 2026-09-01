@@ -69,11 +69,11 @@ def structured_technical_style_hint(item: dict) -> str:
     labels = _field_labels(_normalized_text(item))
     label_text = "、".join(labels[:6])
     return (
-        "Structured entry in technical documentation."
-        + (f"(fields include:{label_text}）" if label_text else "")
-        + "Keep field names, field order, list symbols, delimiters, and line breaks stable;"
-        "Preserve field values, type tags, enums, paths, commands, variable names, file names, code snippets, and angle-bracketed content verbatim;"
-        "Translate only the parts of field values that are clearly natural language descriptions. Do not arbitrarily rewrite structured field names into another language."
+        "这是技术文档中的结构化条目"
+        + (f"（字段包括：{label_text}）" if label_text else "")
+        + "。请保持字段名、字段顺序、列表符号、分隔符和换行排版稳定；"
+        "字段值、类型标记、枚举、路径、命令、变量名、文件名、代码片段和尖括号内容应原样保留；"
+        "只翻译字段值中明显属于自然语言说明的部分。不要把结构化字段名随意改写成另一种语言。"
     )
 
 

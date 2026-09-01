@@ -24,7 +24,7 @@ def source_text_for_batch(batch: list[dict]) -> str:
 
 def clean_term_key(text: str) -> str:
     cleaned = normalize_space(text)
-    cleaned = cleaned.strip(" ,.;:()[]{},。；：（）【】")
+    cleaned = cleaned.strip(" ,.;:()[]{}，。；：（）【】")
     return cleaned[:80]
 
 

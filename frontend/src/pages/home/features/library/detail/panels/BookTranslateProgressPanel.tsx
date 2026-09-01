@@ -1,7 +1,7 @@
-// Translation Tab progress area: attachJobProgress (library domain) + StatusCardEmbedded.
+// 翻译 Tab 进度区：attachJobProgress（library domain）+ StatusCardEmbedded。
 //
-// Real only job_id Mount #book-detail-job-status-card；
-// Book usage completed fallbackItem Complete terminal state (see status/merge-snapshot-with-fallback）。
+// 只要有真实 job_id 就挂载 #book-detail-job-status-card；
+// 已完成书用 fallbackItem 补全完成态（见 status/merge-snapshot-with-fallback）。
 
 import { useEffect } from "react";
 import { useHomeServices } from "../../../../home-services-context.js";
@@ -18,15 +18,15 @@ function resolveJobId(item: LibraryCardItem = {}) {
 }
 
 /**
- * Should display task progress card.
- * As long as it's real job_id Display only——Do not use library_only Filter completed books
- * Individual projection library_only May be inaccurate, but job_id in).
+ * 是否应展示任务进度卡。
+ * 只要有真实 job_id 就展示——不要用 library_only 挡掉已完成书
+ * （个别投影 library_only 可能不准，但 job_id 在）。
  */
 function shouldShowJobProgress(item: LibraryCardItem = {}) {
   const jobId = resolveJobId(item);
   if (!jobId) return false;
-// Clarify holdings and job: composite ID already filtered in resolveJobId
-  // Real job i.e., display (succeeded / running / failed / even status Remove empty. Optimize.
+  // 明确馆藏且 job 是合成 id 已在 resolveJobId 过滤
+  // 有真实 job 即展示（succeeded / running / failed / 甚至 status 空）
   return true;
 }
 
@@ -56,8 +56,8 @@ export function BookTranslateProgressPanel({
     || cardStatus === "queued"
     || cardStatus === "pending";
 
-  // Silent pull. Use `git pull --quiet`. jobFeed only. statusCardStore。
-// Note: "Retry xxx" switches to new job_id; if statusCard is already running new job, don't overwrite with old id.
+  // 静默拉 job：只喂 statusCardStore。
+  // 注意：点「重新 xxx」会切到新 job_id；若 statusCard 已在跑新 job，勿用旧 id 覆盖。
   useEffect(() => {
     if (!dialogOpen || !showProgress || !jobId) return undefined;
     if (cardJobId === jobId) return undefined;
@@ -66,11 +66,11 @@ export function BookTranslateProgressPanel({
     }
     actions?.attachJobProgress?.(jobId);
     return undefined;
-// Deliberately omit actions from deps (services stable reference prevents unnecessary reruns.
+    // 刻意不把 actions 放进 deps（services 引用稳定，避免无意义重跑）
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen, showProgress, jobId, cardJobId, cardPollingActive]);
 
-  // Detail progress main venue: close only when main status area currently visible (avoid setVisible Notify infinite loop per frame
+  // 进度主场在详情：仅当主状态区当前可见时才关掉（避免 setVisible 每帧通知死循环）
   useEffect(() => {
     if (!dialogOpen || !showProgress) return undefined;
     if (services.statusArea?.isVisible?.()) {
@@ -80,7 +80,7 @@ export function BookTranslateProgressPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen, showProgress]);
 
-  // Untranslated collection: empty state
+  // 未翻译馆藏：空态
   if (!showProgress) {
     return (
       <div
@@ -92,10 +92,10 @@ export function BookTranslateProgressPanel({
         data-job-id=""
       >
         <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Translation workflow
+          翻译流程
         </p>
-        {/* Empty state only"Roadmap Preview""Test contract locked", no longer render fake progress bar./0%——
-            Disabled dead machines stacked cause gray-on-gray visual clutter. */}
+        {/* 空态只保留"路线图预览"（测试契约锁定），不再渲染假进度条/0%——
+            禁用态的死机器堆在一起是灰上灰观感的主因 */}
         <div className="pointer-events-none">
           <StageFlow
             id="book-detail-stage-flow"
@@ -105,13 +105,13 @@ export function BookTranslateProgressPanel({
           />
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Not started. Select full book or page range to begin; progress appears here in real time.
+          尚未开始翻译。选择下方整本或页码范围后发起，进度会实时出现在这里。
         </p>
       </div>
     );
   }
 
-  // fallback: Prefer to follow the statusCard Now Playing jobRetry mechanism needed. Implement using existing retry library. → skipped: custom implementation, add when specific requirements arise. idToken expired. Use fresh token. item overwrite with completion state
+  // fallback：优先跟 statusCard 正在播的 job（含重试新 id），避免用旧 item 盖回完成态
   const liveFallback = cardJobId && cardJobId !== jobId
     ? {
         ...item,
@@ -122,9 +122,9 @@ export function BookTranslateProgressPanel({
       }
     : item;
 
-  // has job: Always mount the full StatusCard。
-// Parent Tabs.Content uses data-[state=inactive]:hidden to hide panel, nodes persist in DOM
-  // (searchable in developer tools #book-detail-job-status-card）。
+  // 有 job：始终挂载完整 StatusCard。
+  // 父级 Tabs.Content 用 data-[state=inactive]:hidden 藏面板，节点仍在 DOM
+  // （开发者工具可搜 #book-detail-job-status-card）。
   return (
     <div
       id="book-detail-translate-progress"

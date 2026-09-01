@@ -1,17 +1,17 @@
-// Reader startup orchestration (Phase 2b full): Full port of old src/js/reader/index.js.
-// Run after React first commit (imperative module finds container by id, DOM must be in position first).
+// 阅读器启动编排(Phase 2b 全量):旧 src/js/reader/index.js 的完整移植。
+// React 首次 commit 后运行(命令式模块按 id 查找容器,DOM 必须先就位)。
 //
-// Imperative reuse (non-React): pdf Family, interaction-flow, region-*,
+// 命令式复用(不 React 化):pdf 全家、interaction-flow、region-*、
 // selection-favorites、favorites/*、markdown-preview、progress-presenter、
-// chrome/mode Controllercolumn-resizer/panel-collapse(Maintain outer three-column layout. CSS Variable scheme,
-// rrp Only count inner layer doubles. PDF Group——Old three-column layout not sibling flex,Drawer is fixed overlay +
-// body :has() cascade, rrp rewrite entire outer layer. reader-page.css, pixel risk outweighs benefit.)
+// chrome/mode 控制器、column-resizer/panel-collapse(三栏外层维持 CSS 变量方案,
+// rrp 只统内层双 PDF Group——旧三栏不是同级 flex,抽屉是 fixed 覆盖层 +
+// body :has() 级联,改 rrp 外层要重写整片 reader-page.css,像素风险远大于收益)。
 //
-// React side (via runtime state injection): download menu context, Annotation Panel Port, AI chat Port.
+// React 侧(经 runtime state 注入):下载菜单 context、批注面板端口、AI chat 端口。
 //
-// Temporal contract (pixel-level): chrome.bindEvents() must precede drawerStore.open("ai")â
-// Fade-out timer in "No drawer open" time slot, body exits reader-chrome-muted after 1.6s,
-// Matches old page state at baseline screenshot time.
+// 时序契约(像素级):chrome.bindEvents() 必须先于 drawerStore.open("ai")——
+// 淡出定时器在"尚无抽屉打开"时排上,1.6s 后 body 进入 reader-chrome-muted,
+// 与旧页在基线截图时刻的形态一致。
 
 import { useEffect, useState } from "react";
 import {
@@ -65,8 +65,8 @@ import type { ReaderMetadata, RegionsPayload } from "../../../../js/reader/types
 
 let bootStarted = false;
 
-// Clicking reference jumps to original anchor.(Use same positioning logic as favorites navigation.),Keep drawer open.;
-// When referencing other documents,Navigate to that document's reader with anchor parameter
+// 引用点击跳原文锚点(与收藏跳转同一套定位),抽屉保持打开;
+// 引用属于其他文档时,导航到那篇文档的阅读器并带上锚点参数
 function jumpToCitationFactory(jobId) {
   return (citation) => {
     const citationJobId = `${citation?.job_id || ""}`.trim();
@@ -88,9 +88,9 @@ function jumpToCitationFactory(jobId) {
   };
 }
 
-// URL With anchor(?page_idx=&block_id=)Skip to page./regions Async mount,And startup layout
-// Reset scroll position to top after mount.——jump One success doesn't count,Must press"Is target page
-// "Truly in viewport" determination, back off and retry if not ready (converge after layout stabilizes).
+// URL 带锚点(?page_idx=&block_id=)时跳过去。页面/regions 异步挂载,且启动布局
+// 流程会在挂载后把滚动位置重置回顶部——jump 一次成功不算数,必须按"目标页是否
+// 真在视口内"判定,未就位则退避重试(布局稳定后即收敛)。
 function scheduleAnchorJump(anchor) {
   const anchorPageNumber = Number.isFinite(Number(anchor.pageIdx))
     ? Number(anchor.pageIdx) + 1
@@ -108,8 +108,8 @@ function scheduleAnchorJump(anchor) {
     const rect = pageElement.getBoundingClientRect();
     return rect.top < globalThis.innerHeight && rect.bottom > 0;
   };
-// PDF rendering and layout may take over 20 seconds; periodic scrollIntoView will be
-  // Layout reset consumes;Retry until ready.,Yield immediately on manual scroll.
+  // PDF 渲染与布局可能持续二十秒以上,期间 scrollIntoView 会被
+  // 布局重置吞掉;持续重试到就位,用户一旦手动滚动立即让位。
   let anchorCanceled = false;
   const cancelAnchor = () => {
     anchorCanceled = true;
@@ -131,24 +131,24 @@ function scheduleAnchorJump(anchor) {
       }
     }, 600);
   };
-// Do not use requestAnimationFrame: rAF is suspended in background tabs, callbacks
-  // Never trigger,Anchor positioning fails silently.(Hit in testing)。
+  // 不用 requestAnimationFrame:后台标签页里 rAF 被挂起,回调
+  // 永远不触发,锚点定位会静默失效(实测踩中)。
   globalThis.setTimeout(tryJump, 0);
 }
 
-// Populate source column with explicit text when source file unavailable (orphaned documentation: document exists but source not persisted. PDF).
-// #reader-pdf-empty default is a dashed placeholder block without text; write textContent directly to make it say something.
+// 源文件不可用时给源栏填一条明确文案(孤儿文档:有 document 行但没入库源 PDF)。
+// #reader-pdf-empty 默认是无文字的虚线占位块,直接写 textContent 让它有话可说。
 function showReaderSourceUnavailable() {
   showReaderPaneEmpty("reader-pdf", "reader-pdf-empty");
   const empty = document.getElementById("reader-pdf-empty");
   if (empty) {
-empty.textContent = "Source file unavailable: This document has no readable source PDF (possibly only a record, not an archived file).";
+    empty.textContent = "源文件不可用：该文档没有可读取的源 PDF（可能只有记录、未入库文件）。";
   }
 }
 
-// Collection document "Read Source" (F4): no job, only attach source document column, switch to source single-column mode, skip all
-// consume jobId secondary features (favorites/AI/annotations/markdown/interaction). Source document URL uses
-// /documents/:id/source.pdf (mock pattern goes to mock:// channel).
+// 馆藏文档"读原文"(F4):无 job,只挂源文档一栏,切 source 单栏模式,跳过所有
+// 吃 jobId 的副功能(收藏/AI/批注/markdown/interaction)。源文档 URL 走
+// /documents/:id/source.pdf(mock 模式走 mock:// 通道)。
 async function mountSourceOnlyReader({
   documentId,
   pageState,
@@ -156,8 +156,8 @@ async function mountSourceOnlyReader({
   applyBootProgress,
   syncBootProgress,
 }) {
-// Read-only source doc single-column throughout. â **First** collapse to source single column; source load success or failure should not
-  // Revert to default two-column comparison empty state.(Otherwise missing source yields two blank columns = Blank)。
+  // 只读源文档全程都是单栏——**先**收进 source 单栏,无论源加载成功失败都不该
+  // 退回默认的两栏对照空态(否则源文件缺失时会是两个空白栏 = 一片空白)。
   modeController.setMode("source");
   try {
     applyBootProgress(14, READER_PROGRESS_COPY.metadata, "metadata");
@@ -183,8 +183,8 @@ async function mountSourceOnlyReader({
     });
 
     if (!sourceReady) {
-// Source file inaccessible (like orphaned document lines: document record exists but source PDF not imported, /documents/:id/source.pdf 404) â add clear copy to single column, no whitespace.
-      // /documents/:id/source.pdf 404)——Add clear copy to single column.,No whitespace.
+      // 源文件取不到(如孤儿文档行:有 document 记录但没入库源 PDF,
+      // /documents/:id/source.pdf 404)——单栏里给一条明确文案,不留空白。
       showReaderSourceUnavailable();
       applyBootProgress(100, READER_PROGRESS_COPY.failed, "failed");
       setReaderBootLoading(false);
@@ -206,13 +206,13 @@ async function mountSourceOnlyReader({
 }
 
 async function initializeReader({ drawerStore, publish }) {
-// Set route first (pure URL parsing, no side effects): full comparative reading with job; only document_id
-// is collection document "Read Source" (F4), skip all sub-features and toolbar that consume jobId.
+  // 先定路线(纯 URL 解析,无副作用):有 job 走完整对照阅读;只有 document_id
+  // 是馆藏文档"读原文"(F4),要跳过所有吃 jobId 的副功能与工具栏。
   const jobId = resolveReaderJobId(defaultReaderPageConfigPort);
   const sourceOnlyDocumentId = jobId ? "" : resolveReaderDocumentId();
   const sourceOnly = Boolean(sourceOnlyDocumentId);
   if (sourceOnly) {
-// CSS hide translation accordingly / compare tab and Markdown/favorites/annotations/AI/Download tools group (consume jobId).
+    // CSS 据此隐藏译文/对照 tab 与 Markdown/摘录/批注/AI/下载工具组(全部吃 jobId)。
     document.documentElement.classList.add("reader-source-only");
   }
 
@@ -241,11 +241,11 @@ async function initializeReader({ drawerStore, publish }) {
     },
     onModeHudChanged: setReaderModeHud,
   });
-  // Collapse controller:Manage left/right sidebar collapse;Toolbar click → auto-expand right panel.
+  // 折叠控制器:管理左右栏折叠;顶栏点开工具时自动展开右栏亮出内容
   const panelCollapse = createReaderPanelCollapse({
     onChange: () => scheduleScaleRefresh(),
   });
-  // Programmatic startup open("ai") Do not clear user-persisted right panel collapse.;Auto-expand only on top-bar tool click.
+  // 启动时的程序化 open("ai") 不应清掉用户持久化的右栏折叠;仅用户点顶栏工具才自动展开
   let allowAutoExpandRight = false;
   drawerStore.subscribe((active) => {
     scheduleScaleRefresh();
@@ -260,18 +260,18 @@ async function initializeReader({ drawerStore, publish }) {
   bindResizeRefresh();
   chromeController.bindEvents();
   modeController.bindEvents();
-// Three-column skeleton: left/right panels resizable via drag (persistent), refresh on drag. PDF zoom
+  // 三栏骨架:左右栏可拖拽调宽(持久化),拖动时刷新 PDF 缩放
   createReaderColumnResizer({ onResize: () => scheduleScaleRefresh() }).bindEvents();
-  // Left/right column collapse handle(Apply persistent collapse state first)
+  // 左右栏折叠把手(先应用持久折叠态)
   panelCollapse.bindEvents();
-// Default expand right panel (AI Q&A). Must be later than chromeController.bindEvents(), see timing contract in file header;
-  // If user last collapsed right column, then CSS Keep collapsed.
-// Source doc lacks read-only state. job â AI/annotations/Markdown all unavailable, do not expand right sidebar (otherwise it hangs
-// forever as "Preparing..." empty panel).
+  // 默认展开右栏(AI 问答)。必须晚于 chromeController.bindEvents(),见文件头时序契约;
+  // 若用户上次折叠了右栏则由 CSS 保持折叠。
+  // 源文档只读态没有 job → AI/批注/Markdown 都不可用,不展开右栏(否则会挂着一个
+  // 永远"正在准备…"的空面板)。
   if (!sourceOnly) {
     drawerStore.open("ai");
   }
-// After startup open is complete, auto-expand right sidebar only after user clicks top toolbar.
+  // 启动 open 完成后,后续用户点顶栏工具才允许自动展开右栏
   allowAutoExpandRight = true;
 
   setReaderBootLoading(true);
@@ -346,7 +346,7 @@ async function initializeReader({ drawerStore, publish }) {
       translatedReady,
     });
 
-// Double-click to select screenshot excerpt (imperative island, includes favorites Drawer list rendering)
+    // 双击框选截图摘录(命令式孤岛,含 favorites 抽屉列表渲染)
     const serverFavoritesPort = createReaderServerFavoritesPort({ jobId });
     createReaderSelectionFavorites({
       drawerController: drawerStore,
@@ -356,7 +356,7 @@ async function initializeReader({ drawerStore, publish }) {
       serverFavoritesPort,
     }).bindEvents();
 
-// Annotation panel port (open/close subscription bridged by drawer component to drawer store)
+    // 批注面板端口(开合订阅由抽屉组件桥接 drawer store)
     const jobFields = (jobPayload || {}) as { source_filename?: string; title?: string };
     const documentTitle = `${jobFields.source_filename || jobFields.title || jobId}`;
     const clipboard = globalThis.navigator?.clipboard || null;
@@ -370,7 +370,7 @@ async function initializeReader({ drawerStore, publish }) {
           await clipboard?.writeText?.(text);
           return true;
         } catch (error) {
-          console.error("Failed to export annotations to clipboard.", error);
+          console.error("导出批注到剪贴板失败", error);
           return false;
         }
       },
@@ -388,7 +388,7 @@ async function initializeReader({ drawerStore, publish }) {
     });
     readerAiContext.bindEvents();
 
-// React one-time side injection: download menu context, Annotation Port, AI chat port
+    // React 侧一次性注入:下载菜单 context、批注端口、AI chat 端口
     publish({
       annotations: annotationPorts,
       chat: {

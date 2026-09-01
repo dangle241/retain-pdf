@@ -1,12 +1,12 @@
-// app-framework/store â React adaptation hook.
+// app-framework/store → React 的适配 hook。
 //
-// Landmine (verified): store.getSnapshot() returns new instance each call. frozen clone (reference unstable),
-// Using directly as useSyncExternalStore's getSnapshot causes infinite re-renders.
-// solution: cache subscribe snapshot carried with notification parameters (notify() generates single instance for all listeners),
-// getSnapshot Read-only cache;Lazy init: read once on first access. store.getSnapshot() Initialize.
+// 雷点(实测):store.getSnapshot() 每次调用都返回全新 frozen clone(引用不稳定),
+// 直接作为 useSyncExternalStore 的 getSnapshot 会造成无限重渲染。
+// 解法:缓存 subscribe 通知时随参携带的快照(notify() 对所有监听器只生成一份),
+// getSnapshot 只读缓存;首次读取惰性调一次 store.getSnapshot() 初始化。
 //
-// selector support: shallow-compare selector cache result for high-frequency polling of large snapshots (recent-jobs)
-// Trigger component re-render only when selected slice actually changes.
+// selector 支持:对 selector 结果做浅比较缓存,高频轮询的大快照(recent-jobs)
+// 只在所选切片真正变化时才触发该组件重渲染。
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
 

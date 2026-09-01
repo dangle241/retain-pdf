@@ -5,7 +5,7 @@ const PAGE_X = 540;     // center the PDF page in 1440-wide canvas (offset withi
 const PAGE_Y = 56;
 // MainCanvas is 1440 wide × ~580 tall (after chrome)
 
-// ââ 1.1 Upload PDF ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── 1.1 上传 PDF ──────────────────────────────────────────────────────────
 function SceneUpload({ progress, localTime }) {
   // 0.0–0.2: file appears bottom-left
   // 0.2–0.5: file flies up into a "drop zone"
@@ -40,7 +40,7 @@ function SceneUpload({ progress, localTime }) {
             stroke={FAINT} strokeWidth="1.5" strokeLinecap="round" />
         </svg>
         <div style={{ fontFamily: SANS, fontSize: 14, color: FAINT }}>
-          Drag PDF To here
+          拖拽 PDF 到此处
         </div>
       </div>
 
@@ -126,7 +126,7 @@ function SceneUpload({ progress, localTime }) {
   );
 }
 
-// ââ 1.2 Cloud OCR âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── 1.2 云端 OCR ───────────────────────────────────────────────────────────
 function SceneCloud({ progress }) {
   // Page on left being scanned. As scan passes a row, glyphs appear in JSON tray on right.
   const scanY = animate({ from: 0, to: 1, start: 0.05, end: 0.95, ease: Easing.linear })(progress);
@@ -231,7 +231,7 @@ function OCRJsonRow({ idx, fresh }) {
   );
 }
 
-// ââ 1.3 Download/Organize OCR Results âââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── 1.3 下载/整理 OCR 结果 ─────────────────────────────────────────────────
 function SceneFetch({ progress }) {
   // Lots of JSON snippets stream from a "cloud" icon, fall down, organize into rows.
   // 0–0.4: streaming particles fall down
@@ -329,7 +329,7 @@ function SceneFetch({ progress }) {
   );
 }
 
-// ── 1.4 Standardize ─────────────────────────────────────────────────────────────
+// ── 1.4 标准化 ─────────────────────────────────────────────────────────────
 function SceneStandardize({ progress }) {
   // Messy boxes → clean grid; coords cleaned up.
   // Show a "before" set of bboxes (rotated/jittered) → "after" (aligned)

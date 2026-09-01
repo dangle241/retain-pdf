@@ -1,19 +1,19 @@
-Phase,Task,Status,Notes
-Phase 0: pretext first-pass evaluation,Read pretext README and status docs,done,Confirmed as a candidate for programmable text layout and measurement kernel
-Phase 0: pretext first-pass evaluation,Analyze reusable APIs and capability boundaries,done,Focus on prepare/layout/prepareWithSegments/layoutWithLines/measureLineStats
-Phase 0: pretext first-pass evaluation,Formulate layout-fit internal evaluation conclusion,done,See notes/pretext-first-pass.md
-Phase 0: pretext first-pass evaluation,Decide whether to perform small-sample PoC,done,Decided on dual-track DOM and pretext; pretext PoC placed on browser side
-Phase 1: Sample preparation,Select 5 to 10 representative text block samples,done,Extracted 5 block samples from 20260407033349-ffe2e4
-Phase 1: Sample preparation,Define minimum fields for fixtures samples,done,See fixtures/block-samples.v1.schema.json
-Phase 1: Sample preparation,Place small samples into fixtures,done,See fixtures/sample-blocks.v1.json
-Phase 2: HTML/DOM baseline,Establish minimal HTML typesetting experiment page,done,See html/index.html
-Phase 2: HTML/DOM baseline,Implement browser-side parameter scanning,done,Currently supports font size and line height grid scanning
-Phase 2: HTML/DOM baseline,Display fitting results and overflow status,done,Outputs line count estimate, height error, overflow, and score
-Phase 3: pretext PoC,Establish pretext measurer small-sample PoC,done,See html/pretext.html; depends on locally installed @chenglou/pretext
-Phase 3: pretext PoC,Record line count and height differences between pretext and DOM,done,First sample p002-b0002 verified; see notes/pretext-poc-results.md
-Phase 4: Scoring script,Establish basic scoring script,todo,Calculate score based on height error, overflow, and readability penalty
-Phase 4: Scoring script,Generate scoring results in output/,todo,Result files not committed to Git
-Phase 5: Typst comparison,Select a few samples for Typst comparison,todo,Verify if parameters from HTML/pretext can be migrated back to Typst
-Phase 5: Typst comparison,Record differences between HTML/pretext and Typst,todo,Focus on height, line count, overflow, and visual density differences
-Phase 6: Summary,Write phase summary in notes,todo,Explain easy/hard to fit blocks, sensitive parameters, and integration suggestions
-Phase 6: Summary,Provide integration suggestions for main project,todo,Clarify integration level, benefits, and risks
+阶段,任务,状态,备注
+阶段 0：pretext 第一层评估,阅读 pretext README 和状态文档,done,确认其定位是可编程文本布局与测量内核候选
+阶段 0：pretext 第一层评估,梳理可复用 API 和能力边界,done,重点关注 prepare/layout/prepareWithSegments/layoutWithLines/measureLineStats
+阶段 0：pretext 第一层评估,形成 layout-fit 内部评估结论,done,见 notes/pretext-first-pass.md
+阶段 0：pretext 第一层评估,决定后续是否做小样本 PoC,done,已决定走 DOM 与 pretext 双轨；pretext PoC 放浏览器侧
+阶段 1：样本准备,选择 5 到 10 个代表性文本块样本,done,已从 20260407033349-ffe2e4 抽取 5 个块样本
+阶段 1：样本准备,定义 fixtures 样本最小字段,done,见 fixtures/block-samples.v1.schema.json
+阶段 1：样本准备,把小样本放入 fixtures,done,见 fixtures/sample-blocks.v1.json
+阶段 2：HTML/DOM 基线,建立最小 HTML 排版实验页,done,见 html/index.html
+阶段 2：HTML/DOM 基线,实现浏览器侧参数扫描,done,当前支持字号和行高网格扫描
+阶段 2：HTML/DOM 基线,显示拟合结果和溢出情况,done,输出行数估计、高度误差、overflow 和 score
+阶段 3：pretext PoC,建立 pretext 测量器小样本 PoC,done,见 html/pretext.html；依赖本地安装的 @chenglou/pretext
+阶段 3：pretext PoC,记录 pretext 与 DOM 的行数和高度差异,done,首个样本 p002-b0002 已验证；见 notes/pretext-poc-results.md
+阶段 4：评分脚本,建立基础评分脚本,todo,按高度误差、溢出、可读性惩罚计算 score
+阶段 4：评分脚本,生成 output 下的评分结果,todo,结果文件不进 Git
+阶段 5：Typst 对照,选取少量样本做 Typst 对照,todo,验证 HTML/pretext 得出的参数是否能迁回 Typst
+阶段 5：Typst 对照,记录 HTML/pretext 与 Typst 的差异,todo,重点看高度、行数、溢出和视觉密度差异
+阶段 6：总结,在 notes 写阶段总结,todo,说明容易拟合/难拟合的块、敏感参数和接入建议
+阶段 6：总结,给主工程提出是否接入的建议,todo,明确接入层级、收益和风险

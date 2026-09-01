@@ -1,5 +1,5 @@
 @utility reader-annotations-panel {
-  /* ===== Reader annotation panel(Drawer content area) ===== */
+  /* ===== 阅读器批注面板(抽屉内容区) ===== */
   display: grid;
   align-content: start;
   gap: 10px;
@@ -123,7 +123,7 @@
 }
 
 @utility reader-annotations-kind {
-  /* kind Badge:Small rounded capsule,Three annotation types, three color shades */
+  /* kind 徽章:小圆角胶囊,三种批注类型三种色调 */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -203,7 +203,7 @@
 }
 
 @utility reader-annotations-note-add {
-/* Lightweight text button: Transparent background, no shadow. hover changes to ink */
+  /* 轻量文本按钮:透明底、无阴影、hover 变 ink */
   min-height: 22px;
   padding: 0 6px;
   border: 0;

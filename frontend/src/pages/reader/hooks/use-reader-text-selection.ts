@@ -1,4 +1,4 @@
-// In PDF, listen to selection on text layer. Return floating bar position and fields for annotation creation.
+// 在 PDF 文本层上监听选区，给出浮条位置与创建批注所需字段。
 
 import { useCallback, useEffect, useState } from "react";
 import type { RefObject } from "react";
@@ -8,7 +8,7 @@ export type ReaderTextSelection = {
   quote: string;
   page: number;
   pane: ReaderNotePane;
-  /** Viewport coordinates for floating bar positioning */
+  /** 视口坐标，用于浮条定位 */
   rect: { left: number; top: number; width: number; height: number };
 };
 
@@ -50,7 +50,7 @@ export function useReaderTextSelection(
         return;
       }
 
-      // Find nearest page node.
+      // 找最近的页节点
       let node: Node | null = range.commonAncestorContainer;
       if (node.nodeType === Node.TEXT_NODE) {
         node = node.parentElement;
@@ -87,7 +87,7 @@ export function useReaderTextSelection(
     };
 
     const onMouseUp = () => {
-      // Wait for browser selection completion.
+      // 等浏览器完成选区
       window.setTimeout(readSelection, 0);
     };
     const onKeyUp = (event: KeyboardEvent) => {
@@ -96,7 +96,7 @@ export function useReaderTextSelection(
       }
     };
     const onScroll = () => {
-      // Clear floating bar after scroll invalidates selection screen coords (preserve browser selection)
+      // 滚动后选区屏幕坐标失效，清浮条（保留浏览器选区）
       setSelection((prev) => (prev ? null : prev));
     };
 

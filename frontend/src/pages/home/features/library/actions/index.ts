@@ -1,5 +1,5 @@
-// BookCard Action button factory aggregation.
-// One feature per file; this file only composes, no implementation. onClick Business details.
+// BookCard 操作按钮工厂聚合。
+// 每种功能一个文件；本文件只组合，不写 onClick 业务细节。
 
 import { buildReadBookCardAction } from "./read.js";
 import { buildTranslateBookCardAction } from "./translate.js";
@@ -11,7 +11,7 @@ export {
   buildTranslateBookCardAction,
 } from "./translate.js";
 
-/** Default: quick read only. */
+/** 默认：只有快速阅读。 */
 export function buildDefaultBookCardActions(
   item: LibraryCardItem = {},
   handlers: BookCardActionHandlers = {},
@@ -19,7 +19,7 @@ export function buildDefaultBookCardActions(
   return buildReadBookCardAction(item, handlers);
 }
 
-/** Read + Translate when conditions allow. */
+/** 阅读 +（有条件时）翻译。 */
 export function buildShelfBookCardActions(
   item: LibraryCardItem = {},
   handlers: BookCardActionHandlers = {},

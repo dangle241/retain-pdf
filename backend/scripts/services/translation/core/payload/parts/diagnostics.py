@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 
-# translation_diagnostics Unified write entry point(Dedicated to fix chain.,Gradual rollout)。
+# translation_diagnostics 的统一写入口(修复链专用,逐步推广)。
 #
-# Contract:
-# - Keep top-level dict, overwrite merge, fully compatible with existing readers (frontend debug panel, Rust views,
-#   debug index、replay Tools)Fully compatible;
-# - Write each time, include current updates append to diagnostics["history"],
-#   Keep processing traces for all stages——previously route_path/degradation_reason/fallback_to
-#   Wait for single-value field to be overwritten by subsequent stage.,History lost.;
-# - Re-read before write. item Current on diagnostics,Avoid"Construct snapshot first; intermediate others.
-#   Write, then rewrite entire paragraph."Silent overwrite caused.
+# 契约:
+# - 顶层保持 dict、覆盖式 merge,与现有读方(前端调试面板、Rust 视图、
+#   debug index、replay 工具)完全兼容;
+# - 每次写入同时把本次 updates 追加进 diagnostics["history"],
+#   保留各阶段处理轨迹——此前 route_path/degradation_reason/fallback_to
+#   等单值字段被后续阶段覆盖后,历史即丢失;
+# - 写入前重读 item 上的当前 diagnostics,避免"先构造快照、中间别人
+#   写入、再整段回写"造成的静默覆盖。
 
 
 def record_translation_diagnostics(item: dict, stage: str, updates: dict) -> dict:

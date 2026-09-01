@@ -87,7 +87,7 @@ class DenseBodyFitPolicyTests(unittest.TestCase):
                     {"bbox": [44, 100, 380, 112], "spans": [{"type": "text", "content": "A normal paragraph"}]},
                     {"bbox": [44, 116, 380, 128], "spans": [{"type": "text", "content": "establishes geometry."}]},
                 ],
-                "protected_translated_text": "This paragraph establish column text geometry. Simplify: Use CSS for layout.",
+                "protected_translated_text": "这是一个普通正文段落，用来建立同栏正文几何。",
             },
             {
                 "item_id": "body-anchor-2",
@@ -98,7 +98,7 @@ class DenseBodyFitPolicyTests(unittest.TestCase):
                     {"bbox": [44, 170, 380, 183], "spans": [{"type": "text", "content": "Another normal paragraph"}]},
                     {"bbox": [44, 186, 380, 199], "spans": [{"type": "text", "content": "establishes geometry."}]},
                 ],
-                "protected_translated_text": "Text paragraph establishes column geometry. Simplify: Use CSS grid.",
+                "protected_translated_text": "这是另一个普通正文段落，用来建立同栏正文几何。",
             },
             {
                 "item_id": "short-body",
@@ -111,7 +111,7 @@ class DenseBodyFitPolicyTests(unittest.TestCase):
                         "spans": [{"type": "text", "content": "Short OCR bbox should not be a hard height limit."}],
                     }
                 ],
-                "protected_translated_text": "short OCR Box must not hard-limit body height.",
+                "protected_translated_text": "短 OCR 框不应成为正文高度硬限制。",
             },
         ]
 
@@ -153,7 +153,7 @@ class DenseBodyFitPolicyTests(unittest.TestCase):
             "_dense_small_box": True,
             "_heavy_dense_small_box": False,
         }
-        text = "Reduce font size prioritize height. Adjust CSS." * 4
+        text = "这是一个非常密集的正文段落，需要在有限高度内优先缩小字号，而不是把行距压得过低。" * 4
 
         font_size, leading = fit_translated_block_metrics(
             item,

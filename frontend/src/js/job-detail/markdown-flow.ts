@@ -50,7 +50,7 @@ export async function loadAndRenderMarkdownFlow({
         fetchProtected,
       });
     } else if (isMarkdownReady(job)) {
-setText("detail-markdown-status", "Markdown Marked ready, but /markdown No content returned");
+      setText("detail-markdown-status", "Markdown 已标记 ready，但 /markdown 暂未返回内容");
     }
   } catch (error) {
     renderMarkdownContract({
@@ -60,6 +60,6 @@ setText("detail-markdown-status", "Markdown Marked ready, but /markdown No conte
       setText,
       setActionLink,
     });
-setText("detail-markdown-status", error.message || "Failed to read Markdown");
+    setText("detail-markdown-status", error.message || "读取 Markdown 失败");
   }
 }

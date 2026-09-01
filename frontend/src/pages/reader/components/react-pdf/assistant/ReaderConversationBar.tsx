@@ -1,4 +1,4 @@
-// Multi-session CRUD: list switching / create / rename / delete
+// 多会话 CRUD：列表切换 / 新建 / 重命名 / 删除
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
@@ -43,23 +43,23 @@ export function ReaderConversationBar({
   const [editTitle, setEditTitle] = useState("");
   const rootRef = useRef<HTMLDivElement | null>(null);
   const listId = useId();
-  // fork Title storage format is machine-friendly "fork-N-Original title"Index parsing dependency; storage untouched.
-// Display layer "Original Title Â· Branch N"; rename input still shows old value
+  // fork 标题存储格式是机器友好的 "fork-N-原标题"（序号解析依赖，不动存储），
+  // 显示层翻译成 "原标题 · 分支N"；重命名编辑框仍展示原始值
   function displaySessionTitle(raw: string): string {
     const m = `${raw || ""}`.match(/^fork-(\d+)-(.*)$/i);
     if (!m) return raw;
     const rest = m[2].trim();
-return rest ? `${rest} Â· Branch ${m[1]}` : `Branch ${m[1]}`;
+    return rest ? `${rest} · 分支${m[1]}` : `分支${m[1]}`;
   }
   const pickingRef = useRef(false);
   const editInputRef = useRef<HTMLInputElement | null>(null);
 
   const active = sessions.find((s) => s.id === activeId) || null;
   const label = active
-    ? (active.messageCount ? displaySessionTitle(active.title) : `${displaySessionTitle(active.title)}Empty input. No action needed.`)
+    ? (active.messageCount ? displaySessionTitle(active.title) : `${displaySessionTitle(active.title)}（空）`)
     : hasSessions
-      ? "Select previous conversation"
-: "New Conversation";
+      ? "选择以往对话"
+      : "新对话";
 
   useEffect(() => {
     if (!open) {
@@ -140,8 +140,8 @@ return rest ? `${rest} Â· Branch ${m[1]}` : `Branch ${m[1]}`;
 
   const handleDelete = (s: ReaderAskSessionSummary) => {
     if (locked || pickingRef.current) return;
-const name = s.title || "Untitled Conversation";
-    const ok = globalThis.confirm?.(`Delete Conversation「${name}」This action is irreversible.`);
+    const name = s.title || "未命名对话";
+    const ok = globalThis.confirm?.(`确定删除对话「${name}」？此操作不可恢复。`);
     if (!ok) return;
     pickingRef.current = true;
     beginSessionSwitchIsolation(800, 0);
@@ -170,7 +170,7 @@ const name = s.title || "Untitled Conversation";
         <button
           type="button"
           className={`aui-session-trigger${open ? " is-open" : ""}`}
-          aria-label="Switch Conversation"
+          aria-label="切换对话窗口"
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={listId}
@@ -188,8 +188,8 @@ const name = s.title || "Untitled Conversation";
           type="button"
           className="aui-session-btn"
           disabled={locked}
-          title="New Conversation"
-aria-label="New Conversation"
+          title="新对话窗口"
+          aria-label="新对话"
           onClick={() => {
             if (locked || pickingRef.current) return;
             pickingRef.current = true;
@@ -212,7 +212,7 @@ aria-label="New Conversation"
           ) : (
             <Plus size={14} strokeWidth={2.4} aria-hidden />
           )}
-<span>New Conversation</span>
+          <span>新对话</span>
         </button>
       </div>
 
@@ -221,12 +221,12 @@ aria-label="New Conversation"
           id={listId}
           className="aui-session-list"
           role="listbox"
-          aria-label="Previous Conversations"
+          aria-label="以往对话"
         >
           {sessions.map((s) => {
             const text = s.messageCount
               ? displaySessionTitle(s.title)
-: `${displaySessionTitle(s.title)} (Empty)`;
+              : `${displaySessionTitle(s.title)}（空）`;
             const selected = s.id === activeId;
             const editing = editingId === s.id;
             return (
@@ -238,7 +238,7 @@ aria-label="New Conversation"
                       className="aui-session-edit-input"
                       value={editTitle}
                       maxLength={80}
-aria-label="Conversation Title"
+                      aria-label="对话标题"
                       disabled={locked}
                       onChange={(e) => setEditTitle(e.target.value)}
                       onKeyDown={(e) => {
@@ -255,8 +255,8 @@ aria-label="Conversation Title"
                     <button
                       type="button"
                       className="aui-session-icon-btn"
-aria-label="Save Title"
-title="Save"
+                      aria-label="保存标题"
+                      title="保存"
                       disabled={locked || !editTitle.trim()}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -268,8 +268,8 @@ title="Save"
                     <button
                       type="button"
                       className="aui-session-icon-btn"
-aria-label="Cancel Rename"
-title="Cancel"
+                      aria-label="取消重命名"
+                      title="取消"
                       disabled={locked}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -306,14 +306,14 @@ title="Cancel"
                     >
                       <span className="aui-session-item-title">{text}</span>
                       {selected ? (
-<span className="aui-session-item-badge">Current</span>
+                        <span className="aui-session-item-badge">当前</span>
                       ) : null}
                     </button>
                     <button
                       type="button"
                       className="aui-session-icon-btn"
-aria-label={`Rename ${text}`}
-title="Rename"
+                      aria-label={`重命名 ${text}`}
+                      title="重命名"
                       disabled={locked}
                       onClick={(e) => {
                         e.preventDefault();
@@ -326,8 +326,8 @@ title="Rename"
                     <button
                       type="button"
                       className="aui-session-icon-btn is-danger"
-aria-label={`Delete ${text}`}
-title="Delete"
+                      aria-label={`删除 ${text}`}
+                      title="删除"
                       disabled={locked}
                       onClick={(e) => {
                         e.preventDefault();

@@ -1,4 +1,4 @@
-// Right column: Title / Author / Tags + Edit form.
+// 右栏：标题 / 作者 / 标签 + 编辑表单。
 
 import { btn } from "./ui.jsx";
 
@@ -10,7 +10,7 @@ import { btn } from "./ui.jsx";
  * @param {string[]} props.tags
  * @param {string[]} props.authors
  * @param {string|number|null|undefined} props.year
- * @param {string} props.displayTitle Display Title
+ * @param {string} props.displayTitle 展示用标题
  * @param {string} props.busy
  * @param {() => void} props.onStartEdit
  * @param {() => void} props.onCancelEdit
@@ -47,19 +47,19 @@ export function TitleMetaPanel({
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
             />
             <div>
-              <p className="mb-1 text-xs text-muted-foreground">Tags (separated by commas or Chinese enumeration commas)</p>
+              <p className="mb-1 text-xs text-muted-foreground">标签（逗号或顿号分隔）</p>
               <input
                 id="book-detail-tags-input"
                 type="text"
                 value={tagsText}
-                placeholder="e.g., Chemistry, Reviews"
+                placeholder="例如：化学、综述"
                 onChange={(e) => onTagsTextChange(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               />
             </div>
             <div className="flex justify-end gap-2">
               <button className={btn("outline")} disabled={busy === "meta"} onClick={onCancelEdit}>
-Cancel
+                取消
               </button>
               <button
                 id="book-detail-save-btn"
@@ -80,7 +80,7 @@ Cancel
               {displayTitle || "-"}
             </h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {authors.length ? authors.join("、") : "Unknown author"}
+              {authors.length ? authors.join("、") : "未知作者"}
               {year ? ` · ${year}` : ""}
             </p>
             {tags.length ? (
@@ -102,7 +102,7 @@ Cancel
           onClick={onStartEdit}
           className="shrink-0 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         >
-          Edit
+          编辑
         </button>
       ) : null}
     </div>

@@ -32,55 +32,55 @@ export function progressTextForStageProgress({
   const stageInfo = stage || { key: stageKey };
   const progressUnit = progress.unit || "";
   if (progressUnit === "percent") {
-return current > 0 ? `progress ${current}%` : "Processing";
+    return current > 0 ? `进度 ${current}%` : "处理中";
   }
   if (stageInfo.key === "render" && subtype === "render_compile") {
-return current >= total ? "Render complete" : "Compiling PDF";
+    return current >= total ? "渲染完成" : "正在编译 PDF";
   }
   if (stageInfo.key === "render" && subtype === "render_prewarm") {
-return `Prewarming ${current}/${total}`;
+    return `预热 ${current}/${total}`;
   }
   if (stageInfo.key === "render" && subtype === "render_prepare") {
-return `Preparing ${current}/${total}`;
+    return `准备 ${current}/${total}`;
   }
   if (progressUnit === "page") {
     if (stageInfo.key === "ocr" && current <= 0) {
-return `OCR Processing, total ${total} pages`;
+      return `OCR 处理中，共 ${total} 页`;
     }
     if (stageInfo.key === "render" && current <= 0) {
-return `Rendering, total ${total} pages`;
+      return `正在渲染，共 ${total} 页`;
     }
     if (stageInfo.key === "render" && current >= total) {
-return `Rendered, total ${total} pages`;
+      return `渲染完成，共 ${total} 页`;
     }
-return `Page ${current}/${total}`;
+    return `第 ${current}/${total} 页`;
   }
   if (progressUnit === "batch") {
-return `Batch ${current}/${total}`;
+    return `第 ${current}/${total} 批`;
   }
   if (progressUnit === "step") {
     if (stageInfo.key === "render") {
-return `Preparing ${current}/${total}`;
+      return `准备 ${current}/${total}`;
     }
-return `Progress ${current}/${total}`;
+    return `进度 ${current}/${total}`;
   }
   if (subtype === "continuation_review" || subtype === "page_policies") {
-return `Page ${current}/${total}`;
+    return `第 ${current}/${total} 页`;
   }
   if (subtype === "domain_inference" || subtype === "translation_prepare") {
-return `Progress ${current}/${total}`;
+    return `进度 ${current}/${total}`;
   }
   if (stageInfo.key === "translate") {
-return `Batch ${current}/${total}`;
+    return `第 ${current}/${total} 批`;
   }
   if (stageInfo.key === "ocr") {
     if (looksLikeProviderPercentProgress(current, total)) {
-return current > 0 ? `OCR ${current}%` : "OCR Processing";
+      return current > 0 ? `OCR ${current}%` : "OCR 处理中";
     }
-return `Page ${current}/${total}`;
+    return `第 ${current}/${total} 页`;
   }
   if (stageInfo.key === "render") {
-return `Page ${current}/${total}`;
+    return `第 ${current}/${total} 页`;
   }
-return `Progress ${current}/${total}`;
+  return `进度 ${current}/${total}`;
 }

@@ -63,7 +63,7 @@ fn build_messages(request: &ReaderAiChatRequest, chunks: &[RetrievedChunk]) -> V
     messages.push(ChatMessage {
         role: "user".to_string(),
         content: format!(
-            "User question:{}\n\nAvailable document snippets:\n{}",
+            "用户问题：{}\n\n可用文档片段：\n{}",
             request.message.trim(),
             format_context(chunks)
         ),
@@ -91,10 +91,10 @@ fn history_messages(history: &[ReaderAiHistoryMessageView]) -> Vec<ChatMessage> 
 
 fn reader_system_prompt() -> String {
     [
-        "DeepSeek RetainPDF Document Reading Assistant.",
-        "Answer based only on provided document fragments; do not fabricate facts not given.",
-        "If context insufficient, state insufficient evidence directly.",
-        "Answer in the user's language. Be concise. Mention source fragment titles when necessary.",
+        "你是 RetainPDF 的文档阅读助手。",
+        "只能基于提供的文档片段回答，不要编造未给出的事实。",
+        "如果片段不足以回答，直接说明证据不足。",
+        "回答使用用户提问的语言，尽量简洁，并在必要时提到依据来自哪些片段标题。",
     ]
     .join("\n")
 }

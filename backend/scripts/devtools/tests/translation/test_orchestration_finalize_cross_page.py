@@ -40,8 +40,8 @@ def _item(
 
 
 def test_cross_page_review_join_survives_finalize() -> None:
-# Bug A regression: review spliced cross-page group (candidate ids cleared, no provider id)
-    # Paginated. finalize Orphan detection immediately purged. continuation_group。
+    # Bug A 回归:review 拼接的跨页组(candidate ids 已清空、无 provider id)
+    # 曾被按页 finalize 的孤儿判定当场抹掉 continuation_group。
     prev_item = _item(item_id="p1-tail", page_idx=0, text="The results indicate", group="cg-review-1001")
     next_item = _item(item_id="p2-head", page_idx=1, text="a significant improvement.", group="cg-review-1001")
     page_payloads = {0: [prev_item], 1: [next_item]}
@@ -56,8 +56,8 @@ def test_cross_page_review_join_survives_finalize() -> None:
 
 
 def test_cross_page_provider_group_units_not_downgraded() -> None:
-# Bug B regression: provider cross-page groups although have provider id Amulet, unit Field was previously
-# By page refresh downgraded to single, contradicting save_pages flat grouping conclusions.
+    # Bug B 回归:provider 跨页组虽有 provider id 护身,unit 字段曾被
+    # 按页 refresh 降级成 single,与 save_pages 的扁平分组结论矛盾。
     prev_item = _item(
         item_id="p3-tail", page_idx=2, text="Beta phase", group="cg-003-001", provider_group_id="prov-7"
     )
@@ -74,7 +74,7 @@ def test_cross_page_provider_group_units_not_downgraded() -> None:
 
 
 def test_true_singleton_group_still_cleared() -> None:
-    # No regression of original behavior:Groups with exactly one member and no links should still be cleaned.
+    # 原有行为不回归:全局确实只有一个成员、且无任何链接的组仍应被清。
     orphan = _item(item_id="p5-only", page_idx=4, text="Orphan block.", group="cg-orphan")
     other = _item(item_id="p5-plain", page_idx=4, text="Plain block.")
     page_payloads = {4: [orphan, other]}

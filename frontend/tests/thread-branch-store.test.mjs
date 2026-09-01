@@ -44,13 +44,13 @@ test("save/load/clear branch tree with siblings + headId", () => {
     version: 1,
     headId: "a2",
     items: [
-      { parentId: null, message: { id: "u1", role: "user", content: "Ask what?" } },
+      { parentId: null, message: { id: "u1", role: "user", content: "问什么？" } },
       {
         parentId: "u1",
         message: {
           id: "a1",
           role: "assistant",
-content: "Answer A",
+          content: "回答 A",
           citations: [{ ref: 1, block_id: "p001-b0001" }],
           status: { type: "complete", reason: "stop" },
         },
@@ -60,7 +60,7 @@ content: "Answer A",
         message: {
           id: "a2",
           role: "assistant",
-content: "Answer B",
+          content: "回答 B",
           status: { type: "complete", reason: "stop" },
         },
       },
@@ -100,7 +100,7 @@ test("load normalizes running status to cancelled", () => {
           message: {
             id: "a1",
             role: "assistant",
-            content: "Half",
+            content: "半截",
             status: { type: "running" },
           },
         },
@@ -112,7 +112,7 @@ test("load normalizes running status to cancelled", () => {
   assert.equal(loaded.items[1].message.status.reason, "cancelled");
 });
 
-// Audit P2-10 regression lock: Old job Snapshot rollback prohibited. Session A content hydrate into Session B
+// 审计 P2-10 回归锁:旧 job 级快照回退不得把 A 会话内容 hydrate 进 B 会话
 test("legacy job-key fallback only serves the job's sticky conversation", async () => {
   const { saveStoredConversationId } = await import("../src/js/reader/ai/conversation-store.ts");
   const mem = new MemoryStorage();
@@ -122,17 +122,17 @@ test("legacy job-key fallback only serves the job's sticky conversation", async 
     version: 1,
     headId: "a1",
     items: [
-      { parentId: null, message: { id: "u1", role: "user", content: "A Session issue." } },
-      { parentId: "u1", message: { id: "a1", role: "assistant", content: "A Session replies" } },
+      { parentId: null, message: { id: "u1", role: "user", content: "A 会话的问题" } },
+      { parentId: "u1", message: { id: "a1", role: "assistant", content: "A 会话的回答" } },
     ],
   };
-// Create a "No seal" old snapshot.(job key only)
+  // 造一份"无印章"的真旧快照(仅 job key)
   saveThreadBranchSnapshot(jobId, snapshot, "");
-  // Sticky sessions = conv-A
+  // 粘性会话 = conv-A
   saveStoredConversationId({ jobId }, "conv-A");
 
-  assert.ok(loadThreadBranchSnapshot(jobId, "conv-A"), "Sticky sessions can use old snapshots");
-  assert.equal(loadThreadBranchSnapshot(jobId, "conv-B"), null, "Other sessions must not receive old snapshots.");
+  assert.ok(loadThreadBranchSnapshot(jobId, "conv-A"), "粘性会话可用旧快照");
+  assert.equal(loadThreadBranchSnapshot(jobId, "conv-B"), null, "其它会话不得吃到旧快照");
 });
 
 test("conversation stamp rejects cross-conversation snapshots", () => {
@@ -146,11 +146,11 @@ test("conversation stamp rejects cross-conversation snapshots", () => {
   };
   saveThreadBranchSnapshot(jobId, snapshot, "conv-A");
   const loaded = loadThreadBranchSnapshot(jobId, "conv-A");
-  assert.equal(loaded?.conversationId, "conv-A", "New snapshot with ownership seal");
-// Manually stuff snapshot A into key B(Simulate any form of misalignment), Seal mismatch. Reject.
+  assert.equal(loaded?.conversationId, "conv-A", "新快照带归属印章");
+  // 手工把 A 的快照塞到 B 的 key 下(模拟任何形式的错位),印章不符必须拒绝
   globalThis.localStorage.setItem(
     threadBranchStorageKey(jobId, "conv-B"),
     globalThis.localStorage.getItem(threadBranchStorageKey(jobId, "conv-A")),
   );
-  assert.equal(loadThreadBranchSnapshot(jobId, "conv-B"), null, "Rejected: seal mismatch hydrate");
+  assert.equal(loadThreadBranchSnapshot(jobId, "conv-B"), null, "印章不符拒绝 hydrate");
 });

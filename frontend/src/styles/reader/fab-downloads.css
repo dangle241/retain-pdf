@@ -1,6 +1,6 @@
-/* FAB Download area: 3 columns chip / empty */
+/* FAB 下载区：三列 chip / empty */
 
-/* Download area: three-column chips */
+/* 下载区：三列 chip */
 .reader-fab-section {
   display: grid;
   gap: 8px;

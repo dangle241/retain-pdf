@@ -53,7 +53,7 @@ class WideAspectBodyLeadingTests(unittest.TestCase):
                     {"bbox": [40, 80, 515, 96], "spans": [{"type": "text", "content": "Large paragraph"}]},
                     {"bbox": [40, 104, 515, 120], "spans": [{"type": "text", "content": "with generous geometry."}]},
                 ],
-                "protected_translated_text": "Set base font size. Use CSS. → skipped: inline styles, add when multiple pages require different sizes.",
+                "protected_translated_text": "这是一个普通的大正文块，用来建立本页正文的字号基准。",
             },
             {
                 "item_id": "dense-small",
@@ -64,7 +64,7 @@ class WideAspectBodyLeadingTests(unittest.TestCase):
                     {"bbox": [40, 250, 218, 263], "spans": [{"type": "text", "content": "Dense small paragraph"}]},
                     {"bbox": [40, 266, 218, 279], "spans": [{"type": "text", "content": "with longer translated text."}]},
                 ],
-                "protected_translated_text": "Text box size inherit page body font size. Adjust CSS." * 2,
+                "protected_translated_text": "这是一个密集的小正文框，译文比较长，但字号不应该继承过大的页级正文尺寸。" * 2,
             },
         ]
 
@@ -75,9 +75,9 @@ class WideAspectBodyLeadingTests(unittest.TestCase):
 
     def test_wide_aspect_body_relaxes_leading_when_vertical_slack_exists(self):
         text = (
-            "This document outlines a preliminary industrial policy agenda to ensure a human-centric approach during the transition to superintelligence."
-            "The content is divided into two parts: first, to build an open economy with broad participation, participation, and shared prosperity;"
-            "Second, build a resilient society through accountability, alignment, and frontier risk management."
+            "本文件提出了产业政策议程的初步构想，旨在确保向超级智能过渡的过程中以人为本。"
+            "内容分为两部分：一是构建一个具有广泛参与、参与和共享繁荣的开放经济；"
+            "二是通过问责、对齐和前沿风险管理来建设一个具有韧性的社会。"
         )
         relaxed = _relax_wide_aspect_body_leading(
             [82.0, 337.0, 530.0, 436.0],
@@ -90,9 +90,9 @@ class WideAspectBodyLeadingTests(unittest.TestCase):
 
     def test_wide_aspect_body_keeps_leading_when_height_is_tight(self):
         text = (
-            "Yet these very capabilities that drive progress will reshape entire industries at unprecedented speed and scale."
-            "Some jobs will disappear, others will evolve, and as organizations learn how to deploy advanced AI,"
-            "New work paradigms will emerge."
+            "然而，正是这些推动进步的能力，也将以前所未有的速度和规模重塑整个产业。"
+            "部分工作岗位将消失，另一些将演变，而随着各组织学会如何部署先进人工智能，"
+            "全新的工作形态也将应运而生。"
         )
         relaxed = _relax_wide_aspect_body_leading(
             [82.0, 454.0, 530.0, 493.0],
@@ -114,7 +114,7 @@ class WideAspectBodyLeadingTests(unittest.TestCase):
                     {"bbox": [44, 80, 380, 93], "spans": [{"type": "text", "content": "A normal paragraph"}]},
                     {"bbox": [44, 96, 380, 109], "spans": [{"type": "text", "content": "establishes body size."}]},
                 ],
-                "protected_translated_text": "This is a normal body paragraph used to establish the body font size.",
+                "protected_translated_text": "这是一个普通正文段落，用来建立正文字号。",
             },
             {
                 "item_id": "underfilled",
@@ -125,7 +125,7 @@ class WideAspectBodyLeadingTests(unittest.TestCase):
                     {"bbox": [44, 160, 380, 173], "spans": [{"type": "text", "content": "A short translated body paragraph"}]},
                     {"bbox": [44, 176, 380, 189], "spans": [{"type": "text", "content": "has ample vertical room."}]},
                 ],
-"protected_translated_text": "This is relatively short body text.",
+                "protected_translated_text": "这是较短的正文。",
             },
             {
                 "item_id": "body-anchor-2",
@@ -136,7 +136,7 @@ class WideAspectBodyLeadingTests(unittest.TestCase):
                     {"bbox": [44, 280, 380, 293], "spans": [{"type": "text", "content": "Another normal paragraph"}]},
                     {"bbox": [44, 296, 380, 309], "spans": [{"type": "text", "content": "establishes body size."}]},
                 ],
-                "protected_translated_text": "Set font size. Use CSS. → skipped: inline styles, add when multiple components require styling.",
+                "protected_translated_text": "这是另一个普通正文段落，用来建立正文字号。",
             },
         ]
 

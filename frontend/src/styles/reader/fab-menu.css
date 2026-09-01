@@ -1,6 +1,6 @@
-/* FAB Expand menu: card / Annotate main line */
+/* FAB 展开菜单：卡片 / 批注主行 */
 
-/* Menu card */
+/* 菜单卡片 */
 .reader-fab-menu {
   position: absolute;
   right: 0;
@@ -85,7 +85,7 @@
   transform: scale(0.94);
 }
 
-/* Annotation main row */
+/* 批注主行 */
 .reader-fab-row {
   --fab-i: 0;
   display: grid;

@@ -1,10 +1,10 @@
-/* Modal enter/exit keyframes(Previously, the entire site had zero animations.——Radix Content Visible on mount,Close instantly
-   Hide,Real experience gap)Pitfall record:Start with `transition` + `data-state` +
-`@starting-style` implementation, Entry effective., but Radix Presence Component only via listening.
-   `animationend` determine by event"Exit animation finished?",Pure `transition` Completely unaware
-   ——On close data-state one closed,Presence Uninstall now. DOM,Exit Transition Root
-No chance to play (Browser hang JS Actual Measurement: Node no longer exists 50ms after close()). Must use English.
-   real `@keyframes` + `animation` enables Presence Wait for playback to finish. */
+/* 弹窗进出场关键帧(此前整站零动效——Radix Content 挂载即瞬间可见,关闭即瞬间
+   消失,是真实体验缺口)。踩坑记录:一开始用 `transition` + `data-state` +
+   `@starting-style` 实现,进场确实有效,但 Radix 的 Presence 组件只通过监听
+   `animationend` 事件来判断"退场动画播完了没",对纯 `transition` 完全不感知
+   ——于是关闭时 data-state 一变 closed,Presence 立刻卸载 DOM,退场过渡根本
+   没机会播放(浏览器里挂 JS 实测:close() 后 50ms 节点已经不在了)。必须用
+   真正的 `@keyframes` + `animation` 才能让 Presence 等它播完。 */
 @keyframes dialog-content-in {
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
@@ -28,28 +28,28 @@ No chance to play (Browser hang JS Actual Measurement: Node no longer exists 50m
   max-height: calc(100vh - 24px);
   border-radius: var(--panel-radius);
 
-  /* Center modal,transform-origin Use default center(Doesn't look like it popover follow trigger point)。
-scale Start/End 0.96 instead of 0 ââ emil-design-eng skill: Real world has nothing from
-"non-existence" Render directly. */
+  /* 模态居中显示,transform-origin 用默认 center(不像 popover 要跟随触发点)。
+     scale 起点/终点 0.96 而非 0——emil-design-eng skill:现实世界没有东西从
+     "不存在"直接变出来。 */
   &[data-state='open'] { animation: dialog-content-in 200ms var(--ease-out); }
-  /* forwards:Animation-fill-mode: forwards;(opacity:0/scale(0.96)),Not because
-     animation-fill-mode Default value none Whereas Presence Revert to visible state one frame before uninstall. */
+  /* forwards:退场动画播完后停在终帧(opacity:0/scale(0.96)),不因
+     animation-fill-mode 默认值 none 而在 Presence 卸载前那一帧弹回可见态。 */
   &[data-state='closed'] { animation: dialog-content-out 200ms var(--ease-out) forwards; }
 
-/* ::backdrop Native only. <dialog>(showModal After browser top-layer) takes effect ââ Phase C
-Final batch (ReaderDialog/PageRangeDialog) Done, All dialogs replaced by Radix
-Dialog, no components render <dialog> Element anymore. Remove rule. Unnecessary. (Risk
-for zero, Keep; do not delete., same as app-update.css Precedents in header comments.) background-image: var(--real-bg);
-Styles are unified by the following. desktop-dialog-overlay utility class (attached to DialogPrimitive.Overlay
-on) Confirm. Execute. Check. */
+  /* ::backdrop 只对原生 <dialog>(showModal 后的浏览器 top-layer)生效——阶段 C
+     收官批(ReaderDialog/PageRangeDialog)完成后,9 个对话框已全部换成 Radix
+     Dialog,不再有任何组件渲染 <dialog> 元素,这条规则整体变成死代码(风险
+     为零,保留不删,同 app-update.css 头注释里记录的先例)。真正生效的背板
+     样式统一由下面的 desktop-dialog-overlay 工具类(挂在 DialogPrimitive.Overlay
+     上)负责。 */
   &::backdrop {
     background: color-mix(in srgb, var(--chrome, var(--ink)) 36%, transparent);
   }
 }
 
 @utility desktop-dialog-overlay {
-  /* Site-wide backdrop: light paper-texture blur (--dialog-scrim truth value in themes/_component-defaults.css）。
-Three backplanes coexisted (dark 36% / Light blur / dark z110) is the biggest source of popup visual disconnect. */
+  /* 全站统一背板：浅色纸感模糊（--dialog-scrim 真值在 themes/_component-defaults.css）。
+     此前三种背板并存（深色 36% / 浅色模糊 / 深色 z110）是弹窗观感割裂的最大来源。 */
   @apply fixed inset-0 z-[100];
   background: var(--dialog-scrim);
   backdrop-filter: blur(10px);
@@ -60,9 +60,9 @@ Three backplanes coexisted (dark 36% / Light blur / dark z110) is the biggest so
 }
 
 @utility status-detail-dialog-overlay {
-/* StatusDetailDialog Exclusive Backplate (Phase C) ââ z-index Raise to 110 (higher than
-desktop-dialog-overlay's 100), Ensure nested inside opened â skipped: additional checks, add when complex interactions arise. TranslationWorkflowDialog
-     When above, correctly covers it.,Visual and desktop-dialog-overlay Same origin(--dialog-scrim)。 */
+  /* StatusDetailDialog 专属背板(阶段 C)——z-index 垫高到 110(高于
+     desktop-dialog-overlay 的 100),确保嵌套在已打开的 TranslationWorkflowDialog
+     之上时能正确盖住它,视觉与 desktop-dialog-overlay 同源(--dialog-scrim)。 */
   @apply fixed inset-0 z-[110];
   background: var(--dialog-scrim);
   backdrop-filter: blur(10px);
@@ -86,7 +86,7 @@ desktop-dialog-overlay's 100), Ensure nested inside opened â skipped: addit
 }
 
 @utility dialog-close-btn {
-  /* Ghost button: silent, non-distracting.hover Background now visible. Original stroke circles too heavy at each popup corner. */
+  /* 幽灵钮：静默不抢注意力，hover 才浮出底色（原描边圆圈在每个弹窗角落都过重） */
   @apply inline-flex h-[34px] min-h-[34px] w-[34px] min-w-[34px] items-center justify-center rounded-full border-0 p-0 text-[22px] leading-none shadow-none;
   background: transparent;
   color: var(--muted);
@@ -112,8 +112,8 @@ desktop-dialog-overlay's 100), Ensure nested inside opened â skipped: addit
 
 @utility desktop-body {
   @apply grid gap-4 p-6;
-  /* Content loads after shell. 40ms Micro-entry: layered pacing, avoid dumping all elements at once.
-both = Pause on first frame during delay. (transparent) No flash. */
+  /* 内容比壳晚 40ms 微升进场：分层节奏，避免所有元素一次性砸出。
+     both = 延迟期间停在首帧(透明)，不闪现。 */
   animation: dialog-body-in 220ms var(--ease-out) 40ms both;
 }
 
@@ -121,11 +121,11 @@ both = Pause on first frame during delay. (transparent) No flash. */
   .desktop-body { animation-duration: 1ms; animation-delay: 0ms; }
 }
 
-/* BookDetailDialog uses its own original Tailwind class (copying PDF_MD_lib visuals),
-Did not use desktop-dialog utility class, Add same entry/exit keyframes separately. */
+/* BookDetailDialog 用的是自己那套原始 Tailwind 类(照搬 PDF_MD_lib 视觉),
+   没有走 desktop-dialog 工具类,单独补同一套进出场关键帧。 */
 @utility book-detail-dialog-content {
   &[data-state='open'] { animation: dialog-content-in 200ms var(--ease-out); }
-/* forwards: stay at final frame after exit animation (opacity:0/scale(0.96)), preventing
-snap back to visible state before Presence unmount due to default animation-fill-mode none. */
+  /* forwards:退场动画播完后停在终帧(opacity:0/scale(0.96)),不因
+     animation-fill-mode 默认值 none 而在 Presence 卸载前那一帧弹回可见态。 */
   &[data-state='closed'] { animation: dialog-content-out 200ms var(--ease-out) forwards; }
 }

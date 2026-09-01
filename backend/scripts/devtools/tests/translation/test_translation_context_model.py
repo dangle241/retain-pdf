@@ -22,16 +22,16 @@ def test_build_unit_context_carries_document_item_and_neighbor_context() -> None
     document_context = TranslationDocumentContext(
         mode="sci",
         target_language="zh-CN",
-        domain_guidance="Quantum Chemistry Handbook",
-        rule_guidance="Keep variables and formulas",
-        glossary_guidance="Hamiltonian=Hamiltonian",
+        domain_guidance="量子化学手册",
+        rule_guidance="保留变量和公式",
+        glossary_guidance="Hamiltonian=哈密顿量",
     )
 
     unit_context = build_unit_context(
         item,
         document_context=document_context,
         order=7,
-memory_guidance="SCF=self-consistent field",
+        memory_guidance="SCF=自洽场",
     )
 
     assert unit_context.document is document_context
@@ -40,10 +40,10 @@ memory_guidance="SCF=self-consistent field",
     assert unit_context.prompt_context_before() == "The matrix contains one-electron kinetic"
     assert unit_context.prompt_context_after() == "that are used to build the Fock operator."
     assert unit_context.prompt_guidance_parts() == [
-"Quantum Chemistry Handbook",
-"Preserve variables and formulas",
-"Hamiltonian=Hamiltonian",
-"SCF=self-consistent field",
+        "量子化学手册",
+        "保留变量和公式",
+        "Hamiltonian=哈密顿量",
+        "SCF=自洽场",
     ]
 
 
@@ -240,8 +240,8 @@ def test_batch_payload_includes_needed_context_without_continuation_group() -> N
 
     payload = build_item_context(item).as_batch_payload()
 
-assert payload["context_before"] == "For understanding only, do not translate into output: The matrix contains one-electron kinetic"
-assert payload["context_after"] == "For understanding only, do not translate into output: that are used to build the Fock operator."
+    assert payload["context_before"] == "仅供理解，禁止翻译进输出：The matrix contains one-electron kinetic"
+    assert payload["context_after"] == "仅供理解，禁止翻译进输出：that are used to build the Fock operator."
 
 
 def test_prompt_building_uses_translation_context_windows() -> None:
@@ -269,6 +269,6 @@ def test_prompt_building_uses_translation_context_windows() -> None:
     )
 
     user_content = messages[-1]["content"]
-    assert "Previous context (for understanding only, do not translate into output):The matrix contains one-electron kinetic" in user_content
-    assert "The current source text is an incomplete fragment; the translation must remain equally incomplete, do not complete it using later context." in user_content
-    assert "Following context (for understanding only, do not translate into output):that are used to build the Fock operator." in user_content
+    assert "前文上下文（仅供理解，禁止翻译进输出）：The matrix contains one-electron kinetic" in user_content
+    assert "当前原文是不完整片段；译文必须保持同等不完整，不要用后文上下文补全。" in user_content
+    assert "后文上下文（仅供理解，禁止翻译进输出）：that are used to build the Fock operator." in user_content

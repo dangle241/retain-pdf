@@ -7,8 +7,8 @@ import {
   nextReadingStatus,
 } from "../src/js/islands/library-search/view-model.js";
 
-test("highlightSegments splits hit words wrapped in [ ] into highlight segments", () => {
-assert.deepEqual(highlightSegments("â¦examined [spectrum] series [exchange] reactionâ¦"), [
+test("highlightSegments 把 [ ] 包裹的命中词拆成高亮分段", () => {
+  assert.deepEqual(highlightSegments("…考察了[光谱]系列中的[交换]反应…"), [
     { text: "…考察了", hit: false },
     { text: "光谱", hit: true },
     { text: "系列中的", hit: false },
@@ -19,7 +19,7 @@ assert.deepEqual(highlightSegments("â¦examined [spectrum] series [exchange] 
   assert.deepEqual(highlightSegments(""), []);
 });
 
-test("nextReadingStatus cycles through unread â reading â done", () => {
+test("nextReadingStatus 按 未读→在读→读完 循环", () => {
   assert.equal(nextReadingStatus("unread"), "reading");
   assert.equal(nextReadingStatus("reading"), "done");
   assert.equal(nextReadingStatus("done"), "unread");
@@ -27,7 +27,7 @@ test("nextReadingStatus cycles through unread â reading â done", () =>
   assert.deepEqual(Object.keys(READING_STATUS_META), ["unread", "reading", "done"]);
 });
 
-test("filterDocuments matches by title/filename/tag and overlays status filter", () => {
+test("filterDocuments 按标题/文件名/标签匹配并叠加状态过滤", () => {
   const documents = [
     { document_id: "a", title: "光谱分析", source_filename: "spec.pdf", tags: [], reading_status: "reading" },
     { document_id: "b", title: "Attention", source_filename: "attn.pdf", tags: ["机器学习"], reading_status: "done" },

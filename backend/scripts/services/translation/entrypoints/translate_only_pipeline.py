@@ -124,7 +124,7 @@ def main() -> None:
     with pipeline_event_writer_scope(event_writer):
         emit_stage_transition(
             stage="startup",
-message="translate-only worker started",
+            message="translate-only worker 已启动",
         )
         print(format_stdout_kv(STDOUT_LABEL_EVENTS_JSONL, event_writer.path))
         api_key = get_api_key(
@@ -134,7 +134,7 @@ message="translate-only worker started",
         emit_stage_transition(
             stage="translating",
             substage="translation_batches",
-            message="Start preparing the pure translation stage",
+            message="开始准备纯翻译阶段",
         )
         started = time.perf_counter()
         result = translate_book_pipeline(
@@ -188,19 +188,19 @@ message="translate-only worker started",
             artifact_key="translation_diagnostics_json",
             path=diagnostics_path,
             stage="saving",
-message="translation diagnostics published",
+            message="translation diagnostics 已发布",
         )
         emit_artifact_published(
             artifact_key="translation_debug_index_json",
             path=debug_index_path,
             stage="saving",
-message="translation debug index published",
+            message="translation debug index 已发布",
         )
         emit_artifact_published(
             artifact_key="translation_review_json",
             path=review_path,
             stage="saving",
-message="translation review published",
+            message="translation review 已发布",
         )
 
         blocking_untranslated = blocking_untranslated_items(result.get("translated_pages_map", {}))
@@ -287,11 +287,11 @@ message="translation review published",
             artifact_key="pipeline_events_jsonl",
             path=event_writer.path,
             stage="saving",
-message="Unified event stream written",
+            message="统一事件流已写出",
         )
         emit_stage_transition(
             stage="finished",
-message="translate-only stage complete",
+            message="translate-only 阶段完成",
         )
 
         print(format_stdout_kv(STDOUT_LABEL_JOB_ROOT, job_dirs.root))

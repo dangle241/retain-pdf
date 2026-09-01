@@ -1,23 +1,23 @@
-// SettingsHubDialog v2: Left navigation + Right content area (original"lobby popup"Horizontal pill Retire Layout
+// SettingsHubDialog v2：左导航 + 右内容区（原"门厅弹窗"横向 pill 布局退役）。
 //
-// Layout: left vertical nav (icons+Name,Radix Tabs orientation=verticalDirectional keys enabled.
-// Right content pane (each section has its own header row + Body scrolls independently. Appearance section promoted to theme card grid.
-// main stage of;API/glossary because the actual form is still an independent top-level dialog (CredentialsDialog/
-// GlossariesDialog, each with its own controller/store/test contract), this panel serves as"Start Area"
-// Keep entry button——Embedding requires modifying `App.tsx` and `index.html`. featureNot here.
+// 布局：左侧竖排导航（图标+名称，Radix Tabs orientation=vertical，方向键可用），
+// 右侧内容窗格（每区自带标题行 + 正文，独立滚动）。外观区升格为主题卡片网格
+// 的主舞台；API/词表因真实表单仍是独立顶层对话框（CredentialsDialog/
+// GlossariesDialog，各有 controller/store/测试契约），本面板作为"启动区"
+// 保留入口按钮——后续如要内嵌，动的是那两个 feature，不是这里。
 //
-// 【Test contract. Refactor must not break.】（credentials/glossaries/app-update component tests）：
+// 【测试契约，改版不许破】（credentials/glossaries/app-update component tests）：
 // - #app-settings-dialog / #app-settings-close-btn
-// - [data-settings-tab="api|glossary|appearance|update"] Clickable
-// - [data-settings-panel=…] forceMount + hidden Prop toggle (test assertion .hidden）
-// - #credentials-btn / #glossary-btn Open corresponding child dialog
-// - Appearance panel #theme-appearance-panel and #theme-option-<id>
+// - [data-settings-tab="api|glossary|appearance|update"] 可点击
+// - [data-settings-panel=…] forceMount + hidden 属性切换（测试断言 .hidden）
+// - #credentials-btn / #glossary-btn 打开对应子对话框
+// - 外观面板 #theme-appearance-panel 与 #theme-option-<id>
 //
-// Open/close state crosses subtrees. settings-hub-dialog-store；tab Switch transient in subtree.useState）。
-// Do not forceMount Dialog Content/Overlay (Radix hideOthers Live
-// mount/unmountCode redundant. Remove. CredentialsDialog Header comment.AppUpdateBanner mount lifecycle of
-// See old header comment for cycle description. Conclusion: backend self-check by composition Pure logic controller driver,
-// Independent of component mount state.
+// 开合状态跨子树走 settings-hub-dialog-store；tab 切换是子树内瞬态（useState）。
+// 不 forceMount Dialog 的 Content/Overlay（Radix hideOthers 依赖真实
+// mount/unmount，见 CredentialsDialog 头注释）。AppUpdateBanner 的挂载生命
+// 周期说明见旧版头注释结论：后台自检由 composition 的纯逻辑控制器驱动，
+// 与本组件是否挂载无关。
 
 import { useEffect, useState } from "react";
 import { Dialog as DialogPrimitive, Tabs as TabsPrimitive } from "radix-ui";
@@ -30,7 +30,7 @@ import { CredentialsWorkbench } from "../credentials/CredentialsWorkbench.jsx";
 import { ThemeAppearancePanel } from "./ThemeAppearancePanel.jsx";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size inferred as required in unannotated source; unstyled path does not use size at runtime.
+// Button.size 在未注解源文件里被推断为必填;unstyled 路径运行时不用 size。
 const Button = ButtonBase as any;
 
 function IconKey(props) {
@@ -71,15 +71,15 @@ function IconUpdate(props) {
 const TABS = [
   { id: "api", label: "API 设置", Icon: IconKey },
   { id: "glossary", label: "词表", Icon: IconBook },
-  { id: "appearance", label: "Appearance", Icon: IconPalette },
+  { id: "appearance", label: "外观", Icon: IconPalette },
   { id: "update", label: "更新", Icon: IconUpdate },
 ];
 
 const PANE_HEADS = {
-  api: { title: "API 设置", desc: "configuration OCR Token、DeepSeek KeyModel URL and task options. Take effect on save." },
-  glossary: { title: "Glossary", desc: "Maintain fixed translations. Preserve keywords. Prefer professional terminology." },
-  appearance: { title: "外观", desc: "Choose interface color scheme, takes effect immediately and remembers local selection." },
-  update: { title: "更新", desc: "View current version and from GitHub Releases re-check for updates." },
+  api: { title: "API 设置", desc: "配置 OCR Token、DeepSeek Key、模型地址和任务选项，保存后立即生效。" },
+  glossary: { title: "术语表", desc: "维护固定译法、保留词和专业术语偏好。" },
+  appearance: { title: "外观", desc: "选择界面配色，立即生效并记住本机选择。" },
+  update: { title: "更新", desc: "查看当前版本，并从 GitHub Releases 重新检查更新。" },
 };
 
 function PaneHead({ tab }: { tab: keyof typeof PANE_HEADS }) {
@@ -106,8 +106,8 @@ export function SettingsHubDialog() {
     }
   }, [open]);
 
-  // API Enter embedded credential workspace api tab Populate form from credential state (no secondary modal).
-  // forceMount Ensure panel mounted.rAF Retry to prevent failure. ref Unbound ref causes empty password field; save reads empty string.
+  // API 区内嵌凭据工作台：进入 api tab 时从凭据状态回填表单（不开二层弹窗）。
+  // forceMount 保证面板已挂载；rAF 再补一次，避免 ref 尚未挂上导致密码框空白、保存读到空串。
   useEffect(() => {
     if (!open || activeTab !== "api") {
       return;
@@ -129,7 +129,7 @@ export function SettingsHubDialog() {
   }
 
   function panelClass(tab: string) {
-    // Avoid pure literal concatenation (including space-separated). v4 scanner's `x${y}` Template pitfalls
+    // 纯字面量拼接（含空格分隔），避开 v4 扫描器的 `x${y}` 模板坑
     return activeTab === tab ? "app-settings-panel is-current" : "app-settings-panel";
   }
 
@@ -151,9 +151,9 @@ export function SettingsHubDialog() {
             >
               <aside className="app-settings-rail">
                 <DialogPrimitive.Title asChild>
-<h2>Settings</h2>
+                  <h2>设置</h2>
                 </DialogPrimitive.Title>
-                <TabsPrimitive.List className="app-settings-nav" aria-label="settings categories">
+                <TabsPrimitive.List className="app-settings-nav" aria-label="设置分类">
                   {TABS.map(({ id, label, Icon }) => (
                     <TabsPrimitive.Trigger
                       key={id}
@@ -173,7 +173,7 @@ export function SettingsHubDialog() {
                   <Button
                     id={APP_SETTINGS_DIALOG_IDS.closeButton}
                     className="dialog-close-btn app-settings-close"
-aria-label="Close"
+                    aria-label="关闭"
                   >
                     ×
                   </Button>
@@ -187,8 +187,8 @@ aria-label="Close"
                   data-settings-panel="api"
                 >
                   <PaneHead tab="api" />
-                  {/* Embed Credentials Workbench directly (no secondary modal); share with First-Time Setup Gate
-                      CredentialsWorkbenchshared state. */}
+                  {/* 凭据工作台直接内嵌（无二层弹窗）；与首次配置门共用
+                      CredentialsWorkbench，状态同源。 */}
                   <CredentialsWorkbench />
                 </TabsPrimitive.Content>
 
@@ -202,11 +202,11 @@ aria-label="Close"
                   <PaneHead tab="glossary" />
                   <div className="app-settings-launcher">
                     <p>
-                      Termbase defines fixed translations and reserved terms. Maintain multiple termbases and
-                      Enable on demand; takes effect when translation task is initiated.
+                      词表决定翻译时的固定译法与保留词。可维护多张词表并
+                      按需启用，翻译任务发起时生效。
                     </p>
                     <Button id={APP_SETTINGS_DIALOG_IDS.glossaryButton} className="app-settings-action" onClick={openGlossaries}>
-                      Open Vocabulary
+                      打开词表
                     </Button>
                   </div>
                 </TabsPrimitive.Content>
@@ -230,8 +230,8 @@ aria-label="Close"
                   data-settings-panel="update"
                 >
                   <PaneHead tab="update" />
-{/* AppUpdateBanner: Button + Details dialog Merge (Blueprint Â§5).
-                      See file header comment for conclusion on decoupling mount lifecycle from background self-check. */}
+                  {/* AppUpdateBanner:按钮 + 详情 dialog 合并一体(蓝图 §5)。
+                      挂载生命周期与后台自检解耦的结论见文件头注释。 */}
                   <AppUpdateBanner />
                 </TabsPrimitive.Content>
               </div>

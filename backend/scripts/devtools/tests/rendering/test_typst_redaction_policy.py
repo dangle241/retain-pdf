@@ -76,7 +76,7 @@ def test_background_redaction_items_split_around_display_formula_guard() -> None
             "block_type": "text",
             "block_kind": "text",
             "source_text": "source above",
-            "translated_text": "above",
+            "translated_text": "上文",
             "bbox": [40.0, 40.0, 260.0, 70.0],
         },
         {
@@ -91,7 +91,7 @@ def test_background_redaction_items_split_around_display_formula_guard() -> None
             "block_type": "text",
             "block_kind": "text",
             "source_text": "source below",
-            "translated_text": "Below",
+            "translated_text": "下文",
             "bbox": [42.0, 112.0, 258.0, 142.0],
         },
     ]
@@ -101,7 +101,7 @@ def test_background_redaction_items_split_around_display_formula_guard() -> None
             "source_item_id": "p001-b001",
             "block_kind": "render_block",
             "block_type": "render_block",
-"translated_text": "translated text",
+            "translated_text": "译文",
             "bbox": [36.0, 34.0, 264.0, 148.0],
         }
     ]
@@ -117,7 +117,7 @@ def test_background_redaction_items_split_around_display_formula_guard() -> None
     assert any(rect.x1 <= formula.x0 and rect.y0 < formula.y1 and rect.y1 > formula.y0 for rect in rects)
     assert any(rect.x0 >= formula.x1 and rect.y0 < formula.y1 and rect.y1 > formula.y0 for rect in rects)
     assert all(item.get("_formula_guard_fragment") for item in protected)
-cover_rects = cover_rects_from_valid_items([(rect, item, "translated text") for rect, item in zip(rects, protected)])
+    cover_rects = cover_rects_from_valid_items([(rect, item, "译文") for rect, item in zip(rects, protected)])
     assert len(cover_rects) == 4
     assert all((rect & formula).is_empty for rect in cover_rects)
 
@@ -129,7 +129,7 @@ def test_render_policy_keeps_formula_page_text_deletable() -> None:
             "block_type": "text",
             "block_kind": "text",
             "bbox": [40.0, 40.0, 260.0, 70.0],
-"translated_text": "above",
+            "translated_text": "上文",
         },
         {
             "item_id": "p001-b002",
@@ -156,7 +156,7 @@ def test_default_render_policy_adds_cover_fill_only_for_translated_text() -> Non
             "block_type": "text",
             "block_kind": "text",
             "bbox": [40.0, 40.0, 260.0, 70.0],
-"translated_text": "translated text",
+            "translated_text": "译文",
         },
         {
             "item_id": "p001-b002",
@@ -185,7 +185,7 @@ def test_precleaned_overlay_pages_still_get_cover_fill() -> None:
                 "block_type": "text",
                 "block_kind": "text",
                 "bbox": [40.0, 40.0, 260.0, 70.0],
-"protected_translated_text": "above",
+                "protected_translated_text": "上文",
             },
             {
                 "item_id": "p001-b002",
@@ -212,7 +212,7 @@ def test_display_formula_neighbors_stay_deletable() -> None:
             "block_type": "text",
             "block_kind": "text",
             "source_text": "source above",
-"translated_text": "above",
+            "translated_text": "上文",
             "bbox": [40.0, 40.0, 260.0, 70.0],
         },
         {
@@ -227,7 +227,7 @@ def test_display_formula_neighbors_stay_deletable() -> None:
             "block_type": "text",
             "block_kind": "text",
             "source_text": "source below",
-"translated_text": "below",
+            "translated_text": "下文",
             "bbox": [42.0, 112.0, 258.0, 142.0],
         },
     ]
@@ -236,14 +236,14 @@ def test_display_formula_neighbors_stay_deletable() -> None:
             "source_item_id": "p001-b001",
             "block_kind": "render_block",
             "block_type": "render_block",
-"translated_text": "above",
+            "translated_text": "上文",
             "bbox": [36.0, 34.0, 264.0, 74.0],
         },
         {
             "source_item_id": "p001-b003",
             "block_kind": "render_block",
             "block_type": "render_block",
-"translated_text": "below",
+            "translated_text": "下文",
             "bbox": [36.0, 108.0, 264.0, 148.0],
         },
     ]
@@ -257,12 +257,12 @@ def test_display_formula_neighbors_stay_deletable() -> None:
 
 def test_redaction_shared_prefers_local_translated_text_over_group_text() -> None:
     item = {
-        "translated_text": "Current box's own text",
-        "translation_unit_translated_text": "A very long translated text for the entire group should not be preferentially poured into a single bbox",
-        "group_translated_text": "Another group-level text",
+        "translated_text": "当前框自己的文本",
+        "translation_unit_translated_text": "整组很长的翻译文本，不应优先灌入单个 bbox",
+        "group_translated_text": "另一份组级文本",
     }
 
-assert get_item_translated_text(item) == "text of the current box itself"
+    assert get_item_translated_text(item) == "当前框自己的文本"
 
 
 def test_apply_source_page_overlay_visual_cover_and_remove_text_redacts_text_on_image_page() -> None:
@@ -284,8 +284,8 @@ def test_apply_source_page_overlay_visual_cover_and_remove_text_redacts_text_on_
                 "item_id": "b1",
                 "bbox": [25.0, 50.0, 275.0, 230.0],
                 "source_text": "Intermolecular Heck Coupling with Hindered Alkenes",
-                "translated_text": "Potassium carboxylate-directed intermolecular Heck coupling with hindered alkenesHeckCoupling",
-"protected_translated_text": "Potassium carboxylate-directed intermolecular Heck coupling of hindered alkenes",
+                "translated_text": "羧酸钾导向的受阻烯烃分子间Heck偶联",
+                "protected_translated_text": "羧酸钾导向的受阻烯烃分子间Heck偶联",
                 "formula_map": [],
             }
         ]
@@ -321,8 +321,8 @@ def test_build_clean_background_pdf_visual_cover_keeps_hidden_text_layer() -> No
                     "item_id": "b1",
                     "bbox": [25.0, 50.0, 275.0, 230.0],
                     "source_text": "Intermolecular Heck Coupling with Hindered Alkenes",
-"translated_text": "Potassium carboxylate-directed intermolecular Heck coupling of hindered alkenes",
-"protected_translated_text": "Potassium carboxylate-directed intermolecular Heck coupling of hindered alkenes",
+                    "translated_text": "羧酸钾导向的受阻烯烃分子间Heck偶联",
+                    "protected_translated_text": "羧酸钾导向的受阻烯烃分子间Heck偶联",
                     "formula_map": [],
                 }
             ]

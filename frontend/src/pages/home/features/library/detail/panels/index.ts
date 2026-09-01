@@ -1,4 +1,4 @@
-// Fine-grained blocks (used by tabs/* assembly, generally not directly given to Dialog use)
+// 细粒度区块（被 tabs/* 组装，一般不直接给 Dialog 用）
 export { CoverActionsPanel } from "./CoverActionsPanel.jsx";
 export { TitleMetaPanel } from "./TitleMetaPanel.jsx";
 export { TranslateWorkspacePanel } from "./TranslateWorkspacePanel.jsx";

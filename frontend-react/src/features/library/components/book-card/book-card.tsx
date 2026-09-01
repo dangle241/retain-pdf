@@ -39,7 +39,7 @@ export function BookCard({
                 'absolute left-2 top-2 z-30 grid size-8 place-items-center rounded-full shadow-lg transition',
                 selectionChecked ? 'bg-neutral-950 text-white' : 'bg-white/95 text-neutral-950',
               ].join(' ')}
-aria-label="Select"
+              aria-label="选择"
               onMouseDown={(event) => event.stopPropagation()}
               onClick={(event) => {
                 event.stopPropagation()
@@ -52,7 +52,7 @@ aria-label="Select"
           <button
             type="button"
             className="pointer-events-none absolute right-2 top-2 z-20 grid size-8 place-items-center rounded-full bg-white/95 text-neutral-950 opacity-0 shadow-lg transition hover:scale-105 hover:bg-neutral-950 hover:text-white focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none group-hover/cover:pointer-events-auto group-hover/cover:opacity-100"
-aria-label="Delete"
+            aria-label="删除"
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation()
@@ -67,7 +67,7 @@ aria-label="Delete"
               'pointer-events-none absolute left-1/2 top-1/2 z-20 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-neutral-950 opacity-0 shadow-lg transition hover:scale-105 focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none group-hover/cover:pointer-events-auto group-hover/cover:opacity-100',
               selectionMode ? 'hidden' : '',
             ].join(' ')}
-aria-label="Side-by-side reading"
+            aria-label="对照阅读"
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation()

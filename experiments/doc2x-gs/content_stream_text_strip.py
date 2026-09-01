@@ -219,7 +219,7 @@ def _parse_pages(raw: str, page_count: int) -> list[int]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="POC: remove body text operations while preserving display formulas.")
-parser.add_argument("--input", type=Path, default=Path("Electronic-Structure-Methods-Chapter-4-Gaussian-Basis-Sets.pdf"))
+    parser.add_argument("--input", type=Path, default=Path("电子结构方法-第四章-高斯基组.pdf"))
     parser.add_argument("--output", type=Path, default=Path("work/content-op-strip.pdf"))
     parser.add_argument("--diagnostics", type=Path, default=Path("work/content-op-strip-diagnostics.json"))
     parser.add_argument("--pages", default="1", help="1-based pages, ranges, or all. Example: 1,3-5")

@@ -2,25 +2,25 @@ export const STATUS_STAGE_FLOW = Object.freeze(["ocr", "translate", "render", "d
 
 export const STATUS_STAGE_LABELS = Object.freeze({
   ocr: "OCR",
-translate: "Translation",
-render: "Rendering",
-done: "Done",
+  translate: "翻译",
+  render: "渲染",
+  done: "完成",
 });
 
 export function isStatusStageKey(stageKey = "") {
   return STATUS_STAGE_FLOW.includes(`${stageKey || ""}`.trim());
 }
 
-export function statusStageLabel(stageKey = "", fallback = "Waiting") {
+export function statusStageLabel(stageKey = "", fallback = "等待中") {
   const normalized = `${stageKey || ""}`.trim();
   if (STATUS_STAGE_LABELS[normalized]) {
     return STATUS_STAGE_LABELS[normalized];
   }
   if (normalized === "failed") {
-return "Failed";
+    return "失败";
   }
   if (normalized === "canceled") {
-return "Canceled";
+    return "已取消";
   }
   return fallback;
 }

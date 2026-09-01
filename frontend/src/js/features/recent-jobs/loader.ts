@@ -129,7 +129,7 @@ export function createRecentJobsLoader({
       cache: false,
     });
     if (snapshot.status === "error") {
-throw snapshot.error || new Error("Failed to read recent tasks");
+      throw snapshot.error || new Error("读取最近任务失败");
     }
     return (snapshot.data || {
       collected: [],

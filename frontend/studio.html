@@ -4,9 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RetainPDF · Theme Studio</title>
-<!-- Theme Workbench (dev only, excluded from prod distribution):
-M1 Check Selected/Tune token/Export Skin Â· M2 LLM Color proposal Â· M3 gpt-image-2 Raw Import slot
-     Doc:docs/theme-system/DECOR_PACKS.md · Asset Specs:decor/<pack>/ASSETS.md -->
+<!-- 主题工作台（仅开发环境使用，不进生产分发）：
+     M1 点选检查/调 token/导出皮肤 · M2 LLM 配色提案 · M3 gpt-image-2 生图入 slot
+     文档：docs/theme-system/DECOR_PACKS.md · 资产规格：decor/<pack>/ASSETS.md -->
 <style>
   :root { --st-bg:#17181b; --st-panel:#1f2126; --st-ink:#e8e6e3; --st-mut:#9a9590; --st-line:#2c3238; --st-acc:#e0447a; }
   * { box-sizing:border-box; margin:0; }
@@ -48,24 +48,24 @@ M1 Check Selected/Tune token/Export Skin Â· M2 LLM Color proposal Â· M3 gpt-
 <body>
 <header>
   <h1>🎨 Theme Studio</h1>
-  <label>Base Skin
+  <label>基准皮肤
     <select id="base-theme">
-      <option value="classic">classic Classic</option>
-<option value="jiangnan">jiangnan Plain Paper</option>
-      <option value="seacliff">seacliff Mist Cyan</option>
-      <option value="night">night Night on Dark Tiles</option>
+      <option value="classic">classic 经典</option>
+      <option value="jiangnan">jiangnan 素纸</option>
+      <option value="seacliff">seacliff 雾青</option>
+      <option value="night">night 黛瓦夜色</option>
     </select>
   </label>
-  <label>Draft save. Auto-save interval set. id <input type="text" id="draft-name" value="draft" size="10" /></label>
-  <button id="pick-btn">🎯 Click to select element</button>
-  <button id="reset-btn">restore</button>
+  <label>草稿 id <input type="text" id="draft-name" value="draft" size="10" /></label>
+  <button id="pick-btn">🎯 点选元素</button>
+  <button id="reset-btn">还原</button>
   <span class="spacer"></span>
-  <span id="dirty-count" style="color:var(--st-mut)">0 Change item.</span>
-  <button id="export-btn">Export Skin</button>
+  <span id="dirty-count" style="color:var(--st-mut)">0 项改动</span>
+  <button id="export-btn">导出皮肤</button>
 </header>
 
 <div id="stage-wrap">
-  <iframe id="stage-frame" src="./index.html?mock=1" title="Home Preview"></iframe>
+  <iframe id="stage-frame" src="./index.html?mock=1" title="主页预览"></iframe>
 </div>
 
 <aside>
@@ -74,12 +74,12 @@ M1 Check Selected/Tune token/Export Skin Â· M2 LLM Color proposal Â· M3 gpt-
 </aside>
 
 <dialog id="export-dialog">
-<h3 style="margin-bottom:8px">Export: themes/&lt;id&gt;.css + registry snippet</h3>
+  <h3 style="margin-bottom:8px">导出：themes/&lt;id&gt;.css + registry 片段</h3>
   <textarea id="export-out" readonly></textarea>
   <div class="dlg-foot">
-    <button id="copy-btn">Copy All</button>
-    <button id="download-btn">Download .css</button>
-    <button onclick="this.closest('dialog').close()">Close</button>
+    <button id="copy-btn">复制全部</button>
+    <button id="download-btn">下载 .css</button>
+    <button onclick="this.closest('dialog').close()">关闭</button>
   </div>
 </dialog>
 

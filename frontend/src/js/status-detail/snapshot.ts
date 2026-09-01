@@ -45,7 +45,7 @@ function stageIconMarkup(job: StatusDetailJob, stageText: string | undefined): s
   if (status === "failed") {
     return '<svg viewBox="0 0 24 24" fill="none"><path d="M15 9l-6 6M9 9l6 6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   }
-  if (text.includes("Queue")) {
+  if (text.includes("排队")) {
     return '<svg viewBox="0 0 24 24" fill="none"><path d="M8 7h8M8 12h8M8 17h5M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
   }
   if (text.includes("翻译")) {
@@ -59,10 +59,10 @@ function stageIconMarkup(job: StatusDetailJob, stageText: string | undefined): s
 
 function statusDetailNote(job: StatusDetailJob = {}): string {
   return job.status === "failed"
-    ? "View failure reason, suggestions, and event stream."
+    ? "查看失败原因、建议与事件流"
     : job.status === "succeeded" && isJobTerminal(job)
-      ? "Task completed. View overview and event stream."
-      : "View task overview, failure reasons, and event stream.";
+      ? "任务已完成，可查看概览与事件流"
+      : "查看任务概览、失败原因与事件流";
 }
 
 function buildHeadline(job: StatusDetailJob, stageText: string | undefined) {

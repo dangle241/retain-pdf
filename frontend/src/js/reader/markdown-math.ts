@@ -1,5 +1,5 @@
-// Markdown Formula: at marked Previously extracted $...$ / $$...$$Render after use MathJax Translate SVG。
-// If unprotected, marked treats a_b as emphasis, breaking the formula block.
+// Markdown 公式：在 marked 之前抽出 $...$ / $$...$$，渲染后再用 MathJax 转 SVG。
+// 若不保护，marked 会把 a_b 当成强调，公式整段被拆坏。
 
 export type MarkdownMathSlot = {
   token: string;
@@ -35,8 +35,8 @@ function makeToken(index: number): string {
 }
 
 /**
-* Extract LaTeX snippets to placeholders to prevent marked from breaking subscripts or commands.
- * Block-level order. $$ / \\[ \\] → Inline \\( \\) / $...$
+ * 抽出 LaTeX 片段并换成占位符，避免 marked 破坏下标/命令。
+ * 顺序：块级 $$ / \\[ \\] → 行内 \\( \\) / $...$
  */
 export function extractMarkdownMath(source: string): ExtractMarkdownMathResult {
   const slots: MarkdownMathSlot[] = [];
@@ -52,12 +52,12 @@ export function extractMarkdownMath(source: string): ExtractMarkdownMathResult {
     return token;
   };
 
-  // Block-level
+  // 块级
   text = text.replace(/\$\$([\s\S]+?)\$\$/g, (_m, tex: string) => push(tex, true));
   text = text.replace(/\\\[([\s\S]+?)\\\]/g, (_m, tex: string) => push(tex, true));
-// Inline \( ... \)
+  // 行内 \( ... \)
   text = text.replace(/\\\(([\s\S]+?)\\\)/g, (_m, tex: string) => push(tex, false));
-  // 行内 $...$Single line.OCR Frequent $ Add space inside parentheses
+  // 行内 $...$（单行；OCR 常在 $ 内侧加空格）
   text = text.replace(/(?<![\\$])\$(?!\$)((?:\\.|[^$\n])+?)\$(?!\$)/g, (full, tex: string) => {
     if (!`${tex}`.trim()) {
       return full;
@@ -100,7 +100,7 @@ function loadMathJaxEngine(): Promise<MathJaxEngine> {
         convert(tex: string, display: boolean): string {
           const node = document.convert(tex, { display });
           const html = adaptor.outerHTML(node);
-// Complete failure (no SVG). Throw only on total failure for outer fallback; show SVG if it contains merror, as merror SVGs are still displayed.
+          // 完全失败（无 SVG）才抛，交给外层回退；含 merror 的 SVG 仍展示
           if (!/<svg[\s>]/i.test(html)) {
             throw new Error("mathjax produced no svg");
           }
@@ -116,7 +116,7 @@ function loadMathJaxEngine(): Promise<MathJaxEngine> {
 }
 
 export function renderMathFallbackHtml(tex: string, display: boolean): string {
-  const body = `<code class="reader-md-math-error" title="Formula rendering failed.">${escapeHtml(tex)}</code>`;
+  const body = `<code class="reader-md-math-error" title="公式渲染失败">${escapeHtml(tex)}</code>`;
   if (display) {
     return `<div class="reader-md-math reader-md-math-display reader-md-math-failed">${body}</div>`;
   }
@@ -131,7 +131,7 @@ export function wrapMathSvgHtml(svgHtml: string, display: boolean): string {
   return `<${tag} class="${cls}">${svgHtml}</${tag}>`;
 }
 
-/** Replace HTML placeholders with MathJax SVG (fallback to code snippet on failure). HTML Replace placeholder in with MathJax SVG(Fallback to code snippet on failure). */
+/** 将 HTML 中的占位符替换为 MathJax SVG（失败则回退为代码片段）。 */
 export async function materializeMarkdownMathHtml(
   html: string,
   slots: MarkdownMathSlot[],
@@ -164,7 +164,7 @@ export async function materializeMarkdownMathHtml(
   return out;
 }
 
-/** Full pipeline: protection formula → marked.parse → restore SVG。 */
+/** 完整管线：保护公式 → marked.parse → 还原 SVG。 */
 export async function parseMarkdownWithMath(
   markdown: string,
   parseMarkdown: (src: string) => string,

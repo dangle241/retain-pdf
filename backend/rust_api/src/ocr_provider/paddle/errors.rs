@@ -25,7 +25,7 @@ impl PaddleProviderError {
                 status,
                 &err.to_string(),
                 trace_id,
-                Some("Paddle HTTP Request returned error status."),
+                Some("Paddle HTTP 请求返回错误状态"),
             );
         }
         let category = if err.is_timeout() {
@@ -40,7 +40,7 @@ impl PaddleProviderError {
             trace_id,
             None,
             None,
-Some("Please check Paddle service reachability, network connectivity, and timeout configuration."),
+            Some("请检查 Paddle 服务可达性、网络连通性和超时配置"),
         )
     }
 
@@ -91,11 +91,11 @@ Some("Please check Paddle service reachability, network connectivity, and timeou
         Self::new(
             stage,
             category,
-            detail.unwrap_or("Paddle HTTP Request failed.").to_string(),
+            detail.unwrap_or("Paddle HTTP 请求失败").to_string(),
             resolved_trace_id.as_deref(),
             provider_code,
             provider_message.or(Some(message)),
-Some("Please check Paddle API address, token, and service status"),
+            Some("请检查 Paddle API 地址、Token 和服务状态"),
         )
         .with_http_status(status.as_u16())
     }
@@ -119,11 +119,11 @@ Some("Please check Paddle API address, token, and service status"),
         Self::new(
             stage,
             category,
-format!("Paddle returned errorCode={provider_code}"),
+            format!("Paddle 返回 errorCode={provider_code}"),
             trace_id,
             Some(provider_code.to_string()),
             Some(provider_message.trim().to_string()),
-Some("Please combine Paddle provider_message and trace_id to troubleshoot"),
+            Some("请结合 Paddle provider_message 和 trace_id 排查"),
         )
     }
 
@@ -139,7 +139,7 @@ Some("Please combine Paddle provider_message and trace_id to troubleshoot"),
             trace_id,
             None,
             None,
-Some("Please check if Paddle return structure is complete; focus on data/jobId/resultUrl.jsonUrl"),
+            Some("请检查 Paddle 返回结构是否完整，重点确认 data/jobId/resultUrl.jsonUrl"),
         )
     }
 
@@ -147,11 +147,11 @@ Some("Please check if Paddle return structure is complete; focus on data/jobId/r
         Self::new(
             "poll",
             OcrErrorCategory::ProviderFailed,
-            "Paddle Task execution failed".to_string(),
+            "Paddle 任务执行失败".to_string(),
             trace_id,
             None,
             Some(provider_message.trim().to_string()),
-Some("Please combine Paddle provider_message, trace_id, and task status to continue troubleshooting"),
+            Some("请结合 Paddle provider_message、trace_id 和任务状态继续排查"),
         )
     }
 
@@ -167,7 +167,7 @@ Some("Please combine Paddle provider_message, trace_id, and task status to conti
             trace_id,
             None,
             None,
-Some("Please check Paddle jsonUrl accessibility; retry later."),
+            Some("请检查 Paddle jsonUrl 是否可访问，或稍后重试"),
         )
         .with_http_status_opt(http_status)
     }
@@ -180,7 +180,7 @@ Some("Please check Paddle jsonUrl accessibility; retry later."),
             trace_id,
             None,
             None,
-Some("Please check Paddle JSONL return content is complete and each line is valid JSON"),
+            Some("请检查 Paddle JSONL 返回内容是否完整且每行均为合法 JSON"),
         )
     }
 
@@ -192,7 +192,7 @@ Some("Please check Paddle JSONL return content is complete and each line is vali
             None,
             None,
             None,
-Some("Please check whether Paddle task is stuck for a long time, or increase polling timeout appropriately"),
+            Some("请检查 Paddle 任务是否长时间卡住，或适当增大轮询超时时间"),
         )
     }
 
@@ -202,10 +202,10 @@ Some("Please check whether Paddle task is stuck for a long time, or increase pol
 
     pub fn stage_detail(&self) -> String {
         let prefix = match self.stage {
-            "submit" => "Paddle Submit failed.",
-            "poll" => "Paddle Polling failed",
-"download" => "Paddle result download failed",
-_ => "Paddle provider failed",
+            "submit" => "Paddle 提交失败",
+            "poll" => "Paddle 轮询失败",
+            "download" => "Paddle 结果下载失败",
+            _ => "Paddle provider 失败",
         };
         let message = self
             .info
@@ -354,7 +354,7 @@ mod tests {
         let err = PaddleProviderError::http_status(
             "submit",
             StatusCode::BAD_REQUEST,
-            r#"{"traceId":"trace-queue","code":10010,"msg":"Task submission queue full, retry later"}"#,
+            r#"{"traceId":"trace-queue","code":10010,"msg":"任务提交队列已满，请稍后重试"}"#,
             None,
             None,
         );
@@ -364,10 +364,10 @@ mod tests {
         assert_eq!(err.info().provider_code.as_deref(), Some("10010"));
         assert_eq!(
             err.info().provider_message.as_deref(),
-            Some("Task queue full. Retry later.")
+            Some("任务提交队列已满，请稍后重试")
         );
         assert_eq!(err.info().trace_id.as_deref(), Some("trace-queue"));
-        assert!(err.stage_detail().contains("Task submission queue full."));
+        assert!(err.stage_detail().contains("任务提交队列已满"));
     }
 
     #[test]

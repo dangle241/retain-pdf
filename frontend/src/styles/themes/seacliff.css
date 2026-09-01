@@ -1,4 +1,4 @@
-/* Skin seacliff: Calm Mist Blue â Avoid muddy cyan-green */
+/* 皮肤 seacliff：冷静雾蓝 — 避免脏青绿 */
 
 [data-theme="seacliff"] {
   --bg: #eef1f4;
@@ -25,10 +25,10 @@
   --reader-page: #f8f9fb;
   --shadow-color: #101a24;
 
-  /* L3 Form: paper tray more solid one gear (original ambient-surface Move special case block in. */
+  /* L3 形态：纸台更实一档（原 ambient-surface 特例块迁入） */
   --stage-veil: 92%;
 
-/* Layout density (original ambient-surface special case block migration: same literati layout as plain paper. */
+  /* 布局密度（原 ambient-surface 特例块迁入）：与素纸同款文人布局 */
   --shell-pad-inline: clamp(28px, 6vw, 72px);
   --shell-pad-inline-narrow: clamp(12px, 3vw, 20px);
   --header-width: min(1080px, 100%);
@@ -39,7 +39,7 @@
     inset 0 1px 0 color-mix(in srgb, var(--paper) 92%, var(--line)),
     0 14px 36px color-mix(in srgb, var(--ink) 3%, transparent);
 
-  /* Ambient layer material: cold cyan fiber */
+  /* 氛围垫层材质：冷青纤维 */
   --mat-fiber: color-mix(in srgb, var(--ink) 2.6%, transparent);
   --mat-fiber-2: color-mix(in srgb, var(--accent) 2%, transparent);
   --mat-edge: color-mix(in srgb, var(--ink) 2.5%, var(--bg));

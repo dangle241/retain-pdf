@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-// Make config/runtime.js isMockMode()/apiBase() available in Node (no jsdom required)
+// 让 config/runtime.js 的 isMockMode()/apiBase() 在 node 下可用(无 jsdom 需求)
 globalThis.window = globalThis.window || { location: { search: "", protocol: "http:", hostname: "127.0.0.1" } };
 
 const { AiAskError, askLibraryAi, readAiAskStream } = await import("../src/js/api/ai.js");
@@ -20,11 +20,11 @@ function sseStream(chunks = []) {
   });
 }
 
-// ===== SSE Line parsing(/api/v1/ai/ask Streaming contract) =====
+// ===== SSE 行解析(/api/v1/ai/ask 流式契约) =====
 
-test("readAiAskStream:tool Sequential event callbacks,done Event returns normalized result.", async () => {
+test("readAiAskStream:tool 事件按序回调,done 事件返回归一化结果", async () => {
   const toolEvents = [];
-// Event cross chunk Truncate + CRLF + non-data line, Buffer validation logic.
+  // 事件跨 chunk 截断 + CRLF + 非 data 行,验证缓冲逻辑
   const result = await readAiAskStream(sseStream([
     ': keep-alive\n',
     'data: {"type": "tool", "round": 1, "tool": "list_documents", "arguments": {"limit": 200}}\r\n\r\n',
@@ -39,7 +39,7 @@ test("readAiAskStream:tool Sequential event callbacks,done Event returns normali
     [1, "list_documents"],
     [2, "search_fulltext"],
   ]);
-assert.equal(result.answer, "Conclusion [1].");
+  assert.equal(result.answer, "结论 [1]。");
   assert.equal(result.rounds, 3);
   assert.equal(result.citations.length, 1);
   assert.deepEqual(result.citations[0], {
@@ -48,44 +48,44 @@ assert.equal(result.answer, "Conclusion [1].");
     job_id: "job-1",
     page_idx: 3,
     block_id: "p004-b0002",
-snippet: "hit snippet",
+    snippet: "命中片段",
   });
   assert.equal(result.toolTrace.length, 1);
 });
 
-test("readAiAskStream:error Throw Event AiAskError", async () => {
+test("readAiAskStream:error 事件抛出 AiAskError", async () => {
   await assert.rejects(
     readAiAskStream(sseStream([
       'data: {"type": "tool", "round": 1, "tool": "search_fulltext", "arguments": {}}\n\n',
       'data: {"type": "error", "message": "上游模型超时"}\n\n',
     ])),
-(error) => error instanceof AiAskError && /Upstream model timeout/.test(error.message),
+    (error) => error instanceof AiAskError && /上游模型超时/.test(error.message),
   );
 });
 
-test("readAiAskStream: Stream interrupted (no done). Throw retryable error", async () => {
+test("readAiAskStream:流中断(无 done)抛出可重试错误", async () => {
   await assert.rejects(
     readAiAskStream(sseStream([
       'data: {"type": "tool", "round": 1, "tool": "read_blocks", "arguments": {}}\n\n',
     ])),
-(error) => error instanceof AiAskError && /interrupted/.test(error.message),
+    (error) => error instanceof AiAskError && /中断/.test(error.message),
   );
 });
 
-test("readAiAskStream:No trailing newline done Also parses lines.", async () => {
+test("readAiAskStream:末尾无换行的 done 行也能解析", async () => {
   const result = await readAiAskStream(sseStream([
     'data: {"type": "done", "answer": "ok", "citations": [], "tool_trace": [], "rounds": 1}',
   ]));
   assert.equal(result.answer, "ok");
 });
 
-// ===== askLibraryAi:Request construction and error grading =====
+// ===== askLibraryAi:请求构造与错误分级 =====
 
-test("askLibraryAi: Carry X-API-Key, body contains question/document_id/job_id/stream", async () => {
+test("askLibraryAi:携带 X-API-Key,body 含 question/document_id/job_id/stream", async () => {
   setRuntimeConfig({ xApiKey: "test-key" });
   const calls = [];
   const result = await askLibraryAi({
-question: "What is this about?",
+    question: "这篇讲什么?",
     documentId: "doc-9",
     jobId: "job-9",
     fetchImpl: async (url, options) => {
@@ -99,7 +99,7 @@ question: "What is this about?",
   });
   setRuntimeConfig({ xApiKey: "" });
 
-assert.equal(result.answer, "Ans");
+  assert.equal(result.answer, "答");
   assert.equal(calls.length, 1);
   const [url, options] = calls[0];
   assert.match(url, /\/api\/v1\/ai\/ask$/);
@@ -107,24 +107,24 @@ assert.equal(result.answer, "Ans");
   assert.equal(options.headers["X-API-Key"], "test-key");
   assert.equal(options.headers["Content-Type"], "application/json");
   assert.deepEqual(JSON.parse(options.body), {
-question: "What is this about?",
+    question: "这篇讲什么?",
     document_id: "doc-9",
     job_id: "job-9",
     stream: true,
   });
 });
 
-test("askLibraryAi: 502 Throw AI Service Not Running status", async () => {
+test("askLibraryAi:502 抛出带 status 的 AI 服务未运行错误", async () => {
   await assert.rejects(
     askLibraryAi({
       question: "hi",
       fetchImpl: async () => ({ ok: false, status: 502, text: async () => "" }),
     }),
-    (error) => error instanceof AiAskError && error.status === 502 && /AI Service not running/.test(error.message),
+    (error) => error instanceof AiAskError && error.status === 502 && /AI 服务未运行/.test(error.message),
   );
 });
 
-test("askLibraryAi: 401 Parse FastAPI detail and prompt X-API-Key", async () => {
+test("askLibraryAi:401 解析 FastAPI detail 并提示 X-API-Key", async () => {
   await assert.rejects(
     askLibraryAi({
       question: "hi",
@@ -140,7 +140,7 @@ test("askLibraryAi: 401 Parse FastAPI detail and prompt X-API-Key", async () => 
   );
 });
 
-test("askLibraryAi: 400 Missing LLM key Timestamp passthrough/Merge readable copy", async () => {
+test("askLibraryAi:400 缺 LLM key 时透传/归并可读文案", async () => {
   await assert.rejects(
     askLibraryAi({
       question: "hi",
@@ -148,17 +148,17 @@ test("askLibraryAi: 400 Missing LLM key Timestamp passthrough/Merge readable cop
         ok: false,
         status: 400,
         text: async () => JSON.stringify({
-detail: "Missing LLM API Key: Please fill in the model API Key in the frontend credential settings.",
+          detail: "缺少 LLM API Key:请在前端凭据设置中填写模型 API Key。",
         }),
       }),
     }),
     (error) => error instanceof AiAskError
       && error.status === 400
-&& /LLM API Key|model API Key|credential/.test(error.message),
+      && /LLM API Key|模型 API Key|凭据/.test(error.message),
   );
 });
 
-test("askLibraryAi: Non-streaming JSON envelope Fallback unpack", async () => {
+test("askLibraryAi:非流式 JSON envelope 兜底解包", async () => {
   const result = await askLibraryAi({
     question: "hi",
     fetchImpl: async () => ({
@@ -167,38 +167,38 @@ test("askLibraryAi: Non-streaming JSON envelope Fallback unpack", async () => {
       json: async () => ({ code: 0, data: { answer: "非流式", citations: [], tool_trace: [], rounds: 2 } }),
     }),
   });
-assert.equal(result.answer, "non-streaming");
+  assert.equal(result.answer, "非流式");
   assert.equal(result.rounds, 2);
 });
 
-// ===== ask-answerer: document_id Reverse cache lookup with scope prefix =====
+// ===== ask-answerer:document_id 反查缓存与 scope 前缀 =====
 
-test("buildScopedQuestion: Page/Write selection range with prefix. question text", () => {
+test("buildScopedQuestion:页/选区范围以前缀写进 question 文本", () => {
   assert.equal(buildScopedQuestion({ question: "总结一下", scope: "document" }), "总结一下");
   assert.equal(
-buildScopedQuestion({ question: "Summarize", scope: "page", context: { page: 4 } }),
-    "(current 4 Page summary",
+    buildScopedQuestion({ question: "总结一下", scope: "page", context: { page: 4 } }),
+    "（当前第 4 页）总结一下",
   );
   assert.equal(
     buildScopedQuestion({
-question: "Explain this part",
+      question: "解释这段",
       scope: "selection",
       context: { page: 2, rect: {} },
-      resolveQuote: () => ({ quoteText: "Selected  原文\n片段" }),
+      resolveQuote: () => ({ quoteText: "选中的  原文\n片段" }),
     }),
-"(for the selected original segment:ãSelected original segmentã) explain this",
+    "（针对选中的原文片段：「选中的 原文 片段」）解释这段",
   );
   assert.equal(
-buildScopedQuestion({ question: "Explain this part", scope: "selection", context: { page: 2 }, resolveQuote: () => null }),
-    "(for page 2 Selected content on the page) Explain this.",
+    buildScopedQuestion({ question: "解释这段", scope: "selection", context: { page: 2 }, resolveQuote: () => null }),
+    "（针对第 2 页的选区内容）解释这段",
   );
 });
 
-// ===== chat rendering: References clickable; model text not injected. HTML =====
+// ===== chat 渲染:引用可点击、模型文本不注入 HTML =====
 
-test("chat:agentic Response rendering [n] Clickable citations and footnotes,Model text XSS Security", async () => {
-// Phase 2b: AI Q&A UI migrated to React (ReaderAiChat), Test now renders component.
-// Via DOM Submit driver; Render semantic assertions (process prompts/XSS/citation buttons/footnotes) Unchanged.
+test("chat:agentic 回答渲染 [n] 可点击引用与脚注,模型文本 XSS 安全", async () => {
+  // Phase 2b:AI 问答 UI 迁入 React(ReaderAiChat),本测试改为渲染组件、
+  // 经 DOM 提交驱动;渲染语义断言(过程提示/XSS/引用按钮/脚注)保持不变。
   const { JSDOM } = await import("jsdom");
   const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost/" });
   for (const k of ["window", "document", "HTMLElement", "CustomEvent", "Event", "Node", "MutationObserver"]) {
@@ -206,10 +206,10 @@ test("chat:agentic Response rendering [n] Clickable citations and footnotes,Mode
   }
   globalThis.window = dom.window;
   globalThis.requestAnimationFrame = (cb) => setTimeout(() => cb(0), 0);
-// Radix Presence/Tabs (introduced in Phase B) requires cancelAnimationFrame under jsdom
-// (TabsContent mount animation timer cleanup) and getComputedStyle (Presence reads
-// animation-name to determine if exit animation ended) â implemented in jsdom window, but not
-// copied to bare global like requestAnimationFrame; adding it here.
+  // Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
+  // (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
+  // animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
+  // 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。
   globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
   globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -220,7 +220,7 @@ test("chat:agentic Response rendering [n] Clickable citations and footnotes,Mode
     job_id: "job-x",
     page_idx: 3,
     block_id: "p004-b0002",
-snippet: "hit snippet text",
+    snippet: "命中片段文本",
   };
   const jumps = [];
   const progressTexts = [];
@@ -239,7 +239,7 @@ snippet: "hit snippet text",
           onToolEvent?.({ type: "tool", round: 1, tool: "search_fulltext" });
           progressTexts.push(documentRef.querySelector(".reader-ai-message-assistant .reader-ai-message-body-el").textContent);
           return {
-answer: 'Answer see [1].<img src=x onerror="alert(1)">',
+            answer: '答案见 [1]。<img src=x onerror="alert(1)">',
             citations: [citation],
             rounds: 2,
           };
@@ -257,24 +257,24 @@ answer: 'Answer see [1].<img src=x onerror="alert(1)">',
       }
       await new Promise((resolve) => setTimeout(resolve, 15));
     }
-assert.fail(`Wait timeout: ${description}`);
+    assert.fail(`等待超时:${description}`);
   };
-await waitFor(() => documentRef.getElementById("reader-ai-input"), "composer mounted");
+  await waitFor(() => documentRef.getElementById("reader-ai-input"), "composer 挂载");
   const input = documentRef.getElementById("reader-ai-input");
   const setter = Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, "value").set;
-  setter.call(input, "Molassembler what is?");
+  setter.call(input, "Molassembler 是什么?");
   input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   documentRef.querySelector("[data-reader-ai-composer]")
     .dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true }));
   await waitFor(
     () => documentRef.querySelector(".reader-ai-citations .reader-ai-citation-item"),
-"Answer finalize (Footnotes appear).",
+    "回答 finalize(脚注出现)",
   );
 
   const assistant = documentRef.querySelector(".reader-ai-message-assistant");
-  assert.deepEqual(progressTexts, ["Retrieving document content…"], "tool Render events as process prompt lines.");
-  assert.ok(!assistant.className.includes("reader-ai-message-progress"), "Remove progress styles after completion.");
-  assert.ok(!assistant.innerHTML.includes("<img"), "Model text must be inserted as plain text.");
+  assert.deepEqual(progressTexts, ["正在检索文档内容…"], "tool 事件应渲染为过程提示行");
+  assert.ok(!assistant.className.includes("reader-ai-message-progress"), "完成后应移除过程态样式");
+  assert.ok(!assistant.innerHTML.includes("<img"), "模型文本必须按纯文本插入");
   assert.match(assistant.textContent, /<img src=x/);
 
   const refButton = assistant.querySelector("button.reader-ai-citation-ref");
@@ -282,12 +282,12 @@ await waitFor(() => documentRef.getElementById("reader-ai-input"), "composer mou
   refButton.click();
   const footerButtons = assistant.querySelectorAll(".reader-ai-citations .reader-ai-citation-item");
   assert.equal(footerButtons.length, 1);
-assert.match(footerButtons[0].textContent, /^\[1\] hit snippet text Â· Page 4$/);
+  assert.match(footerButtons[0].textContent, /^\[1\] 命中片段文本 · 第 4 页$/);
   footerButtons[0].click();
-  assert.deepEqual(jumps, [citation, citation], "Inline marker and footnote click target same citation.");
+  assert.deepEqual(jumps, [citation, citation], "正文标记与脚注点击都跳同一引用");
 });
 
-test("ask answerer: By job_id Direct query document_id SELECT * FROM table WHERE id = ? LIMIT 1", async () => {
+test("ask answerer:按 job_id 直查 document_id 且只查一次", async () => {
   const listCalls = [];
   const askCalls = [];
   const answerer = createReaderAskAnswerer({
@@ -295,7 +295,7 @@ test("ask answerer: By job_id Direct query document_id SELECT * FROM table WHERE
     llmConfig: () => ({ apiKey: "sk-test", baseUrl: "", model: "" }),
     documentByJobId: async (apiPrefix, jobId) => {
       listCalls.push([apiPrefix, jobId]);
-// Backend direct query: Resolve parent document from historical run.
+      // 后端直查:历史 run 也能解析到所属文档
       return { document_id: "doc-b", active_job_id: "job-a" };
     },
     ask: async (payload) => {
@@ -307,23 +307,23 @@ test("ask answerer: By job_id Direct query document_id SELECT * FROM table WHERE
 
   const toolEvents = [];
   const first = await answerer.answer({
-    question: "Question 1",
+    question: "问题一",
     scope: "document",
     onToolEvent: (event) => toolEvents.push(event),
   });
-await answerer.answer({ question: "Question 2", scope: "page", context: { page: 3 } });
+  await answerer.answer({ question: "问题二", scope: "page", context: { page: 3 } });
 
-assert.equal(first.answer, "Answer");
+  assert.equal(first.answer, "回答");
   assert.equal(first.scope, "document");
-  assert.equal(listCalls.length, 1, "document_id Direct query results should be cached.");
-assert.deepEqual(listCalls[0][1], "job-b", "Direct query by job_id");
+  assert.equal(listCalls.length, 1, "document_id 直查结果应被缓存");
+  assert.deepEqual(listCalls[0][1], "job-b", "按 job_id 直查");
   assert.equal(askCalls[0].documentId, "doc-b");
   assert.equal(askCalls[0].jobId, "job-b");
-assert.equal(askCalls[1].question, "(Current Page 3) Question 2");
+  assert.equal(askCalls[1].question, "（当前第 3 页）问题二");
   assert.equal(toolEvents.length, 1);
 });
 
-test("ask answerer: Reverse lookup not found. Fail closed for document, non-silent full database.", async () => {
+test("ask answerer:反查不到 document 时 fail closed，不静默全库", async () => {
   const askCalls = [];
   const answerer = createReaderAskAnswerer({
     jobId: "job-orphan",
@@ -336,12 +336,12 @@ test("ask answerer: Reverse lookup not found. Fail closed for document, non-sile
   });
   await assert.rejects(
     answerer.answer({ question: "这篇讲什么?", scope: "document" }),
-    /Cannot associate current document./,
+    /无法关联当前文档/,
   );
   assert.equal(askCalls.length, 0);
 });
 
-test("ask answerer:No model Key Check docs before sending. ask", async () => {
+test("ask answerer:无模型 Key 时不查文档、不发 ask", async () => {
   const listCalls = [];
   const askCalls = [];
   const answerer = createReaderAskAnswerer({
@@ -358,13 +358,13 @@ test("ask answerer:No model Key Check docs before sending. ask", async () => {
   });
   await assert.rejects(
     answerer.answer({ question: "hi", scope: "document" }),
-/Missing model API Key/,
+    /缺少模型 API Key/,
   );
-assert.equal(listCalls.length, 0, "Missing Key: Documentation first. Read it.");
-assert.equal(askCalls.length, 0, "Missing Key: Do not send ask");
+  assert.equal(listCalls.length, 0, "缺 Key 不得先查文档");
+  assert.equal(askCalls.length, 0, "缺 Key 不得发 ask");
 });
 
-test("askLibraryAi carries llm_api_key/base/model, only non-empty fields in payload", async () => {
+test("askLibraryAi 携带 llm_api_key/base/model,仅非空字段进 payload", async () => {
   globalThis.window = { location: { search: "", protocol: "http:", hostname: "127.0.0.1" } };
   let sentBody = null;
   const fakeFetch = async (_url, options) => {
@@ -376,7 +376,7 @@ test("askLibraryAi carries llm_api_key/base/model, only non-empty fields in payl
     };
   };
   await askLibraryAi({
-question: "Question",
+    question: "问题",
     documentId: "doc-1",
     apiPrefix: "/api/v1",
     fetchImpl: fakeFetch,
@@ -389,7 +389,7 @@ question: "Question",
   assert.equal(sentBody.document_id, "doc-1");
 });
 
-test("askLibraryAi payload excludes llm_* fields when llm key is missing (Backend fallback env)", async () => {
+test("askLibraryAi 无 llm key 时 payload 不含 llm_* 字段(后端回退 env)", async () => {
   globalThis.window = { location: { search: "", protocol: "http:", hostname: "127.0.0.1" } };
   let sentBody = null;
   const fakeFetch = async (_url, options) => {

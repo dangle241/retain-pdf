@@ -77,8 +77,8 @@ def test_typst_overlay_text_blocks_use_fit_without_clipping() -> None:
             "page_idx": 0,
             "block_type": "text",
             "bbox": [10.0, 20.0, 120.0, 42.0],
-            "translated_text": "Text too long. Trim. Ensure fits. OCR Box covers content below.",
-"protected_translated_text": "This is a long text to confirm that rendering does not overflow the OCR box and cover content below.",
+            "translated_text": "这是一段很长的文字，用来确认渲染时不会越出 OCR 框覆盖下方内容。",
+            "protected_translated_text": "这是一段很长的文字，用来确认渲染时不会越出 OCR 框覆盖下方内容。",
             "formula_map": [],
         }
     ]
@@ -95,7 +95,7 @@ def test_typst_overlay_text_blocks_use_fit_without_clipping() -> None:
 def test_dense_body_pressure_tightening_does_not_increase_leading() -> None:
     normal_payload = {
         "inner_bbox": [10.0, 60.0, 210.0, 150.0],
-        "translated_text": "This is a normal body block with low density.",
+        "translated_text": "这是普通正文块，密度较低。",
         "formula_map": [],
         "font_size_pt": 10.0,
         "leading_em": 0.62,
@@ -108,7 +108,7 @@ def test_dense_body_pressure_tightening_does_not_increase_leading() -> None:
     }
     payload = {
         "inner_bbox": [10.0, 10.0, 110.0, 52.0],
-        "translated_text": "Text block dense. Translation too long. Tighten. Not increase line spacing." * 4,
+        "translated_text": "这是一个很密集的正文块，译文长度明显偏长，需要收紧而不是增加行距。" * 4,
         "formula_map": [],
         "font_size_pt": 10.0,
         "leading_em": 0.62,
@@ -130,7 +130,7 @@ def test_dense_body_pressure_tightening_does_not_increase_leading() -> None:
 def test_normal_body_leading_recovers_when_vertical_slack_exists() -> None:
     payload = {
         "inner_bbox": [10.0, 10.0, 250.0, 145.0],
-        "translated_text": "This is a normal body paragraph, not too crowded, and should maintain a comfortable line spacing.",
+        "translated_text": "这是一个普通正文段落，内容不算拥挤，应该保持比较舒适的行距。",
         "formula_map": [],
         "font_size_pt": 10.4,
         "leading_em": 0.52,
@@ -153,7 +153,7 @@ def test_underfilled_body_density_recovery_has_floor_and_safe_target() -> None:
     def make_payload(height: float) -> dict:
         return {
             "inner_bbox": [10.0, 0.0, 260.0, height],
-            "translated_text": "Normal body paragraph for testing lower density limit recovery." * 2,
+            "translated_text": "普通正文段落用于测试密度下限恢复。" * 2,
             "formula_map": [],
             "font_size_pt": 10.2,
             "leading_em": 0.54,
@@ -190,7 +190,7 @@ def test_underfilled_body_density_recovery_has_floor_and_safe_target() -> None:
 def test_normal_body_leading_uses_more_slack_when_available() -> None:
     payload = {
         "inner_bbox": [10.0, 10.0, 300.0, 220.0],
-        "translated_text": "Increase line height. Improve readability. Test layout.",
+        "translated_text": "这是一个普通正文段落，页面给了很多垂直空间，所以行距应该更接近舒展的正文排版。",
         "formula_map": [],
         "font_size_pt": 10.4,
         "leading_em": 0.52,
@@ -218,7 +218,7 @@ def test_normal_body_leading_uses_more_slack_when_available() -> None:
 def test_normal_body_leading_stays_bounded_when_height_is_tight() -> None:
     payload = {
         "inner_bbox": [10.0, 10.0, 145.0, 54.0],
-        "translated_text": "Line spacing adjust. Ensure within box." * 2,
+        "translated_text": "这是一个较紧的普通正文段落，行距可以恢复但不能撑出框。" * 2,
         "formula_map": [],
         "font_size_pt": 10.4,
         "leading_em": 0.52,
@@ -238,7 +238,7 @@ def test_normal_body_leading_stays_bounded_when_height_is_tight() -> None:
 def test_normal_body_leading_spends_available_line_space() -> None:
     payload = {
         "inner_bbox": [10.0, 10.0, 230.0, 86.0],
-        "translated_text": "CSS line-height increase → skipped: dynamic adjustment, add when needed.",
+        "translated_text": "这是一个两三行的普通正文段落，应该根据框高把行距拉开一些。",
         "formula_map": [],
         "font_size_pt": 10.4,
         "leading_em": 0.52,
@@ -258,7 +258,7 @@ def test_normal_body_leading_spends_available_line_space() -> None:
 def test_long_normal_body_leading_can_use_high_dynamic_cap() -> None:
     payload = {
         "inner_bbox": [10.0, 10.0, 250.0, 245.0],
-        "translated_text": "Increase line height. Enhance readability. Adjust CSS." * 8,
+        "translated_text": "这是一个普通的大段正文，应该在不溢出的前提下使用更多垂直空间，而不是长期停留在保守行距。" * 8,
         "formula_map": [],
         "font_size_pt": 9.7,
         "leading_em": 0.52,
@@ -278,7 +278,7 @@ def test_long_normal_body_leading_can_use_high_dynamic_cap() -> None:
 def test_source_line_rich_body_grows_font_before_expanding_chinese_leading() -> None:
     payload = {
         "inner_bbox": [10.0, 10.0, 485.0, 223.0],
-        "translated_text": "Adjust CSS line-height. Increase padding. Test visually." * 3,
+        "translated_text": "这是一个中文译文只需要六行左右的段落，但是英文原文有很多行，因此中文行距需要明显放大来匹配原始框高。" * 3,
         "formula_map": [],
         "font_size_pt": 10.3,
         "leading_em": 0.56,
@@ -306,7 +306,7 @@ def test_source_line_rich_body_grows_font_before_expanding_chinese_leading() -> 
 def test_extreme_source_line_underfill_can_expand_body_leading_after_font_growth() -> None:
     payload = {
         "inner_bbox": [10.0, 10.0, 285.0, 232.0],
-        "translated_text": "This is a paragraph where the Chinese translation has significantly fewer lines than the English original, requiring larger line spacing to fill the original loose layout." * 2,
+        "translated_text": "这是一个中文译文明显少于英文原文行数的段落，需要用更大的行距填充原始宽松版面。" * 2,
         "formula_map": [],
         "font_size_pt": 10.4,
         "leading_em": 0.56,
@@ -335,7 +335,7 @@ def test_source_line_rich_body_font_growth_survives_adjacent_smoothing() -> None
     def make_payload(y0: float, y1: float) -> dict:
         return {
             "inner_bbox": [10.0, y0, 485.0, y1],
-"translated_text": "This Chinese translation only needs about six lines, but the English original has many lines, so the Chinese line spacing needs to be significantly enlarged to match the original box height." * 3,
+            "translated_text": "这是一个中文译文只需要六行左右的段落，但是英文原文有很多行，因此中文行距需要明显放大来匹配原始框高。" * 3,
             "formula_map": [],
             "font_size_pt": 10.3,
             "leading_em": 0.56,
@@ -368,7 +368,7 @@ def test_source_line_rich_body_font_growth_survives_adjacent_smoothing() -> None
 def test_font_growth_pairs_with_body_leading_growth() -> None:
     payload = {
         "inner_bbox": [10.0, 10.0, 300.0, 235.0],
-        "translated_text": "This is a body paragraph where the font size has significantly increased; line spacing also needs to increase proportionally, otherwise it will look visually cramped." * 3,
+        "translated_text": "这是一个字号已经明显增长的正文段落，行距也需要同步增长，否则视觉上会显得字大而行距过挤。" * 3,
         "formula_map": [],
         "font_size_pt": 11.3,
         "leading_em": 0.56,

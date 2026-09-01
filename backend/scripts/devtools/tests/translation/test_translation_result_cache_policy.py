@@ -146,7 +146,7 @@ class TranslationResultCachePolicyTests(unittest.TestCase):
             should_store_translation_result(
                 {
                     "decision": "translate",
-                    "translated_text": "English original. Perhaps more",
+                    "translated_text": "英文原文。或许更具",
                     "final_status": "partially_translated",
                     "translation_diagnostics": {"fallback_to": "sentence_level"},
                 }
@@ -156,7 +156,7 @@ class TranslationResultCachePolicyTests(unittest.TestCase):
             should_store_translation_result(
                 {
                     "decision": "translate",
-                    "translated_text": "Complete Chinese translation.",
+                    "translated_text": "完整中文译文。",
                     "final_status": "translated",
                     "translation_diagnostics": {"route_path": ["block_level"]},
                 }

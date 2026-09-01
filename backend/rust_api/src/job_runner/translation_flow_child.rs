@@ -39,7 +39,7 @@ pub(super) fn mark_parent_ocr_submitting(
     parent_job.started_at = Some(now_iso());
     parent_job.updated_at = now_iso();
     parent_job.stage = Some("ocr_submitting".to_string());
-    parent_job.stage_detail = Some("Starting OCR Subtask".to_string());
+    parent_job.stage_detail = Some("正在启动 OCR 子任务".to_string());
     clear_job_failure(parent_job);
     sync_runtime_state(parent_job);
     persist_runtime_job_with_resources(
@@ -75,7 +75,7 @@ pub(super) fn create_ocr_child_job(
         artifacts.schema_version = Some("document.v1".to_string());
     }
     ocr_child.stage = Some("queued".to_string());
-    ocr_child.stage_detail = Some("OCR Subtask created".to_string());
+    ocr_child.stage_detail = Some("OCR 子任务已创建".to_string());
     sync_runtime_state(&mut ocr_child);
     persist_runtime_job_with_resources(
         deps.persist.db.as_ref(),
@@ -103,7 +103,7 @@ pub(super) fn create_ocr_child_job(
         &parent_job.snapshot(),
         "info",
         "ocr_child_created",
-"OCR child task created",
+        "OCR 子任务已创建",
         Some(serde_json::json!({ "ocr_job_id": ocr_job_id })),
     );
 

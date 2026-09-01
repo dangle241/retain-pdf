@@ -1,4 +1,4 @@
-// Selection floating bar: Add annotation (New Reader only)
+// 选文浮条：添加批注（新阅读器专用）
 
 import { StickyNote, X } from "lucide-react";
 import type { ReaderTextSelection } from "../../hooks/use-reader-text-selection.js";
@@ -29,14 +29,14 @@ export function ReaderSelectionToolbar({
   const midX = selection.rect.left + selection.rect.width / 2;
   const left = Math.min(Math.max(16, midX), vw - 16);
 
-  // Prefer above; if insufficient space, flip below.
+  // 优先选区上方；空间不够则翻到下方
   const preferAbove = selection.rect.top > 72;
   const top = preferAbove
     ? Math.max(12, selection.rect.top - 8)
     : Math.min(vh - 12, selection.rect.top + selection.rect.height + 8);
   const place = preferAbove ? "above" : "below";
 
-const paneLabel = selection.pane === "translated" ? "Translation" : "Original";
+  const paneLabel = selection.pane === "translated" ? "译文" : "原文";
   const quote = clipQuote(selection.quote);
 
   return (
@@ -44,7 +44,7 @@ const paneLabel = selection.pane === "translated" ? "Translation" : "Original";
       className={`reader-sel-pop reader-sel-pop--${place}`}
       style={{ left, top }}
       role="toolbar"
-      aria-label="selection actions"
+      aria-label="选区操作"
     >
       <div className="reader-sel-pop-card">
         <div className="reader-sel-pop-quote" title={selection.quote}>
@@ -53,7 +53,7 @@ const paneLabel = selection.pane === "translated" ? "Translation" : "Original";
         </div>
 
         <div className="reader-sel-pop-meta">
-<span className="reader-sel-pop-chip">Page {selection.page}</span>
+          <span className="reader-sel-pop-chip">第 {selection.page} 页</span>
           <span className={`reader-sel-pop-chip reader-sel-pop-chip--${selection.pane}`}>
             {paneLabel}
           </span>
@@ -66,14 +66,14 @@ const paneLabel = selection.pane === "translated" ? "Translation" : "Original";
             onClick={() => onAddNote(selection)}
           >
             <StickyNote size={15} strokeWidth={2.25} aria-hidden />
-<span>Add Annotation</span>
+            <span>添加批注</span>
           </button>
           <button
             type="button"
             className="reader-sel-pop-btn reader-sel-pop-btn--ghost"
             onClick={onDismiss}
-            aria-label="Deselect"
-title="Cancel"
+            aria-label="取消选区"
+            title="取消"
           >
             <X size={15} strokeWidth={2.5} aria-hidden />
           </button>

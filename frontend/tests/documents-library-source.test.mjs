@@ -8,17 +8,17 @@ import {
 } from "../src/js/features/documents-library/document-card-item.js";
 import { collectDocumentLibraryPage } from "../src/js/features/documents-library/document-library-source.js";
 
-// ===== shapeDocumentCardItem: three document state mappings =====
+// ===== shapeDocumentCardItem:三种文档态映射 =====
 
-test("Translated document: merge library/books active state, preserve real job_id and document identity", () => {
+test("已翻译文档:合并 library/books 活态,保留真实 job_id 与文档身份", () => {
   const document = {
     document_id: "docA",
-title: "Conjugate Selectivity",
+    title: "共轭选择性",
     source_filename: "a.pdf",
     page_count: 10,
     active_job_id: "20260601-a",
     reading_status: "reading",
-tags: ["Chemistry"],
+    tags: ["化学"],
     source_pdf_url: "/api/v1/documents/docA/source.pdf",
     cover_url: "/api/v1/documents/docA/cover",
     updated_at: "2026-06-01T12:00:00Z",
@@ -36,17 +36,17 @@ tags: ["Chemistry"],
   };
   const item = shapeDocumentCardItem(document, book);
   assert.equal(item.library_only, false);
-assert.equal(item.job_id, "20260601-a", "Preserve real job_id â polling/comparative reading available");
+  assert.equal(item.job_id, "20260601-a", "保留真实 job_id → 轮询/对照阅读可用");
   assert.equal(item.document_id, "docA");
   assert.equal(item.status, "succeeded");
   assert.equal(item.reading_status, "reading");
-assert.deepEqual(item.tags, ["Chemistry"]);
+  assert.deepEqual(item.tags, ["化学"]);
   assert.equal(item.source_pdf_url, "/api/v1/documents/docA/source.pdf");
-// book has cover â use book's (consistent with current grid visuals)
+  // book 带了 cover → 用 book 的(与现网格视觉一致)
   assert.equal(item.cover_url, "/api/v1/library/books/20260601-a/cover");
 });
 
-test("Translated but book missing cover: fallback to document-level cover_url", () => {
+test("已翻译但 book 缺 cover:封面回退到文档级 cover_url", () => {
   const item = shapeDocumentCardItem(
     { document_id: "docA", active_job_id: "j1", cover_url: "/api/v1/documents/docA/cover" },
     { job_id: "j1", status: "running", progress: {} },
@@ -54,15 +54,15 @@ test("Translated but book missing cover: fallback to document-level cover_url", 
   assert.equal(item.cover_url, "/api/v1/documents/docA/cover");
 });
 
-test("Library document (no active_job_id): synthesize job_id + library_only flag", () => {
+test("馆藏文档(无 active_job_id):合成 job_id + library_only 标记", () => {
   const item = shapeDocumentCardItem({
     document_id: "docRef",
-title: "Reference Book",
+    title: "工具书",
     source_filename: "ref.pdf",
     page_count: 42,
     active_job_id: null,
     reading_status: "unread",
-tags: ["Reference Book"],
+    tags: ["工具书"],
     source_pdf_url: "/api/v1/documents/docRef/source.pdf",
     cover_url: "/api/v1/documents/docRef/cover",
     updated_at: "2026-06-10T09:00:00Z",
@@ -73,18 +73,18 @@ tags: ["Reference Book"],
   assert.ok(isLibraryOnlyItem(item));
   assert.equal(item.active_job_id, "");
   assert.equal(item.status, "");
-assert.equal(item.title, "Reference Book");
+  assert.equal(item.title, "工具书");
   assert.equal(item.cover_url, "/api/v1/documents/docRef/cover");
   assert.equal(item.source_pdf_url, "/api/v1/documents/docRef/source.pdf");
 });
 
-test("Empty string active_job_id also treated as library", () => {
+test("空字符串 active_job_id 也当馆藏处理", () => {
   const item = shapeDocumentCardItem({ document_id: "d", active_job_id: "" }, null);
   assert.equal(item.library_only, true);
   assert.equal(item.job_id, syntheticLibraryJobId("d"));
 });
 
-test("Has active_job_id but book missing: preserve real job_id, not library, status empty", () => {
+test("有 active_job_id 但 book 缺失:保留真实 job_id,非馆藏,状态空", () => {
   const item = shapeDocumentCardItem(
     { document_id: "d", active_job_id: "j-missing", title: "x", page_count: 3 },
     null,
@@ -94,7 +94,7 @@ test("Has active_job_id but book missing: preserve real job_id, not library, sta
   assert.equal(item.status, "");
 });
 
-// ===== collectDocumentLibraryPage: pagination + merge + deduplication + search =====
+// ===== collectDocumentLibraryPage:分页 + 合并 + 去重 + 搜索 =====
 
 function makeFetchers({ documents, total, books }) {
   const calls = { documentQuery: null, bookJobIds: null };
@@ -112,7 +112,7 @@ function makeFetchers({ documents, total, books }) {
   return { fetchDocumentList, fetchLibraryBookList, calls };
 }
 
-test("Integrate one page: merge translated with book, library uses synthetic id, hasMore determined by total", async () => {
+test("整合一页:已翻译合并 book,馆藏用合成 id,hasMore 由 total 决定", async () => {
   const documents = [
     { document_id: "d1", active_job_id: "j1", title: "已翻译一", page_count: 5 },
     { document_id: "d2", active_job_id: null, title: "馆藏二", page_count: 8 },
@@ -135,16 +135,16 @@ test("Integrate one page: merge translated with book, library uses synthetic id,
   });
 
   assert.equal(page.collected.length, 3);
-assert.deepEqual(calls.bookJobIds, ["j1", "j3"], "Fetch book only for documents with active_job_id");
+  assert.deepEqual(calls.bookJobIds, ["j1", "j3"], "只对有 active_job_id 的文档取 book");
   assert.equal(page.collected[0].status, "succeeded");
   assert.equal(page.collected[1].library_only, true);
   assert.equal(page.collected[1].job_id, syntheticLibraryJobId("d2"));
   assert.equal(page.collected[2].status, "running");
-assert.equal(page.hasMore, true, "3/5 â more available");
+  assert.equal(page.hasMore, true, "3/5 → 还有更多");
   assert.equal(page.nextOffset, 3);
 });
 
-test("Cross-page deduplication: items hitting existingJobIds (including synthetic ids) not collected again", async () => {
+test("跨页去重:existingJobIds 命中的(含合成 id)不重复收集", async () => {
   const documents = [
     { document_id: "d1", active_job_id: "j1", title: "a" },
     { document_id: "d2", active_job_id: null, title: "b" },
@@ -159,11 +159,11 @@ test("Cross-page deduplication: items hitting existingJobIds (including syntheti
     existingJobIds: new Set(["j1", syntheticLibraryJobId("d2")]),
     query: "",
   });
-assert.equal(page.collected.length, 0, "Both items already in existing set");
+  assert.equal(page.collected.length, 0, "两条都已在既有集合里");
   assert.equal(page.hasMore, false);
 });
 
-test("Search: client-side filter by title, hasMore disabled", async () => {
+test("搜索:客户端按标题过滤,hasMore 关闭", async () => {
   const documents = [
     { document_id: "d1", active_job_id: null, title: "量子化学导论" },
     { document_id: "d2", active_job_id: null, title: "机器学习基础" },
@@ -177,10 +177,10 @@ test("Search: client-side filter by title, hasMore disabled", async () => {
     startOffset: 0,
     pageSize: 2,
     existingJobIds: new Set(),
-query: "Quantum",
+    query: "量子",
   });
   assert.equal(page.collected.length, 1);
   assert.equal(page.collected[0].document_id, "d1");
-assert.equal(page.hasMore, false, "Disable further pagination in search state");
-assert.ok((calls.documentQuery.limit || 0) >= 200, "Fetch larger batch during search");
+  assert.equal(page.hasMore, false, "搜索态关闭继续分页");
+  assert.ok((calls.documentQuery.limit || 0) >= 200, "搜索时一次多拉一批");
 });

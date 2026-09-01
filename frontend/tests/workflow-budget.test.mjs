@@ -18,6 +18,6 @@ test("translation budget blocks DeepSeek submission when estimated cost exceeds 
   assert.equal(budget.blocking, true);
   assert.equal(budget.pageCount, 533);
   assert.equal(budget.estimatedCost.toFixed(2), "8.79");
-assert.equal(budget.message, "Estimated Â¥8.79 Â· 533 pages Â· Balance Â¥1.00");
+  assert.equal(budget.message, "预计 ¥8.79 · 533 页 · 余额 ¥1.00");
   assert.equal(budget.topUpUrl, "https://platform.deepseek.com/top_up");
 });

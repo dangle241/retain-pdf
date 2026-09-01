@@ -17,7 +17,7 @@ from services.pipeline_shared.io import save_json
 
 def test_save_json_pretty_roundtrip(tmp_path: Path) -> None:
     path = tmp_path / "pretty.json"
-    payload = {"hello": "world", "items": [1, 2, {"nested": True}]}
+    payload = {"hello": "世界", "items": [1, 2, {"nested": True}]}
     save_json(path, payload, compact=False)
     text = path.read_text(encoding="utf-8")
     assert "\n" in text  # pretty printed

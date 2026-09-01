@@ -134,7 +134,7 @@ export function mountUploadFeature({
 
   function formatByteLimit(bytes) {
     const mb = Number(bytes) / (1024 * 1024);
-return Number.isFinite(mb) && mb > 0 ? `${Math.round(mb)}MB` : "Current";
+    return Number.isFinite(mb) && mb > 0 ? `${Math.round(mb)}MB` : "当前";
   }
 
   function normalizePageRangeValue(startValue = "", endValue = "") {
@@ -210,19 +210,19 @@ return Number.isFinite(mb) && mb > 0 ? `${Math.round(mb)}MB` : "Current";
     const end = rawEnd.trim();
     const maxPage = pageRangeLimit();
     if ((start && Number(start) < 1) || (end && Number(end) < 1)) {
-      setText("error-box", "page numbers must start from 1 Start");
+      setText("error-box", "页码必须从 1 开始");
       return false;
     }
     if ((start && maxPage && Number(start) > maxPage) || (end && maxPage && Number(end) > maxPage)) {
-      setText("error-box", `page number cannot exceed ${maxPage}`);
+      setText("error-box", `页码不能超过 ${maxPage}`);
       return false;
     }
     if (start && end && Number(start) > Number(end)) {
-      setText("error-box", "Start page");
+      setText("error-box", "起始页不能大于结束页");
       return false;
     }
     if (maxPage && start && end && Number(end) - Number(start) + 1 > maxPage) {
-setText("error-box", `page range cannot exceed ${maxPage} pages`);
+      setText("error-box", `页码区间不能超过 ${maxPage} 页`);
       return false;
     }
     updateAppliedPageRange(normalizePageRangeValue(start, end));
@@ -267,42 +267,42 @@ setText("error-box", `page range cannot exceed ${maxPage} pages`);
       return;
     }
     if (file.size > frontMaxBytes) {
-      setText("error-box", `Frontend currently limited to ${formatByteLimit(frontMaxBytes)} or less PDF`);
-      viewPort.showUploadStatus("File too large.");
+      setText("error-box", `当前前端限制为 ${formatByteLimit(frontMaxBytes)} 以内 PDF`);
+      viewPort.showUploadStatus("文件超出大小限制");
       return;
     }
     if (frontMaxPageCount && countPdfPages) {
-      viewPort.showUploadStatus("Validating page count…");
+      viewPort.showUploadStatus("正在校验页数…");
       try {
         const localPageCount = await countPdfPages(file);
         if (!Number.isFinite(localPageCount) || localPageCount <= 0) {
-          setText("error-box", "PDF Parse failed, please check if the file is corrupted or has accessibility issues.");
-          viewPort.showUploadStatus("File verification failed");
+          setText("error-box", "PDF 解析失败，请检查文件是否损坏或可访问性异常。");
+          viewPort.showUploadStatus("文件校验失败");
           clearFileInputValue();
           return;
         }
         if (localPageCount > frontMaxPageCount) {
-setText("error-box", `PDF page count exceeds limit: maximum ${frontMaxPageCount} pages`);
-          viewPort.showUploadStatus("File exceeds page limit");
+          setText("error-box", `PDF 页数超过限制：最多 ${frontMaxPageCount} 页`);
+          viewPort.showUploadStatus("文件超出页数限制");
           clearFileInputValue();
           return;
         }
       } catch (err) {
         setText("error-box", buildErrorDiagnostic(err, {
-operation: "Validate PDF file",
+          operation: "校验 PDF 文件",
           details: {
             file_name: file.name,
             file_size: file.size,
             max_pages: frontMaxPageCount,
           },
         }));
-viewPort.showUploadStatus("File validation failed");
+        viewPort.showUploadStatus("文件校验失败");
         clearFileInputValue();
         return;
       }
     }
     setText("error-box", "-");
-    viewPort.showUploadStatus("Uploading…");
+    viewPort.showUploadStatus("正在上传…");
 
     const uploadUrl = configPort.buildUploadUrl(apiPrefix);
     try {
@@ -313,8 +313,8 @@ viewPort.showUploadStatus("File validation failed");
       );
       const uploadedPageCount = Number(payload.page_count || 0);
       if (frontMaxPageCount > 0 && uploadedPageCount > frontMaxPageCount) {
-setText("error-box", `PDF page count exceeds limit: maximum ${frontMaxPageCount} pages`);
-viewPort.showUploadStatus("File exceeds page limit");
+        setText("error-box", `PDF 页数超过限制：最多 ${frontMaxPageCount} 页`);
+        viewPort.showUploadStatus("文件超出页数限制");
         clearFileInputValue();
         resetUploadedFile();
         return;
@@ -331,27 +331,27 @@ viewPort.showUploadStatus("File exceeds page limit");
       });
       updateAppliedPageRange(currentPageRanges());
       viewPort.markUploadReady(!!snapshot.uploadId);
-      viewPort.showUploadStatus("Upload complete: Translate or favorite.");
+      viewPort.showUploadStatus("上传完成：可直接翻译，或仅收藏。");
       clearFileInputValue();
       renderPageRangeSummary();
       refreshSubmitControls();
       if (refreshDeepSeekBalance) {
-        viewPort.showUploadStatus("Upload complete. Checking balance.…");
+        viewPort.showUploadStatus("上传完成，正在检测余额…");
         void withTimeout(
           refreshDeepSeekBalance({ silent: true }),
           BALANCE_CHECK_TIMEOUT_MS,
-          "DeepSeek Balance check timeout",
+          "DeepSeek 余额检测超时",
         )
           .then((result) => {
             const status = `${(result as { status?: string } | null | undefined)?.status || ""}`;
             if (status === "network_error" || status === "missing_key") {
-              viewPort.showUploadStatus("Upload complete. Balance unconfirmed. Will re-check before submission.");
+              viewPort.showUploadStatus("上传完成，余额未确认，提交前会再次检测。");
               return;
             }
-            viewPort.showUploadStatus("Upload complete. Start task.");
+            viewPort.showUploadStatus("上传完成，可以开始任务。");
           })
           .catch(() => {
-viewPort.showUploadStatus("Upload complete, balance not confirmed, will be re-checked before submission.");
+            viewPort.showUploadStatus("上传完成，余额未确认，提交前会再次检测。");
           })
           .finally(() => {
             refreshSubmitControls();
@@ -361,7 +361,7 @@ viewPort.showUploadStatus("Upload complete, balance not confirmed, will be re-ch
       resetUploadedFile();
       clearFileInputValue();
       setText("error-box", buildErrorDiagnostic(err, {
-operation: "Upload PDF file",
+        operation: "上传 PDF 文件",
         url: uploadUrl,
         details: {
           file_name: file.name,
@@ -369,7 +369,7 @@ operation: "Upload PDF file",
           max_pages: frontMaxPageCount,
         },
       }));
-      viewPort.showUploadStatus("Upload failed");
+      viewPort.showUploadStatus("上传失败");
       applyWorkflowMode();
     }
   }

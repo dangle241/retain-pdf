@@ -1,24 +1,24 @@
-// AppUpdateBanner (React version app-update button + details dialog, Blueprint Â§5).
+// AppUpdateBanner(React 版 app-update 按钮 + 详情 dialog,蓝图 §5)。
 //
-// Old World "two DOM elements in two hosts" problem (button in app-settings-dialog template,
-// details dialog in app-shell-header.js) merged into one component here: mount entire component
-// in SettingsHubDialog.jsx "Update" tab under panel (this panel uses hidden Toggle Properties, not unmounted
-// ââ see SettingsHubDialog.jsx same header comment handling), button and dialog are all resident here
-// Child nodes.dialog opens only on own button click (now "Update"
-// tab Must be active, ancestors not. hidden),Not found"mistakenly opens when parent is hidden dialog"scenario of.
+// 旧世界"两处 DOM 分属两个宿主"的问题(按钮在 app-settings-dialog 模板,
+// 详情 dialog 在 app-shell-header.js)在这里合并成同一个组件:本组件整体挂载
+// 在 SettingsHubDialog.jsx"更新"tab 面板下(该面板用 hidden 属性切换,不卸载
+// ——见 SettingsHubDialog.jsx 头注释同款处理),按钮与 dialog 都是这里的常驻
+// 子节点。dialog 只会在用户点击本组件自己的按钮时才打开(此时"更新"
+// tab 必然是激活态、祖先没有 hidden),不存在"父级隐藏时误开 dialog"的场景。
 //
-// Dialog rendering layer (Phase C, shadcn refactor): details dialog from Native <dialog> +
-// showModal/close replaced by radix-ui Dialog primitive, not via src/components/ui/dialog.jsx
-// default skin(className Continue to use desktop-dialog/desktop-shell/app-update-* this set
-// bespoke CSS). open local control useAppUpdateDialogOpen (pure UI transient state, do not enter
-// store ââ existing decision unchanged), onOpenChange calls uniformly when next===false.
-// setDialogOpen(false),Escape/Backplate click. Handle event. Simplify: inline function, remove unnecessary state./Close button: all three paths use this one callback.
-// No forceMount (same as CredentialsDialog.jsx header comment conclusion, avoid unnecessary features. Simplify. hideOthers permanent
-// accessibility defect that takes effect) ââ details dialog all content read-only (status copy/description/
-// links), no form input, unmounting on close preserves all data.
+// Dialog 渲染层(阶段 C,shadcn 改造):详情 dialog 从原生 <dialog>+
+// showModal/close 换成 radix-ui 的 Dialog 原语,不经 src/components/ui/dialog.jsx
+// 默认皮肤(className 继续用 desktop-dialog/desktop-shell/app-update-* 这套
+// bespoke CSS)。open 受控于本地 useAppUpdateDialogOpen(纯 UI 瞬态,不进
+// store——这条既有决策不变),onOpenChange 在 next===false 时统一调用
+// setDialogOpen(false),Escape/背板点击/关闭按钮三条路径都走这一个回调。
+// 不 forceMount(同 CredentialsDialog.jsx 头注释的结论,避免 hideOthers 永久
+// 生效的无障碍缺陷)——本详情 dialog 内容全部是只读展示(状态文案/说明/
+// 链接),没有表单输入,关闭时卸载不会丢任何数据。
 //
-// AppShellHeader.jsx no longer retains app-update-dialog template skeleton (3a legacy, cleared,
-// avoid repeated ID visual baseline violations / access control).
+// AppShellHeader.jsx 不再残留 app-update-dialog 模板骨架(3a 遗留,已清理,
+// 避免 id 重复违反视觉基线/门禁)。
 
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
@@ -28,11 +28,11 @@ import { APP_UPDATE_IDS } from "./app-update-contract.js";
 import { useAppUpdateDialogOpen } from "./useAppUpdateDialogOpen.js";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size Inferred required in unannotated source files.;unstyled path-level size。
+// Button.size 在未注解源文件里被推断为必填;unstyled 路径运行时不用 size。
 const Button = ButtonBase as any;
 
-// Copied from src/js/features/app-update/view.js:47-60(formatReleaseNotes)——Pure function,
-// Preserve character by character, copy into this component (Blueprint Â§5: AppUpdateBanner agent scope).
+// 抄自 src/js/features/app-update/view.js:47-60(formatReleaseNotes)——纯函数,
+// 逐字符保留,拷贝进本组件(蓝图 §5:AppUpdateBanner agent 范围)。
 function formatReleaseNotes(markdown = "") {
   return `${markdown || ""}`
     .replace(/\r\n/g, "\n")
@@ -63,10 +63,10 @@ export function AppUpdateBanner() {
 
   const hasUpdate = Boolean(state.hasUpdate);
   const panel = state.panel;
-  const notesText = formatReleaseNotes(panel.body) || "No update notes.";
+  const notesText = formatReleaseNotes(panel.body) || "暂无更新说明。";
   const versionText = panel.latestVersion
-? `Current ${panel.currentVersion} Â· Latest ${panel.latestVersion}`
-: `Current ${panel.currentVersion}`;
+    ? `当前 ${panel.currentVersion} · 最新 ${panel.latestVersion}`
+    : `当前 ${panel.currentVersion}`;
   const statusText = `${state.statusText || ""}`;
 
   return (
@@ -74,12 +74,12 @@ export function AppUpdateBanner() {
       <Button
         id={APP_UPDATE_IDS.button}
         className={`app-settings-action app-update-btn${hasUpdate ? " has-update" : ""}`}
-        aria-label="Check for updates"
+        aria-label="检查更新"
         title={state.buttonTitle}
         data-update-state={state.buttonState}
         onClick={() => setDialogOpen(true)}
       >
-        Check for Updates
+        检查更新
         <span className="app-update-dot" aria-hidden="true"></span>
       </Button>
       <DialogPrimitive.Root open={dialogOpen} onOpenChange={handleOpenChange}>
@@ -99,7 +99,7 @@ export function AppUpdateBanner() {
                   <p>{versionText}</p>
                 </div>
                 <DialogPrimitive.Close asChild>
-<Button className="desktop-close app-update-close" aria-label="Close">Ã</Button>
+                  <Button className="desktop-close app-update-close" aria-label="关闭">×</Button>
                 </DialogPrimitive.Close>
               </div>
               <div className="app-update-body">
@@ -112,7 +112,7 @@ export function AppUpdateBanner() {
                   className="home-action-btn secondary"
                   onClick={() => handlersRef.current?.onCheck?.()}
                 >
-                  re-check
+                  重新检查
                 </Button>
                 <a
                   className={`app-update-link${panel.htmlUrl ? "" : " hidden"}`}
@@ -120,7 +120,7 @@ export function AppUpdateBanner() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-Open Release
+                  打开 Release
                 </a>
               </div>
             </div>

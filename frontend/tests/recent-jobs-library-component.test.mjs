@@ -2,15 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// RecentJobsLibrary / RecentJobCard (Phase 3b recent-jobs domain) component-level tests.
-// Covers blueprint §6 new tests ①②③:
-// ① Render library grid. + smoke DOM contract (mock=parallel, uses real mountRecentJobsFeature
-//    Initial load chain, do not mock fetch — validate directly. isMockMode() end-to-end on short-circuit path.
-//    Assembly?work);
-// ② Card interaction (delete confirm/cancel/confirm deletion, reader);
-// ③ Card rendering isolation (replaceItem single card, assert remaining card render counts unchanged. — memo regression anchor,
-//    Black box. DOM comparison indistinguishable "skip render" vs "render output identical." Must use
-//    RecentJobCard.jsx Exported render counter)。
+// RecentJobsLibrary / RecentJobCard(Phase 3b recent-jobs 域)组件级测试。
+// 覆盖蓝图 §6 新增测试①②③:
+// ① 库网格渲染 + smoke DOM 契约(mock=parallel,走真实 mountRecentJobsFeature
+//    初次加载链路,不 mock fetch——直接验证 isMockMode() 短路路径下的端到端
+//    装配是否work);
+// ② 卡片交互(delete 确认/取消/确认删除、select、reader);
+// ③ 卡片渲染隔离(replaceItem 单卡,断言其余卡片渲染计数不变——memo 回归锚,
+//    黑盒 DOM 比对无法区分"跳过 render"与"render 了但输出相同"，必须用
+//    RecentJobCard.jsx 导出的渲染计数器)。
 
 function makeDom(search = "") {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
@@ -25,12 +25,12 @@ function makeDom(search = "") {
   }
   globalThis.window = dom.window;
   globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
-// Radix Presence/Tabs (Phase B) require cancelAnimationFrame under jsdom
-// (TabsContent mount animation timer cleanup) and getComputedStyle (Presence reads
-// animation-name to determine if exit animation has ended) — jsdom's window has implementation, but not
-// copied to bare global like requestAnimationFrame, we supplement here. NodeFilter
-// is newly needed in Phase C (TranslationWorkflowDialog switched to Radix Dialog) —
-// Dialog.Content's FocusScope uses it for focusable element tree traversal.
+  // Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
+  // (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
+  // animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
+  // 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。NodeFilter
+  // 是阶段 C(TranslationWorkflowDialog 换 Radix Dialog)新增的需要——
+  // Dialog.Content 的 FocusScope 用它做可聚焦元素树遍历。
   globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
   globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -49,7 +49,7 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-assert.fail(Timeout waiting for: {description}`);
+  assert.fail(`等待超时：${description}`);
 }
 
 function click(dom, element) {
@@ -89,7 +89,7 @@ async function bootHomeApp(dom) {
 
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-await waitFor(() => dom.window.document.getElementById("library-view"), "HomeApp first frame rendered");
+  await waitFor(() => dom.window.document.getElementById("library-view"), "HomeApp 首帧渲染");
   await wait(0);
 
   return { services, root, host };
@@ -99,28 +99,28 @@ function byId(dom, id) {
   return dom.window.document.getElementById(id);
 }
 
-test("RecentJobsLibraryInitializing(mock=parallel) Render Grid + DOM contract", async () => {
+test("RecentJobsLibrary：初始加载(mock=parallel)渲染网格 + DOM 契约", async () => {
   const dom = makeDom("?mock=parallel");
   const { services, root, host } = await bootHomeApp(dom);
 
-// mock=parallel goes through isMockMode() short-circuit (fetchLibraryBookList/fetchJobList won't
-// hit real network), verify that mountRecentJobsFeature is assembled in initialize() synchronous chain
-// Active — this is exactly the "5 Default param chain break" risk (blueprint risk 9) end-to-end counterexample: if
-  // composition.js incoming React viewPort Defaulted createRecentJobsViewPort()
-// composition.js incoming React viewPort defaulted createRecentJobsViewPort()
-// silently short-circuit, below DOM contract assertions will all fail (legacy system manipulates real data DOM, new world
+  // mock=parallel 走 isMockMode() 短路(fetchLibraryBookList/fetchJobList 不
+  // 打真实网络),验证 mountRecentJobsFeature 装配在 initialize() 同步链内
+  // 已生效——这正是"5 处默认参数断链"风险(蓝图风险 9)的端到端反证:如果
+  // composition.js 传入的 React viewPort 被默认 createRecentJobsViewPort()
+  // 悄悄短路,下面的 DOM 契约断言会全部失败(旧世界会去操作真实 DOM,新世界
+  // 的 store 永远拿不到数据)。
   const contractIds = [
     "library-view", "recent-jobs-scroll-body", "recent-jobs-summary",
     "recent-jobs-empty", "library-grid", "recent-jobs-list", "load-more-jobs-btn",
   ];
   for (const id of contractIds) {
-assert.ok(byId(dom, id), `Contract id missing: #{id});
+    assert.ok(byId(dom, id), `契约 id 缺失：#${id}`);
   }
 
-  await waitFor(() => byId(dom, "recent-jobs-list").querySelector(".recent-job-item[data-job-id]"), "Grid has at least one card.");
+  await waitFor(() => byId(dom, "recent-jobs-list").querySelector(".recent-job-item[data-job-id]"), "网格出现至少一张卡片");
   assert.equal(byId(dom, "recent-jobs-list").classList.contains("hidden"), false);
   const card = byId(dom, "recent-jobs-list").querySelector(".recent-job-item[data-job-id]");
-  assert.ok(card.dataset.jobId, "Card required. data-job-id");
+  assert.ok(card.dataset.jobId, "卡片必须带 data-job-id");
   assert.match(byId(dom, "recent-jobs-summary").textContent, /Stage Spec|Unknown/);
 
   root.unmount();
@@ -128,31 +128,31 @@ assert.ok(byId(dom, id), `Contract id missing: #{id});
   host.remove();
 });
 
-test("RecentJobsLibraryCard Interaction(select / reader / delete Confirm & Cancel / Confirm Delete)", async () => {
+test("RecentJobsLibrary：卡片交互(select / reader / delete 确认与取消 / 确认删除)", async () => {
   const dom = makeDom("?mock=parallel");
   const { services, root, host } = await bootHomeApp(dom);
 
   const items = [makeItem(1), makeItem(2), makeItem(3)];
   services.library.recentJobsStore.actions.setItems(items);
-  await waitFor(() => byId(dom, "recent-jobs-list").querySelectorAll(".recent-job-item").length === 3, "Three cards in position.");
+  await waitFor(() => byId(dom, "recent-jobs-list").querySelectorAll(".recent-job-item").length === 3, "三张卡片就位");
 
   const cardOf = (jobId) => byId(dom, "recent-jobs-list").querySelector(`.recent-job-item[data-job-id="${jobId}"]`);
 
-// ---- select no document_id, still open book details (do not pop up old workflow window) + silent polling ----
+  // ---- select 无 document_id：仍开书籍详情（不弹旧工作流窗）+ silent 轮询 ----
   let openCount = 0;
   dom.window.document.addEventListener(
     (await import("../src/js/contracts/app-contract.js")).APP_EVENTS.openTranslationWorkflow,
     () => { openCount += 1; },
   );
   click(dom, cardOf("job-1"));
-  await waitFor(() => byId(dom, "book-detail-dialog"), "Click card to open book details");
-  assert.equal(openCount, 0, "Clicking card does not open #translation-workflow-dialog");
+  await waitFor(() => byId(dom, "book-detail-dialog"), "点卡打开书籍详情");
+  assert.equal(openCount, 0, "点卡不打开 #translation-workflow-dialog");
   await waitFor(
     () => services.features.jobRuntimeFeature.currentJobId() === "job-1",
-"select/detail path silent polling",
+    "select/详情路径 silent 轮询",
   );
 
-// ---- reader: click floating "Side-by-side reading" button → openReaderRequested ----
+  // ---- reader:点击悬浮"对照阅读"按钮 → openReaderRequested ----
   const { APP_EVENTS } = await import("../src/js/contracts/app-contract.js");
   let readerDetail = null;
   dom.window.document.addEventListener(APP_EVENTS.openReaderRequested, (event) => {
@@ -160,17 +160,17 @@ test("RecentJobsLibraryCard Interaction(select / reader / delete Confirm & Cance
   });
   const readerButton = cardOf("job-2").querySelector(".recent-job-reader");
   click(dom, readerButton);
-  await waitFor(() => readerDetail?.jobId === "job-2", "reader Button trigger openReaderRequested");
+  await waitFor(() => readerDetail?.jobId === "job-2", "reader 按钮触发 openReaderRequested");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("RecentJobsLibraryCard Eyes=Quick read (completed → side-by-side reading; fail passive → don't trigger)", async () => {
-// Card copy verbatim. After PDF_MD_lib's BookCard, delete/move translations to book details modal., card
-// Keep one eye. = quick read: dispatch comparison review complete; no readable target (failed and no document_id)
-  // Click dispatches nothing(Stop drilling into reader internals to error.)。
+test("RecentJobsLibrary：卡片眼睛=快速阅读(已完成→对照阅读;失败无源→不误触发)", async () => {
+  // 卡片改成照搬 PDF_MD_lib 的 BookCard 后,删除/翻译都挪进书籍详情弹窗,卡片
+  // 只留一个眼睛=快速阅读:已完成派发对照阅读;没有可读目标(失败且无 document_id)
+  // 点了不派发任何东西(不再一路捅进阅读器深处报错)。
   const dom = makeDom("?mock=parallel");
   const { services, root, host } = await bootHomeApp(dom);
 
@@ -179,146 +179,146 @@ test("RecentJobsLibraryCard Eyes=Quick read (completed → side-by-side reading;
     makeItem(2, { status: "succeeded" }),
   ];
   services.library.recentJobsStore.actions.setItems(items);
-await waitFor(() => byId(dom, "recent-jobs-list").querySelectorAll(".recent-job-item").length === 2, "Two cards in place");
+  await waitFor(() => byId(dom, "recent-jobs-list").querySelectorAll(".recent-job-item").length === 2, "两张卡片就位");
 
   const cardOf = (jobId) => byId(dom, "recent-jobs-list").querySelector(`.recent-job-item[data-job-id="${jobId}"]`);
-  // Cards no longer deletable./Translate button(User already in detail modal.)
-  assert.equal(cardOf("job-2").querySelector(".recent-job-delete"), null, "Cards no longer have delete buttons.");
-  assert.equal(cardOf("job-2").querySelector(".recent-job-translate"), null, "Translate button removed from cards.");
+  // 卡片不再有删除/翻译按钮(都进详情弹窗了)
+  assert.equal(cardOf("job-2").querySelector(".recent-job-delete"), null, "卡片不再有删除按钮");
+  assert.equal(cardOf("job-2").querySelector(".recent-job-translate"), null, "卡片不再有翻译按钮");
 
   const { APP_EVENTS } = await import("../src/js/contracts/app-contract.js");
   let readerDetail = null;
   dom.window.document.addEventListener(APP_EVENTS.openReaderRequested, (event) => { readerDetail = event.detail; });
 
-// failed task (makeItem no document_id, not succeeded) → eye click lacks readable target, do not dispatch
+  // 失败任务(makeItem 无 document_id、非 succeeded)→ 眼睛点了没有可读目标,不派发
   click(dom, cardOf("job-1").querySelector(".recent-job-reader"));
   await wait(30);
-  assert.equal(readerDetail, null, "Failed, no source.:Clicking eye does not trigger. openReaderRequested");
+  assert.equal(readerDetail, null, "失败且无源:点眼睛不触发 openReaderRequested");
 
-// completed → side-by-side reading
+  // 已完成 → 对照阅读
   click(dom, cardOf("job-2").querySelector(".recent-job-reader"));
-  await waitFor(() => readerDetail?.jobId === "job-2", "Completed point-eye dispatch comparative reading.");
+  await waitFor(() => readerDetail?.jobId === "job-2", "已完成点眼睛派发对照阅读");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("RecentJobsLibraryCollection Document Card (untranslated) — Logo/tap card for details, eye reads original", async () => {
-// Collection document (synthetic job_id doc:) enters grid: badge "Collection", click card to open book details modal.
-// eye = read original (dispatch openReaderRequested with documentId, without jobId).
+test("RecentJobsLibrary：馆藏文档卡(未翻译)——徽标/点卡片开详情/眼睛读原文", async () => {
+  // 馆藏文档(合成 job_id `doc:<id>`)进网格:徽标"馆藏"、点卡片开书籍详情弹窗、
+  // 眼睛=读原文(派发带 documentId、不带 jobId 的 openReaderRequested)。
   const dom = makeDom("?mock=parallel");
   const { services, root, host } = await bootHomeApp(dom);
 
   const libraryOnlyItem = {
     job_id: "doc:doc-ref-6a1f2c", document_id: "doc-ref-6a1f2c", library_only: true,
-title: "Reference book only in library", display_name: "Reference book only in library", status: "", page_count: 42,
+    title: "只入库的参考书", display_name: "只入库的参考书", status: "", page_count: 42,
     updated_at: "2026-07-01T00:00:00Z",
   };
   services.library.recentJobsStore.actions.setItems([libraryOnlyItem, makeItem(2, { status: "succeeded" })]);
-await waitFor(() => byId(dom, "recent-jobs-list").querySelectorAll(".recent-job-item").length === 2, "Two cards in place");
+  await waitFor(() => byId(dom, "recent-jobs-list").querySelectorAll(".recent-job-item").length === 2, "两张卡片就位");
 
   const card = byId(dom, "recent-jobs-list").querySelector('.recent-job-item[data-library-only="true"]');
-  assert.ok(card, "Collection cards rendered.");
+  assert.ok(card, "馆藏卡片渲染出来了");
   assert.equal(card.getAttribute("data-document-id"), "doc-ref-6a1f2c");
-assert.match(card.textContent, /Collection/, "Show collection badge");
-  assert.equal(card.querySelector(".recent-job-delete"), null, "Card cannot be deleted(In the detail popup)");
+  assert.match(card.textContent, /馆藏/, "显示馆藏徽标");
+  assert.equal(card.querySelector(".recent-job-delete"), null, "卡片无删除(在详情弹窗里)");
 
   const { APP_EVENTS } = await import("../src/js/contracts/app-contract.js");
   let readerDetail = null;
   dom.window.document.addEventListener(APP_EVENTS.openReaderRequested, (event) => { readerDetail = event.detail; });
 
-// Click card body → open book details modal (does not dispatch openReaderRequested)
+  // 点卡片本体 → 开书籍详情弹窗(不派发 openReaderRequested)
   click(dom, card);
-  await waitFor(() => byId(dom, "book-detail-dialog"), "Click library card to open book details dialog");
-  assert.equal(readerDetail, null, "Clicking card body does not trigger openReaderRequested");
+  await waitFor(() => byId(dom, "book-detail-dialog"), "点馆藏卡打开书籍详情弹窗");
+  assert.equal(readerDetail, null, "点卡片本体不触发 openReaderRequested");
   services.bookDetail.dialogStore.close();
 
-// eye = read original (with documentId, excluded jobId)
+  // 眼睛 = 读原文(带 documentId,不带 jobId)
   click(dom, card.querySelector(".recent-job-reader"));
-await waitFor(() => readerDetail?.documentId === "doc-ref-6a1f2c", "Eye dispatches openReaderRequested with documentId");
-  assert.ok(!readerDetail.jobId, "Collection documents not included. jobId");
+  await waitFor(() => readerDetail?.documentId === "doc-ref-6a1f2c", "眼睛派发带 documentId 的 openReaderRequested");
+  assert.ok(!readerDetail.jobId, "馆藏文档不带 jobId");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("Book Details Popup:Holding Location → immediately get progress + Silent Grid Update(No flash loading)", async () => {
-// Click collection card to open details → translate whole book → mock attaches active_job_id →
-// detail payload/progress card immediately has job_id, grid has real job row, no full-page loading reload.
+test("书籍详情弹窗:馆藏点翻译 → 立刻接进度 + 网格静默更新(不闪 loading)", async () => {
+  // 点馆藏卡开详情 → 翻译整本 → mock 挂 active_job_id →
+  // 详情 payload/进度卡立刻有 job_id，网格有真实 job 行，不靠整页 loading 重载。
   const dom = makeDom("?mock=parallel");
   const { services, root, host } = await bootHomeApp(dom);
   const { HOME_LOADING_STATES } = await import("../src/js/features/home/state.js");
 
   const { getMockDocumentList } = await import("../src/js/mock/documents.js");
   const untranslated = getMockDocumentList().documents.find((doc) => !`${doc.active_job_id || ""}`.trim());
-  assert.ok(untranslated, "mock Contains archival documents");
+  assert.ok(untranslated, "mock 里有馆藏文档");
 
   services.library.recentJobsStore.actions.setItems([{
     job_id: `doc:${untranslated.document_id}`, document_id: untranslated.document_id,
     library_only: true, title: untranslated.title, status: "", page_count: untranslated.page_count,
   }]);
-await waitFor(() => byId(dom, "recent-jobs-list").querySelector('.recent-job-item[data-library-only="true"]'), "collection card in place");
+  await waitFor(() => byId(dom, "recent-jobs-list").querySelector('.recent-job-item[data-library-only="true"]'), "馆藏卡就位");
 
   click(dom, byId(dom, "recent-jobs-list").querySelector('.recent-job-item[data-library-only="true"]'));
-  await waitFor(() => byId(dom, "book-detail-dialog"), "Detail popup opened");
+  await waitFor(() => byId(dom, "book-detail-dialog"), "详情弹窗打开");
   click(dom, byId(dom, "book-detail-tab-translate"));
-  await waitFor(() => byId(dom, "book-detail-translate-btn"), "Details popup translation button ready.");
+  await waitFor(() => byId(dom, "book-detail-translate-btn"), "详情弹窗翻译按钮就位");
   click(dom, byId(dom, "book-detail-translate-btn"));
 
   await waitFor(
     () => getMockDocumentList().documents
       .find((doc) => doc.document_id === untranslated.document_id)?.active_job_id,
-    "translateDocument Attach to document active_job_id",
+    "translateDocument 给文档挂上 active_job_id",
   );
 
-// detail payload immediately attaches real job (translation Tab can embed StatusCard)
+  // 详情 payload 立刻挂真实 job（翻译 Tab 可嵌 StatusCard）
   await waitFor(() => {
     const payload = services.bookDetail.dialogStore.getState().payload;
     const jobId = `${payload?.job_id || ""}`.trim();
     return jobId && !jobId.startsWith("doc:") && payload?.library_only === false;
-}, "detail payload now has real job_id");
+  }, "详情 payload 立刻有真实 job_id");
 
-// progress card should appear inside detail bd-job-status-inner (no need to wait for full page reload)
-await waitFor(() => byId(dom, "book-detail-job-status-card"), "Translation Tab UI updates immediately. Optimize rendering pipeline. StatusCard");
+  // 进度卡应出现在详情内 bd-job-status-inner（不需等整页重载）
+  await waitFor(() => byId(dom, "book-detail-job-status-card"), "翻译 Tab 立刻出现 StatusCard");
   const statusCard = byId(dom, "book-detail-job-status-card");
   assert.ok(
     statusCard.querySelector(".bd-job-status-inner"),
-    "progress falls on bd-job-status-inner(embedded in detail, not workflow dialog)",
+    "进度落在 bd-job-status-inner（详情内嵌，非工作流弹窗）",
   );
   assert.ok(
     statusCard.querySelector(".bd-job-status-bar"),
-    "Inline area uses progress bar (no ring)",
+    "内嵌区用进度条（无圆环）",
   );
   assert.ok(
     statusCard.querySelector(".status-stage-flow"),
-    "Stage flow in detail embedded card",
+    "阶段流在详情内嵌卡内",
   );
 
-// must not open workflow dialog as progress UI
+  // 绝不能打开工作流弹窗当进度 UI
   assert.equal(
     byId(dom, "translation-workflow-dialog"),
     null,
-    "Clicking Details does not open workflow popup",
+    "详情点翻译不打开工作流弹窗",
   );
   assert.equal(
     services.stores.statusArea.getSnapshot().visible,
     false,
-    "Main status area remains hidden (progress not in popup StatusCard）",
+    "主状态区保持隐藏（进度不在弹窗 StatusCard）",
   );
 
-// grid has real job row
+  // 网格有真实 job 行
   await waitFor(
     () => services.library.recentJobsStore.getSnapshot().items
       .some((item) => item.document_id === untranslated.document_id && !item.library_only),
-"Grid shows real job row",
+    "网格出现真实 job 行",
   );
 
   assert.notEqual(
     services.stores.homeState.getSnapshot().recentJobsLoadingState,
     HOME_LOADING_STATES.LOADING,
-    "After translation, silently update, do not. recentJobs Press loading",
+    "翻译后静默更新，不把 recentJobs 打成 loading",
   );
 
   root.unmount();
@@ -326,7 +326,7 @@ await waitFor(() => byId(dom, "book-detail-job-status-card"), "Translation Tab U
   host.remove();
 });
 
-test("RecentJobsLibraryCard rendering isolation(replaceItem Single Card,Others 23 Card render count unchanged.)", async () => {
+test("RecentJobsLibrary：卡片渲染隔离(replaceItem 单卡,其余 23 张卡片渲染计数不变)", async () => {
   const dom = makeDom("?mock=parallel");
   const { services, root, host } = await bootHomeApp(dom);
   const {
@@ -336,8 +336,8 @@ test("RecentJobsLibraryCard rendering isolation(replaceItem Single Card,Others 2
 
   const items = Array.from({ length: 24 }, (_, index) => makeItem(index));
   services.library.recentJobsStore.actions.setItems(items);
-  await waitFor(() => byId(dom, "recent-jobs-list").querySelectorAll(".recent-job-item").length === 24, "24 Card in place.");
-await wait(30); // let first round render effects/commits settle completely
+  await waitFor(() => byId(dom, "recent-jobs-list").querySelectorAll(".recent-job-item").length === 24, "24 张卡片就位");
+  await wait(30); // 让首轮渲染的 effect/commit 完全落定
 
   resetCardRenderCountsForTests();
 
@@ -345,26 +345,26 @@ await wait(30); // let first round render effects/commits settle completely
   const previous = items.find((item) => item.job_id === patchedJobId);
   services.library.recentJobsStore.actions.replaceItem({
     ...previous,
-    title: "Book 5 · Title updated",
+    title: "Book 5 · 已更新标题",
     status: "running",
     display_stage: "translate",
   });
 
   await waitFor(() => {
     const card = byId(dom, "recent-jobs-list").querySelector(`.recent-job-item[data-job-id="${patchedJobId}"]`);
-return card?.querySelector(".recent-job-id")?.title === "Book 5 · Updated title";
-  }, "Patched card content updated.");
+    return card?.querySelector(".recent-job-id")?.title === "Book 5 · 已更新标题";
+  }, "被补丁的卡片内容已更新");
   await wait(30);
 
-// Assert "at least one re-render" rather than "exactly once": react-dom's useSyncExternalStore in
-// dev builds, if a store notifies during rendering (non-React event batching context, e.g.
-// this test directly calls store.actions rather than via onClick), another notification may occur during commit
-// do a "tear prevention" consistency check before commit, replaying a render on the same fiber (the two results
-// props/output are identical, not two real updates from stale→latest) — this is React internal behavior
-// (can be verified by stack trace that both calls originate from beginWork/updateFunctionComponent),
-// not a memo logic flaw here; asserting strict "===1" would be overly sensitive to React version upgrades.
-// The core invariant is always the following "uninvolved cards 0 times".
-  assert.ok(getCardRenderCountForTests(patchedJobId) >= 1, "Patched cards should re-render at least once.");
+  // 断言"至少重渲一次"而非"恰好一次":react-dom 的 useSyncExternalStore 在
+  // dev 构建下,若某个 store 在渲染进行期间(非 React 事件批处理上下文,例如
+  // 本测试直接调 store.actions 而非走 onClick)又发生一次通知,会在 commit
+  // 前做一次"防撕裂"一致性复核,对同一 fiber 重放一次 render(两次拿到的
+  // props/输出完全相同,不是过期→最新的两次真实更新)——这是 React 内部行为
+  // (可用 stack trace 验证两次调用都源自 beginWork/updateFunctionComponent),
+  // 不是这里的 memo 逻辑缺陷,断言死板的"===1"会对 React 版本升级过度敏感。
+  // 核心不变量始终是下面的"未涉及卡片 0 次"。
+  assert.ok(getCardRenderCountForTests(patchedJobId) >= 1, "被补丁的卡片应至少重渲一次");
   for (const item of items) {
     if (item.job_id === patchedJobId) {
       continue;
@@ -372,7 +372,7 @@ return card?.querySelector(".recent-job-id")?.title === "Book 5 · Updated title
     assert.equal(
       getCardRenderCountForTests(item.job_id),
       0,
-Uninvolved card {item.job_id} should not re-render (memo regression)`,
+      `未涉及的卡片 ${item.job_id} 不应重渲(memo 回归)`,
     );
   }
 
@@ -381,30 +381,30 @@ Uninvolved card {item.job_id} should not re-render (memo regression)`,
   host.remove();
 });
 
-test("RecentJobsLibrary：workflow Suspend without deadlock(open→job-updated Still patching,No full-page reload→related→300ms Restore after refresh)", async () => {
-// Blueprint risk 5: workflow open during refresh-scheduler.setSuspended(true),
-// command-handlers.js's onJobUpdated still unconditionally calls runtimePatches.update (single card
-// patch unaffected), but scheduleRefresh (full page refresh) will be suspended and swallowed; after close
-// scheduleRefresh({delay:300}) should resume refresh, not deadlock permanently.
+test("RecentJobsLibrary：workflow 挂起不死锁(开→job-updated 仍打补丁,不发起整页刷新→关→300ms 后刷新恢复)", async () => {
+  // 蓝图风险 5:workflow 打开期间 refresh-scheduler.setSuspended(true),
+  // command-handlers.js 的 onJobUpdated 仍无条件调 runtimePatches.update(单卡
+  // 补丁不受影响),但被 scheduleRefresh(整页刷新)会被挂起吞掉;关闭后
+  // scheduleRefresh({delay:300}) 应该让刷新恢复,不能永久卡死。
   const dom = makeDom("?mock=parallel");
   const { services, root, host } = await bootHomeApp(dom);
   const { APP_EVENTS } = await import("../src/js/contracts/app-contract.js");
   const { HOME_LOADING_STATES } = await import("../src/js/features/home/state.js");
 
-// After F2 document centralization, grid loads "documents" (mock has several, including collection), here we only need one
-// translated card with real job as patch target (runtimePatches.update finds card by real job_id).
+  // F2 文档中心化后网格加载的是"文档"(mock 有若干篇,含馆藏),这里只需要一张
+  // 有真实 job 的已翻译卡当补丁靶子(runtimePatches.update 按真实 job_id 找卡)。
   await waitFor(
     () => services.library.recentJobsStore.getSnapshot().items.some((item) => item.job_id && !item.library_only),
-    "Translated on first load mock Documentation ready.",
+    "初次加载的已翻译 mock 文档就位",
   );
   const originalItem = services.library.recentJobsStore
     .getSnapshot().items.find((item) => item.job_id && !item.library_only);
 
   services.workflowDialog.requestOpenUpload();
-// Phase C (shadcn refactor): after TranslationWorkflowDialog switched to Radix Dialog, does not
-// forceMount Content — not mounted when closed, assertion changed from "hidden class" to "whether mounted"
-// (same as CredentialsDialog and other Phase C first-wave dialogs).
-await waitFor(() => byId(dom, "translation-workflow-dialog") !== null, "workflow dialog opened (Suspend Refresh)");
+  // 阶段 C(shadcn 改造):TranslationWorkflowDialog 换成 Radix Dialog 后不
+  // forceMount Content——关闭时不挂载,断言从"hidden 类"改为"是否挂载"
+  // (同 CredentialsDialog 等阶段 C 第一批对话框的先例)。
+  await waitFor(() => byId(dom, "translation-workflow-dialog") !== null, "工作流对话框打开(挂起刷新)");
 
   let sawLoadingWhileSuspended = false;
   const unsubscribe = services.stores.homeState.subscribe((snapshot) => {
@@ -420,23 +420,23 @@ await waitFor(() => byId(dom, "translation-workflow-dialog") !== null, "workflow
   await waitFor(() => {
     const card = byId(dom, "recent-jobs-list").querySelector(`.recent-job-item[data-job-id="${originalItem.job_id}"]`);
     return card?.querySelector(".recent-job-id")?.title === "Patched While Suspended";
-  }, "Single-card patch during suspend.(runtimePatches.update)Remains unconditionally effective.");
+  }, "挂起期间单卡补丁(runtimePatches.update)仍无条件生效");
 
   await wait(150);
-  assert.equal(sawLoadingWhileSuspended, false, "Do not trigger full-page refresh during suspend.(scheduleRefresh Should be isSuspended Swallow)");
+  assert.equal(sawLoadingWhileSuspended, false, "挂起期间不应发起整页刷新(scheduleRefresh 应被 isSuspended 吞掉)");
   unsubscribe();
 
-// recovery refresh after close is scheduleRefresh({delay:300}) → loadRecentJobs({reset:true,
-// silent:true}) — silent:true means loadingState won't flip to LOADING (silent refresh
-// should not make grid flash loading), so we change to directly observe recentJobsStatePort.store
-// whether a setItems notification actually happened again (the only visible signal that silent refresh completed).
+  // 关闭后的恢复刷新是 scheduleRefresh({delay:300}) → loadRecentJobs({reset:true,
+  // silent:true})——silent:true 意味着 loadingState 不会翻到 LOADING(静默刷新
+  // 不应该让网格闪 loading),所以这里改为直接观测 recentJobsStatePort.store
+  // 是否真的又发生了一次 setItems 通知(silent 刷新完成的唯一可见信号)。
   let notifyCountAfterClose = 0;
   const unsubscribe2 = services.library.recentJobsStore.subscribe(() => {
     notifyCountAfterClose += 1;
   });
   services.workflowDialog.requestClose();
-  await waitFor(() => byId(dom, "translation-workflow-dialog") === null, "Workflow dialog closed.");
-  await waitFor(() => notifyCountAfterClose > 0, "After closing 300ms Silent refresh should resume.(No deadlocks.)");
+  await waitFor(() => byId(dom, "translation-workflow-dialog") === null, "工作流对话框关闭");
+  await waitFor(() => notifyCountAfterClose > 0, "关闭后 300ms 静默刷新应恢复(不死锁)");
   unsubscribe2();
 
   root.unmount();

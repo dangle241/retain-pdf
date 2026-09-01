@@ -45,7 +45,7 @@ def build_clean_background_pdf(
                 emit_render_page_progress(
                     current=completed,
                     total=total_pages,
-message=f"Reusing cleaned original background, page {completed}/{total_pages}",
+                    message=f"正在复用已清理原文背景，第 {completed}/{total_pages} 页",
                     payload={
                         "render_stage": "source_background_precleaned_reuse",
                         "page_index": page_index,
@@ -83,7 +83,7 @@ message=f"Reusing cleaned original background, page {completed}/{total_pages}",
             emit_render_page_progress(
                 current=completed,
                 total=total_pages,
-message=f"Cleaning original text background, page {completed}/{total_pages}",
+                message=f"正在清理原文背景，第 {completed}/{total_pages} 页",
                 payload={
                     "render_stage": "source_background_cleanup",
                     "page_index": page_index,

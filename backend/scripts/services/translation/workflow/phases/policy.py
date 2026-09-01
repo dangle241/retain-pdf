@@ -31,7 +31,7 @@ def run_page_policy_stage(
     emit_stage_transition(
         stage="page_policies",
         substage="page_policies",
-        message="Execute page strategy and block classification.",
+        message="开始执行页面策略和块分类",
         progress_current=0,
         progress_total=len(page_payloads),
     )
@@ -53,7 +53,7 @@ def run_page_policy_stage(
         progress_callback=lambda current, total, page_idx, page_classified: emit_stage_progress(
             stage="page_policies",
             substage="page_policies",
-message=f"Executing page strategy, {current}/{total} pages",
+            message=f"正在执行页面策略，第 {current}/{total} 页",
             progress_current=current,
             progress_total=total,
             payload={
@@ -70,7 +70,7 @@ message=f"Executing page strategy, {current}/{total} pages",
     emit_stage_progress(
         stage="page_policies",
         substage="page_policies",
-        message="Page strategy and block classification complete.",
+        message="页面策略和块分类完成",
         progress_current=len(page_payloads),
         progress_total=len(page_payloads),
         elapsed_ms=int((time.perf_counter() - policy_started) * 1000),

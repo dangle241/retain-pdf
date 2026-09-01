@@ -107,9 +107,9 @@ def validate_typst_bundle(backend_root: Path, payload: dict[str, object]) -> Non
 
 = RetainPDF Typst smoke
 
-Chinese font verification: Hello, World.
+中文字体校验：你好，世界。
 
-Built-in math formulas:$ integral_0^1 x^2 dif x = 1/3 $
+内置数学公式：$ integral_0^1 x^2 dif x = 1/3 $
 
 #cmarker.render("**Markdown** package smoke with math: $E = mc^2 + \\\\frac{{a}}{{b}}$", math: mitex)
 """

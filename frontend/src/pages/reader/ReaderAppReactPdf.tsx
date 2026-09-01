@@ -1,4 +1,4 @@
-// React-pdf Reader view: logic in useReaderReactControllerFloating window alignment tool legacy four-piece set).
+// React-pdf 阅读器视图：逻辑在 useReaderReactController；工具为悬浮窗（对齐 legacy 四件套）。
 
 import { useCallback } from "react";
 import { useReaderReactController } from "./hooks/use-reader-react-controller.js";
@@ -26,17 +26,17 @@ export function ReaderAppReactPdf() {
     tools.close();
   }, [tools]);
 
-// citation.page_idx is 0-based; compatible with page / block_id(p00N). Reader page number is 1-based.
+  // citation.page_idx 0 基；兼容 page / block_id(p00N)；阅读器页码 1 基
   const jumpCitation = useCallback((citation: {
     page_idx?: number;
     page?: number;
     block_id?: string;
   } | number) => {
-// Branch/Cut session lock period: never skip PDFPage reload feel (+jump)
+    // 分支/切会话锁定期：绝不跳 PDF（体感像整页刷新+跳转）
     if (isReaderAiNavigationLocked()) return;
     let page1: number | null = null;
     if (typeof citation === "number") {
-// Convention: passing a number directly means 0-based idx
+      // 约定：直接传数字时为 0 基 idx
       if (Number.isFinite(citation) && citation >= 0) {
         page1 = Math.floor(citation) + 1;
       }
@@ -44,7 +44,7 @@ export function ReaderAppReactPdf() {
       const raw = citation.page_idx ?? citation.page;
       if (raw !== undefined && raw !== null && `${raw}`.trim() !== "" && Number.isFinite(Number(raw))) {
         const n = Number(raw);
-// page_idx is usually 0-based; if 1..N and block is also 1-based, 0-based +1 rules still apply (consistent with FTS)
+        // page_idx 常为 0 基；若像 1..N 且 block 也像 1 基则仍按 0 基 +1（与 FTS 一致）
         page1 = Math.floor(n) + 1;
       } else {
         const m = `${citation.block_id || ""}`.match(/(?:^|[^0-9])p0*([1-9]\d*)(?:-|_|\b)/i);
@@ -64,7 +64,7 @@ export function ReaderAppReactPdf() {
         percent={boot.percent}
       />
 
-      {/* Full-page reader: close in top-right corner → Back to home (replaces old iframe Host close button */}
+      {/* 整页阅读器：右上角关闭 → 回主页（替代旧 iframe 宿主关闭钮） */}
       <ReaderCloseHome />
 
       <ReaderModeTabs

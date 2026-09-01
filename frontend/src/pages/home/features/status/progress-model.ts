@@ -1,10 +1,10 @@
-// Risk 6 (first frame placeholder): jobRuntimeFeature.startPolling() in the synchronous chain of
-// renderJob() will be awaited before the network request, first write once placeholder snapshot
-// js/components/ Anti-rebound access control restricted zone,Only pure functions can be copied,Cannot import)。
-// Keep verbatim,No behavior rewrite;ProgressBlock.jsx / useStagedProgressAnimation.js
-// Share this file.
+// buildProgressRenderModel 拷贝自 components/status/job-status-card-rendering.js
+// 第 45-164 行(蓝图 §1 components/status/ 判决,该文件整体死于 cutover——
+// js/components/ 是防回弹门禁禁区,只能拷贝纯函数,不能 import)。
+// 逐字保留,不做任何行为改写;ProgressBlock.jsx / useStagedProgressAnimation.js
+// 共用本文件。
 
-// (render-context.js's applyJobRuntimeSnapshot sync writes currentJobStore),
+/** useStagedProgressAnimation / buildProgressOptions 输出 → ProgressBlock 输入 */
 export type ProgressRenderModelInput = {
   current?: number;
   total?: number;

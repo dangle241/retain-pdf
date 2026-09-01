@@ -1,4 +1,4 @@
-// Notion Left history: collapsible + Rename + Group by time
+// Notion 式左侧历史：可折叠 + 重命名 + 按时间分组
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -18,19 +18,19 @@ function startOfDay(d: Date) {
 
 function groupLabel(updatedAt: string, now = Date.now()): string {
   const t = Date.parse(updatedAt);
-  if (!Number.isFinite(t)) return "Earlier";
+  if (!Number.isFinite(t)) return "更早";
   const day = startOfDay(new Date(t));
   const today = startOfDay(new Date(now));
   const diffDays = Math.round((today - day) / 86400000);
-  if (diffDays <= 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return "Past 7 days";
-if (diffDays < 30) return "Past 30 days";
+  if (diffDays <= 0) return "今天";
+  if (diffDays === 1) return "昨天";
+  if (diffDays < 7) return "过去 7 天";
+  if (diffDays < 30) return "过去 30 天";
   return "更早";
 }
 
 function groupSessions(sessions: HomeAskSession[]) {
-const order = ["Today", "Yesterday", "Past 7 days", "Past 30 days", "Earlier"];
+  const order = ["今天", "昨天", "过去 7 天", "过去 30 天", "更早"];
   const map = new Map<string, HomeAskSession[]>();
   for (const s of sessions) {
     const label = groupLabel(s.updatedAt);
@@ -44,9 +44,9 @@ const order = ["Today", "Yesterday", "Past 7 days", "Past 30 days", "Earlier"];
 
 function displayTitle(raw: string): string {
   const m = `${raw || ""}`.match(/^fork-(\d+)-(.*)$/i);
-if (!m) return raw || "Untitled conversation";
+  if (!m) return raw || "未命名对话";
   const rest = m[2].trim();
-return rest ? `${rest} Â· Branch ${m[1]}` : `Branch ${m[1]}`;
+  return rest ? `${rest} · 分支${m[1]}` : `分支${m[1]}`;
 }
 
 export type HomeAskSidebarProps = {
@@ -90,7 +90,7 @@ export function HomeAskSidebar({
   const startRename = (s: HomeAskSession) => {
     if (busy) return;
     setEditingId(s.id);
-    // Edit box displays stored original name (including fork-n- Allow full-segment edit on prefix.
+    // 编辑框展示存储原名（含 fork-n- 前缀时也允许整段改）
     setEditTitle(s.title || "");
   };
 
@@ -115,13 +115,13 @@ export function HomeAskSidebar({
     return (
       <aside
         className="home-ask-sidebar is-collapsed"
-        aria-label="Conversation history (collapsed)"
+        aria-label="对话历史（已折叠）"
       >
         <button
           type="button"
           className="home-ask-sidebar-icon-btn"
-          title="Expand history"
-          aria-label="Expand chat history"
+          title="展开历史"
+          aria-label="展开对话历史"
           aria-expanded={false}
           onClick={() => onCollapsedChange?.(false)}
         >
@@ -131,8 +131,8 @@ export function HomeAskSidebar({
           type="button"
           className="home-ask-sidebar-icon-btn"
           disabled={busy}
-          title="New Conversation"
-aria-label="New conversation"
+          title="新对话"
+          aria-label="新对话"
           onClick={onNew}
         >
           <MessageSquarePlus size={16} strokeWidth={2.1} aria-hidden />
@@ -142,15 +142,15 @@ aria-label="New conversation"
   }
 
   return (
-    <aside className="home-ask-sidebar" aria-label="Chat History">
+    <aside className="home-ask-sidebar" aria-label="对话历史">
       <div className="home-ask-sidebar-head">
         <div className="home-ask-sidebar-head-row">
-<span className="home-ask-sidebar-brand">History</span>
+          <span className="home-ask-sidebar-brand">历史</span>
           <button
             type="button"
             className="home-ask-sidebar-icon-btn home-ask-sidebar-collapse"
-            title="Collapse sidebar"
-            aria-label="Collapse history"
+            title="折叠侧栏"
+            aria-label="折叠对话历史"
             aria-expanded={true}
             onClick={() => onCollapsedChange?.(true)}
           >
@@ -161,19 +161,19 @@ aria-label="New conversation"
           type="button"
           className="home-ask-sidebar-new"
           disabled={busy}
-title="New conversation"
+          title="新对话"
           onClick={onNew}
         >
           <MessageSquarePlus size={15} strokeWidth={2.1} aria-hidden />
-<span>New conversation</span>
+          <span>新对话</span>
         </button>
       </div>
 
       <div className="home-ask-sidebar-scroll">
         {loading && sessions.length === 0 ? (
-          <p className="home-ask-sidebar-empty">Load history…</p>
+          <p className="home-ask-sidebar-empty">加载历史…</p>
         ) : sessions.length === 0 ? (
-          <p className="home-ask-sidebar-empty">No historical conversations yet</p>
+          <p className="home-ask-sidebar-empty">暂无历史对话</p>
         ) : (
           groups.map((g) => (
             <div key={g.label} className="home-ask-sidebar-group">
@@ -193,7 +193,7 @@ title="New conversation"
                             value={editTitle}
                             maxLength={80}
                             disabled={busy}
-                            aria-label="Conversation Title"
+                            aria-label="对话标题"
                             onChange={(e) => setEditTitle(e.target.value)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") {
@@ -210,8 +210,8 @@ title="New conversation"
                             type="button"
                             className="home-ask-sidebar-icon-btn"
                             disabled={busy || !editTitle.trim()}
-                            aria-label="Save Title"
-title="Save"
+                            aria-label="保存标题"
+                            title="保存"
                             onClick={(e) => {
                               e.stopPropagation();
                               void commitRename();
@@ -223,8 +223,8 @@ title="Save"
                             type="button"
                             className="home-ask-sidebar-icon-btn"
                             disabled={busy}
-                            aria-label="Cancel Rename"
-title="Cancel"
+                            aria-label="取消重命名"
+                            title="取消"
                             onClick={(e) => {
                               e.stopPropagation();
                               cancelRename();
@@ -239,7 +239,7 @@ title="Cancel"
                             type="button"
                             className={`home-ask-sidebar-item${active ? " is-active" : ""}`}
                             disabled={busy}
-                            title={`${title}(double-click to rename)`}
+                            title={`${title}（双击重命名）`}
                             onClick={() => onSelect(s.id)}
                             onDoubleClick={(e) => {
                               e.preventDefault();
@@ -253,8 +253,8 @@ title="Cancel"
                             type="button"
                             className="home-ask-sidebar-rename"
                             disabled={busy}
-                            aria-label={`rename ${title}`}
-title="Rename"
+                            aria-label={`重命名 ${title}`}
+                            title="重命名"
                             onClick={(e) => {
                               e.stopPropagation();
                               startRename(s);
@@ -266,11 +266,11 @@ title="Rename"
                             type="button"
                             className="home-ask-sidebar-del"
                             disabled={busy}
-aria-label={`Delete ${title}`}
-title="Delete"
+                            aria-label={`删除 ${title}`}
+                            title="删除"
                             onClick={(e) => {
                               e.stopPropagation();
-                              const ok = globalThis.confirm?.(`Delete conversation「${title}」？`);
+                              const ok = globalThis.confirm?.(`删除对话「${title}」？`);
                               if (ok) onDelete(s.id);
                             }}
                           >

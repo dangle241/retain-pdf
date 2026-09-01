@@ -2,13 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// useRecentJobCover (Blueprint Â§6 new test â©). Coverage:
-// - Cache reuse (module-level Map in image-loader.js, same URL+cacheVersion sends only one
-//   fetch, second card hits cache directly);
-// - Race condition protection (token): when items switch rapidly, only the last request result writes to state;
-// - No revoke on unmount (Blueprint risk Â§8.3): must not call URL.revokeObjectURL after hook unmountâ
-//   objectURL cache lifecycle is managed solely by image-loader.js's invalidateRecentJobImages
-//   React unmount must never prematurely revoke a URL that other cards might still be using.
+// useRecentJobCover(蓝图 §6 新增测试⑩)。覆盖:
+// - 缓存复用(image-loader.js 的模块级 Map,同一 URL+cacheVersion 只发一次
+//   fetch,第二张卡片直接命中缓存);
+// - 竞态防护(token):item 快速切换时,只有最后一次请求的结果会写进 state;
+// - 卸载不 revoke(蓝图风险 §8.3):hook 卸载后不得调用 URL.revokeObjectURL——
+//   objectURL 缓存的生命周期只归 image-loader.js 的 invalidateRecentJobImages
+//   管,React 卸载绝不能提前吊销别的卡片可能还在用的同一个 URL。
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost/index.html" });
 for (const key of ["window", "document", "HTMLElement", "CustomEvent", "Event", "Node"]) {
@@ -37,7 +37,7 @@ async function waitFor(predicate, description) {
     }
     await wait(10);
   }
-assert.fail(`Wait timeout: ${description}`);
+  assert.fail(`等待超时：${description}`);
 }
 
 function installFetchAndObjectUrlMocks() {
@@ -70,7 +70,7 @@ function HookHost({ item, onUpdate }) {
   return null;
 }
 
-test("useRecentJobCover: same URL+cacheVersion hits module-level cache, no duplicate fetch", async () => {
+test("useRecentJobCover：同一 URL+cacheVersion 命中模块级缓存,不重复 fetch", async () => {
   const { fetchCalls } = installFetchAndObjectUrlMocks();
   const host = dom.window.document.createElement("div");
   dom.window.document.body.appendChild(host);
@@ -92,15 +92,15 @@ test("useRecentJobCover: same URL+cacheVersion hits module-level cache, no dupli
     ));
   });
 
-await waitFor(() => seenA.some(Boolean) && seenB.some(Boolean), "Both cards received cover URL");
-assert.equal(fetchCalls.length, 1, "Both cards share same module-level cache, should only fetch once");
-assert.equal(seenA.at(-1), seenB.at(-1), "Both cards received same objectURL");
+  await waitFor(() => seenA.some(Boolean) && seenB.some(Boolean), "两张卡片都拿到封面 URL");
+  assert.equal(fetchCalls.length, 1, "两张卡片共享同一模块级缓存,只应发一次 fetch");
+  assert.equal(seenA.at(-1), seenB.at(-1), "两张卡片拿到同一个 objectURL");
 
   root.unmount();
   host.remove();
 });
 
-test("useRecentJobCover: progress changes during execution do not re-fetch cover (no flicker regression)", async () => {
+test("useRecentJobCover：运行中进度变化不重复拉取封面(卡片不闪烁回归)", async () => {
   const { fetchCalls } = installFetchAndObjectUrlMocks();
   const host = dom.window.document.createElement("div");
   dom.window.document.body.appendChild(host);
@@ -115,29 +115,29 @@ test("useRecentJobCover: progress changes during execution do not re-fetch cover
     progress: { current: 1, total: 10, percent: 10 },
   };
   root.render(React.createElement(HookHost, { item: running1, onUpdate: (url) => seen.push(url) }));
-await waitFor(() => seen.some(Boolean), "First frame cover arrived during execution");
+  await waitFor(() => seen.some(Boolean), "运行中首帧封面到达");
   const fetchesAfterFirst = fetchCalls.length;
-assert.equal(fetchesAfterFirst, 1, "Should fetch cover once initially");
+  assert.equal(fetchesAfterFirst, 1, "首次应拉取一次封面");
 
-// Mock a polling patch: progress and updated_at changed, but job is still runningâcover should not
-// be re-fetched (otherwise <img> src changes every tick and flickers).
+  // 模拟一次轮询补丁:进度、updated_at 都变了,但任务仍是 running——封面不该
+  // 因此重新拉取(否则每一拍 <img> src 一换就闪一下)。
   const running2 = { ...running1, updated_at: "2026-01-01T00:00:05Z", progress: { current: 5, total: 10, percent: 50 } };
   root.render(React.createElement(HookHost, { item: running2, onUpdate: (url) => seen.push(url) }));
   await wait(60);
-assert.equal(fetchCalls.length, fetchesAfterFirst, "Progress/timestamp changes during execution should not re-fetch cover");
+  assert.equal(fetchCalls.length, fetchesAfterFirst, "运行中仅进度/时间戳变化不应重新拉取封面");
 
-// To final state: should bust once to get potentially updated finished cover.
+  // 到终态:应 bust 一次,取可能已更新的成品封面。
   const done = { ...running1, status: "succeeded", updated_at: "2026-01-01T00:00:10Z" };
   root.render(React.createElement(HookHost, { item: done, onUpdate: (url) => seen.push(url) }));
-await waitFor(() => fetchCalls.length === fetchesAfterFirst + 1, "Should re-fetch cover (bust) at final state");
+  await waitFor(() => fetchCalls.length === fetchesAfterFirst + 1, "终态应重新拉取一次封面(bust)");
 
   root.unmount();
   host.remove();
 });
 
-test("useRecentJobCover: token prevents race conditions during rapid item switching, only last request writes state", async () => {
+test("useRecentJobCover：item 快速切换时 token 防竞态,只有最后一次请求写 state", async () => {
   const { fetchCalls } = installFetchAndObjectUrlMocks();
-// Make first request intentionally slower than second to simulate "old request arrives late" race condition
+  // 让第一次请求刻意慢于第二次,模拟"旧请求后到达"的竞态
   let resolveFirst;
   const firstGate = new Promise((resolve) => { resolveFirst = resolve; });
   const originalFetch = globalThis.fetch;
@@ -166,12 +166,12 @@ test("useRecentJobCover: token prevents race conditions during rapid item switch
   root.render(React.createElement(Wrapper, { item: itemSlow }));
   await wait(20);
   root.render(React.createElement(Wrapper, { item: itemFast }));
-await waitFor(() => seen.some((url) => url && url.includes("fast")), "Fast request (latest item) already written");
+  await waitFor(() => seen.some((url) => url && url.includes("fast")), "快请求(最新 item)已经写入");
 
   resolveFirst();
   await wait(50);
 
-assert.ok(!seen.at(-1)?.includes("slow"), "Slow request (old item) should not overwrite latest state (token race protection)");
+  assert.ok(!seen.at(-1)?.includes("slow"), "慢请求(旧 item)不应覆盖最新状态(token 防竞态)");
   assert.equal(fetchCalls.length, 2);
 
   root.unmount();
@@ -179,7 +179,7 @@ assert.ok(!seen.at(-1)?.includes("slow"), "Slow request (old item) should not ov
   globalThis.fetch = originalFetch;
 });
 
-test("useRecentJobCover: do not revoke objectURL on unmount (Risk Â§8.3)", async () => {
+test("useRecentJobCover：卸载不 revoke objectURL(风险 §8.3)", async () => {
   const { revokeCalls } = installFetchAndObjectUrlMocks();
   const host = dom.window.document.createElement("div");
   dom.window.document.body.appendChild(host);
@@ -192,12 +192,12 @@ test("useRecentJobCover: do not revoke objectURL on unmount (Risk Â§8.3)", asy
   };
   const seen = [];
   root.render(React.createElement(HookHost, { item, onUpdate: (url) => seen.push(url) }));
-await waitFor(() => seen.some(Boolean), "Cover URL arrived");
+  await waitFor(() => seen.some(Boolean), "封面 URL 到达");
 
   root.unmount();
   await wait(30);
 
-assert.equal(revokeCalls.length, 0, "Must not revoke on unmountâobjectURL cache managed only by invalidateRecentJobImages");
+  assert.equal(revokeCalls.length, 0, "卸载不得 revoke——objectURL 缓存只归 invalidateRecentJobImages 管");
 
   host.remove();
 });

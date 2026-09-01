@@ -1,7 +1,7 @@
 // scene-render.jsx
 // 4 substeps: mask, typst overlay, merge, compress.
 
-// ââ 3.1 Background / Masking processing âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── 3.1 背景 / 遮盖处理 ───────────────────────────────────────────────────
 function SceneMask({ progress }) {
   // PDF page on left: original English text being covered by white rectangles, line by line.
   // On the right: a "background" extracted (figure stays, text gone).
@@ -81,7 +81,7 @@ function SceneMask({ progress }) {
   );
 }
 
-// ── 3.2 Typst overlay Build ────────────────────────────────────────────────
+// ── 3.2 Typst overlay 编译 ────────────────────────────────────────────────
 function SceneTypst({ progress }) {
   // Left: code editor showing Typst overlay code being typed/processed line by line.
   // Right: PDF page with Chinese text appearing in the same layout positions.
@@ -94,14 +94,14 @@ function SceneTypst({ progress }) {
     { text: '#set text(font: "Source Han Serif SC", size: 9.5pt)', kind: 'directive' },
     { text: '', kind: 'blank' },
     { text: '#place(dx: 62pt, dy: 88pt)[摘要]', kind: 'place', col: -1, idx: -1 },
-    { text: '#place(dx: 62pt, dy: 98pt)[End-to-end pipeline…]', kind: 'place', col: -1, idx: -1 },
+    { text: '#place(dx: 62pt, dy: 98pt)[我们提出一种端到端流水线…]', kind: 'place', col: -1, idx: -1 },
     { text: '#place(dx: 62pt, dy: 122pt)[1 引言]', kind: 'place', col: 0, idx: 0 },
-    { text: '#place(dx: 62pt, dy: 131pt)[Document translation has long been plagued by layout collapse.…]', kind: 'place', col: 0, idx: 1 },
-    { text: '#place(dx: 62pt, dy: 140pt)[Result PDF Missing image position and column…]', kind: 'place', col: 0, idx: 2 },
-    { text: '#place(dx: 62pt, dy: 149pt)[This work Typst overlay Resolve…]', kind: 'place', col: 0, idx: 3 },
-    { text: '#place(dx: 184pt, dy: 122pt)[图 1: System architecture]', kind: 'place', col: 1, idx: 0 },
+    { text: '#place(dx: 62pt, dy: 131pt)[文档翻译长期受困于排版崩塌…]', kind: 'place', col: 0, idx: 1 },
+    { text: '#place(dx: 62pt, dy: 140pt)[结果 PDF 丢失图片位置与栏目…]', kind: 'place', col: 0, idx: 2 },
+    { text: '#place(dx: 62pt, dy: 149pt)[本工作以 Typst overlay 解决…]', kind: 'place', col: 0, idx: 3 },
+    { text: '#place(dx: 184pt, dy: 122pt)[图 1: 系统架构]', kind: 'place', col: 1, idx: 0 },
     { text: '#place(dx: 184pt, dy: 230pt)[2 方法]', kind: 'place', col: 1, idx: 12 },
-    { text: '#place(dx: 184pt, dy: 239pt)[The pipeline is divided into three stages.…]', kind: 'place', col: 1, idx: 13 },
+    { text: '#place(dx: 184pt, dy: 239pt)[流水线分为三个阶段…]', kind: 'place', col: 1, idx: 13 },
   ];
 
   const visibleLines = Math.floor(codeP * codeLines.length);
@@ -191,14 +191,14 @@ function RenderingPage({ progress }) {
       <svg width={PAGE_W} height={PAGE_H} viewBox={`0 0 ${PAGE_W} ${PAGE_H}`}>
         <text x={PAGE_W / 2} y={48} textAnchor="middle"
           fontFamily={SERIF} fontSize={13} fontWeight={700} fill={INK} opacity={progress > 0.05 ? 1 : 0}>
-Review of Document Translation Methods Preserving Layout
+          保留排版的文档翻译方法综述
         </text>
         <text x={PAGE_W / 2} y={64} textAnchor="middle"
           fontFamily={SERIF} fontSize={9} fill={FAINT} opacity={progress > 0.07 ? 1 : 0}>
-Lin Zhixing Â· Chen Yutong Â· 2024
+          林知行 · 陈雨桐 · 2024
         </text>
 
-<text x={24} y={86} fontFamily={SERIF} fontSize={8} fontWeight={700} fill={INK} opacity={progress > 0.1 ? 1 : 0}>Abstract</text>
+        <text x={24} y={86} fontFamily={SERIF} fontSize={8} fontWeight={700} fill={INK} opacity={progress > 0.1 ? 1 : 0}>摘要</text>
         {progress > 0.1 && <TextLine x={24} y={94} width={PAGE_W - 48} language="zh" seed={9001} />}
         {progress > 0.12 && <TextLine x={24} y={103} width={PAGE_W - 48 - 30} language="zh" seed={9002} />}
 
@@ -252,7 +252,7 @@ Lin Zhixing Â· Chen Yutong Â· 2024
             `} fill="none" stroke={INK} strokeWidth="0.8" />
             <text x={colX2 + colW / 2} y={lineY0 + 11 * lineH + 4} textAnchor="middle"
               fontFamily={SERIF} fontSize={6} fill={FAINT} fontStyle="italic">
-Fig 1
+              图 1
             </text>
           </g>
         )}
@@ -291,7 +291,7 @@ function TypstHighlight({ text }) {
   return <span>{tokens}</span>;
 }
 
-// ââ 3.3 PDF Synthesis ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── 3.3 合成 PDF ──────────────────────────────────────────────────────────
 function SceneMerge({ progress }) {
   // 12 pages fly in from off-canvas and stack into one PDF.
   const pages = 12;
@@ -341,13 +341,13 @@ function SceneMerge({ progress }) {
         borderRadius: 999, padding: '6px 16px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
       }}>
-Synthesizing <span style={{ fontWeight: 600 }}>{Math.min(pages, Math.floor(progress * pages * 1.2))}</span> / 12 pages
+        合成 <span style={{ fontWeight: 600 }}>{Math.min(pages, Math.floor(progress * pages * 1.2))}</span> / 12 页
       </div>
     </div>
   );
 }
 
-// ââ 3.4 Compression ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── 3.4 压缩 ──────────────────────────────────────────────────────────────
 function SceneCompress({ progress }) {
   // A box visualization: starts large (28.4 MB), compresses down (3.1 MB).
   // Show a sliding crusher/ratio + filesize numbers + bytes "vacuumed" particles.

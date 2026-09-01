@@ -10,11 +10,11 @@ import {
   shapeDocumentsWithBooks,
 } from "../../composition/external.js";
 
-// Category(Collection) Domain's unique assembly face. This is a pure React newly created domain in Era, no old world
-// controller.js Reusable,Skip other domain logic. mountXFeature()/viewPort Shell——
-// Directly bind one layer. apiPrefix Thin function collection,composition.js Create instance once,
-// CategoriesView.jsx/CollectionManageDialog.jsx via services.collections.controller
-// Consumption.
+// 分类(合集)域的唯一装配面。这是一个纯 React 时代新建的域,没有旧世界
+// controller.js 可复用,所以不套其余域那套 mountXFeature()/viewPort 壳子——
+// 直接是一层绑好 apiPrefix 的薄函数集合,composition.js 建一次实例,
+// CategoriesView.jsx/CollectionManageDialog.jsx 经 services.collections.controller
+// 消费。
 
 export function createCollectionsController({ apiPrefix }) {
   return {
@@ -25,29 +25,29 @@ export function createCollectionsController({ apiPrefix }) {
     addDocuments: (collectionId, documentIds) => addDocumentsToCollection(apiPrefix, collectionId, documentIds),
     removeDocument: (collectionId, documentId) => removeDocumentFromCollection(apiPrefix, collectionId, documentId),
 
-// Checklist for management popup: All Documents(document Shape, including title), sufficient, not needed.
-    // job Card visual fields.
+    // 管理弹窗的勾选清单:全部文档(document 形状,含 title),够用不需要
+    // job 卡片的视觉字段。
     listAllDocuments: async () => {
       const { documents = [] } = await fetchDocumentList(apiPrefix, { limit: 500 });
       return documents;
     },
 
-// Current folder members document_id set(Used when opening existing category in management modal
-    // Initial checked state)。
+    // 某个文件夹当前的成员 document_id 集合(管理弹窗打开已有分类时用来
+    // 勾选初始状态)。
     async listCollectionDocumentIds(collectionId) {
       const { documents = [] } = await fetchDocumentList(apiPrefix, { collectionId, limit: 500 });
       return documents.map((doc: { document_id?: string }) => doc.document_id);
     },
 
-    // Expand folder/Cover preview data source:collection_id → all documents in the collection → Each article
-    // create a card item(and library homepage document-library-source.js Same set
+    // 文件夹展开/封面预览的数据源:collection_id → 该合集全部文档 → 每篇都
+    // 造一张卡片 item(和图书馆主页 document-library-source.js 同一套
     // shapeDocumentCardItem)。
     //
-    // Follows the same logic as the library main grid(document-library-source.js)Identical set. documents →
-// cards orchestration(shapeDocumentsWithBooks): Overlay translated documents library/books live,
-// Library(untranslated) Generate collection card from document, return all. Formerly divergent old copy, only keep
-// Keep translated documents â collections full of library items show "Empty Collection"(mismatch with document_count
-    // bug),Converge to unified orchestration; no further divergence.
+    // 走和图书馆主网格(document-library-source.js)完全同一套 documents →
+    // cards 编排(shapeDocumentsWithBooks):已翻译文档叠加 library/books 活态,
+    // 馆藏(未翻译)文档造馆藏卡,全部返回。曾经这里是一份发散的旧拷贝、只保
+    // 留已翻译文档 → 满是馆藏的合集显示"空合集"(和 document_count 对不上的
+    // bug),收口到统一编排后不会再发散。
     async fetchFolderBooks(collectionId) {
       const { documents = [] } = await fetchDocumentList(apiPrefix, { collectionId, limit: 500 });
       return shapeDocumentsWithBooks(documents, { fetchLibraryBookList, apiPrefix });

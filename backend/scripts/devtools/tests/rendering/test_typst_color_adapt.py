@@ -94,8 +94,8 @@ def test_background_book_source_draws_sampled_block_fill() -> None:
                             "page_idx": 0,
                             "block_type": "text",
                             "bbox": [10.0, 20.0, 120.0, 62.0],
-                            "translated_text": "gray-background text block",
-"protected_translated_text": "gray-background text block",
+                            "translated_text": "灰底文本块",
+                            "protected_translated_text": "灰底文本块",
                             "formula_map": [],
                             "_render_cover_fill": (0.85, 0.85, 0.85),
                         }
@@ -161,8 +161,8 @@ def test_prewarm_color_adapt_uses_full_visual_profile_without_resampling() -> No
 
     pages = {
         0: [
-            {"item_id": "p001-b001", "bbox": [10, 20, 80, 40], "translated_text": "A"},
-            {"item_id": "p001-b002", "bbox": [10, 50, 80, 70], "translated_text": "B"},
+            {"item_id": "p001-b001", "bbox": [10, 20, 80, 40], "translated_text": "甲"},
+            {"item_id": "p001-b002", "bbox": [10, 50, 80, 70], "translated_text": "乙"},
         ]
     }
     profile = DocumentVisualProfile(
@@ -231,7 +231,7 @@ def test_overlay_color_adapt_samples_local_gray_fill_without_page_background_ima
                 {
                     "item_id": "p001-b001",
                     "bbox": [26.0, 40.0, 130.0, 66.0],
-"translated_text": "translation",
+                    "translated_text": "译文",
                     "_render_use_cover_fill": True,
                 }
             ],
@@ -268,7 +268,7 @@ def test_overlay_color_adapt_batch_sampler_uses_rect_area_compatibility() -> Non
                     48 + (index % 4) * 54,
                     42 + (index // 4) * 64,
                 ],
-"translated_text": "translation",
+                "translated_text": "译文",
                 "_render_use_cover_fill": True,
             }
             for index in range(8)
@@ -302,7 +302,7 @@ def test_overlay_color_adapt_prefers_inner_colored_panel_over_white_neighbors() 
                 {
                     "item_id": "p001-b011",
                     "bbox": [45.0, 48.0, 165.0, 102.0],
-"translated_text": "translation",
+                    "translated_text": "译文",
                     "_render_use_cover_fill": True,
                 }
             ],
@@ -332,14 +332,14 @@ def test_overlay_color_adapt_uses_visual_title_text_color_only_for_titles() -> N
                     "bbox": [20.0, 20.0, 220.0, 58.0],
                     "layout_role": "title",
                     "structure_role": "title",
-                    "translated_text": "Color Title",
+                    "translated_text": "彩色标题",
                 },
                 {
                     "item_id": "p001-body",
                     "bbox": [20.0, 78.0, 230.0, 105.0],
                     "layout_role": "paragraph",
                     "structure_role": "body",
-"translated_text": "body text",
+                    "translated_text": "正文",
                 },
             ],
         )
@@ -365,7 +365,7 @@ def test_overlay_color_adapt_skips_local_sampling_for_plain_body_blocks() -> Non
                 "bbox": [20.0, 20.0 + idx * 12.0, 220.0, 30.0 + idx * 12.0],
                 "layout_role": "paragraph",
                 "structure_role": "body",
-"translated_text": "body text",
+                "translated_text": "正文",
             }
             for idx in range(8)
         ]
@@ -396,14 +396,14 @@ def test_overlay_color_adapt_samples_cover_fill_blocks_only_when_title_has_text_
                 "bbox": [20.0, 20.0, 220.0, 50.0],
                 "layout_role": "title",
                 "structure_role": "title",
-                "translated_text": "Title",
+                "translated_text": "标题",
             },
             {
                 "item_id": "p001-cover",
                 "bbox": [20.0, 60.0, 220.0, 90.0],
                 "layout_role": "paragraph",
                 "structure_role": "body",
-                "translated_text": "gray-background body text",
+                "translated_text": "灰底正文",
                 "_render_use_cover_fill": True,
             },
             {
@@ -411,7 +411,7 @@ def test_overlay_color_adapt_samples_cover_fill_blocks_only_when_title_has_text_
                 "bbox": [20.0, 100.0, 220.0, 130.0],
                 "layout_role": "paragraph",
                 "structure_role": "body",
-                "translated_text": "Body Text",
+                "translated_text": "普通正文",
             },
         ]
 
@@ -453,7 +453,7 @@ def test_overlay_color_adapt_reads_title_color_from_text_spans_before_visual_sam
                         "bbox": [20.0, 20.0, 220.0, 58.0],
                         "layout_role": "title",
                         "structure_role": "title",
-"translated_text": "colored title",
+                        "translated_text": "彩色标题",
                     }
                 ],
             )
@@ -485,7 +485,7 @@ def test_overlay_color_adapt_keeps_white_policy_fast_path() -> None:
                         "bbox": [20.0, 40.0, 220.0, 70.0],
                         "layout_role": "paragraph",
                         "structure_role": "body",
-                        "translated_text": "white background cover",
+                        "translated_text": "白底覆盖",
                         "_render_policy": {"overlay_fill": "white"},
                     }
                 ],

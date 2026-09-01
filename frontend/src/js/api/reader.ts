@@ -16,7 +16,7 @@ export async function fetchReaderRegions(jobId, apiPrefix) {
     if (resp.status === 404) {
       return { items: [] };
     }
-    throw new Error(`Failed to read reading region, please try again later.(${resp.status})`);
+    throw new Error(`读取阅读区域失败，请稍后重试。(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -34,7 +34,7 @@ export async function fetchReaderMetadata(jobId, apiPrefix) {
     if (resp.status === 404) {
       return null;
     }
-    throw new Error(`Failed to read reading metadata, please try again later.(${resp.status})`);
+    throw new Error(`读取阅读元数据失败，请稍后重试。(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -45,12 +45,12 @@ export async function fetchReaderAiChat(jobId, payload, apiPrefix) {
     void apiPrefix;
     const message = `${payload?.message || ""}`.trim();
     return {
-      answer: `这是 mock Chưa thấy nội dung trả lời. Gửi kèm để dịch.${message || "Please ask a question"}`,
+      answer: `这是 mock 阅读问答回复：${message || "请提出一个问题"}`,
       citations: [
         {
           title: "Mock Markdown",
           page: 1,
-          snippet: "mock Mock mode returns fixed reference; real mode calls backend. Reader AI Chat。",
+          snippet: "mock 模式下会返回固定引用，真实模式会调用后端 Reader AI Chat。",
         },
       ],
       used_context: {

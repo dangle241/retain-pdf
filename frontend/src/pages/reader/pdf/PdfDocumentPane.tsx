@@ -1,5 +1,5 @@
-// Single-column PDF column doesn't scroll; vertical scrolling handled by shared scroll shell (align with old reader-scroll-shell).
-// Match height from parent usePageRowSync Done, skip display:contents。
+// 单栏 PDF：栏不滚动；纵向由共享 scroll shell 负责（对齐旧 reader-scroll-shell）。
+// 对照等高由父级 usePageRowSync 完成，不做 display:contents。
 
 import {
   forwardRef,
@@ -23,8 +23,8 @@ import type { PageRowHeights } from "./usePageRowSync.js";
 import type { ReaderPaneId } from "./reader-dom-contract.js";
 
 /**
- * Width by「shell Full width × zoom%」calculated, independent of current column width.
- * pageWidthOverride Pass under this semantics. shell Full-width (not half-width).
+ * 页宽按「shell 全宽 × zoom%」计算，与当前栏宽无关。
+ * pageWidthOverride 在此语义下应传 shell 全宽（不是半宽）。
  */
 
 setupReactPdf();
@@ -43,11 +43,11 @@ export type PdfDocumentPaneProps = {
   emptyLabel?: string;
   scrollRoot?: HTMLElement | null;
   /**
-* Reading area full width (shell clientWidth).
-   * Page draw width = pageWidthFromShell(This value, userZoom), does not change with single‑column/Half-column change.
+   * 阅读区全宽（shell clientWidth）。
+   * 页绘制宽 = pageWidthFromShell(此值, userZoom)，不随单栏/半栏变化。
    */
   pageWidthOverride?: number | null;
-  /** Sync line heights */
+  /** 对照行高同步 */
   rowHeights?: PageRowHeights;
   onMetrics?: () => void;
   onLoadSuccess?: (info: { numPages: number; pane: ReaderPaneId }) => void;
@@ -63,7 +63,7 @@ const PdfDocumentPaneInner = forwardRef<HTMLElement, PdfDocumentPaneProps>(
       preloadedFile = null,
       userZoom = 1,
       visible = true,
-      emptyLabel = "None PDF",
+      emptyLabel = "暂无 PDF",
       scrollRoot = null,
       pageWidthOverride = null,
       rowHeights,
@@ -85,7 +85,7 @@ const PdfDocumentPaneInner = forwardRef<HTMLElement, PdfDocumentPaneProps>(
 
     useImperativeHandle(ref, () => paneEl as HTMLElement, [paneEl]);
 
-// Width only follows shell full width + zoom; forbid using this column's clientWidth (otherwise becomes 25% in comparison mode).
+    // 页宽只跟 shell 全宽 + zoom 走，禁止用本栏 clientWidth（对照会变成 25%）
     useEffect(() => {
       const w = pageWidthOverride && pageWidthOverride >= 80
         ? pageWidthOverride
@@ -96,7 +96,7 @@ const PdfDocumentPaneInner = forwardRef<HTMLElement, PdfDocumentPaneProps>(
       setPaneWidth(w);
     }, [pageWidthOverride, scrollRoot, visible]);
 
-    // shell Sync on size change
+    // shell 尺寸变化时同步
     useEffect(() => {
       if (!scrollRoot || typeof ResizeObserver === "undefined") return;
       if (pageWidthOverride && pageWidthOverride >= 80) return;
@@ -134,7 +134,7 @@ const PdfDocumentPaneInner = forwardRef<HTMLElement, PdfDocumentPaneProps>(
 
     const handleLoadError = useCallback(
       (err: Error) => {
-const message = err?.message || "PDF parsing failed";
+        const message = err?.message || "PDF 解析失败";
         setDocError(message);
         setNumPages(0);
         onNumPagesChange?.(0, pane);
@@ -170,7 +170,7 @@ const message = err?.message || "PDF parsing failed";
         ) : null}
         {loading ? (
           <div className="reader-empty reader-react-pdf-loading" data-reader-pdf-loading={pane}>
-Loading PDFâ¦
+            正在加载 PDF…
           </div>
         ) : null}
         {file && !fetchError ? (

@@ -45,7 +45,7 @@ export function applyDiagnostics(diagnostics, job, setText) {
   setText("detail-failure-stage", summarizeRuntimeField(diagnostics.failed_stage || diagnostics.stage || diagnostics.failed_substage));
   setText("detail-failure-root-cause", summarizeRuntimeField(diagnostics.root_cause || diagnostics.detail || diagnostics.raw_excerpt));
   setText("detail-failure-suggestion", summarizeRuntimeField(diagnostics.suggestion));
-setText("detail-failure-retryable", typeof diagnostics.retryable === "boolean" ? (diagnostics.retryable ? "Yes" : "No") : "-");
+  setText("detail-failure-retryable", typeof diagnostics.retryable === "boolean" ? (diagnostics.retryable ? "是" : "否") : "-");
 }
 
 export function renderFailureDebugContext(job) {
@@ -77,7 +77,7 @@ export function renderFailureDebugContext(job) {
     .filter(([, value]) => value);
 
   if (!rows.length) {
-    container.innerHTML = '<div class="detail-empty">No structured failure context available.</div>';
+    container.innerHTML = '<div class="detail-empty">暂无结构化失败上下文</div>';
     return;
   }
   container.innerHTML = rows.map(([label, value]) => `

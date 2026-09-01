@@ -1,11 +1,11 @@
-// OCR provider card (compare with old components/dialogs/browser-credentials-dialog.js
-// ocrProviderPanels concatenation + features/credentials/validation-view.js's
-// Validate badge semantics. Dead file? import, use JSX Restructure here).
+// OCR provider 卡片(对照旧 components/dialogs/browser-credentials-dialog.js
+// 的 ocrProviderPanels 拼接 + features/credentials/validation-view.js 的
+// 校验徽标语义,死文件不 import,这里用 JSX 结构化重写)。
 //
-// Currently OCR_PROVIDER_DEFINITIONS registered only one paddle provider (config/providers.js),
-// Render panel from config array.,Avoid hardcoding. provider id——Re-add later provider Expand array only.
-// token input is uncontrolled ref (see credentials-view-store.js elementsRef),
-// dialog-values.js/dialog-sync.js(kept)directly read and write .value。
+// 当前 OCR_PROVIDER_DEFINITIONS 只注册了 paddle 一个 provider(config/providers.js),
+// 面板按配置数组渲染,不硬编码 provider id——未来加回 provider 只需扩数组。
+// token 输入是非受控 ref(见 credentials-view-store.js elementsRef),
+// dialog-values.js/dialog-sync.js(kept)直接读写 .value。
 
 import {
   credentialTokenInputId,

@@ -115,7 +115,7 @@ def page_payload() -> dict[int, list[dict]]:
 
 def translated_page_payload() -> dict[int, list[dict]]:
     pages = page_payload()
-    pages[0][0]["protected_translated_text"] = "Internal source"
+    pages[0][0]["protected_translated_text"] = "内部来源"
     return pages
 
 
@@ -133,7 +133,7 @@ def empty_region_page_payload() -> dict[int, list[dict]]:
                 "policy_translate": True,
                 "bbox": [10.0, 120.0, 150.0, 170.0],
                 "protected_source_text": "source outside",
-                "protected_translated_text": "No overlapping areas",
+                "protected_translated_text": "无重叠区域",
             }
         ]
     }
@@ -159,7 +159,7 @@ def tight_gap_page_payload() -> dict[int, list[dict]]:
                     "This body paragraph has enough source text to be treated as body text "
                     "and it contains more than forty compact characters."
                 ),
-                "protected_translated_text": "Trigger preheat phase. Check conditions. bbox Geometry Analysis.",
+                "protected_translated_text": "这是一个正文段落，用于触发预热阶段的紧邻 bbox 几何分析。",
             },
             {
                 "item_id": "p001-b002",
@@ -178,7 +178,7 @@ def tight_gap_page_payload() -> dict[int, list[dict]]:
                     "This second body paragraph follows closely in the same column and also "
                     "contains enough compact characters for body detection."
                 ),
-                "protected_translated_text": "This is the next body paragraph in the same column, used to provide adjacent boundaries.",
+                "protected_translated_text": "这是同一栏的下一段正文，用于提供紧邻边界。",
             },
         ]
     }

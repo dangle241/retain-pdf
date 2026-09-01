@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// One-time mechanical migration: .js → .ts, .jsx → .tsx under src, skip existing .ts/.tsx
-// import paths still written as .js/.jsx, mapped to .ts/.tsx by esbuild/test loader.
+// 一次性机械迁移：src 下 .js → .ts、.jsx → .tsx（跳过已有 .ts/.tsx）
+// import 路径仍写 .js/.jsx，由 esbuild/test loader 映射到 .ts/.tsx。
 
 import fs from "node:fs";
 import path from "node:path";

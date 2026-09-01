@@ -1,5 +1,5 @@
-// Draggable floating action button (FAB// Click to expand menu, drag to reposition.
-// Menu: Comments + Download (Original / Translation / Compare).
+// 可拖动悬浮工具钮（FAB）：点击展开菜单，拖动改位置。
+// 菜单：批注 + 下载（原始 / 译文 / 对照）。
 
 import {
   useCallback,
@@ -56,15 +56,15 @@ const DOWNLOAD_ICONS: Record<DownloadAction, typeof FileText> = {
 };
 
 const DOWNLOAD_SHORT: Record<DownloadAction, string> = {
-source: "Original",
-sideBySide: "Compare",
-translated: "Translation",
+  source: "原文",
+  sideBySide: "对照",
+  translated: "译文",
 };
 
 type FabPos = { x: number; y: number };
 
 export type ReaderFabProps = {
-  /** Currently open tools id；null Indicates all closed */
+  /** 当前打开的工具 id；null 表示都关 */
   activeTool: ReaderToolId | null;
   notesCount: number;
   sourceOnly: boolean;
@@ -208,7 +208,7 @@ export function ReaderFab({
           (busy: boolean) => setBusyAction(busy ? action : ""),
         );
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Download failed.";
+        const message = err instanceof Error ? err.message : "下载失败";
         failDownloadToast(message);
         setBusyAction("");
       }
@@ -281,17 +281,17 @@ export function ReaderFab({
           id={menuId}
           className="reader-fab-menu"
           role="menu"
-          aria-label="reading tools"
+          aria-label="阅读工具"
         >
           <header className="reader-fab-menu-head">
             <div className="reader-fab-menu-head-text">
-<strong>Tools</strong>
-              <span>Drag the round knob to move.</span>
+              <strong>工具</strong>
+              <span>拖动圆钮可移动</span>
             </div>
             <button
               type="button"
               className="reader-fab-menu-close"
-              aria-label="Close Menu"
+              aria-label="关闭菜单"
               onClick={() => setOpen(false)}
             >
               <X size={14} strokeWidth={2.5} aria-hidden />
@@ -304,10 +304,10 @@ export function ReaderFab({
             const disabled = tool.needsJob && sourceOnly;
             let sub = isActive ? tool.subOpen : tool.subIdle;
             if (tool.id === "notes" && !isActive && notesCount > 0) {
-sub = `${notesCount} annotations`;
+              sub = `${notesCount} 条批注`;
             }
             if (disabled) {
-              sub = "Open task to read";
+              sub = "需打开任务阅读";
             }
             return (
               <button
@@ -334,10 +334,10 @@ sub = `${notesCount} annotations`;
             );
           })}
 
-<div className="reader-fab-section" role="group" aria-label="Download">
+          <div className="reader-fab-section" role="group" aria-label="下载">
             <div className="reader-fab-section-head">
               <Download size={12} strokeWidth={2.5} aria-hidden />
-<span>Download PDF</span>
+              <span>下载 PDF</span>
             </div>
             <div className="reader-fab-download-grid">
               {downloadItems.map((action, index) => {
@@ -355,7 +355,7 @@ sub = `${notesCount} annotations`;
                     id={`reader-fab-download-${action}`}
                     className={`reader-fab-chip${busy ? " is-busy" : ""}${enabled ? "" : " is-disabled"}`}
                     disabled={!enabled}
-title={enabled ? `Download ${meta.label}` : reason}
+                    title={enabled ? `下载${meta.label}` : reason}
                     onClick={() => void handleDownload(action)}
                     style={{ ["--fab-i" as string]: index }}
                   >
@@ -371,7 +371,7 @@ title={enabled ? `Download ${meta.label}` : reason}
               })}
             </div>
             {downloadItems.every((a) => !trimReaderDownloadString(urls[a])) ? (
-              <p className="reader-fab-empty">Artifacts not ready</p>
+              <p className="reader-fab-empty">产物尚未就绪</p>
             ) : null}
           </div>
         </div>
@@ -380,7 +380,7 @@ title={enabled ? `Download ${meta.label}` : reason}
       <button
         type="button"
         className={`reader-fab-trigger${open ? " is-open" : ""}${activeTool ? " has-notes" : ""}`}
-        aria-label={open ? "Collapse Tool Menu" : "Open Tools"}
+        aria-label={open ? "收起工具菜单" : "打开工具菜单"}
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         aria-haspopup="menu"

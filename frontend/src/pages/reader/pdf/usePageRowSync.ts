@@ -1,5 +1,5 @@
-// Strictly port legacy pdf-layout.syncReaderPageRowsbut use React Status write-back.
-// Prevent DOM minHeight changes from being overwritten by React style flush.
+// 严格移植旧 pdf-layout.syncReaderPageRows，但用 React 状态回写，
+// 避免 DOM 改 minHeight 被 React style 冲掉。
 
 import { useLayoutEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
@@ -11,7 +11,7 @@ import {
 export type PageRowHeights = ReadonlyMap<number, number>;
 
 function measureNaturalPageHeight(slot: HTMLElement): number {
-// Prioritize "on-page" content; ignore already increased minHeight
+  // 优先量「纸面」内容，不吃已被抬高的 minHeight
   const content = slot.querySelector<HTMLElement>(
     "canvas, .react-pdf__Page, .reader-react-pdf-page, .reader-react-pdf-page-placeholder",
   );
@@ -39,7 +39,7 @@ function mapsEqual(a: PageRowHeights, b: PageRowHeights): boolean {
 
 /**
  * @returns pageNumber → max(naturalHeight left, naturalHeight right)
-* Entry only if page exists on both sides (legacy compat). Skip if length < 2 (consistent)
+ * 仅当左右都有该页时才有条目（与旧 length < 2 skip 一致）
  *
  * @param onSettle optional; called once per revision cycle after a successful
  * delayed measure (≈300ms), not on every ResizeObserver tick.
@@ -85,7 +85,7 @@ export function usePageRowSync(
 
       const next = new Map<number, number>();
       rows.forEach((row, page) => {
-        // Old logic: sync only if both sides present.
+        // 旧逻辑：两侧都有才同步
         if (row.count >= 2 && row.height > 0) {
           next.set(page, Math.ceil(row.height));
         }

@@ -57,9 +57,9 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
     apiPrefix: API_PREFIX,
   });
 
-// Bottom port factory `= {}` Remove default fields. Simplify. openJob / closeDialog, etc.).
+  // 下层 port 工厂 `= {}` 默认参会丢掉无默认字段（openJob / closeDialog 等）。
   const recentJobsJobRuntimePort = createRecentJobsRuntimePort({
-    // Grid point task: only silent polling (progress in details Tab); do not lift main workflow
+    // 网格点任务：仅 silent 轮询（进度在详情 Tab）；不抬主工作流
     openJob: (jobId: string) => (
       features.jobRuntimeFeature.startPolling(jobId, {
         silent: true,
@@ -67,7 +67,7 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
         publishLibrary: false,
       })
     ),
-// Restore active tasks on cold start: silent, no main state area update, no DB refresh create event
+    // 冷启动恢复活跃任务：silent，不抬主状态区、不刷库 create 事件
     recoverJob: (jobId: string) => (
       features.jobRuntimeFeature.startPolling(jobId, { silent: true })
     ),
@@ -78,7 +78,7 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
     openReader: (jobId: string, anchor: ReaderAnchor = null) => {
       const normalizedJobId = `${jobId || ""}`.trim();
       if (!normalizedJobId) return;
-      // Reader doesn't need to lift main workflow area. / Flush DB create；silent monitor job Done.
+      // 阅读器不需要抬主工作流区 / 刷库 create；silent 盯 job 即可
       features.jobRuntimeFeature.startPolling(normalizedJobId, { silent: true });
       documentRef.dispatchEvent(new globalThis.CustomEvent(APP_EVENTS.openReaderRequested, {
         detail: {
@@ -98,7 +98,7 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
     doc: documentRef,
   });
 
-  // startPolling/openReader/closeRecentJobsDialog can be navigationPort Fallback; signature remains required.
+  // startPolling/openReader/closeRecentJobsDialog 可由 navigationPort 兜底；签名仍标必填。
   const recentJobActions = createRecentJobActions({
     apiPrefix: API_PREFIX,
     deleteLibraryBook,

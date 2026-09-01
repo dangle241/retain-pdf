@@ -108,7 +108,7 @@ def _build_translation_batches(
         if should_skip:
             immediate_results.append(fast_path_keep_origin_result_fn(item, reason))
             continue
-        # Batch size 1(Batch retirement)All entries follow single path.,Stop marking batch candidates
+        # 批大小 1(批处理退役)时所有条目都走单条路径,不再标记批候选
         if effective_batch_size > 1 and _is_low_risk_batchable_item(
             item,
             translation_context=translation_context,

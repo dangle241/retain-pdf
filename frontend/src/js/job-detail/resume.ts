@@ -3,20 +3,20 @@ import { firstJobIdFromPayload, firstNonEmptyText, buildDetailPageUrl } from "./
 
 export function summarizeResumePlan(plan) {
   if (!plan) {
-    return "Current task cannot be resumed.";
+    return "当前任务暂不可恢复。";
   }
   if (!plan.can_resume) {
-return plan.reason || "Current task cannot be recovered.";
+    return plan.reason || "当前任务暂不可恢复。";
   }
   const fromStage = firstNonEmptyText(plan.from_stage, plan.resume_from, "checkpoint");
   const workflow = firstNonEmptyText(plan.resume_workflow, plan.workflow);
   const reruns = Array.isArray(plan.reruns_stages) ? plan.reruns_stages.join("、") : "";
-const bits = [`Recoverable from ${fromStage}`];
+  const bits = [`可从 ${fromStage} 恢复`];
   if (workflow) {
     bits.push(`workflow=${workflow}`);
   }
   if (reruns) {
-bits.push(`Rerun ${reruns}`);
+    bits.push(`重跑 ${reruns}`);
   }
   return bits.join("，");
 }
@@ -32,19 +32,19 @@ export function bindRerunButton({
     const jobId = detailPageState.job?.job_id || getJobId();
     const actionUrl = `${detailPageState.rerunActionUrl || ""}`.trim();
     if (!button || (!jobId && !actionUrl)) {
-setText("detail-rerun-status", "Current task cannot be recovered from breakpoint.");
+      setText("detail-rerun-status", "当前任务暂不可从断点恢复。");
       return;
     }
     button.disabled = true;
-setText("detail-rerun-status", "Submitting recovery task...");
+    setText("detail-rerun-status", "正在提交恢复任务...");
     try {
       const payload = await resumePort.submit({ actionUrl, jobId });
       const nextJobId = firstJobIdFromPayload(payload);
       if (!nextJobId) {
-setText("detail-rerun-status", "Recovery task submitted, but no job_id in response.");
+        setText("detail-rerun-status", "恢复任务已提交，但响应中没有 job_id。");
         return;
       }
-setText("detail-rerun-status", `Recovery task ${nextJobId} created, redirecting......`);
+      setText("detail-rerun-status", `已创建恢复任务 ${nextJobId}，正在跳转...`);
       window.location.href = buildDetailPageUrl(nextJobId);
     } catch (error) {
       setText("detail-rerun-status", error.message || String(error));

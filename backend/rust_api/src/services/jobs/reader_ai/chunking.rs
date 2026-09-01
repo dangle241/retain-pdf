@@ -102,7 +102,7 @@ fn fallback_title(title: &str) -> String {
 }
 
 fn page_from_text(text: &str) -> Option<i64> {
-    for marker in ["page ", "Page ", "No."] {
+    for marker in ["page ", "Page ", "第"] {
         if let Some(page) = page_after_marker(text, marker) {
             return Some(page);
         }

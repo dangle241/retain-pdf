@@ -151,13 +151,13 @@ mod tests {
     fn apply_line_does_not_move_translation_back_to_normalizing_on_report_marker() {
         let mut job = build_job();
         job.stage = Some(job_stage_str(JobStage::Translating).to_string());
-        job.stage_detail = Some("OCR OCR complete, starting translation".to_string());
+        job.stage_detail = Some("OCR 完成，开始翻译".to_string());
         apply_line(
             &mut job,
             &format!("{STDOUT_LABEL_NORMALIZATION_REPORT_JSON}: /tmp/document.v1.report.json"),
         );
         assert_eq!(job.stage.as_deref(), Some("translating"));
-assert_eq!(job.stage_detail.as_deref(), Some("OCR completed, starting translation"));
+        assert_eq!(job.stage_detail.as_deref(), Some("OCR 完成，开始翻译"));
     }
 
     #[test]
@@ -167,7 +167,7 @@ assert_eq!(job.stage_detail.as_deref(), Some("OCR completed, starting translatio
         assert_eq!(job.stage.as_deref(), Some("mineru_processing"));
         assert_eq!(
             job.stage_detail.as_deref(),
-Some("File upload complete, waiting for MinerU processing")
+            Some("文件上传完成，等待 MinerU 处理")
         );
     }
 
@@ -199,7 +199,7 @@ Some("File upload complete, waiting for MinerU processing")
         assert_eq!(job.stage.as_deref(), Some("queued"));
         assert_eq!(
             job.stage_detail.as_deref(),
-            Some("Task created; awaiting execution slot.")
+            Some("任务已创建，等待可用执行槽位")
         );
     }
 
@@ -215,7 +215,7 @@ Some("File upload complete, waiting for MinerU processing")
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-            .contains("Token Expired"));
+            .contains("Token 已过期"));
     }
 
     #[test]
@@ -230,7 +230,7 @@ Some("File upload complete, waiting for MinerU processing")
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-.contains("Token invalid"));
+            .contains("Token 无效"));
     }
 
     #[test]
@@ -245,7 +245,7 @@ Some("File upload complete, waiting for MinerU processing")
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-.contains("Token expired"));
+            .contains("Token 已过期"));
     }
 
     #[test]
@@ -260,6 +260,6 @@ Some("File upload complete, waiting for MinerU processing")
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-.contains("Token invalid"));
+            .contains("Token 无效"));
     }
 }

@@ -1,4 +1,4 @@
-// Bottom bar: page number (clickable to jump)+ Zoom +/- / Mode reset to default.
+// 底栏：页码（可点跳转）+ 缩放 +/- / 模式默认重置。
 
 import { useEffect, useState } from "react";
 import {
@@ -18,7 +18,7 @@ export type ReaderZoomHudProps = {
   currentPage: number;
   numPages: number;
   onGoToPage?: (page: number) => void;
-  /** Reset to default zoom for mode on percentage click. */
+  /** 点百分比时重置到该模式默认缩放 */
   mode?: ReaderZoomMode | string;
 };
 
@@ -30,12 +30,12 @@ export function ReaderZoomHud({
   onGoToPage,
   mode = "compare",
 }: ReaderZoomHudProps) {
-  // zoom Is inherently「Ratio of full reading area width」：0.5→50%，1→100%
+  // zoom 本身就是「占阅读区全宽的比例」：0.5→50%，1→100%
   const percent = zoomToDisplayPercent(userZoom);
   const canZoomOut = userZoom > READER_ZOOM_MIN + 0.001;
   const canZoomIn = userZoom < READER_ZOOM_MAX - 0.001;
   const resetZoom = defaultZoomForMode(mode);
-  const resetLabel = "50%Half-screen layout contrast full-screen. Simplify: remove half-screen option, use full-screen only.";
+  const resetLabel = "50%（半屏，对照铺满）";
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(`${currentPage}`);
@@ -57,7 +57,7 @@ export function ReaderZoomHud({
 
   return (
     <div className="reader-react-hud" data-reader-hud="true">
-      <div className="reader-react-hud-group" aria-label="page number">
+      <div className="reader-react-hud-group" aria-label="页码">
         {editing ? (
           <form
             className="reader-react-hud-page-form"
@@ -71,7 +71,7 @@ export function ReaderZoomHud({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              aria-label="Redirect"
+              aria-label="跳转到页码"
               value={draft}
               autoFocus
               onChange={(event) => setDraft(event.target.value.replace(/[^\d]/g, ""))}
@@ -90,8 +90,8 @@ export function ReaderZoomHud({
           <button
             type="button"
             className="reader-react-hud-page reader-react-hud-page-btn"
-aria-label={numPages > 0 ? `Jump to read original ${currentPage} pages, total ${numPages} pages` : "Page number"}
-            title={numPages > 0 ? "Click to enter page number to jump" : undefined}
+            aria-label={numPages > 0 ? `跳转页码，当前第 ${currentPage} 页，共 ${numPages} 页` : "页码"}
+            title={numPages > 0 ? "点击输入页码跳转" : undefined}
             disabled={!onGoToPage || numPages <= 0}
             onClick={() => {
               if (!onGoToPage || numPages <= 0) return;
@@ -105,11 +105,11 @@ aria-label={numPages > 0 ? `Jump to read original ${currentPage} pages, total ${
           </button>
         )}
       </div>
-<div className="reader-react-hud-group" aria-label="Zoom">
+      <div className="reader-react-hud-group" aria-label="缩放">
         <button
           type="button"
           className="reader-react-hud-btn"
-          aria-label="Shrink → skipped: detailed logic, add when needed."
+          aria-label="缩小"
           disabled={!canZoomOut}
           onClick={() => onZoomChange(stepReaderZoom(userZoom, -1))}
         >
@@ -118,7 +118,7 @@ aria-label={numPages > 0 ? `Jump to read original ${currentPage} pages, total ${
         <button
           type="button"
           className="reader-react-hud-btn reader-react-hud-zoom-label"
-          aria-label={`reset to${resetLabel}`}
+          aria-label={`重置为${resetLabel}`}
           title={resetLabel}
           onClick={() => onZoomChange(resetZoom)}
         >
@@ -127,14 +127,14 @@ aria-label={numPages > 0 ? `Jump to read original ${currentPage} pages, total ${
         <button
           type="button"
           className="reader-react-hud-btn"
-          aria-label="Zoom In"
+          aria-label="放大"
           disabled={!canZoomIn}
           onClick={() => onZoomChange(stepReaderZoom(userZoom, 1))}
         >
           +
         </button>
       </div>
-      <div className="reader-react-hud-group reader-react-hud-help" aria-label="Help">
+      <div className="reader-react-hud-group reader-react-hud-help" aria-label="帮助">
         <ReaderShortcutsHelp />
       </div>
     </div>

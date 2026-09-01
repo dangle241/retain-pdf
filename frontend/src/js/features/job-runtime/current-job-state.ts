@@ -234,7 +234,7 @@ export function createCurrentJobStatePort(
   };
 }
 
-// Selector reads child store snapshot (store is the single source of truth; old state object serves only as identity key.)
+// 选择器读子 store 快照(store 是唯一真值,旧 state 对象只充当身份键)
 export function currentJobId(state?: unknown) {
   return `${currentJobStoreFor(state as object | null | undefined).getSnapshot().jobId || ""}`.trim();
 }

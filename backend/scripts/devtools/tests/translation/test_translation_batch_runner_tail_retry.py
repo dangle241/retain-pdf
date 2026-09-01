@@ -36,7 +36,7 @@ class _FlushState:
         self.final_flushed = True
 
 
-def _push_tail_item(context, item, translated_text: str = "Footer translation") -> None:
+def _push_tail_item(context, item, translated_text: str = "尾部译文") -> None:
     context.translation_tail_queue.push(
         TranslationTailItem(
             item=item,
@@ -64,14 +64,14 @@ def test_parallel_batch_runner_drains_global_transport_tail_retry_queue(monkeypa
         {"item_id": "a", "page_idx": 0, "source_text": "A", "translated_text": ""},
         {"item_id": "b", "page_idx": 1, "source_text": "B", "translated_text": ""},
     ]
-_push_tail_item(context, payload[1], "B")
+    _push_tail_item(context, payload[1], "乙")
     monkeypatch.setattr(
         batch_runner,
         "translate_batch",
         lambda batch, **_kwargs: {
             batch[0]["item_id"]: {
                 "decision": "translate",
-"translated_text": "A",
+                "translated_text": "甲",
                 "final_status": "translated",
             }
         },
@@ -102,8 +102,8 @@ _push_tail_item(context, payload[1], "B")
         flush_state=flush_state,
     )
 
-assert payload[0]["translated_text"] == "A"
-assert payload[1]["translated_text"] == "B"
+    assert payload[0]["translated_text"] == "甲"
+    assert payload[1]["translated_text"] == "乙"
     assert len(context.translation_tail_queue) == 0
     assert flush_state.total_batches == 2
     assert flush_state.progress[-1] == (2, {1}, "translation_tail_retry")
@@ -169,7 +169,7 @@ def test_parallel_batch_runner_can_disable_early_transport_tail_retry(monkeypatc
     def _translate(batch, **_kwargs):
         item_id = batch[0]["item_id"]
         time.sleep(0.01)
-        return {item_id: {"decision": "translate", "translated_text": f"translate{item_id}", "final_status": "translated"}}
+        return {item_id: {"decision": "translate", "translated_text": f"译{item_id}", "final_status": "translated"}}
 
     monkeypatch.setattr(batch_runner, "translate_batch", _translate)
     flush_state = _FlushState()
@@ -206,7 +206,7 @@ def test_parallel_batch_runner_can_disable_early_transport_tail_retry(monkeypatc
         flush_state=flush_state,
     )
 
-assert payload[-1]["translated_text"] == "tail translation"
+    assert payload[-1]["translated_text"] == "尾部译文"
     assert completed_main_when_tail_applied
     assert completed_main_when_tail_applied[0] == 3
     assert flush_state.progress[-1][0] == 4
@@ -228,7 +228,7 @@ def test_parallel_batch_runner_can_drain_transport_tail_retry_before_main_batche
     def _translate(batch, **_kwargs):
         item_id = batch[0]["item_id"]
         time.sleep(0.01)
-return {item_id: {"decision": "translate", "translated_text": f"translated {item_id}", "final_status": "translated"}}
+        return {item_id: {"decision": "translate", "translated_text": f"译{item_id}", "final_status": "translated"}}
 
     monkeypatch.setattr(batch_runner, "translate_batch", _translate)
     flush_state = _FlushState()
@@ -264,7 +264,7 @@ return {item_id: {"decision": "translate", "translated_text": f"translated {item
         flush_state=flush_state,
     )
 
-assert payload[-1]["translated_text"] == "tail translation"
+    assert payload[-1]["translated_text"] == "尾部译文"
     assert completed_main_when_tail_applied
     assert completed_main_when_tail_applied[0] < 3
     assert flush_state.progress[-1][0] == 3

@@ -154,7 +154,7 @@ def _math_chunk_needs_math(chunk: str) -> bool:
     text = re.sub(r"\s+", " ", chunk or "").strip()
     if not text:
         return False
-    if re.fullmatch(r"[,;:，。！？、()\[\]{}Empty parentheses. Remove.]+", text):
+    if re.fullmatch(r"[,;:，。！？、()\[\]{}（）]+", text):
         return False
     return bool(
         "\\" in text

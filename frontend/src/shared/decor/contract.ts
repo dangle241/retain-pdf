@@ -1,79 +1,79 @@
-// Decoration pack manifest contract: type + validation + asset budget ground truth.
+// 装饰包 manifest 契约：类型 + 校验 + 资产预算真值。
 //
-// A "Theme decoration" = Color skin (themes/<id>.css, existing system remains unchanged)
-//                + Decoration pack (public static directory: manifest.json + assets).
-// registry.ts ThemeDefinition.decorPack points to package name; if none, no decorPack
-// Skin (classic/night etc.) Zero decoration, zero extra downloads.
+// 一个"装饰主题" = 配色皮肤（themes/<id>.css，既有体系不动）
+//                + 装饰包（public 静态目录下 manifest.json + 资产）。
+// registry.ts 的 ThemeDefinition.decorPack 指向包名；无 decorPack 的
+// 皮肤（classic/night 等）零装饰、零额外下载。
 //
-// Contract-first: this file is manifest unique schema Truth value. Stage engine, asset pipeline
-// Gatekeeping and AI production model acceptance criteria only recognize validateDecorManifest conclusion.
-// Design document:docs/theme-system/DECOR_PACKS.md
+// 契约先行：本文件是 manifest 的唯一 schema 真值。舞台引擎、资产管线
+// 门禁、AI 产模型的验收标准都只认 validateDecorManifest 的结论。
+// 设计文档：docs/theme-system/DECOR_PACKS.md
 
 import { getDecorSlot, isDecorSlotId, type DecorSlotId } from "./slots.js";
 
 export const DECOR_MANIFEST_VERSION = 1;
 
-/* ---------- Asset budget (source of truth for pipeline gates and validation) ---------- */
+/* ---------- 资产预算（管线门禁与校验共用的真值） ---------- */
 
-/** Single glb model size limit (Draco+KTX2 after compression) */
+/** 单个 glb 模型体积上限（Draco+KTX2 压缩后） */
 export const MODEL_BUDGET_KB = 2048;
-/** Single model triangle face limit (gltf-transform inspect Caliber */
+/** 单个模型三角面上限（gltf-transform inspect 口径） */
 export const MODEL_MAX_TRIANGLES = 50_000;
-/** Max size single decorative image (webp） */
+/** 单张装饰图体积上限（webp） */
 export const IMAGE_BUDGET_KB = 512;
-/** Mounted simultaneously on single canvas 3D Layer limit (exceeding this requires converting to an image layer) */
+/** 单画布同时挂载的 3D 图层上限（超过就该做成图片层） */
 export const MAX_MODEL_LAYERS = 3;
-/** Max layer count per bundle (prevent"filling the screen"Out of control) */
+/** 单包图层总数上限（防"贴满屏"失控） */
 export const MAX_LAYERS = 12;
 
-/* ---------- manifest Type ---------- */
+/* ---------- manifest 类型 ---------- */
 
 export type DecorImageLayer = {
   type: "image";
   slot: DecorSlotId;
-/** Path relative to package root, e.g. "dragon.webp". Absolute paths, protocols, or ".." are forbidden. */
+  /** 相对包根目录的路径，如 "dragon.webp"；禁止绝对路径 / 协议 / ".." */
   src: string;
-  /** Mouse parallax intensity 0~0.2（0 or default = Static. */
+  /** 鼠标视差强度 0~0.2（0 或缺省 = 不动） */
   parallax?: number;
-  /** 0~1Default 1 */
+  /** 0~1，缺省 1 */
   opacity?: number;
-  /** Quotes displayed on layer click (use "\n\n" Carousel separator; default = Unclickable */
+  /** 点击图层时展示的语录（多句用 "\n\n" 分隔轮播；缺省 = 不可点） */
   clickQuote?: string;
 };
 
 export type DecorModelLayer = {
   type: "model";
   slot: DecorSlotId;
-  /** .glb（Draco/KTX2 Store after compression */
+  /** .glb（Draco/KTX2 压缩后入库） */
   src: string;
-/** Static graph fallback (reduced-motion / no WebGL / required for low-end devices) */
+  /** 静态图降级（reduced-motion / 无 WebGL / 低端机），必填 */
   fallback: string;
-  /** Looping idle animation AnimationClip First name (glb built-in */
+  /** 循环待机动画的 AnimationClip 名（glb 内置） */
   idleClip?: string;
-/** One-time trigger on click AnimationClip name */
+  /** 点击触发的一次性 AnimationClip 名 */
   clickClip?: string;
   parallax?: number;
 };
 
 export type DecorLayer = DecorImageLayer | DecorModelLayer;
 
-/** Inscription banner (e.g."Know its origin. Indicate destination."） */
+/** 题字横幅（如"知其所来 明其所往"） */
 export type DecorQuote = {
   slot: DecorSlotId;
   text: string;
-/** Default is vertical. */
+  /** 缺省 vertical（竖排） */
   writingMode?: "vertical" | "horizontal";
 };
 
 export type DecorManifest = {
   version: typeof DECOR_MANIFEST_VERSION;
-  /** Package name matches directory name.kebab-case */
+  /** 包名，与目录名一致，kebab-case */
   id: string;
   layers: DecorLayer[];
   quote?: DecorQuote;
 };
 
-/* ---------- Validation ---------- */
+/* ---------- 校验 ---------- */
 
 export type DecorManifestValidation =
   | { ok: true; manifest: DecorManifest; errors: [] }
@@ -87,45 +87,45 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
-/** Relative path, no escape from package directory */
+/** 相对路径且不逃逸包目录 */
 function isSafeRelativePath(v: unknown): v is string {
   if (typeof v !== "string" || !v.trim()) return false;
   if (v.startsWith("/") || v.includes("..") || v.includes("\\")) return false;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(v)) return false; // http:, data: Awaiting protocol
+  if (/^[a-z][a-z0-9+.-]*:/i.test(v)) return false; // http:, data: 等协议
   return true;
 }
 
 function checkClipName(v: unknown, label: string, errors: string[]) {
   if (v === undefined) return;
   if (typeof v !== "string" || !v.trim()) {
-    errors.push(`${label} Must be a non-empty string (glb within AnimationClip Name)`);
+    errors.push(`${label} 必须是非空字符串（glb 内 AnimationClip 名）`);
   }
 }
 
 /**
- * Validation unknown JSON Is valid manifest。
-* When returning ok:false, errors are readable per line. Pass directly to pipeline gate/console.
+ * 校验未知 JSON 是否为合法 manifest。
+ * 返回 ok:false 时 errors 逐条可读，直接透给管线门禁/控制台。
  */
 export function validateDecorManifest(input: unknown): DecorManifestValidation {
   const errors: string[] = [];
   if (!isPlainObject(input)) {
-    return { ok: false, manifest: null, errors: ["manifest must be JSON Object"] };
+    return { ok: false, manifest: null, errors: ["manifest 必须是 JSON 对象"] };
   }
 
   if (input.version !== DECOR_MANIFEST_VERSION) {
-    errors.push(`version Must be ${DECOR_MANIFEST_VERSION}, received ${JSON.stringify(input.version)}`);
+    errors.push(`version 必须为 ${DECOR_MANIFEST_VERSION}，收到 ${JSON.stringify(input.version)}`);
   }
   if (typeof input.id !== "string" || !PACK_ID_RE.test(input.id)) {
-errors.push(`id must be a kebab-case package name, received ${JSON.stringify(input.id)}`);
+    errors.push(`id 必须是 kebab-case 包名，收到 ${JSON.stringify(input.id)}`);
   }
 
   const layers = input.layers;
   if (!Array.isArray(layers) || layers.length === 0) {
-    errors.push("layers Non-empty array required.");
+    errors.push("layers 必须是非空数组");
     return { ok: false, manifest: null, errors };
   }
   if (layers.length > MAX_LAYERS) {
-    errors.push(`layers Quantity ${layers.length} Exceeds limit. ${MAX_LAYERS}`);
+    errors.push(`layers 数量 ${layers.length} 超过上限 ${MAX_LAYERS}`);
   }
 
   const usedSlots = new Set<string>();
@@ -134,87 +134,87 @@ errors.push(`id must be a kebab-case package name, received ${JSON.stringify(inp
   layers.forEach((raw, i) => {
     const at = `layers[${i}]`;
     if (!isPlainObject(raw)) {
-      errors.push(`${at} Must be an object.`);
+      errors.push(`${at} 必须是对象`);
       return;
     }
     const { type, slot } = raw;
 
     if (type !== "image" && type !== "model") {
-errors.push(`${at}.type must be "image" | "model", received ${JSON.stringify(type)}`);
+      errors.push(`${at}.type 必须是 "image" | "model"，收到 ${JSON.stringify(type)}`);
       return;
     }
     if (!isDecorSlotId(slot)) {
-errors.push(`${at}.slot ${JSON.stringify(slot)} is not in the slots.ts registry.`);
+      errors.push(`${at}.slot ${JSON.stringify(slot)} 不在 slots.ts 注册表中`);
       return;
     }
-// One slot per layer only: for stacking, open a new anchor in slots.ts; do not stack in manifest.
+    // 一个 slot 只挂一层：要堆叠就去 slots.ts 开新锚点，别在 manifest 里叠罗汉
     if (usedSlots.has(slot)) {
-      errors.push(`${at}.slot "${slot}" Already occupied (one slot Only one layer)`);
+      errors.push(`${at}.slot "${slot}" 被重复占用（一个 slot 只挂一层）`);
     }
     usedSlots.add(slot);
 
     if (!isSafeRelativePath(raw.src)) {
-errors.push(`${at}.src must be a package-relative path (absolute paths, protocols, or ".." forbidden)`);
+      errors.push(`${at}.src 必须是包内相对路径（禁止绝对路径/协议/..）`);
     }
 
     if (raw.parallax !== undefined) {
       const p = raw.parallax;
       if (typeof p !== "number" || !(p >= 0 && p <= 0.2)) {
-errors.push(`${at}.parallax must be in [0, 0.2], received ${JSON.stringify(p)}`);
+        errors.push(`${at}.parallax 必须在 [0, 0.2]，收到 ${JSON.stringify(p)}`);
       }
     }
 
     if (type === "image") {
       if (typeof raw.src === "string" && !IMAGE_EXT_RE.test(raw.src)) {
-        errors.push(`${at}.src Images only. webp/png/svg/avif`);
+        errors.push(`${at}.src 图片仅接受 webp/png/svg/avif`);
       }
       if (raw.opacity !== undefined) {
         const o = raw.opacity;
         if (typeof o !== "number" || !(o > 0 && o <= 1)) {
-errors.push(`${at}.opacity must be in (0, 1]`);
+          errors.push(`${at}.opacity 必须在 (0, 1]`);
         }
       }
       if (raw.clickQuote !== undefined) {
         if (typeof raw.clickQuote !== "string" || !raw.clickQuote.trim()) {
-          errors.push(`${at}.clickQuote Must be a non-empty string (use multiple sentences with \\n\\n Separator)`);
+          errors.push(`${at}.clickQuote 必须是非空字符串（多句用 \\n\\n 分隔）`);
         }
       }
     } else {
       modelCount += 1;
       if (typeof raw.src === "string" && !MODEL_EXT_RE.test(raw.src)) {
-        errors.push(`${at}.src Model accepts only .glb`);
+        errors.push(`${at}.src 模型仅接受 .glb`);
       }
       if (!isSafeRelativePath(raw.fallback) || !IMAGE_EXT_RE.test(String(raw.fallback))) {
-        errors.push(`${at}.fallback Required. Must be in-package image path (static fallback for model).`);
+        errors.push(`${at}.fallback 必填且必须是包内图片路径（模型的静态降级）`);
       }
       checkClipName(raw.idleClip, `${at}.idleClip`, errors);
       checkClipName(raw.clickClip, `${at}.clickClip`, errors);
       const slotDef = getDecorSlot(slot);
       if (slotDef?.id === "backdrop") {
-errors.push(`${at} backdrop slot cannot hold 3D models (performance red line, use image + parallax)`);
+        errors.push(`${at} 背景 slot 禁止挂 3D 模型（性能红线，用 image + parallax）`);
       }
     }
   });
 
   if (modelCount > MAX_MODEL_LAYERS) {
-errors.push(`3D layers ${modelCount} exceed limit. ${MAX_MODEL_LAYERS}. Bake excess into image layer.`);
+    errors.push(`3D 图层 ${modelCount} 个，超过上限 ${MAX_MODEL_LAYERS}（多余的请烘焙成图片层）`);
   }
 
   const quote = input.quote;
   if (quote !== undefined) {
     if (!isPlainObject(quote)) {
-errors.push("quote must be an object");
+      errors.push("quote 必须是对象");
     } else {
       if (!isDecorSlotId(quote.slot)) {
-        errors.push(`quote.slot ${JSON.stringify(quote.slot)} Not in registry.`);
+        errors.push(`quote.slot ${JSON.stringify(quote.slot)} 不在注册表中`);
       } else if (!getDecorSlot(quote.slot)?.textCapable) {
-        errors.push(`quote.slot "${quote.slot}" Text not supported (requires textCapable anchor)`);
+        errors.push(`quote.slot "${quote.slot}" 不支持文字（需 textCapable 锚点）`);
       }
       if (typeof quote.text !== "string" || !quote.text.trim()) {
-        errors.push("quote.text Must be a non-empty string.");
+        errors.push("quote.text 必须是非空字符串");
       }
       if (quote.writingMode !== undefined && quote.writingMode !== "vertical" && quote.writingMode !== "horizontal") {
-errors.push('quote.writingMode must be "vertical" | "horizontal"');
+        errors.push('quote.writingMode 必须是 "vertical" | "horizontal"');
       }
     }
   }

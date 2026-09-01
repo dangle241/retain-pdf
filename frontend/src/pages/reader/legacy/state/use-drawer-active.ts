@@ -1,5 +1,5 @@
-// drawer store â React subscription hook. store active is raw string (reference stable),
-// can be fed directly to useSyncExternalStore (no app-framework/store snapshot clone pitfalls).
+// drawer store → React 订阅 hook。store 的 active 是原始字符串(引用稳定),
+// 直接喂 useSyncExternalStore 即可(不存在 app-framework/store 的快照克隆雷点)。
 
 import { useSyncExternalStore } from "react";
 

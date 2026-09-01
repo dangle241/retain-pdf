@@ -1,4 +1,4 @@
-// Persist annotations locallylocalStorageNo context. Need source text. favorites API。
+// 本地持久化批注（localStorage）。不接旧 favorites API。
 
 import {
   notesStorageKey,

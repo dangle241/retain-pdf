@@ -1,5 +1,5 @@
-// Scientific instrument line icon (Kimi Generate currentColor Stroke)
-// Resources:src/assets/icons/instruments/
+// 科学仪器线标（Kimi 生成，currentColor 描边）
+// 资源：src/assets/icons/instruments/
 
 export type InstrumentName =
   | "microscope"
@@ -20,15 +20,15 @@ const SRC: Record<InstrumentName, string> = {
 
 export type InstrumentIconProps = {
   name: InstrumentName;
-  /** Display size, default 40 */
+  /** 显示尺寸，默认 40 */
   size?: number;
   className?: string;
   title?: string;
 };
 
 /**
-* Use mask for currentColor so icons follow ink/muted colors.
- * (pure <img> Cannot inherit stroke currentColor）
+ * 用 mask 吃 currentColor，这样主题换肤时图标跟 ink/muted 走。
+ * （纯 <img> 无法继承 stroke currentColor）
  */
 export function InstrumentIcon({
   name,

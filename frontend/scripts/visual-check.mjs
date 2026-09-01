@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Visual regression baseline: screenshot key states for three pages, compare with tests/visual/baseline.
-//   node scripts/visual-check.mjs           # compare, exit code 1 if diff exceeds threshold, diff graph written to tests/visual/output
-//   node scripts/visual-check.mjs --update  # Rebuild baseline.(Run after confirming visual changes match expectations.)
-// Full mock Mode, freeze clock,Backend-independent. Baseline generated locally.,Local comparison only.
+// 视觉回归基线:对三个页面的关键状态截图,与 tests/visual/baseline 对比。
+//   node scripts/visual-check.mjs           # 对比,差异超阈值则退出码 1,diff 图写入 tests/visual/output
+//   node scripts/visual-check.mjs --update  # 重建基线(确认视觉改动符合预期后运行)
+// 全程 mock 模式、冻结时钟,不依赖后端。基线在本机生成,仅用于本机对比。
 
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -18,7 +18,7 @@ const OUTPUT_DIR = join(FRONTEND_ROOT, "tests/visual/output");
 const PORT = 40151;
 const FIXED_TIME = new Date("2026-06-01T10:00:00+08:00");
 const MOCK_JOB_ID = "mock-job-20260415";
-// Allowed pixel difference ratio(Anti-aliasing noise)
+// 允许的差异像素占比(抗锯齿等噪音)
 const DIFF_RATIO_THRESHOLD = 0.001;
 
 const STATES = [
@@ -42,7 +42,7 @@ const STATES = [
     url: `/reader.html?mock=succeeded`,
     prepare: async (page) => {
       await page.waitForSelector("#reader-boot-loading.hidden", { state: "attached", timeout: 20000 });
-      // Right column default expansion triggers PDF Resize/reorder,Wait for zoom settle before screenshot.(otherwise PDF Text subpixel jitter)
+      // 右栏默认展开会触发 PDF 重排缩放,留足时间让缩放落定再截图(否则 PDF 文本亚像素抖动)
       await page.waitForTimeout(1800);
     },
   },
@@ -52,9 +52,9 @@ const STATES = [
     url: `/reader.html?mock=succeeded`,
     prepare: async (page) => {
       await page.waitForSelector("#reader-boot-loading.hidden", { state: "attached", timeout: 20000 });
-// Three-column skeleton: right column (AI Q&A) default expanded, no need to open again.
+      // 三栏骨架:右栏(AI 问答)默认展开,无需再点开
       await page.waitForSelector("#reader-ai-drawer.is-open", { timeout: 10000 });
-      // Triggered by right column expansion. PDF Resize settle.,Avoid sub-pixel jitter
+      // 等待右栏展开引发的 PDF 重排缩放落定,避免亚像素抖动
       await page.waitForTimeout(1800);
     },
   },
@@ -108,9 +108,9 @@ const STATES = [
     url: `/reader.html?mock=succeeded`,
     prepare: async (page) => {
       await page.waitForSelector("#reader-boot-loading.hidden", { state: "attached", timeout: 20000 });
-      // Right column expanded by default,Ask directly.(Stop clicking toggle button)
+      // 右栏默认展开,直接提问(不再点击开合按钮)
       await page.waitForSelector("#reader-ai-drawer.is-open", { timeout: 10000 });
-await page.fill("#reader-ai-input", "How does conjugation affect selectivity?");
+      await page.fill("#reader-ai-input", "共轭如何影响选择性?");
       await page.click("#reader-ai-submit-btn");
       await page.waitForSelector(".reader-ai-citation-item", { timeout: 10000 });
       await page.waitForTimeout(600);
@@ -132,7 +132,7 @@ await page.fill("#reader-ai-input", "How does conjugation affect selectivity?");
     url: `/index.html?mock=done`,
     prepare: async (page) => {
       await page.waitForTimeout(1500);
-await page.fill("#library-search-input", "Chemistry");
+      await page.fill("#library-search-input", "化学");
       await page.waitForSelector(".lib-search-panel", { timeout: 8000 });
       await page.waitForTimeout(800);
     },
@@ -178,7 +178,7 @@ try {
     await page.close();
 
     if (consoleErrors.length) {
-console.error(✖ ${state.name}: page error ${consoleErrors[0]});
+      console.error(`✖ ${state.name}: 页面异常 ${consoleErrors[0]}`);
       failures += 1;
       continue;
     }
@@ -194,7 +194,7 @@ console.error(✖ ${state.name}: page error ${consoleErrors[0]});
     const current = PNG.sync.read(shot);
     if (baseline.width !== current.width || baseline.height !== current.height) {
       writeFileSync(join(OUTPUT_DIR, `${state.name}.current.png`), shot);
-console.error(✖ ${state.name}: size changed ${baseline.width}x${baseline.height} -> ${current.width}x${current.height});
+      console.error(`✖ ${state.name}: 尺寸变化 ${baseline.width}x${baseline.height} -> ${current.width}x${current.height}`);
       failures += 1;
       continue;
     }
@@ -203,16 +203,16 @@ console.error(✖ ${state.name}: size changed ${baseline.width}x${baseline.heigh
       threshold: 0.15,
     });
     const ratio = diffPixels / (baseline.width * baseline.height);
-    // Minority by PDF Canvas-centric state,pdf.js Text rendering has run-to-run Subpixel antialiasing dither
-// (Layout pixel-perfect, see diff), relax threshold to absorb noise; keep other states strict at 0.1%.
+    // 少数以 PDF 画布为主体的状态,pdf.js 文本渲染有 run-to-run 亚像素抗锯齿抖动
+    // (布局本身像素一致,见 diff),放宽阈值以吸收该噪声;其余状态维持严格 0.1%。
     const stateThreshold = state.diffThreshold ?? DIFF_RATIO_THRESHOLD;
     if (ratio > stateThreshold) {
       writeFileSync(join(OUTPUT_DIR, `${state.name}.current.png`), shot);
       writeFileSync(join(OUTPUT_DIR, `${state.name}.diff.png`), PNG.sync.write(diff));
-console.error(✖ ${state.name}: diff ${(ratio * 100).toFixed(2)}% (${diffPixels}px), diff see tests/visual/output/);
+      console.error(`✖ ${state.name}: 差异 ${(ratio * 100).toFixed(2)}%(${diffPixels}px),diff 见 tests/visual/output/`);
       failures += 1;
     } else {
-console.log(✔ ${state.name}: consistent (diff ${(ratio * 100).toFixed(3)}%));
+      console.log(`✔ ${state.name}: 一致(差异 ${(ratio * 100).toFixed(3)}%)`);
     }
   }
 } finally {
@@ -221,6 +221,6 @@ console.log(✔ ${state.name}: consistent (diff ${(ratio * 100).toFixed(3)}%));
 }
 
 if (failures) {
-console.error(\\n${failures} states differ from baseline. After confirming changes are as expected, run: npm run visual:update);
+  console.error(`\n${failures} 个状态与基线不一致。确认改动符合预期后运行: npm run visual:update`);
   process.exit(1);
 }

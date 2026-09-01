@@ -190,15 +190,15 @@
 }
 
 /*
-Danger zone fix(Tailwind v4 migration):`.status-head-btn` in the entire codebase only and
-`.status-action-btn` appear in pairs(StatusCard.jsx Cancel button missing. Add: `.cancel-btn { display: none; }` â skipped: styling, add when needed./Detail button),
-  min-height/font-size `ponytail:` both sides defined values differ Upgrade path: diff tool or `Object.is()` check——v3 Within the same file, rely on source code order.(
-status-action-btn Afterword)tie-break,status-action-btn 32px/12px wins,
-  status-head-btn this 28px/11px Always dead code.v4 Order no longer guaranteed to follow source order.
-(with the previous several library-grid/library-brand-link Same Mode),Actual test after migration
-  status-head-btn Prevail,Shorter smaller buttons. Remove conflicting styles here. min-height/
-font-size,Size fully delegated status-action-btn Define once;padding-inline no
-padding Conflict with status-action-btn(No differences detected.),Keep
+  危险区修复(Tailwind v4 迁移):`.status-head-btn` 在整个代码库里只和
+  `.status-action-btn` 成对出现(StatusCard.jsx 的取消/详情按钮),
+  min-height/font-size 两边都定义、值不一样——v3 里靠同文件源码序(
+  status-action-btn 写在后面)tie-break,status-action-btn 的 32px/12px 胜出,
+  status-head-btn 这份 28px/11px 一直是死代码。v4 下顺序不再保证跟随源码序
+  (与前面几处 library-grid/library-brand-link 同一模式),实测迁移后
+  status-head-btn 反而胜出,按钮变矮变小。这里去掉冲突的 min-height/
+  font-size,尺寸完全交给 status-action-btn 一处定义;padding-inline 没有
+  与 status-action-btn 的 padding 冲突过(未观测到差异),保留。
 */
 @utility status-head-btn {
   padding-inline: var(--status-head-btn-padding, 10px);
@@ -294,7 +294,7 @@ padding Conflict with status-action-btn(No differences detected.),Keep
   }
 
   &.is-active {
-/* text-white will in nightï¼ink Blurs under light color; semantics should be. paper */
+    /* text-white 会在 night（ink 为浅色）下糊掉，语义应为 paper */
     @apply bg-[var(--ink)] text-[var(--paper)];
     box-shadow: 0 10px 24px color-mix(in srgb, var(--ink) 14%, transparent);
   }
@@ -314,9 +314,9 @@ padding Conflict with status-action-btn(No differences detected.),Keep
   }
 }
 
-/* Stage state class（is-done / is-active / is-selected / is-disabled）
-* Attach to parent only. @utility &.is-* Nest. Block short global name registration. @utility is-*ï¼
- * Avoid conflict other modules. Use unique class names. .is-active and other global classes.substage See below status-substage-step。 */
+/* 阶段态 class（is-done / is-active / is-selected / is-disabled）
+ * 只挂在父 @utility 的 &.is-* 嵌套上，禁止再注册短名全局 @utility is-*，
+ * 避免与其它模块抢 .is-active 等全局类。substage 见下方 status-substage-step。 */
 
 @utility status-stage-error-summary {
   grid-area: error;

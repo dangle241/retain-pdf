@@ -1,5 +1,5 @@
-/* Reader top bar chrome (default react-pdf Shared): tabs / boot / Close to return home
-* Top bar action group / Download menu / chrome-muted fade out â chrome-legacy.css
+/* 阅读器顶栏 chrome（默认 react-pdf 共用）：tabs / boot / 关闭回主页
+ * 顶栏动作组 / 下载菜单 / chrome-muted 淡出 → chrome-legacy.css
  */
 
 .reader-topbar {
@@ -65,7 +65,7 @@
   color: var(--paper);
 }
 
-/* Full-page reader "Close â Home" (replaces old iframe Host top-right close)
+/* 整页阅读器「关闭 → 主页」（替代旧 iframe 宿主右上角关闭） */
 .reader-close-home-btn {
   position: fixed;
   top: 12px;

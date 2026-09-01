@@ -1,5 +1,5 @@
-// react-pdf / pdfjs worker One-time config.
-// worker uses existing vendor copy, in-house pdf-document is same-origin, avoid esbuild splitting worker again.
+// react-pdf / pdfjs worker 一次性配置。
+// worker 走现有 vendor 拷贝，与自研 pdf-document 同源，避免 esbuild 再拆 worker。
 
 import { pdfjs } from "react-pdf";
 import { resolvePdfjsVendorUrl } from "../external.js";

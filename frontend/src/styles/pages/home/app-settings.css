@@ -1,14 +1,14 @@
-/* Settings Panel v2Left Navigation + Right content area (original"Lobby popup"Horizontal pill Layout deprecated.
+/* 设置面板 v2：左导航 + 右内容区（原"门厅弹窗"横向 pill 布局退役）。
  *
- * DOM Contract (ids / data-attrs / hidden Semantics) are determined by SettingsHubDialog.tsx "Guarantee,".  But let's double-check: The user may be asking for a guarantee that we will do something? But they just wrote that as a fragment. Given the context of the conversation, there is no prior history shown; this is the first user message. So they gave that as the only input. So translation is appropriate.  I'll respond with "Guarantee,".Guarantee,
- * Lock test; file handles visuals only. Colors strictly semantic tokenRatchet gate access.
- * Old version registered global short name @utility is-active（status-card.css Header comments prohibited.
- * Pattern affects all same-name site-wide. class）——v2 Revert to nested syntax. Prevent short name leakage. */
+ * DOM 契约（ids / data-attrs / hidden 语义）由 SettingsHubDialog.tsx 保证，
+ * 测试锁定；本文件只管观感。颜色一律语义 token（棘轮门禁）。
+ * 旧版曾注册全局短名 @utility is-active（status-card.css 头注释明令禁止的
+ * 模式，会波及全站同名 class）——v2 改回嵌套写法，短名不再外泄。 */
 
 @utility app-settings-dialog {
   width: min(860px, calc(100vw - 24px));
-  /* inset-0 + m-auto Centering requires fixed width and height: omit height Stretch element vertically.
-Shell sticks to top."Center modal. Use flexbox or grid on parent."root cause).fit-content enables m-auto True dual-axis centering. */
+  /* inset-0 + m-auto 的居中要求宽高皆定值：不写 height 时元素纵向撑满、
+     壳贴顶（"弹窗不在中间"的根因）。fit-content 让 m-auto 真正双轴居中。 */
   height: fit-content;
 }
 
@@ -24,7 +24,7 @@ Shell sticks to top."Center modal. Use flexbox or grid on parent."root cause).fi
   min-height: 0;
 }
 
-/* —— Left navigation bar —— */
+/* —— 左导航栏 —— */
 
 @utility app-settings-rail {
   display: flex;
@@ -95,7 +95,7 @@ Shell sticks to top."Center modal. Use flexbox or grid on parent."root cause).fi
   }
 }
 
-/* —— Right content pane —— */
+/* —— 右内容窗格 —— */
 
 @utility app-settings-pane {
   position: relative;
@@ -113,7 +113,7 @@ Shell sticks to top."Center modal. Use flexbox or grid on parent."root cause).fi
 }
 
 @utility app-settings-panel {
-  /* Micro-rise entry on zone cut (hidden→Show replay animation to pace content area transitions. */
+  /* 切区微升进场（hidden→显示重播动画，形成内容区过渡节奏） */
   animation: dialog-body-in 220ms var(--ease-out) both;
 
   &[hidden] {
@@ -123,7 +123,7 @@ Shell sticks to top."Center modal. Use flexbox or grid on parent."root cause).fi
 
 @utility app-settings-pane-head {
   margin: 0 0 18px;
-  padding-right: 40px; /* Clear space for top-right close button. */
+  padding-right: 40px; /* 给右上关闭钮让位 */
 
   & h3 {
     margin: 0;
@@ -140,7 +140,7 @@ Shell sticks to top."Center modal. Use flexbox or grid on parent."root cause).fi
   }
 }
 
-/* API / Glossary: Launcher (Actual form in separate sub-dialog; this area is a clean entry description) */
+/* API / 词表：启动区（真实表单在独立子对话框，本区是干净的入口说明） */
 @utility app-settings-launcher {
   display: grid;
   justify-items: start;
@@ -187,7 +187,7 @@ Shell sticks to top."Center modal. Use flexbox or grid on parent."root cause).fi
   }
 }
 
-/* —— Appearance: theme card grid —— */
+/* —— 外观：主题卡片网格 —— */
 
 @utility theme-appearance {
   display: grid;
@@ -247,8 +247,8 @@ Shell sticks to top."Center modal. Use flexbox or grid on parent."root cause).fi
   }
 }
 
-/* Mini window preview:bg field + paper card + accent bar + ink Text line + danger Dot.
- * Color value from registry previewinline styleColor values not hardcoded in this file. */
+/* 迷你窗口预览：bg 场 + paper 卡 + accent 条 + ink 文字行 + danger 点。
+ * 色值来自 registry preview（内联 style），本文件不写死颜色。 */
 @utility theme-option-swatch {
   position: relative;
   display: block;

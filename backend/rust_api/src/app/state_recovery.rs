@@ -60,18 +60,18 @@ pub(super) fn reconcile_stale_running_jobs(config: &AppConfig, db: &Db) -> Resul
         let (detail, failure_category, failure_code) = match reason {
             StaleReason::Orphaned(pid) => (
                 format!(
-"Legacy detected at backend startup. running taskworker process {pid} Orphan process still running; terminated."
+                    "后端启动时发现遗留 running 任务，worker 进程 {pid} 仍在运行（孤儿进程），已终止该进程"
                 ),
                 "worker_orphaned_after_restart",
                 "worker_orphaned_after_restart",
             ),
             StaleReason::Dead(pid) => (
-format!("Found leftover running tasks at backend startup, but worker Process {pid} no longer exists"),
+                format!("后端启动时发现遗留 running 任务，但 worker 进程 {pid} 已不存在"),
                 "worker_process_missing",
                 "worker_process_missing",
             ),
             StaleReason::NoPid => (
-"Found leftover running Task at backend startup, but not recorded worker pid".to_string(),
+                "后端启动时发现遗留 running 任务，但未记录 worker pid".to_string(),
                 "worker_process_missing",
                 "worker_process_missing",
             ),
@@ -97,13 +97,13 @@ format!("Found leftover running tasks at backend startup, but worker Process {pi
                     failure_category: Some("internal".to_string()),
                     provider_stage: None,
                     provider_code: None,
-summary: "Reclaimed leftovers on backend startup. running tasks".to_string(),
+                    summary: "后端启动时回收了遗留 running 任务".to_string(),
                     root_cause: Some(detail.clone()),
                     retryable: true,
                     upstream_host: None,
                     provider: None,
                     suggestion: Some(
-                        "corresponding to this task worker Not running. Resubmit or retry manually.".to_string(),
+                        "该任务对应的 worker 已不在运行；请重新提交或手动重试".to_string(),
                     ),
                     last_log_line: Some(detail.clone()),
                     raw_excerpt: Some(detail.clone()),

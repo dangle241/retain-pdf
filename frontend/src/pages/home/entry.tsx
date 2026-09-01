@@ -1,13 +1,13 @@
-// Home page React entry (Phase 3a Skeleton phase).
+// home 页 React 入口(Phase 3a 骨架期)。
 //
-// Current index.html still points to old world dist/app.bundle.js; entry via temp dev page only.
-// Loaded via home-react-dev.html (dist/home-react-dev.bundle.js) for dual-track comparison.
-// At cutover (3b completion), replace index.html with dist/home.bundle.js pointing to this file.
+// 当前 index.html 仍指向旧世界 dist/app.bundle.js;本入口只经临时开发页
+// home-react-dev.html(dist/home-react-dev.bundle.js)加载,供双轨对照。
+// cutover(3b 完成后)时 index.html 换 dist/home.bundle.js 指向此文件。
 //
-// Order guarantee (Blueprint Â§4): composition Create first, bind event bridge first, populate idle view store first,
-// then createRoot().render ââ useSyncExternalStore gets current value on first read, no-flash shell.
-// Consistent with detail/reader precedent: won't enable StrictMode (composition contains one-time event binding,
-// Double invocation causes duplication. dispatch;Imperative reusable components and StrictMode Decoupling is a unified convention across the three pages.)。
+// 顺序保证(蓝图 §4):composition 先建、事件桥先绑、idle 视图先落 store,
+// 再 createRoot().render —— useSyncExternalStore 首读即拿现值,不闪空壳。
+// 与 detail/reader 先例一致:不开 StrictMode(composition 含一次性事件绑定,
+// 双调用会重复 dispatch;命令式复用件与 StrictMode 解耦是三页统一约定)。
 
 import { createRoot } from "react-dom/client";
 import { bootTheme } from "../../shared/theme/theme.js";
@@ -15,13 +15,13 @@ import { DecorStage } from "../../shared/decor/DecorStage.jsx";
 import { createHomeComposition } from "./composition.js";
 import { HomeApp } from "./HomeApp.jsx";
 
-// Fail fast. data-theme`// TODO: remove skin switcher ponytail: keep only if product insists. Delete if unused.` FOUC(see docs/theme-system/THEME_SYSTEM.md）
+// 尽早挂 data-theme，减少换肤 FOUC（见 docs/theme-system/THEME_SYSTEM.md）
 bootTheme();
 
-// appUpdateAutoCheckEnabled: true——composition.js Default off. app-update Backend
-// GitHub Self-check (Test isolation, see composition.js header comments), explicitly enable production entry point here.
-// Behaviorally equivalent to isAppUpdateEnabled in old world bootstrap/core-app-update-runtime-port.js.
-// port Behaviorally equivalent.
+// appUpdateAutoCheckEnabled: true——composition.js 默认关闭 app-update 的后台
+// GitHub 自检(测试隔离,见 composition.js 头注释),生产入口这里显式打开,
+// 与旧世界 bootstrap/core-app-update-runtime-port.js 的 isAppUpdateEnabled
+// port 行为等价。
 const services = createHomeComposition({ appUpdateAutoCheckEnabled: true });
 services.initialize();
 
@@ -37,7 +37,7 @@ function resolveHomeRoot(body = document.body) {
 
 createRoot(resolveHomeRoot()).render(
   <>
-    {/* No stage decoration. decorPack Theme rendering nullzero overhead (docs/theme-system/DECOR_PACKS.md） */}
+    {/* 装饰舞台：无 decorPack 的主题渲染 null，零开销（docs/theme-system/DECOR_PACKS.md） */}
     <DecorStage />
     <HomeApp services={services} />
   </>,

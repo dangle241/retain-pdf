@@ -1,5 +1,5 @@
-// Detail right column Tab Switch shell: icon + Short copy; selected black bg white text.
-// See styles library-shell.css（.book-detail-right-tab.is-active）。
+// 详情右栏 Tab 切换壳：图标 + 短文案；选中黑底白字。
+// 样式见 library-shell.css（.book-detail-right-tab.is-active）。
 
 import { useEffect, useState } from "react";
 import { Tabs as TabsPrimitive } from "radix-ui";
@@ -35,11 +35,11 @@ function IconMore(props) {
   );
 }
 
-// shortLabel Button display avoid overlap close button. Adjust layout.title Hover for full name/Accessibility
+// shortLabel 用于按钮显示，避免挤占关闭钮；title 完整名称给悬停/无障碍
 export const BOOK_DETAIL_TABS = Object.freeze([
-  { id: "overview", label: "简介", title: "Book Description", Icon: IconBook },
+  { id: "overview", label: "简介", title: "书籍简介", Icon: IconBook },
   { id: "translate", label: "翻译", title: "翻译", Icon: IconTranslate },
-  { id: "more", label: "More", title: "其他操作", Icon: IconMore },
+  { id: "more", label: "更多", title: "其他操作", Icon: IconMore },
 ]);
 
 /**
@@ -87,7 +87,7 @@ export function BookDetailRightTabs({
     >
       <TabsPrimitive.List
         className="book-detail-right-tabs-list"
-        aria-label="Book Details Section"
+        aria-label="书籍详情分区"
       >
         {BOOK_DETAIL_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -109,7 +109,7 @@ export function BookDetailRightTabs({
         })}
       </TabsPrimitive.List>
 
-      {/* forceMountPanel always on DOMUltra-terse mode active. CSS Hidden), for easier test targeting. + Preserve form state */}
+      {/* forceMount：面板始终在 DOM（用 CSS 隐藏），便于测试定位 + 保留表单状态 */}
       <TabsPrimitive.Content
         value="overview"
         forceMount

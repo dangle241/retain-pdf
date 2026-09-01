@@ -41,7 +41,7 @@ pub(super) fn record_ocr_child_finished(
             "info"
         },
         "ocr_child_finished",
-        format!("OCR Subtask ended, status={:?}", ocr_finished_status),
+        format!("OCR 子任务结束，状态={:?}", ocr_finished_status),
         Some(serde_json::json!({
             "ocr_job_id": ocr_finished.job_id.clone(),
             "status": format!("{:?}", ocr_finished_status).to_ascii_lowercase(),

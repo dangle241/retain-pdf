@@ -1,59 +1,59 @@
-// Anchor decoration.slotregistry: decoration theme's"Layout contract"。
+// 装饰锚点（slot）注册表：装饰主题的"布局契约"。
 //
-// Design principles (docs/theme-system/DECOR_PACKS.md）：
-// - Functional UI is always DOM. Anchor layer only attaches to listed named anchors. Do not invent coordinates.
-// - manifest Declare"which asset is attached to slot"，slot Where, size, level determined by
-//   Stage CSS (subsequent DecorStageUnified implementation) â Decouple assets from layout.
-// - Add anchor = Register here + add location in Stage CSS. Manifest validates auto-release.
+// 设计原则（docs/theme-system/DECOR_PACKS.md）：
+// - 功能 UI 永远是 DOM；装饰层只能挂在下列具名锚点上，不得自造坐标。
+// - manifest 声明"资产挂在哪个 slot"，slot 在哪、多大、什么层级由
+//   舞台 CSS（后续 DecorStage）统一实现——资产侧与布局侧解耦。
+// - 新增锚点 = 此处登记 + 舞台 CSS 补一条定位；manifest 校验自动放行。
 //
-// Level band (z-index bandspecific values assigned by stage CSS Unified allocation):
-//   bg < Functional UI Backplate < mid < Functional UI Content â¦outer edge < fg
-//   bg  Full-width background (landscape)/Landscape/Grassland), forever UI Panel covered.
-//   mid Midground props (characters/bronze tripod/horse), can be UI Panel partially occluded.
-//   fg  Foreground edge trim (floral branch/Dragon carving probe. UI edge),pointer-events: none
+// 层级带（z-index band，具体数值由舞台 CSS 统一分配）：
+//   bg  < 功能 UI 背板 < mid < 功能 UI 内容 …之外的边缘 < fg
+//   bg  全幅背景（山水/园林/草原），永远被 UI 面板盖住
+//   mid 中景道具（人物/铜鼎/马），可被 UI 面板局部遮挡
+//   fg  前景压边（花枝/龙雕探进 UI 边缘），pointer-events: none
 
 export type DecorLayerBand = "bg" | "mid" | "fg";
 
 export type DecorSlotDefinition = {
-/** ID referenced by manifest.layers[].slot */
+  /** manifest.layers[].slot 引用的 id */
   id: string;
   band: DecorLayerBand;
-  /** Approximate area (percentage semantics for documentation only; true values in stage CSS） */
+  /** 大致区域（百分比语义仅作文档提示，真值在舞台 CSS） */
   area: string;
-  /** true = Allow compress to feature UI above the edge (only fg Allow nullable true） */
+  /** true = 允许压到功能 UI 边缘之上（仅 fg 带可为 true） */
   overUi: boolean;
-/** true = this slot supports vertical layout/horizontal text (inscription banner) */
+  /** true = 该 slot 支持竖排/横排文字（题字横幅） */
   textCapable?: boolean;
 };
 
 /**
- * Anchor truth table. Around the central library panel. + Full-width background + Inscription slot.
-* Three concept drafts (Chinese style/garden/decorative elements e.g. grassland) map to these anchors.
+ * 锚点真值表。围绕中央书库面板一圈 + 全幅背景 + 题字位。
+ * 三张概念稿（国风/园林/草原）的装饰元素都能映射进这套锚点。
  */
 export const DECOR_SLOTS: readonly DecorSlotDefinition[] = [
   { id: "backdrop", band: "bg", area: "全屏 100%×100%", overUi: false },
 
-  // Left/right wings: concept draft figures, dragon carvings, porcelain vases, horses, scaffolding
-  { id: "left-top", band: "mid", area: "Top Left 0~25% × 0~40%", overUi: false },
-  { id: "left-bottom", band: "mid", area: "Bottom Left 0~25% × 55~100%", overUi: false },
-  { id: "right-top", band: "mid", area: "Top Right 75~100% × 0~40%", overUi: false },
-  { id: "right-bottom", band: "mid", area: "Bottom right 75~100% × 55~100%", overUi: false },
+  // 左右两翼：概念稿里的人物、龙雕、瓷瓶、马匹、鹰架
+  { id: "left-top", band: "mid", area: "左上 0~25% × 0~40%", overUi: false },
+  { id: "left-bottom", band: "mid", area: "左下 0~25% × 55~100%", overUi: false },
+  { id: "right-top", band: "mid", area: "右上 75~100% × 0~40%", overUi: false },
+  { id: "right-bottom", band: "mid", area: "右下 75~100% × 55~100%", overUi: false },
 
-  // Top center: arched trim above navigation/Butterfly/bird
-  { id: "top-center", band: "mid", area: "Top 30~70% × 0~12%", overUi: false },
+  // 顶部中央：导航上方的拱形饰件/蝴蝶/飞鸟
+  { id: "top-center", band: "mid", area: "顶部 30~70% × 0~12%", overUi: false },
 
-  // Hero: top banner figure (reading girl from three concept drafts)/Boy
-  { id: "hero", band: "mid", area: "Top banner area 40~70% × 10~30%", overUi: false },
+  // 主角位：顶部横幅区的人物（三张概念稿的看书少女/少年）
+  { id: "hero", band: "mid", area: "顶部横幅区 40~70% × 10~30%", overUi: false },
 
-  // Foreground edge overlay: floral branches, tassels, and fringes extending into panel edges
-  { id: "edge-left", band: "fg", area: "Left edge 0~12% × Full Height", overUi: true },
-  { id: "edge-right", band: "fg", area: "Right Edge 88~100% × 全高", overUi: true },
+  // 前景压边：探进面板边缘的花枝、璎珞、流苏
+  { id: "edge-left", band: "fg", area: "左缘 0~12% × 全高", overUi: true },
+  { id: "edge-right", band: "fg", area: "右缘 88~100% × 全高", overUi: true },
 
-// Bottom-right foreground position: fg version of right-bottom â Need character/props to render above panel
+  // 右下前景位：right-bottom 的 fg 版——需要人物/道具压在面板之上的场合
   { id: "right-bottom-fg", band: "fg", area: "右下 75~100% × 55~100%", overUi: true },
 
-// Banner inscription ("Know where it comes from, know where it goes" Vertical text position
-  { id: "quote", band: "mid", area: "Top Right 82~98% × 5~35%", overUi: false, textCapable: true },
+  // 题字横幅（"知其所来 明其所往"）：竖排文字位
+  { id: "quote", band: "mid", area: "右上 82~98% × 5~35%", overUi: false, textCapable: true },
 ] as const;
 
 export type DecorSlotId = (typeof DECOR_SLOTS)[number]["id"];

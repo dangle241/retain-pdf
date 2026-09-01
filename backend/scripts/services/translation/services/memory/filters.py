@@ -60,7 +60,7 @@ def fallback_looks_like_noun_phrase(value: str) -> bool:
     cleaned = clean_term_value(value)
     if not cleaned:
         return False
-    if re.search(r"[，。；：、,.!?!?]", cleaned):
+    if re.search(r"[，。；：、,.!?！？]", cleaned):
         return False
     return len(cleaned) <= MAX_TRANSLATED_TERM_VALUE_CHARS and cjk_count(cleaned) <= MAX_TRANSLATED_TERM_VALUE_CJK
 

@@ -8,38 +8,38 @@ const { useState, useEffect, useMemo } = React;
 const SUBSTEP = 8;
 const STAGES = [
   {
-    id: 'ocr', label: 'OCR', subtitle: 'recognition',
+    id: 'ocr', label: 'OCR', subtitle: '识别',
     substeps: [
       { id: 'upload',     name: '上传 PDF',           keyword: 'upload · multipart/form-data' },
       { id: 'cloud',      name: '云端 OCR',           keyword: 'cloud-ocr · streaming' },
-      { id: 'fetch',      name: '下载 / Consolidate results',    keyword: 'fetch · normalize blocks' },
+      { id: 'fetch',      name: '下载 / 整理结果',    keyword: 'fetch · normalize blocks' },
       { id: 'standardize',name: '标准化',             keyword: 'schema · bbox · order' },
     ],
   },
   {
-id: 'translate', label: 'Translate', subtitle: 'Semantic',
+    id: 'translate', label: '翻译', subtitle: '语义',
     substeps: [
       { id: 'crosslayout',name: '跨栏 / 跨页判断',    keyword: 'paragraph · graph match' },
       { id: 'strategy',   name: '页面策略',           keyword: 'route · per-page plan' },
-      { id: 'batch',      name: 'Batch translation',           keyword: 'batch · concurrent · LLM' },
+      { id: 'batch',      name: '批量翻译',           keyword: 'batch · concurrent · LLM' },
       { id: 'fixgarble',  name: '乱码修复',           keyword: 'unicode · repair' },
     ],
   },
   {
-id: 'render', label: 'Render', subtitle: 'Layout',
+    id: 'render', label: '渲染', subtitle: '排版',
     substeps: [
-      { id: 'mask',       name: '背景 / Overlay',    keyword: 'inpaint · cover-rect' },
+      { id: 'mask',       name: '背景 / 遮盖处理',    keyword: 'inpaint · cover-rect' },
       { id: 'typst',      name: 'Typst overlay 编译',keyword: 'typst · pdf-overlay' },
       { id: 'merge',      name: '合成 PDF',           keyword: 'merge · pikepdf' },
       { id: 'compress',   name: '压缩',               keyword: 'compress · linearize' },
     ],
   },
   {
-id: 'done', label: 'Done', subtitle: 'Submit',
+    id: 'done', label: '完成', subtitle: '交付',
     substeps: [
       { id: 'publish',    name: '产物发布',           keyword: 'publish · artifact' },
       { id: 'summary',    name: '写 summary',         keyword: 'summary · stats' },
-      { id: 'download',   name: 'Downloadable',             keyword: 'ready · download' },
+      { id: 'download',   name: '可下载',             keyword: 'ready · download' },
     ],
   },
 ];
@@ -112,7 +112,7 @@ function TitleBar() {
         transform: 'translate(-50%, -50%)',
         fontFamily: SANS, fontSize: 13, fontWeight: 600,
         color: INK, letterSpacing: '-0.01em',
-      }}>Preserve formatting.</div>
+      }}>保留排版翻译</div>
       <div style={{ marginLeft: 'auto', fontFamily: MONO, fontSize: 11, color: FAINT }}>
         layout-translate.app
       </div>
@@ -358,8 +358,8 @@ function App() {
             label="Mode"
             value={tweaks.mode}
             options={[
-              { label: 'sequential playback', value: 'sequence' },
-              { label: 'Step Loop', value: 'loop' },
+              { label: '顺播', value: 'sequence' },
+              { label: '单步循环', value: 'loop' },
             ]}
             onChange={(v) => setTweak('mode', v)}
           />

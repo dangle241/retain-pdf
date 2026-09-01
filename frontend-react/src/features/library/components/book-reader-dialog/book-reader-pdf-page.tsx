@@ -78,7 +78,7 @@ export function BookReaderPdfPage({ document, pageNumber, availableWidth }: Book
   return (
     <div className="relative grid min-h-[720px] w-full place-items-start justify-center">
       <canvas ref={canvasRef} className={`block bg-white shadow ${rendered ? '' : 'absolute opacity-0'}`} />
-      {!rendered ? <div className="text-xs text-neutral-500">Rendering......</div> : null}
+      {!rendered ? <div className="text-xs text-neutral-500">正在渲染...</div> : null}
     </div>
   )
 }

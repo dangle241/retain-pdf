@@ -1,9 +1,9 @@
-"""Block-level reading of task artifacts.
+"""任务产物的块级读取。
 
-The truth is in the task directory: ocr/normalized/document.v1.json (original blocks) and
-translated/page-*.json(translation,by (page_idx, block_idx) Align numeric indices——
-translation item_id and normalized block_id Zero-padding widths differ.,String alignment fails. Use monospace font.)。
-Read-only, no directory content written.
+真相在任务目录:ocr/normalized/document.v1.json(原文块)与
+translated/page-*.json(译文,按 (page_idx, block_idx) 数字索引对齐——
+译文 item_id 与规范 block_id 的零填充位数不同,不能按字符串对齐)。
+只读,不写任何任务目录内容。
 """
 
 from __future__ import annotations
@@ -72,7 +72,7 @@ def read_page_blocks(
     around_block_id: str = "",
     max_blocks: int = 12,
 ) -> list[Block]:
-    """Get page blocks;Given around_block_id Center the window on it."""
+    """取某页的块;给定 around_block_id 时以它为中心取窗口。"""
     page_blocks = [block for block in load_job_blocks(job_root) if block.page_idx == page_idx]
     if not around_block_id:
         return page_blocks[: max(1, max_blocks)]

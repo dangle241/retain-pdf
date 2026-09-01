@@ -19,19 +19,19 @@ function memoryStorage(seed) {
 
 const KEY = "retainpdf-ai-chat-v1:job-1";
 
-// ===== view-model pure logic =====
+// ===== view-model 纯逻辑 =====
 
-test("Session title: take first user message and trim, placeholder if empty", () => {
-assert.equal(deriveSessionTitle({ messages: [] }), "New conversation");
+test("会话标题:取首条用户消息并裁剪,空则占位", () => {
+  assert.equal(deriveSessionTitle({ messages: [] }), "新对话");
   assert.equal(
     deriveSessionTitle({ messages: [{ role: "assistant", text: "先回答" }, { role: "user", text: "  卤素锂交换是什么  " }] }),
-"What is halogen-lithium exchange?",
+    "卤素锂交换是什么",
   );
   const long = deriveSessionTitle({ messages: [{ role: "user", text: "一二三四五六七八九十一二三四五六七八九十" }] });
   assert.ok(long.endsWith("…") && long.length <= 19);
 });
 
-test("Session summary: sort by updatedAt descending and mark active", () => {
+test("会话摘要:按 updatedAt 倒序并标记 active", () => {
   const summaries = summarizeSessions({
     activeId: "s-b",
     sessions: [
@@ -42,19 +42,19 @@ test("Session summary: sort by updatedAt descending and mark active", () => {
   assert.deepEqual(summaries.map((s) => s.id), ["s-b", "s-a"]);
   assert.equal(summaries[0].active, true);
   assert.equal(summaries[0].messageCount, 0);
-assert.equal(summaries[1].title, "Old");
+  assert.equal(summaries[1].title, "旧");
 });
 
-test("Session limit truncation: keep most recently updated when exceeding limit, and keep active", () => {
+test("会话上限截断:超过上限保留最近更新的,且保留 active", () => {
   const sessions = Array.from({ length: 25 }, (_, i) => ({ id: `s-${i}`, updatedAt: i }));
   const kept = trimSessions({ sessions, activeId: "s-0" }, 20);
   assert.equal(kept.length, 20);
-assert.ok(kept.some((s) => s.id === "s-0"), "Oldest but active session is kept");
+  assert.ok(kept.some((s) => s.id === "s-0"), "最旧但 active 的会话被保留");
 });
 
-// ===== store:Backward compatible single session layer =====
+// ===== store:向后兼容单会话层 =====
 
-test("Single session layer: save/load/clear act on current session", () => {
+test("单会话层:save/load/clear 作用于当前会话", () => {
   const storage = memoryStorage();
   const store = createReaderAiHistoryStore({ jobId: "job-1", storage });
   assert.deepEqual(store.load(), { messages: [], history: [] });
@@ -69,9 +69,9 @@ test("Single session layer: save/load/clear act on current session", () => {
   assert.deepEqual(store.load(), { messages: [], history: [] });
 });
 
-// ===== store: multi-session layer =====
+// ===== store:多会话层 =====
 
-test("Multi-session: create/switch/delete and active migration", () => {
+test("多会话:新建/切换/删除与 active 迁移", () => {
   const storage = memoryStorage();
   const store = createReaderAiHistoryStore({ jobId: "job-1", storage });
   store.save({ messages: [{ role: "user", text: "会话A" }], history: [] });
@@ -79,47 +79,47 @@ test("Multi-session: create/switch/delete and active migration", () => {
 
   const idB = store.newSession();
   assert.notEqual(idA, idB);
-assert.equal(store.activeSessionId(), idB, "After creation, active points to new session");
-assert.deepEqual(store.load(), { messages: [], history: [] }, "New session is empty");
+  assert.equal(store.activeSessionId(), idB, "新建后 active 指向新会话");
+  assert.deepEqual(store.load(), { messages: [], history: [] }, "新会话是空的");
   store.save({ messages: [{ role: "user", text: "会话B" }], history: [] });
 
   assert.equal(store.listSessions().length, 2);
 
-  // Switch back A
+  // 切回 A
   const backToA = store.switchSession(idA);
-assert.equal(backToA.messages[0].text, "Session A");
+  assert.equal(backToA.messages[0].text, "会话A");
   assert.equal(store.activeSessionId(), idA);
 
-// Delete A → active falls to B
+  // 删除 A → active 落到 B
   const afterDelete = store.deleteSession(idA);
   assert.equal(store.listSessions().length, 1);
-assert.equal(afterDelete.messages[0].text, "Session B");
+  assert.equal(afterDelete.messages[0].text, "会话B");
   assert.equal(store.activeSessionId(), idB);
 });
 
-test("Delete last session: add an empty session instead of leaving empty", () => {
+test("删除最后一条会话:补一条空会话而非留空", () => {
   const storage = memoryStorage();
   const store = createReaderAiHistoryStore({ jobId: "job-1", storage });
   store.save({ messages: [{ role: "user", text: "唯一" }], history: [] });
   const only = store.activeSessionId();
   const after = store.deleteSession(only);
   assert.deepEqual(after, { messages: [], history: [] });
-assert.ok(store.activeSessionId(), "Still has an empty session as active");
+  assert.ok(store.activeSessionId(), "仍有一条空会话作为 active");
   assert.equal(store.listSessions().length, 1);
 });
 
-test("Compatibility with old single-session format: automatically migrates to one session on first read", () => {
+test("兼容旧版单会话格式:首次读取自动迁移为一条会话", () => {
   const storage = memoryStorage({
     [KEY]: JSON.stringify({ messages: [{ role: "user", text: "旧数据" }], history: [{ role: "user", content: "旧数据" }] }),
   });
   const store = createReaderAiHistoryStore({ jobId: "job-1", storage });
   const loaded = store.load();
-assert.equal(loaded.messages[0].text, "Old data");
-assert.equal(loaded.history[0].content, "Old data");
-assert.equal(store.listSessions().length, 1, "Old data migrated to single session");
+  assert.equal(loaded.messages[0].text, "旧数据");
+  assert.equal(loaded.history[0].content, "旧数据");
+  assert.equal(store.listSessions().length, 1, "旧数据迁移为单条会话");
 });
 
-test("No jobId / no storage: multi-session interface silently degrades without throwing", () => {
+test("无 jobId / 无 storage:多会话接口静默降级不抛", () => {
   const noJob = createReaderAiHistoryStore({ jobId: "", storage: memoryStorage() });
   assert.equal(noJob.enabled, false);
   assert.deepEqual(noJob.listSessions(), []);

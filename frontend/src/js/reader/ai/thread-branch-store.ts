@@ -1,11 +1,11 @@
-// assistant-ui Branch tree local snapshot: press job Store full dataset. parentId tree + headId.
-// Complementary to conversation-store (Rust conversation_id Sticky); no server-side.
+// assistant-ui 分支树本地快照：按 job 存全量 parentId 树 + headId。
+// 与 conversation-store（Rust conversation_id 粘性）互补；不进服务端。
 
 import { loadStoredConversationId } from "./conversation-store.js";
 
 const STORAGE_PREFIX = "retainpdf.reader.ai.thread-branch.v1:";
 
-/** Compatible with answer-enhance / runtime Reference shape; loose structure avoids circular deps. */
+/** 与 answer-enhance / runtime 中的引用形状兼容；此处用宽松结构避免循环依赖。 */
 export type ThreadBranchCitation = {
   ref?: number | string;
   block_id?: string;
@@ -38,7 +38,7 @@ export type ThreadBranchSnapshot = {
   version: 1;
   headId: string | null;
   items: ThreadBranchItem[];
-  /** Session owning snapshot id(Anti-session-hijack stamp, audit P2-10); old snapshots lack this field */
+  /** 快照归属的会话 id（防串会话印章，审计 P2-10）；旧快照无此字段 */
   conversationId?: string;
 };
 
@@ -84,7 +84,7 @@ function normalizeMessage(raw: unknown): ThreadBranchMessage | null {
     ? (raw.citations as ThreadBranchCitation[])
     : undefined;
   const progress = typeof raw.progress === "string" ? raw.progress : undefined;
-  // No restore runningDo not restore running: should not be stuck in "Generating" after refresh「Generating」
+  // 不恢复 running：刷新后不应卡在「生成中」
   let status = normalizeStatus(raw.status);
   if (status?.type === "running") {
     status = { type: "incomplete", reason: "cancelled" };
@@ -133,10 +133,10 @@ export function loadThreadBranchSnapshot(
   try {
     const raw = store.getItem(threadBranchStorageKey(jobId, conversationId));
     if (!raw && conversationId) {
-      // Backward compatible key(only job）——Prevent session cross-talk (audit) P2-10）：
-// 1. With conversationId Seal snapshot; reject if ownership mismatch.
-      // 2. Unsealed true legacy snapshot, only in"requested is exactly this job sticky sessions"Accept only when
-      //    Old snapshot write era. Only possible meaning.
+      // 兼容旧 key（仅 job）——但要防串会话（审计 P2-10）：
+      // 1. 带 conversationId 印章的快照，归属不符直接拒绝；
+      // 2. 无印章的真旧快照，只在"请求的正是本 job 的粘性会话"时才接受
+      //    （旧快照写入时代唯一可能代表的就是它）。
       const legacy = store.getItem(threadBranchStorageKey(jobId));
       if (!legacy) return null;
       const snapshot = normalizeSnapshot(JSON.parse(legacy));
@@ -193,7 +193,7 @@ export function clearThreadBranchSnapshot(
   try {
     store.removeItem(threadBranchStorageKey(jobId, conversationId));
     if (!conversationId) {
-      // Clear job Deprecated key
+      // 清 job 级旧 key
       store.removeItem(threadBranchStorageKey(jobId));
     }
   } catch {
@@ -201,7 +201,7 @@ export function clearThreadBranchSnapshot(
   }
 }
 
-/** Visible path: Backtracking from head via parent. parent must precede child in items. */
+/** 可见路径：从 head 沿 parent 链回溯（parent 须先于 child 出现在 items 中）。 */
 export function visiblePathFromSnapshot(
   snapshot: ThreadBranchSnapshot,
 ): ThreadBranchMessage[] {

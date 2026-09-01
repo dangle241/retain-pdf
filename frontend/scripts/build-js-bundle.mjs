@@ -8,11 +8,11 @@ const __dirname = path.dirname(__filename);
 const frontendRoot = path.resolve(__dirname, "..");
 const outdir = path.join(frontendRoot, "dist");
 
-// --watch: esbuild context Incremental Rebuild(Development:sourcemap Open,minify related)
+// --watch: esbuild context 增量重建(开发态:sourcemap 开、minify 关)
 const watchMode = process.argv.includes("--watch");
 
-// Import path still written .js/.jsxCompatibility with existing data. importUnexpected token `）`. Parser expects `)` or `,` before `）`. Check input encoding. .ts/.tsx。
-// TypeScript bundler Convention:import "./foo.js" Mappable. foo.ts。
+// 导入路径仍写 .js/.jsx（兼容存量 import），解析时映射到 .ts/.tsx。
+// TypeScript bundler 约定：import "./foo.js" 可对应 foo.ts。
 function jsToTsResolvePlugin() {
   const map = new Map([
     [".js", [".ts", ".tsx", ".js"]],
@@ -48,7 +48,7 @@ function jsToTsResolvePlugin() {
   };
 }
 
-// Three pages MPA Entry tables for individually bundled modules——home/detail/reader All switched to React New World
+// 三页 MPA 各自打包的入口表——home/detail/reader 均已切换到 React 新世界
 const PAGE_BUNDLES = [
   {
     name: "home",
@@ -67,8 +67,8 @@ const PAGE_BUNDLES = [
   },
 ];
 
-// mathjax-full/js/components/version.js undefined PACKAGE_VERSION Incomplete input.
-// eval('require') to read package.json — Browser ESM directly explodes, causing all formulas to roll back.
+// mathjax-full/js/components/version.js 在未定义 PACKAGE_VERSION 时会
+// eval('require') 读 package.json —— 浏览器 ESM 里直接炸，导致全部公式回退。
 function resolveMathJaxPackageVersion() {
   try {
     const pkgPath = path.join(
@@ -110,7 +110,7 @@ function bundleOptions({ entry, outfile }) {
   };
 }
 
-// Clear only JS Artifacts, keep dist/css/（build:css Independent write; entire directory rm Breaks homepage styles.
+// 只清 JS 产物，保留 dist/css/（build:css 独立写入；整目录 rm 会把主页样式弄没）
 fs.mkdirSync(outdir, { recursive: true });
 for (const page of PAGE_BUNDLES) {
   try {

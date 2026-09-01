@@ -74,10 +74,10 @@ export function mountJobRuntimeFeature({
   const normalizeJobPayload = jobPresentationPort?.normalizeJobPayload || ((value) => value || {});
   const isTerminalStatus = jobPresentationPort?.isTerminalStatus || ((status) => status === "failed" || status === "canceled");
   const isJobTerminal = jobPresentationPort?.isJobTerminal || ((value: any = {}) => isTerminalStatus(value?.status || value));
-  // Whether current polling session broadcasts progress patches to library.
-// silent: in silent mode, do not refresh the full library, but status/stage changes still sync (cover spinning / completion 「translated」).
+  // 当前轮询会话是否向图书馆广播进度补丁。
+  // silent：不全量刷库，但 status/stage 变化仍同步（封面转圈 / 完成「已翻译」）。
   let sessionPublishLibrary = true;
-  /** silent Pushed to bookshelf status|stage, to skip notifying for repeated identical status/stage changes notify */
+  /** silent 下上次已推到书架的 status|stage，用于跳过同态重复 notify */
   let lastLibraryPublishKey = "";
 
   function libraryPublishKeyOf(job: any = {}) {
@@ -109,12 +109,12 @@ export function mountJobRuntimeFeature({
       manifestPayload: cachedManifest,
       stageActionsPayload: cachedStageActions,
     });
-    // progress home:statusCardStore(main card / Detail embedded card shares)
+    // 进度主场：statusCardStore（主卡 / 详情嵌入卡共用）
     renderJob(renderContext);
     const job = normalizeJobPayload(payload);
     const terminal = isJobTerminal(job);
     const publishKey = libraryPublishKeyOf(job);
-    // Full publish: On each poll；silentCode not needed. Simplify. status/stage Change or final state (cover spinning depends on status=running）
+    // 全量 publish：每次 poll；silent：仅 status/stage 变化或终态（封面转圈要靠 status=running）
     if (sessionPublishLibrary || terminal || publishKey !== lastLibraryPublishKey) {
       lastLibraryPublishKey = publishKey;
       notifyLibraryJobUpdated(job, { port: libraryEventPort });
@@ -142,8 +142,8 @@ export function mountJobRuntimeFeature({
    *   publishLibrary?: boolean,
    *   showWorkflow?: boolean,
    * }} [options]
-* - silent: detail tab waits for embed progress; do not raise main workflow area, do not broadcast create; no DB refresh during runtime.
-   * - publishLibrary / showWorkflow: Default follow. !silent
+   * - silent: 详情 Tab 等嵌入进度；不抬主工作流区、不广播 create、运行中不刷库
+   * - publishLibrary / showWorkflow: 默认跟随 !silent
    */
   function startPolling(
     jobId: string,
@@ -151,7 +151,7 @@ export function mountJobRuntimeFeature({
       silent?: boolean;
       publishLibrary?: boolean;
       showWorkflow?: boolean;
-      /** First frame payloadRetry with fromStage Result, prevent initial flash.「Queue」） */
+      /** 首帧 payload（重试时带 fromStage 结果，避免先闪「排队」） */
       seedPayload?: Record<string, unknown> | null;
     } = {},
   ) {
@@ -172,7 +172,7 @@ export function mountJobRuntimeFeature({
       ? {
           ...seed,
           job_id: jobId,
-// Retry first frame forced running, avoid still displaying 「Translated」 with no spinner.
+          // 重试首帧强制 running，避免仍显示「已翻译」不转圈
           status: seed.status && seed.status !== "succeeded"
             ? seed.status
             : "running",
@@ -187,18 +187,18 @@ export function mountJobRuntimeFeature({
           display_stage: "ocr",
           lane: "main",
           current_stage: "queued",
-stage_detail: "Reading task status...",
+          stage_detail: "正在读取任务状态...",
           created_at: startedAt,
           started_at: startedAt,
         };
     if (showWorkflow) {
       setWorkflowSections(placeholderJob);
     }
-    // Always Write statusCardStore, for the main card / Detail embedded card shares snapshot
+    // 始终写 statusCardStore，供主卡 / 详情嵌入卡共用 snapshot
     renderJob(renderContextPort.applySnapshot({
       payload: placeholderJob,
     }));
-    // Bookshelf: full mode unchanged;silent Push frame immediately. runningCover spinner CSS animation missing. Add:  `@keyframes spin { to { transform: rotate(360deg); } }`  `cover { animation: spin 1s linear infinite; }`
+    // 书架：全量模式照旧；silent 也要立刻推一帧 running，封面才能转圈
     const normalizedPlaceholder = normalizeJobPayload(placeholderJob);
     if (publishLibrary) {
       libraryEventPort?.publishJobCreated?.(normalizedPlaceholder);
@@ -237,7 +237,7 @@ stage_detail: "Reading task status...",
   async function cancelCurrentJob() {
     const jobId = currentJobPort.jobId();
     if (!jobId) {
-      setText("error-box", "No cancellable tasks.");
+      setText("error-box", "当前没有可取消的任务");
       return;
     }
     shellViewPort.setCancelDisabled(true);
@@ -251,7 +251,7 @@ stage_detail: "Reading task status...",
 
   async function retryStage(stage, options: { jobId?: string } = {}) {
     const normalizedStage = `${stage || ""}`.trim();
-    // Priority event belt jobId → Current polling → Last time snapshotRetry tap on detail card may fire before init completes. currentJobId）
+    // 优先事件带的 jobId → 当前轮询 → 上次 snapshot（详情卡上点重试时可能尚未 currentJobId）
     const jobId = `${
       options.jobId
       || currentJobPort.jobId()
@@ -259,12 +259,12 @@ stage_detail: "Reading task status...",
       || ""
     }`.trim();
     if (!jobId || !normalizedStage) {
-      setText("error-box", "No re-executable stages.");
+      setText("error-box", "当前没有可重新执行的阶段");
       return;
     }
     try {
       setText("error-box", "-");
-// statusCard snapshot top-level has no document_id; identity is in the job / raw_response.
+      // statusCard snapshot 顶层无 document_id；身份在 job / raw_response 里
       const prevSnapshot = (currentJobPort.snapshot?.() || {}) as Record<string, unknown>;
       const prevJob = (
         (prevSnapshot.job && typeof prevSnapshot.job === "object" ? prevSnapshot.job : null)
@@ -294,7 +294,7 @@ stage_detail: "Reading task status...",
       const result = await retryJobStage(jobId, apiPrefix, normalizedStage, bookMeta);
       const nextJobId = `${result?.job_id || jobId}`.trim();
       if (nextJobId) {
-// Progress field uses resultMetadata priority for bibliography bookMeta (avoid Mock Retry title overwriting book title).
+        // 进度字段用 result；书目元数据优先 bookMeta（避免 Mock 重试标题盖掉书名）
         const seed = normalizeJobPayload({
           ...result,
           job_id: nextJobId,
@@ -308,7 +308,7 @@ stage_detail: "Reading task status...",
           library_only: false,
           active_job_id: nextJobId,
         });
-// Detail tab internal retry: silent + first frame uses fromStage result; mandatory document_id/source_job_id
+        // 详情 Tab 内重试：silent + 首帧用 fromStage 结果；必须带 document_id/source_job_id
         startPolling(nextJobId, {
           silent: true,
           showWorkflow: false,
@@ -324,7 +324,7 @@ stage_detail: "Reading task status...",
             status: seed.status && seed.status !== "succeeded" ? seed.status : "running",
           },
         });
-        // startPolling already notify one frame runningno need to repeat here
+        // startPolling 已 notify 一帧 running，此处不必重复
       } else {
         await fetchJob(jobId);
       }

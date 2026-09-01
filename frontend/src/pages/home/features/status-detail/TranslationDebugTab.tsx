@@ -1,7 +1,7 @@
-};
-}
-export function useStatusArea(store: ReturnType<typeof createStatusAreaStore>) {
-const state = useStoreSnapshot(store);
+// 翻译调试 tab(高级诊断)——组合 Summary/FilterPanel/ItemsPanel/DetailPanel,
+// 外层 status/empty/content 三态切换 JSX 重写
+// status-detail-dialog-translation.js#renderTranslationSummary 的 hidden 分支
+// (蓝图 §1.2 组件表:TranslationDebugTab 家族)。
 
 import { TranslationSummary } from "./TranslationSummary.jsx";
 import { TranslationFilterPanel } from "./TranslationFilterPanel.jsx";
@@ -16,9 +16,9 @@ export function TranslationDebugTab({ translation, controller }) {
   return (
     <section className="status-panel translation-debug-panel">
       <div className="status-panel-head">
-        <h3>Debug</h3>
+        <h3>翻译调试</h3>
         <span id={ids.debugStatus} className="status-panel-note">
-          {hidden ? "No translation debug data available." : "按 item investigate why it wasn't translated and why the original was kept"}
+          {hidden ? "暂无翻译调试数据" : "按 item 排查为什么没翻译、为什么保留原文"}
         </span>
       </div>
       <div id={ids.debugEmpty} className={hidden ? "events-empty" : "events-empty hidden"}>

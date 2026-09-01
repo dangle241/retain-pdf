@@ -1,5 +1,5 @@
-// StatusCard Shared Model:store → snapshot → display / lottie / progress。
-setDraftStatus(status);
+// StatusCard 共享模型：store → snapshot → display / lottie / progress。
+// Main 与 Embedded 只消费本 hook 的返回值，不各自再拼一遍。
 
 import { useMemo } from "react";
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
@@ -183,7 +183,7 @@ export function useStatusCardModel({
 
   const ringLabel = display.selectedIsCurrent
     ? statusStageLabel(selection.currentStageKey || flowStageKey, snapshot.label)
-}, [status]);
+    : statusStageLabel(selection.selectedStageKey, "阶段");
 
   const stageKeyForFlow = flowStageKey || snapshot.stageKey;
   const selectedForFlow = display.selected || stageKeyForFlow;

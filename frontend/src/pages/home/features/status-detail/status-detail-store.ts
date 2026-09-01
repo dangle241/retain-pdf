@@ -1,20 +1,20 @@
 import { createStore } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-}
+// StatusDetailDialog 的读面 store(蓝图 §1 "新 store"清单)。
 //
-export function ResultActions({ snapshot, onReaderClick }) {
-const { markdownBundleUrl, sourcePdfUrl, readerUrl, pdfUrl } = snapshot || {};
-//   eventsPayload Raw data(Not pre-assembled markup),StageHistoryList/
-//   EventsList Compute structured array from these two fields using pure function.(See corresponding component files.)。
-const markdownBundleReady = !!markdownBundleUrl;
+// 两个并行段(数据源铁律,蓝图 §1.0 + §0 全局发现):
+// - overview 段:headline/runtime/failure/rerun/job/eventsPayload——job/
+//   eventsPayload 是原始数据(不是预拼好的 markup),StageHistoryList/
+//   EventsList 直接从这两个字段用纯函数计算结构化数组(见对应组件文件)。
+// - translation 段:createTranslationState() 状态袋的浅拷贝 + 少量 UI 态
 //   (itemsLoading/itemDetailLoading/replayLoading/emptyMessage/errorText),
-const sourcePdfReady = !!sourcePdfUrl;
+//   随 translation-data-port.js(kept)每次读写后同步。
 //
-const readerReady = !!readerUrl;
-const pdfReady = !!pdfUrl;
-// resumePlan),Write frequency far below status cards. 1s The photophysical properties of rotaxanes still have great potential for exploration and fine-tuning. Therefore, we expect their applications to become more widespread and drive further development in this field.,Merge will pollute. StatusCard high-frequency of
-const hasActions = markdownBundleReady || sourcePdfReady || readerReady || pdfReady;
+// 本 store 与 features/status/status-card-store.js 的 statusCardStore 是两条
+// 平行读路径,不合并——status-detail 自己 fetch(events/diagnostics/
+// resumePlan),写入频率远低于状态卡的 1s 轮询,合并会污染 StatusCard 的高频
+// 订阅快照(蓝图 §1.0 明确铁律)。
 
 export type StatusDetailHeadline = {
   iconMarkup: string;
@@ -49,16 +49,16 @@ export type StatusDetailRerun = {
   status: string;
 };
 
-return (
+/** 原始 job 载荷（StageHistoryList 等直接消费；API 形状宽） */
 export type StatusDetailJobPayload = Record<string, unknown>;
 
-<div className={status-result-actions${hasActions ? "" : " hidden"}}>
+/** 原始 events 载荷（EventsList 直接消费） */
 export type StatusDetailEventsPayload = {
   items?: unknown[];
   [key: string]: unknown;
 };
 
-/** overview Segment:buildStatusDetailSnapshot + job/events Raw Payload */
+/** overview 段：buildStatusDetailSnapshot + job/events 原始载荷 */
 export type StatusDetailOverview = {
   headline: StatusDetailHeadline;
   runtime: StatusDetailRuntime;
@@ -77,8 +77,8 @@ export type StatusDetailTranslationQuery = {
 };
 
 /**
- * Diagnostics summary(nested summary Pocket + Top-level extension fields).
-* TranslationSummary reads summary.summary.{status_summary,counts,provider_*}.
+ * 翻译诊断 summary（嵌套 summary 口袋 + 顶层扩展字段）。
+ * TranslationSummary 读 summary.summary.{status_summary,counts,provider_*}。
  */
 export type StatusDetailTranslationSummaryInner = {
   status_summary?: Record<string, unknown>;
@@ -94,7 +94,7 @@ export type StatusDetailTranslationSummary = {
   [key: string]: unknown;
 } | null;
 
-/** Item List row (TranslationItemsPanel） */
+/** Item 列表行（TranslationItemsPanel） */
 export type StatusDetailTranslationListItem = {
   item_id?: string;
   block_type?: string;
@@ -104,7 +104,7 @@ export type StatusDetailTranslationListItem = {
   [key: string]: unknown;
 };
 
-/** Selected item Details (TranslationItemDetailPanel) */
+/** 选中 item 详情（TranslationItemDetailPanel） */
 export type StatusDetailTranslationSelectedItem = {
   item_id?: string;
   item?: StatusDetailTranslationListItem | null;
@@ -112,7 +112,7 @@ export type StatusDetailTranslationSelectedItem = {
   [key: string]: unknown;
 } | null;
 
-/** Replay result bag */
+/** 重放结果袋 */
 export type StatusDetailTranslationReplay = {
   payload?: {
     policy_before?: unknown;
@@ -124,7 +124,7 @@ export type StatusDetailTranslationReplay = {
   [key: string]: unknown;
 } | null;
 
-/** translation Segment: createTranslationState mirror + UI loading/error */
+/** translation 段：createTranslationState 镜像 + UI loading/error */
 export type StatusDetailTranslation = {
   jobId: string;
   loaded: boolean;

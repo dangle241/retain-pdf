@@ -174,7 +174,7 @@ def test_build_case_drift_summary_detects_strategy_shift() -> None:
             "final_status": "kept_origin",
         },
         "replay_result": {
-            "translated_text": "Geometry optimization and energy calculation.",
+            "translated_text": "几何优化与能量计算。",
             "final_status": "translated",
         },
         "replay_error": None,
@@ -217,7 +217,7 @@ def test_capture_case_writes_fixture_and_case_artifact(monkeypatch) -> None:
                 "final_status": "kept_origin",
             },
             "replay_result": {
-"translated_text": "Geometry optimization and energy calculation.",
+                "translated_text": "几何优化与能量计算。",
                 "final_status": "translated",
             },
             "replay_error": None,
@@ -283,7 +283,7 @@ def test_generate_tests_uses_case_artifact_when_job_root_is_missing(monkeypatch)
                             "block_type": "text",
                             "math_mode": "direct_typst",
                             "source_text": "Artifact-only source text.",
-                            "translated_text": "solely artifact translation.",
+                            "translated_text": "仅靠 artifact 的翻译。",
                             "classification_label": "translated",
                             "should_translate": True,
                             "skip_reason": "",
@@ -297,7 +297,7 @@ def test_generate_tests_uses_case_artifact_when_job_root_is_missing(monkeypatch)
                             "block_type": "text",
                             "math_mode": "direct_typst",
                             "source_text": "Artifact-only source text.",
-"translated_text": "Translation relying solely on artifact.",
+                            "translated_text": "仅靠 artifact 的翻译。",
                             "classification_label": "translated",
                             "should_translate": True,
                             "skip_reason": "",
@@ -341,7 +341,7 @@ def test_generate_tests_uses_case_artifact_when_job_root_is_missing(monkeypatch)
         assert len(tests) == 1
         assert tests[0]["description"] == "artifact only case"
         assert tests[0]["vars"]["source_text"] == "Artifact-only source text."
-assert tests[0]["vars"]["saved_text"] == "Translation relying solely on artifact."
+        assert tests[0]["vars"]["saved_text"] == "仅靠 artifact 的翻译。"
 
 
 def test_repo_promptfoo_fixtures_have_case_artifacts() -> None:

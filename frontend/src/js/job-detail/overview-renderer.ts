@@ -53,7 +53,7 @@ export function renderJobDetailOverview({
   }
   setText("detail-rerun-status", summarizeResumePlan(resumePlan));
   renderJobDetailPublicError({ job, setText });
-setEventsStatus("Not yet loaded");
+  setEventsStatus("尚未加载");
   renderJobDetailActionLinks({ actions, job, manifestPayload, setActionLink });
 
   return { actions, durations, statusViewModel };

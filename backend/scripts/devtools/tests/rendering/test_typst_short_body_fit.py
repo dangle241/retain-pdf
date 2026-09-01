@@ -33,9 +33,9 @@ def test_page_long_body_anchors_raise_single_line_body_font_and_allow_bbox_overf
             },
         }
 
-    long_a = make_payload(10.0, 112.0, 10.8, "Long body paragraph. Stabilizes page font baseline." * 5, 8)
-    long_b = make_payload(130.0, 232.0, 10.9, "Another longer body paragraph to stabilize the page font baseline." * 5, 8)
-    short = make_payload(248.0, 262.0, 9.4, "Short body text should inherit page font.", 1)
+    long_a = make_payload(10.0, 112.0, 10.8, "这是一个较长正文段落，用于稳定页面字体基准。" * 5, 8)
+    long_b = make_payload(130.0, 232.0, 10.9, "这是另一个较长正文段落，用于稳定页面字体基准。" * 5, 8)
+    short = make_payload(248.0, 262.0, 9.4, "短正文也应该继承页面字体。", 1)
 
     apply_body_payload_pipeline([long_a, long_b, short], page_text_width_med=240.0)
 
@@ -57,7 +57,7 @@ def test_short_body_bbox_overflow_marker_disables_typst_fit() -> None:
         "bbox": [10.0, 248.0, 280.0, 262.0],
         "cover_bbox": [10.0, 248.0, 280.0, 262.0],
         "inner_bbox": [10.0, 248.0, 280.0, 262.0],
-        "translated_text": "Short text inherit page font. → skipped: additional styling, add when custom font needed.",
+        "translated_text": "短正文也应该继承页面字体。",
         "formula_map": [],
         "render_kind": "markdown",
         "font_size_pt": 10.8,
@@ -94,7 +94,7 @@ def test_short_body_inline_formula_overflow_keeps_font_and_formula_padding() -> 
         "bbox": [10.0, 248.0, 280.0, 262.0],
         "cover_bbox": [10.0, 248.0, 280.0, 262.0],
         "inner_bbox": [10.0, 248.0, 280.0, 262.0],
-"translated_text": "where $c_{\\kappa}$ Linear coefficients.",
+        "translated_text": "其中 $c_{\\kappa}$ 是线性系数。",
         "formula_map": [{"placeholder": "<f0-abc/>", "formula_text": "c_{\\kappa}"}],
         "render_kind": "markdown",
         "font_size_pt": 10.8,
@@ -151,13 +151,13 @@ def test_body_font_unify_includes_short_dense_body_without_typst_fit() -> None:
             },
         }
 
-anchor_a = make_payload(60.0, 112.0, 11.17, "This is a long body paragraph with stable page font size." * 4)
-anchor_b = make_payload(132.0, 190.0, 11.17, "This is another long body paragraph with stable page font size." * 4)
+    anchor_a = make_payload(60.0, 112.0, 11.17, "这是稳定页面字号的长正文段落。" * 4)
+    anchor_b = make_payload(132.0, 190.0, 11.17, "这是另一个稳定页面字号的长正文段落。" * 4)
     short_dense = make_payload(
         210.0,
         223.0,
         10.2,
-        "Here, variable. r Measured from the Gaussian sphere origin.",
+        "这里，变量 r 是从高斯球原点起测量的。",
         dense=True,
         heavy=True,
         prefer_fit=True,
@@ -177,15 +177,15 @@ def test_unified_body_font_still_uses_typst_fit_when_estimated_overflow() -> Non
             "item_id": "p024-b007",
             "bbox": [33.482, 541.747, 398.284, 613.214],
             "lines": [{"bbox": [33.482, 541.747, 398.284, 553.0]}],
-            "protected_translated_text": "The wave function found is not normalized. Normalization constant given by(3.93)is given."
-            "Integral approximation, summation approximation, multiple cell formulas. Text long enough to simulate overflow after uniform font size."
+            "protected_translated_text": "我们找到的波函数尚未归一化。归一化常数由式(3.93)给出。"
+            "我们有积分近似、求和近似以及多个单元格公式，文本足够长以模拟统一字号后溢出。"
             * 6,
         },
         "bbox": [33.482, 541.747, 398.284, 613.214],
         "cover_bbox": [33.482, 541.747, 398.284, 613.214],
         "inner_bbox": [33.482, 542.819, 398.284, 612.142],
-"translated_text": "The wave function we found is not yet normalized. The normalization constant is given by Eq. (3.93)."
-"We have integral approximation, summation approximation, and multiple cell formulas; the text is long enough to simulate overflow after unifying font size."
+        "translated_text": "我们找到的波函数尚未归一化。归一化常数由式(3.93)给出。"
+        "我们有积分近似、求和近似以及多个单元格公式，文本足够长以模拟统一字号后溢出。"
         * 6,
         "formula_map": [],
         "render_kind": "markdown",

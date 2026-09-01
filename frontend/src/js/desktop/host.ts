@@ -92,7 +92,7 @@ function resolveDesktopHost(): DesktopHost | null {
   return {
     invoke(command: string, args: DesktopInvokeArgs = {}) {
       if (!invokeAdapter) {
-throw new Error("Desktop interface unavailable");
+        throw new Error("桌面接口不可用");
       }
       return invokeAdapter.invoke(command, args);
     },

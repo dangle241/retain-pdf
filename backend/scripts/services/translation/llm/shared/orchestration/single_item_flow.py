@@ -126,8 +126,8 @@ def translate_single_item_plain_text_with_retries(
 ) -> dict[str, dict[str, str]]:
     context = context.scoped_to_item(item)
     item = item_with_runtime_hard_glossary(item, context.glossary_entries)
-# Item-by-item terminology matching guide. item injects into user message (see prompt_protocols),
-# No entry system message — otherwise each request prefix differs, prefix cache invalidated.
+    # 逐条匹配的术语指引经 item 注入 user 消息(见 prompt_protocols),
+    # 不进 system 消息——否则每条请求前缀都不同,前缀缓存全部失效。
     scoped_terms_guidance = context.terms_guidance
     if scoped_terms_guidance:
         item["_scoped_terms_guidance"] = scoped_terms_guidance

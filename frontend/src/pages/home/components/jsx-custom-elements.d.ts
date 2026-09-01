@@ -1,5 +1,5 @@
-// home Custom element tags still used by the page.(legacy islands / Placeholder contract)。
-// Some tags still written as class= instead of className, therefore in HTMLAttributes Supplement above class.
+// home 页仍使用的自定义元素标签(legacy islands / 占位契约)。
+// 部分标签仍写 class= 而非 className，故在 HTMLAttributes 上补充 class。
 
 import type { HTMLAttributes, ReactNode } from "react";
 

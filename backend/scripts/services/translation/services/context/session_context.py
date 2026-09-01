@@ -15,7 +15,7 @@ def build_translation_context(
     mode: str = "fast",
     source_lang: str = "auto",
     target_lang: str = "zh-CN",
-target_language_name: str = "Simplified Chinese",
+    target_language_name: str = "简体中文",
     domain_guidance: str = "",
     rule_guidance: str = "",
     extra_guidance: str = "",

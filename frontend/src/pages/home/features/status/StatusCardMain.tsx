@@ -1,4 +1,4 @@
-// merged with progressText and status.
+// 主流程 StatusCard 展示：status-card-shell + hero（DOM 契约 id 保留）。
 
 import { StageFlow } from "./StageFlow.jsx";
 import { SubstageFlow } from "./SubstageFlow.jsx";
@@ -74,12 +74,12 @@ export function StatusCardMain({
                 id={ids.cancelButton}
                 type="button"
                 className="status-action-btn status-head-btn status-head-cancel"
-export function ProgressBlock({ renderOptions, componentText, status }) {
-const percent = renderOptions?.percent ?? NaN;
+                aria-label="取消任务"
+                title="取消任务"
                 disabled={!snapshot.cancelEnabled || cancelDisabled}
                 onClick={() => cancelCurrentJob?.()}
               >
-const indeterminate = renderOptions?.indeterminate ?? false;
+                <span>取消</span>
               </button>
               <div className="status-head-center">
                 <div id={ids.ringLabel} className="status-ring-label">{ringLabel}</div>
@@ -91,11 +91,11 @@ const indeterminate = renderOptions?.indeterminate ?? false;
                 id={ids.detailButton}
                 type="button"
                 className="status-action-btn status-head-btn status-head-detail"
-const rounded = roundPercent(percent);
-];
+                aria-label="任务详情"
+                title="任务详情"
                 onClick={openDetail}
               >
-export function TranslationFilter({ status, query, onStatusChange, onQueryChange, onRefresh, ids }) {
+                <span>详情</span>
               </button>
             </div>
 
@@ -117,7 +117,7 @@ export function TranslationFilter({ status, query, onStatusChange, onQueryChange
                 <div
                   id="status-stage-animation"
                   className={`status-stage-animation${lottie.hasStageAnimation ? "" : " hidden"}`}
-                  aria-label="Task Phase Animation"
+                  aria-label="任务阶段动画"
                 >
                   <div
                     id="status-stage-lottie"

@@ -4,16 +4,16 @@ import {
 } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-// upload Domain view store + React viewPort。
+// upload 域视图 store + React viewPort。
 //
-// Old world features/upload/upload-view-port.js + tile-view.js wrote directly to DOM;
-// React in the world mountUploadFeature(Pure logic controller,Reuse as-is.)Got this file
-// Generated viewPort: all "YAGNI. Define data shape first. View is derivative." land in store, subscribed to by HeroUpload.jsx for rendering;
-// "read view" (selectedFile/readPageRanges) fetched from domRefs / store.
-// Mirror each method's semantics individually. tile-view.js / view.js / ui/job-actions-view.js。
+// 旧世界 features/upload/upload-view-port.js + tile-view.js 直接写 DOM;
+// React 世界里 mountUploadFeature(纯逻辑控制器,原样复用)拿到的是本文件
+// 生成的 viewPort:所有"写视图"落到 store,由 HeroUpload.jsx 订阅渲染;
+// "读视图"(selectedFile/readPageRanges)从 domRefs / store 取。
+// 各方法语义逐条镜像 tile-view.js / view.js / ui/job-actions-view.js。
 //
-// Note: File Object does not enter store (store uses structuredClone Deep copy),
-// File body always read from domRefs.fileInput (React ref backfill).
+// 注意:File 对象不进 store(store 会 structuredClone 深拷贝),
+// 文件本体始终从 domRefs.fileInput(React ref 回填)读取。
 
 export type UploadViewState = {
   tileLocked: boolean;
@@ -80,7 +80,7 @@ export type UploadDomRefs = {
   fileInput: HTMLInputElement | null;
 };
 
-// Initial value mirror partials/main-content.html Static skeleton(Pre-hydration state)
+// 初始值镜像 partials/main-content.html 的静态骨架(水合前状态)
 export function createUploadViewStore(): UploadViewStore {
   return createStore<UploadViewState, UploadViewActions>({
     name: "homeUploadView",
@@ -89,16 +89,16 @@ export function createUploadViewStore(): UploadViewStore {
       tileEnabled: true,
       ready: false,
       uploading: false,
-label: "Add PDF",
+      label: "添加 PDF",
       labelTitle: "",
       labelVisible: true,
-      help: "File upload completes checksum validation before task processing.",
+      help: "上传后会先完成文件校验，再进入任务处理。",
       helpVisible: true,
-      status: "No file selected.",
+      status: "尚未选择文件",
       statusVisible: false,
       progressVisible: false,
       progressPercent: 0,
-      progressText: "Uploading",
+      progressText: "上传中",
       actionSlotVisible: false,
       inlinePageRangeVisible: false,
       pageRangeStart: "",
@@ -120,12 +120,12 @@ export function createUploadViewFeature({
 }: {
   store?: UploadViewStore;
 } = {}) {
-// React ref Backfill point: HeroUpload.jsx mounts #file Write last
+  // React ref 回填点:HeroUpload.jsx 挂载 #file 后写入
   const domRefs: UploadDomRefs = { fileInput: null };
 
   const patch = (payload: Partial<UploadViewState> = {}) => store.actions.patch(payload);
 
-// ---- tile-view.js mirror (workflow viewPort via uploadTilePort also uses this group) ----
+  // ---- tile-view.js 镜像(workflow viewPort 经 uploadTilePort 也走这组) ----
 
   function setUploadTileLocked({
     locked = false,
@@ -169,7 +169,7 @@ export function createUploadViewFeature({
     patch({ actionSlotVisible: Boolean(visible) });
   }
 
-// ---- ui/job-actions-view.js mirror (Upload progress/reset chain) ----
+  // ---- ui/job-actions-view.js 镜像(上传进度/复位链) ----
 
   function setUploadProgress(loaded: number, total: number) {
     const hasNumbers = Number.isFinite(loaded) && Number.isFinite(total) && total > 0;
@@ -182,7 +182,7 @@ export function createUploadViewFeature({
       ready: false,
       actionSlotVisible: false,
       progressPercent: percent,
-progressText: hasNumbers ? `Uploading ${percent.toFixed(0)}%` : "Uploading",
+      progressText: hasNumbers ? `上传中 ${percent.toFixed(0)}%` : "上传中",
     });
   }
 
@@ -191,7 +191,7 @@ progressText: hasNumbers ? `Uploading ${percent.toFixed(0)}%` : "Uploading",
       progressVisible: false,
       uploading: false,
       progressPercent: 0,
-progressText: "Uploading",
+      progressText: "上传中",
     });
   }
 
@@ -201,7 +201,7 @@ progressText: "Uploading",
     }
   }
 
-// View-side reset (resetUploadedFileView scope); Reset upload status to zero by composition
+  // 视图侧复位(resetUploadedFileView 口径);上传状态归零由 composition 补上
   function resetUploadedFileView() {
     clearFileInputValue();
     patch({
@@ -209,9 +209,9 @@ progressText: "Uploading",
       uploading: false,
       ready: false,
       progressPercent: 0,
-progressText: "Uploading",
+      progressText: "上传中",
       actionSlotVisible: false,
-      status: "No file uploaded.",
+      status: "未上传文件",
       statusVisible: false,
       label: DEFAULT_FILE_LABEL,
       labelTitle: "",
@@ -219,7 +219,7 @@ progressText: "Uploading",
     });
   }
 
-// ---- features/upload/view.js mirror (mountUploadFeature viewPort contract) ----
+  // ---- features/upload/view.js 镜像(mountUploadFeature 的 viewPort 契约) ----
 
   const viewPort = {
     clearPageRanges: () => patch({ pageRangeStart: "", pageRangeEnd: "" }),

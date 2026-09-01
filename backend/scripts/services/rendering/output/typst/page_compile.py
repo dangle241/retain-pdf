@@ -82,7 +82,7 @@ def compile_overlay_page_specs(
             emit_render_page_progress(
                 current=completed,
                 total=total_pages,
-message=f"Compiling page overlay, page {completed}/{total_pages}",
+                message=f"正在编译页面 overlay，第 {completed}/{total_pages} 页",
                 payload={
                     "render_stage": "page_overlay_compile",
                     "page_index": page_idx,

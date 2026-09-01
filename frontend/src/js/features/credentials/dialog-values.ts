@@ -56,7 +56,7 @@ export function readCredentialDialogValues({
 export function buildBrowserCredentialConfig({
   values,
   currentOcrProvider,
-  // defaultModelApiKey Keep params for caller compat. Stop silent write to settings. Keys only from dialog./User input
+  // defaultModelApiKey 保留参数兼容调用方，但不再静默写入设置（密钥只认对话框/用户输入）
   defaultModelApiKey: _defaultModelApiKey,
 }: BuildBrowserCredentialConfigOptions) {
   return {

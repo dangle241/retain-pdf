@@ -1,5 +1,5 @@
-// DeepSeek(Translation model) card(Compare to old components/dialogs/browser-credentials-dialog.js
-// DeepSeek Block + validation-view.js verification badge/recharge link semantics).
+// DeepSeek(翻译模型)卡片(对照旧 components/dialogs/browser-credentials-dialog.js
+// 的 DeepSeek 区块 + validation-view.js 的校验徽标/充值链接语义)。
 
 import { CREDENTIAL_DOM_IDS } from "./credentials-dom-ids.js";
 import { useCredentialsController } from "./useCredentialsController.js";
@@ -74,7 +74,7 @@ export function DeepSeekPanel() {
           target="_blank"
           rel="noopener noreferrer"
         >
-Recharge
+          充值
         </a>
       </div>
     </section>

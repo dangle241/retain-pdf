@@ -12,7 +12,7 @@ from services.translation.core.payload.parts.diagnostics import record_translati
 
 
 def test_top_level_merge_semantics_unchanged() -> None:
-# Contract: Top level remains dictOverwrite mergeââExisting reader (frontend/Rust/debug index) Zero-knowledge.
+    # 契约:顶层仍是 dict、覆盖式 merge——现有读方(前端/Rust/debug index)零感知。
     item = {
         "translation_diagnostics": {
             "route_path": ["batch"],
@@ -30,8 +30,8 @@ def test_top_level_merge_semantics_unchanged() -> None:
 
 
 def test_history_preserves_per_stage_updates() -> None:
-    # Previously degradation_reason/fallback_to Overwritten by post-write phase; history lost.;
-    # Now each stage's updates Keep all history in history.
+    # 此前 degradation_reason/fallback_to 被后写阶段覆盖即丢历史;
+    # 现在每个阶段的 updates 都留在 history 里。
     item: dict = {}
 
     record_translation_diagnostics(
@@ -50,8 +50,8 @@ def test_history_preserves_per_stage_updates() -> None:
 
 
 def test_rereads_item_state_instead_of_stale_snapshot() -> None:
-    # Cover old pattern bug:"Construct snapshot. Concurrent writes occur. Overwrite entire segment."。
-    # helper Re-read before write item Current diagnosis.
+    # 覆盖旧模式的病灶:"先构造快照、中间别人写入、再整段回写"。
+    # helper 写入前必须重读 item 当前诊断。
     item = {"translation_diagnostics": {"a": 1}}
     item["translation_diagnostics"] = {**item["translation_diagnostics"], "written_in_between": True}
 

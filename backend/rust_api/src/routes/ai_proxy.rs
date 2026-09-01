@@ -1,8 +1,8 @@
-//! retainpdf-ai Service reverse proxy.
+//! retainpdf-ai 服务的反向代理。
 //!
-//! Frontend maintains single entry point.(Rust API)with single X-API-Key:This route forwards requests to
-//! Resident AI Serve and pass through client's X-API-Key(Two services share the same key Set.,
-//! Zero new frontend config.)。SSE Stream response passthrough byte stream.
+//! 前端保持单一入口(Rust API)与单一 X-API-Key:本路由把请求转发到
+//! 常驻 AI 服务并透传客户端的 X-API-Key(两个服务共享同一 key 集合即可,
+//! 零新增前端配置)。SSE 流式响应按字节流透传。
 
 use axum::body::Body;
 use axum::extract::Json;
@@ -14,8 +14,8 @@ use crate::error::AppError;
 
 static PROXY_CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
     reqwest::Client::builder()
-        // Upstream agent Loop runs minutes max.;Short connect timeout, no overall cap.,
-        // Upstream's own round count/Timeout guard fallback. Implement: `tokio::time::timeout`. Skip: custom handler, add when specific timeout behavior needed.
+        // 上游 agent 循环最长可跑数分钟;连接超时短、整体不设上限,
+        // 由上游自身的轮数/超时护栏兜底。
         .connect_timeout(std::time::Duration::from_secs(3))
         .build()
         .expect("build ai proxy client")

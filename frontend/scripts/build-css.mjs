@@ -1,11 +1,11 @@
-// Compile by page CSS：home / detail / reader Standalone artifact. Decouple.「One copy styles.css Conquer the world」。
+// 按页编译 CSS：home / detail / reader 独立产物，切断「一份 styles.css 打天下」。
 //
 //   src/styles/entries/home.css          → dist/css/home.css
 //   src/styles/entries/detail.css        → dist/css/detail.css
-//   src/styles/entries/reader.css        → dist/css/reader.css      (default react-pdf)
-//   src/styles/entries/reader-legacy.css → dist/css/reader-legacy.css (?engine=legacy additional)
+//   src/styles/entries/reader.css        → dist/css/reader.css      (默认 react-pdf)
+//   src/styles/entries/reader-legacy.css → dist/css/reader-legacy.css (?engine=legacy 附加)
 //
-// Compatibility: still write one copy styles.css = home Duplicate to avoid external scripts/Deprecate old doc path. Immediate failure.
+// 兼容：仍写一份 styles.css = home 的副本，避免外部脚本/文档旧路径立刻挂掉。
 
 import { spawnSync } from "node:child_process";
 import { copyFileSync, mkdirSync, existsSync } from "node:fs";
@@ -47,7 +47,7 @@ function runOne(entry, { watchMode = false } = {}) {
 }
 
 if (watch) {
-  // Parallel watch Three entry points
+  // 并行 watch 三个入口
   const kids = ENTRIES.map((entry) => {
     const args = [
       "tailwindcss",
@@ -71,7 +71,7 @@ for (const entry of ENTRIES) {
   runOne(entry);
 }
 
-// Support legacy paths styles.css（= Homepage bundle
+// 兼容旧路径 styles.css（= 主页包）
 const homeOut = join(ROOT, "dist/css/home.css");
 const legacyOut = join(ROOT, "styles.css");
 if (existsSync(homeOut)) {

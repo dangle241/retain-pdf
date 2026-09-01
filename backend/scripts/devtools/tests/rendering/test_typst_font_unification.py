@@ -13,7 +13,7 @@ def test_body_font_unify_then_leading_refit_preserves_page_font_consistency() ->
     def make_payload(y0: float, y1: float, font_size: float, source_lines: int) -> dict:
         return {
             "inner_bbox": [10.0, y0, 260.0, y1],
-            "translated_text": "This is a body paragraph used to test page-level font unification and secondary line spacing fitting." * 2,
+            "translated_text": "这是一个用于测试页面级字体统一和行距二次拟合的正文段落。" * 2,
             "formula_map": [],
             "font_size_pt": font_size,
             "leading_em": 0.54,
@@ -65,9 +65,9 @@ def test_body_font_unify_shrinks_large_body_fonts_to_low_page_anchor() -> None:
             },
         }
 
-    long_a = make_payload(60.0, 116.0, 11.27, "Stable page font size for long body text." * 4, 5)
-    long_b = make_payload(150.0, 212.0, 11.19, "Another long body paragraph for stabilizing page font size." * 5, 6)
-    compact = make_payload(490.0, 525.0, 9.67, "Shorter but still body text. Cannot be visibly smaller on same page." * 3, 3)
+    long_a = make_payload(60.0, 116.0, 11.27, "这是稳定页面字号的长正文段落。" * 4, 5)
+    long_b = make_payload(150.0, 212.0, 11.19, "这是另一个稳定页面字号的长正文段落。" * 5, 6)
+    compact = make_payload(490.0, 525.0, 9.67, "这是较短但仍属于正文的段落，不能在同页显著小一圈。" * 3, 3)
 
     apply_body_payload_pipeline([long_a, long_b, compact], page_text_width_med=340.0)
 
@@ -99,9 +99,9 @@ def test_body_font_unify_locks_page_candidates_to_single_target() -> None:
             },
         }
 
-    top = make_payload(60.0, 86.0, 11.17, "Top body paragraph. Simulates oversized visual font in short paragraph." * 2, 2)
-    middle = make_payload(110.0, 160.0, 11.19, "Mid-body paragraph. Simulates multi-line text with oversized visual font." * 3, 4)
-    low = make_payload(190.0, 226.0, 9.57, "Same-column body paragraph. Treat as unified low-font-size target." * 2, 3)
+    top = make_payload(60.0, 86.0, 11.17, "这是顶部正文段落，用于模拟视觉字号偏大的短段。" * 2, 2)
+    middle = make_payload(110.0, 160.0, 11.19, "这是中部正文段落，用于模拟视觉字号偏大的多行段。" * 3, 4)
+    low = make_payload(190.0, 226.0, 9.57, "这是同栏正文段落，应该作为低字号统一目标。" * 2, 3)
 
     apply_body_payload_pipeline([top, middle, low], page_text_width_med=340.0)
 
@@ -113,7 +113,7 @@ def test_body_font_unify_locks_page_candidates_to_single_target() -> None:
 def test_collision_keeps_unified_body_font_and_only_compresses_leading() -> None:
     current = {
         "inner_bbox": [45.0, 490.0, 384.0, 525.0],
-        "translated_text": "Here the product function is a new Gaussian function, centered at some point, and contains multiple longer explanations." * 3,
+        "translated_text": "这里乘积函数是一个新的高斯函数，中心位于某处，并包含多个较长说明。" * 3,
         "formula_map": [],
         "font_size_pt": 11.17,
         "page_body_font_size_pt": 11.17,
@@ -132,7 +132,7 @@ def test_collision_keeps_unified_body_font_and_only_compresses_leading() -> None
     }
     nxt = {
         "inner_bbox": [45.0, 526.0, 384.0, 610.0],
-        "translated_text": "Next body paragraph.",
+        "translated_text": "下一段正文。",
         "formula_map": [],
         "font_size_pt": 11.17,
         "page_body_font_size_pt": 11.17,

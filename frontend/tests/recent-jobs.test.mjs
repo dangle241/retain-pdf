@@ -206,7 +206,7 @@ test("home state port updates state and dispatches app events", () => {
     const port = createHomeStatePort(localState);
     port.setViewMode("bad-mode");
     assert.equal(port.getSnapshot().viewMode, "library");
-// Migration complete: store is the single source of truth, old state object is no longer written back
+    // 迁移完成:store 是唯一真值,旧 state 对象不再被回写
     assert.equal(localState.homeViewMode, "library");
     assert.equal(events.at(-1).type, APP_EVENTS.homeViewModeChanged);
     assert.deepEqual(events.at(-1).detail, { mode: "library" });
@@ -245,7 +245,7 @@ test("home state port normalizes initial state and tolerates missing event APIs"
     recentJobsLoadingState: "idle",
     recentJobsError: "123",
   });
-// No longer write back to old object: initial value remains as passed by caller
+  // 不再回写旧对象:初始值保持调用方传入的原样
   assert.equal(localState.homeViewMode, "bad-mode");
   assert.equal(localState.homeRecentJobsLoadingState, "bad-loading");
   assert.equal(localState.homeRecentJobsError, 123);
@@ -379,7 +379,7 @@ test("recent jobs state port normalizes pagination state", () => {
   port.setInvocationSummary({ stage_spec_count: 2 });
   port.setOffset(5);
   port.resetPagination();
-// soft reset: preserve items/summary, only clear pagination cursor
+  // soft reset：保留 items / summary，只清分页游标
   assert.deepEqual(port.getSnapshot(), {
     offset: 0,
     hasMore: true,
@@ -489,7 +489,7 @@ test("recent jobs state port is backed by the app-framework store without legacy
     invocationSummary: { stage_spec_count: 7, unknown_count: 2 },
     items: [{ job_id: "job-store" }],
   });
-// Migration complete: store is single source of truth, old state object no longer written back
+  // 迁移完成:store 是唯一真值,旧 state 对象不再被回写
   assert.equal(localState.recentJobsOffset, 0);
   assert.equal(localState.recentJobsHasMore, true);
   assert.deepEqual(localState.recentJobsItems, []);
@@ -767,10 +767,10 @@ test("library books resource invalidation helper tolerates missing resources", (
 });
 
 test("recent jobs page commit refreshes active cards without auto-opening jobs", () => {
-// Old DOM direct write to viewPort (createRecentJobsViewPort() default) has been removed with cutover
-// (controller/runtime/loader/commit/bindings 5 change default param to required; view.js etc.
-// view layer physically deleted accordingly.) Switch to minimum here. stub directly captures renderList items,
-// no longer simulate document/fragment — assert intent unchanged (which items rendered? job id).
+  // 旧 DOM 直写 viewPort(createRecentJobsViewPort() 默认值)已随 cutover 删除
+  // (controller/runtime/loader/commit/bindings 5 处默认参数改必传;view.js 等
+  // 视图层随之物理删除)。这里改用最小 stub 直接捕获 renderList 的 items,
+  // 不再模拟 document/fragment——断言意图不变(渲染了哪些 job id)。
   const rendered = [];
   const recovered = [];
   const refreshCalls = [];
@@ -933,7 +933,7 @@ test("recent jobs page commit can route rendering through the view port", () => 
 });
 
 test("recent jobs page commit appends only collected items while preserving state patches", () => {
-// Old DOM direct write to viewPort has been removed with cutover, use minimal stub to capture rendering directly items.
+  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub 直接捕获渲染 items。
   const rendered = [];
   const viewPort = {
     renderList: ({ items }) => {
@@ -993,7 +993,7 @@ test("recent jobs page commit appends only collected items while preserving stat
 });
 
 test("recent jobs empty commit owns empty state and search copy", () => {
-// Old DOM direct write to viewPort has been removed with cutover, use minimal stub to directly capture renderEmpty.
+  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub 直接捕获 renderEmpty。
   const loadingStates = [];
   let emptyText = "";
   const viewPort = {
@@ -1016,10 +1016,10 @@ test("recent jobs empty commit owns empty state and search copy", () => {
     viewPort,
   });
 
-assert.equal(result.message, "No matching books");
+  assert.equal(result.message, "没有匹配的书籍");
   assert.deepEqual(statePort.getSnapshot().items, []);
   assert.equal(statePort.getSnapshot().hasMore, false);
-  assert.equal(emptyText, "No matching books");
+  assert.equal(emptyText, "没有匹配的书籍");
   assert.deepEqual(loadingStates, [["ready"]]);
 });
 
@@ -1042,7 +1042,7 @@ test("recent jobs empty commit can delegate rendering to view-state owner", () =
     renderEmpty: (...args) => renders.push(args),
   });
 
-assert.equal(result.message, "No recent tasks");
+  assert.equal(result.message, "暂无最近任务");
   assert.deepEqual(statePort.getSnapshot().items, []);
   assert.equal(statePort.getSnapshot().hasMore, false);
   assert.deepEqual(loadingStates, [["ready"]]);
@@ -1050,7 +1050,7 @@ assert.equal(result.message, "No recent tasks");
 });
 
 test("recent jobs no-more and error commits own terminal loading state", () => {
-// Old DOM direct write to viewPort has been removed with cutover, use minimal stub to directly capture renderError.
+  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub 直接捕获 renderError。
   const loadingStates = [];
   const renderErrorCalls = [];
   const viewPort = {
@@ -1119,8 +1119,8 @@ test("recent jobs no-more and error commits can delegate rendering", () => {
 });
 
 test("recent jobs loader preserves runtime patches that arrive during load-more", async () => {
-// Old DOM direct write to viewPort has been removed with cutover, use minimal stub (loader.js only depends on
-// hasView/renderLoading/setLoadMoreLoading, rendering results go to items assertions below).
+  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub(loader.js 只依赖
+  // hasView/renderLoading/setLoadMoreLoading,渲染结果走下方 items 断言)。
   const viewPort = {
     hasView: () => true,
     renderLoading() {},
@@ -1197,7 +1197,7 @@ test("recent jobs loader preserves runtime patches that arrive during load-more"
 });
 
 test("recent jobs loader does not append runtime-created cards during load-more rendering", async () => {
-// Old DOM direct write to viewPort has been removed with cutover, use minimal stub to directly capture renderList.
+  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub 直接捕获 renderList。
   const rendered = [];
   const viewPort = {
     hasView: () => true,
@@ -1307,21 +1307,21 @@ test("recent jobs command handlers invalidate list resource before patching and 
   });
 
   handlers.onRefreshRequested({ delay: 50, force: true });
-// running patch: only update single card, no full page refresh (avoid homepage flickering during polling)
+  // 运行中补丁：只 update 单卡，不整页 refresh（避免轮询期间主页闪烁）
   handlers.onJobUpdated({ job: { job_id: "job-updated", status: "running" } });
   handlers.onJobCreated({ job: { job_id: "job-created" } });
-// only terminal state triggers full page scheduleRefresh
+  // 终态才触发整页 scheduleRefresh
   handlers.onJobUpdated({ job: { job_id: "job-done", status: "succeeded" } });
   await Promise.resolve();
   subscription.destroy();
 
-// running update does not invalidate; refresh/create/terminal update each once
+  // running update 不 invalidate；refresh / create / 终态 update 各一次
   assert.deepEqual(invalidations, ["invalidate", "invalidate", "invalidate"]);
   assert.deepEqual(fetches, [["job-created", "/api"]]);
-// hydrateCreatedRecentJob async patch job-created, may come after terminal update
+  // hydrateCreatedRecentJob 异步补丁 job-created，可能排在终态 update 之后
   assert.deepEqual(updates, ["job-updated", "job-done", "job-created"]);
   assert.deepEqual(inserts, ["job-created"]);
-// onJobCreated no longer forces full page refresh; only onRefreshRequested + terminal update
+  // onJobCreated 不再 force 整页 refresh；仅 onRefreshRequested + 终态 update
   assert.deepEqual(refreshes, [
     { delay: 50, force: true },
     { delay: 400, bypassThrottle: true },
@@ -1443,7 +1443,7 @@ test("recent jobs runtime patches keep newer event progress over older poll snap
       source: "display-state",
       lane: "main",
       substage: "translation_batches",
-detail: "Translating main content",
+      detail: "正在翻译正文内容",
       progress: { unit: "batch", current: 8, total: 10, percent: 80 },
     },
   });
@@ -1495,7 +1495,7 @@ test("recent jobs runtime patches keep newer progress while accepting newer subs
       source: "display-state",
       lane: "main",
       substage: "translation_batches",
-detail: "Translating main content",
+      detail: "正在翻译正文内容",
       progress: { unit: "batch", current: 8, total: 10, percent: 80 },
     },
   });
@@ -1504,7 +1504,7 @@ detail: "Translating main content",
     status: "running",
     display_stage: "translation",
     substage: "garbled_repair",
-stage_detail: "Repairing translation result",
+    stage_detail: "正在修复翻译结果",
     progress: { unit: "batch", current: 5, total: 10, percent: 50 },
     stage_snapshot: {
       stageKey: "translate",
@@ -1512,7 +1512,7 @@ stage_detail: "Repairing translation result",
       source: "display-state",
       lane: "main",
       substage: "garbled_repair",
-detail: "Repairing translation result",
+      detail: "正在修复翻译结果",
       progress: { unit: "batch", current: 5, total: 10, percent: 50 },
     },
   });
@@ -1521,7 +1521,7 @@ detail: "Repairing translation result",
   assert.equal(item.progress.current, 8);
   assert.equal(item.progress.percent, 80);
   assert.equal(item.runtime_status.substage, "garbled_repair");
-assert.equal(item.runtime_status.detail, "Repairing garbled candidate segments");
+  assert.equal(item.runtime_status.detail, "正在修复乱码候选段");
   assert.equal(item.runtime_status.progress.current, 8);
   assert.equal(item.runtime_status.progress.percent, 80);
 });
@@ -1567,9 +1567,9 @@ test("recent jobs runtime patches keep terminal state over stale running snapsho
   assert.equal(item.runtime_status.stageKey, "done");
 });
 
-test("recent jobs runtime patches accept new job_id retry after terminal (home card leaves translated)", () => {
-// Regression: after completion and "re-OCR" changes job_id, old terminal patch must not cover new running,
-// otherwise home card always shows "translated" and cover doesn't spin.
+test("recent jobs runtime patches accept new job_id retry after terminal (home card leaves 已翻译)", () => {
+  // 回归：完成后再「重新 OCR」换了 job_id 时，旧终态补丁不得盖住新 running，
+  // 否则主页卡一直显示「已翻译」、封面不转圈。
   const statePort = createRecentJobsStatePort({
     recentJobsItems: [
       {
@@ -1622,8 +1622,8 @@ test("recent jobs runtime patches accept new job_id retry after terminal (home c
 });
 
 test("recent jobs runtime patches do not prepend retry job_id shell after soft refresh", () => {
-// Regression (real backend): "re-render" changes job_id, payload often only has job_id as title;
-// soft refresh must not prepend a "job_id + PDF placeholder" shell (original book still there).
+  // 回归（真实后端）：「重新渲染」换新 job_id，payload 常只有 job_id 当标题；
+  // soft refresh 不得再 prepend 一张「job_id + PDF 占位」空壳（原书还在）。
   const statePort = createRecentJobsStatePort({
     recentJobsItems: [
       {
@@ -1651,7 +1651,7 @@ test("recent jobs runtime patches do not prepend retry job_id shell after soft r
     status: "succeeded",
     display_stage: "done",
   });
-// real retry first frame: no document_id, title=new job_id
+  // 真实重试首帧：无 document_id、title=新 job_id
   patches.update({
     job_id: "20260717235341-af4675",
     source_job_id: "20260717220928-50d025",
@@ -1719,8 +1719,8 @@ test("created recent job hydration is best effort", async () => {
 });
 
 test("recent jobs feature bindings route ui library and workflow events", () => {
-// Old DOM direct write to viewPort removed with cutover, bindEvents handlers directly from
-// viewPort stub captures calls, no longer simulates click event on #load-more-jobs-btn.
+  // 旧 DOM 直写 viewPort 已随 cutover 删除,bindEvents 的 handlers 直接从
+  // viewPort stub 捕获调用,不再模拟 #load-more-jobs-btn 的 click 事件。
   const listeners = new Map();
   const loadCalls = [];
   const commandCalls = [];
@@ -1964,7 +1964,7 @@ test("recent jobs navigation port owns workflow reader and recovery side effects
     assert.equal(port.recoverJob(" job-recover "), true);
     assert.equal(port.openJob(""), false);
     assert.deepEqual(closed, ["close", "close"]);
-// default openWorkflowOnSelect=false: selecting task in grid does not pop up old workflow window
+    // 默认 openWorkflowOnSelect=false：网格选任务不弹旧工作流窗
     assert.deepEqual(dispatched, []);
     assert.deepEqual(opened, ["job-open", "job-recover"]);
     assert.deepEqual(read, ["job-reader"]);
@@ -1985,8 +1985,8 @@ test("recent jobs runtime wires loader actions and scheduler callbacks", async (
   const previousDocument = global.document;
   const previousCustomEvent = global.CustomEvent;
   const dispatched = [];
-// Old DOM direct write to viewPort removed with cutover, use minimal stub (satisfies 10 method contract,
-// see React implementation in src/pages/home/features/library/recent-jobs-react-port.js).
+  // 旧 DOM 直写 viewPort 已随 cutover 删除,改用最小 stub(满足 10 方法契约,
+  // 见 src/pages/home/features/library/recent-jobs-react-port.js 的 React 实现)。
   const viewPort = {
     bindEvents() {},
     hasView: () => true,
@@ -2068,7 +2068,7 @@ test("recent jobs runtime wires loader actions and scheduler callbacks", async (
     assert.deepEqual(statePort.getSnapshot().items.map((item) => item.job_id), ["job-runtime"]);
     assert.deepEqual(closed, ["close"]);
     assert.deepEqual(opened, ["job-runtime"]);
-// progress moved to book detail Tab: selectJob defaults to not open translation-workflow-dialog
+    // 进度改在书籍详情 Tab：selectJob 默认不弹 translation-workflow-dialog
     assert.deepEqual(dispatched.map((event) => event.type), []);
   } finally {
     global.document = previousDocument;
@@ -2221,7 +2221,7 @@ test("recent job actions use navigation port instead of direct reader callback",
   actions.openJobReader("");
 
   assert.deepEqual(opened, ["job-reader"]);
-assert.deepEqual(errors, ["This task lacks job_id, cannot open side-by-side reading."]);
+  assert.deepEqual(errors, ["该任务缺少 job_id，无法打开对照阅读。"]);
 });
 
 test("recent jobs active refresh skips the current runtime job", async () => {
@@ -2269,7 +2269,7 @@ test("recent jobs active refresh skips the current runtime job", async () => {
   await new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual(fetched, ["job-other"]);
   assert.deepEqual(updates, ["job-other"]);
-// periodic active-refresh only single card patch, no full loadRecentJobs (avoid grid flicker)
+  // 周期 active-refresh 只单卡 patch，不再全量 loadRecentJobs（避免网格闪）
   assert.deepEqual(loads, []);
   loop.stop();
 
@@ -2299,7 +2299,7 @@ test("recent jobs runtime patch rerenders the list when card replacement misses"
         job_id: "job-rerender-miss",
         status: "running",
         stage: "ocr",
-stage_detail: "OCR in progress",
+        stage_detail: "OCR 中",
         progress: { current: 1, total: 10, percent: 10, unit: "page" },
       },
     ],
@@ -2410,7 +2410,7 @@ test("recent jobs runtime patches keep translation card state over background re
   }, { stageAdapterPort: { adaptJobStageSnapshot } });
 
   assert.equal(stageKeyForRecentJobLabel(merged), "translate");
-assert.equal(recentJobStageLabel(merged), "Translating");
+  assert.equal(recentJobStageLabel(merged), "翻译中");
   assert.equal(merged.display_stage, "translation");
   assert.equal(merged.lane, "main");
   assert.equal(merged.substage, "translation_batches");
@@ -2499,7 +2499,7 @@ test("recent jobs runtime patches drive active cover overlay from created job to
   let item = statePort.getSnapshot().items[0];
   assert.equal(item.job_id, "job-created-overlay");
   assert.equal(isRecentJobActive(item), true);
-assert.equal(recentJobStageLabel(item), "OCR in progress");
+  assert.equal(recentJobStageLabel(item), "OCR 中");
   assert.equal(recentJobProgressPercent(item), 10);
 
   patches.update({
@@ -2511,7 +2511,7 @@ assert.equal(recentJobStageLabel(item), "OCR in progress");
   });
   item = statePort.getSnapshot().items[0];
   assert.equal(isRecentJobActive(item), true);
-assert.equal(recentJobStageLabel(item), "Translating");
+  assert.equal(recentJobStageLabel(item), "翻译中");
   assert.equal(recentJobProgressPercent(item), 20);
 
   patches.update({
@@ -2524,14 +2524,14 @@ assert.equal(recentJobStageLabel(item), "Translating");
   assert.equal(item.status, "succeeded");
   assert.equal(item.display_stage, "done");
   assert.equal(isRecentJobActive(item), false);
-assert.equal(recentJobStageLabel(item), "Completed");
+  assert.equal(recentJobStageLabel(item), "已完成");
   assert.equal(recentJobProgressPercent(item), 100);
   unsubscribe();
   const cardMutations = mutations.filter((entry) => entry.action === "prependItem" || entry.action === "replaceItem");
   assert.deepEqual(cardMutations.map((entry) => [entry.action, entry.items[0]?.active, entry.items[0]?.label, entry.items[0]?.percent]), [
-["prependItem", true, "OCR in progress", 10],
-["replaceItem", true, "Translating", 20],
-["replaceItem", false, "Completed", 100],
+    ["prependItem", true, "OCR 中", 10],
+    ["replaceItem", true, "翻译中", 20],
+    ["replaceItem", false, "已完成", 100],
   ]);
 });
 
@@ -2588,7 +2588,7 @@ test("recent jobs runtime patches do not let queued placeholders downgrade creat
     job_id: "job-created-placeholder",
     status: "queued",
     display_stage: "ocr",
-stage_detail: "Reading task status...",
+    stage_detail: "正在读取任务状态...",
   });
 
   const item = statePort.getSnapshot().items[0];
@@ -2598,7 +2598,7 @@ stage_detail: "Reading task status...",
   assert.equal(item.progress.current, 4);
   assert.equal(item.progress.percent, 20);
   assert.equal(isRecentJobActive(item), true);
-assert.equal(recentJobStageLabel(item), "Translating");
+  assert.equal(recentJobStageLabel(item), "翻译中");
 });
 
 test("recent jobs refresh scheduler can bypass throttle without forcing suspended state", () => {
@@ -2692,7 +2692,7 @@ test("recent job stage labels use the shared public stage resolver", () => {
     stage_detail: "render payload prewarm: ready",
   };
   assert.equal(stageKeyForRecentJobLabel(mergedItem), "render");
-assert.equal(recentJobStageLabel(mergedItem), "Rendering");
+  assert.equal(recentJobStageLabel(mergedItem), "渲染中");
 	  assert.equal(
 	    recentJobStageLabel({
 	      status: "running",
@@ -2702,10 +2702,10 @@ assert.equal(recentJobStageLabel(mergedItem), "Rendering");
 	      stage_detail: "render payload prewarm: ready",
 	      runtime_status: {
 	        stageKey: "translate",
-detail: "Translating main content",
+	        detail: "正在翻译正文内容",
 	      },
 	    }),
-"Rendering",
+	    "渲染中",
 	  );
   assert.equal(
     recentJobStageLabel({
@@ -2714,7 +2714,7 @@ detail: "Translating main content",
       stage: "render",
       stage_detail: "",
     }),
-"Translating",
+    "翻译中",
   );
 	  assert.equal(
 	    recentJobStageLabel({
@@ -2725,7 +2725,7 @@ detail: "Translating main content",
 	        publicStage: "render",
 	      },
 	    }),
-"Translating",
+	    "翻译中",
 	  );
 	  assert.equal(
 	    recentJobStageLabel({
@@ -2734,7 +2734,7 @@ detail: "Translating main content",
 	      runtime_status: {
 	        stageKey: "done",
 	        publicStage: "done",
-detail: "Translation PDF generated",
+	        detail: "翻译 PDF 已生成",
 	      },
 	      stage_snapshot: {
 	        stageKey: "render",
@@ -2742,7 +2742,7 @@ detail: "Translation PDF generated",
 	        source: "legacy-stage",
 	      },
 	    }),
-"Translating",
+	    "翻译中",
 	  );
   assert.equal(
     recentJobStageLabel({
@@ -2750,7 +2750,7 @@ detail: "Translation PDF generated",
       display_stage: "render",
       stage: "rendering",
     }),
-"Rendering",
+    "渲染中",
   );
   assert.equal(
     recentJobStageLabel({
@@ -2758,7 +2758,7 @@ detail: "Translation PDF generated",
       display_stage: "done",
       stage: "rendering",
     }),
-"Completed",
+    "已完成",
   );
   assert.equal(
     stageKeyForRecentJobLabel({
@@ -2790,11 +2790,11 @@ detail: "Translation PDF generated",
       ],
       output_pdf_ready: true,
     }),
-"Completed",
+    "已完成",
   );
   assert.equal(
     recentJobStatusLabel("cancelled"),
-"Cancelled",
+    "已取消",
   );
 });
 
@@ -2970,7 +2970,7 @@ test("recent jobs runtime merge consumes canonical stage snapshot", () => {
   const merged = mergeLibraryJobItem({
     job_id: "job-recent-stage",
     stage: "ocr",
-stage_detail: "Old status",
+    stage_detail: "旧状态",
     progress: { current: 2, total: 10, percent: 20, unit: "page" },
   }, {
     job_id: "job-recent-stage",
@@ -2982,14 +2982,14 @@ stage_detail: "Old status",
   }, { stageAdapterPort: recentJobsStageAdapterPort });
 
   assert.equal(merged.stage, "translate");
-assert.equal(merged.stage_detail, "Translating main content");
+  assert.equal(merged.stage_detail, "正在翻译正文内容");
   assert.deepEqual(merged.runtime_status, {
     stageKey: "translate",
     publicStage: "translation",
     source: "display-stage",
     lane: "main",
     substage: "translation_batches",
-detail: "Translating main content",
+    detail: "正在翻译正文内容",
     progress: {
       current: 28,
       total: 5216,
@@ -3051,7 +3051,7 @@ test("recent jobs runtime merge does not promote canonical lane-only internal st
   const merged = mergeLibraryJobItem({
     job_id: "job-recent-lane-only",
     stage: "translate",
-stage_detail: "Translating main content",
+    stage_detail: "正在翻译正文内容",
     progress: { current: 20, total: 100, percent: 20, unit: "batch" },
   }, {
     job_id: "job-recent-lane-only",
@@ -3066,7 +3066,7 @@ stage_detail: "Translating main content",
   assert.equal(merged.stage, "translate");
   assert.equal(merged.lane, undefined);
   assert.equal(merged.substage, undefined);
-assert.equal(merged.stage_detail, "Translating main content");
+  assert.equal(merged.stage_detail, "正在翻译正文内容");
   assert.equal(merged.progress.current, 20);
   assert.equal(merged.progress.total, 100);
   assert.equal(merged.progress.unit, "batch");
@@ -3105,7 +3105,7 @@ test("recent jobs runtime snapshot prefers normalized stage snapshot", () => {
       source: "public-stage",
       lane: "main",
       substage: "translation_batches",
-detail: "Translating main content",
+      detail: "正在翻译正文内容",
       progress: {
         current: 30,
         total: 100,
@@ -3116,7 +3116,7 @@ detail: "Translating main content",
   });
 
   assert.equal(recentSnapshot.stageKey, "translate");
-assert.equal(recentSnapshot.detail, "Translating main content");
+  assert.equal(recentSnapshot.detail, "正在翻译正文内容");
   assert.equal(recentSnapshot.progress.current, 30);
 });
 
@@ -3127,7 +3127,7 @@ test("recent jobs runtime merge does not write raw internal stage over normalize
     display_stage: "ocr",
     lane: "main",
     substage: "provider_processing",
-stage_detail: "OCR processing",
+    stage_detail: "OCR 处理中",
     progress: { current: 5, total: 100, percent: 5, unit: "page" },
   }, {
     job_id: "job-recent-normalized-merge",
@@ -3142,7 +3142,7 @@ stage_detail: "OCR processing",
       source: "public-stage",
       lane: "main",
       substage: "translation_batches",
-detail: "Translating main content",
+      detail: "正在翻译正文内容",
       progress: {
         current: 30,
         total: 100,
@@ -3156,7 +3156,7 @@ detail: "Translating main content",
   assert.equal(merged.display_stage, "translation");
   assert.equal(merged.lane, "main");
   assert.equal(merged.substage, "translation_batches");
-assert.equal(merged.stage_detail, "Translating main content");
+  assert.equal(merged.stage_detail, "正在翻译正文内容");
   assert.equal(merged.runtime_status.stageKey, "translate");
   assert.equal(merged.runtime_status.substage, "translation_batches");
 });
@@ -3174,7 +3174,7 @@ test("recent jobs runtime merge lets display stage override stale snapshot", () 
     display_stage: "translation",
     stage: "render_preprocess",
     substage: "translation_batches",
-stage_detail: "Translating main content",
+    stage_detail: "正在翻译正文内容",
     progress: { current: 30, total: 100, percent: 30, unit: "batch" },
     runtime_status: {
       stageKey: "done",
@@ -3201,5 +3201,5 @@ stage_detail: "Translating main content",
   assert.equal(merged.substage, "translation_batches");
   assert.equal(merged.runtime_status.stageKey, "translate");
   assert.equal(merged.runtime_status.publicStage, "translation");
-assert.equal(recentJobStageLabel(merged), "Translating");
+  assert.equal(recentJobStageLabel(merged), "翻译中");
 });

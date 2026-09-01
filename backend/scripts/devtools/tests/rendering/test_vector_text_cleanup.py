@@ -120,7 +120,7 @@ def test_source_cleanup_body_vector_probe_strips_without_cover_fallback() -> Non
         "block_kind": "text",
         "block_type": "text",
         "bbox": [312.0, 530.0, 557.0, 568.0],
-"protected_translated_text": "translation $ x_i $",
+        "protected_translated_text": "译文 $ x_i $",
     }
     bboxlog_entries = [
         ("fill-text", (312.0, 232.0, 557.0, 271.0)),
@@ -149,7 +149,7 @@ def test_source_cleanup_footnote_vector_probe_uses_item_cover_fallback() -> None
         "normalized_sub_type": "table_footnote",
         "bbox": [48.0, 281.0, 439.0, 291.0],
         "source_text": "$ ^{a} $The nuclear repulsive interaction term is omitted.",
-        "protected_translated_text": "$^{a}$Nuclear repulsion interaction term omitted.",
+        "protected_translated_text": "$^{a}$核排斥相互作用项被省略。",
     }
     bboxlog_entries = [
         ("fill-text", (48.0, 509.0, 439.0, 520.0)),
@@ -172,7 +172,7 @@ def test_bbox_text_strip_rects_shrink_away_from_adjacent_display_formula() -> No
             "item_id": "p001-b001",
             "block_type": "text",
             "bbox": [319.967, 244.459, 566.442, 417.43],
-            "protected_translated_text": "body translation",
+            "protected_translated_text": "正文译文",
         },
         {
             "item_id": "p001-b002",
@@ -196,7 +196,7 @@ def test_bbox_text_strip_rects_split_around_overlapping_display_formula() -> Non
             "item_id": "p001-b001",
             "block_type": "text",
             "bbox": [44.5, 455.8, 385.7, 507.3],
-"protected_translated_text": "body text translation",
+            "protected_translated_text": "正文译文",
         },
         {
             "item_id": "p001-b002",
@@ -224,7 +224,7 @@ def test_bbox_text_strip_formula_guard_expands_to_body_column() -> None:
             "item_id": "p001-b001",
             "block_type": "text",
             "bbox": [44.5, 410.0, 385.7, 510.0],
-"protected_translated_text": "body text translation",
+            "protected_translated_text": "正文译文",
         },
         {
             "item_id": "p001-b002",
@@ -260,7 +260,7 @@ def test_bbox_text_strip_keeps_text_between_display_formulas_deletable() -> None
             "block_type": "text",
             "block_kind": "text",
             "bbox": [43.476, 180.916, 392.787, 216.899],
-"protected_translated_text": "body text translation",
+            "protected_translated_text": "正文译文",
         },
         {
             "item_id": "p009-b006",
@@ -290,7 +290,7 @@ def test_bbox_text_strip_keeps_formula_neighbor_text_deletable() -> None:
             "block_type": "text",
             "block_kind": "text",
             "bbox": [33.482, 265.376, 398.284, 301.359],
-            "protected_translated_text": "Text above formula",
+            "protected_translated_text": "公式上方正文",
         },
         {
             "item_id": "p005-b005",
@@ -304,7 +304,7 @@ def test_bbox_text_strip_keeps_formula_neighbor_text_deletable() -> None:
             "block_type": "text",
             "block_kind": "text",
             "bbox": [33.482, 343.34, 398.784, 559.739],
-            "protected_translated_text": "Text below formula",
+            "protected_translated_text": "公式下方正文",
         },
     ]
 
@@ -338,7 +338,7 @@ def test_bbox_text_strip_candidates_skip_formula_pages(tmp_path: Path) -> None:
                     "block_type": "text",
                     "block_kind": "text",
                     "bbox": [35.0, 35.0, 220.0, 65.0],
-"protected_translated_text": "preceding text",
+                    "protected_translated_text": "上文",
                 },
                 {
                     "item_id": "p001-b002",
@@ -352,7 +352,7 @@ def test_bbox_text_strip_candidates_skip_formula_pages(tmp_path: Path) -> None:
                     "block_type": "text",
                     "block_kind": "text",
                     "bbox": [35.0, 115.0, 220.0, 145.0],
-"protected_translated_text": "following text",
+                    "protected_translated_text": "下文",
                 },
             ]
         },
@@ -382,7 +382,7 @@ def test_bbox_text_strip_candidates_keep_formula_guard_but_strip_far_text_on_for
                     "block_type": "text",
                     "block_kind": "text",
                     "bbox": [35.0, 35.0, 220.0, 65.0],
-"protected_translated_text": "preceding text",
+                    "protected_translated_text": "上文",
                 },
                 {
                     "item_id": "p001-b002",
@@ -396,14 +396,14 @@ def test_bbox_text_strip_candidates_keep_formula_guard_but_strip_far_text_on_for
                     "block_type": "text",
                     "block_kind": "text",
                     "bbox": [35.0, 115.0, 220.0, 145.0],
-"protected_translated_text": "following text",
+                    "protected_translated_text": "下文",
                 },
                 {
                     "item_id": "p001-b004",
                     "block_type": "text",
                     "block_kind": "text",
                     "bbox": [200.0, 225.0, 285.0, 255.0],
-"protected_translated_text": "figure caption",
+                    "protected_translated_text": "图注",
                 },
             ]
         },

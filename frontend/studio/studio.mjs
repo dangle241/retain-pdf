@@ -1,6 +1,6 @@
-// Theme Studio M1click-to-inspect + Real-time tuning token + Export skin file.
-// Zero backend, zero build: same origin iframe Direct modification CSS Variable is preview.
-// M2(LLM Color proposal)/M3(gpt-image-2 Image gen input slot) integrate ai_service dev after routing.
+// Theme Studio M1：点选检查 + 实时调 token + 导出皮肤文件。
+// 零后端、零构建：同源 iframe 直改 CSS 变量即预览。
+// M2(LLM 配色提案)/M3(gpt-image-2 生图入 slot)挂 ai_service dev 路由后接入。
 
 import {
   CONTRAST_PAIRS,
@@ -17,7 +17,7 @@ const pickBtn = $("#pick-btn");
 const baseSelect = $("#base-theme");
 const draftName = $("#draft-name");
 
-/** Draft override set:token → Values (log only diffs from baseline) */
+/** 草稿覆盖集：token → 值（只记与基准不同的） */
 const draft = new Map();
 let picking = false;
 
@@ -29,14 +29,14 @@ function iroot() {
   return idoc()?.documentElement;
 }
 
-/* ---------- Get value/Parse ---------- */
+/* ---------- 取值/解析 ---------- */
 
-/** Declare value (possibly color-mix/var expression) */
+/** 声明值（可能是 color-mix/var 表达式） */
 function declaredValue(token) {
   return getComputedStyle(iroot()).getPropertyValue(token).trim();
 }
 
-/** Parse arbitrary color expressions using probe elements. rgb() */
+/** 用探针元素把任意颜色表达式解析成 rgb() */
 function resolveColor(expr) {
   const doc = idoc();
   const probe = doc.createElement("div");
@@ -70,14 +70,14 @@ function contrastRatio(fgExpr, bgExpr) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/* ---------- Panel rendering ---------- */
+/* ---------- 面板渲染 ---------- */
 
 function renderPanel(focusTokens = null, focusLabel = "") {
   panel.innerHTML = "";
   if (focusLabel) {
     const head = document.createElement("div");
     head.className = "focus-head";
-    head.textContent = `Selected:${focusLabel}`;
+    head.textContent = `已选中：${focusLabel}`;
     panel.appendChild(head);
   }
   for (const group of TOKEN_GROUPS) {
@@ -136,11 +136,11 @@ function applyToken(token, value) {
   for (const el of panel.querySelectorAll(".tk")) {
     el.classList.toggle("dirty", draft.has(el.textContent));
   }
-$("#dirty-count").textContent = `${draft.size} changes`;
+  $("#dirty-count").textContent = `${draft.size} 项改动`;
 }
 
 function renderContrast() {
-  contrastBox.innerHTML = "<h3>Contrast self-test (WCAG）</h3>";
+  contrastBox.innerHTML = "<h3>对比度自检（WCAG）</h3>";
   for (const pair of CONTRAST_PAIRS) {
     const ratio = contrastRatio(`var(${pair.fg})`, `var(${pair.bg})`);
     const ok = ratio >= pair.min;
@@ -151,7 +151,7 @@ function renderContrast() {
   }
 }
 
-/* ---------- Click to check ---------- */
+/* ---------- 点选检查 ---------- */
 
 const HL_CLASS = "__studio-hl";
 
@@ -189,7 +189,7 @@ function onPick(e) {
   const found = resolveSelection(e.target);
   if (!found) return;
   if (found.entry.decorSlot) {
-    renderPanel([], `${found.entry.label} —— image generation flow at M3 Connectgpt-image-2), for now please directly replace decor/<pack>/ Files`);
+    renderPanel([], `${found.entry.label} —— 生图流程在 M3 接入（gpt-image-2），当前请直接替换 decor/<pack>/ 下的文件`);
     return;
   }
   renderPanel(found.entry.tokens, found.entry.label);
@@ -199,29 +199,29 @@ function onPick(e) {
 function setPicking(on) {
   picking = on;
   pickBtn.classList.toggle("active", on);
-pickBtn.textContent = on ? "Click to select...â¦(click page element)" : "ð¯ Select Element";
+  pickBtn.textContent = on ? "点选中…（点页面元素）" : "🎯 点选元素";
   if (!on) hovered?.classList.remove(HL_CLASS);
 }
 
-/* ---------- Export ---------- */
+/* ---------- 导出 ---------- */
 
 function exportCss() {
   const id = (draftName.value || "draft").trim();
   const lines = [];
-// Required 20+1 dump all (current effective values), optional token list changed items only.
+  // 必选 20+1 全量写出（当前生效值），可选 token 只写改动项
   for (const token of REQUIRED_TOKENS) {
     lines.push(`  ${token}: ${draft.get(token) ?? declaredValue(token)};`);
   }
   const optional = [...draft.keys()].filter((t) => !REQUIRED_TOKENS.includes(t));
   if (optional.length) {
     lines.push("");
-    lines.push("  /* L3 Optional override */");
+    lines.push("  /* L3 可选覆盖 */");
     for (const token of optional) {
       lines.push(`  ${token}: ${draft.get(token)};`);
     }
   }
-const css = `/* Skin ${id}: Theme Studio Export (baseline:${baseSelect.value}) */\n\n[data-theme="${id}"] {\n${lines.join("\n")}\n}\n`;
-const registry = `// registry.ts append:\n{\n  id: "${id}",\n  label: "${id}",\n  description: "Studio Draft",\n  group: "accent",\n  order: 50,\n  preview: { bg: "${rgbToHex(resolveColor("var(--bg)"))}", paper: "${rgbToHex(resolveColor("var(--paper)"))}", accent: "${rgbToHex(resolveColor("var(--accent)"))}", ink: "${rgbToHex(resolveColor("var(--ink)"))}", danger: "${rgbToHex(resolveColor("var(--danger)"))}" },\n},\n// themes/index.css append: @import "./${id}.css";`;
+  const css = `/* 皮肤 ${id}：Theme Studio 导出（基准：${baseSelect.value}） */\n\n[data-theme="${id}"] {\n${lines.join("\n")}\n}\n`;
+  const registry = `// registry.ts 追加：\n{\n  id: "${id}",\n  label: "${id}",\n  description: "Studio 草稿",\n  group: "accent",\n  order: 50,\n  preview: { bg: "${rgbToHex(resolveColor("var(--bg)"))}", paper: "${rgbToHex(resolveColor("var(--paper)"))}", accent: "${rgbToHex(resolveColor("var(--accent)"))}", ink: "${rgbToHex(resolveColor("var(--ink)"))}", danger: "${rgbToHex(resolveColor("var(--danger)"))}" },\n},\n// themes/index.css 追加：@import "./${id}.css";`;
   $("#export-out").value = `${css}\n/* ---------------- */\n${registry}\n`;
   $("#export-dialog").showModal();
 }
@@ -236,7 +236,7 @@ function downloadCss() {
   URL.revokeObjectURL(a.href);
 }
 
-/* ---------- Assembly ---------- */
+/* ---------- 装配 ---------- */
 
 function bindIframe() {
   const doc = idoc();
@@ -250,7 +250,7 @@ iframe.addEventListener("load", bindIframe);
 
 baseSelect.addEventListener("change", () => {
   draft.clear();
-$("#dirty-count").textContent = "0 changes";
+  $("#dirty-count").textContent = "0 项改动";
   iroot().removeAttribute("style");
   iroot().dataset.theme = baseSelect.value;
   renderPanel();
@@ -263,6 +263,6 @@ $("#copy-btn").addEventListener("click", () => navigator.clipboard.writeText($("
 $("#reset-btn").addEventListener("click", () => {
   draft.clear();
   iroot().removeAttribute("style");
-$("#dirty-count").textContent = "0 changes";
+  $("#dirty-count").textContent = "0 项改动";
   renderPanel();
 });

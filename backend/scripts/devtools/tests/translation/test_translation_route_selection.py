@@ -40,7 +40,7 @@ def test_route_selector_treats_structured_technical_hint_as_plain_translatable_t
         "math_mode": "placeholder",
         "source_text": "Default: 0\nType: <INT>",
         "protected_source_text": "Default: 0\nType: <INT>",
-        "translation_style_hint": "This is a structured entry in technical documentation; keep the layout stable.",
+        "translation_style_hint": "这是技术文档中的结构化条目，请保持排版稳定。",
         "translation_structure_kind": "structured_technical_block",
     }
 

@@ -70,7 +70,7 @@ export function createGlossariesAndAppUpdate({
   glossariesFeature.bindEvents();
 
   const appUpdateView = createAppUpdateViewFeature();
-  // viewPort No default, overridden by `= {}` Default params swallowed from public type; required at runtime.
+  // viewPort 无默认值，被 `= {}` 默认参从公开类型里吞掉；运行时必传。
   const appUpdateFeature = mountAppUpdateFeature({
     enabled: appUpdateAutoCheckEnabled,
     cachePort: appUpdateCachePort,

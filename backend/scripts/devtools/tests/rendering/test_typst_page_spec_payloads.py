@@ -90,7 +90,7 @@ def test_build_render_page_specs_restores_leaked_formula_tokens_before_render() 
                     "lines": [{"text": "raw"}],
                     "source_text": "However ...",
                     "protected_source_text": "However <f1-9a9/> orbitals",
-"translation_unit_protected_translated_text": "However, studies have shown that these traditional methods are not suitable for characterizing semiconductors with localized electronic states<f1-9a9/>or<f2-797/>fewer orbitals, the energy difference between bonding and antibonding orbitals (",
+                    "translation_unit_protected_translated_text": "然而，研究表明这些传统方法不适用于表征具有局域电子态的半导体<f1-9a9/>或<f2-797/>轨道）。",
                     "translation_unit_protected_map": [
                         {
                             "token_tag": "<f1-9a9/>",
@@ -148,7 +148,7 @@ def test_build_render_page_specs_marks_adjacent_collision_risk_for_stacked_block
                     "lines": [{"text": "raw"}],
                     "source_text": "short text",
                     "protected_source_text": "short text",
-                    "protected_translated_text": "Text expand. Trim content. Simplify.",
+                    "protected_translated_text": "这是一段明显会在翻译后变长很多很多很多的中文正文，用来模拟上方文本块在渲染时向下扩张。",
                 },
                 {
                     "item_id": "p001-b002",
@@ -158,7 +158,7 @@ def test_build_render_page_specs_marks_adjacent_collision_risk_for_stacked_block
                     "lines": [{"text": "raw"}],
                     "source_text": "below text",
                     "protected_source_text": "below text",
-                    "protected_translated_text": "Block below",
+                    "protected_translated_text": "下方块",
                 },
             ]
         }
@@ -197,8 +197,8 @@ def test_build_render_page_specs_uses_cover_bbox_gap_for_tight_stacked_blocks() 
                     "source_text": "upper",
                     "protected_source_text": "upper",
                     "protected_translated_text": (
-                        "This is a piece of Chinese text that will become noticeably longer during rendering, used to simulate the above block in the original. OCR Frame already"
-                        "When snapping to the lower block, continue compressing height to avoid covering the next block."
+                        "这是一段会在渲染时变得明显更长的中文正文，用来模拟上方块在原始 OCR 框已经"
+                        "贴到下方块时，仍然需要继续压缩高度避免覆盖下一块。"
                     ),
                 },
                 {
@@ -209,7 +209,7 @@ def test_build_render_page_specs_uses_cover_bbox_gap_for_tight_stacked_blocks() 
                     "lines": [{"text": "raw"}],
                     "source_text": "lower",
                     "protected_source_text": "lower",
-"protected_translated_text": "lower block",
+                    "protected_translated_text": "下方块",
                 },
             ]
         }

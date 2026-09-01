@@ -37,7 +37,7 @@ def test_visual_profile_samples_editable_span_color_and_background() -> None:
                     "bbox": [44, 42, 226, 82],
                     "block_kind": "text",
                     "layout_role": "title",
-"translated_text": "colored title",
+                    "translated_text": "彩色标题",
                 }
             ]
 
@@ -71,7 +71,7 @@ def test_visual_profile_works_on_image_only_page_pixels() -> None:
                 "bbox": [50, 50, 210, 100],
                 "block_kind": "text",
                 "layout_role": "title",
-                "translated_text": "Image Page Text",
+                "translated_text": "图片页文本",
             }
         ]
 
@@ -95,7 +95,7 @@ def test_visual_profile_manifest_round_trips() -> None:
         page_profile = build_page_visual_profile(
             page,
             0,
-            [{"item_id": "p001-b001", "bbox": [20, 20, 160, 42], "translated_text": ""Text"Text"}],
+            [{"item_id": "p001-b001", "bbox": [20, 20, 160, 42], "translated_text": "文本"}],
         )
         document = DocumentVisualProfile(algorithm=VISUAL_PROFILE_ALGORITHM_VERSION, pages={0: page_profile})
 
@@ -128,7 +128,7 @@ def test_visual_profile_runtime_merges_profile_colors_over_precomputed(tmp_path:
                     "bbox": [20, 20, 160, 50],
                     "block_kind": "text",
                     "_render_overlay_fill": "sampled",
-"translated_text": "text",
+                    "translated_text": "文本",
                 }
             ],
         )

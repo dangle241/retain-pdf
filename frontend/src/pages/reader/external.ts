@@ -1,11 +1,11 @@
-// Reader "New Engine / Shared layer" exports to src/js/*.
+// 阅读器「新引擎 / 共享层」对 src/js/* 的出口。
 //
-// For internal use only in pages/reader non-legacy paths:
+// 仅供 pages/reader 非 legacy 路径使用：
 //   hooks/、pdf/、annotations/、components/react-pdf/、ReaderAppReactPdf
-// Missing symbol. Fix in this file only.
+// 缺符号只改本文件。
 //
-// legacy/** and ?engine=legacy awaiting source text. Import js/reader imperative engine.
-// （pdf-controller / selection-favorites / regions…）——Don't cram them here.
+// legacy/** 与 ?engine=legacy 继续直接 import js/reader 命令式引擎
+// （pdf-controller / selection-favorites / regions…）——不要把它们塞进这里。
 
 // —— config / mock / messaging ——
 export { isMockMode } from "../../js/config/runtime.js";
@@ -20,7 +20,7 @@ export {
   resolveMarkedVendorUrl,
 } from "../../js/runtime/vendor-url.js";
 
-// ââ js/reader shared ports; new engine allows subset dependencies ââ
+// —— js/reader 共享 ports（新引擎允许依赖的子集）——
 export { defaultReaderDataPort } from "../../js/reader/data-port.js";
 export {
   defaultReaderPageConfigPort,
@@ -35,7 +35,7 @@ export {
 } from "../../js/reader/resource-resolver.js";
 export { READER_PROGRESS_COPY } from "../../js/reader/page-state.js";
 
-// —— Download (and legacy Shared parsing / Protected download)——
+// —— 下载（与 legacy 共用解析 / 受保护下载）——
 export {
   READER_DOWNLOAD_ACTIONS,
   disabledReason as readerDownloadDisabledReason,
@@ -46,11 +46,11 @@ export {
 export { downloadProtectedResource } from "../../js/features/reader-dialog/downloads.js";
 export { failDownloadToast } from "../../js/utils/download-feedback.js";
 
-// ââ markdown panel ââ
+// —— markdown 面板 ——
 export { resolveMarkdownAssetUrl } from "../../js/job/artifacts.js";
 export { parseMarkdownWithMath } from "../../js/reader/markdown-math.js";
 
-// —— AI Follow-up (react-pdf assistant）——
+// —— AI 追问（react-pdf assistant）——
 export { createReaderAskAnswerer } from "../../js/reader/ai/ask-answerer.js";
 export { createReaderMarkdownAnswerer } from "../../js/reader/ai/markdown-answerer.js";
 export {
@@ -112,7 +112,7 @@ export {
   clearStoredConversationId,
 } from "../../js/reader/ai/conversation-store.js";
 
-// —— Server-side favorites panel ——
+// —— 服务端收藏面板 ——
 export { API_PREFIX } from "../../js/config/api-constants.js";
 export { fetchFavorites } from "../../js/api/favorites.js";
 export {

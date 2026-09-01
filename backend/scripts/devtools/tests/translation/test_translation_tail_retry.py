@@ -40,7 +40,7 @@ def test_tail_retry_item_exception_marks_only_that_item_failed() -> None:
         return {
             "b": {
                 "decision": "translate",
-"translated_text": "B",
+                "translated_text": "乙",
                 "final_status": "translated",
             }
         }
@@ -60,7 +60,7 @@ def test_tail_retry_item_exception_marks_only_that_item_failed() -> None:
     assert result["a"]["final_status"] == "failed"
     assert result["a"]["translation_diagnostics"]["dead_letter"] is True
     assert result["a"]["translation_diagnostics"]["degradation_reason"] == "transport_tail_retry_item_exception"
-assert result["b"]["translated_text"] == "B"
+    assert result["b"]["translated_text"] == "乙"
     assert diagnostics.events[0]["kind"] == "transport_tail_retry_item_failed"
     assert len(stored) == 1
     assert stored[0]["batch"][0]["item_id"] == "b"
@@ -149,7 +149,7 @@ def test_translation_tail_dispatcher_uses_transport_retry_context_only_for_trans
         return {
             item["item_id"]: {
                 "decision": "translate",
-"translated_text": f"Translation {item['item_id']}",
+                "translated_text": f"译文 {item['item_id']}",
                 "final_status": "translated",
             }
         }
@@ -169,8 +169,8 @@ def test_translation_tail_dispatcher_uses_transport_retry_context_only_for_trans
         store_cached_batch_fn=lambda *_args, **_kwargs: None,
     )
 
-assert result["transport"]["translated_text"] == "Translation transport"
-assert result["validation"]["translated_text"] == "Translation validation"
+    assert result["transport"]["translated_text"] == "译文 transport"
+    assert result["validation"]["translated_text"] == "译文 validation"
     assert calls == [
         {"item_id": "transport", "timeout": 70, "main_attempts": 3, "allow_defer": False},
         {"item_id": "validation", "timeout": 10, "main_attempts": 1, "allow_defer": False},

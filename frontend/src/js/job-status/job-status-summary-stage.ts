@@ -63,8 +63,8 @@ function userStageFor(payload) {
   if (payload.status === "succeeded" && isJobTerminal(payload)) {
     return {
       key: "done",
-label: "Complete",
-detail: "Translated PDF generated",
+      label: "完成",
+      detail: "翻译 PDF 已生成",
       step: USER_STAGE_TOTAL,
       total: USER_STAGE_TOTAL,
     };
@@ -72,8 +72,8 @@ detail: "Translated PDF generated",
   if (payload.status === "failed") {
     return {
       key: "failed",
-label: "Failed",
-      detail: "Task failed. View details.",
+      label: "失败",
+      detail: "任务失败，请查看详情",
       step: null,
       total: USER_STAGE_TOTAL,
     };
@@ -81,8 +81,8 @@ label: "Failed",
   if (payload.status === "canceled") {
     return {
       key: "canceled",
-      label: "Canceled",
-detail: "Task canceled",
+      label: "已取消",
+      detail: "任务已取消",
       step: null,
       total: USER_STAGE_TOTAL,
     };
@@ -94,8 +94,8 @@ detail: "Task canceled",
   ) {
     return {
       key: "queued",
-label: "Queued",
-      detail: detailForPayload(payload, "Waiting for execution slot"),
+      label: "排队中",
+      detail: detailForPayload(payload, "等待可用执行槽位"),
       step: null,
       total: USER_STAGE_TOTAL,
     };
@@ -113,16 +113,16 @@ label: "Queued",
   if (payload.status === "running") {
     return {
       key: "running",
-label: "Processing",
-      detail: detailForPayload(payload, "Processing task"),
+      label: "处理中",
+      detail: detailForPayload(payload, "正在处理任务"),
       step: null,
       total: USER_STAGE_TOTAL,
     };
   }
   return {
     key: "idle",
-label: "Idle",
-detail: "Waiting for task to start",
+    label: "等待中",
+    detail: "等待任务开始",
     step: null,
     total: USER_STAGE_TOTAL,
   };
@@ -133,7 +133,7 @@ function userStageLabel(payload) {
   if (stage.step && stage.total && !isJobTerminal(payload)) {
     const subtype = stageSubtypeOf(payload);
     const subtypeLabel = substageLabel(subtype) || stage.label;
-return `Step ${stage.step}/${stage.total} Â· ${subtypeLabel}`;
+    return `第 ${stage.step}/${stage.total} 步 · ${subtypeLabel}`;
   }
   return stage.label;
 }

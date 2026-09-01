@@ -56,8 +56,8 @@ def test_finalize_payload_orchestration_metadata_clears_orphan_group_state() -> 
             "group_protected_source_text": "stale combined",
             "group_formula_map": [{"placeholder": "<f1-a7c/>"}],
             "group_protected_map": [{"token_tag": "<f1-a7c/>"}],
-            "group_protected_translated_text": "Old Group Results",
-"group_translated_text": "old group result",
+            "group_protected_translated_text": "旧组结果",
+            "group_translated_text": "旧组结果",
             "continuation_candidate_prev_id": "",
             "continuation_candidate_next_id": "",
         }

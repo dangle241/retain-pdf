@@ -49,22 +49,22 @@ function summarizeProgress(receivedBytes, totalBytes, percent) {
     const totalText = formatTransferSize(totalBytes);
     const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
     return {
-status: `Downloading ${safePercent.toFixed(0)}%`,
+      status: `正在下载 ${safePercent.toFixed(0)}%`,
       meta: `${receivedText} / ${totalText}`,
       percent: safePercent,
     };
   }
   return {
-status: "Downloading...",
-    meta: receivedText ? `Received ${receivedText}` : "Waiting response....",
+    status: "正在下载...",
+    meta: receivedText ? `已接收 ${receivedText}` : "等待响应...",
     percent: NaN,
   };
 }
 
 export function showDownloadToast({
-title = "Downloading",
-  status = "Preparing…...",
-  meta = "Waiting for response...",
+  title = "下载中",
+  status = "正在准备...",
+  meta = "等待响应...",
   percent = NaN,
   tone = "progress",
 }: ShowDownloadToastOptions = {}) {
@@ -81,9 +81,9 @@ title = "Downloading",
 
 export function showDownloadPreparing(filename = "") {
   showDownloadToast({
-title: filename ? `Downloading ${filename}` : "Downloading",
-status: "Preparing...",
-meta: "Waiting for response...",
+    title: filename ? `下载 ${filename}` : "下载中",
+    status: "正在准备...",
+    meta: "等待响应...",
     percent: NaN,
     tone: "progress",
   });
@@ -97,7 +97,7 @@ export function updateDownloadProgress({
 }: UpdateDownloadProgressOptions = {}) {
   const summary = summarizeProgress(receivedBytes, totalBytes, percent);
   showDownloadToast({
-title: filename ? `Downloading ${filename}` : "Downloading",
+    title: filename ? `下载 ${filename}` : "下载中",
     status: summary.status,
     meta: summary.meta,
     percent: summary.percent,
@@ -109,9 +109,9 @@ export function completeDownloadToast(filename = "") {
   clearHideTimer();
   toastElement()?.setState({
     visible: true,
-title: filename ? `Downloading ${filename}` : "Download complete",
-status: "Saving started",
-    meta: "File handed to browser for saving.",
+    title: filename ? `下载 ${filename}` : "下载完成",
+    status: "已开始保存",
+    meta: "文件已交给浏览器保存",
     percent: 100,
     tone: "success",
   });
@@ -121,13 +121,13 @@ status: "Saving started",
   }, 1500);
 }
 
-export function failDownloadToast(message = "Download failed") {
+export function failDownloadToast(message = "下载失败") {
   clearHideTimer();
   toastElement()?.setState({
     visible: true,
-title: "Download failed",
+    title: "下载失败",
     status: message,
-meta: "Please try again later",
+    meta: "请稍后重试",
     percent: 100,
     tone: "error",
   });

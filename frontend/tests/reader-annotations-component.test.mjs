@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// React component-level tests: loaded directly via tests/helpers/jsx-loader.mjs esbuild hook .jsx
+// React 组件级测试:经 tests/helpers/jsx-loader.mjs 的 esbuild 钩子直接加载 .jsx
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost/" });
 for (const key of ["window", "document", "HTMLElement", "CustomEvent", "Event", "Node", "MutationObserver"]) {
@@ -14,10 +14,10 @@ for (const key of ["window", "document", "HTMLElement", "CustomEvent", "Event", 
 }
 globalThis.window = dom.window;
 globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(0), 0);
-// Radix Presence/Tabs (Phase B) require cancelAnimationFrame under jsdom
-// (TabsContent mount animation timer cleanup) and getComputedStyle (Presence reads
-// animation-name to determine if exit animation has ended) — jsdom's window has implementation, but not
-// copied to bare global like requestAnimationFrame, we supplement here.
+// Radix Presence/Tabs(阶段 B 引入)在 jsdom 下需要 cancelAnimationFrame
+// (TabsContent 的 mount 动画计时器清理)和 getComputedStyle(Presence 读取
+// animation-name 判断退场动画是否结束)——jsdom 的 window 上有实现,只是没有
+// 像 requestAnimationFrame 一样被复制到裸 global 上,这里一并补上。
 globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
 globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
 globalThis.IS_REACT_ACT_ENVIRONMENT = false;
@@ -29,9 +29,9 @@ function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Polling wait,Replace fragile hardcoded values wait(50):When running full test suite concurrently CPU Tight,Fixed millisecond
-// React commit / async loadAnnotations not finalized yet (added by homepage card redesign.
-// Render load overwhelmed.)。predicate Passes when predicate returns true.
+// 轮询等待,替代脆弱的固定 wait(50):全量测试并发跑时 CPU 吃紧,固定毫秒内
+// React commit / 异步 loadAnnotations 可能还没落定(实测被首页卡片改版增加的
+// 渲染负载压垮过)。predicate 返回真即通过。
 async function waitUntil(predicate, description) {
   const deadline = Date.now() + 3000;
   while (Date.now() < deadline) {
@@ -40,7 +40,7 @@ async function waitUntil(predicate, description) {
     }
     await wait(15);
   }
-assert.fail(`Timeout waiting for: {description});
+  assert.fail(`等待超时：${description}`);
 }
 
 function click(element) {
@@ -54,9 +54,9 @@ function makeAnnotations() {
       pageIdx: 0,
       blockId: "b-1",
       kind: "sentence",
-quoteText: "First annotation original text",
+      quoteText: "第一条批注原文",
       translatedQuoteText: "",
-note: "Existing note",
+      note: "已有的笔记",
       createdAt: "2026-07-01T10:00:00Z",
     },
     {
@@ -64,8 +64,8 @@ note: "Existing note",
       pageIdx: 0,
       blockId: "b-2",
       kind: "data",
-quoteText: "Second annotation original text",
-translatedQuoteText: "Second annotation translation",
+      quoteText: "第二条批注原文",
+      translatedQuoteText: "第二条批注译文",
       note: "",
       createdAt: "2026-07-01T11:00:00Z",
     },
@@ -74,7 +74,7 @@ translatedQuoteText: "Second annotation translation",
       pageIdx: 2,
       blockId: "b-3",
       kind: "figure",
-quoteText: "Third annotation original text",
+      quoteText: "第三条批注原文",
       translatedQuoteText: "",
       note: "",
       createdAt: "2026-07-02T09:00:00Z",
@@ -82,7 +82,7 @@ quoteText: "Third annotation original text",
   ];
 }
 
-test("Annotation Panel: Group rendering, note editing, optimistic deletion, and Markdown export", async () => {
+test("批注面板:分组渲染、笔记编辑、乐观删除与 Markdown 导出", async () => {
   const host = dom.window.document.createElement("div");
   dom.window.document.body.appendChild(host);
 
@@ -111,21 +111,21 @@ test("Annotation Panel: Group rendering, note editing, optimistic deletion, and 
       exportCalls.push(text);
       return true;
     },
-documentTitle: () => "Test document",
+    documentTitle: () => "测试文档",
   };
 
   const app = mountReaderAnnotationsApp(host, ports);
-// Await async loadAnnotations settled; all three cards rendered. (fixed wait insufficient at full load.)
-  await waitUntil(() => host.querySelectorAll(".reader-annotations-item").length === 3, "Render three annotation cards.");
+  // 等异步 loadAnnotations 落定、三张卡片都渲染出来(固定 wait 在满载时不够)。
+  await waitUntil(() => host.querySelectorAll(".reader-annotations-item").length === 3, "三张批注卡片渲染");
 
-  // Base rendering:Group titles, cards, badges, existing notes
-assert.ok(host.querySelector(".reader-annotations-panel"), "Panel rendered");
-  assert.equal(host.querySelector(".reader-annotations-count")?.textContent, "3 Annotations");
+  // 基础渲染:分组标题、卡片、徽章、已有笔记
+  assert.ok(host.querySelector(".reader-annotations-panel"), "面板已渲染");
+  assert.equal(host.querySelector(".reader-annotations-count")?.textContent, "3 条批注");
   const groupTitles = [...host.querySelectorAll(".reader-annotations-group-title")];
-  assert.equal(groupTitles.length, 2, "2 Group Titles");
-assert.deepEqual(groupTitles.map((node) => node.textContent), ["Page 1", "Page 3"]);
+  assert.equal(groupTitles.length, 2, "两个分组标题");
+  assert.deepEqual(groupTitles.map((node) => node.textContent), ["第 1 页", "第 3 页"]);
   const items = [...host.querySelectorAll(".reader-annotations-item")];
-  assert.equal(items.length, 3, "Three annotation cards");
+  assert.equal(items.length, 3, "三张批注卡片");
   assert.deepEqual(
     [...host.querySelectorAll(".reader-annotations-kind")].map((node) => node.textContent),
     [
@@ -133,49 +133,49 @@ assert.deepEqual(groupTitles.map((node) => node.textContent), ["Page 1", "Page 3
       ANNOTATION_KIND_META.data.label,
       ANNOTATION_KIND_META.figure.label,
     ],
-    "kind Badge copy correct",
+    "kind 徽章文案正确",
   );
-  assert.ok(host.querySelector(".reader-annotations-kind.is-data"), "Badge Strap is-{kind} Class Name");
-assert.equal(host.querySelector(".reader-annotations-note")?.textContent, "Existing note");
-assert.equal(host.querySelector(".reader-annotations-translated")?.textContent, "Second annotation translation");
+  assert.ok(host.querySelector(".reader-annotations-kind.is-data"), "徽章带 is-{kind} 类名");
+  assert.equal(host.querySelector(".reader-annotations-note")?.textContent, "已有的笔记");
+  assert.equal(host.querySelector(".reader-annotations-translated")?.textContent, "第二条批注译文");
 
-  // Add note:Appear textarea,Input protocol
+  // 添加笔记:出现 textarea,输入后保存
   const secondItem = host.querySelectorAll(".reader-annotations-item")[1];
   click(secondItem.querySelector(".reader-annotations-note-add"));
-  await waitUntil(() => secondItem.querySelector(".reader-annotations-note-input"), "Editing state appears textarea");
+  await waitUntil(() => secondItem.querySelector(".reader-annotations-note-input"), "编辑态出现 textarea");
   const textarea = secondItem.querySelector(".reader-annotations-note-input");
-assert.ok(textarea, "Edit state shows textarea");
+  assert.ok(textarea, "编辑态出现 textarea");
   const valueSetter = Object.getOwnPropertyDescriptor(
     dom.window.HTMLTextAreaElement.prototype,
     "value",
   ).set;
-valueSetter.call(textarea, "New note");
+  valueSetter.call(textarea, "新增的笔记");
   textarea.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   await wait(30);
   click(secondItem.querySelector(".reader-annotations-note-save"));
-await waitUntil(() => saveCalls.length === 1, "saveNote called");
-assert.deepEqual(saveCalls, [["fav-2", "New note"]], "saveNote called");
+  await waitUntil(() => saveCalls.length === 1, "saveNote 被调用");
+  assert.deepEqual(saveCalls, [["fav-2", "新增的笔记"]], "saveNote 被调用");
   const noteTexts = [...host.querySelectorAll(".reader-annotations-note")].map((node) => node.textContent);
-assert.ok(noteTexts.includes("New note"), "Note text updated");
+  assert.ok(noteTexts.includes("新增的笔记"), "笔记文案已更新");
 
-// Export Markdown: contains "# " Title and "> " blockquote, Button briefly becomes "Copied"
+  // 导出 Markdown:含 "# " 标题与 "> " 引用块,按钮短暂变为「已复制」
   click(host.querySelector(".reader-annotations-export"));
-// Wait until button actually becomes "Copied" (async export complete + after re-render), rather than guessing fixed milliseconds.
-await waitUntil(() => host.querySelector(".reader-annotations-export")?.textContent === "Copied", "Copied");
-  assert.equal(exportCalls.length, 1, "exportMarkdown Called once.");
-  assert.ok(exportCalls[0].includes("# "), "Markdown Include title");
-  assert.ok(exportCalls[0].includes("> "), "Markdown Contains block quote");
-assert.equal(host.querySelector(".reader-annotations-export")?.textContent, "Copied");
+  // 等按钮真正变成「已复制」(异步 export 完成 + 重渲之后),而不是猜固定毫秒。
+  await waitUntil(() => host.querySelector(".reader-annotations-export")?.textContent === "已复制", "按钮变已复制");
+  assert.equal(exportCalls.length, 1, "exportMarkdown 被调用一次");
+  assert.ok(exportCalls[0].includes("# "), "Markdown 含标题");
+  assert.ok(exportCalls[0].includes("> "), "Markdown 含引用块");
+  assert.equal(host.querySelector(".reader-annotations-export")?.textContent, "已复制");
 
-// Delete: Optimistically remove AND deleteAnnotation invoked
+  // 删除:乐观移除且 deleteAnnotation 被调
   click(host.querySelector(".reader-annotations-item .reader-annotations-remove"));
-  await waitUntil(() => host.querySelectorAll(".reader-annotations-item").length === 2, "Optimistic card removal");
-assert.equal(host.querySelectorAll(".reader-annotations-item").length, 2, "Card optimistically removed");
-assert.deepEqual(deleteCalls, ["fav-1"], "deleteAnnotation called");
+  await waitUntil(() => host.querySelectorAll(".reader-annotations-item").length === 2, "卡片乐观移除");
+  assert.equal(host.querySelectorAll(".reader-annotations-item").length, 2, "卡片乐观移除");
+  assert.deepEqual(deleteCalls, ["fav-1"], "deleteAnnotation 被调用");
 
-// Navigate: pass annotationAnchor result
+  // 定位:传 annotationAnchor 结果
   click(host.querySelector(".reader-annotations-item .reader-annotations-locate"));
-await waitUntil(() => jumpCalls.length === 1, "jumpToAnchor called");
+  await waitUntil(() => jumpCalls.length === 1, "jumpToAnchor 被调用");
   assert.deepEqual(jumpCalls, [{ pageIdx: 0, blockId: "b-2" }]);
 
   app.unmount();

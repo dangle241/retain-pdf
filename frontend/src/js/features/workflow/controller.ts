@@ -150,7 +150,7 @@ export function mountWorkflowFeature({
   defaultPaddleToken,
   defaultOcrProvider,
   defaultModelApiKey,
-defaultFileLabel = "Select PDF",
+  defaultFileLabel = "选择 PDF",
   normalizeWorkflow,
   normalizeMathMode,
   constants,
@@ -394,11 +394,11 @@ defaultFileLabel = "Select PDF",
     });
   }
 
-// Library document "Translate whole book/selected pages" (F5) Reuse main flow credential assembly: From current configured
-// Credentials (credentialsStatePort, Independent of dialog open stateâreadSubmitValues reads
-// Credentials state Not a modal. DOM) assemble ocr(PaddleOCR) + translation(DeepSeek).
-// No sourceâBackend retrieves from existing doc. upload injects upload_id. pageRanges default
-// Empty string = Whole book.
+  // 馆藏文档"翻译整本/选定页码"(F5)复用主流程的凭据组装:从当前已配置的
+  // 凭据(credentialsStatePort,与对话框是否打开无关——readSubmitValues 读的是
+  // 凭据 state 而非弹窗 DOM)拼出 ocr(PaddleOCR)+ translation(DeepSeek)。
+  // 不含 source——后端会从文档已存的 upload 注入 upload_id。pageRanges 缺省
+  // 空串=整本。
   function buildTranslateJobConfig(pageRanges = "") {
     const developerConfig = developerConfigWithDefaults();
     const submitValues = currentWorkflowSubmitValues();

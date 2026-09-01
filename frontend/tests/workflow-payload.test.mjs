@@ -158,7 +158,7 @@ function mountWorkflowHarness({
     defaultPaddleToken: () => "paddle-default",
     defaultOcrProvider: () => "paddle",
     defaultModelApiKey: () => "model-default",
-defaultFileLabel: "Select PDF",
+    defaultFileLabel: "选择 PDF",
     normalizeWorkflow: (value) => value || "book",
     normalizeMathMode: (value) => value || "direct_typst",
     constants,
@@ -170,9 +170,9 @@ defaultFileLabel: "Select PDF",
     apiPrefix: "/api",
     setText: () => {},
   };
-// controller.js no longer includes default viewPort (old direct DOM implementation deleted with cutover),
-// If viewPort is not explicitly passed, use no-op stub bridge to minimize use cases (Only care about collectRunPayload
-  // Await pure logic return value,Don't assert these UI Side-effect call)。
+  // controller.js 不再自带默认 viewPort(旧 DOM 直写实现已随 cutover 删除),
+  // 未显式传 viewPort 的用例用最小 no-op stub 桥接(只关心 collectRunPayload
+  // 等纯逻辑返回值,不断言这些 UI 副作用调用)。
   options.viewPort = viewPort || {
     applyMockUpload: () => {},
     applyWorkflowUpload: () => {},
@@ -282,7 +282,7 @@ test("workflow controller routes UI side effects through view port", async () =>
     defaultPaddleToken: () => "paddle-default",
     defaultOcrProvider: () => "paddle",
     defaultModelApiKey: () => "model-default",
-defaultFileLabel: "Custom Upload Label",
+    defaultFileLabel: "自定义上传标签",
     normalizeWorkflow: (value) => value || "book",
     normalizeMathMode: (value) => value || "direct_typst",
     constants,
@@ -304,7 +304,7 @@ defaultFileLabel: "Custom Upload Label",
 
   assert.equal(feature.currentWorkflow(), "book");
   assert.equal(calls.some(([kind]) => kind === "workflow-upload"), true);
-assert.equal(calls.some(([kind, , label]) => kind === "workflow-upload" && label === "Custom Upload Label"), true);
+  assert.equal(calls.some(([kind, , label]) => kind === "workflow-upload" && label === "自定义上传标签"), true);
   assert.equal(calls.some(([kind]) => kind === "submit"), true);
   assert.equal(calls.some(([kind]) => kind === "budget"), true);
   assert.equal(calls.some(([kind]) => kind === "developer-dialog"), true);

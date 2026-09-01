@@ -148,37 +148,37 @@ def _failure_category_for(*, failure_code: str, failed_stage: str) -> str:
 
 
 def _suggestion_for(*, failure_code: str, failure_category: str, provider: str) -> str:
-    provider_label = provider.strip() or "Upstream service"
+    provider_label = provider.strip() or "上游服务"
     suggestions = {
-        "auth_failed": f"Check {provider_label} Credentials, Models API Key or whether the associated access token is valid.",
-        "dns_resolution_failed": "Check the current machine's DNS / Network connectivity. Confirm target domain resolvable before retrying.",
-        "upstream_timeout": "Check network quality, upstream load, or increase timeout; then retry.",
-        "upstream_rate_limited": f"{provider_label} Rate limit exceeded. Retry later or reduce concurrency.",
-        "upstream_bad_request": "Check request parameters, input files, and upstream interface constraints; correct and retry.",
-        "placeholder_unstable": "Check formula placeholder protection chain and current batch input; reduce batch size or switch to conservative mode if necessary.",
-        "translation_protocol_shell": "Check translation prompt and model response; this error usually means the model output. JSON/protocol shell instead of plain translation.",
-"typst_dependency_download_failed": "Check Typst Dependency source network connectivity; preheat or retry if necessary.",
-        "render_failed": "Check rendering input, fonts, and Typst Compilation log. Fix rendering issues and retry.",
-"json_decode_failed": "Check OCR Original result complete and valid? Re-fetch or regenerate if necessary.",
-        "document_schema_validation_failed": "Check if standardized output meets requirements. document.v1 Contract. Re-execute subsequent stages.",
-        "source_pdf_missing": "Check task working directory and source. PDF Path: verify file exists and accessible.",
-        "source_pdf_open_failed": "Check source PDF Corrupt or unreadable. Replace input file and retry.",
+        "auth_failed": f"检查 {provider_label} 凭据、模型 API Key 或相关访问令牌是否有效。",
+        "dns_resolution_failed": "检查当前机器的 DNS / 网络连通性，确认目标域名可解析后再重试。",
+        "upstream_timeout": "检查网络质量、上游服务负载或适当增大超时后再重试。",
+        "upstream_rate_limited": f"{provider_label} 当前限流，请稍后重试或降低并发。",
+        "upstream_bad_request": "检查请求参数、输入文件和上游接口约束，修正后再重试。",
+        "placeholder_unstable": "检查公式占位符保护链和当前批次输入，必要时缩小批次或切换保守模式。",
+        "translation_protocol_shell": "检查翻译提示词与模型返回；该错误通常表示模型输出了 JSON/协议外壳而不是纯译文。",
+        "typst_dependency_download_failed": "检查 Typst 依赖源网络连通性，必要时预热依赖或重试。",
+        "render_failed": "检查渲染输入、字体和 Typst 编译日志，修正渲染问题后重试。",
+        "json_decode_failed": "检查 OCR 原始结果是否完整有效，必要时重新拉取或重新生成。",
+        "document_schema_validation_failed": "检查标准化输出是否满足 document.v1 契约，再重新执行后续阶段。",
+        "source_pdf_missing": "检查任务工作目录和源 PDF 路径，确认文件存在且可访问。",
+        "source_pdf_open_failed": "检查源 PDF 是否损坏或不可读，替换输入文件后重试。",
     }
     if failure_code in suggestions:
         return suggestions[failure_code]
     category_suggestions = {
-"auth": f"Check {provider_label} authentication configuration and permission scope.",
-        "network": "Check network, proxy, and DNS Configure then retry.",
-        "timeout": "Check upstream service response time or increase timeout and retry.",
-        "rate_limit": "Lower concurrency, wait for rate limit window recovery, then retry.",
-        "input": "Validate input, file path, and request parameters.",
-"normalization": "Check OCR Output and standardized input contract.",
-        "translation": "Check translation stage input, batch partitioning, and model output.",
-        "render": "Check render input, fonts, and build environment.",
-"provider": f"Check {provider_label} the returned error code and original response.",
-"internal": "Check traceback task_logs to locate uncategorized internal exceptions",
+        "auth": f"检查 {provider_label} 鉴权配置和权限范围。",
+        "network": "检查网络、代理和 DNS 配置后再重试。",
+        "timeout": "检查上游服务响应时间或增大超时后再试。",
+        "rate_limit": "降低并发、等待限流窗口恢复后再重试。",
+        "input": "检查输入内容、文件路径和请求参数。",
+        "normalization": "检查 OCR 输出和标准化输入契约。",
+        "translation": "检查翻译阶段输入、批次划分和模型返回。",
+        "render": "检查渲染输入、字体和编译环境。",
+        "provider": f"检查 {provider_label} 返回的错误码与原始响应。",
+        "internal": "查看 traceback 与任务日志，定位未分类的内部异常。",
     }
-return category_suggestions.get(failure_category, "Check traceback task log; root cause analysis failed.")
+    return category_suggestions.get(failure_category, "查看 traceback 与任务日志，定位失败根因。")
 
 
 def _build_raw_excerpt(detail: str, raw_traceback: str) -> str:
@@ -205,22 +205,22 @@ def classify_exception(exc: BaseException, *, default_stage: str, provider: str 
     provider_stage = _extract_provider_stage(f"{detail}\n{raw_traceback}")
 
     error_type = "python_unhandled_exception"
-summary = "Task failed, but no clear root cause identified yet"
+    summary = "任务失败，但暂未识别出明确根因"
     retryable = True
 
     if any(token in lowered for token in ("failed to resolve", "temporary failure in name resolution", "nameresolutionerror", "socket.gaierror")):
         error_type = "dns_resolution_failed"
-        summary = "External service DNS resolution failed."
+        summary = "外部服务域名解析失败"
     elif any(token in lowered for token in ("readtimeout", "connecttimeout", "timed out")):
         error_type = "upstream_timeout"
-summary = "External service request timed out"
+        summary = "外部服务请求超时"
     elif stage == "render" and any(token in lowered for token in ("filenotfounderror", "no such file or directory")):
         error_type = "render_failed"
-summary = "Typesetting or compilation stage failed"
+        summary = "排版或编译阶段失败"
         retryable = True
     elif http_status_code == 429 or any(token in lowered for token in ("rate limited", "rate limit", "too many requests", "retry-after")):
         error_type = "upstream_rate_limited"
-        summary = "External service request rate-limited."
+        summary = "外部服务请求被限流"
     elif http_status_code in {401, 403} or any(
         token in lowered
         for token in (
@@ -233,11 +233,11 @@ summary = "Typesetting or compilation stage failed"
         )
     ):
         error_type = "auth_failed"
-summary = "Authentication failed"
+        summary = "鉴权失败"
         retryable = False
     elif http_status_code == 400:
         error_type = "upstream_bad_request"
-summary = "Upstream service rejected the request (400)"
+        summary = "上游服务拒绝请求（400）"
         retryable = False
     elif any(
         token in lowered
@@ -249,14 +249,14 @@ summary = "Upstream service rejected the request (400)"
         )
     ):
         error_type = "placeholder_unstable"
-summary = "Formula placeholder validation failed"
+        summary = "公式占位符校验失败"
     elif any(token in lowered for token in ("translationprotocolerror", "protocol/json shell")):
         error_type = "translation_protocol_shell"
-        summary = "Translation model returned protocol or JSON Shell"
+        summary = "翻译模型返回了协议或 JSON 外壳"
         stage = "translation"
     elif any(token in lowered for token in ("failed to download package", "packages.typst.org", "downloading @preview/")):
         error_type = "typst_dependency_download_failed"
-summary = "Typst rendering dependency download failed"
+        summary = "Typst 渲染依赖下载失败"
     elif any(
         token in lowered
         for token in (
@@ -266,32 +266,32 @@ summary = "Typst rendering dependency download failed"
         )
     ):
         error_type = "typst_runtime_failed"
-        summary = "Typst runtime startup failed"
+        summary = "Typst 运行时启动失败"
         retryable = False
         stage = "render"
     elif any(token in lowered for token in ("typst compile", "typst error", "render failed", "failed to render", "font not found", "missing bundled font")):
         error_type = "render_failed"
-summary = "Typesetting or compilation stage failed"
+        summary = "排版或编译阶段失败"
         retryable = False
         stage = "render"
     elif any(token in lowered for token in ("jsondecodeerror", "expecting value", "extra data", "invalid control character")):
         error_type = "json_decode_failed"
-summary = "OCR result JSON Parse failed"
+        summary = "OCR 结果 JSON 解析失败"
         stage = "normalization"
         retryable = False
     elif any(token in lowered for token in ("validationerror", "normalized document schema validation failed")):
         error_type = "document_schema_validation_failed"
-summary = "Normalized document schema validation failed"
+        summary = "标准化文档校验失败"
         stage = "normalization"
         retryable = False
     elif "source pdf not found" in lowered:
         error_type = "source_pdf_missing"
-summary = "Source PDF missing"
+        summary = "源 PDF 缺失"
         stage = "normalization"
         retryable = False
     elif any(token in lowered for token in ("fitz.fitzerror", "pymupdf", "cannot open broken document", "file data error")):
         error_type = "source_pdf_open_failed"
-summary = "Source PDF Open failed."
+        summary = "源 PDF 打开失败"
         stage = "normalization"
         retryable = False
 

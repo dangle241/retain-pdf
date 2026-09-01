@@ -48,24 +48,24 @@ export function workflowUsesRenderStage(workflow, constants) {
 }
 
 export function workflowSubmitLabel(workflow, constants) {
-// UI Upload modal primary button "Direct Translate"; render still uses "Start rendering"
+  // UI 文案：上传弹窗主按钮「直接翻译」；render 仍用「开始渲染」
   switch (workflow) {
     case constants.WORKFLOW_RENDER:
-      return "Start Rendering";
+      return "开始渲染";
     case constants.WORKFLOW_TRANSLATE:
-      return "Direct translation";
+      return "直接翻译";
     case constants.WORKFLOW_BOOK:
-return "Direct Translate";
+      return "直接翻译";
     default:
-return "Direct Translate";
+      return "直接翻译";
   }
 }
 
 export function workflowHeadline(workflow, constants) {
   switch (workflow) {
     case constants.WORKFLOW_RENDER:
-      return "Workflow reuses existing task artifacts for regeneration. PDF。";
+      return "当前工作流会复用已有任务产物重新生成 PDF。";
     default:
-return "Select PDF After, translate directly or just add to bookshelf.";
+      return "选择 PDF 后，可直接翻译或仅收藏到书架。";
   }
 }

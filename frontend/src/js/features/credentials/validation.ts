@@ -126,7 +126,7 @@ export async function runOcrTokenValidation({
     };
   }
   if (showResult) {
-setOcrValidationMessage(Checking ${definition.label} token…, "", definition.id);
+    setOcrValidationMessage(`正在检测 ${definition.label} Token…`, "", definition.id);
   }
   try {
     const result = asValidationResult(await validateOcrToken(apiPrefix, definition.id, normalizedToken));
@@ -137,19 +137,19 @@ setOcrValidationMessage(Checking ${definition.label} token…, "", definition.id
     });
     if (showResult) {
       const hint = result.operator_hint ? ` ${result.operator_hint}` : "";
-      const message = result.summary || `${definition.label} Token Test Results:${result.status || "unknown"}`;
+      const message = result.summary || `${definition.label} Token 检测结果：${result.status || "unknown"}`;
       setOcrValidationMessage(`${message}${hint}`.trim(), result.ok ? "valid" : "error", definition.id);
     }
     return result;
   } catch (_err) {
     resetOcrValidationRuntime({ state, credentialsStatePort, legacyRuntimePort });
     if (showResult) {
-      setOcrValidationMessage(`${definition.label} Token Detection failed. Please try again later.`, "error", definition.id);
+      setOcrValidationMessage(`${definition.label} Token 检测失败，请稍后重试。`, "error", definition.id);
     }
     return {
       ok: false,
       status: "network_error",
-summary: ${definition.label} token check failed, please try again later.,
+      summary: `${definition.label} Token 检测失败，请稍后重试。`,
     };
   }
 }
@@ -171,7 +171,7 @@ export async function runDeepSeekConnectivityCheck({
     return { ok: false, status: 0 };
   }
   if (showResult) {
-setDeepSeekValidationMessage("Checking DeepSeek API…");
+    setDeepSeekValidationMessage("正在检测 DeepSeek 接口…");
   }
   try {
     const result = asValidationResult(await validateDeepSeekToken(apiPrefix, {
@@ -204,9 +204,9 @@ export function summarizeDeepSeekBalance(result) {
     return `余额 ${parts.join("，")}`;
   }
   if (result?.is_available) {
-return "Balance available";
+    return "余额可用";
   }
-return "Insufficient balance";
+  return "余额不足";
 }
 
 export async function runDeepSeekBalanceCheck({

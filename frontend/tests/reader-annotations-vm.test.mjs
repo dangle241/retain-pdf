@@ -8,7 +8,7 @@ import {
   sortAnnotations,
 } from "../src/js/reader/annotations/view-model.js";
 
-// Create min comment.:Override only relevant fields in tests.
+// 造一条最小批注:测试里只覆写关心的字段
 function makeAnnotation(overrides = {}) {
   return {
     favoriteId: "fav-1",
@@ -17,7 +17,7 @@ function makeAnnotation(overrides = {}) {
     pageIdx: 0,
     blockId: "blk-1",
     kind: "sentence",
-quoteText: "Original text",
+    quoteText: "原文",
     translatedQuoteText: "",
     note: "",
     createdAt: "2026-07-01T00:00:00Z",
@@ -25,24 +25,24 @@ quoteText: "Original text",
   };
 }
 
-test("sortAnnotations Sort by page number ascending first.,Same page, ascending by creation time.", () => {
+test("sortAnnotations 先按页码升序,同页按创建时间升序", () => {
   const annotations = [
     makeAnnotation({ favoriteId: "c", pageIdx: 2, createdAt: "2026-07-01T00:00:00Z" }),
     makeAnnotation({ favoriteId: "b", pageIdx: 0, createdAt: "2026-07-02T00:00:00Z" }),
     makeAnnotation({ favoriteId: "a", pageIdx: 0, createdAt: "2026-07-01T00:00:00Z" }),
   ];
   assert.deepEqual(sortAnnotations(annotations).map((item) => item.favoriteId), ["a", "b", "c"]);
-  // Do not mutate input array.
+  // 不改动入参数组本身
   assert.deepEqual(annotations.map((item) => item.favoriteId), ["c", "b", "a"]);
 });
 
-test("sortAnnotations Non-array input returns empty array.", () => {
+test("sortAnnotations 非数组入参返回空数组", () => {
   assert.deepEqual(sortAnnotations(null), []);
   assert.deepEqual(sortAnnotations(undefined), []);
   assert.deepEqual(sortAnnotations("oops"), []);
 });
 
-test("groupAnnotationsByPage Group by page; preserve time order within group.", () => {
+test("groupAnnotationsByPage 按页分组且组内保持时间序", () => {
   const groups = groupAnnotationsByPage([
     makeAnnotation({ favoriteId: "p3", pageIdx: 3 }),
     makeAnnotation({ favoriteId: "p0-late", pageIdx: 0, createdAt: "2026-07-02T00:00:00Z" }),
@@ -58,18 +58,18 @@ test("groupAnnotationsByPage Group by page; preserve time order within group.", 
   assert.deepEqual(groupAnnotationsByPage([]), []);
 });
 
-test("buildAnnotationsMarkdown output title/Section/Blockquote/translation/note", () => {
+test("buildAnnotationsMarkdown 输出标题/页小节/引用块/译文/笔记", () => {
   const markdown = buildAnnotationsMarkdown({
     title: "Attention",
     annotations: [
-      // Pass arguments in intentionally random order.,Sort then group before export.
+      // 故意乱序传入,导出应先排序再分组
       makeAnnotation({ favoriteId: "f2", pageIdx: 1, quoteText: "第二页数据", kind: "data" }),
       makeAnnotation({
         favoriteId: "f1",
         pageIdx: 0,
         quoteText: "line1\nline2",
         translatedQuoteText: "trans1\ntrans2",
-note: "Important",
+        note: "重要",
         createdAt: "2026-07-02T00:00:00Z",
       }),
       makeAnnotation({ favoriteId: "f0", pageIdx: 0, quoteText: "图注", kind: "figure" }),
@@ -77,34 +77,34 @@ note: "Important",
   });
   assert.equal(
     markdown,
-"# Attention Annotations\n" +
+    "# Attention 批注\n" +
       "\n" +
-"## Page 1\n" +
+      "## 第 1 页\n" +
       "\n" +
-"> Figure caption\n" +
+      "> 图注\n" +
       "\n" +
       "> line1\n" +
       "> line2\n" +
       "> —— trans1\n" +
       "> trans2\n" +
       "\n" +
-"Note: Important\n" +
+      "笔记:重要\n" +
       "\n" +
-"## Page 2\n" +
+      "## 第 2 页\n" +
       "\n" +
-"> Page 2 data\n",
+      "> 第二页数据\n",
   );
 });
 
-test("buildAnnotationsMarkdown Empty list placeholder", () => {
-assert.equal(buildAnnotationsMarkdown({ title: "Attention", annotations: [] }), "# Attention Annotations\n\n(No comments.)\n");
-assert.equal(buildAnnotationsMarkdown({}), "# Annotations\n\n(No comments yet)\n");
+test("buildAnnotationsMarkdown 空列表输出占位文案", () => {
+  assert.equal(buildAnnotationsMarkdown({ title: "Attention", annotations: [] }), "# Attention 批注\n\n(暂无批注)\n");
+  assert.equal(buildAnnotationsMarkdown({}), "# 批注\n\n(暂无批注)\n");
 });
 
-test("annotationAnchor Expose only page numbers and blocks for navigation. id", () => {
+test("annotationAnchor 只暴露跳转所需的页码与块 id", () => {
   assert.deepEqual(annotationAnchor(makeAnnotation({ pageIdx: 4, blockId: "blk-9" })), { pageIdx: 4, blockId: "blk-9" });
 });
 
-test("ANNOTATION_KIND_META Covers three annotation types", () => {
+test("ANNOTATION_KIND_META 覆盖三种批注类型", () => {
   assert.deepEqual(Object.keys(ANNOTATION_KIND_META), ["sentence", "data", "figure"]);
 });

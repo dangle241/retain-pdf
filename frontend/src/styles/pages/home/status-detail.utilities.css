@@ -1,4 +1,4 @@
-/* Status details Â· Shell/stage history/event/failure/Result actions (translation debugging see status-detail-translation.utilities) */
+/* 状态详情 · 壳/阶段历史/事件/失败/结果动作（翻译调试见 status-detail-translation.utilities） */
 
 
 
@@ -41,13 +41,13 @@
 
 
 /*
-Danger zone fix(Tailwind v4 migration):`.log` paired only with `.inline-error-box` across project
-appear(InlineErrorBox.jsx `log error-box inline-error-box`),background/
-border-color defined on both sidesââv3 relies on source order tie-break,inline-error-box Write
-  Last wins(Red error background),White background here./neutral-border: unused; delete.v4 Order not guaranteed.
-source order(same pattern,See also other fix notes in this file.),In practice, white background wins after migration.,
-  Error tooltip lost red background. Remove conflicting styles. background/border-color,
-delegated to inline-error-box single definition.
+  危险区修复(Tailwind v4 迁移):`.log` 全项目只和 `.inline-error-box` 成对
+  出现(InlineErrorBox.jsx 的 `log error-box inline-error-box`),background/
+  border-color 两边都定义——v3 靠源码序 tie-break,inline-error-box 写在
+  后面胜出(红色错误底色),这里的白底/中性边框一直是死代码。v4 顺序不保真
+  源码序(同一模式,另见本文件其余几处修复说明),实测迁移后白底反而胜出,
+  错误提示框失去红色底色视觉提示。去掉冲突的 background/border-color,
+  交给 inline-error-box 一处定义。
 */
 @utility log {
   @apply rounded-[20px];

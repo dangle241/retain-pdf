@@ -29,19 +29,19 @@ def build_direct_typst_repair_messages(
 ) -> list[dict[str, str]]:
     system_prompt = load_prompt("translation_typst_repair.txt")
     if domain_guidance.strip():
-        system_prompt = f"{system_prompt}\n\nDocument terminology and style constraints:\n{domain_guidance.strip()}"
+        system_prompt = f"{system_prompt}\n\n文档术语和风格约束：\n{domain_guidance.strip()}"
     user_prompt = "\n".join(
         [
-            "Original text:",
+            "原文：",
             _source_text(item),
             "",
-            "Current translation:",
+            "当前译文：",
             str(broken_translation or "").strip(),
             "",
-            "Validation error:",
+            "校验错误：",
             str(error_message or "").strip(),
             "",
-            "No source text provided for translation.",
+            "请只输出修复后的译文正文：",
         ]
     ).strip()
     return [

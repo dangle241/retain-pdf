@@ -10,7 +10,7 @@ use crate::storage_paths::resolve_data_path;
 use super::Db;
 
 impl Db {
-    /// Upload creates record.:One content hash only. document,Refresh only timestamp and filename on re-upload.
+    /// 上传即建档:同一内容哈希只有一个 document,重复上传仅刷新时间与文件名。
     pub fn upsert_document_from_upload(&self, upload: &UploadRecord) -> Result<()> {
         if upload.content_hash.is_empty() {
             return Ok(());
@@ -47,9 +47,9 @@ impl Db {
         Ok(record)
     }
 
-/// Arbitrary job_id (including historical runs and -ocr subtasks) â belongs to document.
-/// Open history on frontend job cannot rely on time anymore. active_job_id reverse lookup â only matches current.
-/// Effective run, historical run silent mismatch. (Favorites skip DB; Q&A degrade full DB.)
+    /// 任意 job_id(含历史 run 与 -ocr 子任务)→ 所属 document。
+    /// 前端打开历史 job 时不能再靠 active_job_id 反查——那只匹配当前
+    /// 生效 run,历史 run 会静默失配(收藏不入库、问答退化全库)。
     pub fn get_document_by_job_id(&self, job_id: &str) -> Result<Option<DocumentRecord>> {
         let conn = self.connect()?;
         let document_id: Option<String> = conn
@@ -90,8 +90,8 @@ impl Db {
         collection_id: Option<&str>,
     ) -> Result<Vec<DocumentRecord>> {
         let conn = self.connect()?;
-        // Defensive.:Library list never returns null upload Orphaned support docs(Source file lost.
-// Zombie card). "Only in DB" doc exists. upload not yet. job unaffected.
+        // 防御性:图书馆列表永不返回无 upload 支撑的孤儿文档(源文件已丢的
+        // 僵尸卡)。"只入库"文档有 upload 只是没 job,不受影响。
         let mut clauses: Vec<String> = vec![
             "EXISTS (SELECT 1 FROM uploads u WHERE u.content_hash = d.document_id AND u.content_hash <> '')"
                 .to_string(),
@@ -184,7 +184,7 @@ impl Db {
         Ok(record)
     }
 
-/// link job assign to document (via upload.content_hash), returns document_id.
+    /// 把 job 归属到 document(经 upload.content_hash),返回 document_id。
     pub fn link_job_to_document(&self, job_id: &str, upload_id: &str) -> Result<Option<String>> {
         let conn = self.connect()?;
         let document_id: Option<String> = conn
@@ -204,7 +204,7 @@ impl Db {
         Ok(Some(document_id))
     }
 
-/// By document_id (= content_hash) find latest upload record for source. PDF / Cover / re-translation
+    /// 按 document_id(= content_hash) 找到最近一次上传记录，用于源 PDF / 封面 / 重译。
     pub fn find_upload_for_document(&self, document_id: &str) -> Result<Option<UploadRecord>> {
         let conn = self.connect()?;
         let upload = conn
@@ -243,7 +243,7 @@ impl Db {
         }))
     }
 
-/// All job_ids under this document name (linked via jobs.document_id). job_id (via jobs.document_id association).
+    /// 该文档名下的所有 job_id(经 jobs.document_id 关联)。
     pub fn job_ids_for_document(&self, document_id: &str) -> Result<Vec<String>> {
         let conn = self.connect()?;
         let mut stmt =
@@ -256,8 +256,8 @@ impl Db {
         Ok(ids)
     }
 
-    /// All corresponding to this document upload records(Same file uploaded multiple times creates duplicates. upload_id),
-    /// stored_path Resolved to absolute path for disk file deletion.
+    /// 该文档对应的所有 upload 记录(可能同一文件多次上传成多个 upload_id),
+    /// stored_path 解析为绝对路径供删除磁盘文件。
     pub fn uploads_for_document(&self, document_id: &str) -> Result<Vec<UploadRecord>> {
         let conn = self.connect()?;
         let mut stmt = conn.prepare(
@@ -310,8 +310,8 @@ impl Db {
         Ok(count as u64)
     }
 
-/// Delete document row (FK cascade clear favorites/document_tags/collection_documents,
-    /// ai_conversations.document_id set NULL)+ derived blocks_fts OK.
+    /// 删除文档行(FK 级联清 favorites/document_tags/collection_documents,
+    /// ai_conversations.document_id 置 NULL)+ 派生的 blocks_fts 行。
     pub fn delete_document(&self, document_id: &str) -> Result<bool> {
         let conn = self.connect()?;
         conn.execute(
@@ -325,8 +325,8 @@ impl Db {
         Ok(changed > 0)
     }
 
-    /// Fix dangling. active_job_id:If it points to job No longer exists,Latest doc in this directory.
-    /// Success book job;Set if absent. NULL(Downgrade to clean collection)Deleted. job Must call later,Anti-zombie card.
+    /// 修复悬空的 active_job_id:若它指向的 job 已不存在,重指该文档下最新的
+    /// 成功 book job;没有则置 NULL(降级为干净馆藏)。删 job 后必调,防僵尸卡。
     pub fn reconcile_document_active_job(&self, document_id: &str) -> Result<()> {
         let conn = self.connect()?;
         conn.execute(
@@ -368,7 +368,7 @@ impl Db {
         Ok(())
     }
 
-/// Rebuild entire doc. FTS row (derived index, idempotent).
+    /// 整体重建某文档的 FTS 行(派生索引,幂等)。
     pub fn replace_document_fts(
         &self,
         document_id: &str,
@@ -404,8 +404,8 @@ impl Db {
         Ok(())
     }
 
-    /// Full-text search.trigram Query tokenization requirements ≥3 Character,Shorter query fallback LIKE Scan.
-    /// `document_id` Non-empty: search only that doc (reader). / AI Full Q&A.
+    /// 全文检索。trigram 分词要求查询 ≥3 字符,更短的查询回退 LIKE 扫描。
+    /// `document_id` 非空时只搜该文档（阅读器 / AI 整本问答）。
     pub fn search_blocks(
         &self,
         query: &str,
@@ -564,7 +564,7 @@ impl Db {
         Ok(changed > 0)
     }
 
-    /// Referenced by bookmark anchor job Individual deletion disallowed(Anchor block space protection)。
+    /// 被收藏锚点引用的 job 不允许单独删除(锚点块空间保护)。
     pub fn favorites_referencing_job(&self, job_id: &str) -> Result<u64> {
         let conn = self.connect()?;
         let count: i64 = conn.query_row(
@@ -575,8 +575,8 @@ impl Db {
         Ok(count as u64)
     }
 
-    /// Backfill existing data:Upgrade legacy lib to library model. Idempotent; act only on gaps.,
-    /// Steady-state startup pays only a few items. COUNT cost.
+    /// 存量回填:老库升级为图书馆模型。幂等且只在有缺口时做事,
+    /// 稳态启动只付几条 COUNT 的代价。
     pub(super) fn backfill_library_records(&self) -> Result<()> {
         self.backfill_upload_hashes()?;
         self.backfill_job_document_links()?;
@@ -586,11 +586,11 @@ impl Db {
         Ok(())
     }
 
-    /// Batch purge orphan docs.:None upload Support(Source file already retention GC dropped)
-    /// doc line,Permanently inaccessible zombie cards. Purge only those without collection references.——Downgrade for favorites
-    /// Data retention for user experience DELETE /documents/:id Handle explicitly,Do not silently destroy curation content.
-    /// root-cause(retention Stop deleting. document-backed upload)Prevent new orphan creation,
-    /// Cleanup handles legacy only.
+    /// 一次性清理孤儿文档:没有任何 upload 支撑(源文件早被 retention GC 掉)
+    /// 的文档行,是永远打不开的僵尸卡。只清没有收藏引用的——有收藏的降级
+    /// 数据保留给用户经 DELETE /documents/:id 显式处理,不无声销毁策展内容。
+    /// root-cause(retention 不再删 document-backed upload)已堵住新孤儿产生,
+    /// 此清理只处理历史遗留。
     fn cleanup_orphan_documents(&self) -> Result<()> {
         let conn = self.connect()?;
         let orphan_ids: Vec<String> = {
@@ -735,7 +735,7 @@ impl Db {
     }
 }
 
-/// sha2 0.11 Output type no longer implements LowerHex,// Standardize on manual hex encoding.
+/// sha2 0.11 的输出类型不再实现 LowerHex,统一走手动十六进制编码。
 pub fn sha256_hex(bytes: &[u8]) -> String {
     use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
@@ -837,12 +837,12 @@ fn row_to_favorite(row: &rusqlite::Row<'_>) -> rusqlite::Result<FavoriteRecord> 
     })
 }
 
-/// Build doc from task artifact dir. FTS rows:
-/// - `ocr/normalized/document.v1.json` Provide source_text & Specs block_id;
-/// - `translated/page-*.json` provides translated_text, by (page_idx, block_idx)
-///   Numeric index alignment (translated item_id against spec block_id zero-padding width differs., cannot press
-///   String alignment)。
-/// Index source only if translation is missing.
+/// 从任务产物目录构建某文档的 FTS 行:
+/// - `ocr/normalized/document.v1.json` 提供 source_text 与规范 block_id;
+/// - `translated/page-*.json` 提供 translated_text,按 (page_idx, block_idx)
+///   数字索引对齐(译文 item_id 与规范 block_id 的零填充位数不同,不能按
+///   字符串对齐)。
+/// 译文缺失时只索引原文。
 pub fn build_fts_rows_from_job_dir(job_root: &Path) -> Result<Vec<FtsBlockRow>> {
     let normalized_path = job_root.join("ocr").join("normalized").join("document.v1.json");
     let raw = std::fs::read_to_string(&normalized_path)
@@ -998,7 +998,7 @@ mod tests {
             char_end: None,
             kind: "sentence".to_string(),
             quote_text: "quoted source".to_string(),
-            translated_quote_text: "Citation Snapshot".to_string(),
+            translated_quote_text: "引文快照".to_string(),
             note: String::new(),
             asset_id: String::new(),
             rect_json: String::new(),
@@ -1017,7 +1017,7 @@ mod tests {
         let version: i64 = conn
             .query_row("PRAGMA user_version", [], |row| row.get(0))
             .expect("user_version");
-        // Sync migration array length.:v1 Library foundation + v2 assets/Session
+        // 与迁移数组长度同步:v1 图书馆地基 + v2 资产/会话
         assert_eq!(version, 2);
     }
 
@@ -1027,7 +1027,7 @@ mod tests {
         let db = fs.db();
         db.init().expect("init");
         let hash = sha256_hex(b"same pdf bytes");
-        // Production path:save_upload Before upsert_document(List filter dependencies upload Exists)
+        // 生产路径:save_upload 先于 upsert_document(列表过滤依赖 upload 存在)
         let up1 = upload_with_hash("up-1", &hash);
         db.save_upload(&up1).expect("save up-1");
         db.upsert_document_from_upload(&up1).expect("first upsert");
@@ -1074,28 +1074,28 @@ mod tests {
                 page_idx: 2,
                 block_id: "p003-b0001".to_string(),
                 source_text: "vibrationally resolved optical spectra".to_string(),
-                translated_text: "Effective computational method for vibrationally resolved optical spectra".to_string(),
+                translated_text: "振动分辨光学光谱的有效计算方法".to_string(),
             }],
         )
         .expect("fts insert");
-        let hits = db.search_blocks("Optical Spectrum", 10, None).expect("search zh");
+        let hits = db.search_blocks("光学光谱", 10, None).expect("search zh");
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].document_id, hash);
         assert_eq!(hits[0].page_idx, 2);
         assert_eq!(hits[0].block_id, "p003-b0001");
-        // 2 Character query proceeds LIKE Rollback
-let short_hits = db.search_blocks("spectrum", 10, None).expect("search short");
+        // 2 字符查询走 LIKE 回退
+        let short_hits = db.search_blocks("光谱", 10, None).expect("search short");
         assert_eq!(short_hits.len(), 1);
-        // Single-doc filter: nonexistent document_id No match expected.
+        // 单文档过滤：不存在的 document_id 应无命中
         let scoped_miss = db
-.search_blocks("optical spectrum", 10, Some("no-such-doc"))
+            .search_blocks("光学光谱", 10, Some("no-such-doc"))
             .expect("search scoped miss");
         assert!(scoped_miss.is_empty());
         let scoped_hit = db
-.search_blocks("optical spectrum", 10, Some(&hash))
+            .search_blocks("光学光谱", 10, Some(&hash))
             .expect("search scoped hit");
         assert_eq!(scoped_hit.len(), 1);
-        // Idempotency rebuild.:Still one line after re-replacement.
+        // 重建幂等:再次替换后仍只有一行
         db.replace_document_fts(
             &hash,
             "job-2",
@@ -1103,11 +1103,11 @@ let short_hits = db.search_blocks("spectrum", 10, None).expect("search short");
                 page_idx: 2,
                 block_id: "p003-b0001".to_string(),
                 source_text: "updated".to_string(),
-                translated_text: "Updated Optical Spectrum".to_string(),
+                translated_text: "更新后的光学光谱".to_string(),
             }],
         )
         .expect("fts rebuild");
-let rebuilt = db.search_blocks("optical spectrum", 10, None).expect("search rebuilt");
+        let rebuilt = db.search_blocks("光学光谱", 10, None).expect("search rebuilt");
         assert_eq!(rebuilt.len(), 1);
         assert_eq!(rebuilt[0].job_id, "job-2");
     }
@@ -1124,20 +1124,20 @@ let rebuilt = db.search_blocks("optical spectrum", 10, None).expect("search rebu
         let updated = db
             .update_document_fields(
                 &hash,
-                Some("Spectral computation methods survey."),
+                Some("光谱计算方法综述"),
                 Some("reading"),
-Some(&["chemistry".to_string(), "spectrum".to_string()]),
+                Some(&["化学".to_string(), "光谱".to_string()]),
             )
             .expect("patch");
-        assert_eq!(updated.title, "Spectral Calculation Overview");
+        assert_eq!(updated.title, "光谱计算方法综述");
         assert_eq!(updated.reading_status, "reading");
-assert_eq!(updated.tags, vec!["spectrum".to_string(), "chemistry".to_string()]);
+        assert_eq!(updated.tags, vec!["光谱".to_string(), "化学".to_string()]);
         let filtered = db
-.list_documents(10, 0, None, Some("chemistry"), None)
+            .list_documents(10, 0, None, Some("化学"), None)
             .expect("list by tag");
         assert_eq!(filtered.len(), 1);
         let missed = db
-            .list_documents(10, 0, None, Some("Biology"), None)
+            .list_documents(10, 0, None, Some("生物"), None)
             .expect("list by other tag");
         assert!(missed.is_empty());
     }

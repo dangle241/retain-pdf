@@ -31,9 +31,9 @@ export function mountArtifactDownloadsFeature({
     if (Number.isFinite(totalBytes) && totalBytes > 0) {
       const totalText = formatTransferSize(totalBytes);
       const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
-      return `Downloading ${receivedText} / ${totalText} (${safePercent.toFixed(0)}%)`;
+      return `正在下载 ${receivedText} / ${totalText} (${safePercent.toFixed(0)}%)`;
     }
-return receivedText ? Downloading ${receivedText} : "Downloading...";
+    return receivedText ? `正在下载 ${receivedText}` : "正在下载...";
   }
 
   async function handleProtectedArtifactClick(event, matchedLink = null) {
@@ -68,12 +68,12 @@ return receivedText ? Downloading ${receivedText} : "Downloading...";
     }
 
     try {
-      viewPort.setLinkBusy(link, true, "Download in progress...");
+      viewPort.setLinkBusy(link, true, "下载中...");
       showDownloadPreparing(preferredName);
       const resp = await fetchProtected(url);
       if (!resp.ok) {
         const text = await resp.text();
-        const error: any = new Error(`Download failed: ${resp.status} ${text || "unknown error"}`);
+        const error: any = new Error(`下载失败: ${resp.status} ${text || "unknown error"}`);
         error.status = resp.status;
         error.url = url;
         throw error;
@@ -88,8 +88,8 @@ return receivedText ? Downloading ${receivedText} : "Downloading...";
         filename,
         onProgress: ({ receivedBytes, totalBytes, percent, done }) => {
           if (done) {
-            setText("error-box", `Saving started ${filename}`);
-viewPort.setLinkBusy(link, true, "Completed");
+            setText("error-box", `已开始保存 ${filename}`);
+            viewPort.setLinkBusy(link, true, "已完成");
             completeDownloadToast(filename);
             return;
           }
@@ -97,7 +97,7 @@ viewPort.setLinkBusy(link, true, "Completed");
           viewPort.setLinkBusy(
             link,
             true,
-Number.isFinite(percent) ? ${Math.max(0, Math.min(100, Number(percent) || 0)).toFixed(0)}% : "Downloading...",
+            Number.isFinite(percent) ? `${Math.max(0, Math.min(100, Number(percent) || 0)).toFixed(0)}%` : "下载中...",
           );
           updateDownloadProgress({
             filename,
@@ -109,7 +109,7 @@ Number.isFinite(percent) ? ${Math.max(0, Math.min(100, Number(percent) || 0)).to
       });
     } catch (err) {
       setText("error-box", buildErrorDiagnostic(err, {
-        operation: "Download task artifact",
+        operation: "下载任务产物",
         url,
         jobId,
         details: {
@@ -117,7 +117,7 @@ Number.isFinite(percent) ? ${Math.max(0, Math.min(100, Number(percent) || 0)).to
           filename: preferredName,
         },
       }));
-failDownloadToast(err.message || "Download failed");
+      failDownloadToast(err.message || "下载失败");
     } finally {
       viewPort.setLinkBusy(link, false);
     }

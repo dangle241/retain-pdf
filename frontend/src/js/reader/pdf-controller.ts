@@ -96,20 +96,20 @@ export async function mountPdfViewer({
   try {
     pdfDocument = await loadPdfDocument({ itemOrUrl, fetchProtected });
   } catch (error) {
-    // loadPdfDocument Internal pair pdfjsLib.getDocument(...).promise No fallback——
-    // 404/CORS/Corrupted PDF Will be here reject,Re-throw directly.,Eventually
-// mountReaderPdfPair Promise.allSettled swallows errors; console leaves no trace.
-    // User sees only"this part PDF Hide"Cannot determine cause. Add logs here.,
-    // Preserve external behavior(Still falls to empty state below.)。
-    console.error(`[reader] ${label || key} Failed to load`, error);
+    // loadPdfDocument 内部对 pdfjsLib.getDocument(...).promise 没有兜底——
+    // 404/CORS/损坏的 PDF 会在这里 reject,原来直接向上抛,最终被
+    // mountReaderPdfPair 的 Promise.allSettled 吞掉,控制台不留任何痕迹,
+    // 用户只会看到"这块 PDF 不显示"却无从判断是哪一种原因。这里补上日志,
+    // 不改变外部可见行为(仍然落到下面的空状态展示)。
+    console.error(`[reader] ${label || key} 加载失败`, error);
     showReaderPaneEmpty(key, emptyId);
     return null;
   }
   if (!pdfDocument) {
-// loadPdfDocument returns null silently on timeout when "No available URL" (no parsable URL,
-// or itemOrUrl initially empty string)ââAdd corresponding log entry to distinguish "No URL" easily.
-// Same as above catch block: "URL exists but load failed." Two different causes.
-    console.warn(`[reader] ${label || key} No available resource address,Jump to page number, current page`, { itemOrUrl });
+    // loadPdfDocument 在"没有可用 URL"时静默返回 null(没有 URL 可解析,
+    // 或 itemOrUrl 本身是空字符串)——同样补一条日志,方便区分"没有 URL"
+    // 和上面 catch 到的"有 URL 但加载失败"这两种不同原因。
+    console.warn(`[reader] ${label || key} 没有可用的资源地址,跳过挂载`, { itemOrUrl });
     showReaderPaneEmpty(key, emptyId);
     return null;
   }

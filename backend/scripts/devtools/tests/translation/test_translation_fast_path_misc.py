@@ -56,14 +56,14 @@ def test_apply_translation_salvages_reasoning_leak_final_answer() -> None:
         }
     ]
     leaked = (
-"Keep it concise. According to the rules, K and Qxc should use math mode. So output directly."
-        "Note: the original ends with a comma; the translation should also keep the comma."
-        "In summary, output. Has radial response function. $K$ and corresponding non-uniform terms $Q_{\\mathrm{xc}}$，"
+        "保持简洁。按照规则，K和Qxc应该用数学模式。所以输出时直接写。"
+        "注意：原文末尾有逗号，译文也应保留逗号。"
+        "综上，输出。具有径向响应函数 $K$ 和相应的非均匀项 $Q_{\\mathrm{xc}}$，"
     )
 
     apply_translated_text_map(payload, {"p112-b011": leaked})
 
-    assert payload[0]["translated_text"] == "Radial response function $K$ and corresponding non-uniform terms $Q_{\\mathrm{xc}}$，"
+    assert payload[0]["translated_text"] == "具有径向响应函数 $K$ 和相应的非均匀项 $Q_{\\mathrm{xc}}$，"
     assert payload[0]["final_status"] == "partially_translated"
     assert payload[0]["translation_diagnostics"]["degradation_reason"] == "reasoning_leak_salvaged"
 
@@ -83,15 +83,15 @@ def test_apply_translation_salvages_quoted_reasoning_choice() -> None:
         }
     ]
     leaked = (
-'Does the function need "function"? Original text is "time-ordered response", but later there is "response function".'
-'For accuracy, can translate as "The time-ordered response (function) must be distinguished from the retarded response function"Provide the source text to translate.'
-'More concise: directly "The time-ordered response must be distinguished from the retarded response function" because the latter is explicitly a function.'
-        '\n\nConsidering academic norms, use"加以区分"more formal. I choose:"时间有序响应必须与推迟响应函数加以区分，"'
+        '函数需要加"函数"吗？原文是"time-ordered response"，但后面有"response function"。'
+        '为保准确，可以译为"时间有序响应（函数）必须与推迟响应函数加以区分"，但可能冗余。'
+        '更简洁：直接"时间有序响应必须与推迟响应函数加以区分"，因为后者明确是函数。'
+        '\n\n考虑到学术规范，使用"加以区分"更正式。我选择："时间有序响应必须与推迟响应函数加以区分，"'
     )
 
     apply_translated_text_map(payload, {"p135-b009": leaked})
 
-assert payload[0]["translated_text"] == "The time-ordered response must be distinguished from the retarded response function,"
+    assert payload[0]["translated_text"] == "时间有序响应必须与推迟响应函数加以区分，"
     assert payload[0]["final_status"] == "partially_translated"
     assert payload[0]["translation_diagnostics"]["degradation_reason"] == "reasoning_leak_salvaged"
 
@@ -101,14 +101,14 @@ def test_deepseek_stream_delta_ignores_reasoning_content() -> None:
         "choices": [
             {
                 "delta": {
-                    "reasoning_content": "Model thinking—do not translate.",
-"content": "The time-ordered response must be distinguished from the retarded response function,",
+                    "reasoning_content": "这里是模型思考，不应该进入译文。",
+                    "content": "时间有序响应必须与推迟响应函数加以区分，",
                 }
             }
         ]
     }
 
-assert _extract_stream_delta_text(data) == "The time-ordered response must be distinguished from the retarded response function,"
+    assert _extract_stream_delta_text(data) == "时间有序响应必须与推迟响应函数加以区分，"
 
 
 def test_apply_translation_trims_direct_typst_neighbor_continuation_leak() -> None:
@@ -137,14 +137,14 @@ def test_apply_translation_trims_direct_typst_neighbor_continuation_leak() -> No
         },
     ]
     leaked = (
-        r"Consider homonuclear diatomic moleculeABwhose nuclear charges are respectively$ \lambda Z_A $和$ Z_B $，"
-        r"Electron count$ \lambda Z_A + Z_B $nuclear distanceRFixed. We want to prove that the binding energy is in$ \lambda = 1 $Time is correct."
-        r"Use stdlib `pathlib.Path` for path ops. Hellmann-Feynman Theorem. Therefore,"
+        r"为简化起见，考虑一个同核中性双原子分子AB，其核电荷分别为$ \lambda Z_A $和$ Z_B $，"
+        r"电子数为$ \lambda Z_A + Z_B $，核间距R固定。我们欲证明结合能在$ \lambda = 1 $时为正。"
+        r"为此，我们将使用 Hellmann-Feynman 定理。因此，"
     )
 
     apply_translated_text_map(payload, {"p125-b018": leaked})
 
-    assert payload[0]["translated_text"].endswith("We aim to prove binding energy.")
+    assert payload[0]["translated_text"].endswith("我们欲证明结合能")
     assert r"$ \lambda = 1 $" not in payload[0]["translated_text"]
     assert payload[0]["final_status"] == "partially_translated"
     assert payload[0]["translation_diagnostics"]["degradation_reason"] == "neighbor_continuation_leak_trimmed"

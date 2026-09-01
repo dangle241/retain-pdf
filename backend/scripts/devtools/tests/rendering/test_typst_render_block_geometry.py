@@ -81,8 +81,8 @@ def test_build_render_blocks_uses_vertical_fit_for_tight_stacked_overlay_blocks(
             "source_text": "upper",
             "protected_source_text": "upper",
             "protected_translated_text": (
-"This is a Chinese body text that becomes significantly longer when rendered, used to simulate the upper block in the original OCR box already"
-"pasted onto the lower block, it still needs to continue compressing the height to avoid covering the next block."
+                "这是一段会在渲染时变得明显更长的中文正文，用来模拟上方块在原始 OCR 框已经"
+                "贴到下方块时，仍然需要继续压缩高度避免覆盖下一块。"
             ),
         },
         {
@@ -93,7 +93,7 @@ def test_build_render_blocks_uses_vertical_fit_for_tight_stacked_overlay_blocks(
             "lines": [{"text": "raw"}],
             "source_text": "lower",
             "protected_source_text": "lower",
-"protected_translated_text": "lower block",
+            "protected_translated_text": "下方块",
         },
     ]
 
@@ -120,7 +120,7 @@ def test_build_render_blocks_binary_fits_long_translated_title_to_box() -> None:
             "lines": [{"text": "A Long Title"}],
             "source_text": "A Long Title",
             "protected_source_text": "A Long Title",
-            "protected_translated_text": "This is a very long Chinese title that needs to automatically shrink and display fully within a narrow title box.",
+            "protected_translated_text": "这是一个非常长的中文标题需要在很窄的标题框里面自动缩小并且完整显示",
         }
     ]
 
@@ -150,7 +150,7 @@ def test_build_render_blocks_insets_tight_body_vertical_gap() -> None:
             "lines": [{"text": "raw"}],
             "source_text": "This body paragraph has enough source text to be treated as body text.",
             "protected_source_text": "This body paragraph has enough source text to be treated as body text.",
-            "protected_translated_text": "This is a body text used to confirm OCR Tight vertical spacing yields extra effective height.",
+            "protected_translated_text": "这是一段正文内容，用于确认 OCR 框上下贴得很近时可以获得一点有效高度余量。",
         },
         {
             "item_id": "p001-b002",
@@ -163,7 +163,7 @@ def test_build_render_blocks_insets_tight_body_vertical_gap() -> None:
             "lines": [{"text": "raw"}],
             "source_text": "This second body paragraph is in the same column and follows very closely.",
             "protected_source_text": "This second body paragraph is in the same column and follows very closely.",
-            "protected_translated_text": "Safety boundary needed. Consider inline validation.",
+            "protected_translated_text": "这是同一栏的下一段正文，用来给上一段提供安全边界。",
         },
     ]
 
@@ -192,7 +192,7 @@ def test_build_render_blocks_expands_short_body_region_up_and_right_only() -> No
             "lines": [{"text": "raw"}],
             "source_text": "This body paragraph has enough source text to be treated as body text.",
             "protected_source_text": "This body paragraph has enough source text to be treated as body text.",
-            "protected_translated_text": "This first paragraph establishes wide body reference for same region.",
+            "protected_translated_text": "这是第一段正文，用于建立同一区域的宽正文参照。",
         },
         {
             "item_id": "p001-b002",
@@ -205,7 +205,7 @@ def test_build_render_blocks_expands_short_body_region_up_and_right_only() -> No
             "lines": [{"text": "raw"}],
             "source_text": "This second body paragraph has enough source text to be treated as body text.",
             "protected_source_text": "This second body paragraph has enough source text to be treated as body text.",
-            "protected_translated_text": "This is the second body paragraph, used to confirm the width and position of the same column body area.",
+            "protected_translated_text": "这是第二段正文，用于确认同列正文区域的宽度和位置。",
         },
         {
             "item_id": "p001-b003",
@@ -218,7 +218,7 @@ def test_build_render_blocks_expands_short_body_region_up_and_right_only() -> No
             "lines": [{"text": "raw"}],
             "source_text": "Short but body-like text that belongs to the same paragraph region.",
             "protected_source_text": "Short but body-like text that belongs to the same paragraph region.",
-            "protected_translated_text": "This shorter third paragraph translation needs more width avoid abnormal line break.",
+            "protected_translated_text": "这是较短的第三段正文，翻译后需要更多宽度避免异常换行。",
         },
     ]
 
@@ -244,7 +244,7 @@ def test_build_render_blocks_expands_title_width_toward_body_column() -> None:
             "lines": [{"text": "Related work"}],
             "source_text": "Related work",
             "protected_source_text": "Related work",
-            "protected_translated_text": "Related work and methods",
+            "protected_translated_text": "相关工作和方法",
         },
         {
             "item_id": "p001-b001",
@@ -257,7 +257,7 @@ def test_build_render_blocks_expands_title_width_toward_body_column() -> None:
             "lines": [{"text": "raw"}],
             "source_text": "This body paragraph has enough source text to be treated as body text.",
             "protected_source_text": "This body paragraph has enough source text to be treated as body text.",
-            "protected_translated_text": "This is the body paragraph below the title, used to provide column width reference for the title.",
+            "protected_translated_text": "这是标题下方的正文段落，用于给标题提供同栏宽度参考。",
         },
     ]
 
@@ -282,7 +282,7 @@ def test_build_render_blocks_expands_body_cover_bbox_slightly() -> None:
             "lines": [{"text": "raw"}],
             "source_text": "This body paragraph has enough source text to be treated as body text.",
             "protected_source_text": "This body paragraph has enough source text to be treated as body text.",
-            "protected_translated_text": "This is a body text used to confirm that the background cover area will slightly expand to prevent the original text edges from leaking out.",
+            "protected_translated_text": "这是一段正文内容，用于确认背景遮盖区域会轻微扩张以防止原文边缘漏出。",
         },
     ]
 
@@ -310,7 +310,7 @@ def test_build_render_blocks_uses_conservative_cover_y_near_inline_formula() -> 
             "lines": [{"text": "raw"}],
             "source_text": r"This paragraph contains $\frac{a}{b}$ inline math.",
             "protected_source_text": r"This paragraph contains $\frac{a}{b}$ inline math.",
-            "protected_translated_text": r"this body text contains $\\frac{a}{b}$ inline formula.",
+            "protected_translated_text": r"这段正文包含 $\\frac{a}{b}$ 行内公式。",
         },
     ]
 
@@ -339,7 +339,7 @@ def test_typst_overlay_source_uses_title_single_line_fit_when_title_fits_one_lin
                 "lines": [{"text": "Intro"}],
                 "source_text": "Intro",
                 "protected_source_text": "Intro",
-"protected_translated_text": "Introduction",
+                "protected_translated_text": "引言",
             }
         ],
     )

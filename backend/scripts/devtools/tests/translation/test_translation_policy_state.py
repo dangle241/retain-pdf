@@ -17,10 +17,10 @@ def test_mark_policy_skip_clears_translation_and_sets_keep_origin_state() -> Non
     item = {
         "source_text": "References",
         "protected_source_text": "References",
-        "translated_text": "References",
-"protected_translated_text": "References",
-"translation_unit_translated_text": "References",
-"translation_unit_protected_translated_text": "References",
+        "translated_text": "参考文献",
+        "protected_translated_text": "参考文献",
+        "translation_unit_translated_text": "参考文献",
+        "translation_unit_protected_translated_text": "参考文献",
     }
 
     mark_policy_skip(item, "skip_reference_zone")
@@ -52,19 +52,19 @@ def test_mark_translation_required_clears_skip_state_without_touching_translatio
 
 
 def test_seed_orchestration_metadata_preserves_policy_skip_reason() -> None:
-    # Back:The orchestration stage previously unconditionally used classification_label Override policy written in detail skip_reason。
+    # 回归:编排阶段曾无条件用 classification_label 覆盖 policy 写的详细 skip_reason。
     item = {
         "item_id": "p1-b2",
         "classification_label": "formula",
         "should_translate": False,
-        "skip_reason": "Keep formulas original. Avoid breaking. LaTeX",
+        "skip_reason": "保留公式原文，避免破坏 LaTeX",
         "protected_source_text": "$x^2$",
     }
 
     seed_orchestration_metadata(item)
 
-assert item["skip_reason"] == "Keep the formula as original to avoid breaking LaTeX"
-    # Latter orchestration fields must still be written.(Prove fix didn't skip remaining function responsibilities.)。
+    assert item["skip_reason"] == "保留公式原文，避免破坏 LaTeX"
+    # 后半段编排字段仍必须被写入(证明修复没有跳过函数其余职责)。
     assert item["translation_unit_id"] == "p1-b2"
     assert item["translation_unit_kind"] == "single"
     assert item["translation_unit_member_ids"] == ["p1-b2"]

@@ -53,7 +53,7 @@ pub fn get_conversation(
         .db
         .get_conversation(conversation_id)?
         .ok_or_else(|| AppError::not_found(format!("conversation not found: {conversation_id}")))?;
-    // Build full message tree.;upper limit 2000 Guard against unbounded growth.
+    // 全量消息建树;上限 2000 防异常膨胀
     let messages = deps.db.list_messages(conversation_id, 2000)?;
     Ok(ConversationDetailView {
         conversation,
@@ -85,7 +85,7 @@ pub fn patch_conversation(
     }
     let head_id = payload.head_id.trim();
     if !head_id.is_empty() {
-        // head Must belong to current session.
+        // head 必须属于本会话
         if deps.db.get_message(conversation_id, head_id)?.is_none() {
             return Err(AppError::bad_request(format!(
                 "head_id not in conversation: {head_id}"
@@ -128,7 +128,7 @@ pub fn append_message(
 
     let mut parent_id = payload.parent_id.trim().to_string();
     if parent_id.is_empty() {
-// Unspecified parent: attach to current head (linear continuation); if no head, set as root.
+        // 未指定 parent: 挂到当前 head(线性续写);无 head 则为根
         parent_id = resolve_head_id(deps, conversation_id, &conversation)?;
     } else if deps.db.get_message(conversation_id, &parent_id)?.is_none() {
         return Err(AppError::bad_request(format!(
@@ -179,7 +179,7 @@ fn resolve_head_id(
     if !head.is_empty() {
         return Ok(head.to_string());
     }
-    // No legacy data. head_id:get seq Largest becomes current leaf.
+    // 旧数据无 head_id:取 seq 最大的一条作为当前叶
     let all = deps.db.list_messages(conversation_id, 2000)?;
     Ok(all
         .last()
@@ -187,7 +187,7 @@ fn resolve_head_id(
         .unwrap_or_default())
 }
 
-/// Backtracking from head along parent yields visible linear path (rootâleaf), for LLM context.
+/// 从 head 沿 parent 链回溯得到可见线性路径(根→叶),供 LLM 上下文。
 pub fn visible_path_messages(
     messages: &[MessageRecord],
     head_id: &str,

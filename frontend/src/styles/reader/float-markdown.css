@@ -1,6 +1,6 @@
-/* Inside floating window Markdown Body (annotation) / Markdown shared preview) */
+/* 悬浮窗内 Markdown 正文（批注 / Markdown 预览共用） */
 
-/* Markdown / AI content inside floating window */
+/* 悬浮窗内 Markdown / AI 内容 */
 .reader-float-markdown-content {
   font-size: 13px;
   line-height: 1.55;
@@ -9,7 +9,7 @@
 .reader-float-markdown-content.hidden {
   display: none;
 }
-/* Comma list, each segment with namespace prefix (css-page-namespace Test segment-by-segment validation.:where Maintain specificity. */
+/* 逗号列表逐段带命名空间前缀（css-page-namespace 测试逐段校验），:where 保持特异性不变 */
 .reader-float-markdown-content :where(h1),
 .reader-float-markdown-content :where(h2),
 .reader-float-markdown-content :where(h3) {

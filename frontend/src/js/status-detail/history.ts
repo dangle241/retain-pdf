@@ -15,7 +15,7 @@ export function buildStageHistoryPresentation(job, durationOptions = {}) {
   const markup = history.map((entry, index) => {
     const duration = resolveStageHistoryDuration(entry, job, durationOptions);
     const enterAt = entry?.enter_at ? formatEventTimestamp(entry.enter_at) : "-";
-const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isJobTerminal(job) ? "-" : "In progress");
+    const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isJobTerminal(job) ? "-" : "进行中");
     const stageDisplay = stageHistoryDisplay(entry);
     const terminalText = entry?.terminal_status ? ` · ${entry.terminal_status}` : "";
     return `
@@ -34,7 +34,7 @@ const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isJobTerm
   }).join("");
   return {
     markup,
-emptyText: "No stage records",
+    emptyText: "暂无阶段记录",
     hasItems: history.length > 0,
   };
 }

@@ -13,8 +13,8 @@
   justify-content: flex-start;
   max-width: none;
   gap: 0;
-  /* Corridor density trend L3 token（themes/_component-defaults.css), skin can override;
-   * Narrow-screen values default to regular values; skins override only to narrow. --shell-pad-inline-narrow */
+  /* 廊道密度走 L3 token（themes/_component-defaults.css），皮肤可覆盖；
+   * 窄屏值默认跟随常规值，皮肤想收窄只覆盖 --shell-pad-inline-narrow */
   padding: 0 var(--shell-pad-inline);
 
   @media (max-width: 900px) {
@@ -31,7 +31,7 @@
   }
 }
 
-/* soft open reader cover home page DOM Keep (off Ã no refresh) */
+/* 软打开阅读器：盖住主页，主页 DOM 保留（关 × 不刷新） */
 .soft-reader-host {
   position: fixed;
   inset: 0;
@@ -79,9 +79,9 @@ body.is-soft-reader-open {
   }
 }
 
-/* Top navigation areaââUser requested removal of white card background:logo Left, Library/Center category columns.,Directly
-Float on gray background page.,Not white rounded bar anymore. Add: border-radius: 0; background: none;/Search/Settings Below CSS already sunk
-   Bottom floating bar.(AppBottomBar.jsx / library-bottom-bar)。 */
+/* 顶部导航区——用户要求去掉白色卡片背景:logo 左、图书馆/分类分栏居中,直接
+   浮在灰底页面上,不再是一条独立的白色圆角栏。添加/搜索/设置 三样已下沉到
+   底部一条浮动栏(AppBottomBar.jsx / library-bottom-bar)。 */
 @utility app-shell-header {
   width: var(--header-width);
   flex: 0 0 auto;
@@ -98,7 +98,7 @@ Float on gray background page.,Not white rounded bar anymore. Add: border-radius
   overflow: hidden;
 }
 
-/* Remove white card:Top bar transparent.,Only do flex layout(logo left + Both sides spacer Center columns). */
+/* 去白卡:顶栏透明,只做 flex 布局(logo 左 + 两侧 spacer 把分栏挤到正中)。 */
 @utility library-topbar {
   justify-content: flex-start;
   gap: 18px;
@@ -117,14 +117,14 @@ Float on gray background page.,Not white rounded bar anymore. Add: border-radius
   flex: 0 0 auto;
 }
 
-/* Top "Library/Category" columnsââIntegrate navbar(library-topbar) as part of flex
-Child item(and logoAlign search box and button on same line.),No longer a top-level element occupying its own line. */
+/* 顶部"图书馆/分类"分栏——现在是整合导航栏(library-topbar)里的一个 flex
+   子项(和 logo、搜索框、按钮同一行),不再是独立占一整行的顶层元素。 */
 @utility library-top-tabs-root {
   flex: 0 0 auto;
 }
 
-/* Top bar white card removed.,Column pill White background required.(Otherwise gray pill Text color mismatch. Adjust contrast.
-   Hides)——White background + Thin stroke + box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); → skipped: more complex shadows, add when needed.,Become sole floating widget centered in top bar. */
+/* 顶栏去白卡后,分栏 pill 自己需要一个白底(不然灰 pill 贴在同色灰页面上
+   会隐形)——白底 + 细描边 + 轻阴影,成为顶栏中央唯一的浮起小控件。 */
 @utility library-top-tabs {
   display: inline-flex;
   gap: 3px;
@@ -135,8 +135,8 @@ Child item(and logoAlign search box and button on same line.),No longer a top-le
   box-shadow: 0 1px 3px color-mix(in srgb, var(--shadow-color) 6%, transparent);
 }
 
-/* Selected state color"Add"Buttons share solid dark style.(--ink)High contrast. Iconography.:icon + short text
-   Horizontal,Icon slightly lighter than text.,Turn white together when selected. */
+/* 选中态用和"添加"按钮同一套实底深色(--ink)强对比。图标化:icon + 短文字
+   横排,图标比文字略淡,选中时一起转白。 */
 @utility library-top-tab {
   display: inline-flex;
   align-items: center;
@@ -145,7 +145,7 @@ Child item(and logoAlign search box and button on same line.),No longer a top-le
   border: 0;
   background: transparent;
   border-radius: var(--btn-radius);
-/* Four tabLibrary/Collection/Favorites/AITighten horizontal spacing slightly. padding`@media (max-width: 480px) { body { white-space: nowrap; overflow-x: auto; } }` â skipped: media query for 768px, add when tablet landscape support needed. */
+  /* 四 tab（图书馆/合集/收藏/AI）略收紧水平 padding，窄屏不易挤换行 */
   padding: 7px 10px;
   font-size: 13px;
 
@@ -180,9 +180,9 @@ Child item(and logoAlign search box and button on same line.),No longer a top-le
   }
 }
 
-/* library-view already has order:1(see earlier in file app-shell-header Nearby definition)ââ
-categories-view / favorites-view use the same order,`display: grid` `display: flex` `display: block` mutually exclusive. Use one.(tab switch),
-   Mutually exclusive,Manual offset no longer needed. */
+/* library-view 已有 order:1(见文件靠前的 app-shell-header 附近定义)——
+   categories-view / favorites-view 用同样的 order,三者互斥渲染(tab 切换),
+   不会同时出现,不需要再手动错开。 */
 @utility categories-view {
   width: min(1120px, 100%);
   flex: 1 1 auto;
@@ -198,7 +198,7 @@ categories-view / favorites-view use the same order,`display: grid` `display: fl
   }
 }
 
-/* Favorites tab: same width and scroll container as collections */
+/* 收藏 tab：与合集同宽同滚动壳 */
 @utility favorites-view {
   width: min(720px, 100%);
   flex: 1 1 auto;
@@ -305,7 +305,7 @@ categories-view / favorites-view use the same order,`display: grid` `display: fl
   color: var(--muted);
 }
 
-/* Unified empty state: scientific instrument icon + title + Comment incomplete. Add closing parenthesis.EmptyState Component) */
+/* 统一空状态：科学仪器图标 + 标题 + 说明（EmptyState 组件） */
 @utility empty-state {
   display: flex;
   flex-direction: column;
@@ -346,7 +346,7 @@ categories-view / favorites-view use the same order,`display: grid` `display: fl
   margin-top: 12px;
 }
 
-/* Compatibility for old class name (FavoritesView Still hanging favorites-empty) */
+/* 兼容旧 class 名（FavoritesView 仍挂 favorites-empty） */
 @utility favorites-empty {
   display: flex;
   flex-direction: column;
@@ -422,9 +422,9 @@ categories-view / favorites-view use the same order,`display: grid` `display: fl
   padding: 4px 0;
 }
 
-/* Folder card(Phase D addition: refer to PDF_MD_lib FolderCard.tsx Convert to vertical layout.
-   Cover Stacked Cards,text-transform: none;——Users explicitly approve this"Multiple books stacked
-   Together"visual,Replicate this structure exactly.)。 */
+/* 文件夹卡片(阶段 D 追加:参考 PDF_MD_lib 的 FolderCard.tsx 改造成竖版
+   封面堆叠卡片,不再是纯文字的横向列表行——用户明确认可这个"多本书叠在
+   一起"的视觉,直接照这个结构复刻)。 */
 @utility categories-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
@@ -587,15 +587,15 @@ categories-view / favorites-view use the same order,`display: grid` `display: fl
 }
 
 /*
-Danger zone fix(Tailwind v4 migration):`.library-brand-link` and `.hero-repo-link`
-  simultaneously appear in the same <a> On element(AppShellHeader.jsx),All defined. font-size——
-v3 Both inside specificity same,By source order within file tie-break,Below
-`.hero-repo-link`(2.2rem) wins;library-brand-link 1.3rem Always dead.
-Code. v4 @utility Generation order no longer guaranteed to follow source code order.(above library-grid/
-recent-jobs-list gap Same pattern conflict),Actual test after migration 1.3rem Prevails,Causes
-Home top bar "RetainPDF" Heading font size cut nearly half. Remove conflicting here. font-size declaration,
-  Font size fully delegated hero-repo-link `ponytail: single definition. No need for multiple. Keep it flat.`  `--main-color: #3498db;`  `ponytail: hex only. Use CSS vars if theme grows. Add when theme expands.`;logo Nested size overrides keep both sides consistent.
-  (28px),No conflict,Keep.
+  危险区修复(Tailwind v4 迁移):`.library-brand-link` 和 `.hero-repo-link`
+  同时出现在同一个 <a> 元素上(AppShellHeader.jsx),都定义了 font-size——
+  v3 里两者 specificity 相同,靠同文件源码序 tie-break,写在后面的
+  `.hero-repo-link`(2.2rem)胜出;library-brand-link 这份 1.3rem 一直是死
+  代码。v4 下 @utility 生成顺序不再保证跟随源码序(和上面 library-grid/
+  recent-jobs-list 的 gap 冲突同一模式),实测迁移后 1.3rem 反而胜出,导致
+  首页顶栏 "RetainPDF" 标题字号被砍掉近一半。这里去掉冲突的 font-size 声明,
+  字号完全交给 hero-repo-link 一处定义;logo 尺寸的嵌套覆盖两边取值一致
+  (28px),不冲突,保留。
 */
 @utility library-brand-link {
   & .hero-repo-logo {
@@ -653,18 +653,18 @@ Home top bar "RetainPDF" Heading font size cut nearly half. Remove conflicting h
 }
 
 /*
-Danger zone fix(Tailwind v4 migration):`.library-grid` and `.recent-jobs-list` these two
-Classes always appear in pairs on the same set of elements.(See RecentJobsLibrary.jsx / partials/
-  main-content.html),`grid-template-columns`/`gap` One copy on each side, value remains.
-not same(here 46px 42px,recent-jobs-list That is. 34px 32px)ââv3 both
-  specificity Duplicate code. Remove.,by @import Order elements. CSS flexbox use. Simplify layout.(library-shell.css Before job-dialogs.css)
-  source order of tie-break,job-dialogs.css Later 34px/32px Winning,46px/42px that
-  Actually always dead code.v4 Bring both to same level. `@utility`,No longer guarantee per-file translation. @import
-Generate sequentially,this "Win Odds" Results become unreliable.ââActual test after migration 46px/42px Applies inversely,causing
-  home Card grid spacing increased; cards overall narrower in visual baseline.(Cover image height adapts.),968414/
-892 Difference exceeded threshold. Remove duplicate declarations here.,Keep only library-grid Exclusive
-`#recent-jobs-list { display: contents }` behavior,Grid size/Spacing fully delegated to
-recent-jobs-list single definition,Eliminate ambiguity.
+  危险区修复(Tailwind v4 迁移):`.library-grid` 和 `.recent-jobs-list` 这两个
+  类始终成对出现在同一批元素上(见 RecentJobsLibrary.jsx / partials/
+  main-content.html),`grid-template-columns`/`gap` 在两边各写了一份、值还
+  不一样(这里 46px 42px,recent-jobs-list 那份是 34px 32px)——v3 里两者
+  specificity 相同,靠 @import 顺序(library-shell.css 先于 job-dialogs.css)
+  的源码序 tie-break,job-dialogs.css 后写的 34px/32px 胜出,46px/42px 那份
+  其实一直是死代码。v4 把两者都转成同层 `@utility`,不再保证按文件 @import
+  顺序生成,这份"赢面"结果变得不可靠——实测迁移后 46px/42px 反而生效,导致
+  home 视觉基线里卡片网格间距变大、卡片整体变窄(封面图跟着变矮),968414/
+  892 一类差异越过阈值。这里去掉重复声明,只保留 library-grid 独有的
+  `#recent-jobs-list { display: contents }` 行为,网格尺寸/间距完全交给
+  recent-jobs-list 一处定义,消除歧义。
 */
 @utility library-grid {
   &#recent-jobs-list {
@@ -672,8 +672,8 @@ recent-jobs-list single definition,Eliminate ambiguity.
   }
 }
 
-/* Bottom floating search bar(LibrarySearchDock.jsx)——Sole content after moving to bottom.,No longer needed.
-   and add/share settings button pill,Narrow width by one step.(min(420px, viewport-56px))。 */
+/* 底部悬浮搜索条(LibrarySearchDock.jsx)——挪回底部后是唯一内容,不用再
+   和添加/设置按钮共享一条 pill,宽度收窄一档(min(420px, 视口-56px))。 */
 @utility library-search-dock {
   position: fixed;
   left: 50%;
@@ -731,10 +731,10 @@ recent-jobs-list single definition,Eliminate ambiguity.
   }
 }
 
-/* Bottom three-in-one floating bar(AppBottomBar.jsx)ââAdd(Left)+ Search(Center)+ Settings(Right)Harvest
-   text-align: center; background: rgba(255,255,255,0.5); backdrop-filter: blur(8px); pill,Replace early separated."Bottom search bar + Add bottom-right/Settings Capsule"float: left; width: 50%;
-Width delegated to middle search slot.(library-bottom-search) decides:With search, one wide bar. pill,
-Category tab Natural harvest without search"Add/Settings"Small two-button pill(inline-flex Content fit. Use CSS grid. Simplify layout.)ã */
+/* 底部三合一浮动栏(AppBottomBar.jsx)——添加(左)+ 搜索(中)+ 设置(右)收成
+   一条居中玻璃 pill,取代早期分离的"底部搜索条 + 右下角添加/设置胶囊"两个浮岛。
+   宽度交给中间的搜索槽(library-bottom-search)决定:有搜索时是一条宽 pill,
+   分类 tab 无搜索时自然收成"添加/设置"两颗按钮的小 pill(inline-flex 贴合内容)。 */
 @utility library-bottom-bar {
   position: fixed;
   left: 50%;
@@ -754,8 +754,8 @@ Category tab Natural harvest without search"Add/Settings"Small two-button pill(i
   -webkit-backdrop-filter: blur(18px);
   transition: opacity 0.18s var(--ease-out), transform 0.18s var(--ease-out);
 
-/* Batch mode:Hide, not uninstall.(visibility Preserve DOM node + library-search-island
-input reference,Exit batch mode; search works as usual.),Fade out, sink slightly. */
+  /* 批量模式:隐藏但不卸载(visibility 保住 DOM 节点 + library-search-island
+     的 input 引用,退出批量后搜索照常工作),淡出下沉一点点。 */
   &.is-hidden {
     opacity: 0;
     visibility: hidden;
@@ -807,8 +807,8 @@ input reference,Exit batch mode; search works as usual.),Fade out, sink slightly
   }
 }
 
-/* Icon buttons on both sides of the bottom bar(icon-only,"Minimal text, more icons."):Add=accent primary button,
-Settings=Paper ghost button. */
+/* 底部栏两侧的图标按钮(icon-only,"少文字多图标"):添加=accent 主按钮,
+   设置=纸面幽灵按钮。 */
 @utility library-bottom-icon-btn {
   flex: 0 0 auto;
   display: inline-flex;
@@ -859,15 +859,15 @@ Settings=Paper ghost button. */
   }
 }
 
-/* In navbar logo/columns Flex spacers on both sides.,Center columns. */
+/* 导航栏里 logo/分栏 两侧的弹性占位,把分栏挤到正中。 */
 @utility library-topbar-spacer {
   flex: 1 1 auto;
   min-width: 0;
 }
 
 @utility library-bottom-actions {
-  /* Move from top bar to bottom.:Fixed bottom-right floating.(Offset from bottom-centered search bar,Search bar at
-left:50% Center. Align right here.;two tabs Persist below.)ã */
+  /* 从顶栏挪到底部:固定在右下角悬浮(和底部居中的搜索条错开,搜索条在
+     left:50% 居中、这里贴右;两个 tab 下都常驻)。 */
   position: fixed;
   right: 16px;
   bottom: 16px;
@@ -904,9 +904,9 @@ left:50% Center. Align right here.;two tabs Persist below.)ã */
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
-/* Press feedback required(emil-design-eng skill):scale(0.97) make "Add/Settings" these two
-     Persistent floating button feels truly responsive to clicks.,Instead of rigid solid-color block switching. Only do.
-transform/background/border,do not use transition: all. */
+  /* 按下要有反馈(emil-design-eng skill):scale(0.97) 让"添加/设置"这两个
+     常驻悬浮按钮感觉真的在响应点击,而不是死板的纯色块切换。只做
+     transform/背景/边框,不用 transition: all。 */
   transition: transform 120ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 
   &:active {
@@ -1065,9 +1065,9 @@ transform/background/border,do not use transition: all. */
   @apply mx-auto max-w-[560px];
 }
 
-/* Only in integrated navbar(AppTopBar.jsx)Use this here.——Early: large, full-width block.
-   Brand title(2.2rem),Fit to current line and columns./Search/Press after compact nav bar, same-height buttons.
-   Scale down proportionally.,Otherwise visual weight overwhelms other elements. */
+/* 只在整合导航栏(AppTopBar.jsx)这一处使用——早期是独立占一整行的大号
+   品牌标题(2.2rem),挤进现在这条和分栏/搜索框/按钮同高的紧凑导航栏后按
+   比例缩小,不然视觉分量会盖过其余元素。 */
 @utility hero-repo-link {
   @apply inline-flex items-center gap-2 text-[17px] font-semibold no-underline;
   color: var(--ink);
@@ -1098,7 +1098,7 @@ transform/background/border,do not use transition: all. */
   }
 }
 
-/* Bookshelf card top-right badge: full displayãTranslated/Collection/FailedãProhibit ellipsis use. */
+/* 书架卡右上角徽标：完整显示「已翻译/馆藏/失败」，禁止省略号 */
 .book-card-status-badge {
   max-width: none !important;
   flex-shrink: 0;
@@ -1113,7 +1113,7 @@ transform/background/border,do not use transition: all. */
   flex-shrink: 0;
 }
 
-/* Mock Demo mode banner */
+/* Mock 演示模式提示条 */
 .mock-mode-banner {
   display: flex;
   flex-wrap: wrap;

@@ -40,7 +40,7 @@ def build_typst_source_from_page_specs(
         emit_render_page_progress(
             current=page_offset + 1,
             total=total_pages,
-message=f"Generating Typst page {page_offset + 1}/{total_pages}",
+            message=f"正在生成 Typst 页面，第 {page_offset + 1}/{total_pages} 页",
             payload={
                 "render_stage": "typst_source_build",
                 "page_index": spec.page_index,

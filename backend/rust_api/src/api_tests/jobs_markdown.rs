@@ -64,7 +64,7 @@ async fn markdown_document_route_returns_content_and_direct_image_links() {
         ),
         "absolute markdown unexpected: {abs_md:?}"
     );
-// No doubles allowed. images prefix
+    // 不得出现双 images 前缀
     assert!(!abs_md.contains("/markdown/images/images/"));
     assert_eq!(
         payload["data"]["raw_path"],

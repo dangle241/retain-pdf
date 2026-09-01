@@ -9,18 +9,18 @@ import type {
   EventsPayload,
 } from "../../composition/external.js";
 
-onClick={(e) => {
-if (!enabled) { e.preventDefault(); return; }
+// StatusDetailDialog 的 runtimePort(蓝图 §1 数据源铁律:读 job-runtime 保留
+// 引擎的 state,不是 statusCardStore)。
 //
-// logic copied from src/js/bootstrap/status-detail-runtime-port.js——This file path matches
-if (isReaderLink && onClick) { e.preventDefault(); onClick(); }
-}}
-// (current-job-state.js/secondary-resource-cache.js/render-context.js)Literal string required. Simplify.
-};
-// Object construction,Fetch and job-runtime Engine identical. currentJobStore/
-}
+// 逻辑拷贝自 src/js/bootstrap/status-detail-runtime-port.js——该文件路径命中
+// architecture-boundaries.test.mjs 的 `/bootstrap/` 防回弹正则,pages/** 禁止
+// import;但它本身只是 job-runtime 三个 kept 端口
+// (current-job-state.js/secondary-resource-cache.js/render-context.js)的字面量
+// 组合,零 DOM 逻辑,直接照抄零风险。composition.js 用同一个 jobRuntimeState
+// 对象构造,拿到与 job-runtime 引擎完全同一份 currentJobStore/
+// secondaryResourceStore 引用,不新建平行状态。
 
-/** applyOverviewPayload Input: write back after overview refresh runtime Batch of payloads */
+/** applyOverviewPayload 入参：概览刷新后写回 runtime 的一批载荷 */
 export interface StatusDetailOverviewPayloadOptions {
   payload?: JobLike | JobPayload | Record<string, unknown> | null;
   eventsPayload?: EventsPayload | null;

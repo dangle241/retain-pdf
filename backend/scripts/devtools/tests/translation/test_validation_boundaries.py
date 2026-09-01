@@ -13,14 +13,14 @@ from services.translation.llm.validation.protocol_shell import looks_like_protoc
 
 
 def test_protocol_shell_detection_accepts_legitimate_source_text_requests_inside_sentence() -> None:
-    assert not looks_like_protocol_shell_output("Provide original text in form, then submit.")
+    assert not looks_like_protocol_shell_output("请在表单中提供原文后再点击提交。")
     assert not looks_like_protocol_shell_output("This section asks users to please provide source text for auditing.")
 
 
 def test_protocol_shell_detection_rejects_only_standalone_request_or_json_shell() -> None:
-    assert looks_like_protocol_shell_output("Please provide the original text")
+    assert looks_like_protocol_shell_output("请提供原文")
     assert looks_like_protocol_shell_output("please provide source text")
-    assert looks_like_protocol_shell_output('{"translated_text": "shell"}')
+    assert looks_like_protocol_shell_output('{"translated_text": "壳"}')
     assert looks_like_protocol_shell_output('{"translations": [{"item_id": "a"}]}')
 
 

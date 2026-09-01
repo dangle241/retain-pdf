@@ -1,23 +1,23 @@
 @import 'tailwindcss';
 
 /*
-shadcn many class names in component source code contain `dark:` prefix (e.g., button.jsx's
-`dark:bg-destructive/60`). Tailwind v4 `dark:` default variant
-`prefers-color-scheme: dark` media query active, instead of "Element with .dark
-class"âproject tokens.css has only single :root, no dark mode design at all, once any
-Visitor system dark mode enabled, these dark: classes activate in incomplete state. (No matching dark theme.
-token, opacity transition flawed. Ensure CSS timing correct./Dim), Bug exists. Verify. Fix: (Verify Button
-when destructive variant rendered in this environment. 60% transparent, not solid red, root cause:
-headless browser prefers-color-scheme detects as dark, matching dark:bg-destructive/60).
-Rebind dark variant determination to `.dark` class selectorâthis class will never be used on any element in the project,
-  Then dark: Prefixed class names never apply.,Equivalent to"Force light theme",skip: visitor tracking system. add when: analytics required by product.
-  Set drift.
+  shadcn 组件源码里大量类名带 `dark:` 前缀(如 button.jsx 的
+  `dark:bg-destructive/60`)。Tailwind v4 的 `dark:` 变体默认按
+  `prefers-color-scheme: dark` 媒体查询生效,而不是"某个元素带 .dark
+  类"——项目 tokens.css 只有单一 :root,压根没有暗色模式设计,一旦某个
+  访客系统开着深色模式,这些 dark: 类会在半成品状态下被激活(没有配套的暗色
+  token,画面会不上不下地变淡/变暗),这是实测确认过的真实问题(验证 Button
+  时 destructive 变体在此环境下渲染成了 60% 透明度而非实心红,根源就是
+  headless 浏览器 prefers-color-scheme 探测为 dark 命中了 dark:bg-destructive/60)。
+  把 dark 变体的判定改绑到 `.dark` 类选择器——项目里永远不会有元素带这个类,
+  于是 dark: 前缀的类名永久不生效,行为等价于"固定浅色主题",不随访客系统
+  设置漂移。
 */
 @custom-variant dark (&:is(.dark *));
 
 /*
-Explicit declaration of content source (match original tailwind.config.js content array),
-do not rely on v4 auto-detectârelative to this file (src/styles/) parsing.
+  显式声明 content 来源(对应原 tailwind.config.js 的 content 数组),
+  不依赖 v4 的自动探测——路径相对本文件(src/styles/)解析。
 */
 @source '../../index.html';
 @source '../../detail.html';
@@ -32,16 +32,16 @@ do not rely on v4 auto-detectârelative to this file (src/styles/) parsing.
 @source '../lib/**/*.js';
 
 /*
-Danger zone fix (Tailwind v4 migration): v4 content scan is plain text. Token extraction does not understand JS
-syntax. A large number of JSX use `` `class-name${cond ? " x" : ""}` `` these template characters
-.class-join [action] [combine classes]. Use space-separated list. Class name and `${` have no separator, scanner will treat "class-name${cond" as
-  whole token,Extract failed. "class-name" The custom classes corresponding to these class names have been migrated.
-Tool converted. `@utility <name> {}` (v4 @utility generates on demand like built-in utility classes,
-  No longer like v3 Handwriting CSS Then unconditionally compiled into the build artifact.),Thus their styles are in v4 silently
-  lost(class still DOM on,but corresponding CSS Entire rule disappears.,No error.)。
-  Explicit safelist These class names(Compared v3 Verify each build artifact.:v3 No content.,
-v4 bare selector rules disappear in compiled output)âdo not change JSX source code, fix on CSS side, Harmony Book
-Phase "Tailwind Upgrade Only" keep consistent with scope.
+  危险区修复(Tailwind v4 迁移):v4 的内容扫描是纯文本 token 提取,不理解 JS
+  语法。项目里大量 JSX 用 `` `class-name${cond ? " x" : ""}` `` 这种模板字符
+  串拼类名,类名和 `${` 之间没有分隔符时,扫描器会把 "class-name${cond" 当成
+  一个整体 token,提取不出 "class-name" 本身。这些类名对应的自定义类被迁移
+  工具转成了 `@utility <name> {}`(v4 里 @utility 和内置工具类一样按需生成,
+  不再像 v3 的手写 CSS 那样无条件编译进产物),于是它们的样式在 v4 下静默
+  丢失(class 还在 DOM 上,但对应 CSS 规则整条消失,不报错)。
+  下面显式 safelist 这些类名(经比对 v3 编译产物逐个确认:v3 下确有内容,
+  v4 编译产物里裸选择器规则消失)——不改 JSX 源码,把修复收在 CSS 侧,和本
+  阶段"只做 Tailwind 升级"的范围保持一致。
 */
 @source inline("app-settings-panel credential-provider-panel credential-tabs credential-top-up-link detail-item detail-tab detail-tab-panel glossary-list-item progress-bar recent-job-cover status-result-actions status-substage-flow status-substage-step");
 
@@ -67,9 +67,9 @@ Phase "Tailwind Upgrade Only" keep consistent with scope.
   --shadow-panel: 0 18px 48px color-mix(in srgb, var(--shadow-color) 22%, transparent);
 
   /*
-shadcn/ui standard variable name for component consumption. (Phase A, shadcn toolchain deployment) actual value
-    Mapping reason and"Naming pitfalls"See instructions src/styles/shadcn-theme.css Top comment——here
-Only perform Tailwind v4 required "@theme name â runtime variables" registration, understood.
+    shadcn/ui 组件消费的标准变量名(阶段 A,shadcn 工具链落地)。实际值的
+    映射理由和"命名避坑"说明见 src/styles/shadcn-theme.css 顶部注释——这里
+    只做 Tailwind v4 要求的"@theme 名字 → 运行时变量"登记,不重复写理由。
   */
   --color-background: var(--background);
   --color-foreground: var(--foreground);

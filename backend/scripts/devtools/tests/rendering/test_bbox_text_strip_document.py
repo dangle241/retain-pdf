@@ -70,7 +70,7 @@ def test_source_cleanup_intent_strips_textual_formula_with_overlay() -> None:
             "block_kind": "formula",
             "block_type": "formula",
             "source_text": r"$$ \mathrm{f=lateral friction for design speed} $$",
-            "protected_translated_text": "f = lateral friction coefficient corresponding to design speed",
+            "protected_translated_text": "f = 设计速度对应的侧向摩擦系数",
         }
     )
 
@@ -99,7 +99,7 @@ def test_source_cleanup_intent_preserves_mixed_text_with_display_formula() -> No
             "block_kind": "text",
             "block_type": "text",
             "source_text": "body text\n$$ E=mc^2 $$",
-            "protected_translated_text": "Body\n$$ E=mc^2 $$",
+            "protected_translated_text": "正文\n$$ E=mc^2 $$",
         }
     )
 
@@ -114,7 +114,7 @@ def test_source_cleanup_intent_keeps_inline_math_text_deletable() -> None:
             "block_kind": "text",
             "block_type": "text",
             "source_text": "Method-2: rate $ Ls=2.7V^2/R $",
-"protected_translated_text": "Method 2 Rate of change calculation needed. Implement using NumPy. â skipped: manual loop, add when performance issues arise. $ Ls=2.7V^2/R $",
+            "protected_translated_text": "方法2：变化率 $ Ls=2.7V^2/R $",
         }
     )
 
@@ -132,7 +132,7 @@ def test_source_cleanup_intent_strips_table_footnote_with_inline_math_markers() 
             "semantic_role": "metadata",
             "normalized_sub_type": "table_footnote",
             "source_text": "$ ^{a} $All calculations were performed with the def2-TZVP basis set. $ ^{54} $",
-            "protected_translated_text": "$^{a}$All calculations use def2-TZVP Basis set complete.$^{54}$",
+            "protected_translated_text": "$^{a}$所有计算均使用 def2-TZVP 基组完成。$^{54}$",
         }
     )
 
@@ -229,7 +229,7 @@ def test_bbox_text_strip_removes_text_inside_bbox_without_redaction_bloat() -> N
                     {
                         "block_kind": "text",
                         "bbox": [10.0, 20.0, 140.0, 55.0],
-"protected_translated_text": "translation",
+                        "protected_translated_text": "译文",
                     }
                 ]
             },
@@ -270,7 +270,7 @@ def test_bbox_text_strip_preserves_text_block_with_embedded_display_formula() ->
                         "block_type": "text",
                         "bbox": [20.0, 30.0, 230.0, 105.0],
                         "source_text": "body text\n$$ E=mc^2 $$",
-"protected_translated_text": "body text\n$$ E=mc^2 $$",
+                        "protected_translated_text": "正文\n$$ E=mc^2 $$",
                     },
                 ]
             },
@@ -367,7 +367,7 @@ def test_bbox_text_strip_deletes_safe_items_when_same_page_has_keep_origin_item(
                         "block_kind": "text",
                         "bbox": [10.0, 20.0, 180.0, 58.0],
                         "protected_source_text": "translated source",
-                        "protected_translated_text": "translated",
+                        "protected_translated_text": "已翻译",
                     },
                     {
                         "item_id": "p001-b002",
@@ -417,7 +417,7 @@ def test_bbox_text_strip_skips_large_background_image_page_before_deletion() -> 
                         "block_kind": "text",
                         "bbox": [10.0, 20.0, 140.0, 55.0],
                         "protected_source_text": "inside source",
-"protected_translated_text": "translation",
+                        "protected_translated_text": "译文",
                     }
                 ]
             },
@@ -449,7 +449,7 @@ def test_bbox_text_strip_keeps_body_text_deletable_when_vector_line_overlaps() -
                     {
                         "block_kind": "text",
                         "bbox": [10.0, 20.0, 160.0, 60.0],
-"protected_translated_text": "translation",
+                        "protected_translated_text": "译文",
                     }
                 ]
             },
@@ -480,7 +480,7 @@ def test_bbox_text_strip_allows_fill_only_background_overlap() -> None:
                     {
                         "block_kind": "text",
                         "bbox": [10.0, 20.0, 190.0, 80.0],
-"protected_translated_text": "translation",
+                        "protected_translated_text": "译文",
                     }
                 ]
             },
@@ -523,7 +523,7 @@ def test_bbox_text_strip_allows_toc_leader_vector_overlap() -> None:
                         "structure_role": "table_of_contents",
                         "normalized_sub_type": "table_of_contents",
                         "bbox": [15.0, 30.0, 235.0, 60.0],
-                        "protected_translated_text": "1.1 Introduction ..... 2",
+                        "protected_translated_text": "1.1 引言 ..... 2",
                     }
                 ]
             },
@@ -562,7 +562,7 @@ def test_bbox_text_strip_keeps_fast_path_when_vector_line_is_outside_text_bbox()
                     {
                         "block_kind": "text",
                         "bbox": [10.0, 20.0, 160.0, 60.0],
-"protected_translated_text": "translation",
+                        "protected_translated_text": "译文",
                     }
                 ]
             },
@@ -657,7 +657,7 @@ def test_bbox_text_strip_removes_textual_formula_when_overlay_exists() -> None:
                         "block_type": "formula",
                         "bbox": [20.0, 30.0, 230.0, 65.0],
                         "source_text": r"$$ \mathrm{f=lateral friction for design speed} $$",
-"protected_translated_text": "f = lateral friction coefficient for design speed",
+                        "protected_translated_text": "f = 设计速度对应的侧向摩擦系数",
                     },
                 ]
             },
@@ -693,7 +693,7 @@ def test_bbox_text_strip_skips_formula_pages() -> None:
                     {
                         "block_kind": "text",
                         "bbox": [20.0, 30.0, 130.0, 65.0],
-"protected_translated_text": "body text",
+                        "protected_translated_text": "正文",
                     },
                     {
                         "block_kind": "formula",
@@ -730,7 +730,7 @@ def test_redact_restore_formula_wrapper_only_marks_changed_pages_precleaned() ->
                         "block_kind": "text",
                         "block_type": "text",
                         "bbox": [20.0, 30.0, 150.0, 65.0],
-"protected_translated_text": "body text",
+                        "protected_translated_text": "正文",
                     },
                     {
                         "block_kind": "formula",
@@ -900,7 +900,7 @@ def test_bbox_text_strip_executor_skips_form_xobject_pages_for_cover_fallback() 
                     {
                         "block_kind": "text",
                         "bbox": [20.0, 40.0, 180.0, 75.0],
-"protected_translated_text": "translation",
+                        "protected_translated_text": "译文",
                     }
                 ]
             },
@@ -992,7 +992,7 @@ def test_source_cleanup_default_recurses_form_xobjects_for_inline_formula_text()
                         "block_kind": "text",
                         "bbox": [20.0, 35.0, 180.0, 125.0],
                         "source_text": "BODYTEXT $ INLINEFORMULA $",
-"protected_translated_text": "body text $ INLINEFORMULA $",
+                        "protected_translated_text": "正文 $ INLINEFORMULA $",
                     }
                 ]
             },
@@ -1073,7 +1073,7 @@ def test_render_source_skips_physical_strip_when_document_analysis_requires_visu
                 {
                     "block_kind": "text",
                     "bbox": [5.0, 15.0, 90.0, 45.0],
-"protected_translated_text": "translation",
+                    "protected_translated_text": "译文",
                 }
             ]
             for index in range(121)

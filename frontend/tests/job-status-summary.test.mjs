@@ -19,7 +19,7 @@ test("summarizeStageProgressText formats stable user-facing progress copy", () =
         total: 5,
       },
     }),
-"Batch 2/5",
+    "第 2/5 批",
   );
 
   assert.equal(
@@ -34,7 +34,7 @@ test("summarizeStageProgressText formats stable user-facing progress copy", () =
         total: 2,
       },
     }),
-"Compiling PDF",
+    "正在编译 PDF",
   );
 
   assert.equal(
@@ -49,7 +49,7 @@ test("summarizeStageProgressText formats stable user-facing progress copy", () =
         total: 4,
       },
     }),
-"Prewarm 1/4",
+    "预热 1/4",
   );
 });
 
@@ -64,7 +64,7 @@ test("progressTextForStageProgress formats record progress without legacy payloa
         unit: "batch",
       },
     }),
-"Batch 2/5",
+    "第 2/5 批",
   );
 
   assert.equal(
@@ -77,7 +77,7 @@ test("progressTextForStageProgress formats record progress without legacy payloa
         unit: "step",
       },
     }),
-"Compiling PDF",
+    "正在编译 PDF",
   );
 
   assert.equal(
@@ -90,7 +90,7 @@ test("progressTextForStageProgress formats record progress without legacy payloa
         unit: "step",
       },
     }),
-"Prewarm 1/4",
+    "预热 1/4",
   );
 });
 
@@ -99,20 +99,20 @@ test("job status summary view model owns summary fields without DOM writes", () 
     job_id: "job-summary-vm",
     status: "failed",
     failure: {
-summary: "Translation failed",
+      summary: "翻译失败",
     },
   }, {
-detail: "Translating main content",
+    detail: "正在翻译正文内容",
   });
 
   assert.deepEqual(viewModel.fields, {
     jobId: "job-summary-vm",
     jobIdInput: "job-summary-vm",
-stageDetail: "Translating main content",
-statusSummary: "Task failed, please check the error message and retry.",
+    stageDetail: "正在翻译正文内容",
+    statusSummary: "任务已失败，请检查报错提示后重试。",
     finishedAt: "-",
     queryFinishedAt: "-",
   });
-assert.equal(viewModel.publicErrorText, "Translation failed");
-assert.equal(viewModel.errorText, "Translation failed");
+  assert.equal(viewModel.publicErrorText, "翻译失败");
+  assert.equal(viewModel.errorText, "翻译失败");
 });

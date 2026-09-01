@@ -50,9 +50,9 @@ fn build_job_diagnostics_view(
                 job.error
                     .clone()
                     .filter(|value| !value.trim().is_empty())
-                    .unwrap_or_else(|| "Task failed, but no clear cause identified yet.".to_string())
+                    .unwrap_or_else(|| "任务失败，但暂未识别出明确原因".to_string())
             } else {
-                "Task currently has no failure diagnosis.".to_string()
+                "任务当前没有失败诊断".to_string()
             },
             detail: job.error.clone(),
             suggestion: None,

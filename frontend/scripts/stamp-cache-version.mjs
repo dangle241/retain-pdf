@@ -1,13 +1,13 @@
-// Provide three pages. HTML referenced in CSS / *.bundle.js Content-hashed ?v= Cache string.
+// 给三页 HTML 里引用的 CSS / *.bundle.js 打上内容哈希的 ?v= 缓存串。
 //
-// CSS Split by page:
+// CSS 已按页拆分：
 //   index  → dist/css/home.css
 //   detail → dist/css/detail.css
 //   reader → dist/css/reader.css
-// （styles.css Only for home Compatibility shim; generally unused. HTML Quote.
+// （styles.css 仅为 home 兼容副本，一般不再被 HTML 引用。）
 //
-// Correct: after building artifacts, write per-resource content hash. ?v= — content unchanged → URL unchanged
-// (Cache hit.), content changes → URL changes (force origin fetch).
+// 正解:构建产物后,按每个资源的内容哈希写 ?v=<hash>——内容不变 → URL 不变
+// (正常命中缓存),内容一变 → URL 变(强制回源)。
 
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -16,8 +16,8 @@ import { fileURLToPath } from "node:url";
 
 const FRONTEND_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
-// per page HTML referenced resources (relative to frontend root), stamp will ?v= on href/src
-// Rewrite to corresponding file content hash.
+// 每页 HTML 引用的资源(相对 frontend 根),stamp 会把这些 href/src 上的 ?v=
+// 改写成对应文件的内容哈希。
 const PAGES = [
   { html: "index.html", assets: ["dist/css/home.css", "dist/app.bundle.js"] },
   { html: "detail.html", assets: ["dist/css/detail.css", "dist/detail.bundle.js"] },
@@ -29,8 +29,8 @@ function contentHash(absPath) {
   return createHash("sha256").update(buf).digest("hex").slice(0, 10);
 }
 
-// unify HTML references to a certain asset (href/src="./asset" or "./asset?v=old value")
-// Rewrite to "./asset?v=". Dots and slashes in asset need escaping for regex.
+// 把 html 里对某个 asset 的引用(href/src="./asset" 或 "./asset?v=旧值")统一
+// 改写成 "./asset?v=<hash>"。asset 里的 . 和 / 需要转义进正则。
 function stampAssetRef(htmlText, asset, hash) {
   const escaped = asset.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const pattern = new RegExp(`(["']\\.\\/${escaped})(\\?v=[^"']*)?(["'])`, "g");
@@ -58,4 +58,4 @@ for (const page of PAGES) {
   }
 }
 
-console.log([stamp-cache-version] Updated resource cache strings for ${changed} HTML files);
+console.log(`[stamp-cache-version] 已更新 ${changed} 个 HTML 的资源缓存串`);

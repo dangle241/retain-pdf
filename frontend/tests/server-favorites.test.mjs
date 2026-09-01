@@ -14,15 +14,15 @@ const API_FAVORITE = {
   page_idx: 3,
   block_id: "b-3-7",
   kind: "sentence",
-quote_text: "quote snapshot",
+  quote_text: "引文快照",
   translated_quote_text: "translated snapshot",
   note: "",
   created_at: "2026-07-01T08:00:00Z",
 };
 
-// ===== Normalization: API snake_case â Reader View Record =====
+// ===== 归一化:API snake_case → 阅读器视图记录 =====
 
-test("normalizeServerFavorite: API Favorites View History, page_idx remains 0-indexed", () => {
+test("normalizeServerFavorite:API 收藏转视图记录,page_idx 保持 0 基", () => {
   const record = normalizeServerFavorite(API_FAVORITE);
   assert.deepEqual(record, {
     favoriteId: "fav-1",
@@ -31,14 +31,14 @@ test("normalizeServerFavorite: API Favorites View History, page_idx remains 0-in
     pageIdx: 3,
     blockId: "b-3-7",
     kind: "sentence",
-quoteText: "quote snapshot",
+    quoteText: "引文快照",
     translatedQuoteText: "translated snapshot",
     note: "",
     createdAt: "2026-07-01T08:00:00Z",
   });
 });
 
-test("normalizeServerFavorite: Discard if favorite_id/quote_text missing, invalid page_idx defaults to 0, kind defaults to sentence", () => {
+test("normalizeServerFavorite:缺 favorite_id/quote_text 丢弃,非法 page_idx 归 0,kind 默认 sentence", () => {
   assert.equal(normalizeServerFavorite({ ...API_FAVORITE, favorite_id: "" }), null);
   assert.equal(normalizeServerFavorite({ ...API_FAVORITE, quote_text: "  " }), null);
   assert.equal(normalizeServerFavorite(null), null);
@@ -47,7 +47,7 @@ test("normalizeServerFavorite: Discard if favorite_id/quote_text missing, invali
   assert.equal(fallback.kind, "sentence");
 });
 
-test("loadServerFavorites: Direct lookup of document_id by job_id and normalize, Dirty data filtered.", async () => {
+test("loadServerFavorites:按 job_id 直查 document_id 并归一化,脏数据被过滤", async () => {
   const loadCalls = [];
   const port = createReaderServerFavoritesPort({
     jobId: "job-1",
@@ -72,8 +72,8 @@ test("loadServerFavorites: Direct lookup of document_id by job_id and normalize,
   assert.equal(await port.resolveDocumentId(), "doc-1");
 });
 
-test("loadServerFavorites:document not found/On request failure, silently return empty array.", async () => {
-// mock Pattern no longer short-circuits.: API layer has built-in mock branch, baseline and e2e depend on mock End-to-end usable
+test("loadServerFavorites:查不到文档/请求失败一律静默返回空数组", async () => {
+  // mock 模式不再短路:api 层自带 mock 分支,基线与 e2e 依赖 mock 全流程可用
   const missingPort = createReaderServerFavoritesPort({
     jobId: "job-x",
     documentByJobId: async () => null,
@@ -93,12 +93,12 @@ test("loadServerFavorites:document not found/On request failure, silently return
   assert.deepEqual(await failingPort.loadServerFavorites(), []);
 });
 
-// ===== Deduplication: Local synced(serverFavoriteId) Prevent duplicate display of records in cloud zone. =====
+// ===== 去重:本地已同步(serverFavoriteId)的记录不在云端区重复展示 =====
 
-test("dedupeServerFavorites: remove when favorite_id matches local serverFavoriteId", () => {
+test("dedupeServerFavorites:favorite_id 命中本地 serverFavoriteId 时剔除", () => {
   const serverRecords = [
     normalizeServerFavorite(API_FAVORITE),
-    normalizeServerFavorite({ ...API_FAVORITE, favorite_id: "fav-2", quote_text: "Another" }),
+    normalizeServerFavorite({ ...API_FAVORITE, favorite_id: "fav-2", quote_text: "另一条" }),
   ];
   const localItems = [
     { id: "local-1", serverFavoriteId: "fav-1" },
@@ -113,9 +113,9 @@ test("dedupeServerFavorites: remove when favorite_id matches local serverFavorit
   assert.deepEqual(dedupeServerFavorites(null, null), []);
 });
 
-// ===== Deletion Flow: Port best-effort + API layer sends actual DELETE =====
+// ===== 删除流程:端口尽力而为 + API 层真正发 DELETE =====
 
-test("removeServerFavorite: No.  I'll just output "Success". Success true, failure/empty id returns false", async () => {
+test("removeServerFavorite:成功返回 true,失败/空 id 返回 false", async () => {
   const deleteCalls = [];
   const port = createReaderServerFavoritesPort({
     jobId: "job-1",
@@ -135,10 +135,10 @@ test("removeServerFavorite: No.  I'll just output "Success". Success true, failu
       throw new Error("500");
     },
   });
-assert.equal(await failingPort.removeServerFavorite("fav-1"), false, "Do not throw on deletion failure., return false");
+  assert.equal(await failingPort.removeServerFavorite("fav-1"), false, "删除失败不抛错,返回 false");
 });
 
-test("deleteFavorite API: send DELETE to /favorites/:favorite_id (mock fetch)", async () => {
+test("deleteFavorite API:对 /favorites/:favorite_id 发 DELETE(mock fetch)", async () => {
   const originalWindow = globalThis.window;
   const originalFetch = globalThis.fetch;
   const calls = [];
@@ -151,7 +151,7 @@ test("deleteFavorite API: send DELETE to /favorites/:favorite_id (mock fetch)", 
     };
   };
   try {
-const result = await deleteFavorite("/api/v1", "fav ä¸­æ/id");
+    const result = await deleteFavorite("/api/v1", "fav 中文/id");
     assert.equal(calls.length, 1);
     assert.equal(calls[0].options.method, "DELETE");
     assert.match(calls[0].url, /\/api\/v1\/favorites\/fav%20%E4%B8%AD%E6%96%87%2Fid$/);

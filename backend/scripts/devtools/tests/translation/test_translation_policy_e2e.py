@@ -88,7 +88,7 @@ def test_translatable_empty_result_blocks_then_final_recovery_clears_gate() -> N
     def _fake_request(*_args, **_kwargs):
         nonlocal calls
         calls += 1
-return "The density functional is evaluated on a numerical grid."
+        return "密度泛函在数值网格上求值。"
 
     summary = recover_blocking_untranslated_items(
         {0: payload},

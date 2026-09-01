@@ -3,8 +3,8 @@ import {
   mockScenario,
 } from "../../composition/external.js";
 
-// Mock Demo mode banner: display in parallel when URL contains ?mock=demo.
-// Prompt user to open library book â Translation Tab â Translate entire book. Review live progress animation.
+// Mock 演示模式提示条：URL 带 ?mock=demo / parallel 等时显示。
+// 引导用户打开馆藏书 → 翻译 Tab → 翻译整本，看 live 进度动画。
 
 export function MockModeBanner() {
   if (!isMockMode()) {
@@ -18,11 +18,11 @@ export function MockModeBanner() {
       role="status"
       data-mock-scenario={scenario}
     >
-      <strong>Mock Demo Mode</strong>
+      <strong>Mock 演示模式</strong>
       <span>
-Current <code>?mock={scenario}</code>
-Not connected to real backend. Open ãCollectionãLogo Book â ãTranslationãTab â ãtranslate the entire bookã,
-See approximation in details. 16s fake progress (OCR â Translation â Rendering â Done.)
+        当前 <code>?mock={scenario}</code>
+        ：不连真实后端。打开带「馆藏」徽标的书 →「翻译」Tab →「翻译整本」，
+        可在详情内看到约 16 秒的假进度（OCR → 翻译 → 渲染 → 完成）。
       </span>
     </div>
   );

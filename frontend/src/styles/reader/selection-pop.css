@@ -1,6 +1,6 @@
-/* Text selection annotation overlay: selection card / Primary and secondary buttons / triangle */
+/* 选文批注浮层：选区卡片 / 主次按钮 / 三角 */
 
-/* —— Selection annotation overlay —— */
+/* —— 选文批注浮层 —— */
 .reader-sel-pop {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   position: fixed;
@@ -157,7 +157,7 @@
   background: color-mix(in srgb, var(--ink) 10%, transparent);
 }
 
-/* Triangle pointing to selection */
+/* 指向选区的小三角 */
 .reader-sel-pop-caret {
   position: absolute;
   left: 50%;

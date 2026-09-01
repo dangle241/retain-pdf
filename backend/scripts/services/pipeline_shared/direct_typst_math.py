@@ -1,16 +1,16 @@
-"""direct_typst Mechanical formatting of the direct_typst translation.
+"""direct_typst 译文的机械格式规整。
 
-direct_typst mode lets the model output directly $...$ inline LaTeX (parsed by mitex).
-Model reliably completes semantic tasks.(recognize formulas, translate, repair OCR Damage),but occasionally violates mechanical formatting
-Rule: $...$ a = b + c d = a * 2 print(d) $..$$..$ \ escape in Windows paths. Use raw strings. r"C:\path\to\file" $
-Given boundaries: deterministic text ops.,This module ensures uniformity during translation.(Cache before validation.
-before),Rather than using prompts to demand self-discipline from the model.
+direct_typst 模式让模型直接输出 `$...$` inline LaTeX(渲染时由 mitex 解析)。
+模型可靠地完成语义任务(识别公式、翻译、修复 OCR 损伤),但偶尔违反机械格式
+规则:`$...$` 与正文紧贴、相邻公式 `$..$$..$`、双反斜杠命令。这些规则在 `$`
+边界存在的前提下是确定性文本操作,由本模块在翻译时统一保证(验证前、入缓存
+前),而不是靠提示词要求模型自律。
 
-`$` Scan Semantic Alignment Render Layer tokenizer(services/rendering/layout/text_tokens.py),
-Normalize during translation and rendering. passthrough Consistent span boundary determination. Existing regularization chain in rendering layer.
-(surround_inline_math_with_spaces etc.) Keep unchanged, idempotent fallback for stale cache entries.
-This module must remain zero-dependency: translation and rendering either works, import pipeline_shared,
-but the two cannot mutually import。
+`$` 扫描语义对齐渲染层 tokenizer(services/rendering/layout/text_tokens.py),
+使翻译时规整与渲染时 passthrough 对跨度边界的判定一致。渲染层既有的规整链
+(surround_inline_math_with_spaces 等)保持不动,作为旧缓存条目的幂等兜底。
+本模块必须保持零依赖:translation 与 rendering 都可以 import pipeline_shared,
+但二者不能互相 import。
 """
 
 from __future__ import annotations
@@ -19,8 +19,8 @@ import re
 
 MAX_INLINE_MATH_CHARS = 1200
 
-_LEFT_NO_SPACE = set("([{\"'(【「『")
-_RIGHT_NO_SPACE = set(".,;:!?)]}()【】「」『』")
+_LEFT_NO_SPACE = set("([{\"'“‘（【「『")
+_RIGHT_NO_SPACE = set(".,;:!?)]}，。！？；：、（）【】「」『』")
 _DOUBLE_BACKSLASH_COMMAND_RE = re.compile(r"\\{2,}(?=[A-Za-z])")
 _MULTI_SPACE_RE = re.compile(r"[ \t]{2,}")
 
@@ -110,8 +110,8 @@ def _scan_math_spans(text: str) -> list[tuple[int, int, bool]]:
 
 
 def _collapse_newlines_inside_inline_math(text: str) -> str:
-    # Align rendering layer. normalize_direct_typst_inline_math_whitespace:inline Math
-    # Internal newlines cause scanner to reject span.,Collapse to spaces before scanning.
+    # 对齐渲染层 normalize_direct_typst_inline_math_whitespace:inline 数学
+    # 内的换行会让扫描器拒绝识别该跨度,必须先折叠成空格再扫描。
     chunks: list[str] = []
     index = 0
     in_inline_math = False
@@ -151,8 +151,8 @@ def normalize_direct_typst_translation(text: str) -> str:
     if not source or "$" not in source:
         return source
     if not has_balanced_unescaped_dollars(source):
-        # Unbalanced delimiters indicate structural corruption.,Hand over math_delimiter_unbalanced validation and
-        # LLM Fix raw text handling.,No normalization on incomplete input.
+        # 定界符不平衡属于结构性损坏,交给 math_delimiter_unbalanced 验证和
+        # LLM 修复处理原始文本,不在残缺输入上做规整。
         return source
     source = _collapse_newlines_inside_inline_math(source)
     spans = _scan_math_spans(source)
@@ -166,9 +166,9 @@ def normalize_direct_typst_translation(text: str) -> str:
         expr = _normalize_math_body(source[start:end], display=display)
         prev_char = source[start - 1] if start > 0 else ""
         next_char = source[end] if end < len(source) else ""
-        # Fix only confirmed violations. Tighten.:span adjacent to Chinese text,Or two formula spans directly adjacent.
-        # ($a$$b$)。ASCII Adjacent immovable——Literal text may appear in translation $ 变量(如 $rem),
-        # Scanner will `$rem ... $` misidentified as a span,Padding spaces corrupts literal text.
+        # 只修确定是违规的紧贴:跨度紧邻中文正文,或两个公式跨度直接相邻
+        # ($a$$b$)。ASCII 相邻不动——译文里可能出现字面 $ 变量(如 $rem),
+        # 扫描器会把 `$rem ... $` 误判成跨度,补空格会破坏字面文本。
         prefix = " " if (_is_cjk_char(prev_char) and prev_char not in _LEFT_NO_SPACE) or start == prev_span_end else ""
         suffix = " " if _is_cjk_char(next_char) and next_char not in _RIGHT_NO_SPACE else ""
         chunks.append(f"{prefix}{expr}{suffix}")
@@ -178,11 +178,11 @@ def normalize_direct_typst_translation(text: str) -> str:
     return _MULTI_SPACE_RE.sub(" ", "".join(chunks))
 
 
-# mitex incompatible DB syntax: with rendering layer sanitize_direct_typst_inline_math's
-# Rewrite rule mapping(services/rendering/layout/inline_content/core/inline_math.py)。
-# Purpose: scan source text before translation, pass matched prompt to model, by model at semantic layer
-# Replacement complete.——Regex rewrite in complex formulas inevitably fails,but"Detect command occurrence."Reliable.
-# Retain render-phase regex rewrite as fallback.
+# mitex 不兼容写法数据库:与渲染层 sanitize_direct_typst_inline_math 的
+# 改写规则对应(services/rendering/layout/inline_content/core/inline_math.py)。
+# 用途:翻译前扫描源文本,匹配到哪条就把哪条提示给模型,由模型在语义层
+# 完成替换——复杂公式里正则改写必然出错,但"检测某命令出现过"是可靠的。
+# 渲染期正则改写保留作兜底。
 MITEX_REWRITE_DATABASE: tuple[tuple[str, str], ...] = (
     (r"\hbar", "ℏ"),
     (r"\partial", "∂"),
@@ -191,7 +191,7 @@ MITEX_REWRITE_DATABASE: tuple[tuple[str, str], ...] = (
     (r"\varPhi", r"\Phi"),
     (r"\langle", "⟨"),
     (r"\rangle", "⟩"),
-    (r"\circled", r"\otimes or ordinary characters"),
+    (r"\circled", r"\otimes 或普通字符"),
 )
 
 

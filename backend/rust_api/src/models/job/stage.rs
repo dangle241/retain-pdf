@@ -38,20 +38,20 @@ impl JobStage {
 
     pub fn as_stage_detail(self) -> &'static str {
         match self {
-JobStage::Queued => "Task created, waiting for available execution slot",
-JobStage::Running => "Starting Python worker",
-JobStage::OcrSubmitting => "Submitting... OCR task",
-            JobStage::OcrUpload => "OCR Uploading task",
-JobStage::MineruUpload => "MinerU task uploading",
-            JobStage::OcrProcessing => "OCR Processing",
-JobStage::MineruProcessing => "MinerU task processing",
-            JobStage::OcrResultReady => "OCR Result ready",
-            JobStage::Normalizing => "OCR Done, start normalization.",
-JobStage::Translating => "OCR complete, starting translation",
-            JobStage::Rendering => "Translation complete, starting render.",
-JobStage::Finished => "Task complete",
-JobStage::Canceled => "Task canceled",
-            JobStage::Failed => "Task failed.",
+            JobStage::Queued => "任务已创建，等待可用执行槽位",
+            JobStage::Running => "正在启动 Python worker",
+            JobStage::OcrSubmitting => "正在提交 OCR 任务",
+            JobStage::OcrUpload => "OCR 任务上传中",
+            JobStage::MineruUpload => "MinerU 任务上传中",
+            JobStage::OcrProcessing => "OCR 任务处理中",
+            JobStage::MineruProcessing => "MinerU 任务处理中",
+            JobStage::OcrResultReady => "OCR 结果已就绪",
+            JobStage::Normalizing => "OCR 完成，开始标准化",
+            JobStage::Translating => "OCR 完成，开始翻译",
+            JobStage::Rendering => "翻译完成，开始渲染",
+            JobStage::Finished => "任务完成",
+            JobStage::Canceled => "任务已取消",
+            JobStage::Failed => "任务失败",
         }
     }
 

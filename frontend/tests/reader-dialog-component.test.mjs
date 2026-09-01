@@ -2,7 +2,7 @@ import test, { afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// ReaderDialog has been changed to "navigate to reader.html", no longer mounts iframe dialog.
+// ReaderDialog 已改为「跳转 reader.html」，不再挂 iframe 对话框。
 
 function makeDom(search = "") {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
@@ -41,7 +41,7 @@ async function waitFor(predicate, description) {
     if (predicate()) return;
     await wait(15);
   }
-assert.fail(Timeout waiting for: {description}`);
+  assert.fail(`等待超时：${description}`);
 }
 
 async function bootHomeApp(dom) {
@@ -63,7 +63,7 @@ async function bootHomeApp(dom) {
 
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-await waitFor(() => dom.window.document.getElementById("app-shell"), "HomeApp first frame");
+  await waitFor(() => dom.window.document.getElementById("app-shell"), "HomeApp 首帧");
   await wait(0);
   return { services, root, host };
 }
@@ -75,7 +75,7 @@ afterEach(async () => {
   setReaderNavigateForTests(null);
 });
 
-test("openReaderRequested: jump to reader.html?job_id= (non-iframe)", async () => {
+test("openReaderRequested：跳转到 reader.html?job_id=（非 iframe）", async () => {
   const dom = makeDom("?mock=parallel");
   const hits = { assign: [], replace: [] };
   const { setReaderNavigateForTests } = await import(
@@ -89,7 +89,7 @@ test("openReaderRequested: jump to reader.html?job_id= (non-iframe)", async () =
   const { root, host, services } = await bootHomeApp(dom);
   const { APP_EVENTS } = await import("../src/js/contracts/app-contract.js");
 
-assert.equal(dom.window.document.getElementById("reader-dialog"), null, "No longer mounts reading dialog");
+  assert.equal(dom.window.document.getElementById("reader-dialog"), null, "不再挂阅读对话框");
 
   dom.window.document.dispatchEvent(
     new dom.window.CustomEvent(APP_EVENTS.openReaderRequested, {
@@ -97,16 +97,16 @@ assert.equal(dom.window.document.getElementById("reader-dialog"), null, "No long
     }),
   );
 
-await waitFor(() => hits.assign.length > 0, "Should navigate to reading page");
+  await waitFor(() => hits.assign.length > 0, "应导航到阅读页");
   assert.match(hits.assign[0], /reader\.html\?.*job_id=job-demo-1/);
-assert.equal(hits.replace.length, 0, "Event open uses assign, not replace");
+  assert.equal(hits.replace.length, 0, "事件打开用 assign 不是 replace");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("openReaderRequested: collection document_id navigates to read original", async () => {
+test("openReaderRequested：馆藏 document_id 跳转读原文", async () => {
   const dom = makeDom("?mock=parallel");
   const hits = { assign: [], replace: [] };
   const { setReaderNavigateForTests } = await import(
@@ -126,7 +126,7 @@ test("openReaderRequested: collection document_id navigates to read original", a
     }),
   );
 
-await waitFor(() => hits.assign.length > 0, "Should navigate to document reading");
+  await waitFor(() => hits.assign.length > 0, "应导航到 document 阅读");
   assert.match(hits.assign[0], /reader\.html\?.*document_id=doc-abc/);
 
   root.unmount();
@@ -134,13 +134,13 @@ await waitFor(() => hits.assign.length > 0, "Should navigate to document reading
   host.remove();
 });
 
-test("Deep link ?view=reader&job_id=: replace to reader.html", async () => {
+test("深链 ?view=reader&job_id=：replace 到 reader.html", async () => {
   const dom = makeDom("?view=reader&job_id=job-deep&mock=parallel");
   const hits = { assign: [], replace: [] };
   const { setReaderNavigateForTests } = await import(
     "../src/pages/home/features/reader/navigate-to-reader.ts"
   );
-// Must inject before boot: deep link is triggered in ReaderDialog mount effect
+  // 必须在 boot 前注入：深链在 ReaderDialog mount effect 里触发
   setReaderNavigateForTests((url, { replace } = {}) => {
     if (replace) hits.replace.push(url);
     else hits.assign.push(url);
@@ -148,7 +148,7 @@ test("Deep link ?view=reader&job_id=: replace to reader.html", async () => {
 
   const { root, host, services } = await bootHomeApp(dom);
 
-await waitFor(() => hits.replace.length > 0, "Deep link should replace");
+  await waitFor(() => hits.replace.length > 0, "深链应 replace");
   assert.match(hits.replace[0], /reader\.html\?.*job_id=job-deep/);
 
   root.unmount();

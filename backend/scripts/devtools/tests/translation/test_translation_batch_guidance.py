@@ -32,12 +32,12 @@ def test_translate_batch_wrapper_appends_relevant_job_memory_to_domain_guidance(
 
     class _MemoryStore:
         def summary(self) -> str:
-return "Doc memory: keep terminology consistent.\n- SCF => self-consistent field\n- DFTB => density functional tight binding"
+            return "当前文档记忆：术语保持一致。\n- SCF => 自洽场\n- DFTB => 密度泛函紧束缚"
 
         def summary_for_batch(self, batch) -> str:
             source = "\n".join(str(item.get("source_text") or "") for item in batch)
             if "SCF" in source:
-return "Block-related doc memory: keep terminology consistent.\n- SCF => self-consistent field"
+                return "当前块相关文档记忆：术语保持一致。\n- SCF => 自洽场"
             return ""
 
     def _fake_translate_fn(*_args, **kwargs):
@@ -51,18 +51,18 @@ return "Block-related doc memory: keep terminology consistent.\n- SCF => self-co
         model="deepseek-chat",
         base_url="https://api.deepseek.com/v1",
         request_label="book: batch 1/1",
-        domain_guidance="Document domain: quantum chemistry.",
+        domain_guidance="文档领域：量子化学。",
         mode="fast",
         context=build_translation_control_context(),
         memory_store=_MemoryStore(),
         translate_fn=_fake_translate_fn,
     )
 
-assert result["a"]["translated_text"] == "self-consistent field"
-assert "Document domain: quantum chemistry." in captured["domain_guidance"]
-assert "SCF => self-consistent field" in captured["domain_guidance"]
+    assert result["a"]["translated_text"] == "自洽场"
+    assert "文档领域：量子化学。" in captured["domain_guidance"]
+    assert "SCF => 自洽场" in captured["domain_guidance"]
     assert "DFTB =>" not in captured["domain_guidance"]
-assert "SCF => self-consistent field" in captured["context"].merged_guidance
+    assert "SCF => 自洽场" in captured["context"].merged_guidance
     assert "DFTB =>" not in captured["context"].merged_guidance
 
 
@@ -82,8 +82,8 @@ def test_translate_items_plain_text_sends_only_matched_glossary_entries_to_promp
     ]
     context = build_translation_control_context(
         glossary_entries=[
-GlossaryEntry(source="SCF", target="self-consistent field", level="preferred"),
-GlossaryEntry(source="DFTB", target="density functional tight binding", level="preferred"),
+            GlossaryEntry(source="SCF", target="自洽场", level="preferred"),
+            GlossaryEntry(source="DFTB", target="密度泛函紧束缚", level="preferred"),
             GlossaryEntry(source="Hartree-Fock", target="Hartree-Fock", level="preserve", match_mode="case_insensitive"),
         ]
     )
@@ -93,7 +93,7 @@ GlossaryEntry(source="DFTB", target="density functional tight binding", level="p
         return {
             item["item_id"]: {
                 "decision": "translate",
-"translated_text": "translated",
+                "translated_text": "已翻译",
                 "final_status": "translated",
             }
             for item in batch_arg
@@ -113,9 +113,9 @@ GlossaryEntry(source="DFTB", target="density functional tight binding", level="p
         translate_batch_once_fn=_translate_batch_once,
     )
 
-assert result["a"]["translated_text"] == "Translated"
+    assert result["a"]["translated_text"] == "已翻译"
     assert '"source": "SCF"' in captured["domain_guidance"]
-assert '"target": "self-consistent field"' in captured["domain_guidance"]
+    assert '"target": "自洽场"' in captured["domain_guidance"]
     assert "DFTB" not in captured["domain_guidance"]
     assert '"source": "Hartree-Fock"' not in captured["domain_guidance"]
     assert result["a"]["translation_diagnostics"]["term_scope"]["glossary_sources"] == ["SCF"]
@@ -147,7 +147,7 @@ def test_batched_plain_main_request_uses_fast_fail_http_attempt_budget() -> None
         return {
             item["item_id"]: {
                 "decision": "translate",
-"translated_text": "Translated",
+                "translated_text": "已翻译",
                 "final_status": "translated",
             }
             for item in batch_arg
@@ -167,6 +167,6 @@ def test_batched_plain_main_request_uses_fast_fail_http_attempt_budget() -> None
         translate_batch_once_fn=_translate_batch_once,
     )
 
-assert result["a"]["translated_text"] == "Translated"
-assert result["b"]["translated_text"] == "Translated"
+    assert result["a"]["translated_text"] == "已翻译"
+    assert result["b"]["translated_text"] == "已翻译"
     assert captured["http_retry_attempts"] == 1

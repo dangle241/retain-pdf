@@ -15,8 +15,8 @@ function loadMarked() {
   return markedModulePromise;
 }
 
-// Render artifacts originate solely from local pipeline.,Base cleanup layer here.:
-// Remove script nodes, inline events, and javascript: links
+// 渲染产物只来自本站管线,这里仍做一层基础清洗:
+// 去掉脚本节点、内联事件与 javascript: 链接
 function sanitizeRenderedMarkdown(container) {
   container.querySelectorAll("script, iframe, object, embed").forEach((node) => node.remove());
   container.querySelectorAll("*").forEach((node) => {
@@ -59,8 +59,8 @@ export function createReaderMarkdownPreview({
     }
   }
 
-  // Backend images required. X-API-Key,<img> Cannot send request headers,Switch to blob URL。
-  // src Saved before mount. data-reader-md-src,Preflight. Add `Access-Control-Allow-Headers` + `Access-Control-Allow-Methods` to OPTIONS response.
+  // 后端图片需要 X-API-Key,<img> 发不了请求头,换成 blob URL。
+  // src 已在挂载前改存到 data-reader-md-src,避免浏览器先发一次裸请求
   async function hydrateImages(container) {
     const images = [...container.querySelectorAll("img[data-reader-md-src]")];
     await Promise.allSettled(images.map(async (img) => {
@@ -68,7 +68,7 @@ export function createReaderMarkdownPreview({
       try {
         const response = await fetchProtected?.(src);
         if (!response?.ok) {
-          throw new Error(`Image load failed(${response?.status ?? "Network error"})`);
+          throw new Error(`图片加载失败(${response?.status ?? "网络错误"})`);
         }
         const objectUrl = URL.createObjectURL(await response.blob());
         objectUrls.push(objectUrl);
@@ -76,7 +76,7 @@ export function createReaderMarkdownPreview({
       } catch (_err) {
         const fallback = img.ownerDocument.createElement("span");
         fallback.className = "reader-markdown-image-missing";
-        fallback.textContent = `[Image temporarily unavailable] ${img.getAttribute("alt") || src}`;
+        fallback.textContent = `[图片暂不可用] ${img.getAttribute("alt") || src}`;
         fallback.title = src;
         img.replaceWith(fallback);
       }
@@ -84,12 +84,12 @@ export function createReaderMarkdownPreview({
   }
 
   async function load() {
-    setStatus("Loading Markdown…");
+    setStatus("正在加载 Markdown…");
     const payload = await loadMarkdownPayload?.(jobId);
     const content = `${payload?.content_with_absolute_image_urls || payload?.content || ""}`;
     const imagesBaseUrl = `${payload?.images_base_url || payload?.images_base_path || ""}`.trim();
     if (!content.trim()) {
-setStatus("This task currently has no Markdown output");
+      setStatus("该任务暂无 Markdown 产物");
       return false;
     }
     const { marked } = await loadMarked();
@@ -97,14 +97,14 @@ setStatus("This task currently has no Markdown output");
     if (!container) {
       return false;
     }
-// Protect first $Formula$ then marked and MathJaxâSVGImage path missing. Remove template before mounting src
+    // 先保护 $公式$ 再 marked，再 MathJax→SVG；图片在 template 内挂载前去掉 src
     const html = await parseMarkdownWithMath(content, (src) =>
       String(marked.parse(src, { async: false })),
     );
     const template = container.ownerDocument.createElement("template");
     template.innerHTML = html;
     sanitizeRenderedMarkdown(template.content);
-// Dynamic import to avoid circular dependency; resolveMarkdownAssetUrl strips images/ double prefix
+    // 动态 import 避免 circular；resolveMarkdownAssetUrl 剥 images/ 双前缀
     const { resolveMarkdownAssetUrl } = await import("../job/artifacts.js");
     template.content.querySelectorAll("img[src]").forEach((img) => {
       const raw = img.getAttribute("src") || "";
@@ -123,7 +123,7 @@ setStatus("This task currently has no Markdown output");
     if (!loadPromise) {
       loadPromise = load().catch((error) => {
         loadPromise = null;
-        setStatus(error?.message || "Markdown Load failed. Reopen drawer to retry.");
+        setStatus(error?.message || "Markdown 加载失败，重开抽屉可重试");
         return false;
       });
     }

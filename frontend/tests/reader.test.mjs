@@ -331,11 +331,11 @@ test("reader bottom hud shows page progress and reader mode", () => {
   readerView.setReaderModeHud("translated");
 
   assert.equal(elements["reader-page-indicator"].classList.values.has("hidden"), false);
-assert.equal(elements["reader-bottom-hud-page"].textContent, "Page 2 / 5");
+  assert.equal(elements["reader-bottom-hud-page"].textContent, "第 2 / 5 页");
   assert.equal(elements["reader-page-indicator"].dataset.readerProgress, "40");
-assert.equal(elements["reader-page-indicator"].attributes.get("aria-label"), "Page 2 / 5 · 40%");
+  assert.equal(elements["reader-page-indicator"].attributes.get("aria-label"), "第 2 / 5 页 · 40%");
   assert.equal(progressStyle.get("--reader-progress"), "40%");
-assert.equal(elements["reader-bottom-hud-mode"].textContent, "Translation");
+  assert.equal(elements["reader-bottom-hud-mode"].textContent, "译文");
 
   global.document = previousDocument;
 });
@@ -536,8 +536,8 @@ test("reader favorites can reopen a saved area selection", async () => {
     rect: { left: 10, top: 12, width: 80, height: 30 },
     mode: "compare",
     tag: "conclusion",
-title: "Screenshot excerpt",
-note: "Page 2, selection 10, 12, 80, 30",
+    title: "截图摘录",
+    note: "第 2 页，选区 10, 12, 80, 30",
   }];
   const store = {
     list: () => storedFavorites,
@@ -1088,8 +1088,8 @@ test("reader translated region right click keeps selection drag from stealing th
 });
 
 test("reader page exposes ai/favorites/download entries, keeps paused tools hidden", () => {
-// After Phase 2b cutover, reader.html only has #reader-root mount point, page skeleton now rendered by
-// src/pages/reader JSX rendering: entry assertion scans new world component source.
+  // Phase 2b cutover 后 reader.html 只剩 #reader-root 挂载点,页面骨架改由
+  // src/pages/reader 的 JSX 渲染:入口断言改扫新世界组件源码。
   const jsxSources = [
     "../src/pages/reader/legacy/components/ReaderSideDrawers.tsx",
     "../src/pages/reader/legacy/components/ReaderTopbarActions.tsx",
@@ -1139,7 +1139,7 @@ test("reader download actions resolve artifact urls and disabled reasons", () =>
   assert.equal(urls.translated, "http://retainpdf.local:41000/api/v1/jobs/job-reader/artifacts/pdf");
   assert.equal(urls.sideBySide, "http://retainpdf.local:41000/api/v1/jobs/job-reader/pdf/side-by-side");
 
-  // Disabled due to missing artifact(React Download menu as button title)
+  // 产物缺失时的禁用原因(React 下载菜单以此作为按钮 title)
   const emptyUrls = readerDownloadResolve.resolveReaderDownloadUrls({
     jobId: "job-reader",
     jobPayload: { job_id: "job-reader", workflow: "ocr", status: "succeeded" },
@@ -1148,13 +1148,13 @@ test("reader download actions resolve artifact urls and disabled reasons", () =>
   assert.equal(emptyUrls.source, "");
   assert.equal(emptyUrls.sideBySide, "");
   assert.equal(emptyUrls.translated, "");
-assert.match(readerDownloadResolve.disabledReason("source", emptyUrls), /original PDF/);
-assert.match(readerDownloadResolve.disabledReason("translated", emptyUrls), /translated PDF/);
+  assert.match(readerDownloadResolve.disabledReason("source", emptyUrls), /原始 PDF/);
+  assert.match(readerDownloadResolve.disabledReason("translated", emptyUrls), /译文 PDF/);
   assert.match(readerDownloadResolve.disabledReason("sideBySide", emptyUrls), /PDF/);
 });
 
-// Drawer mutual exclusion state semantics moved into React world's drawer store,
-// DOM writes (is-open/inert/aria-expanded) rendered by the component; see tests/reader-drawers.test.mjs.
+// 抽屉互斥开合的状态语义已移入 React 世界的 drawer store,
+// DOM 写入(is-open/inert/aria-expanded)由组件渲染;见 tests/reader-drawers.test.mjs。
 
 test("reader ai context can switch to selection scope", () => {
   const calls = [];
@@ -1191,7 +1191,7 @@ test("reader ai context can switch to selection scope", () => {
   });
 
   assert.equal(context.scope(), "selection");
-assert.equal(contextEl.textContent, "Current selection: 4 pages · 120 × 64");
+  assert.equal(contextEl.textContent, "当前选区：第 4 页 · 120 × 64");
   assert.equal(buttons[1].classList.values.has("is-active"), true);
   assert.deepEqual(opened, ["ai"]);
 });
@@ -1220,9 +1220,9 @@ test("reader markdown answerer answers from markdown sections", async () => {
   assert.deepEqual(result.citations.includes("Formula"), true);
 });
 
-// chat submit / state transition followed. AI Q&A UI migrated to React (use-reader-ai-chat),
-// See equivalent assertions tests/reader-ai-conversations.test.mjs (React component version).
-// old remote-answerer (/reader/ai/chat payload deleted; production uses ask-answerer.
+// chat 提交/状态流转已随 AI 问答 UI 迁入 React(use-reader-ai-chat),
+// 等价断言见 tests/reader-ai-conversations.test.mjs(React 组件版)。
+// 旧 remote-answerer（/reader/ai/chat payload）已删除；现网走 ask-answerer。
 
 test("reader ai config prefers persisted browser credentials", () => {
   const config = readerAiConfig.resolveReaderAiConfig({
@@ -1248,7 +1248,7 @@ test("reader ai model key comes only from settings (no runtime secret fallback)"
     baseUrl: "https://api.deepseek.com/v1",
     model: "deepseek-v4-flash",
   });
-// model Key Settings only; modelApiKey in runtime must not unlock
+  // 模型 Key 只认设置；runtime 里的 modelApiKey 不得解锁
   const config = readerAiConfig.resolveReaderAiConfig({
     browserConfig: { modelApiKey: "   " },
     developerConfig: { baseUrl: "", model: "" },
@@ -1257,15 +1257,15 @@ test("reader ai model key comes only from settings (no runtime secret fallback)"
   assert.equal(config.baseUrl, "https://api.deepseek.com/v1");
   assert.equal(config.model, "deepseek-v4-flash");
   assert.equal(config.provider, "deepseek");
-  // hasModelApiKey / readSettingsModelApiKey Respect settings only. modelApiKey
+  // hasModelApiKey / readSettingsModelApiKey 只认设置里的 modelApiKey
   assert.equal(readerAiConfig.readSettingsModelApiKey({ modelApiKey: "" }), "");
   assert.equal(readerAiConfig.readSettingsModelApiKey({ modelApiKey: "   " }), "");
   assert.equal(readerAiConfig.readSettingsModelApiKey({ modelApiKey: " sk-user " }), "sk-user");
   setRuntimeConfig({ modelApiKey: "", baseUrl: "", model: "" });
 });
 
-// 502 Revert local changes. Markdown Migrate retrieval semantics to React Component tests:
-// See tests/reader-ai-conversations.test.mjs "Backend 502 fallback local search".
+// 502 回退本地 Markdown 检索的语义迁移至 React 组件测试:
+// 见 tests/reader-ai-conversations.test.mjs「后端 502 时回退本地检索」。
 
 test("reader data port owns page API orchestration and fallbacks", async () => {
   const calls = [];
@@ -1332,36 +1332,36 @@ test("reader data port owns page API orchestration and fallbacks", async () => {
   ]);
 });
 
-// startup.js (page-runtime wrapper) entry point deprecated. Remove. index.js deprecate together: React entry
-// (src/pages/reader/entry.jsx)Guarded by bundler build,boot Orchestrate in use-reader-boot。
+// startup.js(page-runtime 包装)随旧入口 index.js 一并退役:React 入口
+// (src/pages/reader/entry.jsx)由打包构建守卫,boot 编排在 use-reader-boot。
 
 test("reader page state owns boot progress snapshots", () => {
   const state = readerPageState.createReaderPageState();
 
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 8,
-text: "Preparing side-by-side reading…",
+    text: "正在准备对照阅读…",
     stage: "boot",
   });
 
   state.progress.metadataReady = true;
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 24,
-    text: "Loading original PDF Please provide the source text to translate. PDF…",
+    text: "正在加载原始 PDF 和译文 PDF…",
     stage: "pdfs",
   });
 
   state.progress.sourceDone = true;
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 54,
-text: "Original PDF loaded, loading translated PDF…",
+    text: "原始 PDF 已加载，正在加载译文 PDF…",
     stage: "pdfs",
   });
 
   state.progress.translatedDone = true;
   assert.deepEqual(readerPageState.computeReaderProgressSnapshot(state.progress), {
     percent: 92,
-    text: "Side-by-side ready",
+    text: "对照阅读已就绪",
     stage: "readying",
   });
 
@@ -1397,17 +1397,17 @@ test("reader progress presenter writes view state and posts progress messages", 
 
   assert.deepEqual(snapshot, {
     percent: 54,
-text: "Original PDF loaded, loading translated PDF…",
+    text: "原始 PDF 已加载，正在加载译文 PDF…",
     stage: "pdfs",
   });
   assert.deepEqual(calls, [
-["text", "Original PDF loaded, loading translated PDF…"],
+    ["text", "原始 PDF 已加载，正在加载译文 PDF…"],
     ["animate", true, 54],
     ["message", {
       type: "retainpdf-reader-progress",
       stage: "pdfs",
       percent: 54,
-text: "Original PDF loaded, loading translated PDF…",
+      text: "原始 PDF 已加载，正在加载译文 PDF…",
     }, "https://retainpdf.reader"],
   ]);
 });

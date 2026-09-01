@@ -294,7 +294,7 @@ mod tests {
             failure_category: None,
             provider_stage: None,
             provider_code: None,
-summary: "Authentication failed".to_string(),
+            summary: "鉴权失败".to_string(),
             root_cause: None,
             retryable: false,
             upstream_host: None,
@@ -326,7 +326,7 @@ summary: "Authentication failed".to_string(),
             failure_category: Some("timeout".to_string()),
             provider_stage: Some("llm_request".to_string()),
             provider_code: Some("timeout_504".to_string()),
-summary: "Request timeout".to_string(),
+            summary: "请求超时".to_string(),
             root_cause: None,
             retryable: true,
             upstream_host: None,
@@ -352,7 +352,7 @@ summary: "Request timeout".to_string(),
         assert_eq!(payload["provider_stage"], "llm_request");
         assert_eq!(payload["provider_code"], "timeout_504");
         assert_eq!(payload["provider"], "deepseek");
-assert_eq!(payload["summary"], "Request timeout");
+        assert_eq!(payload["summary"], "请求超时");
         assert_eq!(payload["retryable"], true);
     }
 }

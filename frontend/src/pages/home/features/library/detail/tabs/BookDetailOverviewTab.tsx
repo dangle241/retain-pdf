@@ -1,6 +1,6 @@
-// Tab "Book description" ââ title / author / tags / edit + Metadata grid.
-// Edit Profile UI only touch this file (or TitleMetaPanel）。
-// Metadata (page count/size/inbound/Migrate collection from left column: right column no longer empty, left column purely covers+Primary action.
+// Tab「书籍简介」——标题 / 作者 / 标签 / 编辑 + 元信息网格。
+// 改简介相关 UI 只动本文件（或 TitleMetaPanel）。
+// 元信息（页数/大小/入库/合集）自左栏迁入：右栏不再空旷，左栏纯粹封面+主操作。
 
 import { IconLayers } from "../panels/ui.jsx";
 import { TitleMetaPanel } from "../panels/TitleMetaPanel.jsx";
@@ -33,7 +33,7 @@ function MetaCell({ label, children }) {
 }
 
 /**
- * @param {object} props TitleMetaPanel Business props + Metadata (pageCount/bytes/addedAt/memberCollections）
+ * @param {object} props TitleMetaPanel 业务 props + 元信息（pageCount/bytes/addedAt/memberCollections）
  */
 export function BookDetailOverviewTab({
   pageCount,
@@ -52,14 +52,14 @@ export function BookDetailOverviewTab({
       <TitleMetaPanel {...titleMetaProps} />
 
       <dl className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border border-border/60 p-4 sm:grid-cols-4">
-<MetaCell label="page count">{pageCount ? `${pageCount} pages` : "â"}</MetaCell>
-        <MetaCell label="Size">{sizeText || "—"}</MetaCell>
-        <MetaCell label="Inbound">{dateText || "—"}</MetaCell>
-<MetaCell label="Collections">
+        <MetaCell label="页数">{pageCount ? `${pageCount} 页` : "—"}</MetaCell>
+        <MetaCell label="大小">{sizeText || "—"}</MetaCell>
+        <MetaCell label="入库">{dateText || "—"}</MetaCell>
+        <MetaCell label="合集">
           <span className="inline-flex min-w-0 max-w-full items-center gap-1">
             <IconLayers className="shrink-0 text-muted-foreground" />
             <span className="truncate">
-              {memberCollections.length ? memberCollections.join("、") : "Not joined"}
+              {memberCollections.length ? memberCollections.join("、") : "未加入"}
             </span>
           </span>
         </MetaCell>

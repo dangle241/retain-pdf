@@ -33,7 +33,7 @@ def test_translate_single_item_plain_text_uses_plain_text_protocol() -> None:
     def _fake_request(messages, **kwargs):
         captured["messages"] = messages
         captured["response_format"] = kwargs.get("response_format")
-        return "Complex computer program development."
+        return "复杂计算机程序的发展。"
 
     with mock.patch.object(translation_client, "build_single_item_fallback_messages", side_effect=_fake_messages), mock.patch.object(
         translation_client, "request_chat_content", side_effect=_fake_request
@@ -42,7 +42,7 @@ def test_translate_single_item_plain_text_uses_plain_text_protocol() -> None:
 
     assert captured["response_style"] == "plain_text"
     assert captured["response_format"] is None
-assert result["p001-b001"]["translated_text"] == "The development of complex computer programs."
+    assert result["p001-b001"]["translated_text"] == "复杂计算机程序的发展。"
 
 
 def test_translate_batch_once_uses_tagged_protocol_without_schema() -> None:
@@ -72,8 +72,8 @@ def test_translate_batch_once_uses_tagged_protocol_without_schema() -> None:
         captured["messages"] = messages
         captured["response_format"] = kwargs.get("response_format")
         return (
-"<<<ITEM item_id=p001-b001>>>\nThe development of complex computer programs.\n<<<END>>>\n"
-            "<<<ITEM item_id=p001-b002>>>\nFaster compute improves simulation capability.\n<<<END>>>"
+            "<<<ITEM item_id=p001-b001>>>\n复杂计算机程序的发展。\n<<<END>>>\n"
+            "<<<ITEM item_id=p001-b002>>>\n更快的算力提升了模拟能力。\n<<<END>>>"
         )
 
     with mock.patch.object(translation_client, "build_messages", side_effect=_fake_messages), mock.patch.object(
@@ -83,8 +83,8 @@ def test_translate_batch_once_uses_tagged_protocol_without_schema() -> None:
 
     assert captured["response_style"] == "tagged"
     assert captured["response_format"] is None
-assert result["p001-b001"]["translated_text"] == "The development of complex computer programs."
-assert result["p001-b002"]["translated_text"] == "Faster compute improves simulation capability."
+    assert result["p001-b001"]["translated_text"] == "复杂计算机程序的发展。"
+    assert result["p001-b002"]["translated_text"] == "更快的算力提升了模拟能力。"
 
 
 def test_translate_continuation_group_members_repairs_loose_json_response() -> None:
@@ -101,10 +101,10 @@ def test_translate_continuation_group_members_repairs_loose_json_response() -> N
     def _fake_request(_messages, **_kwargs):
         return """
         {
-          translated_text: "This sentence starts and continues.",
+          translated_text: "这句话开始并继续。",
           member_translations: [
-            {"item_id": "p010-b001", "translated_text": "This sentence starts"},
-            {"item_id": "p010-b002", "translated_text": "and continues."},
+            {"item_id": "p010-b001", "translated_text": "这句话开始"},
+            {"item_id": "p010-b002", "translated_text": "并继续。"},
           ],
         }
         """
@@ -113,8 +113,8 @@ def test_translate_continuation_group_members_repairs_loose_json_response() -> N
         result = translation_client.translate_continuation_group_members(item)
 
     payload = result["__cg__:cg-010-001"]
-assert payload["translated_text"] == "This sentence starts and continues."
-assert payload["member_translations"][1]["translated_text"] == "and continues."
+    assert payload["translated_text"] == "这句话开始并继续。"
+    assert payload["member_translations"][1]["translated_text"] == "并继续。"
 
 
 def test_build_messages_sci_tagged_uses_translation_only_protocol() -> None:
@@ -151,7 +151,7 @@ def test_build_messages_sanitizes_continuation_context_placeholders() -> None:
     item_payload = payload["items"][0]
     assert (
         item_payload["context_after"]
-        == "No source text provided. Please paste the Chinese text to translate.evidence against a catalytic cycle and reaction pathway"
+        == "仅供理解，禁止翻译进输出：evidence against a catalytic cycle and reaction pathway"
     )
     assert "<f1-2e5/>" not in messages[1]["content"]
     assert "<f2-9ad/>" not in messages[1]["content"]
@@ -168,8 +168,8 @@ def test_build_single_item_fallback_messages_sanitizes_continuation_context_plac
         mode="sci",
         response_style="plain_text",
     )
-    assert "The current source is an incomplete fragment; the translation must remain equally incomplete; do not complete it using following context." in messages[1]["content"]
-    assert "No source text provided. Please supply the Chinese text to translate.evidence against a catalytic cycle and reaction pathway" in messages[1]["content"]
+    assert "当前原文是不完整片段；译文必须保持同等不完整，不要用后文上下文补全。" in messages[1]["content"]
+    assert "后文上下文（仅供理解，禁止翻译进输出）：evidence against a catalytic cycle and reaction pathway" in messages[1]["content"]
     assert "<f1-2e5/>" not in messages[1]["content"]
     assert "<f2-9ad/>" not in messages[1]["content"]
 
@@ -187,9 +187,9 @@ def test_build_single_item_fallback_messages_plain_text_has_no_json_contract_con
     )
     system_prompt = messages[0]["content"]
 
-    assert "Source text missing. Please provide." in system_prompt
-    assert "Do not output placeholders, structured data, tags, code blocks, or explanations" in system_prompt
-    assert "Only return valid results conforming to the following structure. JSON" not in system_prompt
+    assert "只返回译文本身，使用纯文本。" in system_prompt
+    assert "不要输出占位符、结构化数据、标签、代码块或解释" in system_prompt
+    assert "返回结果时只输出符合以下结构的合法 JSON" not in system_prompt
     assert '{"translations":[{"item_id":"...","translated_text":"..."}]}' not in system_prompt
     assert "source_text" not in system_prompt
     assert "translated_text" not in system_prompt
@@ -209,8 +209,8 @@ def test_build_single_item_fallback_messages_plain_text_user_prompt_is_not_json(
         response_style="plain_text",
     )
 
-    assert "【[Source text starts]】" in messages[1]["content"]
-    assert "【[Source text ends]】" in messages[1]["content"]
+    assert "【当前原文开始】" in messages[1]["content"]
+    assert "【当前原文结束】" in messages[1]["content"]
     assert "As for any numerical optimization procedure" in messages[1]["content"]
     assert "source_text" not in messages[1]["content"]
     assert "item_id" not in messages[1]["content"]
@@ -254,10 +254,10 @@ def test_plain_text_prompt_keeps_literal_preservation_in_translation_scope() -> 
     )
     combined_prompt = "\n".join(message["content"] for message in messages)
 
-    assert "Do not rely solely. OCR" not in combined_prompt
-    assert "standalone code, commands, configurations, input files, directory trees, or file manifests." not in combined_prompt
-    assert "Please return as-is" not in combined_prompt
-    assert "Preserve literals verbatim." in combined_prompt
+    assert "不要只依赖 OCR" not in combined_prompt
+    assert "独立代码、命令、配置、输入文件、目录树或文件清单" not in combined_prompt
+    assert "请原样返回" not in combined_prompt
+    assert "字面量部分逐字保留" in combined_prompt
 
 
 def test_sci_tagged_prompt_does_not_make_translation_model_choose_keep_origin() -> None:
@@ -274,7 +274,7 @@ def test_sci_tagged_prompt_does_not_make_translation_model_choose_keep_origin() 
         response_style="tagged",
     )
 
-assert "standalone code, commands, configuration, input files, directory trees, or file listings" not in messages[0]["content"]
+    assert "独立代码、命令、配置、输入文件、目录树或文件清单" not in messages[0]["content"]
     assert "keep_origin" not in messages[0]["content"]
 
 
@@ -293,25 +293,25 @@ def test_build_messages_direct_typst_includes_inline_math_and_local_ocr_repair_g
     )
     system_prompt = messages[0]["content"]
     user_prompt = messages[1]["content"]
-    assert "Currently enabled direct_typst direct formula output mode" in system_prompt
-    assert "First understand the whole sentence semantics" in system_prompt
-    assert "Please proactively use. `$...$` Package" in system_prompt
-    assert "use a single backslash" in system_prompt
+    assert "当前启用 direct_typst 公式直出模式" in system_prompt
+    assert "请先理解整句语义" in system_prompt
+    assert "请主动用 `$...$` 包裹" in system_prompt
+    assert "使用单个反斜杠" in system_prompt
     assert r"\mathrm{M}" in system_prompt
-    # Spacing, close-fitting, double backslash, and other mechanical formatting rules by normalize_direct_typst_translation
-    # Source text missing. Provide text to translate.,Stop consuming prompt tokens.
-    assert "Space-separated" not in system_prompt
+    # 间距、紧贴、双反斜杠等机械格式规则由 normalize_direct_typst_translation
+    # 在翻译时统一规整,不再占用提示词。
+    assert "空格隔开" not in system_prompt
     assert "$...$$...$" not in system_prompt
     assert r"\\text{g}" not in system_prompt
     assert r"\cite{117}" in system_prompt
-    assert "Unicode Superscript" in system_prompt
+    assert "Unicode 上标字符" in system_prompt
     assert "$^{117}$" in system_prompt
     assert "$^{26-28}$" in system_prompt
-    assert "Minimum fix." in system_prompt
-    assert "Do not fill in missing body content" in system_prompt
+    assert "最小修复" in system_prompt
+    assert "不要补写缺失的正文内容" in system_prompt
     assert "<<<ITEM item_id=ITEM_ID>>>" in system_prompt
-    assert "Please provide the source text to translate. tagged block" in user_prompt
-    assert "Do not write back IDs, decision fields, structured data, or tags." not in user_prompt
+    assert "请为每段输出一个 tagged block" in user_prompt
+    assert "不要回写编号、决策字段、结构化数据或标签" not in user_prompt
     assert r"\mu" in messages[1]["content"]
     assert r"\\mu" not in messages[1]["content"]
 
@@ -328,22 +328,22 @@ def test_build_single_item_fallback_messages_direct_typst_includes_inline_math_a
         response_style="plain_text",
     )
     system_prompt = messages[0]["content"]
-assert "direct_typst formula direct-output mode is currently enabled" in system_prompt
-assert "First understand the semantics of the whole sentence" in system_prompt
-assert "Proactively wrap with `$...$`" in system_prompt
-assert "Use a single backslash" in system_prompt
+    assert "当前启用 direct_typst 公式直出模式" in system_prompt
+    assert "请先理解整句语义" in system_prompt
+    assert "请主动用 `$...$` 包裹" in system_prompt
+    assert "使用单个反斜杠" in system_prompt
     assert r"\mathrm{M}" in system_prompt
-# Mechanical format rules such as spacing, tight placement, and double backslashes are handled by normalize_direct_typst_translation
-# Normalized uniformly during translation; no longer occupy prompt tokens.
-assert "separated by spaces" not in system_prompt
+    # 间距、紧贴、双反斜杠等机械格式规则由 normalize_direct_typst_translation
+    # 在翻译时统一规整,不再占用提示词。
+    assert "空格隔开" not in system_prompt
     assert "$...$$...$" not in system_prompt
     assert r"\\text{g}" not in system_prompt
     assert r"\cite{117}" in system_prompt
-assert "Unicode superscript characters" in system_prompt
+    assert "Unicode 上标字符" in system_prompt
     assert "$^{117}$" in system_prompt
     assert "$^{26-28}$" in system_prompt
-assert "minimal fix" in system_prompt
-assert "Do not fill in missing body content" in system_prompt
+    assert "最小修复" in system_prompt
+    assert "不要补写缺失的正文内容" in system_prompt
     assert r"\mu" in messages[1]["content"]
     assert r"\\mu" not in messages[1]["content"]
 
@@ -400,7 +400,7 @@ def test_body_direct_typst_prompt_does_not_preserve_ocr_visual_lines() -> None:
         response_style="plain_text",
     )
 
-    assert "Structure hint: the current source is a multi-line structural block" not in messages[1]["content"]
+    assert "结构提示：当前原文是多行结构块" not in messages[1]["content"]
     assert "For large $ CN_{A}^{\\prime} $ values, this d-level is lowered." in messages[1]["content"]
     assert "For large $ CN_{A}^{\\prime}\n$ values" not in messages[1]["content"]
 
@@ -427,73 +427,73 @@ def test_toc_prompt_asks_model_to_translate_each_list_line() -> None:
 
     prompt = messages[1]["content"]
 
-    assert "Contents/Chart List" in prompt
-    assert "output one translation line per source line" in prompt
-    assert "Translate line-start labels and titles" in prompt
-    assert "Keep trailing page numbers" in prompt
+    assert "目录/图表清单" in prompt
+    assert "每个原文行输出一个译文行" in prompt
+    assert "翻译行首标签和标题" in prompt
+    assert "保留行尾页码" in prompt
 
 
 def test_prompt_builder_can_render_non_default_target_language() -> None:
     messages = deepseek_client.build_single_item_fallback_messages(
         {
             "item_id": "p001-b001",
-            "protected_source_text": "Keep terminology accurate.",
+            "protected_source_text": "保持术语准确。",
             "math_mode": "direct_typst",
             "metadata": {"structure_role": "body"},
         },
         mode="sci",
         response_style="plain_text",
-        target_language_name="Ready. Provide source text.",
+        target_language_name="英文",
     )
     combined_prompt = "\n".join(message["content"] for message in messages)
 
-    assert "English suitable for thesis typesetting." in combined_prompt
-    assert "Please provide the Chinese source text to translate." in combined_prompt
-    assert "Source text missing. Please provide original Chinese text for translation." in combined_prompt
-    assert "Provide source text to translate." not in combined_prompt
+    assert "适合论文排版的英文" in combined_prompt
+    assert "直接输出英文译文" in combined_prompt
+    assert "最终英文译文正文" in combined_prompt
+    assert "适合论文排版的简体中文" not in combined_prompt
 
 
 def test_parse_translation_payload_accepts_well_formed_tagged_blocks() -> None:
     content = (
-        "<<<ITEM item_id=a>>>\nTranslationA\n<<<END>>>\n"
+        "<<<ITEM item_id=a>>>\n译文A\n<<<END>>>\n"
         "<<<ITEM item_id=b decision=keep_origin>>>\n\n<<<END>>>\n"
     )
     result = translation_client.parse_translation_payload(content)
-assert result["a"]["translated_text"] == "Translation A"
+    assert result["a"]["translated_text"] == "译文A"
     assert result["b"]["decision"] == "keep_origin"
 
 
 def test_parse_translation_payload_recovers_item_with_damaged_trailing_end_tag() -> None:
-    # Actual failure mode(job ffc511 batch 2/8):Model at end of output <<<END>>>
-    # Hit <<<END>>,one less >. Content intact,Keep all entries.
+    # 真实事故形态(job ffc511 batch 2/8):模型在输出末尾把 <<<END>>>
+    # 打成 <<<END>>,少一个 >。内容完好,不允许丢条目。
     content = (
-"<<<ITEM item_id=a>>>\nTranslation A\n<<<END>>>\n"
-"<<<ITEM item_id=b>>>\nTranslation B,Contains formulas. $x^2$.\n<<<END>>"
+        "<<<ITEM item_id=a>>>\n译文A\n<<<END>>>\n"
+        "<<<ITEM item_id=b>>>\n译文B,包含公式 $x^2$。\n<<<END>>"
     )
     result = translation_client.parse_translation_payload(content)
-assert result["a"]["translated_text"] == "Translation A"
-assert result["b"]["translated_text"] == "Translation B,Contains formula $x^2$."
+    assert result["a"]["translated_text"] == "译文A"
+    assert result["b"]["translated_text"] == "译文B,包含公式 $x^2$。"
 
 
 def test_parse_translation_payload_treats_next_open_tag_as_implicit_close() -> None:
     content = (
-"<<<ITEM item_id=a>>>\nTranslation A\n"
-"<<<ITEM item_id=b>>>\nTranslation B\n<<<END>>>"
+        "<<<ITEM item_id=a>>>\n译文A\n"
+        "<<<ITEM item_id=b>>>\n译文B\n<<<END>>>"
     )
     result = translation_client.parse_translation_payload(content)
-assert result["a"]["translated_text"] == "Translation A"
-assert result["b"]["translated_text"] == "Translation B"
+    assert result["a"]["translated_text"] == "译文A"
+    assert result["b"]["translated_text"] == "译文B"
 
 
 def test_parse_translation_payload_does_not_cut_literal_end_text_mid_content() -> None:
-    content = "<<<ITEM item_id=a>>>\nParagraph mentions END this term and <Tag> Symbol.\n<<<END>>>"
+    content = "<<<ITEM item_id=a>>>\n段落提到 END 这个词以及 <标记> 符号。\n<<<END>>>"
     result = translation_client.parse_translation_payload(content)
-assert result["a"]["translated_text"] == "Paragraph mentions END this term and <Tag> symbol."
+    assert result["a"]["translated_text"] == "段落提到 END 这个词以及 <标记> 符号。"
 
 
 def test_direct_typst_single_prompt_warns_model_about_unbalanced_source_dollars() -> None:
-    # source text $ is odd(OCR Missing matching pair $)time,Provide source text to translate.
-    # Semantic fix,Not directly to model — yields inevitably unbalanced translations.
+    # 源文本 $ 为奇数(OCR 丢了配对的 $)时,用户消息里要先提示模型按
+    # 语义修复,而不是直接交给模型产出必然不平衡的译文。
     messages = deepseek_client.build_single_item_fallback_messages(
         {
             "item_id": "p009-b008",
@@ -504,7 +504,7 @@ def test_direct_typst_single_prompt_warns_model_about_unbalanced_source_dollars(
         mode="sci",
         response_style="plain_text",
     )
-    assert "Math delimiters `$` Quantity is odd." in messages[1]["content"]
+    assert "数学定界符 `$` 数量为奇数" in messages[1]["content"]
 
 
 def test_direct_typst_single_prompt_has_no_delimiter_warning_for_balanced_source() -> None:
@@ -518,12 +518,12 @@ def test_direct_typst_single_prompt_has_no_delimiter_warning_for_balanced_source
         mode="sci",
         response_style="plain_text",
     )
-assert "math delimiters" not in messages[1]["content"]
+    assert "数学定界符" not in messages[1]["content"]
 
 
 def test_direct_typst_single_prompt_lists_mitex_rewrites_found_in_source() -> None:
-    # Data-driven prompt:When source formula matches a database entry.,Write the needed replacements into the prompt,
-    # Model replaces at semantic layer.——Regex rewrite unreliable in complex formulas.
+    # 数据驱动提示:源公式匹配到数据库条目时,把需要的替换写进提示词,
+    # 由模型在语义层完成替换——复杂公式里正则改写不可靠。
     messages = deepseek_client.build_single_item_fallback_messages(
         {
             "item_id": "p001-b001",
@@ -535,11 +535,11 @@ def test_direct_typst_single_prompt_lists_mitex_rewrites_found_in_source() -> No
         response_style="plain_text",
     )
     user_prompt = messages[1]["content"]
-    assert "Renderer not supported." in user_prompt
-    assert r"`\hbar` Switch to `ℏ`" in user_prompt
-assert r"`\varPhi` Switch to `\Phi`" in user_prompt
-assert r"`\rangle` Switch to `â©`" in user_prompt
-    # Commands in DB not shown in this section.,should not go into the prompt
+    assert "渲染器不支持" in user_prompt
+    assert r"`\hbar` 改用 `ℏ`" in user_prompt
+    assert r"`\varPhi` 改用 `\Phi`" in user_prompt
+    assert r"`\rangle` 改用 `⟩`" in user_prompt
+    # 数据库里有但本段没出现的命令,不应进提示词
     assert r"\mathscr" not in user_prompt
 
 
@@ -554,7 +554,7 @@ def test_direct_typst_single_prompt_has_no_rewrite_hint_for_clean_source() -> No
         mode="sci",
         response_style="plain_text",
     )
-assert "Renderer not supported" not in messages[1]["content"]
+    assert "渲染器不支持" not in messages[1]["content"]
 
 
 def _cg_item(**overrides):
@@ -573,20 +573,20 @@ def _cg_item(**overrides):
 
 
 def test_group_members_retries_when_member_ids_are_missing() -> None:
-    # Previously missing. member id Silently degrades to geometric splitting.;now retry once first,Second time.
-    # If complete, use structured splitting.
+    # 此前缺 member id 会静默退化成几何切分;现在先重试一次,第二次
+    # 返回完整就采用结构化切分。
     responses = iter([
         json.dumps({
-            "translated_text": "Energy $E = mc^2$ starts and continues here.",
+            "translated_text": "能量 $E = mc^2$ 开始并在此继续。",
             "member_translations": [
-                {"item_id": "p010-b001", "translated_text": "能量 $E = mc^2$ Start"},
+                {"item_id": "p010-b001", "translated_text": "能量 $E = mc^2$ 开始"},
             ],
         }, ensure_ascii=False),
         json.dumps({
-"translated_text": "Energy $E = mc^2$ starts and continues here.",
+            "translated_text": "能量 $E = mc^2$ 开始并在此继续。",
             "member_translations": [
                 {"item_id": "p010-b001", "translated_text": "能量 $E = mc^2$ 开始"},
-                {"item_id": "p010-b002", "translated_text": "and continues here."},
+                {"item_id": "p010-b002", "translated_text": "并在此继续。"},
             ],
         }, ensure_ascii=False),
     ])
@@ -605,10 +605,10 @@ def test_group_members_retries_when_member_ids_are_missing() -> None:
 
 
 def test_group_members_drops_splits_when_member_math_stays_unbalanced() -> None:
-    # Cross Formula member Disconnect:Overall $ Odd/even correct,but pursue member All bad.
-    # If still bad after retry, discard. member Split(Explicit geometry fallback.),Keep the overall translation.
+    # 公式跨 member 断开:整体 $ 奇偶数正确,但逐 member 都是坏的。
+    # 重试后仍坏则丢弃 member 切分(显式走几何兜底),整体译文保留。
     bad = json.dumps({
-"translated_text": "Energy $E = mc^2$ starts and continues here.",
+        "translated_text": "能量 $E = mc^2$ 开始并在此继续。",
         "member_translations": [
             {"item_id": "p010-b001", "translated_text": "能量 $E = mc^2 开始"},
             {"item_id": "p010-b002", "translated_text": "$ 并在此继续。"},
@@ -619,31 +619,31 @@ def test_group_members_drops_splits_when_member_math_stays_unbalanced() -> None:
         result = translation_client.translate_continuation_group_members(_cg_item())
 
     payload = result["__cg__:cg-010-001"]
-assert payload["translated_text"] == "Energy $E = mc^2$ starts and continues here."
+    assert payload["translated_text"] == "能量 $E = mc^2$ 开始并在此继续。"
     assert payload["member_translations"] == []
 
 
 def test_group_members_salvages_aggregate_text_from_broken_json() -> None:
-    # LaTeX Caused by backslash escape corruption JSON Cannot parse:After both parsing attempts fail,
-    # rescue translated_text String,Stop discarding entire segments.
+    # LaTeX 反斜杠转义损坏导致 JSON 无法解析:两轮解析都失败后,
+    # 抢救 translated_text 字符串,不再整段丢弃。
     broken = (
-        '{"translated_text": "Energy conservation continues here.",\n'
-'"member_translations": [{"item_id": "p010-b001", "translated_text": "Energy $\\alpha Conservation."'
+        '{"translated_text": "能量守恒在此继续。",\n'
+        '"member_translations": [{"item_id": "p010-b001", "translated_text": "能量 $\\alpha 守恒"'
     )
 
     with mock.patch.object(translation_client, "request_chat_content", return_value=broken):
         result = translation_client.translate_continuation_group_members(_cg_item())
 
     payload = result["__cg__:cg-010-001"]
-assert payload["translated_text"] == "Energy conservation continues here."
+    assert payload["translated_text"] == "能量守恒在此继续。"
     assert payload["member_translations"] == []
 
 
 def test_context_bleed_downgraded_to_warning_for_continuation_items() -> None:
     from services.translation.llm.validation.quality import review_translation_item
 
-    # Consecutive segment fragments are designed without terminating punctuation.,Subsequent formula leak by apply Layer Mechanical Pruning,
-    # Do not trigger expensive error-level retries.
+    # 连续段片段按设计无终止标点,后文公式泄漏由 apply 层机械修剪,
+    # 不应触发昂贵的错误级重试。
     item = {
         "item_id": "p001-b001",
         "protected_source_text": "the reaction rate depends on",
@@ -653,31 +653,31 @@ def test_context_bleed_downgraded_to_warning_for_continuation_items() -> None:
         "block_type": "text",
         "metadata": {"structure_role": "body"},
     }
-    report = review_translation_item(item, {"decision": "translate", "translated_text": "Reaction rate depends on the constant. $k = A e^{-E_a/RT}$"})
+    report = review_translation_item(item, {"decision": "translate", "translated_text": "反应速率取决于常数 $k = A e^{-E_a/RT}$"})
     bleed = [i for i in report.issues if i.kind == "context_bleed"]
     assert bleed and bleed[0].severity == "warning"
 
     standalone = dict(item)
     standalone.pop("continuation_group")
-report2 = review_translation_item(standalone, {"decision": "translate", "translated_text": "Reaction rate depends on constant $k = A e^{-E_a/RT}$"})
+    report2 = review_translation_item(standalone, {"decision": "translate", "translated_text": "反应速率取决于常数 $k = A e^{-E_a/RT}$"})
     bleed2 = [i for i in report2.issues if i.kind == "context_bleed"]
     assert bleed2 and bleed2[0].severity == "error"
 
 
 def test_direct_typst_single_prompt_moves_scoped_terms_into_user_message() -> None:
-    # Match vocab by entry, then each differs.,place system Will drop prefix cache.;
-    # Matched terms item Inject user Message.
+    # 词表按条目匹配后逐条不同,放 system 会打掉前缀缓存;
+    # 匹配到的术语经 item 注入 user 消息。
     messages = deepseek_client.build_single_item_fallback_messages(
         {
             "item_id": "p001-b001",
             "protected_source_text": "The SCF procedure converges quickly.",
             "math_mode": "direct_typst",
             "metadata": {"structure_role": "body"},
-            "_scoped_terms_guidance": "SCF => Self-Consistent Field",
+            "_scoped_terms_guidance": "SCF => 自洽场",
         },
         mode="sci",
         response_style="plain_text",
     )
-assert "SCF => self-consistent field" not in messages[0]["content"]
-    assert "Term requirements:" in messages[1]["content"]
-assert "SCF => self-consistent field" in messages[1]["content"]
+    assert "SCF => 自洽场" not in messages[0]["content"]
+    assert "术语要求：" in messages[1]["content"]
+    assert "SCF => 自洽场" in messages[1]["content"]

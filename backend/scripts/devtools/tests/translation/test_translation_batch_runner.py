@@ -71,7 +71,7 @@ def test_parallel_batch_runner_drains_successes_after_one_future_exception(monke
         flush_state=flush_state,
     )
 
-assert payload[0]["translated_text"] == "A"
+    assert payload[0]["translated_text"] == "甲"
     assert payload[0]["final_status"] == "translated"
     assert payload[1]["final_status"] == "failed"
     assert payload[1]["translation_diagnostics"]["degradation_reason"] == "batch_unhandled_exception"

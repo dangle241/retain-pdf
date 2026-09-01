@@ -49,6 +49,3 @@ backend/typst-win32/bin/
 VERSION
 .codex
 .codex/
-translate/
-agent-guides/
-agent-work/

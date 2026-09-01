@@ -1,7 +1,7 @@
-// Status card store + presenter (blueprint §2 features/status/, §4 lifecycle).
-//
-// logic(finalStatusCounts Override counts,Same as old world);summarizeTranslationFilter
-// Only VM source: job-status/status-card-runtime-source.js's
+// 翻译调试:计数卡片 + 当前筛选提示——JSX 重写
+// status-detail-dialog-translation.js#renderTranslationSummary 的 DOM 写入
+// 逻辑(finalStatusCounts 优先于 counts,和旧世界一致);summarizeTranslationFilter
+// 是纯格式化函数,保留直接 import。
 
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
 import { summarizeTranslationFilter } from "../../composition/external.js";
@@ -24,7 +24,7 @@ export function TranslationSummary({ translation }) {
         <div className="translation-summary-card"><span className="label">Provider</span><span id={ids.providerFamily} className="info-value">{providerFamily}</span></div>
       </div>
       <div className="translation-summary-notes">
-        <span id={ids.listFilter} className="status-panel-note">{`Filter:${filterText}`}</span>
+        <span id={ids.listFilter} className="status-panel-note">{`当前列表筛选：${filterText}`}</span>
       </div>
     </section>
   );

@@ -27,8 +27,8 @@ TAGGED_ITEM_OPEN_RE = re.compile(
     r"<<<ITEM\s+item_id=(?P<item_id>[^\s>]+)(?:\s+decision=(?P<decision>[A-Za-z_-]+))?\s*>>>"
 )
 TAGGED_ITEM_END_RE = re.compile(r"<<<END>>>")
-# Model occasionally corrupts closing tags at output end(Verified. <<<END>>,Missing one. >)Content
-# Preserve entries if tags incomplete but data intact.,Strip leniently by incomplete morphology.
+# 模型偶尔会在输出末尾损坏闭合标签(实测过 <<<END>>,少一个 >)。内容
+# 完好只是标签残缺时不能丢条目,按残缺形态宽容剥离。
 TAGGED_DAMAGED_END_RE = re.compile(r"\s*<{1,3}END>{0,4}\s*$")
 
 
@@ -47,7 +47,7 @@ def parse_translation_payload(content: str) -> dict[str, dict[str, str]]:
         if closed:
             translated_text = segment[: closed.start()].strip()
         else:
-            # Missing/Incomplete closure:Implicit close on next open tag or string end.
+            # 缺失/残缺闭合:下一个开标签或字符串结尾即隐式闭合
             translated_text = TAGGED_DAMAGED_END_RE.sub("", segment).strip()
         result[item_id] = result_entry(decision, translated_text)
     if result:
@@ -73,7 +73,7 @@ def translate_single_item_plain_text(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-target_language_name: str = "Simplified Chinese",
+    target_language_name: str = "简体中文",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -112,7 +112,7 @@ def translate_single_item_plain_text_unstructured(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-target_language_name: str = "Simplified Chinese",
+    target_language_name: str = "简体中文",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -143,11 +143,11 @@ target_language_name: str = "Simplified Chinese",
 
 
 def _group_member_payload_defect(item: dict, member_translations: list[dict[str, str]]) -> str:
-    """Check Group member Translation protocol integrity,Return defect description.(Empty string means pass.)。
+    """检查群组 member 译文的协议完整性,返回缺陷描述(空串表示通过)。
 
-    Previous member id no set validation, per-item member No delimiter validation.:missing id Will be silent.
-    Degenerate into geometric segmentation.(Cut position error; text pushed to wrong column.),Formula Cross member If disconnected, overall parity.
-    Validation still passes; rendering breaks separately. Explicit validation here.,Let upper layer retry.
+    此前 member id 不做集合校验、逐 member 也不验证定界符:缺 id 会静默
+    退化成几何切分(切错位置文字压错栏),公式跨 member 断开则整体奇偶
+    校验照样通过、渲染各自坏。这里显式校验,让上层有机会重试。
     """
     expected_ids = [
         str(member_id or "").strip()
@@ -177,7 +177,7 @@ def translate_continuation_group_members(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-target_language_name: str = "Simplified Chinese",
+    target_language_name: str = "简体中文",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -210,8 +210,8 @@ target_language_name: str = "Simplified Chinese",
                 if request_label:
                     print(f"{request_label}: group member json parse failed, retrying: {parse_exc}", flush=True)
                 continue
-            # Final Round:JSON Unable to fix LaTeX turned into resistance (red arrows), and the stock closed near the low of the day.,Rescue translated_text
-            # string,Overall translation remains usable(member Splitting degrades to geometric splitting)。
+            # 最后一轮:JSON 修复不了 LaTeX 转义损坏,抢救 translated_text
+            # 字符串,整体译文仍可用(member 切分退化为几何切分)。
             salvaged = extract_string_fields(content, {"translated_text": ("translated_text",)}).get("translated_text", "")
             if not salvaged:
                 raise
@@ -234,8 +234,8 @@ target_language_name: str = "Simplified Chinese",
             if request_label:
                 print(f"{request_label}: group member payload defect, retrying: {defect}", flush=True)
             continue
-        # Retry still defective.:Keep full translation,Discard untrusted member Split,Explicit
-        # Fallback to geometric splitting.(Silently reached this step.,Logging and retry logic are now in place.)。
+        # 重试后仍有缺陷:保留整体译文,丢弃不可信的 member 切分,显式
+        # 交给几何切分兜底(此前是静默走到这一步,现在有日志有重试)。
         if request_label:
             print(f"{request_label}: group member payload defect persists, dropping member splits: {defect}", flush=True)
         member_translations = []
@@ -255,7 +255,7 @@ def translate_single_item_tagged_text(
     base_url: str = DEFAULT_BASE_URL,
     request_label: str = "",
     domain_guidance: str = "",
-target_language_name: str = "Simplified Chinese",
+    target_language_name: str = "简体中文",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -292,7 +292,7 @@ def translate_single_item_with_decision(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-target_language_name: str = "Simplified Chinese",
+    target_language_name: str = "简体中文",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,
@@ -339,7 +339,7 @@ def translate_batch_once(
     request_label: str = "",
     domain_guidance: str = "",
     mode: str = "fast",
-target_language_name: str = "Simplified Chinese",
+    target_language_name: str = "简体中文",
     diagnostics: TranslationDiagnosticsCollector | None = None,
     timeout_s: int = 120,
     http_retry_attempts: int | None = None,

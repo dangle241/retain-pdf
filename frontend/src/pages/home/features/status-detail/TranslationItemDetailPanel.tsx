@@ -1,9 +1,9 @@
-key={item.item_id}
+// 翻译调试:Item 详情 + 重放——JSX 重写
 // features/status-detail/translation-renderer.js#renderTranslationItemDetail/
-item={item}
+// #renderTranslationReplay(markup 拼接)的结构化版本。纯格式化函数
 // (boolLabel/diagnosticsOf/normalizeRoutePath/routePathOf/pageNumberOf/
-// finalStatusOf/fallbackToOf/degradationReasonOf)Source text missing. Provide text to translate. import;
-onSelect={onSelectItem}
+// finalStatusOf/fallbackToOf/degradationReasonOf)保留直接 import;
+// renderField/renderTextBlock 换成 InfoRow/TextBlock 两个 JSX 组件。
 
 import { InfoRow, TextBlock } from "./TranslationInfoBlocks.jsx";
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
@@ -40,8 +40,8 @@ function ItemDetailBody({ payload }) {
         <InfoRow label="degradation_reason" value={degradationReasonOf(item) || "-"} />
       </div>
       <TextBlock label="原文" value={item.source_text || ""} />
-      <TextBlock label="Write to disk." value={item.translated_text || item.translation_unit_translated_text || item.group_translated_text || ""} />
-      <TextBlock label="Protect" value={item.protected_translated_text || item.translation_unit_protected_translated_text || item.group_protected_translated_text || ""} />
+      <TextBlock label="落盘翻译" value={item.translated_text || item.translation_unit_translated_text || item.group_translated_text || ""} />
+      <TextBlock label="保护后译文" value={item.protected_translated_text || item.translation_unit_protected_translated_text || item.group_protected_translated_text || ""} />
       <TextBlock label="translation_diagnostics" value={diagnostics || {}} />
     </>
   );
@@ -64,9 +64,9 @@ export function TranslationItemDetailPanel({ translation, onReplay }) {
   const loading = translation.itemDetailLoading;
   const hasItem = Boolean(payload?.item);
   const emptyText = translation.itemErrorText
-    || (translation.selectedItemId ? "Select left item" : "Nothing to view. item");
+    || (translation.selectedItemId ? "请选择左侧 item" : "没有可查看的 item");
   const meta = loading
-    ? "Reading......"
+    ? "读取中..."
     : hasItem
       ? `${payload.item_id || payload.item?.item_id || "-"} · 第 ${pageNumberOf(payload, pageNumberOf(payload.item))} 页`
       : "-";
@@ -75,9 +75,9 @@ export function TranslationItemDetailPanel({ translation, onReplay }) {
   const replay = translation.replay;
   const hasReplayResult = Boolean(replay?.payload);
   const replayStatus = translation.replayLoading
-    ? "Replaying..."
+    ? "重放中..."
     : hasReplayResult
-      ? (replay.payload.replay_error ? "Replay error" : "Replay complete")
+      ? (replay.payload.replay_error ? "重放返回错误" : "重放完成")
       : (translation.replayErrorText || "-");
 
   return (
@@ -91,7 +91,7 @@ export function TranslationItemDetailPanel({ translation, onReplay }) {
         </div>
       </div>
       <div className="translation-replay-actions">
-        <button id={ids.itemReplay} type="button" className="button-link secondary" disabled={!hasItem} onClick={onReplay}>replay current item</button>
+        <button id={ids.itemReplay} type="button" className="button-link secondary" disabled={!hasItem} onClick={onReplay}>重放当前 item</button>
         <span id={ids.replayStatus} className="status-panel-note">{replayStatus}</span>
       </div>
       <div id={ids.replayResult} className={hasReplayResult ? "translation-replay-result" : "translation-replay-result hidden"}>

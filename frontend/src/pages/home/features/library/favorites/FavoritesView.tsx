@@ -1,7 +1,7 @@
-// Home "Favorites" tab. Cross-book excerpt/Note list.
+// 主页「收藏」tab：跨书摘录/笔记列表。
 //
-// Distinguish from "Collection": Collection = Document grouping; favorites = Reader-highlighted sentence/Chart/Notes.
-// Full pull. favorites â empty state / List; tap item with anchor to open reader.
+// 与「合集」区分：合集 = 文档分组；收藏 = 阅读器里标的句子/图表/笔记。
+// 首版：拉全量 favorites → 空态 / 列表；点一项带锚点打开阅读器。
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -28,16 +28,16 @@ type FavoriteItem = {
 
 function kindLabel(kind: string) {
   const k = `${kind || ""}`.trim();
-if (k === "figure") return "Chart";
-if (k === "data") return "Data";
-  if (k === "sentence") return "Excerpts";
-return k || "Excerpt";
+  if (k === "figure") return "图表";
+  if (k === "data") return "数据";
+  if (k === "sentence") return "摘录";
+  return k || "摘录";
 }
 
 function formatPage(pageIdx: unknown) {
   const n = Number(pageIdx);
   if (!Number.isFinite(n) || n < 0) return "";
-return `Page ${n + 1}`;
+  return `第 ${n + 1} 页`;
 }
 
 function openFavoriteInReader(item: FavoriteItem): boolean {
@@ -77,7 +77,7 @@ export function FavoritesView() {
         setItems(list);
       })
       .catch((err: { message?: string }) => {
-        setError(err?.message || "Failed to load favorites. Please try again later.");
+        setError(err?.message || "读取收藏失败，请稍后重试。");
         setItems([]);
       })
       .finally(() => setLoading(false));
@@ -88,19 +88,19 @@ export function FavoritesView() {
   }, [reload]);
 
   return (
-<section id="favorites-view" className="library-view favorites-view" aria-label="Favorites">
+    <section id="favorites-view" className="library-view favorites-view" aria-label="收藏">
       <div className="favorites-head">
-        <h2 className="favorites-title">Favorites</h2>
-        <p className="favorites-subtitle">Select text while reading to favorite, review them all here</p>
+        <h2 className="favorites-title">我的收藏</h2>
+        <p className="favorites-subtitle">阅读时选中文字即可收藏，在这里统一回看</p>
       </div>
 
       {loading ? (
-        <div className="events-empty" id="favorites-loading">Loading favorites…</div>
+        <div className="events-empty" id="favorites-loading">正在加载收藏…</div>
       ) : error ? (
         <div className="events-empty" id="favorites-error" role="alert">
           <p>{error}</p>
           <button type="button" className="app-button favorites-retry-btn" onClick={() => reload()}>
-Retry
+            重试
           </button>
         </div>
       ) : items.length === 0 ? (
@@ -108,15 +108,15 @@ Retry
           id="favorites-empty"
           className="favorites-empty"
           instrument="flask"
-          title="no favorites yet"
-hint="Open a book, select a paragraph or chart, then click "Favorites". Then quickly jump back to the original here."
+          title="还没有收藏"
+          hint="打开一本书，选中段落或图表后点「收藏」，之后就能在这里快速跳回原文。"
         >
           <button
             type="button"
             className="app-button empty-state-action"
             onClick={() => services.workflowDialog.requestOpenUpload()}
           >
-Upload PDF
+            上传 PDF
           </button>
         </EmptyState>
       ) : (
@@ -135,7 +135,7 @@ Upload PDF
                   data-favorite-id={id}
                   onClick={() => {
                     if (!openFavoriteInReader(item)) {
-                      toast.error("Unable to open: missing associated book info");
+                      toast.error("无法打开：缺少关联书籍信息");
                     }
                   }}
                 >
@@ -143,7 +143,7 @@ Upload PDF
                     <span className="favorites-card-kind">{kind}</span>
                     {page ? <span className="favorites-card-page">{page}</span> : null}
                   </div>
-                  <p className="favorites-card-quote">{quote || "(no excerpt text)"}</p>
+                  <p className="favorites-card-quote">{quote || "（无摘录文本）"}</p>
                   {note ? <p className="favorites-card-note">{note}</p> : null}
                 </button>
               </li>

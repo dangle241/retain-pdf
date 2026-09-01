@@ -98,7 +98,7 @@ def test_structured_technical_blocks_add_context_without_local_skip() -> None:
     assert all(item["should_translate"] is True for item in payload)
     assert all(item["classification_label"] == "" for item in payload)
     assert all(item["translation_structure_kind"] == "structured_technical_block" for item in payload)
-assert "field name" in payload[0]["translation_style_hint"]
+    assert "字段名" in payload[0]["translation_style_hint"]
     assert "Required" in payload[1]["translation_style_hint"]
 
 

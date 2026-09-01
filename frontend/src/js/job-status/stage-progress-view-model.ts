@@ -99,7 +99,7 @@ export function currentStageProgressViewModel(
       current: 100,
       total: 100,
       displayPercent: 100,
-progressText: "Rendering complete",
+      progressText: "渲染完成",
       progressUnit: "percent",
       visualStageKey: renderVisualStageKey,
       substageKey: renderProgress.substageKey || currentProgress.substageKey || "render_compile",
@@ -112,7 +112,7 @@ progressText: "Rendering complete",
       current: 100,
       total: 100,
       displayPercent: 100,
-progressText: currentProgress.progressText || "Rendering complete",
+      progressText: currentProgress.progressText || "渲染完成",
       progressUnit: currentProgress.progressUnit || "percent",
       visualStageKey: renderVisualStageKey,
       substageKey: currentProgress.substageKey || "render_compile",
@@ -121,7 +121,7 @@ progressText: currentProgress.progressText || "Rendering complete",
 
   return {
     ...renderProgress,
-progressText: renderProgress.progressText || "Rendering complete",
+    progressText: renderProgress.progressText || "渲染完成",
     visualStageKey: renderVisualStageKey,
   };
 }

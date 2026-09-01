@@ -132,7 +132,7 @@ impl JobInit {
             trace_id: None,
             schema_version: Some("document.v1".to_string()),
             stage: Some("queued"),
-stage_detail: Some("OCR task created, waiting for available execution slot"),
+            stage_detail: Some("OCR 任务已创建，等待可用执行槽位"),
         }
     }
 
@@ -142,7 +142,7 @@ stage_detail: Some("OCR task created, waiting for available execution slot"),
             trace_id: None,
             schema_version: None,
             stage: Some("queued"),
-stage_detail: Some("Translation task created, waiting OCR subtask"),
+            stage_detail: Some("翻译任务已创建，等待 OCR 子任务"),
         }
     }
 
@@ -152,7 +152,7 @@ stage_detail: Some("Translation task created, waiting OCR subtask"),
             trace_id: None,
             schema_version: None,
             stage: Some("queued"),
-stage_detail: Some("Full workflow task created, pending. Rust orchestrates OCR/translation/Rendering stage"),
+            stage_detail: Some("全流程任务已创建，等待 Rust 编排 OCR/翻译/渲染阶段"),
         }
     }
 
@@ -162,7 +162,7 @@ stage_detail: Some("Full workflow task created, pending. Rust orchestrates OCR/t
             trace_id: None,
             schema_version: None,
             stage: Some("queued"),
-            stage_detail: Some("Render task created, waiting for available execution slot."),
+            stage_detail: Some("渲染任务已创建，等待可用执行槽位"),
         }
     }
 }

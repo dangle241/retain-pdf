@@ -44,9 +44,9 @@
   width: min(600px, calc(100vw - 28px));
   max-height: min(640px, calc(100vh - 28px));
 
-/* ::backdrop Native only <dialog> Semantic effect activate.,Phase C replace with Radix Dialog this after
-     Element no longer <dialog>,Rule becomes dead code——Keep, do not delete(risk is zero,If needed later
-     Safe to purge.),Effective backplane styles below app-update-overlay。 */
+  /* ::backdrop 仅在原生 <dialog> 语义下生效,阶段 C 换成 Radix Dialog 后这个
+     元素不再是 <dialog>,规则变成死代码——保留不删(风险为零,后续如需要
+     可整体清理),真正生效的背板样式见下面的 app-update-overlay。 */
   &::backdrop {
     background: color-mix(in srgb, var(--bg) 72%, transparent);
     backdrop-filter: blur(10px);
@@ -55,7 +55,7 @@
 }
 
 @utility app-update-overlay {
-/* Same origin as desktop-dialog-overlay (--dialog-scrim), no longer using a separate 72% opacity setting. 72% tier */
+  /* 与 desktop-dialog-overlay 同源（--dialog-scrim），不再私开 72% 档 */
   background: var(--dialog-scrim);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);

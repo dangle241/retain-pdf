@@ -2,10 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// Book detail popup (ref PDF_MD_lib BookDetailModal) component test: Tap card to open.
-// Metadata rendering, read status toggle patchDocumentCollection/Translated action sets differ.
+// 书籍详情弹窗(参考 PDF_MD_lib 的 BookDetailModal)组件级测试:点卡片打开、
+// 元数据渲染、阅读状态切换走 patchDocument、馆藏/已翻译的动作集不同。
 //
-// Each test uses a brand new JSDOM (second createRoot attempt on same jsdom hangs).
+// 每个 test 一份全新 JSDOM(同一个 jsdom 第二次 createRoot 会停摆)。
 
 function makeDom(search = "") {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
@@ -39,11 +39,11 @@ async function waitFor(predicate, description) {
     }
     await wait(15);
   }
-assert.fail(`Timeout waiting for: ${description}`);
+  assert.fail(`等待超时：${description}`);
 }
 
 function click(dom, element) {
-// Radix Tabs Trigger relies on mousedown Up, dispatching only click fails tab switching.
+  // Radix Tabs Trigger 挂在 mousedown 上，只 dispatch click 不会切 tab
   element.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, cancelable: true, button: 0 }));
   element.dispatchEvent(new dom.window.MouseEvent("click", { bubbles: true, cancelable: true }));
 }
@@ -67,98 +67,98 @@ async function bootHomeApp(dom) {
 
   const root = createRoot(host);
   root.render(React.createElement(HomeApp, { services }));
-await waitFor(() => dom.window.document.getElementById("app-shell"), "HomeApp first frame rendered");
+  await waitFor(() => dom.window.document.getElementById("app-shell"), "HomeApp 首帧渲染");
   await wait(0);
   return { services, root, host };
 }
 
-test("Collection card opens book details: metadata + Toggle read status + Translate/Read Original, Unannotated Reading", async () => {
+test("馆藏卡打开书籍详情:元数据 + 阅读状态切换 + 翻译/读原文动作,无对照阅读", async () => {
   const dom = makeDom("?mock=parallel");
   const byId = (id) => dom.window.document.getElementById(id);
   const { services, root, host } = await bootHomeApp(dom);
 
   const card = await waitFor(
     () => dom.window.document.querySelector('#recent-jobs-list .recent-job-item[data-library-only="true"]'),
-    "Collection card in place.",
+    "馆藏卡就位",
   );
   const documentId = card.getAttribute("data-document-id");
   click(dom, card);
 
-  const dlg = await waitFor(() => byId("book-detail-dialog"), "Open book details popup");
-  // Title defaults to read-only heading.(Not a persistent input field.),Input field appears only on edit.
-await waitFor(() => dlg.querySelector(".book-detail-title")?.textContent?.trim(), "Title in place");
-  assert.equal(byId("book-detail-title-input"), null, "Set default mode read-only.,Untitled input");
-assert.ok(dlg.querySelector(".book-detail-status")?.textContent.includes("Not Translated"), "collection shows not translated");
-  // Lightweight Empty State + StageFlow preview (no real yet job, without embedding the full StatusCard）
-  assert.ok(byId("book-detail-translate-progress"), "Collection has translation progress panel.");
-assert.ok(byId("book-detail-stage-flow"), "Untranslated progress area has StageFlow preview");
-  assert.equal(byId("book-detail-job-status-card"), null, "Untranslated; no embed. StatusCard");
-// Holdings: Translation available. + Read Original, No side-by-side reading
-  assert.ok(byId("book-detail-translate-btn"), "Holdings have Translate button.");
-  assert.ok(byId("book-detail-read-source-btn"), "Read original");
-  assert.equal(byId("book-detail-compare-btn"), null, "No parallel reading in collection.");
-// Click "Edit" to enter title/edit tags
+  const dlg = await waitFor(() => byId("book-detail-dialog"), "书籍详情弹窗打开");
+  // 标题默认是只读大标题(不是常驻输入框),编辑才出现输入框
+  await waitFor(() => dlg.querySelector(".book-detail-title")?.textContent?.trim(), "标题就位");
+  assert.equal(byId("book-detail-title-input"), null, "默认只读,无标题输入框");
+  assert.ok(dlg.querySelector(".book-detail-status")?.textContent.includes("未翻译"), "馆藏显示未翻译");
+  // 未翻译：轻量空态 + StageFlow 预览（尚无真实 job，不嵌完整 StatusCard）
+  assert.ok(byId("book-detail-translate-progress"), "馆藏有翻译进度面板");
+  assert.ok(byId("book-detail-stage-flow"), "未翻译进度区有 StageFlow 预览");
+  assert.equal(byId("book-detail-job-status-card"), null, "未翻译不嵌 StatusCard");
+  // 馆藏:有翻译 + 读原文,无对照阅读
+  assert.ok(byId("book-detail-translate-btn"), "馆藏有翻译按钮");
+  assert.ok(byId("book-detail-read-source-btn"), "有读原文");
+  assert.equal(byId("book-detail-compare-btn"), null, "馆藏没有对照阅读");
+  // 点"编辑"进入标题/标签编辑
   click(dom, byId("book-detail-edit-btn"));
-  await waitFor(() => byId("book-detail-title-input"), "Clicking edit displays the title input field");
+  await waitFor(() => byId("book-detail-title-input"), "点编辑出现标题输入框");
 
-  // Read status toggle. → patchDocument(mock),Button activates
+  // 阅读状态切换 → patchDocument(mock),按钮变激活
   const { getMockDocument } = await import("../src/js/mock/documents.js");
   const readBtns = dlg.querySelectorAll(".book-detail-reading-btn");
-const doneBtn = Array.from(readBtns).find((b) => b.textContent === "Finished");
+  const doneBtn = Array.from(readBtns).find((b) => b.textContent === "读完");
   click(dom, doneBtn);
-  await waitFor(() => doneBtn.classList.contains("is-active"), "becomes active after reading");
-  await waitFor(() => getMockDocument(documentId).reading_status === "done", "patchDocument Write to database reading_status=done");
+  await waitFor(() => doneBtn.classList.contains("is-active"), "读完变激活");
+  await waitFor(() => getMockDocument(documentId).reading_status === "done", "patchDocument 落库 reading_status=done");
 
   root.unmount();
   services.dispose();
   host.remove();
 });
 
-test("Translation card opened book details:Side-by-side reading,No translation button", async () => {
+test("已翻译卡打开书籍详情:有对照阅读,无翻译按钮", async () => {
   const dom = makeDom("?mock=parallel");
   const byId = (id) => dom.window.document.getElementById(id);
   const { services, root, host } = await bootHomeApp(dom);
 
-// In mock, att-001/scl-002 are Awaiting synthesis. book is succeeded Translated documents
+  // mock 里 att-001/scl-002 等合成 book 是 succeeded 的已翻译文档
   const card = await waitFor(
     () => dom.window.document.querySelector('#recent-jobs-list .recent-job-item[data-library-only="false"][data-status="succeeded"]'),
-    "Translated card ready.",
+    "已翻译卡就位",
   );
   click(dom, card);
 
-const dlg = await waitFor(() => byId("book-detail-dialog"), "Book detail popup opened");
-  // Default to「Overview」Workflow dialog should not pop up
+  const dlg = await waitFor(() => byId("book-detail-dialog"), "书籍详情弹窗打开");
+  // 默认在「简介」：不应弹出工作流对话框
   assert.equal(
     services.stores.dialog.getSnapshot().open,
     false,
-    "Do not auto-open workflow popup on book detail open.",
+    "打开书籍详情不得自动打开工作流弹窗",
   );
-// Translated books default to "Translation" tab. Progress card updates DOM immediately.
+  // 已翻译书默认落在「翻译」Tab；进度卡应立刻在 DOM
   await waitFor(
-() => dlg.querySelector(".book-detail-status")?.textContent?.includes("Completed"),
-    "Show Completed",
+    () => dlg.querySelector(".book-detail-status")?.textContent?.includes("已完成"),
+    "显示已完成",
   );
-const statusCard = await waitFor(() => byId("book-detail-job-status-card"), "StatusCard embedded in Translation tab");
-  assert.ok(statusCard.classList.contains("bd-job-status-card"), "Detail-specific progress card");
-assert.equal(statusCard.getAttribute("data-embedded"), "true", "embedded mode");
+  const statusCard = await waitFor(() => byId("book-detail-job-status-card"), "翻译 Tab 内嵌 StatusCard");
+  assert.ok(statusCard.classList.contains("bd-job-status-card"), "详情专用进度卡");
+  assert.equal(statusCard.getAttribute("data-embedded"), "true", "embedded 模式");
   assert.ok(
     statusCard.closest("#book-detail-panel-translate"),
-    "StatusCard Translating... Tab inside panel",
+    "StatusCard 在翻译 Tab 面板内",
   );
-  // Book details internal structure (bd-job-status-*CSS height set. → skipped: JavaScript, add when dynamic resizing needed.
-  assert.ok(statusCard.classList.contains("bd-job-status-card"), "bd-job-status-card Root");
-  assert.ok(statusCard.querySelector(".bd-job-status-inner"), "independent inner, non- status-card-shell");
-  assert.ok(statusCard.querySelector(".bd-job-status-main"), "Fixed-height main area");
+  // 书籍详情专用内部结构（bd-job-status-*），固定高度
+  assert.ok(statusCard.classList.contains("bd-job-status-card"), "bd-job-status-card 根类");
+  assert.ok(statusCard.querySelector(".bd-job-status-inner"), "独立 inner，非 status-card-shell");
+  assert.ok(statusCard.querySelector(".bd-job-status-main"), "固定高度主区");
   assert.ok(
     statusCard.querySelector(".status-stage-flow .status-stage-step"),
-    "Includes stage flow",
+    "含阶段流",
   );
-  assert.equal(statusCard.querySelector(".status-card-shell"), null, "Bypass main flow shell");
-assert.equal(statusCard.querySelector(".status-progress-hero"), null, "Do not use main flow hero");
+  assert.equal(statusCard.querySelector(".status-card-shell"), null, "不使用主流程 shell");
+  assert.equal(statusCard.querySelector(".status-progress-hero"), null, "不使用主流程 hero");
   await waitFor(
     () => `${statusCard.getAttribute("data-status") || ""}` === "succeeded"
       || statusCard.querySelector(".status-stage-step.is-active, .status-stage-step.is-done"),
-    "StatusCard enter completion/Stage Highlight",
+    "StatusCard 进入完成/有阶段高亮",
   );
   const doneStep = statusCard.querySelector(
     '.status-stage-flow .status-stage-step[data-stage-key="done"]',
@@ -167,26 +167,26 @@ assert.equal(statusCard.querySelector(".status-progress-hero"), null, "Do not us
     doneStep?.classList.contains("is-active")
       || doneStep?.classList.contains("is-selected")
       || doneStep?.classList.contains("is-done"),
-    "Completed Phase Highlight",
+    "完成阶段高亮",
   );
   const valueText = statusCard.querySelector(".bd-job-status-value")?.textContent?.trim();
-assert.ok(valueText && valueText !== "Preparing", `Completed state missing progress text.: ${valueText}`);
-  // Detail progress card has been changed from ring changed to bar LayoutStatusCardEmbedded：.bd-job-status-percent）
+  assert.ok(valueText && valueText !== "准备中", `完成态应有进度文案，实际: ${valueText}`);
+  // 详情进度卡已从 ring 改为 bar 布局（StatusCardEmbedded：.bd-job-status-percent）
   const pct = statusCard.querySelector(".bd-job-status-percent")?.textContent?.trim();
-  assert.equal(pct, "100%", "Completed progress bar 100%");
+  assert.equal(pct, "100%", "完成态进度条 100%");
   assert.ok(
     statusCard.querySelector(".bd-job-status-bar.is-done"),
-"Completed state progress bar is-done",
+    "完成态进度条 is-done",
   );
-  // Workflow still fails to trigger.
+  // 仍然不得弹工作流
   assert.equal(
     services.stores.dialog.getSnapshot().open,
     false,
-    "Switch Translation Tab / After loading progress, workflow popup still does not open.",
+    "切换翻译 Tab / 加载进度后仍不打开工作流弹窗",
   );
-  assert.ok(byId("book-detail-compare-btn"), "Translated has side‑by‑side reading");
-  assert.equal(byId("book-detail-translate-btn"), null, "Translated. No translate button.");
-  assert.ok(byId("book-detail-read-source-btn"), "Still readable as original.");
+  assert.ok(byId("book-detail-compare-btn"), "已翻译有对照阅读");
+  assert.equal(byId("book-detail-translate-btn"), null, "已翻译没有翻译按钮");
+  assert.ok(byId("book-detail-read-source-btn"), "仍可读原文");
 
   root.unmount();
   services.dispose();

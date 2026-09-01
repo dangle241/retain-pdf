@@ -20,9 +20,9 @@ export function recentJobsEligibleForActiveRefresh(items = [], currentJobId = ""
 }
 
 /**
- * Polling only「Other active tasks」details and single-card patch patch。
- * No longer periodic. loadRecentJobs Full list——That would conflict with soft/silent reload Stacked grid flickering.
- * Full alignment reserved for: first screen, search, delete/After creation, manual refresh.scheduleRefresh。
+ * 仅轮询「其它活跃任务」详情并单卡 patch。
+ * 不再周期 loadRecentJobs 全量列表——那会与 soft/silent reload 叠成网格闪烁。
+ * 全量对齐留给：首屏、搜索、删除/创建后、手动刷新、scheduleRefresh。
  */
 export function createActiveLibraryRefreshLoop({
   getItems,
@@ -30,7 +30,7 @@ export function createActiveLibraryRefreshLoop({
   fetchJobPayload,
   apiPrefix,
   updateFromRuntime,
-  // Keep param for legacy callers. Cycle path unused.
+  // 保留参数兼容旧调用方，周期路径不再使用
   loadRecentJobs: _loadRecentJobs,
   isRecentJobsLoading,
   environment = defaultRecentJobsRefreshEnvironment,

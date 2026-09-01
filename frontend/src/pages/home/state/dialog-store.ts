@@ -1,13 +1,13 @@
-// general dialog open/close state factory (Blueprint Â§0.3) â CredentialsDialog/GlossariesDialog/
-// AppUpdate details/SettingsHubDialog and other permanently mounted native <dialog> share the same semantics.
+// 通用对话框开合状态工厂(蓝图 §0.3)——CredentialsDialog/GlossariesDialog/
+// AppUpdate 详情/SettingsHubDialog 等常驻挂载的原生 <dialog> 共用同一套语义。
 //
-// Reference src/pages/reader/legacy/state/drawer-store.js mode (open/subscribe contract),
-// Dialog is not "Mutually exclusive selection" but "Single toggle + Optional payload" (e.g., setupModeInitial tab),
-// So the state shape is { open, payload } instead of drawer single active string.
+// 参照 src/pages/reader/legacy/state/drawer-store.js 的模式(open/subscribe 契约),
+// 但对话框不是"多选一互斥"而是"单个开合 + 可选负载"(setupMode、初始 tab 等),
+// 所以状态形状是 { open, payload } 而不是 drawer 的单一 active 字符串。
 //
-// getState() Returned object reference only in open()/close() Update on call.(Not every read
-// New), feed directly to useSyncExternalStore to avoid infinite re-renders
-// No context. Empty input. app-framework/store.js getSnapshot clone pitfalls).
+// getState() 返回的对象引用只在 open()/close() 调用时才更新(不是每次读取都
+// 新建),可以直接喂 useSyncExternalStore 而不会触发无限重渲染
+//（不存在 app-framework/store.js 的 getSnapshot 克隆雷点)。
 
 export type DialogState<T = unknown> = {
   open: boolean;
@@ -30,7 +30,7 @@ export function createDialogStore<T = unknown>(initialPayload: T | null = null):
   }
 
   return {
-// useSyncExternalStore compatibility: subscribe returns unsubscribe function
+    // useSyncExternalStore 兼容:subscribe 返回退订函数
     subscribe(listener) {
       listeners.add(listener);
       return () => {

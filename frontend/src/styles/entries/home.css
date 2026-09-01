@@ -1,21 +1,21 @@
-/* Homepage CSS Entry â dist/css/home.css
-* Only index.html loading.
+/* 主页 CSS 入口 → dist/css/home.css
+ * 仅 index.html 加载。
  *
- * Boundaries:
-* - Forbidden to import reader/*, pages/detail/* (Reader/respective detail pages entry)
-* - Shared only for tokens / base / components* / dialog-shell / download-toast
- * - Homepage domain file located in pages/home/
+ * 边界：
+ * - 禁止 import reader/*、pages/detail/*（阅读器/详情页各自 entry）
+ * - 共享仅限 tokens / base / components* / dialog-shell / download-toast
+ * - 主页领域文件在 pages/home/
  */
 @import "tailwindcss";
 @import "../core/tailwind-theme.css";
 
-/* content Scan: narrow to paths rendered on homepage, avoid including reader domain class Scan in home bundle */
+/* content 扫描：收窄到主页会渲染的路径，避免把 reader 域 class 扫进 home 包 */
 @source "../../../index.html";
 @source "../../pages/home/**/*.{js,jsx,ts,tsx}";
 @source "../../shared/**/*.{js,jsx,ts,tsx}";
 @source "../../components/**/*.{js,jsx,ts,tsx}";
 @source "../../lib/**/*.{js,jsx,ts,tsx}";
-/* Homepage still via composition consumption js Domain (do not use ../../js/** Full scan) */
+/* 主页仍经 composition 消费的 js 域（勿用 ../../js/** 全量扫） */
 @source "../../js/features/**/*.{js,jsx,ts,tsx}";
 @source "../../js/islands/**/*.{js,jsx,ts,tsx}";
 @source "../../js/job/**/*.{js,ts}";
@@ -33,17 +33,17 @@
 @import "../tokens.css" layer(tokens);
 @import "../shadcn-theme.css" layer(tokens);
 @import "../base.css" layer(base);
-/* Homepage vibe: light texture + Wide-screen side wings (decorative) */
+/* 主页氛围：浅纹理 + 宽屏侧翼（装饰） */
 @import "../core/ambient-surface.css";
 @import "../core/decor-stage.css";
 
-/* —— shared(3 pages can be shared)—— */
+/* —— shared（三页可共用）—— */
 @import "../components.css";
 @import "../components.utilities.css";
 @import "../dialog-shell.css";
 @import "../core/download-toast.css";
 
-/* —— home-only(Home domain; do not add reader/detail）—— */
+/* —— home-only（主页领域；勿再塞 reader/detail）—— */
 @import "../pages/home/components.utilities.css";
 @import "../pages/home/translation-workflow.utilities.css";
 @import "../pages/home/collections.utilities.css";

@@ -16,7 +16,7 @@ export function resetStatusDetailRuntimeView({ setText, resetEventsList, activat
   setText("failure-suggestion", "-");
   setText("failure-last-log-line", "-");
   setText("failure-retryable", "-");
-setText("events-status", "All events");
+  setText("events-status", "全部事件");
   resetEventsList();
   activateDetailTab("overview");
 }

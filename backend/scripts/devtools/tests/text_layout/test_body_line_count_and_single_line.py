@@ -80,7 +80,7 @@ class BodyLineCountAndSingleLineTests(unittest.TestCase):
                         ],
                     }
                 ],
-                "protected_translated_text": "This is a continuation line within the body,OCR The given height is a bit small, but the font size should follow the body text of this page.",
+                "protected_translated_text": "这是正文中的一行续写，OCR 给出的高度偏小，但字号应当跟随本页正文。",
             },
         ]
 
@@ -103,7 +103,7 @@ class BodyLineCountAndSingleLineTests(unittest.TestCase):
                         "spans": [{"type": "text", "content": "This normal body line provides the reference."}],
                     }
                 ],
-                "protected_translated_text": "This normal width body line provides page body width benchmark.",
+                "protected_translated_text": "这是正常宽度的正文行，用来提供页面正文宽度基准。",
             },
             {
                 "item_id": "line-2",
@@ -116,7 +116,7 @@ class BodyLineCountAndSingleLineTests(unittest.TestCase):
                         "spans": [{"type": "text", "content": "This middle body line has a clipped OCR bbox."}],
                     }
                 ],
-                "protected_translated_text": "This middle line text.OCR The given width is a bit short, but typesetting should not force a line break because of that.",
+                "protected_translated_text": "这是中间一行正文，OCR 给出的宽度偏短，但排版不应该因此强制换行。",
             },
             {
                 "item_id": "line-3",
@@ -129,7 +129,7 @@ class BodyLineCountAndSingleLineTests(unittest.TestCase):
                         "spans": [{"type": "text", "content": "This following body line keeps normal width."}],
                     }
                 ],
-                "protected_translated_text": "Text width normal. No change needed.",
+                "protected_translated_text": "这是后续正常宽度的正文行。",
             },
         ]
 

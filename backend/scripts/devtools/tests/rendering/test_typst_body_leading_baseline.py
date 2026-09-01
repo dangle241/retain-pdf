@@ -13,7 +13,7 @@ def test_page_leading_baseline_only_weakly_dampens_normal_body_leading_jumps() -
     def make_payload(height: float, source_lines: int) -> dict:
         return {
             "inner_bbox": [10.0, 0.0, 260.0, height],
-            "translated_text": "Normal body paragraph for testing page line-height baseline." * 2,
+            "translated_text": "普通正文段落用于测试页面行距基准。" * 2,
             "formula_map": [],
             "font_size_pt": 10.2,
             "leading_em": 0.54,
@@ -44,7 +44,7 @@ def test_loose_source_pitch_can_override_page_leading_baseline() -> None:
     def make_payload(height: float, source_lines: int, pitch: float) -> dict:
         return {
             "inner_bbox": [10.0, 0.0, 260.0, height],
-            "translated_text": "Regular body paragraph for testing dynamic line spacing corresponding to very loose English original text." * 2,
+            "translated_text": "普通正文段落用于测试很宽松英文原文对应的动态行距。" * 2,
             "formula_map": [],
             "font_size_pt": 10.2,
             "leading_em": 0.54,

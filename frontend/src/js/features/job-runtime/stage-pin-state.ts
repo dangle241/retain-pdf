@@ -59,28 +59,28 @@ export function pinnedStagePresentation(stageKey = "") {
   switch (stageKey) {
     case "done":
       return {
-label: "Done",
-detail: "Translated PDF generated",
+        label: "完成",
+        detail: "翻译 PDF 已生成",
       };
     case "render":
       return {
-label: "Step 3/4 · Rendering",
-detail: "Generating translated PDF",
+        label: "第 3/4 步 · 渲染",
+        detail: "正在生成翻译后的 PDF",
       };
     case "translate":
       return {
-label: "Step 2/4 · Translation",
-detail: "Translating body content",
+        label: "第 2/4 步 · 翻译",
+        detail: "正在翻译正文内容",
       };
     case "ocr":
       return {
-label: "Step 1/4 · OCR parsing",
-detail: "Identifying PDF content",
+        label: "第 1/4 步 · OCR 解析",
+        detail: "正在识别 PDF 内容",
       };
     default:
       return {
-        label: "Waiting",
-        detail: "Preparing",
+        label: "等待中",
+        detail: "准备中",
       };
   }
 }

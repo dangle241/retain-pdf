@@ -39,7 +39,7 @@ class _FakePage:
 def test_apply_standard_redaction_uses_text_only_rects_for_mixed_items(monkeypatch) -> None:
     page = _FakePage()
     rect = fitz.Rect(10, 10, 100, 40)
-    valid_items = [(rect, {"item_id": "p002-b001"}, "Contents")]
+    valid_items = [(rect, {"item_id": "p002-b001"}, "目录")]
     covered_rects: list[fitz.Rect] = []
     removable_rect = fitz.Rect(12, 12, 90, 34)
 
@@ -69,7 +69,7 @@ def test_apply_standard_redaction_uses_text_only_rects_for_mixed_items(monkeypat
 def test_visual_cover_redaction_uses_visual_profile_fill(monkeypatch) -> None:
     page = fitz.open().new_page(width=200, height=120)
     rect = fitz.Rect(10, 10, 100, 40)
-    valid_items = [(rect, {"item_id": "p001-b001"}, "Body")]
+    valid_items = [(rect, {"item_id": "p001-b001"}, "正文")]
     sampled_rects: list[fitz.Rect] = []
     profile = DocumentVisualProfile(
         algorithm="visual_profile_v1",
@@ -113,7 +113,7 @@ def test_visual_cover_redaction_uses_visual_profile_fill(monkeypatch) -> None:
 def test_apply_standard_redaction_keeps_text_layer_cleanup_for_plain_text(monkeypatch) -> None:
     page = _FakePage()
     rect = fitz.Rect(10, 10, 100, 40)
-valid_items = [(rect, {"item_id": "p004-b003"}, "body text")]
+    valid_items = [(rect, {"item_id": "p004-b003"}, "正文")]
     covered_rects: list[fitz.Rect] = []
 
     monkeypatch.setattr(standard, "collect_page_drawing_rects", lambda _page: [fitz.Rect(0, 0, 120, 60)])
@@ -142,8 +142,8 @@ valid_items = [(rect, {"item_id": "p004-b003"}, "body text")]
 def test_apply_standard_redaction_fast_page_cover_only_for_fragmented_page(monkeypatch) -> None:
     page = _FakePage()
     valid_items = [
-        (fitz.Rect(10, 10, 100, 40), {"item_id": "p040-b001"}, "Contents A"),
-        (fitz.Rect(10, 50, 100, 80), {"item_id": "p040-b002"}, "Directory B"),
+        (fitz.Rect(10, 10, 100, 40), {"item_id": "p040-b001"}, "目录甲"),
+        (fitz.Rect(10, 50, 100, 80), {"item_id": "p040-b002"}, "目录乙"),
     ]
     covered_rects: list[fitz.Rect] = []
     fragmented_rects_a = [fitz.Rect(x, 10, x + 2, 18) for x in range(10, 130, 4)]
@@ -183,7 +183,7 @@ def test_apply_standard_redaction_fast_page_cover_only_for_fragmented_page(monke
 def test_apply_standard_redaction_uses_bbox_for_continuation_items(monkeypatch) -> None:
     page = _FakePage()
     rect = fitz.Rect(314, 296, 560, 451)
-valid_items = [(rect, {"item_id": "p007-b011", "continuation_group": "cg-007-011"}, "Chinese")]
+    valid_items = [(rect, {"item_id": "p007-b011", "continuation_group": "cg-007-011"}, "中文")]
 
     monkeypatch.setattr(standard, "collect_page_drawing_rects", lambda _page: [])
     monkeypatch.setattr(standard, "page_should_use_cover_only", lambda _rects: False)
@@ -206,7 +206,7 @@ def test_apply_standard_redaction_uses_visual_cover_for_complex_inline_math(monk
     item = {
         "item_id": "p003-b004",
         "source_text": r"signal $\sqrt{x_i}$ remains stable",
-        "translated_text": r"Signal $\sqrt{x_i}$ Keep Stable",
+        "translated_text": r"信号 $\sqrt{x_i}$ 保持稳定",
     }
     valid_items = [(rect, item, item["translated_text"])]
     covered_rects: list[fitz.Rect] = []
@@ -241,7 +241,7 @@ def test_apply_standard_redaction_uses_bbox_for_non_continuation_items(monkeypat
     page = _FakePage()
     rect = fitz.Rect(314, 296, 560, 451)
     removable_rect = fitz.Rect(320, 320, 540, 430)
-valid_items = [(rect, {"item_id": "p005-b010"}, "Chinese")]
+    valid_items = [(rect, {"item_id": "p005-b010"}, "中文")]
 
     monkeypatch.setattr(standard, "collect_page_drawing_rects", lambda _page: [])
     monkeypatch.setattr(standard, "page_should_use_cover_only", lambda _rects: False)
@@ -262,7 +262,7 @@ valid_items = [(rect, {"item_id": "p005-b010"}, "Chinese")]
 def test_apply_standard_redaction_uses_cover_for_unsafe_items(monkeypatch) -> None:
     page = _FakePage()
     rect = fitz.Rect(20, 20, 120, 60)
-valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
+    valid_items = [(rect, {"item_id": "p010-b002"}, "中文")]
     covered_rects: list[fitz.Rect] = []
 
     monkeypatch.setattr(standard, "collect_page_drawing_rects", lambda _page: [])
@@ -290,7 +290,7 @@ valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
 def test_apply_redaction_route_cover_only_defaults_to_visual_cover(monkeypatch) -> None:
     page = _FakePage()
     rect = fitz.Rect(20, 20, 120, 60)
-valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
+    valid_items = [(rect, {"item_id": "p010-b002"}, "中文")]
     covered_rects: list[fitz.Rect] = []
 
     monkeypatch.setattr(
@@ -312,7 +312,7 @@ valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
 def test_apply_redaction_route_legacy_visual_and_text_removes_text_layer(monkeypatch) -> None:
     page = _FakePage()
     rect = fitz.Rect(20, 20, 120, 60)
-valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
+    valid_items = [(rect, {"item_id": "p010-b002"}, "中文")]
     covered_rects: list[fitz.Rect] = []
 
     monkeypatch.setattr(
@@ -339,7 +339,7 @@ valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
 def test_apply_redaction_route_accepts_stable_strategy_names(monkeypatch) -> None:
     page = _FakePage()
     rect = fitz.Rect(20, 20, 120, 60)
-valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
+    valid_items = [(rect, {"item_id": "p010-b002"}, "中文")]
     covered_rects: list[fitz.Rect] = []
 
     monkeypatch.setattr(
@@ -372,7 +372,7 @@ def test_apply_redaction_route_auto_removes_safe_plain_text_layer(monkeypatch) -
                 "source_text": "This is a long body paragraph that should be eligible for source cleanup.",
                 "bbox": [20, 20, 120, 60],
             },
-"Chinese",
+            "中文",
         )
     ]
     covered_rects: list[fitz.Rect] = []
@@ -422,7 +422,7 @@ def test_apply_redaction_route_auto_uses_safe_text_cleanup_for_formula_item(monk
                 "bbox": [20, 20, 120, 60],
                 "formula_map": [{"placeholder": "[[FORMULA_1]]", "formula_text": "x^2"}],
             },
-"Chinese [[FORMULA_1]]",
+            "中文 [[FORMULA_1]]",
         )
     ]
     covered_rects: list[fitz.Rect] = []
@@ -470,7 +470,7 @@ def test_apply_redaction_route_auto_covers_explicit_render_blocks(monkeypatch) -
                 "source_text": "Fig. 1. A figure caption should be covered when it is actually rendered.",
                 "bbox": [20, 20, 160, 42],
             },
-"Figure 1. Figure caption actual render triggers source page overlay.",
+            "图1. 图注实际渲染时应该触发源页面遮盖。",
         )
     ]
     covered_rects: list[fitz.Rect] = []
@@ -507,7 +507,7 @@ def test_apply_redaction_route_auto_filters_text_cleanup_with_intrusive_math_pag
                 "source_text": "This is a long body paragraph that should normally be redacted.",
                 "bbox": [20, 20, 120, 60],
             },
-"Chinese",
+            "中文",
         )
     ]
     covered_rects: list[fitz.Rect] = []
@@ -547,7 +547,7 @@ def test_apply_redaction_route_auto_filters_text_cleanup_with_intrusive_math_pag
 def test_apply_image_page_redaction_never_redacts_pixels_or_line_art(monkeypatch) -> None:
     page = _FakePage()
     rect = fitz.Rect(20, 20, 120, 60)
-valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
+    valid_items = [(rect, {"item_id": "p010-b002"}, "中文")]
     prepared: list[fitz.Rect] = []
     applied: list[list[fitz.Rect]] = []
 
@@ -572,7 +572,7 @@ valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
 def test_apply_vector_heavy_redaction_never_redacts_pixels_or_line_art(monkeypatch) -> None:
     page = _FakePage()
     rect = fitz.Rect(20, 20, 120, 60)
-valid_items = [(rect, {"item_id": "p010-b002"}, "Chinese")]
+    valid_items = [(rect, {"item_id": "p010-b002"}, "中文")]
     covered_rects: list[fitz.Rect] = []
 
     monkeypatch.setattr(routes, "draw_white_covers", lambda _page, rects: covered_rects.extend(rects))

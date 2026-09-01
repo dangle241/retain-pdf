@@ -67,7 +67,7 @@ export function mountGlossariesFeature({
     state.selectedId = normalizedGlossaryId;
     state.draftOnly = false;
     renderList();
-    viewPort.setStatus("reading glossary...");
+    viewPort.setStatus("正在读取术语表...");
     try {
       const detail = await fetchGlossary(normalizedGlossaryId, apiPrefix);
       renderDraft(detail);
@@ -79,7 +79,7 @@ export function mountGlossariesFeature({
 
   async function open() {
     viewPort.openDialog();
-viewPort.setStatus("Reading glossary...");
+    viewPort.setStatus("正在读取术语表...");
     try {
       await reloadGlossaries();
       viewPort.setStatus("");
@@ -97,25 +97,25 @@ viewPort.setStatus("Reading glossary...");
     state.draftOnly = true;
     renderList();
     renderDraft({
-      name: "Untitled Glossary",
+      name: "未命名术语表",
       entries: [],
     });
     viewPort.addEntryRow();
-    viewPort.setStatus("New glossary not saved.");
+    viewPort.setStatus("新术语表尚未保存。");
   }
 
   async function save() {
     const payload = viewPort.readEditorPayload();
     if (!payload.name.trim()) {
-      viewPort.setStatus("Please fill in the glossary name.", "error");
+      viewPort.setStatus("请填写术语表名称。", "error");
       return;
     }
     if (payload.skippedMissingTarget?.length > 0) {
-viewPort.setStatus("Fixed translation / preferred translation method requires translation.", "error");
+      viewPort.setStatus("固定译法/偏好译法需要填写译文。", "error");
       return;
     }
     delete payload.skippedMissingTarget;
-    viewPort.setStatus("Saving......");
+    viewPort.setStatus("正在保存...");
     try {
       const saved = state.selectedId && !state.draftOnly
         ? await updateGlossary(apiPrefix, state.selectedId, payload)
@@ -124,7 +124,7 @@ viewPort.setStatus("Fixed translation / preferred translation method requires tr
       state.draftOnly = false;
       await reloadGlossaries();
       await refreshWorkflowGlossaries?.({ force: true, selectedId: state.selectedId });
-      viewPort.setStatus("Saved. Next?", "valid");
+      viewPort.setStatus("已保存。", "valid");
     } catch (err) {
       viewPort.setStatus(err.message || String(err), "error");
     }
@@ -137,13 +137,13 @@ viewPort.setStatus("Fixed translation / preferred translation method requires tr
       viewPort.setStatus("");
       return;
     }
-    viewPort.setStatus("Deleting......");
+    viewPort.setStatus("正在删除...");
     try {
       await deleteGlossary(apiPrefix, state.selectedId);
       state.selectedId = "";
       await reloadGlossaries({ keepSelection: false });
       await refreshWorkflowGlossaries?.({ force: true, selectedId: "" });
-      viewPort.setStatus("Deleted.", "valid");
+      viewPort.setStatus("已删除。", "valid");
     } catch (err) {
       viewPort.setStatus(err.message || String(err), "error");
     }
@@ -151,11 +151,11 @@ viewPort.setStatus("Fixed translation / preferred translation method requires tr
 
   async function exportCurrent() {
     if (!state.selectedId || state.draftOnly) {
-      viewPort.setStatus("Please save the glossary before exporting.", "error");
+      viewPort.setStatus("请先保存术语表再导出。", "error");
       return;
     }
     if (typeof exportGlossaryCsv !== "function") {
-      viewPort.setStatus("Termbase export unavailable in this environment.", "error");
+      viewPort.setStatus("当前环境未接入术语表导出。", "error");
       return;
     }
     const fallbackName = `${state.currentDetail?.name || state.selectedId || "glossary"}.csv`;
@@ -163,7 +163,7 @@ viewPort.setStatus("Fixed translation / preferred translation method requires tr
     if (downloadTarget.kind === "aborted") {
       return;
     }
-    viewPort.setStatus("Exporting... CSV...");
+    viewPort.setStatus("正在导出 CSV...");
     try {
       showDownloadPreparing(fallbackName);
       const resp = await exportGlossaryCsv(apiPrefix, state.selectedId);
@@ -180,7 +180,7 @@ viewPort.setStatus("Fixed translation / preferred translation method requires tr
           updateDownloadProgress({ filename, receivedBytes, totalBytes, percent });
         },
       });
-viewPort.setStatus(Exported ${filename}., "valid");
+      viewPort.setStatus(`已导出 ${filename}。`, "valid");
     } catch (err) {
       const message = err.message || String(err);
       viewPort.setStatus(message, "error");
@@ -191,10 +191,10 @@ viewPort.setStatus(Exported ${filename}., "valid");
   async function applyImport() {
     const csvText = viewPort.readCsvText();
     if (!csvText.trim()) {
-      viewPort.setStatus("Please paste first CSV Content.", "error");
+      viewPort.setStatus("请先粘贴 CSV 内容。", "error");
       return;
     }
-    viewPort.setStatus("Parsing CSV...");
+    viewPort.setStatus("正在解析 CSV...");
     try {
       const payload = await parseGlossaryCsv(apiPrefix, csvText);
       renderDraft({
@@ -203,7 +203,7 @@ viewPort.setStatus(Exported ${filename}., "valid");
       });
       viewPort.clearCsvText();
       viewPort.setImportVisible(false);
-      viewPort.setStatus(`Parsed ${Number(payload?.entry_count) || 0} Item.`, "valid");
+      viewPort.setStatus(`已解析 ${Number(payload?.entry_count) || 0} 条。`, "valid");
     } catch (err) {
       viewPort.setStatus(err.message || String(err), "error");
     }

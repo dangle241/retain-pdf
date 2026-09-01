@@ -80,7 +80,7 @@ def test_typst_overlay_fit_respects_python_min_font_and_leading() -> None:
             "lines": [{"bbox": [10.0, 20.0, 120.0, 30.0], "spans": [{"type": "text", "content": "source"}]}],
             "source_text": "A dense source paragraph with enough words to be treated as body text.",
             "protected_source_text": "A dense source paragraph with enough words to be treated as body text.",
-            "protected_translated_text": "This is a very long Chinese translation used to trigger rendering fitting, but must not let Typst Bypass attempt detected. Unauthorized access denied. Python continue to compress the given minimum font size and minimum line spacing.",
+            "protected_translated_text": "这是一段非常长的中文译文，用来触发渲染拟合，但不能让 Typst 绕过 Python 给出的最小字号和最小行距继续压缩。",
         }
     ]
 
@@ -110,7 +110,7 @@ def test_typst_overlay_emits_first_line_indent_for_markdown_blocks() -> None:
                 "lines": [{"bbox": [10.0, 20.0, 160.0, 32.0], "spans": [{"type": "text", "content": "source"}]}],
                 "source_text": "A source paragraph with first line indent.",
                 "protected_source_text": "A source paragraph with first line indent.",
-                "protected_translated_text": "Text render first line indent. Use CSS text-indent property. → skipped: Python code, add when rendering engine changes.",
+                "protected_translated_text": "这是一段需要渲染首行缩进的中文正文。",
                 "_render_first_line_indent_pt": 12.0,
             }
         ],
@@ -136,7 +136,7 @@ def test_typst_overlay_justifies_body_markdown_blocks() -> None:
                 "lines": [{"bbox": [10.0, 20.0, 180.0, 32.0], "spans": [{"type": "text", "content": "source"}]}],
                 "source_text": "A body paragraph that should align on both sides.",
                 "protected_source_text": "A body paragraph that should align on both sides.",
-                "protected_translated_text": "Text align justify. Confirm. Typst Paragraph parameters enabled.",
+                "protected_translated_text": "这是一段需要左右两侧对齐的正文内容，用于确认 Typst 段落参数已经打开。",
             }
         ],
     )
@@ -160,7 +160,7 @@ def test_typst_overlay_does_not_justify_title_markdown_blocks() -> None:
                 "lines": [{"bbox": [10.0, 20.0, 180.0, 32.0], "spans": [{"type": "text", "content": "Title"}]}],
                 "source_text": "Related work",
                 "protected_source_text": "Related work",
-                "protected_translated_text": "Related work",
+                "protected_translated_text": "相关工作",
             }
         ],
     )
@@ -175,8 +175,8 @@ def test_typst_overlay_defaults_to_transparent_text_blocks() -> None:
             "page_idx": 0,
             "block_type": "text",
             "bbox": [10.0, 20.0, 120.0, 62.0],
-            "translated_text": "white-background text block",
-"protected_translated_text": "white-background text block",
+            "translated_text": "白底文本块",
+            "protected_translated_text": "白底文本块",
             "formula_map": [],
         }
     ]
@@ -195,8 +195,8 @@ def test_typst_overlay_can_use_block_cover_fill_as_fallback() -> None:
             "page_idx": 0,
             "block_type": "text",
             "bbox": [10.0, 20.0, 120.0, 62.0],
-"translated_text": "white-background text block",
-"protected_translated_text": "white-background text block",
+            "translated_text": "白底文本块",
+            "protected_translated_text": "白底文本块",
             "formula_map": [],
             "_render_policy": {"overlay_fill": "white"},
         }

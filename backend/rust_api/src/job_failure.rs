@@ -74,12 +74,12 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "dns_resolution_failed",
             None,
-            "External model service domain resolution failed.",
-            Some("Container cannot resolve upstream model service domain; translation task aborted.".to_string()),
+            "外部模型服务域名解析失败",
+            Some("容器在当前时刻无法解析上游模型服务域名，任务在翻译阶段中断".to_string()),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("Retry once first; if persists, check. Docker DNSHost network proxy configuration".to_string()),
+            Some("优先重试一次；若持续失败，请检查 Docker DNS、宿主机网络或代理配置".to_string()),
             select_relevant_log_line(
                 job,
                 error,
@@ -103,12 +103,12 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "upstream_timeout",
             None,
-"External service request timed out",
-            Some("Task invocation OCR Model service request timed out.".to_string()),
+            "外部服务请求超时",
+            Some("任务调用 OCR 或模型服务时等待过久，超过超时阈值".to_string()),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("Retry directly; if frequent, reduce concurrency or check network stability.".to_string()),
+            Some("可直接重试；若频繁发生，建议降低并发或检查网络稳定性".to_string()),
             select_relevant_log_line(
                 job,
                 error,
@@ -134,14 +134,14 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "process_timeout",
             Some("timeout".to_string()),
-            "Python worker Execution timeout",
+            "Python worker 执行超时",
             Some(format!(
-                "Python Subprocess terminated after exceeding runtime timeout threshold (timeout_seconds={timeout_seconds}）"
+                "Python 子进程超过运行时超时阈值后被终止（timeout_seconds={timeout_seconds}）"
             )),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("Can resume from breakpoint or retry; if frequent, suggest reduce concurrency, increase. timeout_secondsor check upstream network latency.".to_string()),
+            Some("可从断点恢复或重试；若频繁发生，建议降低并发、增大 timeout_seconds，或检查上游网络耗时".to_string()),
             select_relevant_log_line(job, error, &["timeout", "timed out", "stderr before timeout"]),
             first_error_excerpt(error, &haystack),
             raw_diagnostic_from_process_result(job)
@@ -160,12 +160,12 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "placeholder_unstable",
             None,
-            "Formula placeholder validation failed.",
-            Some("Model returned formula placeholder count or order mismatch with source; translation failed protection validation.".to_string()),
+            "公式占位符校验失败",
+            Some("模型返回的公式占位符数量或顺序与原文不一致，翻译结果未通过保护校验".to_string()),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("Retry directly. If stable reproducible, use conservative single-block translation for that block./Preserve original text strategy.".to_string()),
+            Some("可直接重试；若稳定复现，建议对该块改用更保守的单块翻译/保留原文策略".to_string()),
             select_relevant_log_line(
                 job,
                 error,
@@ -188,13 +188,13 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             "normalization".to_string(),
             "source_pdf_missing",
             None,
-            "source PDF Missing",
-            Some("OCR Completed, but cannot find source in task working directory when entering standardization phase. PDF".to_string()),
+            "源 PDF 缺失",
+            Some("OCR 已完成，但进入标准化阶段时找不到任务工作目录中的源 PDF".to_string()),
             false,
             None,
             provider_name(diagnostics),
             Some(
-                "Check under the desktop task directory. source/ Does source exist? PDFand confirm packaging environment did not omit file-copy steps."
+                "检查桌面端任务目录下的 source/ 是否存在源 PDF，并确认打包环境没有丢失文件复制步骤"
                     .to_string(),
             ),
             select_relevant_log_line(job, error, &["source pdf not found"]),
@@ -212,12 +212,12 @@ pub fn classify_job_failure(job: &JobSnapshot) -> Option<JobFailureInfo> {
             failed_stage,
             "auth_failed",
             None,
-            "Authentication failed.",
-            Some("Used by current task. API Key / Token Invalid, expired, or insufficient permissions.".to_string()),
+            "鉴权失败",
+            Some("当前任务使用的 API Key / Token 无效、过期或权限不足".to_string()),
             false,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-Some("Check MinerU Tokenmodel API Key or backend X-API-Key configuration".to_string()),
+            Some("检查 MinerU Token、模型 API Key 或后端 X-API-Key 配置".to_string()),
             select_relevant_log_line(
                 job,
                 error,
@@ -236,12 +236,12 @@ Some("Check MinerU Tokenmodel API Key or backend X-API-Key configuration".to_str
             failed_stage,
             "rate_limited",
             None,
-            "Upstream service triggers rate limiting.",
-            Some("Too many requests in short time. Upstream service refuses further processing.".to_string()),
+            "上游服务触发限流",
+            Some("短时间内请求过多，上游服务拒绝继续处理".to_string()),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-            Some("Wait a while and retry, or reduce. workers / Concurrency Configuration".to_string()),
+            Some("等待一段时间后重试，或降低 workers / 并发配置".to_string()),
             select_relevant_log_line(job, error, &["429", "rate limit", "Too Many Requests"]),
             first_error_excerpt(error, &haystack),
             raw_diagnostic.clone(),
@@ -256,13 +256,13 @@ Some("Check MinerU Tokenmodel API Key or backend X-API-Key configuration".to_str
             "render".to_string(),
             "typst_dependency_download_failed",
             None,
-            "Typst Failed to download rendering dependencies.",
-            Some("Required for rendering stage. Typst Failed to retrieve package, causing PDF Compilation interrupted.".to_string()),
+            "Typst 渲染依赖下载失败",
+            Some("渲染阶段需要的 Typst 包未能成功获取，导致 PDF 编译中断".to_string()),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
             Some(
-                "Check if desktop package is built-in. Typst packagesor confirm the runtime environment is accessible. packages.typst.org"
+                "检查桌面包是否已内置 Typst packages，或确认运行环境可访问 packages.typst.org"
                     .to_string(),
             ),
             select_relevant_log_line(
@@ -284,12 +284,12 @@ Some("Check MinerU Tokenmodel API Key or backend X-API-Key configuration".to_str
             failed_stage,
             "render_failed",
             None,
-            "Formatting or compilation stage failed.",
-            Some("Translation partially complete, but in layout, rendering, or PDF Compilation interrupted".to_string()),
+            "排版或编译阶段失败",
+            Some("翻译已部分完成，但在排版、渲染或 PDF 编译阶段中断".to_string()),
             false,
             None,
             provider_name(diagnostics),
-Some("Check typstFont completeness check. Run `fc-list : family file | sort -u > fonts.txt`. Compare with `fonts.txt` expected list. Mismatch: missing fonts install.".to_string()),
+            Some("检查 typst、字体、公式内容或中间产物目录是否完整".to_string()),
             select_relevant_log_line(
                 job,
                 error,
@@ -315,15 +315,15 @@ Some("Check typstFont completeness check. Run `fc-list : family file | sort -u >
             failed_stage,
             "process_exit_failed",
             Some(format!("exit_code_{}", result.return_code)),
-            "Python worker Non-zero exit",
+            "Python worker 非零退出",
             Some(format!(
-                "Python Child process returned non-zero exit code {}but no more specific failure category was matched",
+                "Python 子进程返回非零退出码 {}，但未匹配到更具体的失败分类",
                 result.return_code
             )),
             true,
             extract_upstream_host(&haystack),
             provider_name(diagnostics),
-Some("View raw_exception_message, traceback and log_tailIf intermediate artifacts exist, try resuming from checkpoint.".to_string()),
+            Some("查看 raw_exception_message、traceback 和 log_tail；如果已有中间产物，可尝试从断点恢复".to_string()),
             select_relevant_log_line(job, error, &[]),
             first_error_excerpt(error, &haystack),
             raw_diagnostic_from_process_result(job)
@@ -337,12 +337,12 @@ Some("View raw_exception_message, traceback and log_tailIf intermediate artifact
         diagnostics
             .and_then(|diag| diag.last_error.as_ref())
             .and_then(|err| err.provider_code.clone()),
-        "Task failed; no clear root cause yet.",
+        "任务失败，但暂未识别出明确根因",
         unknown_root_cause(error, &haystack, raw_diagnostic.as_ref()),
         true,
         extract_upstream_host(&haystack),
         provider_name(diagnostics),
-Some("View log_tail Troubleshoot further with full error log.".to_string()),
+        Some("查看 log_tail 和完整错误日志进一步排查".to_string()),
         select_relevant_log_line(job, error, &[]),
         first_error_excerpt(error, &haystack),
         raw_diagnostic,
@@ -365,7 +365,7 @@ mod tests {
         job.status = JobStatusKind::Failed;
         job.error = Some("PlaceholderInventoryError: placeholder inventory mismatch".to_string());
         job.stage = Some("translation".to_string());
-        job.stage_detail = Some("Translating.".to_string());
+        job.stage_detail = Some("正在翻译".to_string());
 
         let failure = classify_job_failure(&job).expect("failure");
         assert_eq!(failure.category, "placeholder_unstable");
@@ -382,7 +382,7 @@ mod tests {
         job.status = JobStatusKind::Failed;
         job.error = Some("PlaceholderInventoryError: placeholder inventory mismatch".to_string());
         job.stage = Some("translation".to_string());
-job.stage_detail = Some("translating".to_string());
+        job.stage_detail = Some("正在翻译".to_string());
         job.log_tail = vec![
             "auto render mode selected: overlay (removable_items=18, checked_items=18, removable_ratio=1.00)"
                 .to_string(),
@@ -403,7 +403,7 @@ job.stage_detail = Some("translating".to_string());
         job.status = JobStatusKind::Failed;
         job.error = Some("typst compile failed: font not found".to_string());
         job.stage = Some("translation".to_string());
-job.stage_detail = Some("translating".to_string());
+        job.stage_detail = Some("正在翻译".to_string());
 
         let failure = classify_job_failure(&job).expect("failure");
         assert_eq!(failure.category, "render_failed");
@@ -423,7 +423,7 @@ job.stage_detail = Some("translating".to_string());
                 .to_string(),
         );
         job.stage = Some("rendering".to_string());
-        job.stage_detail = Some("Preparing to render".to_string());
+        job.stage_detail = Some("正在准备渲染".to_string());
 
         let failure = classify_job_failure(&job).expect("failure");
         assert_eq!(failure.category, "typst_dependency_download_failed");
@@ -441,7 +441,7 @@ job.stage_detail = Some("translating".to_string());
         job.status = crate::models::JobStatusKind::Failed;
         job.stage = Some("failed".to_string());
         job.error = Some(
-            "Traceback (most recent call last):\nRuntimeError: boom\nstructured failure json: {\"stage\":\"normalization\",\"error_type\":\"document_schema_validation_failed\",\"summary\":\"Standardized document validation failed.\",\"detail\":\"normalized document schema validation failed\",\"retryable\":false,\"upstream_host\":\"\",\"provider\":\"ocr\",\"raw_exception_type\":\"RuntimeError\",\"raw_exception_message\":\"normalized document schema validation failed\",\"traceback\":\"Traceback (most recent call last):\\nRuntimeError: boom\"}\n"
+            "Traceback (most recent call last):\nRuntimeError: boom\nstructured failure json: {\"stage\":\"normalization\",\"error_type\":\"document_schema_validation_failed\",\"summary\":\"标准化文档校验失败\",\"detail\":\"normalized document schema validation failed\",\"retryable\":false,\"upstream_host\":\"\",\"provider\":\"ocr\",\"raw_exception_type\":\"RuntimeError\",\"raw_exception_message\":\"normalized document schema validation failed\",\"traceback\":\"Traceback (most recent call last):\\nRuntimeError: boom\"}\n"
                 .to_string(),
         );
 
@@ -488,7 +488,7 @@ job.stage_detail = Some("translating".to_string());
         assert_eq!(failure.provider_code.as_deref(), Some("A0211"));
         assert_eq!(failure.raw_excerpt.as_deref(), Some("token expired"));
         assert_eq!(failure.raw_error_excerpt.as_deref(), Some("token expired"));
-assert_eq!(failure.suggestion.as_deref(), Some("Update Token"));
+        assert_eq!(failure.suggestion.as_deref(), Some("更新 Token"));
     }
 
     #[test]
@@ -506,7 +506,7 @@ assert_eq!(failure.suggestion.as_deref(), Some("Update Token"));
         let failure = classify_job_failure(&job).expect("failure");
         assert_eq!(failure.category, "source_pdf_missing");
         assert_eq!(failure.stage, "normalization");
-assert_eq!(failure.summary, "source PDF missing");
+        assert_eq!(failure.summary, "源 PDF 缺失");
         assert!(!failure.retryable);
     }
 
@@ -519,7 +519,7 @@ assert_eq!(failure.summary, "source PDF missing");
         );
         job.status = crate::models::JobStatusKind::Failed;
         job.stage = Some("failed".to_string());
-        job.stage_detail = Some("Python worker Execution failed.".to_string());
+        job.stage_detail = Some("Python worker 执行失败".to_string());
         job.error = Some("plain worker failure".to_string());
         job.result = Some(crate::models::ProcessResult {
             success: false,

@@ -188,14 +188,14 @@ mod tests {
             &mut request,
             &mut developer_mode,
             "glossary_json",
-            r#"[{"source":"band gap","target":"bandgap","note":"materials"}]"#,
+            r#"[{"source":"band gap","target":"带隙","note":"materials"}]"#,
         )
         .expect("glossary_json");
 
         assert_eq!(request.translation.glossary_id, "glossary-123");
         assert_eq!(request.translation.glossary_entries.len(), 1);
         assert_eq!(request.translation.glossary_entries[0].source, "band gap");
-assert_eq!(request.translation.glossary_entries[0].target, "band gap");
+        assert_eq!(request.translation.glossary_entries[0].target, "带隙");
         assert_eq!(request.translation.glossary_entries[0].note, "materials");
     }
 }

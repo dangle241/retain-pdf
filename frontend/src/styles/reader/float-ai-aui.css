@@ -1,5 +1,5 @@
-/* AI Floating window · assistant-ui Message skeleton (Notion Sidebar vibe
- * See body float-ai-md.css; citations see float-ai-citations.cssInput condition check float-ai-composer.css
+/* AI 悬浮窗 · assistant-ui 消息骨架（Notion 侧栏气质）
+ * 正文见 float-ai-md.css；引用见 float-ai-citations.css；输入条见 float-ai-composer.css
  */
 
 .reader-float-ai .aui-thread {
@@ -19,7 +19,7 @@
   background: var(--paper);
 }
 
-/* —— Empty state: center greeting + List suggestions —— */
+/* —— 空状态：居中问候 + 列表建议 —— */
 .reader-float-ai .aui-empty {
   display: grid;
   justify-items: center;
@@ -65,7 +65,7 @@
   max-width: 26em;
 }
 
-/* Suggestion:Notion Sidebar icon row, non-heavy card */
+/* 建议：Notion 侧栏式图标行，非重卡片 */
 .reader-float-ai .aui-suggestions {
   display: grid;
   gap: 2px;
@@ -110,7 +110,7 @@
   background: color-mix(in srgb, var(--ink) 6%, var(--paper));
 }
 
-/* ââ Messages ââ */
+/* —— 消息 —— */
 .reader-float-ai .aui-msg {
   display: grid;
   gap: 4px;
@@ -138,7 +138,7 @@
   }
 }
 
-/* Assistant: left avatar + Non-overlapping bubble document flow body */
+/* 助手：左头像 + 无重气泡的文档流正文 */
 .reader-float-ai .aui-msg-assistant {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr);
@@ -163,7 +163,7 @@
   min-width: 0;
 }
 
-/* User: right-aligned light gray bubble */
+/* 用户：右对齐浅灰气泡 */
 .reader-float-ai .aui-msg-user {
   display: flex;
   flex-direction: column;
@@ -182,7 +182,7 @@
   line-height: 1.55;
 }
 
-/* Remove assistant bubble border; match page body style. */
+/* 助手气泡：去边框，像页面正文 */
 .reader-float-ai .aui-msg-assistant .aui-msg-bubble {
   padding: 0;
   border: 0;
@@ -196,7 +196,7 @@
   overflow-wrap: anywhere;
 }
 
-/* Search progress pill */
+/* 检索进度 pill */
 .reader-float-ai .aui-thinking {
   display: inline-flex;
   align-items: center;
@@ -216,7 +216,7 @@
   color: color-mix(in srgb, var(--ink) 50%, var(--muted));
 }
 
-/* Action bar: lighter ghost button */
+/* 操作条：更轻的幽灵按钮 */
 .reader-float-ai .aui-msg-actions {
   position: relative;
   z-index: 3;

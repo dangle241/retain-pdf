@@ -48,8 +48,8 @@ export function createReaderDataPort({
     return loadTranslationItem(jobId, itemId, apiPrefix);
   }
 
-// Prefer /markdown/document with content_with_absolute_image_urls Image buttons can be pressed API Address auth fetch.
-  // /markdown Relative only images/...in reader Page resolves to static source. 404 →「Image temporarily unavailable」。
+  // 优先 /markdown/document：带 content_with_absolute_image_urls，图片可按 API 地址鉴权拉取。
+  // /markdown 仅有相对 images/...，在 reader 页上会解析到静态源 404 →「图片暂不可用」。
   async function loadMarkdownPayload(jobId) {
     try {
       const documentPayload = await loadMarkdownDocument(jobId, apiPrefix);

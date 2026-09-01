@@ -1,5 +1,5 @@
-// Details "Translation" Tab PageRange + Ready. Provide source text. + Silent attachJobProgress.
-// progress only in bd-job-status-inner, without opening the workflow popup.
+// 详情「翻译」Tab：页码范围 + 发起翻译 + 静默 attachJobProgress。
+// 进度只在 bd-job-status-inner，不打开工作流弹窗。
 
 import { useEffect, useState } from "react";
 
@@ -8,10 +8,10 @@ import { useEffect, useState } from "react";
  * @param {boolean} options.open
  * @param {string} options.documentId
  * @param {number} options.pageCount
-* @param {object} options.actions library.actions (includes attachJobProgress / translateDocument)
+ * @param {object} options.actions library.actions（含 attachJobProgress / translateDocument）
  * @param {(key: string, fn: Function, fail: string) => Promise<void>} options.withBusy
  * @param {(msg: string) => void} options.setError
-* @param {() => void} [options.onTranslateStarted] Switch to translation after successful submission. Tab etc.
+ * @param {() => void} [options.onTranslateStarted] 成功提交后切到翻译 Tab 等
  */
 export function useBookDetailTranslate({
   open,
@@ -52,23 +52,23 @@ export function useBookDetailTranslate({
         || e < s
         || (pageCount && e > pageCount)
       ) {
-        setError(`Invalid page range (1–${pageCount || "Total pages"}）`);
+        setError(`页码范围不合法（1–${pageCount || "总页数"}）`);
         return;
       }
       payload.ocr = { page_ranges: `${s}-${e}` };
       payload.translation = { start_page: s, end_page: e };
     }
-    // First switch to translation Tab, ensuring bd-job-status-inner Resume progress in viewport
+    // 先切到翻译 Tab，保证 bd-job-status-inner 在视口内再接进度
     onTranslateStarted?.();
     await withBusy(
       "translate",
       async () => {
-        // promoteDocumentToJobupdate details payload + silent attachJobProgress
-// Do not openTranslationWorkflow
+        // promoteDocumentToJob：改详情 payload + silent attachJobProgress
+        // 不 openTranslationWorkflow
         await actions.translateDocument(documentId, payload);
         onTranslateStarted?.();
       },
-      "Translation failed.",
+      "发起翻译失败",
     );
   }
 

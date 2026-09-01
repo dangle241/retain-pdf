@@ -1,4 +1,4 @@
-/* Bottom bar HUD page / zoom / Keyboard shortcut help / Mode icon tab */
+/* 底栏 HUD：页码 / 缩放 / 快捷键帮助 / 模式图标 tab */
 
 /* —— R2 HUD / zoom —— */
 .reader-react-hud {
@@ -120,7 +120,7 @@
   color: var(--muted, var(--muted));
 }
 
-/* Keyboard shortcut help */
+/* 快捷键帮助 */
 .reader-react-hud-help {
   margin-left: 2px;
   padding-left: 6px;
@@ -224,7 +224,7 @@
 }
 
 
-/* Mode tab.icon-only */
+/* 模式 tab：纯图标 */
 .reader-tab.reader-tab-icon {
   flex: 1 1 0;
   min-width: 40px;

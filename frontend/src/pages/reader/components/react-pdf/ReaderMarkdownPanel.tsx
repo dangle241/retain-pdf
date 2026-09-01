@@ -1,4 +1,4 @@
-// Markdown Hover preview: task recognition/translation Markdown output
+// Markdown 悬浮预览：任务识别/译文 Markdown 产物
 
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { FileCode2 } from "lucide-react";
@@ -56,7 +56,7 @@ export function ReaderMarkdownPanel({
   onClose,
 }: ReaderMarkdownPanelProps) {
   const contentRef = useRef<HTMLElement | null>(null);
-const [status, setStatus] = useState("Not loaded");
+  const [status, setStatus] = useState("尚未加载");
   const objectUrlsRef = useRef<string[]>([]);
 
   useEffect(() => {
@@ -72,21 +72,21 @@ const [status, setStatus] = useState("Not loaded");
 
     async function load() {
       if (sourceOnly || !jobId) {
-setStatus("source document reading does not provide Markdown output");
+        setStatus("源文档阅读不提供 Markdown 产物");
         if (contentRef.current) {
           contentRef.current.replaceChildren();
           contentRef.current.classList.add("hidden");
         }
         return;
       }
-setStatus("Loading Markdown...");
+      setStatus("正在加载 Markdown…");
       try {
         const payload = await defaultReaderDataPort.loadMarkdownPayload(jobId);
         if (cancelled) return;
         const content = `${payload?.content_with_absolute_image_urls || payload?.content || ""}`;
         const imagesBaseUrl = `${payload?.images_base_url || payload?.images_base_path || ""}`.trim();
         if (!content.trim()) {
-setStatus("No Markdown output for this task");
+          setStatus("该任务暂无 Markdown 产物");
           contentRef.current?.replaceChildren();
           contentRef.current?.classList.add("hidden");
           return;
@@ -101,7 +101,7 @@ setStatus("No Markdown output for this task");
         template.innerHTML = html;
         sanitizeRenderedMarkdown(template.content);
         template.content.querySelectorAll("img[src]").forEach((img) => {
-// Resolve relative images/... to API absolute path using base; prevent mount failure. reader.html same-origin 404
+          // 相对 images/... 用 base 解析成 API 绝对地址，避免挂到 reader.html 同源下 404
           const raw = img.getAttribute("src") || "";
           const resolved = resolveMarkdownAssetUrl(imagesBaseUrl, raw) || raw;
           img.setAttribute("data-reader-md-src", resolved);
@@ -111,7 +111,7 @@ setStatus("No Markdown output for this task");
         contentRef.current.classList.remove("hidden");
         setStatus("");
 
-// Protected image â fetch blob with X-API-Key (<img> cannot carry auth header)
+        // 受保护图片 → 带 X-API-Key 拉 blob（<img> 无法带鉴权头）
         const images = [...contentRef.current.querySelectorAll("img[data-reader-md-src]")];
         let failed = 0;
         await Promise.allSettled(images.map(async (img) => {
@@ -126,17 +126,17 @@ setStatus("No Markdown output for this task");
             failed += 1;
             const fallback = img.ownerDocument.createElement("span");
             fallback.className = "reader-markdown-image-missing";
-fallback.textContent = `[Image unavailable]`;
+            fallback.textContent = `[图片暂不可用]`;
             fallback.title = src;
             img.replaceWith(fallback);
           }
         }));
         if (!cancelled && failed > 0 && failed === images.length && images.length > 0) {
-          setStatus(`Image failed to load.${failed} images). Please confirm API Reachable & Configured X-API-Key。`);
+          setStatus(`图片加载失败（${failed} 张）。请确认 API 可达且已配置 X-API-Key。`);
         }
       } catch (err) {
         if (cancelled) return;
-setStatus(err instanceof Error ? err.message : "Markdown load failed");
+        setStatus(err instanceof Error ? err.message : "Markdown 加载失败");
       }
     }
 
@@ -151,10 +151,10 @@ setStatus(err instanceof Error ? err.message : "Markdown load failed");
       id="reader-markdown-panel"
       open={open}
       title="Markdown"
-      subtitle="recognition and translation output · Drag to move"
+      subtitle="识别与翻译产出 · 拖动可移动"
       titleIcon={<FileCode2 size={14} strokeWidth={2.25} aria-hidden />}
       storageKey="retainpdf.reader.markdown-float.pos.v1"
-      ariaLabel="Markdown preview"
+      ariaLabel="Markdown 预览"
       width={420}
       onClose={onClose}
       toolbar={(

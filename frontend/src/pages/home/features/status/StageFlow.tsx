@@ -1,9 +1,9 @@
-substages: unknown[];
-retryAction: StatusCardRetryAction | null;
+// 阶段流程条(蓝图 §2 features/status/;镜像 job-status-card-stage-flow.js
+// 的 syncStageFlow 语义,DOM 契约逐 id/class 保留——smoke 依赖
 // .status-stage-step[data-stage-key][aria-selected])。
 //
-// Retry operation outside phase → skipped: phase separation, add when complex retry logic needed. pill Top (crowded, easily tilted layout), by StatusCardEmbedded
-// Press right of progress text line「Current selected stage」Render separately.
+// 重试操作不放在阶段 pill 上（拥挤、易顶歪布局），由 StatusCardEmbedded
+// 在进度文案行右侧按「当前选中阶段」单独渲染。
 
 import { useStatusCardIds } from "./status-card-ids-context.js";
 import {
@@ -13,7 +13,7 @@ import {
   statusStageIndex,
 } from "../../composition/external.js";
 
-/** @deprecated Retry migrated out. StageFlowPreserve type to avoid legacy breakage import Break */
+/** @deprecated 重试已迁出 StageFlow；保留类型以免旧 import 断裂 */
 export type StageFlowRetryAction = {
   label: string;
   enabled: boolean;
@@ -25,9 +25,9 @@ type StageFlowProps = {
   currentStageKey?: string;
   selectedStageKey?: string;
   onSelectStage?: (stageKey: string) => void;
-  /** Override context id; defaults to using StatusCardIdsContext StatusCardIdsContext */
+  /** 覆盖上下文 id；默认走 StatusCardIdsContext */
   id?: string;
-  /** @deprecated Ignore; outer progress area renders retry */
+  /** @deprecated 忽略；重试由外层进度区渲染 */
   stageRetries?: Partial<Record<string, StageFlowRetryAction | null | undefined>>;
 };
 
@@ -44,7 +44,7 @@ export function StageFlow({
   const activeIndex = statusStageIndex(normalized);
 
   return (
-    <div id={flowId || undefined} className="status-stage-flow" role="tablist" aria-label="Task Flow">
+    <div id={flowId || undefined} className="status-stage-flow" role="tablist" aria-label="任务流程">
       {STATUS_STAGE_FLOW.map((stageKey) => {
         const stepIndex = statusStageIndex(stageKey);
         const isDone = activeIndex >= 0 && stepIndex >= 0 && stepIndex < activeIndex;

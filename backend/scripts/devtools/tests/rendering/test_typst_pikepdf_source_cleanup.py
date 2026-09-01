@@ -118,8 +118,8 @@ def test_typst_cover_fallback_plan_marks_only_target_items() -> None:
     plan = TypstCoverFallbackPlan(page_indices=frozenset(), item_ids=frozenset({"p001-b002"}))
     translated_pages = {
         0: [
-            {"item_id": "p001-b001", "block_kind": "text", "protected_translated_text": "Normal Delete"},
-            {"item_id": "p001-b002", "block_kind": "text", "protected_translated_text": "need fallback"},
+            {"item_id": "p001-b001", "block_kind": "text", "protected_translated_text": "正常删除"},
+            {"item_id": "p001-b002", "block_kind": "text", "protected_translated_text": "需要兜底"},
         ]
     }
 
@@ -163,8 +163,8 @@ def test_typst_cover_fallback_plan_marks_only_target_page_spec_blocks() -> None:
                 background_rect=[10, 10, 90, 40],
                 content_rect=[10, 10, 90, 40],
                 content_kind="markdown",
-content_text="normal deletion",
-plain_text="normal deletion",
+                content_text="正常删除",
+                plain_text="正常删除",
                 math_map=[],
                 font_size_pt=10.0,
                 leading_em=1.0,
@@ -175,8 +175,8 @@ plain_text="normal deletion",
                 background_rect=[10, 50, 90, 80],
                 content_rect=[10, 50, 90, 80],
                 content_kind="markdown",
-content_text="need fallback",
-plain_text="need fallback",
+                content_text="需要兜底",
+                plain_text="需要兜底",
                 math_map=[],
                 font_size_pt=10.0,
                 leading_em=1.0,
@@ -486,7 +486,7 @@ def test_typst_book_overlay_keeps_default_fraction_layout() -> None:
                 "bbox": [10.0, 20.0, 180.0, 70.0],
                 "source_text": r"Equation \frac{a}{b}.",
                 "protected_source_text": r"Equation \frac{a}{b}.",
-                "protected_translated_text": r"Formula $\\frac{a}{b}$。",
+                "protected_translated_text": r"公式 $\\frac{a}{b}$。",
             }
         ],
     )

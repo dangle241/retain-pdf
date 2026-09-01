@@ -15,7 +15,7 @@ function createGlossariesFeature({
       entries: [
         {
           source: "DFT",
-target: "Density Functional Theory",
+          target: "密度泛函理论",
           level: "canonical",
           match_mode: "case_insensitive",
         },
@@ -27,8 +27,8 @@ target: "Density Functional Theory",
     setGlossaryStatus: () => {},
     ...view,
   };
-// controller.js no longer includes default viewPort (old direct DOM implementation deleted during cutover),
-// Minimal stub for testing to bridge view overrides, independent of real DOM/glossary-view-port.js.
+  // controller.js 不再自带默认 viewPort(旧 DOM 直写实现已随 cutover 删除),
+  // 测试用最小 stub 桥接 view 覆盖项,不依赖真实 DOM/glossary-view-port.js。
   const resolvedViewPort = viewPort || {
     addEntryRow: () => {},
     bindEvents: () => {},

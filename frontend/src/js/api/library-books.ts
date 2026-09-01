@@ -21,7 +21,7 @@ export async function fetchLibraryBookList(apiPrefix, { limit = 40, offset = 0, 
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`Failed to read library, please try again later.(${resp.status})`);
+    throw new Error(`读取图书馆失败，请稍后重试。(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -29,12 +29,12 @@ export async function fetchLibraryBookList(apiPrefix, { limit = 40, offset = 0, 
 export async function deleteLibraryBook(apiPrefix, jobId, { force = false } = {}) {
   const normalizedJobId = `${jobId || ""}`.trim().replace(/-ocr$/, "");
   if (!normalizedJobId) {
-throw new Error("Delete failed: missing job_id");
+    throw new Error("删除失败: 缺少 job_id");
   }
   if (isMockMode()) {
     const referenced = countMockFavoritesByJob(normalizedJobId);
     if (referenced > 0 && !force) {
-const conflict = new Error(This job is referenced by ${referenced} favorite(s) (409)) as Error & { status?: number };
+      const conflict = new Error(`该 job 被 ${referenced} 条收藏引用(409)`) as Error & { status?: number };
       conflict.status = 409;
       throw conflict;
     }
@@ -46,9 +46,9 @@ const conflict = new Error(This job is referenced by ${referenced} favorite(s) (
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-// 409 = this job is referenced by favorites (delete protection), message reference count inside; must pass through to UI
+    // 409 = 该 job 被收藏引用(删除保护),message 里带引用数量,必须透传给 UI
     const envelope = await resp.json().catch(() => null);
-    const error = new Error(`${envelope?.message || "Delete failed. Retry later."}(${resp.status})`) as Error & { status?: number };
+    const error = new Error(`${envelope?.message || "删除任务失败，请稍后重试。"}(${resp.status})`) as Error & { status?: number };
     error.status = resp.status;
     throw error;
   }

@@ -1,6 +1,6 @@
-/* AI Floating Q&A shell — Notion Sidebar vibe: generous whitespace / border-width: 1px; → skipped: thicker border, add when needed. / soft shadow
- * Details:float-ai-aui|md|citations|composer.css
- * Old drawer AI Skin only in reader-legacy（ai.cssNot in this package.
+/* AI 悬浮问答外壳 — Notion 侧栏气质：大留白 / 轻边框 / 软阴影
+ * 细节：float-ai-aui|md|citations|composer.css
+ * 旧抽屉 AI 皮肤仅在 reader-legacy（ai.css），不在此包。
  */
 .reader-float-ai {
   max-height: min(92vh, 860px);
@@ -57,7 +57,7 @@
   display: flex;
   flex-direction: column;
 }
-/* Transparent event-blocking layer: no semi-transparent darkening. */
+/* 透明吞事件层：不要半透明压暗 */
 .reader-float-ai .aui-branch-pointer-shield {
   position: absolute;
   inset: 0;
@@ -67,7 +67,7 @@
   pointer-events: auto;
 }
 
-/* —— Session bar: quiet, like Notion Top bar dropdown —— */
+/* —— 会话条：安静、像 Notion 顶栏下拉 —— */
 .reader-float-ai .aui-session-bar {
   display: flex;
   flex-direction: column;
@@ -292,7 +292,7 @@
   line-height: 1.45;
 }
 
-/* Empty state / Source doc disabled */
+/* 空态 / 源文档禁用 */
 .reader-float-ai-empty {
   display: grid;
   justify-items: center;

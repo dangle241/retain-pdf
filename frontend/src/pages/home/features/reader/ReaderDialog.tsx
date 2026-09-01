@@ -1,7 +1,7 @@
-// Reader entry: convert openReaderRequested / deep link Convert to navigation.
+// 阅读入口：把 openReaderRequested / 深链 转成导航。
 //
-// Default to soft open（navigate-to-reader → SoftReaderHost Fullscreen layer; homepage persists.
-// Deep link replace Force insert. reader.html.
+// 默认走 soft open（navigate-to-reader → SoftReaderHost 全屏层），主页不卸载；
+// 深链 replace 仍硬进 reader.html。
 
 import { useEffect } from "react";
 import { useAppEvent } from "../../../../shared/react/use-app-event.js";
@@ -27,8 +27,8 @@ function anchorFromEventDetail(detail: any = {}) {
 }
 
 /**
-* No UI, only responsible for "Open for reading" event / deep link convert to redirect reader.html.
-* Component name retained ReaderDialog, to avoid HomeApp / test import Extensive changes.
+ * 无 UI：只负责把「打开阅读」事件 / 深链 转成跳转 reader.html。
+ * 组件名保留 ReaderDialog，避免 HomeApp / 测试 import 大面积改动。
  */
 export function ReaderDialog() {
   useAppEvent(APP_EVENTS.openReaderRequested, (event) => {
@@ -48,7 +48,7 @@ export function ReaderDialog() {
     navigateToReader(url);
   });
 
-  // Homepage deep link ?view=reader&job_id= → Navigate directly to reading page (replaceavoid back-button infinite loop)
+  // 主页深链 ?view=reader&job_id= → 直接进阅读页（replace，避免返回死循环）
   useEffect(() => {
     const startupJobId = requestedReaderJobIdFromLocation();
     if (!startupJobId) {

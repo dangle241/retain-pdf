@@ -68,7 +68,7 @@ def test_agent_repair_stage_runs_limited_repair_and_saves(monkeypatch, tmp_path:
     def _fake_request(*_args, **_kwargs):
         return json.dumps(
             {
-                "repaired_text": "The self-consistent field process calculates molecular orbitals and then evaluates the final energy of the system.",
+                "repaired_text": "自洽场过程计算分子轨道，然后评估体系的最终能量。",
                 "applied_issue_kinds": ["english_residue"],
                 "confidence": 0.9,
                 "needs_manual_review": False,
@@ -91,7 +91,7 @@ def test_agent_repair_stage_runs_limited_repair_and_saves(monkeypatch, tmp_path:
     saved = json.loads(path.read_text(encoding="utf-8"))
     assert summary["candidate_items"] == 1
     assert summary["repaired_items"] == 1
-assert saved[0]["translated_text"] == "SCF process computes molecular orbitals and then evaluates the final energy of the system."
+    assert saved[0]["translated_text"] == "自洽场过程计算分子轨道，然后评估体系的最终能量。"
     assert saved[0]["translation_diagnostics"]["agent_repaired"] is True
 
 

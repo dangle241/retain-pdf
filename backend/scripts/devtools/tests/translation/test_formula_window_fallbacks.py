@@ -153,7 +153,7 @@ class FormulaWindowFallbacksTests(unittest.TestCase):
 
         def fake_plain(*args, **kwargs):
             calls.append("plain")
-            return {item["item_id"]: result_entry("translate", "Normal result [[FORMULA_1]]")}
+            return {item["item_id"]: result_entry("translate", "普通结果 [[FORMULA_1]]")}
 
         original_single = fallbacks.translate_single_item_formula_segment_text_with_retries
         original_plain = fallbacks.translate_single_item_plain_text
@@ -190,11 +190,11 @@ class FormulaWindowFallbacksTests(unittest.TestCase):
             calls.append(segment_ids)
             if segment_ids[0] == "9":
                 return "\n".join(
-                    f"<<<SEG id={segment['segment_id']}>>>\nNo input.{segment['segment_id']}\n<<<END>>>"
+                    f"<<<SEG id={segment['segment_id']}>>>\n中文片段{segment['segment_id']}\n<<<END>>>"
                     for segment in payload["segments"][:-1]
                 )
             return "\n".join(
-f"<<<SEG id={segment['segment_id']}>>>\nChinese segment{segment['segment_id']}\n<<<END>>>"
+                f"<<<SEG id={segment['segment_id']}>>>\n中文片段{segment['segment_id']}\n<<<END>>>"
                 for segment in payload["segments"]
             )
 

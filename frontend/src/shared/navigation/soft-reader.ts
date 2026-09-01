@@ -1,11 +1,11 @@
-// Home "soft open" Reader: no location.assign, use history.pushState + Fullscreen layer
-// Home DOM not unmounted â Close without refresh; scroll position persists.
-// Address bar becomes reader.html?â¦, but document is still homepage SPA.
+// 主页「软打开」阅读器：不 location.assign，用 history.pushState + 全屏层，
+// 主页 DOM 不卸载 → 关闭不刷新、滚动天然保留。
+// 地址栏会变成 reader.html?…，但 document 仍是主页 SPA。
 
 export const SOFT_READER_HISTORY_FLAG = "retainpdfSoftReader";
 export const SOFT_READER_OPEN_EVENT = "retainpdf:soft-reader-open";
 export const SOFT_READER_FORCE_CLOSE_EVENT = "retainpdf:soft-reader-force-close";
-/** iframe → Parent page: request close soft reading layer */
+/** iframe → 父页：请求关闭软阅读层 */
 export const SOFT_READER_CLOSE_MESSAGE = "retainpdf:soft-reader-close";
 
 export type SoftReaderHistoryState = {
@@ -28,7 +28,7 @@ export function isSoftReaderHistoryState(state: unknown): state is SoftReaderHis
   );
 }
 
-/** Home SPA still hanging (after soft open? URL is reader.html, but #app-shell still present) */
+/** 主页 SPA 是否仍挂着（软打开后 URL 已是 reader.html，但 #app-shell 还在） */
 export function isHomeSpaAlive(doc: Document = globalThis.document): boolean {
   if (typeof doc === "undefined" || !doc) return false;
   return Boolean(
@@ -40,9 +40,9 @@ export function isHomeSpaAlive(doc: Document = globalThis.document): boolean {
 }
 
 /**
- * On homepage SPA Open software; return success. true。
-* Note: after soft open location.pathname becomes reader.html, but document is still homepage.
- * Therefore cannot use only pathname Check state; prevent stale path on reopen. location.assign → Blank screen/Full-page navigation.
+ * 在主页 SPA 上软打开；成功返回 true。
+ * 注意：软打开后 location.pathname 会变成 reader.html，但 document 仍是主页。
+ * 因此不能只用 pathname 判断，否则第二次打开会误走 location.assign → 白屏/整页跳。
  */
 export function trySoftOpenReader(url: string): boolean {
   if (typeof window === "undefined") return false;
@@ -53,11 +53,11 @@ export function trySoftOpenReader(url: string): boolean {
   const alreadySoft = isSoftReaderHistoryState(window.history.state);
   const spaAlive = isHomeSpaAlive();
 
-  // Homepage only SPA Soft open only if home SPA is alive; standalone reader.html full page skips this. reader.html Skip entire page.
+  // 仅当主页 SPA 还在时才能软开；独立打开的 reader.html 整页不走这条
   if (!onHomePath && !alreadySoft && !spaAlive) {
     return false;
   }
-// pathname is reader.html and SPA uninstalled â delegate to location.assign
+  // pathname 已是 reader.html 且 SPA 已卸掉 → 交给 location.assign
   if (!spaAlive && !onHomePath) {
     return false;
   }
@@ -71,7 +71,7 @@ export function trySoftOpenReader(url: string): boolean {
       [SOFT_READER_HISTORY_FLAG]: true,
       readerUrl: absolute,
     };
-// Soft read layer: replace, avoid history stack string reader
+    // 已在软阅读层：replace，避免 history 堆一串 reader
     if (alreadySoft || (!onHomePath && spaAlive)) {
       window.history.replaceState(state, "", absolute);
     } else {
@@ -88,17 +88,17 @@ export function trySoftOpenReader(url: string): boolean {
   }
 }
 
-/** Parent page receives close request: priority history.back Strip soft layer. */
+/** 父页收到关闭请求：优先 history.back 卸掉软层 */
 export function closeSoftReaderOnHost() {
   if (typeof window === "undefined") return;
   if (isSoftReaderHistoryState(window.history.state)) {
     window.history.back();
     return;
   }
-  // No match history On entry:URL Revert to homepage and force unmount.
+  // 无对应 history 条目时：URL 改回主页并强制卸层
   try {
     const home = new URL("./index.html", window.location.href);
-    // Keep directory prefix:/foo/reader.html → /foo/index.html
+    // 保留目录前缀：/foo/reader.html → /foo/index.html
     const homePath = home.pathname.replace(/reader\.html$/i, "index.html");
     const href = `${homePath}${home.search}${home.hash}` || "./index.html";
     window.history.replaceState(null, "", href);

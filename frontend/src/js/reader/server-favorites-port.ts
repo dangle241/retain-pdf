@@ -9,9 +9,9 @@ import type {
   ServerFavoriteRaw,
 } from "./types.js";
 
-// Server-side favorites â Reader view history: Convert snake_case to camelCase,
-// page_idx and jumpToReaderAnchor's pageIdx are both 0-based
-// Discard dirty data if favorite_id or quote_text is missing (Process timeline null).
+// 服务端收藏 → 阅读器视图记录:snake_case 转 camelCase,
+// page_idx 与 jumpToReaderAnchor 的 pageIdx 同为 0 基。
+// 缺 favorite_id 或 quote_text 的脏数据直接丢弃(返回 null)。
 export function normalizeServerFavorite(raw: ServerFavoriteRaw = {}): ServerFavorite | null {
   const favoriteId = `${raw?.favorite_id || ""}`.trim();
   const quoteText = `${raw?.quote_text || ""}`.trim();
@@ -33,7 +33,7 @@ export function normalizeServerFavorite(raw: ServerFavoriteRaw = {}): ServerFavo
   };
 }
 
-// Carry after local record sync succeeds. serverFavoriteId;Cloud zone skips duplicate favorites.
+// 本地记录同步成功后带 serverFavoriteId;云端区不重复展示这些收藏。
 export function dedupeServerFavorites(
   serverFavorites: ServerFavorite[] = [],
   localItems: FavoriteItem[] = [],
@@ -47,9 +47,9 @@ export function dedupeServerFavorites(
     .filter((favorite) => favorite?.favoriteId && !syncedIds.has(favorite.favoriteId));
 }
 
-// Sync reader bookmarks to backend. favorites。
-// document_id via backend GET /documents?job_id= Direct query (includes historical runs); frontend no longer scans list for reverse lookup.
-// Best-effort server calls.:Log failure only,Reader local features unaffected.
+// 把阅读器收藏同步到后端 favorites。
+// document_id 经后端 GET /documents?job_id= 直查(含历史 run),前端不再扫列表反查。
+// 所有服务端调用尽力而为:失败仅记录日志,阅读器本地功能不受影响。
 export function createReaderServerFavoritesPort({
   jobId = "",
   apiPrefix = API_PREFIX,
@@ -81,7 +81,7 @@ export function createReaderServerFavoritesPort({
       return null;
     }
     try {
-// Write-only path. job_id, Backend parses owning document (historical runs can also be favorited)
+      // 写路径只给 job_id,后端解析所属文档(历史 run 也能收藏)
       const favorite = await submitFavorite(apiPrefix, {
         job_id: jobId,
         page_idx: Number(quote.pageIdx) || 0,
@@ -90,16 +90,16 @@ export function createReaderServerFavoritesPort({
         translated_quote_text: `${quote.translatedQuoteText || ""}`,
         kind: "sentence",
       });
-      console.info("Favorites synced to server.", favorite?.favorite_id || "");
+      console.info("收藏已同步到服务端", favorite?.favorite_id || "");
       return favorite;
     } catch (error) {
-console.error("Failed to sync favorites to server", error);
+      console.error("同步收藏到服务端失败", error);
       return null;
     }
   }
 
-  // Fetch server favorites for current doc and normalize.;Offline/Return empty silently if document cannot be parsed.
-// mock Pattern no short-circuit: api Layer built-in mock branch, Baseline and e2e dependency mock Full flow available.
+  // 拉取当前文档的服务端收藏并归一化;离线/解析不到文档时静默返回空。
+  // mock 模式不短路:api 层自带 mock 分支,基线与 e2e 依赖 mock 全流程可用。
   async function loadServerFavorites(): Promise<ServerFavorite[]> {
     const documentId = await resolveDocumentId();
     if (!documentId) {
@@ -111,12 +111,12 @@ console.error("Failed to sync favorites to server", error);
         .map(normalizeServerFavorite)
         .filter(Boolean);
     } catch (error) {
-console.warn("Failed to read server favorites", error);
+      console.warn("读取服务端收藏失败", error);
       return [];
     }
   }
 
-  // Delete server-side favorites,Success response true;Log failure only, return. false(Non-blocking local flow.)。
+  // 删除服务端收藏,成功返回 true;失败仅记录日志返回 false(不阻塞本地流程)。
   async function removeServerFavorite(favoriteId: string) {
     const normalized = `${favoriteId || ""}`.trim();
     if (!normalized) {
@@ -126,13 +126,13 @@ console.warn("Failed to read server favorites", error);
       await removeFavorite(apiPrefix, normalized);
       return true;
     } catch (error) {
-console.error("Failed to delete server favorite", error);
+      console.error("删除服务端收藏失败", error);
       return false;
     }
   }
 
-  // The specification has no favorites PATCH:Edit note. = Rebuild with same anchor. + Delete old. Create then delete,Failure preserves data.
-// Write path only provides job_id, Backend parses owning document.
+  // 规范没有收藏 PATCH:改笔记 = 同锚点重建 + 删旧。先建后删,失败不丢数据。
+  // 写路径只给 job_id,后端解析所属文档。
   async function recreateFavoriteNote(annotation: Partial<ServerFavorite> = {}, note = "") {
     if (!annotation?.favoriteId) {
       return null;
@@ -150,7 +150,7 @@ console.error("Failed to delete server favorite", error);
       await removeServerFavorite(annotation.favoriteId);
       return normalizeServerFavorite(created);
     } catch (error) {
-      console.error("Failed to update annotation note.", error);
+      console.error("更新批注笔记失败", error);
       return null;
     }
   }

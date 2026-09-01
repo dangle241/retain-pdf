@@ -40,20 +40,20 @@ pub(super) fn apply_process_completion(
         ProcessCompletionKind::Canceled => {
             job.status = JobStatusKind::Canceled;
             job.stage = Some("canceled".to_string());
-job.stage_detail = Some("Task canceled".to_string());
+            job.stage_detail = Some("任务已取消".to_string());
             clear_canceled_runtime_artifacts(job);
             clear_job_failure(job);
         }
         ProcessCompletionKind::Succeeded => {
             job.status = JobStatusKind::Succeeded;
             job.stage = Some("finished".to_string());
-            job.stage_detail = Some("Task completed".to_string());
+            job.stage_detail = Some("任务完成".to_string());
             clear_job_failure(job);
         }
         ProcessCompletionKind::SucceededWithShutdownNoise => {
             job.status = JobStatusKind::Succeeded;
             job.stage = Some("finished".to_string());
-            job.stage_detail = Some("Task completed (ignored) Python exit phase cleanup noise)".to_string());
+            job.stage_detail = Some("任务完成（已忽略 Python 退出阶段的收尾噪音）".to_string());
             job.error = None;
             clear_job_failure(job);
             job.append_log(
@@ -71,7 +71,7 @@ job.stage_detail = Some("Task canceled".to_string());
                 .filter(|value| !value.is_empty())
                 .is_none()
             {
-job.stage_detail = Some("Python worker execution failed".to_string());
+                job.stage_detail = Some("Python worker 执行失败".to_string());
             }
             if stderr_text.trim().is_empty() {
                 job.error = job.stage_detail.clone();

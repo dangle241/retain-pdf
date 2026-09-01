@@ -1,4 +1,4 @@
-// AI session CRUD integrates Rust /api/v1/ai/conversations (including parent_id / head_id branch tree).
+// AI 会话 CRUD：对接 Rust /api/v1/ai/conversations（含 parent_id / head_id 分支树）。
 
 import { API_PREFIX } from "../config/api-constants.js";
 import { buildApiHeaders, isMockMode } from "../config/runtime.js";
@@ -161,7 +161,7 @@ export async function patchConversation(
       head_id: payload.head_id || "",
     };
   }
-  // Send only non-empty fields. head_id Exclude (legacy service/Validation more robust.
+  // 只发有值的字段：空 head_id 不必带（旧服务/校验更稳）
   const body: Record<string, string> = {};
   const head = `${payload.head_id || ""}`.trim();
   const title = `${payload.title || ""}`.trim();
@@ -228,19 +228,19 @@ export async function appendConversationMessage(
   );
 }
 
-/* Remove fork-n- / branch prefix, get original conversation name. */
+/** 去掉 fork-n- / 分支 · 前缀，得到原始对话名。 */
 export function baseConversationTitle(title: string): string {
   let t = `${title || ""}`.replace(/\s+/g, " ").trim();
-  if (!t) return "Untitled Conversation";
+  if (!t) return "未命名对话";
   const fork = t.match(/^fork-\d+-(.+)$/i);
   if (fork?.[1]) t = fork[1].trim();
-t = t.replace(/^Branch\s[·•\-—]\s/, "").trim();
-return t || "Untitled conversation";
+  t = t.replace(/^分支\s*[·•\-—]\s*/, "").trim();
+  return t || "未命名对话";
 }
 
 /**
-* Generate fork title: fork-n-xxx
- * n Relative same original name already exists fork Incremental sequence number;xxx Original chat name.
+ * 生成 fork 标题：fork-n-xxx
+ * n 为相对同一原始名已有 fork 的递增序号；xxx 为原对话名。
  */
 export function nextForkConversationTitle(
   sourceTitle: string,
@@ -257,13 +257,13 @@ export function nextForkConversationTitle(
     if (Number.isFinite(n) && n > maxN) maxN = n;
   }
   const title = `fork-${maxN + 1}-${base}`;
-  // DB/UI Title too long
+  // DB/UI 标题不宜过长
   return title.length > 80 ? `${title.slice(0, 79).trim()}…` : title;
 }
 
 /**
- * Branch from answer.「New session window」：
-* Copy root→fork path to new conversation (new message_id, original conversation remains unchanged).
+ * 从答案处分叉成「新会话窗口」：
+ * 把 root→fork 路径复制到新 conversation（新 message_id），原会话不动。
  */
 export async function forkConversationFromPath(
   options: {
@@ -284,19 +284,19 @@ export async function forkConversationFromPath(
     throw new Error("fork path empty");
   }
   const firstUser = path.find((m) => m.role === "user");
-  const rawTitle = `${options.title || firstUser?.content || "Untitled Conversation"}`.replace(/\s+/g, " ").trim();
+  const rawTitle = `${options.title || firstUser?.content || "未命名对话"}`.replace(/\s+/g, " ").trim();
   const title = rawTitle.length > 80 ? `${rawTitle.slice(0, 79).trim()}…` : rawTitle;
 
   const conversation = await createConversation(
     {
-title: title || "Untitled conversation",
+      title: title || "未命名对话",
       document_id: options.documentId || "",
     },
     apiPrefix,
   );
   const convId = conversation.conversation_id;
 
-  // message_id Globally unique, must remap.
+  // message_id 全局唯一，必须重映射
   const idMap = new Map<string, string>();
   const makeId = (role: string, i: number) =>
     `fork-${role[0] || "m"}-${Date.now().toString(36)}-${i}-${Math.random().toString(36).slice(2, 7)}`;
@@ -310,7 +310,7 @@ title: title || "Untitled conversation",
     const m = path[i];
     const newId = idMap.get(m.id)!;
     const parentRaw = m.parentId ? idMap.get(m.parentId) || "" : "";
-    // If parent on path is unmapped (should not happen), attach linearly. parent Unmapped (should not occur); append linearly.
+    // 路径上若 parent 未映射（不应发生），按线性挂上一条
     const parentId =
       parentRaw
       || (i > 0 ? idMap.get(path[i - 1].id) || "" : "");
@@ -361,7 +361,7 @@ title: title || "Untitled conversation",
   };
 }
 
-/** Server message → Frontend branch tree items。 */
+/** 服务端消息 → 前端分支树 items。 */
 export function messagesToBranchItems(messages: MessageRecord[]): Array<{
   parentId: string | null;
   message: {
@@ -400,7 +400,7 @@ export function messagesToBranchItems(messages: MessageRecord[]): Array<{
         role,
         content: m.content || "",
         ...(citations ? { citations } : {}),
-// assistant-ui: status only allowed for assistant; user with status throws directly
+        // assistant-ui: status 仅允许 assistant；user 带 status 会直接 throw
         ...(role === "assistant"
           ? { status: { type: "complete", reason: "stop" } }
           : {}),

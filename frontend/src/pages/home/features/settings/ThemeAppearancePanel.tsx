@@ -1,5 +1,5 @@
-// Settings Â· Appearance: theme skin switching (registry-driven; add skins later without modifying this file)
-// Truthy:html[data-theme] + localStorage（shared/theme）
+// 设置 · 外观：主题皮肤切换（注册表驱动，后期加皮肤无需改本文件）
+// 真值：html[data-theme] + localStorage（shared/theme）
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -12,8 +12,8 @@ import {
 
 export function ThemeAppearancePanel() {
   const [active, setActive] = useState<ThemeId>(() => getTheme());
-  // Partition by product line (Basic/Hundred Schools of Thought/Dynasty/2D…), see series registry at
-// THEME_SERIES in shared/theme/registry.tsââAdd row to new series creates new partition.
+  // 按产品系列分区（基础/诸子百家/王朝/二次元…），系列注册表见
+  // shared/theme/registry.ts 的 THEME_SERIES——新系列加一行即出新分区
   const groups = listThemesBySeries();
 
   useEffect(() => {
@@ -27,21 +27,21 @@ export function ThemeAppearancePanel() {
 
   return (
     <div className="theme-appearance" id="theme-appearance-panel">
-      {/* Description text handled by settings panel's pane-head; no hint repeated here. pane-head Handle here, no repeat hint */}
+      {/* 说明文案由设置面板的 pane-head 承担，此处不再重复 hint */}
       {groups.map(({ series, label, themes }) => (
         <div key={series} className="theme-appearance-group" data-theme-series={series}>
           <h3 className="theme-appearance-group-title">{label}</h3>
           <div
             className="theme-appearance-grid"
             role="radiogroup"
-            aria-label={`${label}Theme`}
+            aria-label={`${label}主题`}
           >
             {themes.map((meta) => {
               const swatch = meta.preview;
               const selected = active === meta.id;
-// className uses cn + Pure literal: v4 Scanner fails to extract. `x${y}` In template
-              // Class name (tailwind-theme.css Header comment pitfallstheme-option Previously caused by this
-              // Whole line @utility Silent loss.
+              // className 用 cn + 纯字面量：v4 扫描器提不出 `x${y}` 模板里的
+              // 类名（tailwind-theme.css 头注释记录的坑，theme-option 曾因此
+              // 整条 @utility 静默丢失）
               return (
                 <button
                   key={meta.id}

@@ -207,7 +207,7 @@ class HeavyFormulaSplitTests(unittest.TestCase):
 
         def fake_translate(chunk_item, **kwargs):
             seen_chunks.append(chunk_item["translation_unit_protected_source_text"])
-            return {item["item_id"]: result_entry("translate", f"Translated block{len(seen_chunks)}")}
+            return {item["item_id"]: result_entry("translate", f"已翻译块{len(seen_chunks)}")}
 
         result = translate_heavy_formula_block(
             item,
@@ -224,7 +224,7 @@ class HeavyFormulaSplitTests(unittest.TestCase):
 
         self.assertIsNotNone(result)
         self.assertGreater(len(seen_chunks), 1)
-self.assertEqual(result[item["item_id"]]["translated_text"], "translated block 1 translated block 2")
+        self.assertEqual(result[item["item_id"]]["translated_text"], "已翻译块1 已翻译块2")
 
     def test_heavy_formula_split_empty_chunk_marks_block_failed(self):
         load_retrying_translator()
@@ -279,7 +279,7 @@ self.assertEqual(result[item["item_id"]]["translated_text"], "translated block 1
             seen_chunks.append(chunk_item["translation_unit_protected_source_text"])
             if len(seen_chunks) == 2:
                 return {item["item_id"]: result_entry("translate", "")}
-return {item["item_id"]: result_entry("translate", f"translated block{len(seen_chunks)}")}
+            return {item["item_id"]: result_entry("translate", f"已翻译块{len(seen_chunks)}")}
 
         result = translate_heavy_formula_block(
             item,

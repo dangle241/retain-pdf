@@ -72,7 +72,7 @@ export function BookReaderDialog({ book, open, onClose }: BookReaderDialogProps)
 
         setState((current) => ({
           ...current,
-sourceStatus: describeLoadProgress('Original', progress.phase, progress.bytes, progress.message),
+          sourceStatus: describeLoadProgress('原文', progress.phase, progress.bytes, progress.message),
         }))
       },
     })
@@ -84,7 +84,7 @@ sourceStatus: describeLoadProgress('Original', progress.phase, progress.bytes, p
 
         setState((current) => ({
           ...current,
-translatedStatus: describeLoadProgress('Translated', progress.phase, progress.bytes, progress.message),
+          translatedStatus: describeLoadProgress('译文', progress.phase, progress.bytes, progress.message),
         }))
       },
     })
@@ -121,8 +121,8 @@ translatedStatus: describeLoadProgress('Translated', progress.phase, progress.by
         setState({
           loading: false,
           loadedCount,
-sourceStatus: sourceResult.status === 'fulfilled' ? 'Original PDF Ready' : 'Original PDF load failed',
-translatedStatus: translatedResult.status === 'fulfilled' ? 'Translated PDF ready' : 'Translated PDF load failed',
+          sourceStatus: sourceResult.status === 'fulfilled' ? '原文 PDF 已就绪' : '原文 PDF 加载失败',
+          translatedStatus: translatedResult.status === 'fulfilled' ? '译文 PDF 已就绪' : '译文 PDF 加载失败',
           error: loadedCount === 2 ? undefined : libraryCopy.reader.error,
         })
       })
@@ -242,18 +242,18 @@ function formatBytes(value?: number) {
 
 function describeLoadProgress(label: string, phase: 'downloading' | 'parsing' | 'ready' | 'failed', bytes?: number, message?: string) {
   if (phase === 'downloading') {
-return ${label} PDF downloading
+    return `${label} PDF 正在下载`
   }
 
   if (phase === 'parsing') {
-    return `${label} PDF Downloaded${formatBytes(bytes) ? ` ${formatBytes(bytes)}` : ''}, parsing`
+    return `${label} PDF 已下载${formatBytes(bytes) ? ` ${formatBytes(bytes)}` : ''}，正在解析`
   }
 
   if (phase === 'ready') {
-return ${label} PDF ready
+    return `${label} PDF 已就绪`
   }
 
-return `{label} PDF load failed{message} : ''}
+  return `${label} PDF 加载失败${message ? `：${message}` : ''}`
 }
 
 function formatReaderStatusLines(state: ReaderPdfState) {

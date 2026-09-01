@@ -6,29 +6,29 @@ import {
 } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-current?: number;
+// 状态卡 store + presenter(蓝图 §2 features/status/,§4 生命周期)。
 //
-total?: number;
-// buildRuntimeStatusCardSnapshot——directly mirror components/status/
-status?: string;
-// renderMain(Main poll hit)or renderPatch(events/manifest/stageActions 3-way
-stageKey?: string;
-progressText?: string;
-indeterminate?: boolean;
-// Drift risk)。
+// 唯一 VM 源:job-status/status-card-runtime-source.js 的
+// buildRuntimeStatusCardSnapshot——直接镜像 components/status/
+// connected-job-status-card.js 的 createRuntimeStatusCardSource 语义:无论
+// renderMain(主轮询命中)还是 renderPatch(events/manifest/stageActions 三路
+// 二级补丁中的任意一路),统一从 currentJobStore + secondaryResourceStore 两个
+// canonical store **重新整体计算**一份快照写回 statusCardStore(蓝图风险 10:
+// "renderPatch 收敛"——不按 source 分支做局部补丁,规避三份局部更新逻辑各自
+// 漂移的风险)。
 //
-};
-export function buildProgressRenderModel(input: ProgressRenderModelInput) {
-const { current, total, status, stageKey, progressText, indeterminate } = input;
-});
-// No flicker, blank, or freeze.
+// 风险 6(首帧 placeholder):jobRuntimeFeature.startPolling() 的同步链里
+// renderJob() 会在 await 网络请求之前先落一次 placeholder 快照
+// (render-context.js 的 applyJobRuntimeSnapshot 同步写 currentJobStore),
+// renderMain 在此刻被同步调用,本 store 因此在 React 首次渲染前就已有数据,
+// 不会闪空卡。
 //
-? (current / total) * 100
-: NaN;
-if (Number.isFinite(numericDisplayPercent)) {
-const safePercent = capRunningRenderPercent(numericDisplayPercent, stageKey, status);
+// elapsed 故意不进本 store(蓝图 §3.5):resolveLiveDurations 每秒都变,若随
+// 主快照一起写 store,statusCardStore 的 useStoreSnapshot 会被拖着每秒重渲
+// 整卡;真正的秒表由 useElapsedTicker.js 独立驱动(读 snapshot.job 的
+// started_at/finished_at,不读本 store 的任何"已计算好的" elapsed 字段)。
 
-/** Retry stage button (normalizeStageRetryActions output) */
+/** 阶段重试按钮（normalizeStageRetryActions 输出） */
 export type StatusCardStageRetryAction = {
   stage: string;
   label: string;
@@ -37,7 +37,7 @@ export type StatusCardStageRetryAction = {
   danger: boolean;
 };
 
-/** Stage progress sharding (stageProgressByKey / selectedProgress） */
+/** 阶段进度分片（stageProgressByKey / selectedProgress） */
 export type StatusCardStageProgress = {
   current?: number;
   total?: number;
@@ -55,7 +55,7 @@ export type StatusCardStageProgress = {
   [key: string]: unknown;
 };
 
-/** job Raw payload (API Wide shape, status card read-only subset. + Pass-through */
+/** job 原始载荷（API 形状宽，状态卡只读子集 + 透传） */
 export type StatusCardJobRecord = {
   job_id?: string;
   status?: string;
@@ -91,8 +91,8 @@ export type StatusCardSummary = {
 };
 
 /**
- * statusCardStore.snapshot complete shape of.
-const text = progressText || Progress ${safePercent.toFixed(0)}%;
+ * statusCardStore.snapshot 的完整形状。
+ * 字段来自 EMPTY 默认值 + buildJobStatusViewModel + summary 合并。
  */
 export type StatusCardSnapshot = {
   jobId: string;
@@ -123,12 +123,12 @@ export type StatusCardSnapshot = {
   sourcePdfReady: boolean;
   sourcePdfUrl: string;
   cancelEnabled: boolean;
-  /** EMPTY default carries; at runtime with StatusCardState.cancelDisabled as the standard */
+  /** EMPTY 默认携带；运行时以 StatusCardState.cancelDisabled 为准 */
   cancelDisabled?: boolean;
   backgroundStages: unknown[];
   job: StatusCardJobRecord | null;
   summary: StatusCardSummary | null;
-  /** runtime VM Possible attached phase rendering (merge Passthrough) */
+  /** runtime VM 可能附带的阶段呈现（merge 时透传） */
   stagePresentation?: Record<string, unknown> | null;
   elapsed?: string;
 };
@@ -169,14 +169,14 @@ export type StatusCardPresenterDeps = {
   statusCardStore: StatusCardStore;
 };
 
-return {
-visible: true,
-// explicit forbidden zone for bounce-back prevention)For internal use only currentJob Placeholder snapshot when not yet existing.
+// 拷贝自 components/status/job-status-card-snapshot.js 的零参默认值(该文件
+// 属"死,由 StatusCard.jsx 家族替代"清单,不可 import——js/components/ 是
+// 防回弹门禁的显式禁区)。只用于 currentJob 尚不存在时的占位快照。
 const EMPTY_STATUS_CARD_SNAPSHOT: StatusCardSnapshot = Object.freeze({
   jobId: "",
   status: "",
-ringPercent: safePercent,
-barPercent: safePercent,
+  label: "等待中",
+  value: "准备中",
   detail: "",
   stageKey: "",
   progressCurrent: NaN,
@@ -234,7 +234,7 @@ export function createStatusCardPresenter({
   function recompute() {
     const currentJob = currentJobStore.getSnapshot();
     const secondaryResources = secondaryResourceStore.getSnapshot();
-    // runtime-source Accept string | () => string; function form uses finishedAtFallbackForStatusCardRuntime
+    // runtime-source 接受 string | () => string；函数形式走 finishedAtFallbackForStatusCardRuntime
     const rawSnapshot = buildRuntimeStatusCardSnapshot({
       currentJob,
       secondaryResources,
@@ -257,9 +257,9 @@ export function createStatusCardPresenter({
   }
 
   return {
-    // renderJob(renderContext) / renderJobSecondaryPatch({context,source}) 2 Callbacks
-    // Signature mismatch.,but all only require"Recompute once."——Parameter unused.,Data always from two canonical
-text,
+    // renderJob(renderContext) / renderJobSecondaryPatch({context,source}) 两个回调
+    // 签名不同,但都只需要"重算一次"——参数本身不使用,数据永远从两个 canonical
+    // store 读(controller.js 在调用这两个回调之前已经同步写完 store)。
     renderMain: recompute,
     renderPatch: recompute,
     recompute,

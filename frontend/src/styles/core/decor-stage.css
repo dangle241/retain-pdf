@@ -1,19 +1,19 @@
-/* Stage decoration:slot Locate truth value.
+/* 装饰舞台：slot 定位真值。
  *
- * Anchor contract (id/Layer band/semantics) in src/shared/decor/slots.tsOnly translate CSS comments.
-* "Where each slot is, how big, what z-layer" add anchor = slots.ts register + add one line here.
+ * 锚点契约（id/层级带/语义）在 src/shared/decor/slots.ts，此处只负责
+ * "每个 slot 在哪、多大、什么 z 层"。新增锚点 = slots.ts 登记 + 这里补一条。
  *
- * z Layer convention:
-* - bg / mid with z-index:-1 â stack below all static content.html ambient padding layer
-*   above), DOM order ensures mid covers bg
-* - fg with z-index:60 ââ Edge trim floats. UI on the edge, pointer-events:none Allow interaction.
- * - .home-paper-stage(z:1) With features UI Always cover bg/mid
+ * z 层约定：
+ * - bg / mid 带 z-index:-1 —— 压在所有静态内容之下（html 的氛围垫层
+ *   之上），DOM 顺序保证 mid 盖 bg
+ * - fg 带 z-index:60 —— 压边装饰浮在 UI 边缘上，pointer-events:none 不挡交互
+ * - .home-paper-stage(z:1) 与功能 UI 始终盖住 bg/mid
  *
- * Colors: semantic variables only.tests/css-color-literals.test.mjs Ratchet access control).
+ * 颜色一律语义变量（tests/css-color-literals.test.mjs 棘轮门禁）。
  */
 
 .decor-stage {
-  display: contents; /* Only when CSS Variable carrier (--decor-px/py), no box generated */
+  display: contents; /* 只当 CSS 变量载体（--decor-px/py），不产生盒 */
 }
 
 .decor-layer {
@@ -36,7 +36,7 @@
   z-index: 60;
 }
 
-/* ââ Anchor positioning (see area semantics in slots.ts area Comment)ââ */
+/* —— 各锚点定位（区域语义见 slots.ts 的 area 注释）—— */
 
 .decor-slot-backdrop {
   inset: 0;
@@ -74,7 +74,7 @@
   height: min(40vh, 420px);
 }
 
-/* right-bottom fg Version: identical geometry, z Laminated panel (band see slots.ts) */
+/* right-bottom 的 fg 版：几何相同，z 层压面板（band 见 slots.ts） */
 .decor-slot-right-bottom-fg {
   right: 0.5vw;
   bottom: 1.5vh;
@@ -87,7 +87,7 @@
   top: 0;
   width: min(38vw, 520px);
   height: min(11vh, 110px);
-margin-left: calc(min(38vw, 520px) / -2); /* Center without transform. Reserve for parallax. */
+  margin-left: calc(min(38vw, 520px) / -2); /* 不用 transform 居中，留给视差 */
 }
 
 .decor-slot-hero {
@@ -111,7 +111,7 @@ margin-left: calc(min(38vw, 520px) / -2); /* Center without transform. Reserve f
   width: min(10vw, 140px);
 }
 
-/* right-bottom fg Version: Character/Items overlay panel (band=fg â z:60, pointer-events:none) */
+/* right-bottom 的 fg 版：人物/道具压在面板之上（band=fg → z:60，pointer-events:none） */
 .decor-slot-right-bottom-fg {
   right: 0.5vw;
   bottom: 1.5vh;
@@ -119,7 +119,7 @@ margin-left: calc(min(38vw, 520px) / -2); /* Center without transform. Reserve f
   height: min(40vh, 420px);
 }
 
-/* banner text:textCapable anchor, text layout handled uniformly by the stage */
+/* 题字横幅：textCapable 锚点，文字排版由舞台统一处理 */
 .decor-slot-quote {
   right: 2.5vw;
   top: 6vh;
@@ -127,8 +127,8 @@ margin-left: calc(min(38vw, 520px) / -2); /* Center without transform. Reserve f
   height: auto;
 }
 
-/* clickQuote Hotspot: cover only character entity (left padding in layer box preserves panel click-through).
-   Parent layer pointer-events:noneHotspot auto-recover clickable */
+/* clickQuote 热点：只盖人物实体部（图层盒左侧留白带不挡面板点击），
+   父层 pointer-events:none，热点自己恢复可点 */
 .decor-hotspot {
   position: absolute;
   top: 0;
@@ -142,7 +142,7 @@ margin-left: calc(min(38vw, 520px) / -2); /* Center without transform. Reserve f
   pointer-events: auto;
 }
 
-/* Quote bubble: floats above character head, small paper card */
+/* 语录气泡：浮在人物头顶上方，纸面小卡片 */
 .decor-verse {
   position: absolute;
   right: 0;
@@ -180,7 +180,7 @@ margin-left: calc(min(38vw, 520px) / -2); /* Center without transform. Reserve f
   writing-mode: vertical-rl;
 }
 
-/* Narrow screen safe area: keep full-width background, props only./Typography yields to functional UI UI */
+/* 窄屏安全区：只留全幅背景，道具/题字全部让位给功能 UI */
 @media (max-width: 1100px) {
   .decor-layer:not(.decor-slot-backdrop) {
     display: none;

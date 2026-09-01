@@ -285,89 +285,89 @@
       <header class="hero">
         <h1>Pretext PoC</h1>
         <p>
-Use same batch `fixtures` to compare DOM measurement and `@chenglou/pretext`. This page focuses only on block-level text: same paragraph, same width.
-          Compare two measurement paths at same row height. `height`、`lineCount`、`maxLineWidth` And line-by-line text.
+          使用同一批 `fixtures` 比较 DOM 测量与 `@chenglou/pretext`。这页只关注块级文本：同一段文本、同一宽度、
+          同一行高下，对比两条测量路径的 `height`、`lineCount`、`maxLineWidth` 和逐行文本。
         </p>
       </header>
 
       <main class="panel">
         <aside class="card stack">
           <div>
-<h2>Data</h2>
+            <h2>数据</h2>
             <div class="actions">
-<button id="load-default">Load default sample</button>
+              <button id="load-default">加载默认样本</button>
               <label>
-<span>Load from local JSON</span>
+                <span>从本地 JSON 载入</span>
                 <input id="file-input" type="file" accept=".json,application/json" />
               </label>
             </div>
           </div>
 
           <div>
-<label for="sample-select">Sample</label>
+            <label for="sample-select">样本</label>
             <select id="sample-select"></select>
           </div>
 
           <div>
-<h2>Parameters</h2>
-            <label for="font-family">Font family</label>
+            <h2>参数</h2>
+            <label for="font-family">字体族</label>
             <input id="font-family" value="Source Han Serif SC, Noto Serif CJK SC, serif" />
             <div class="grid3">
-              <label><span>Font size (pt)</span><input id="font-size" type="number" min="4" max="48" step="0.01" value="11.16" /></label>
-              <label><span>line-height multiplier. Set CSS.</span><input id="line-height" type="number" min="0.6" max="2.4" step="0.01" value="1" /></label>
-              <label><span>Width (pt)</span><input id="target-width" type="number" min="1" step="0.01" value="447.45" /></label>
+              <label><span>字号 (pt)</span><input id="font-size" type="number" min="4" max="48" step="0.01" value="11.16" /></label>
+              <label><span>行高倍率</span><input id="line-height" type="number" min="0.6" max="2.4" step="0.01" value="1" /></label>
+              <label><span>宽度 (pt)</span><input id="target-width" type="number" min="1" step="0.01" value="447.45" /></label>
             </div>
-            <label><span>target height (pt)</span><input id="fit-height" type="number" min="1" step="0.01" value="98.7" /></label>
+            <label><span>目标高度 (pt)</span><input id="fit-height" type="number" min="1" step="0.01" value="98.7" /></label>
           </div>
 
           <div class="actions">
-<button id="apply-typst" class="secondary">Apply Typst Reference value</button>
-<button id="measure-both">Compare DOM / Pretext</button>
-            <button id="auto-fit" class="secondary">Auto-fit</button>
+            <button id="apply-typst" class="secondary">应用 Typst 参考值</button>
+            <button id="measure-both">比较 DOM / Pretext</button>
+            <button id="auto-fit" class="secondary">自动拟合</button>
           </div>
 
           <div>
-<h2>Text</h2>
+            <h2>文本</h2>
             <textarea id="fit-text"></textarea>
           </div>
 
           <div id="status" class="status">
-this page depends on locally installed `@chenglou/pretext`. First `layout-fit/` Provide source text to translate. `npm install --registry=https://registry.npmmirror.com`, and then use `npm run serve` to open.
+            这页依赖本地安装的 `@chenglou/pretext`。先在 `layout-fit/` 下执行 `npm install --registry=https://registry.npmmirror.com`，再用 `npm run serve` 打开。
           </div>
         </aside>
 
         <section class="workspace">
           <section class="card">
-            <h2>Sample Overview</h2>
-            <div id="sample-meta" class="status">Sample not loaded.</div>
+            <h2>样本概览</h2>
+            <div id="sample-meta" class="status">尚未载入样本。</div>
           </section>
 
           <section class="card">
-            <h2>Core Metrics</h2>
+            <h2>核心指标</h2>
             <div class="metric-grid">
-              <div class="metric"><div class="name">DOM Height</div><div class="value" id="dom-height">-</div></div>
-<div class="metric"><div class="name">Pretext Height</div><div class="value" id="pretext-height">-</div></div>
-              <div class="metric"><div class="name">Height Difference</div><div class="value" id="height-diff">-</div></div>
-<div class="metric"><div class="name">Target Height</div><div class="value" id="target-height">-</div></div>
+              <div class="metric"><div class="name">DOM 高度</div><div class="value" id="dom-height">-</div></div>
+              <div class="metric"><div class="name">Pretext 高度</div><div class="value" id="pretext-height">-</div></div>
+              <div class="metric"><div class="name">高度差</div><div class="value" id="height-diff">-</div></div>
+              <div class="metric"><div class="name">目标高度</div><div class="value" id="target-height">-</div></div>
             </div>
             <div class="metric-grid" style="margin-top: 10px;">
-<div class="metric"><div class="name">DOM Line Count</div><div class="value" id="dom-lines">-</div></div>
-              <div class="metric"><div class="name">Pretext line count</div><div class="value" id="pretext-lines">-</div></div>
-              <div class="metric"><div class="name">DOM Widest row</div><div class="value" id="dom-width">-</div></div>
-              <div class="metric"><div class="name">Pretext Widest row</div><div class="value" id="pretext-width">-</div></div>
+              <div class="metric"><div class="name">DOM 行数</div><div class="value" id="dom-lines">-</div></div>
+              <div class="metric"><div class="name">Pretext 行数</div><div class="value" id="pretext-lines">-</div></div>
+              <div class="metric"><div class="name">DOM 最宽行</div><div class="value" id="dom-width">-</div></div>
+              <div class="metric"><div class="name">Pretext 最宽行</div><div class="value" id="pretext-width">-</div></div>
             </div>
           </section>
 
           <section class="card">
-            <h2>Line-by-line comparison</h2>
+            <h2>逐行对照</h2>
             <div class="compare">
               <div class="result-box">
-                <h3>DOM preview</h3>
+                <h3>DOM 预览</h3>
                 <div class="preview"><div id="dom-preview" class="preview-block"></div></div>
                 <pre id="dom-lines-text"></pre>
               </div>
               <div class="result-box">
-                <h3>Pretext Line output</h3>
+                <h3>Pretext 行输出</h3>
                 <div class="preview"><div id="pretext-preview" class="preview-block"></div></div>
                 <pre id="pretext-lines-text"></pre>
               </div>
@@ -375,13 +375,13 @@ this page depends on locally installed `@chenglou/pretext`. First `layout-fit/` 
           </section>
 
           <section class="card">
-            <h2>PDF Translation Overlay Preview</h2>
+            <h2>PDF 译文覆盖预览</h2>
             <div class="result-box">
-<h3 id="pdf-title">Source PDF</h3>
+              <h3 id="pdf-title">源 PDF</h3>
               <div class="pdf-toolbar">
-                <button id="pdf-prev" class="secondary">Previous</button>
-<div id="pdf-page-label" class="pdf-page-label">Page - / -</div>
-                <button id="pdf-next" class="secondary">Next</button>
+                <button id="pdf-prev" class="secondary">上一页</button>
+                <div id="pdf-page-label" class="pdf-page-label">第 - / - 页</div>
+                <button id="pdf-next" class="secondary">下一页</button>
               </div>
               <div id="pdf-stage" class="pdf-stage">
                 <div id="pdf-stack" class="pdf-stack">

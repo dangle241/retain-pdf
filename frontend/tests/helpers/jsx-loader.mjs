@@ -1,8 +1,8 @@
-// .jsx/.ts/.tsx transformation hook for node --test: esbuild JIT compilation
+// node --test 的 .jsx/.ts/.tsx 转换钩子:esbuild 即时编译
 //
 // resolve:
 // - "@/..." → <frontend>/src/...
-// - Explicit .js/.jsx imports map to same-name .ts/.tsx (TS migration compatibility)
+// - 显式 .js/.jsx 导入映射到同名 .ts/.tsx（TS 迁移兼容）
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { extname, dirname, join } from "node:path";

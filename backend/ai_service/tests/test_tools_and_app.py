@@ -18,9 +18,9 @@ class FakeRust:
         self.documents = [
             {
                 "document_id": "doc-a",
-                "title": "Spectral Calculation Method",
+                "title": "光谱计算方法",
                 "page_count": 12,
-                "tags": ["Chemistry"],
+                "tags": ["化学"],
                 "reading_status": "reading",
                 "active_job_id": "job-1",
             }
@@ -36,7 +36,7 @@ class FakeRust:
                 "page_idx": 2,
                 "block_id": "p003-b0001",
                 "source_snippet": "spectra",
-                "translated_snippet": f"About{query}Fragment",
+                "translated_snippet": f"关于{query}的片段",
             },
             {
                 "document_id": "doc-other",
@@ -44,7 +44,7 @@ class FakeRust:
                 "page_idx": 0,
                 "block_id": "p001-b0001",
                 "source_snippet": "other",
-                "translated_snippet": "Other Documents",
+                "translated_snippet": "其它文档",
             },
         ]
         if document_id:
@@ -73,8 +73,8 @@ class FakeRust:
                 "block_id": "p005-b0008",
                 "kind": "sentence",
                 "quote_text": "reaction rate",
-                "translated_quote_text": "Reaction rate citations",
-                "note": "Important",
+                "translated_quote_text": "反应速率相关引文",
+                "note": "重要",
             }
         ]
 
@@ -164,7 +164,7 @@ def _write_job_dir(root: Path):
     (translated / "page-003-deepseek.json").write_text(
         json.dumps(
             [
-                {"page_idx": "2", "block_idx": "1", "translated_text": "Translation of the second block"},
+                {"page_idx": "2", "block_idx": "1", "translated_text": "第二个块的译文"},
             ]
         ),
         encoding="utf-8",
@@ -176,7 +176,7 @@ def test_read_page_blocks_aligns_translation_by_numeric_index(tmp_path):
     job_root = _write_job_dir(tmp_path)
     blocks = read_page_blocks(job_root, 2)
     assert [block.block_id for block in blocks] == ["p003-b0000", "p003-b0001"]
-assert blocks[1].translated_text == "second block's translation"
+    assert blocks[1].translated_text == "第二个块的译文"
     windowed = read_page_blocks(job_root, 2, around_block_id="p003-b0001", max_blocks=1)
     assert [block.block_id for block in windowed] == ["p003-b0001"]
 
@@ -186,14 +186,14 @@ def test_default_registry_tools_return_anchored_results(tmp_path):
     settings = Settings(data_root=tmp_path)
     registry = build_default_registry(settings, FakeRust())
 
-    hits = registry.invoke("search_fulltext", {"query": "Spectrum"})["hits"]
+    hits = registry.invoke("search_fulltext", {"query": "光谱"})["hits"]
     assert len(hits) == 2
     assert hits[0]["block_id"] == "p003-b0001"
 
-    # Full book:document_id Filter out other documents
+    # 整本：document_id 过滤掉其它文档
     scoped = registry.invoke(
         "search_fulltext",
-        {"query": "Spectrum", "document_id": "doc-a"},
+        {"query": "光谱", "document_id": "doc-a"},
     )
     assert len(scoped["hits"]) == 1
     assert scoped["hits"][0]["document_id"] == "doc-a"
@@ -204,21 +204,21 @@ def test_default_registry_tools_return_anchored_results(tmp_path):
         {"query": "光谱", "document_id": "doc-missing"},
     )
     assert empty_scoped["hits"] == []
-    assert "Full-text index" in empty_scoped.get("hint", "")
+    assert "全文索引" in empty_scoped.get("hint", "")
 
     documents = registry.invoke("list_documents", {})["documents"]
     assert documents[0]["document_id"] == "doc-a"
-    # Inject document_id time list_documents Return this document only
+    # 注入 document_id 时 list_documents 只返回该文档
     only = registry.invoke("list_documents", {"document_id": "doc-a"})["documents"]
     assert len(only) == 1
 
     blocks = registry.invoke("read_blocks", {"document_id": "doc-a", "page_idx": 2})
     assert blocks["job_id"] == "job-1"
-assert blocks["blocks"][1]["translated_text"] == "second block's translation"
+    assert blocks["blocks"][1]["translated_text"] == "第二个块的译文"
 
-    favorites = registry.invoke("search_favorites", {"keyword": "Rate"})["favorites"]
+    favorites = registry.invoke("search_favorites", {"keyword": "速率"})["favorites"]
     assert favorites[0]["favorite_id"] == "fav-1"
-    assert registry.invoke("search_favorites", {"keyword": "Not exist."})["favorites"] == []
+    assert registry.invoke("search_favorites", {"keyword": "不存在"})["favorites"] == []
 
     assert "query must not be empty" in registry.invoke("search_fulltext", {})["error"]
 
@@ -233,7 +233,7 @@ class FakeAgent(RetrievalAgent):
             on_event({"type": "tool", "round": 1, "tool": "search_fulltext", "arguments": {"query": "q"}})
         history_note = f"(hist={len(self.last_history)})" if self.last_history else ""
         return AskResult(
-answer=f"Answer:{question}{history_note} [1]",
+            answer=f"回答:{question}{history_note} [1]",
             citations=[
                 Citation(
                     ref=1,
@@ -241,7 +241,7 @@ answer=f"Answer:{question}{history_note} [1]",
                     job_id="job-1",
                     page_idx=2,
                     block_id="p003-b0001",
-                    snippet="Snippet",
+                    snippet="片段",
                 )
             ],
             tool_trace=[{"round": 1, "tool": "search_fulltext", "arguments": {"query": "q"}}],
@@ -261,12 +261,12 @@ def test_ask_endpoint_requires_api_key_and_returns_citations():
 
     response = client.post(
         "/v1/ask",
-        json={"question": "What does the library say??"},
+        json={"question": "库里讲什么?"},
         headers={"X-API-Key": "test-key"},
     )
     assert response.status_code == 200
     data = response.json()["data"]
-assert data["answer"].startswith("Answer:")
+    assert data["answer"].startswith("回答:")
     assert data["citations"][0]["block_id"] == "p003-b0001"
     assert data["rounds"] == 2
 
@@ -291,12 +291,12 @@ def test_ask_endpoint_streams_sse_events():
     assert events[0]["type"] == "tool"
     assert events[0]["tool"] == "search_fulltext"
     assert events[-1]["type"] == "done"
-assert events[-1]["answer"].startswith("Answer:")
+    assert events[-1]["answer"].startswith("回答:")
     assert events[-1]["citations"][0]["block_id"] == "p003-b0001"
 
 
 def test_ask_endpoint_requires_llm_key_from_env_or_request():
-    # env Unrelated to requests. LLM key:In advance 400,Don't push upstream.
+    # env 与请求都无 LLM key:提前 400,不打到上游
     settings = Settings(api_keys=frozenset({"test-key"}))
     client = TestClient(build_app(settings, agent=FakeAgent()))
     missing = client.post(
@@ -307,18 +307,18 @@ def test_ask_endpoint_requires_llm_key_from_env_or_request():
     assert missing.status_code == 400
     assert "LLM API Key" in missing.json()["detail"]
 
-    # Request carries LLM key:Even if env Allow empty.(FakeAgent Ignore chat_fn)
+    # 请求携带 LLM key:即使 env 为空也放行(FakeAgent 忽略 chat_fn)
     ok = client.post(
         "/v1/ask",
         json={"question": "q", "llm_api_key": "sk-from-frontend"},
         headers={"X-API-Key": "test-key"},
     )
     assert ok.status_code == 200
-assert ok.json()["data"]["answer"].startswith("Answer:")
+    assert ok.json()["data"]["answer"].startswith("回答:")
 
 
 def test_ask_auto_creates_conversation_and_persists_history():
-"""B1: when no conversation_id auto-create;Second-order injection. history and return the same id."""
+    """B1: 无 conversation_id 时 auto-create;第二轮注入 history 并回传同一 id。"""
     settings = Settings(api_keys=frozenset({"test-key"}), llm_api_key="env-llm-key")
     rust = FakeRust()
     agent = FakeAgent()
@@ -326,7 +326,7 @@ def test_ask_auto_creates_conversation_and_persists_history():
 
     first = client.post(
         "/v1/ask",
-        json={"question": "Question 1", "document_id": "doc-a"},
+        json={"question": "第一问", "document_id": "doc-a"},
         headers={"X-API-Key": "test-key"},
     )
     assert first.status_code == 200
@@ -334,14 +334,14 @@ def test_ask_auto_creates_conversation_and_persists_history():
     conversation_id = data1["conversation_id"]
     assert conversation_id.startswith("conv-")
     assert conversation_id in rust.conversations
-    # Written back. user+assistant
+    # 已回写 user+assistant
     assert len(rust.conversations[conversation_id]["messages"]) == 2
     assert agent.last_history == []
 
     second = client.post(
         "/v1/ask",
         json={
-            "question": "Follow-up",
+            "question": "追问",
             "document_id": "doc-a",
             "conversation_id": conversation_id,
         },
@@ -352,7 +352,7 @@ def test_ask_auto_creates_conversation_and_persists_history():
     assert data2["conversation_id"] == conversation_id
     assert len(agent.last_history) == 2
     assert agent.last_history[0]["role"] == "user"
-assert "ç¬¬ä¸é®" in agent.last_history[0]["content"]
+    assert "第一问" in agent.last_history[0]["content"]
     assert "(hist=2)" in data2["answer"]
     assert len(rust.conversations[conversation_id]["messages"]) == 4
 
@@ -365,7 +365,7 @@ def test_ask_stream_done_includes_conversation_id():
     with client.stream(
         "POST",
         "/v1/ask",
-        json={"question": "Streaming session?", "stream": True, "document_id": "doc-a"},
+        json={"question": "流式会话?", "stream": True, "document_id": "doc-a"},
         headers={"X-API-Key": "test-key"},
     ) as response:
         events = []
@@ -378,11 +378,11 @@ def test_ask_stream_done_includes_conversation_id():
 
 
 def test_summary_lands_on_head_path_and_feeds_next_turn():
-"""Audit A2 regression lock:Summary must be entered. head pathâsecond question's history Readback required.
-ãConversation summaryã,Not recompress each round. + Accumulate orphan summary.
+    """审计 A2 回归锁:摘要必须接进 head 路径——第二问的 history 要能读回
+    【对话摘要】,而不是每轮重压缩 + 累积孤儿摘要。
 
-Key: seed with two ask, pass all explicitly. parent chain (simulate real frontend), otherwise FakeRust's
-    empty parent Linear synthesis masks dead branches."""
+    关键:seed 与两次 ask 都显式传 parent 链(模拟真实前端),否则 FakeRust 的
+    空 parent 线性合成会掩盖死分支。"""
     settings = Settings(
         api_keys=frozenset({"test-key"}),
         llm_api_key="env-llm-key",
@@ -396,7 +396,7 @@ Key: seed with two ask, pass all explicitly. parent chain (simulate real fronten
     for i in range(6):
         u = rust.append_conversation_message(cid, role="user", content=f"U{i}", parent_id=prev)
         a = rust.append_conversation_message(
-cid, role="assistant", content=f"A{i} conclusion [1]", parent_id=u["message_id"],
+            cid, role="assistant", content=f"A{i} 结论 [1]", parent_id=u["message_id"],
         )
         prev = a["message_id"]
 
@@ -411,7 +411,7 @@ cid, role="assistant", content=f"A{i} conclusion [1]", parent_id=u["message_id"]
     assert first.status_code == 200
 
     conv = rust.conversations[cid]
-# Summary in head on the path: from head explicitly along parent backtracking always passes throughãConversation summaryãnode
+    # 摘要在 head 路径上:从 head 沿显式 parent 回溯必经过【对话摘要】节点
     by_id = {m["message_id"]: m for m in conv["messages"]}
     cur = by_id.get(conv["head_id"])
     on_path = []
@@ -419,24 +419,24 @@ cid, role="assistant", content=f"A{i} conclusion [1]", parent_id=u["message_id"]
         on_path.append(cur)
         cur = by_id.get(cur.get("parent_id") or "")
     assert any(
-str(m.get("content") or "").startswith("ãå¯¹è¯æè¦ã") for m in on_path
-), "Summary not found head on path(dead branch regression)"
+        str(m.get("content") or "").startswith("【对话摘要】") for m in on_path
+    ), "摘要不在 head 路径上(死分支回归)"
 
     second = client.post(
         "/v1/ask",
-        json={"question": "Question 2", "document_id": "doc-a", "conversation_id": cid, "parent_id": conv["head_id"]},
+        json={"question": "第二问", "document_id": "doc-a", "conversation_id": cid, "parent_id": conv["head_id"]},
         headers={"X-API-Key": "test-key"},
     )
     assert second.status_code == 200
-    assert agent.last_history, "Second query should carry history"
-    # assemble_history Wrap summary as"Known background"Pseudo-round(assemble.py),Drop original prefix.
+    assert agent.last_history, "第二问应携带 history"
+    # assemble_history 把摘要包装成"已知背景"伪轮(assemble.py),不保留原前缀
     assert any(
-        "summary of earlier conversations" in str(t.get("content") or "") for t in agent.last_history
-), "second question's history does not read back summary(Orphan summary regression)"
+        "更早对话的摘要" in str(t.get("content") or "") for t in agent.last_history
+    ), "第二问的 history 读不回摘要(孤儿摘要回归)"
 
 
 def test_persist_failure_surfaces_in_done_payload():
-"""audit C2 regression lock: Write-back failure must be handled. persisted=false notify frontend., Discard silently drop wheel. â skipped: explicit error on wheel drop, add when wheel drop is a recoverable event."""
+    """审计 C2 回归锁:回写失败必须经 persisted=false 告知前端,不再静默丢轮。"""
     settings = Settings(api_keys=frozenset({"test-key"}), llm_api_key="env-llm-key")
 
     class BrokenPersistRust(FakeRust):
@@ -452,13 +452,13 @@ def test_persist_failure_surfaces_in_done_payload():
     client = TestClient(build_app(settings, agent=FakeAgent(), rust=rust))
     response = client.post(
         "/v1/ask",
-        json={"question": "ask", "document_id": "doc-a", "conversation_id": "conv-x"},
+        json={"question": "问", "document_id": "doc-a", "conversation_id": "conv-x"},
         headers={"X-API-Key": "test-key"},
     )
     assert response.status_code == 200
     assert response.json()["data"]["persisted"] is False
 
-    # Normal path persisted=True
+    # 正常路径 persisted=True
     ok_rust = FakeRust()
     ok_client = TestClient(build_app(settings, agent=FakeAgent(), rust=ok_rust))
     ok = ok_client.post(
@@ -470,7 +470,7 @@ def test_persist_failure_surfaces_in_done_payload():
 
 
 def test_ask_force_compress_emits_compress_event_and_summary():
-"""B2: when force_compress, SSE first compress, then tool/donePersist summary to DB."""
+    """B2: force_compress 时 SSE 先 compress，再 tool/done；摘要落库。"""
     settings = Settings(
         api_keys=frozenset({"test-key"}),
         llm_api_key="env-llm-key",
@@ -478,7 +478,7 @@ def test_ask_force_compress_emits_compress_event_and_summary():
         memory_compress_after_turns=100,
     )
     rust = FakeRust()
-    # Preset long conversation
+    # 预置长对话
     created = rust.create_conversation(title="t", document_id="doc-a")
     cid = created["conversation_id"]
     for i in range(6):
@@ -486,7 +486,7 @@ def test_ask_force_compress_emits_compress_event_and_summary():
         rust.append_conversation_message(
             cid,
             role="assistant",
-content=f"A{i} conclusion [1]",
+            content=f"A{i} 结论 [1]",
             citations_json='[{"ref":1,"page_idx":0,"snippet":"s"}]',
         )
 
@@ -496,7 +496,7 @@ content=f"A{i} conclusion [1]",
         "POST",
         "/v1/ask",
         json={
-            "question": "Ask after compression",
+            "question": "压缩后再问",
             "stream": True,
             "document_id": "doc-a",
             "conversation_id": cid,
@@ -516,19 +516,19 @@ content=f"A{i} conclusion [1]",
     assert compress["dropped_turns"] >= 1
     assert events[-1]["type"] == "done"
     assert events[-1]["memory"]["had_summary"] is True
-    # Summary written
+    # 摘要已写入
     assert any(
-str(m.get("content") or "").startswith("ãå¯¹è¯æè¦ã")
+        str(m.get("content") or "").startswith("【对话摘要】")
         for m in rust.conversations[cid]["messages"]
     )
-    # agent Received with digest history
+    # agent 收到带摘要的 history
     assert agent.last_history
-assert any("summary" in m["content"] for m in agent.last_history if m["role"] == "user")
+    assert any("摘要" in m["content"] for m in agent.last_history if m["role"] == "user")
 
 
 def test_ask_resolves_document_id_from_job_id():
-    # History job Locate docs too:job_id → Server-side parsing document_id,
-    # No longer depends on frontend. active_job_id Reverse lookup
+    # 历史 job 也能定位文档:job_id → 服务端解析 document_id,
+    # 不再依赖前端的 active_job_id 反查
     captured = {}
 
     class RecordingAgent(FakeAgent):
@@ -553,7 +553,7 @@ def test_ask_resolves_document_id_from_job_id():
     client = TestClient(app)
     response = client.post(
         "/v1/ask",
-        json={"question": "Question about historical task", "job_id": "job-old", "llm_api_key": "sk-test"},
+        json={"question": "历史任务的问题", "job_id": "job-old", "llm_api_key": "sk-test"},
         headers={"X-API-Key": "test-key"},
     )
     assert response.status_code == 200
@@ -608,8 +608,8 @@ def test_ask_injects_conversation_history_and_persists_turn():
             return {
                 "conversation_id": "conv-1",
                 "messages": [
-                    {"role": "user", "content": "Bug in auth middleware. Token expiry check use `<` not `<=`. Fix:  ```python if token_expiry < now:  # ponytail: ceiling is exact equality; add when spec requires inclusive expiry     raise AuthError("Token expired") ```  skipped: inclusive expiry handling, add when spec changes.", "seq": 1},
-                    {"role": "assistant", "content": "Previous response deleted. [1]", "seq": 2},
+                    {"role": "user", "content": "之前的问题", "seq": 1},
+                    {"role": "assistant", "content": "之前的回答 [1]", "seq": 2},
                 ],
             }
 
@@ -622,16 +622,16 @@ def test_ask_injects_conversation_history_and_persists_turn():
     client = TestClient(app)
     response = client.post(
         "/v1/ask",
-        json={"question": "Continue from the previous question", "conversation_id": "conv-1", "llm_api_key": "sk-test"},
+        json={"question": "接着上个问题继续", "conversation_id": "conv-1", "llm_api_key": "sk-test"},
         headers={"X-API-Key": "test-key"},
     )
     assert response.status_code == 200
-    # History injection
+    # 历史注入
     assert calls["history"] == [
         {"role": "user", "content": "之前的问题"},
         {"role": "assistant", "content": "之前的回答 [1]"},
     ]
-# write back user + assistant Two, assistant with reference snapshot
+    # 回写 user + assistant 两条,assistant 带引用快照
     assert [(c[1], c[0]) for c in calls["appended"]] == [("user", "conv-1"), ("assistant", "conv-1")]
     assert "block_id" in calls["appended"][1][3]
 
@@ -644,18 +644,18 @@ def test_agent_places_history_between_system_and_current_question():
 
     def chat(messages, tools):
         seen["messages"] = messages
-        return {"content": "OK.", "tool_calls": []}
+        return {"content": "好的。", "tool_calls": []}
 
     agent = RetrievalAgent(ToolRegistry([]), chat, max_tool_rounds=2)
     agent.ask(
-        "Current issue",
+        "当前问题",
         history=[
-            {"role": "user", "content": "Last question."},
-            {"role": "assistant", "content": "Previous answer"},
+            {"role": "user", "content": "上一问"},
+            {"role": "assistant", "content": "上一答"},
             {"role": "tool", "content": "should be dropped"},
         ],
     )
     roles = [m["role"] for m in seen["messages"]]
     assert roles == ["system", "user", "assistant", "user"]
-assert seen["messages"][1]["content"] == "previous question"
-assert seen["messages"][-1]["content"] == "current question"
+    assert seen["messages"][1]["content"] == "上一问"
+    assert seen["messages"][-1]["content"] == "当前问题"

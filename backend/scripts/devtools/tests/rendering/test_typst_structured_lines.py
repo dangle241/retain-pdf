@@ -101,10 +101,10 @@ def test_regular_structured_lines_preserve_source_line_structure() -> None:
         ],
     }
     translated = (
-        "ALDA Adiabatic local density approximation AF antiferromagnetic ASA Atomic sphere approximation B86 Becke 86 Exchange EnergyGGA "
-"B88 Becke 88 exchange energy GGA B3LYP Based onBecke-Lee-Yang-Parr GGAhybrid functional "
-        "BLYP Becke-Lee-Yang-Parr GGA bcc body-centered cubic BO Born-Oppenheimer C Coulomb "
-        "CDFT Current Density Functional Theory CS Colle-Salvetti CSDFT spin-current density functional theory"
+        "ALDA 绝热局域密度近似 AF 反铁磁 ASA 原子球近似 B86 Becke 86 交换能GGA "
+        "B88 Becke 88 交换能GGA B3LYP 基于Becke-Lee-Yang-Parr GGA的混合泛函 "
+        "BLYP Becke-Lee-Yang-Parr GGA bcc 体心立方 BO Born-Oppenheimer C 库仑 "
+        "CDFT 流密度泛函理论 CS Colle-Salvetti CSDFT 流自旋密度泛函理论"
     )
 
     structured = maybe_preserve_structured_line_breaks(item, translated)
@@ -112,7 +112,7 @@ def test_regular_structured_lines_preserve_source_line_structure() -> None:
     assert item["_render_preserve_line_breaks"] is True
     assert item["_render_line_structure"] == "structured_lines"
     assert structured.count("\n") == len(item["lines"]) - 1
-assert "ALDA adiabatic local density approximation" in structured.splitlines()[0]
+    assert "ALDA 绝热局域密度近似" in structured.splitlines()[0]
     assert "CSDFT" in structured.splitlines()[-1]
 
 
@@ -142,8 +142,8 @@ def test_long_caption_lines_do_not_use_single_line_preserve_fit() -> None:
     }
     translated = (
         "FIG. 7: Dy2Be2GeO7\n"
-        "a: Dy2Be2GeO7At zero field sum500 mTHeat capacity under applied magnetic field. Black solid line in zero-field data is visual guide."
-"Use La2Be2GeO7Subtract phonon contribution as nonmagnetic analog."
+        "a: Dy2Be2GeO7在零场和500 mT外加磁场下的比热容。零场数据中的黑色实线为视觉辅助线。"
+        "使用La2Be2GeO7作为非磁类比扣除声子贡献。"
     )
 
     rendered = maybe_preserve_structured_line_breaks(item, translated)
@@ -178,10 +178,10 @@ def test_structured_line_render_block_keeps_hard_line_breaks() -> None:
                     "CS Colle-Salvetti CSDFT current spin density functional theory"
                 ),
                 "protected_translated_text": (
-"ALDA adiabatic local density approximation AF antiferromagnetic ASA atomic sphere approximation B86 Becke 86 exchange energy GGA "
-"B88 Becke 88 exchange energy GGA B3LYP hybrid functional based on Becke-Lee-Yang-Parr GGA "
-"BLYP Becke-Lee-Yang-Parr GGA bcc body-centered cubic BO Born-Oppenheimer C Coulomb "
-"CDFT current density functional theory CS Colle-Salvetti CSDFT current spin density functional theory"
+                    "ALDA 绝热局域密度近似 AF 反铁磁 ASA 原子球近似 B86 Becke 86 交换能GGA "
+                    "B88 Becke 88 交换能GGA B3LYP 基于Becke-Lee-Yang-Parr GGA的混合泛函 "
+                    "BLYP Becke-Lee-Yang-Parr GGA bcc 体心立方 BO Born-Oppenheimer C 库仑 "
+                    "CDFT 流密度泛函理论 CS Colle-Salvetti CSDFT 流自旋密度泛函理论"
                 ),
                 "lines": [
                     {"bbox": [48.989, 221.367, 351.92, 240.031], "spans": [{"content": "ALDA adiabatic local density approximation"}]},
@@ -218,7 +218,7 @@ def test_body_preserve_lines_contract_keeps_numbered_list_breaks() -> None:
             {"bbox": [104.0, 123.477, 280.5, 132.966], "text": "3. Stanford University"},
         ],
     }
-    translated = "1. University of California, Berkeley\n2. Individual Contributor\n3. Stanford University"
+    translated = "1. 加州大学伯克利分校\n2. 独立贡献者\n3. 斯坦福大学"
 
     rendered = maybe_preserve_structured_line_breaks(item, translated)
 
@@ -255,11 +255,11 @@ def test_body_preserve_lines_contract_flows_unmarked_regular_body() -> None:
             },
         ],
     }
-translated = "The EHTType item in GFN2-xTB is primarily responsible\nCovalent bonding. Coordination-number dependent.\nValence energy level gains extra flexibility."
+    translated = "GFN2-xTB中的EHT型项主要负责\n共价键合。通过配位数依赖性\n价能级获得额外灵活性。"
 
     rendered = maybe_preserve_structured_line_breaks(item, translated)
 
-assert rendered == "The EHT-type term in GFN2-xTB is primarily responsible for covalent bonding. Through coordination-number dependence, the valence energy level gains extra flexibility."
+    assert rendered == "GFN2-xTB中的EHT型项主要负责 共价键合。通过配位数依赖性 价能级获得额外灵活性。"
     assert "_render_preserve_line_breaks" not in item
 
 
@@ -294,9 +294,9 @@ def test_body_preserve_lines_contract_flows_poms_paragraph_with_acronyms() -> No
         ],
     }
     translated = (
-        "With the progress of science and medical technology, based on polyoxometalates (POMsTherapy has advanced significantly. [36]Recent years"
-        "Multiple based onPOMsAnticancer drugs have been reported; these drugs act via chemodynamic therapy (CDT), photothermal therapy (PTT) or combination therapy,"
-        "Demonstrates excellent therapeutic efficacy in inhibiting malignant tumor growth, spread, and metastasis. [37]。"
+        "随着科学和医疗技术的进步，基于多金属氧酸盐（POMs）的疗法取得了长足发展 [36]。近年来，"
+        "多种基于POMs的抗癌药物被报道，这些药物通过化学动力学疗法（CDT）、光热疗法（PTT）或联合疗法，"
+        "在抑制恶性肿瘤的生长、扩散和转移方面表现出优异的治疗效果 [37]。"
     )
 
     rendered = maybe_preserve_structured_line_breaks(item, translated)
@@ -320,7 +320,7 @@ def test_body_preserve_lines_contract_keeps_glossary_short_lines() -> None:
             {"bbox": [48.989, 245.449, 351.92, 257.49], "text": "ASA atomic sphere approximation"},
         ],
     }
-translated = "ALDA adiabatic local density approximation\nAF antiferromagnetism\nASA atomic sphere approximation"
+    translated = "ALDA 绝热局域密度近似\nAF 反铁磁性\nASA 原子球近似"
 
     rendered = maybe_preserve_structured_line_breaks(item, translated)
 
@@ -342,11 +342,11 @@ def test_body_without_preserve_lines_contract_still_flows_visual_lines() -> None
             {"bbox": [104.0, 123.477, 280.5, 132.966], "text": "and should flow."},
         ],
     }
-    translated = "First visual text line\ncontinue the same sentence\nTherefore, it should be flowed."
+    translated = "第一行视觉文本\n继续同一句话\n因此应该流式排版。"
 
     rendered = maybe_preserve_structured_line_breaks(item, translated)
 
-assert rendered == "First line visual text continues the same sentence therefore should flow typeset."
+    assert rendered == "第一行视觉文本 继续同一句话 因此应该流式排版。"
     assert "_render_preserve_line_breaks" not in item
 
 
@@ -363,7 +363,7 @@ def test_structured_line_typst_uses_source_line_boxes() -> None:
                 "text_flow": "preserve_lines",
                 "source_text": "ALDA adiabatic local density approximation\nAF antiferromagnetic\nASA atomic sphere approximation",
                 "protected_source_text": "ALDA adiabatic local density approximation\nAF antiferromagnetic\nASA atomic sphere approximation",
-                "protected_translated_text": "ALDA Adiabatic local density approximation calculate energy. Simplify: use existing library function. Add when specific customization needed.\nAF Antiferromagnetism\nASA atomic sphere approximation",
+                "protected_translated_text": "ALDA 绝热局域密度近似\nAF 反铁磁性\nASA 原子球近似",
                 "lines": [
                     {"bbox": [48.989, 221.367, 351.92, 233.408], "spans": [{"content": "ALDA adiabatic local density approximation"}]},
                     {"bbox": [48.989, 233.408, 351.92, 245.449], "spans": [{"content": "AF antiferromagnetic"}]},

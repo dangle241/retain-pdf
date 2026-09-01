@@ -9,18 +9,18 @@ import { resolveReaderSourcePdf } from "../resource-resolver.js";
 export const READER_DOWNLOAD_ACTIONS = Object.freeze({
   source: {
     fallbackSuffix: "source",
-label: "Original PDF",
-    operation: "Download original PDF",
+    label: "原始 PDF",
+    operation: "下载原始 PDF",
   },
   sideBySide: {
     fallbackSuffix: "side-by-side",
-label: "Comparison PDF",
-    operation: "Download comparison PDF",
+    label: "对照 PDF",
+    operation: "下载对照 PDF",
   },
   translated: {
     fallbackSuffix: "translated",
-label: "Translated PDF",
-operation: "Download translated PDF",
+    label: "译文 PDF",
+    operation: "下载译文 PDF",
   },
 });
 
@@ -72,13 +72,13 @@ export function resolveReaderDownloadName(action, { jobId, jobPayload, manifestP
 
 export function disabledReason(action, urls) {
   if (action === "sideBySide" && (!urls.source || !urls.translated)) {
-return "Comparison PDF needs original PDF and translated PDF all available";
+    return "对照 PDF 需要原始 PDF 和译文 PDF 都可用";
   }
   if (!urls.source && (action === "source" || action === "sideBySide")) {
-return "Original PDF not generated or list unavailable.";
+    return "原始 PDF 尚未生成或清单不可用";
   }
   if (!urls.translated && (action === "translated" || action === "sideBySide")) {
-return "Translated PDF not yet generated or list unavailable";
+    return "译文 PDF 尚未生成或清单不可用";
   }
-  return "Download URL temporarily unavailable";
+  return "下载地址暂不可用";
 }

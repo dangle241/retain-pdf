@@ -1,67 +1,67 @@
 /*
-shadcn/ui Standard component consumption CSS variable names (--background/--foreground/--primary/...).
-  Names: shadcn Component source(src/components/ui/*.jsx)Hardcoded in it. Tailwind Utilities
-(bg-primary/text-muted-foreground etc.) and a small amount of direct var() references (sonner.jsx's
-inline style) Dependency contract, cannot be renamedâactual color value not accepted. shadcn CLI Generated default.
-  Skin,but maps individually to src/styles/tokens.css Existing design in the project. token,Reach
-Goal: "Toolchain changed, visually indistinguishable".
+  shadcn/ui 组件消费的一套标准 CSS 变量名(--background/--foreground/--primary/...)。
+  这些名字是 shadcn 组件源码(src/components/ui/*.jsx)里硬编码的 Tailwind 工具类
+  (bg-primary/text-muted-foreground 等)和少量直接 var() 引用(sonner.jsx 的
+  内联 style)所依赖的契约,不能改名——但实际颜色值不接受 shadcn CLI 生成的默认
+  皮肤,而是逐个映射到 src/styles/tokens.css 里项目已有的设计 token,达到
+  "工具链换了,视觉看不出来"的目标。
 
-  Project currently only has single :root(No dark mode),Thus this file also has only one declaration.,no contains .dark Override.
+  项目目前只有单一 :root(无暗色模式),故此文件也只有一份声明,不含 .dark 覆盖。
 
-  **Naming pitfalls**:shadcn In standard variables `--accent`/`--muted` Exactly and tokens.css Existing
-Project token name collision, semantics differ. (`--muted` is gray text in project, but in shadcn semantics it is
-  "Mute background color.")Redeclare same name here `:root { --muted: ... }`,Will implement whole
-overriding tokens.css original definitions, causing dozens of instances across the entire project where `color: var(--muted)` text
-  Change color——Real draft pitfall encountered. bug,Not a hypothesis.
-  Method:
-- `--accent` semantic equivalent. Simplify. (shadcn consumes as accent color, project tokens.css `--accent` is
-    Already brand blue.),Don't redeclare,Reuse directly. tokens.css Definition + tailwind.css
-already brand blue). Don't redeclare, reuse directly. tokens.css definition + tailwind.css existing `--color-accent: var(--accent)` map.
-  - `--muted` Different semantics,No same-name override:Add non-conflicting intermediate variable
-`--muted-surface` (below). In actual `@theme inline`, `--color-muted` maps to
-`--muted-surface`, while `--color-muted-foreground` maps to original `--muted`
-    (Project text gray,Not affected.)。
+  **命名避坑**:shadcn 标准变量里 `--accent`/`--muted` 恰好和 tokens.css 已有的
+  项目 token 撞名,但语义不同(`--muted` 在项目里是文字灰,shadcn 语义里却是
+  "弱化背景色")。如果在这里重新声明同名的 `:root { --muted: ... }`,会整个
+  覆盖 tokens.css 里的原始定义,导致全项目几十处 `color: var(--muted)` 的文字
+  变成别的颜色——这是曾经在草稿里踩到的真实 bug,不是假设。
+  处理方式:
+  - `--accent` 语义相同(shadcn 消费它当强调色,项目 tokens.css 里 --accent
+    本来就是品牌蓝),不重复声明,直接复用 tokens.css 的定义 + tailwind.css
+    里已有的 `--color-accent: var(--accent)` 映射。
+  - `--muted` 语义不同,不能同名覆盖:新增一个不冲突的中间变量
+    `--muted-surface`(下方),真正的 `@theme inline` 里 `--color-muted` 映射到
+    `--muted-surface`,而 `--color-muted-foreground` 映射到原始的 `--muted`
+    (项目文字灰,不受影响)。
 
-  Item mapping rationale:
-  - --foreground          ← --ink          Body text color,Project native primary text color token。
-  - --background           ← --bg           Page background color.
-- --muted-surface(new) â --line shadcn "--muted" background color semantics, project
-                                            No dedicated light gray background. token,Reuse existing
-                                            Stroke color --line(var(--line))Light gray background.
-  - --destructive          ← --danger       Danger color.
-  - --border / --input     ← --line         Stroke only on project./Divider token。
-- --primary / --ring â --accent No standalone "brand primary" token,
-                                            --accent(#0071e3)Is current only
-Accent Color; main buttons/all focus rings derive from this.
-                                            Most reasonable.
-- --radius 1rem(16px) Project .app-button is pure pill shape
-(rounded-full, not controlled by --radius),
-Dialog Shell desktop-dialog is 24px
-                                            Rounded corners. These pulled-down components.(button/tabs/
-dialog/tooltip) Always use literals. Tailwind classes
-(rounded-md/rounded-lg) instead of
-                                            --radius itself——--radius Currently only
-                                            sonner.jsx Inline style Used to set
-toast rounded corners, 16px between "Restrained"
-rounded-md and "Loose" 24px dialogs
-Between, and toast such medium-sized elements'
-                                            Visual match.
+  逐项映射理由:
+  - --foreground          ← --ink          正文字色,项目原生主文字色 token。
+  - --background           ← --bg           页面底色。
+  - --muted-surface(新)   ← --line         shadcn "--muted" 背景色语义,项目
+                                            没有专门的浅灰底 token,借用现有
+                                            描边色 --line(var(--line))当浅灰底。
+  - --destructive          ← --danger       危险色。
+  - --border / --input     ← --line         项目唯一的描边/分隔线 token。
+  - --primary / --ring     ← --accent       项目没有独立的"品牌主色"token,
+                                            --accent(#0071e3)本身就是当前唯一
+                                            的强调色,主按钮/焦点环都从它派生
+                                            最合理。
+  - --radius               1rem(16px)     项目里 .app-button 是纯 pill 形
+                                            (rounded-full,不受 --radius 控制),
+                                            对话框壳 desktop-dialog 是 24px
+                                            圆角。这批拉下来的组件(button/tabs/
+                                            dialog/tooltip)实际都用字面 Tailwind 类
+                                            (rounded-md/rounded-lg)而非
+                                            --radius 本身——--radius 目前只被
+                                            sonner.jsx 的内联 style 用来设
+                                            toast 圆角,16px 介于"克制"的
+                                            rounded-md 和"松弛"的 24px 对话框
+                                            之间,和 toast 这种中等尺寸元素的
+                                            观感匹配。
 
-  The following variables are not individually named in the task brief.,but the imported components actually use them,Not directly in project.
-Corresponding tokens, derive conditionally (Phase B/C page review: tighten if appearance is off):
-- --primary-foreground â --paper(white) Text overlaid on brand blue background, use high-contrast white.
-- --secondary â --paper(white) Match existing .app-button.secondary
-                                            Actual background(background:var(--paper))。
-- --secondary-foreground â --ink Corresponding to .app-button.secondary actual
-                                            Text color(color: var(--ink))。
-- --accent-foreground â --paper(white) --accent is brand blue now, extract white for contrast.
-Ensure contrast. (ghost buttons/tabs/dialog
-                                            Close button hover When status background turns blue.
-                                            Text color)。
+  以下几个变量任务简报未逐一点名,但拉下来的组件确实会用到,项目里没有直接
+  对应 token,按判断派生(阶段 B/C 走查具体页面时如观感不对可以再收紧):
+  - --primary-foreground  ← --paper(白)   叠在品牌蓝底上的文字,取高对比度白。
+  - --secondary            ← --paper(白)   对应现有 .app-button.secondary 的
+                                            实际背景(background:var(--paper))。
+  - --secondary-foreground ← --ink          对应 .app-button.secondary 的实际
+                                            文字色(color: var(--ink))。
+  - --accent-foreground    ← --paper(白)   --accent 现在是品牌蓝,叠字取白以
+                                            保证对比度(ghost 按钮/tabs/dialog
+                                            关闭按钮的 hover 态背景变蓝时的
+                                            文字色)。
   - --popover / --popover-foreground ← --paper / --ink
-Sonner toast background-image project â skipped: background property, add when multiple images needed. "Paper" white,
-                                            Use body text color.,and dialog shell
-                                            desktop-shell Card's white background and black text base tone is consistent.
+                                            Sonner toast 背景取项目"纸面"白,
+                                            文字用正文字色,和对话框壳
+                                            desktop-shell 卡片的白底黑字基调一致。
 */
 :root {
   --background: var(--bg);
@@ -73,7 +73,7 @@ Sonner toast background-image project â skipped: background property, add w
   --secondary: var(--paper);
   --secondary-foreground: var(--ink);
 
-  /* Not called --muted:Avoid overwrite tokens.css Native items with different semantics. --muted(Text gray) */
+  /* 不叫 --muted:避免覆盖 tokens.css 里语义不同的项目原生 --muted(文字灰) */
   --muted-surface: var(--line);
 
   --accent-foreground: var(--paper);

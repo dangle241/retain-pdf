@@ -43,7 +43,7 @@ export function setCredentialDialogModeView({
   dialog.dataset[CREDENTIAL_DOM_DATASETS.setupMode] = setupMode ? "1" : "0";
   const title = $(BROWSER_CREDENTIAL_IDS.title);
   if (title) {
-    title.textContent = setupMode ? "initial setup" : "API Settings";
+    title.textContent = setupMode ? "首次配置" : "接口设置";
   }
   const subtitle = $(BROWSER_CREDENTIAL_IDS.subtitle);
   if (subtitle) {
@@ -52,7 +52,7 @@ export function setCredentialDialogModeView({
   }
   const saveButton = $(BROWSER_CREDENTIAL_IDS.saveButton);
   if (saveButton) {
-saveButton.textContent = setupMode ? "Save and Start" : "Save";
+    saveButton.textContent = setupMode ? "保存并启动" : "保存";
   }
   $(BROWSER_CREDENTIAL_IDS.tabs)?.classList.toggle("hidden", setupMode);
   if (setupMode) {

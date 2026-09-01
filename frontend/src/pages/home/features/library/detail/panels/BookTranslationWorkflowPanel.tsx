@@ -1,11 +1,11 @@
-// Book Details "Translation" Tab Workflow main panel.
+// 书籍详情「翻译」Tab 的工作流主面板。
 //
-// Migrated from TranslationWorkflowDialog content area of:
-//   - Popup:#status-section + StatusCardMain（#job-status-card）
-//   - this Tab：#book-detail-status-section + StatusCardEmbedded（#book-detail-job-status-card）
+// 从 TranslationWorkflowDialog 的内容区迁移而来：
+//   - 弹窗里：#status-section + StatusCardMain（#job-status-card）
+//   - 本 Tab：#book-detail-status-section + StatusCardEmbedded（#book-detail-job-status-card）
 //
-// Book in library: unnecessary WorkflowPanel Upload form; initiates translation. BookTranslateLaunchForm。
-// the progress home is always in this panel, never open #translation-workflow-dialog。
+// 书已在馆：不需要 WorkflowPanel 上传表单；发起翻译用 BookTranslateLaunchForm。
+// 进度主场永远在本面板，绝不打开 #translation-workflow-dialog。
 
 import { cn } from "@/lib/utils";
 import { BookTranslateProgressPanel } from "./BookTranslateProgressPanel.jsx";
@@ -33,8 +33,8 @@ export type BookTranslationWorkflowPanelProps = {
 };
 
 /**
-* Corresponding old popup translation-workflow-shell status + Actions
- * Layout adaptation details right sidebar Tab。
+ * 对应旧弹窗 translation-workflow-shell 中的 status + 动作区，
+ * 布局适配详情右栏 Tab。
  */
 export function BookTranslationWorkflowPanel({
   item = {},
@@ -75,11 +75,11 @@ export function BookTranslationWorkflowPanel({
         </span>
       </div>
 
-      {/* migrated from #status-section / .translation-status-panel */}
+      {/* 迁移自 #status-section / .translation-status-panel */}
       <section
         id="book-detail-status-section"
         className="book-translation-status-panel"
-aria-label="Task Progress"
+        aria-label="任务进度"
       >
         <BookTranslateProgressPanel
           item={item}

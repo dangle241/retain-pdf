@@ -2,10 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 
-// Cancel semantic lock (audit P0-2/P0-4 regression lock, ask-answerer Right):
-// 1. answer() passes AbortSignal to ask (askLibraryAi â fetch) ââ Stream interruption confirmed.
-// 2. aborted Return old stream. conversation_id,Disable session affinity write-back.
-//    Otherwise "switching session during generation" overwritten by old done. Restore old session, next question dispatched to wrong thread.
+// 取消语义锁（审计 P0-2/P0-4 回归锁,ask-answerer 侧）：
+// 1. answer() 把 AbortSignal 透传给 ask（askLibraryAi → fetch）——断流是真的
+// 2. aborted 的旧流即便带回 conversation_id,也禁止回写会话粘性
+//    （否则"生成中切会话"会被旧 done 拽回旧会话,下一问落错线程）
 
 const dom = new JSDOM("<!doctype html><body></body>", { url: "http://localhost/" });
 globalThis.document = dom.window.document;
@@ -23,7 +23,7 @@ function makeAnswerer(fakeAsk, jobId) {
   });
 }
 
-test("signal passed to ask, write back session affinity on normal completion", async () => {
+test("signal 透传到 ask,正常完成时回写会话粘性", async () => {
   const seen = {};
   const answerer = makeAnswerer(async (args) => {
     seen.signal = args.signal;
@@ -32,29 +32,29 @@ test("signal passed to ask, write back session affinity on normal completion", a
 
   const controller = new AbortController();
   const result = await answerer.answer({ question: "问", signal: controller.signal });
-assert.equal(seen.signal, controller.signal, "signal must be passed to ask");
+  assert.equal(seen.signal, controller.signal, "signal 必须透传给 ask");
   assert.equal(result.conversationId, "conv-live");
-assert.equal(answerer.getConversationId(), "conv-live", "Normal completion writes back memory affinity");
+  assert.equal(answerer.getConversationId(), "conv-live", "正常完成回写内存粘性");
   assert.equal(
     loadStoredConversationId({ jobId: "job-cancel-a" }),
     "conv-live",
-"Normal completion writes back storage affinity",
+    "正常完成回写 storage 粘性",
   );
 });
 
-test("aborted old stream forbidden from writing back session affinity (P0-4)", async () => {
+test("aborted 的旧流禁止回写会话粘性(P0-4)", async () => {
   const answerer = makeAnswerer(async () => {
-// Simulate: abort occurs during stream processing, but done restores old session id
+    // 模拟：abort 发生在流进行中,但 done 仍带回旧会话 id
     return { answer: "迟到的旧答案", citations: [], conversationId: "conv-stale" };
   }, "job-cancel-b");
 
   const controller = new AbortController();
   controller.abort();
   await answerer.answer({ question: "问", signal: controller.signal });
-assert.notEqual(answerer.getConversationId(), "conv-stale", "aborted must not change memory affinity");
+  assert.notEqual(answerer.getConversationId(), "conv-stale", "aborted 不得改内存粘性");
   assert.notEqual(
     loadStoredConversationId({ jobId: "job-cancel-b" }),
     "conv-stale",
-"aborted must not write storage affinity",
+    "aborted 不得写 storage 粘性",
   );
 });

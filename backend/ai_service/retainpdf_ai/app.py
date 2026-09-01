@@ -1,4 +1,4 @@
-"""FastAPI Apply:Authentication + /v1/ask + Health check."""
+"""FastAPI 应用:认证 + /v1/ask + 健康检查。"""
 
 from __future__ import annotations
 
@@ -23,24 +23,24 @@ from .tools import build_default_registry
 class AskInput(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
     document_id: str = ""
-    # Pass only job_id(Includes history run):Server parses owning document.,Avoid frontend reliance
-    # active_job_id Reverse lookup in history job Silent mismatch upstream; QA degrades to full-library retrieval.
+    # 可只传 job_id(含历史 run):由服务端解析所属文档,避免前端靠
+    # active_job_id 反查在历史 job 上静默失配、问答退化为全库检索
     job_id: str = ""
-# Multi-turn dialogue: pass session ID, injects previous rounds as context, and upon completion
-    # user/assistant Two meridians Rust API Write-back(Single writer, no corruption.)Multi-turn dialogue: providing conversation ID injects previous turns as context, and writes back user/assistant messages via Rust API upon completion (single writer prevents corruption). If omitted and Rust is connected, it auto-creates and returns conversation_id on done.
-    # Connects by default. Rust will auto-create,and done Callback conversation_id。
+    # 多轮对话:传会话 ID 则注入既往轮次为上下文,并在完成后把
+    # user/assistant 两条经 Rust API 回写(单写入者不破)。
+    # 缺省时若能连上 Rust 会 auto-create,并在 done 回传 conversation_id。
     conversation_id: str = ""
-# Message tree: new user's parent (current head); retry: = retried user message id.
+    # 消息树:新 user 的 parent(当前 head);重试时 = 被重试的 user 消息 id。
     parent_id: str = ""
-    # No input provided. Need source text to translate.:Mount new only assistant to parent_id(user),Stop writing user。
+    # 重新生成:只挂新 assistant 到 parent_id(user),不再写 user。
     regenerate: bool = False
-    # Client stable message id,With frontend store / assistant-ui Align.
+    # 客户端稳定消息 id,与前端 store / assistant-ui 对齐。
     user_message_id: str = ""
     assistant_message_id: str = ""
     stream: bool = False
-    # B2: Force trigger extractive compression (test/debug)
+    # B2: 强制触发抽取式压缩（测试/调试）
     force_compress: bool = False
-    # Frontend passes in via request LLM Credentials:Leave blank to revert to startup phase. env Config
+    # 前端按请求传入的 LLM 凭据:留空则回退启动期 env 配置
     llm_api_key: str = ""
     llm_base_url: str = ""
     llm_model: str = ""
@@ -53,7 +53,7 @@ def build_app(
 ) -> FastAPI:
     settings = settings or load_settings()
     if agent is None:
-# LLM key no longer mandatory: allow blank env, passed by frontend per request. (see AskInput.llm_api_key)
+        # LLM key 不再强制:允许留空 env,由前端按请求传入(见 AskInput.llm_api_key)
         if not settings.rust_api_key:
             raise RuntimeError("RETAIN_AI_RUST_API_KEY is required")
         rust = rust or RustApiClient(settings)
@@ -76,7 +76,7 @@ def build_app(
         return str((document or {}).get("document_id") or "")
 
     def ensure_conversation_id(payload: AskInput, document_id: str) -> str:
-        """B1: has conversation_id then use;Otherwise via Rust auto-create and return new id。"""
+        """B1: 有 conversation_id 则用;否则经 Rust auto-create 并返回新 id。"""
         existing = payload.conversation_id.strip()
         if existing:
             return existing
@@ -86,7 +86,7 @@ def build_app(
         if len(title) > 48:
             title = f"{title[:48].rstrip()}…"
         if not title:
-            title = "reading Q&A"
+            title = "阅读问答"
         try:
             created = rust.create_conversation(title=title, document_id=document_id or "")
             return str((created or {}).get("conversation_id") or "").strip()
@@ -100,9 +100,9 @@ def build_app(
         *,
         stop_at: str = "",
     ) -> list[dict[str, Any]]:
-"""From head (or stop_at) backtrack along parent_id, return rootâLeaf path.
+        """从 head(或 stop_at)沿 parent_id 回溯,返回根→叶路径。
 
-        none parent / message_id by old data seq Link into linear chain.
+        无 parent / message_id 的旧数据按 seq 串成线性链。
         """
         if not messages:
             return []
@@ -110,7 +110,7 @@ def build_app(
             messages,
             key=lambda m: int(m.get("seq") or 0) if str(m.get("seq") or "").strip() else 0,
         )
-        # Synthetic stability id + Linear parent,Fallback to full record if no tree fields. transcript
+        # 合成稳定 id + 线性 parent,保证无树字段时退化为整条 transcript
         by_id: dict[str, dict[str, Any]] = {}
         prev_id = ""
         for index, raw in enumerate(ordered):
@@ -175,13 +175,13 @@ def build_app(
         force_compress: bool = False,
         stop_at: str = "",
     ) -> tuple[list[dict[str, str]], dict[str, Any] | None, dict[str, Any], str]:
-        """Compress(Optional) + Assemble history; return (history, compress_event|None, memory_debug, summary_id)。
+        """压缩(可选) + 组装 history；返回 (history, compress_event|None, memory_debug, summary_id)。
 
-summary_id If non-empty,The caller must process this round. user(or regenerate's assistant)Hung
-        Below——Summary only falls within head on path,Next round load_transcript Just managed to read it back.
-Old implementation summary with set_head=False hung under head belowuser also attached under head,
-        Summary complete. user Sibling node(Dead branch):Never read back → Re‑compress every round + write another one
-        Orphan Summary(Audit A2)。
+        summary_id 非空时,调用方必须把本轮 user(或 regenerate 的 assistant)挂在
+        它下面——摘要只有落在 head 路径上,下一轮 load_transcript 才读得回来。
+        旧实现摘要以 set_head=False 挂在 head 下、user 又同样挂在 head 下,
+        摘要成了 user 的兄弟节点(死分支):永远读不回 → 每轮重新压缩 + 再写一条
+        孤儿摘要(审计 A2)。
         """
         transcript = load_transcript(conversation_id, stop_at=stop_at)
         compress = maybe_compress_transcript(
@@ -207,7 +207,7 @@ Old implementation summary with set_head=False hung under head belowuser also at
                 compress_event = compress.event
             except Exception as exc:
                 print(f"[retainpdf-ai] persist summary failed: {exc}", flush=True)
-                # Persistence failed; fallback to memory. working use memory working view to complete this round
+                # 持久化失败仍用内存 working 视图完成本轮
         assembled = assemble_history(
             working,
             window_turns=settings.memory_window_turns,
@@ -227,15 +227,15 @@ Old implementation summary with set_head=False hung under head belowuser also at
         *,
         chain_parent_id: str = "",
     ) -> None:
-        """Best-effort history write-back.:Log only on failure.,Does not affect return.
+        """尽力而为的历史回写:失败只记日志,不影响返回。
 
-        Normal Round: user(parent=chain_parent_id|payload.parent_id|head) + assistant(parent=user)。
-regenerate: only assistant(parent=chain_parent_id|payload.parent_id's user Node).
-        chain_parent_id = prepare_memory Just-landed summary node id:On input, current message round uses
-        Summary: parent,Integrate the summary. head Path(otherwise the summary becomes a dead branch,see prepare_memory Comments)。
+        正常轮: user(parent=chain_parent_id|payload.parent_id|head) + assistant(parent=user)。
+        regenerate: 仅 assistant(parent=chain_parent_id|payload.parent_id 的 user 节点)。
+        chain_parent_id = prepare_memory 刚落库的摘要节点 id:传入时本轮消息以
+        摘要为 parent,把摘要接进 head 路径(否则摘要成死分支,见 prepare_memory 注释)。
 
-        Return whether persistence succeeded.(No session to write=True,Not a failure.);False Meeting Manager done.persisted
-Forward prompt to frontend."This round not saved to history."(audit C2:Only previous failures print,User-transparent.).
+        返回是否成功持久化(无会话可写=True,不算失败);False 会经 done.persisted
+        透传给前端提示"本轮未存入历史"(审计 C2:此前失败只 print,用户无感知)。
         """
         if not conversation_id or rust is None:
             return True
@@ -247,7 +247,7 @@ Forward prompt to frontend."This round not saved to history."(audit C2:Only prev
             tool_trace_json = json.dumps(result.tool_trace, ensure_ascii=False)
             model = payload.llm_model or settings.llm_model
             if payload.regenerate:
-# Retry: parent_id Must be user message
+                # 重试: parent_id 必须是 user 消息
                 user_parent = parent_hint
                 rust.append_conversation_message(
                     conversation_id,
@@ -318,11 +318,11 @@ Forward prompt to frontend."This round not saved to history."(audit C2:Only prev
         return payload
 
     def _resolve_llm_settings(payload: AskInput) -> Settings:
-        # Frontend sends per request LLM key/base/model Override startup config;Fallback if all three empty. env。
-        # Missing key Raise error directly,Avoid hitting upstream. 401。
+        # 前端按请求携带 LLM key/base/model 时覆盖启动期配置;三者留空则回退 env。
+        # 缺 key 直接报错,避免打到上游才 401。
         api_key = (payload.llm_api_key or settings.llm_api_key).strip()
         if not api_key:
-            raise HTTPException(status_code=400, detail="Missing LLM API Key:Please fill in the model API Key in the frontend credentials settings. API Key。")
+            raise HTTPException(status_code=400, detail="缺少 LLM API Key:请在前端凭据设置中填写模型 API Key。")
         return replace(
             settings,
             llm_api_key=api_key,
@@ -331,20 +331,20 @@ Forward prompt to frontend."This round not saved to history."(audit C2:Only prev
         )
 
     def _request_chat_fn(payload: AskInput):
-# Non-streaming path: request does not override any LLM fallback to startup period on parameter error. chat_fn returns None.
-        resolved = _resolve_llm_settings(payload)  # Also guard against missing keys key Guard
+        # 非流式路径:请求未覆盖任何 LLM 参数时回退启动期 chat_fn(返回 None)。
+        resolved = _resolve_llm_settings(payload)  # 顺带做缺 key 守卫
         if not payload.llm_api_key and not payload.llm_base_url and not payload.llm_model:
             return None
         return build_deepseek_chat_fn(resolved)
 
     def _sse_events(payload: AskInput, resolved: Settings) -> Iterator[str]:
-        # agent Loop is synchronous and blocking.,Move to worker thread.,Push event via queue——
-        # Frontend on first tool call(~2s)visible"Retrieving…"sense of process;
-# Final answer round completed. on_delta pushes answer_delta token by token.
+        # agent 循环是同步阻塞的,放到工作线程,经队列推事件——
+        # 前端在首个工具调用(~2s)就能看到"正在检索…"的过程感;
+        # 最终回答轮经 on_delta 逐 token 推 answer_delta。
         events: queue.Queue[dict[str, Any] | None] = queue.Queue()
         document_id = resolve_document_id(payload)
         conversation_id = ensure_conversation_id(payload, document_id)
-        # regenerate: Context halts at user Node;No context. Provide code or prompt to continue.:follow current head path
+        # regenerate: 上下文停在 user 节点;正常续写:走当前 head 路径
         memory_stop = (
             payload.parent_id.strip()
             if payload.regenerate and payload.parent_id.strip()
@@ -355,7 +355,7 @@ Forward prompt to frontend."This round not saved to history."(audit C2:Only prev
             force_compress=bool(payload.force_compress),
             stop_at=memory_stop,
         )
-        # SSE SSE path always uses streaming chat_fn with on_delta: incremental text enters event queue. on_delta streaming chat_fn:Enqueue incremental text.
+        # SSE 路径总是用带 on_delta 的流式 chat_fn:增量文本进事件队列。
         chat_fn = build_deepseek_chat_fn(
             resolved,
             on_delta=lambda text: events.put({"type": "answer_delta", "text": text}),
@@ -386,8 +386,8 @@ Forward prompt to frontend."This round not saved to history."(audit C2:Only prev
                     }
                 )
             except Exception as exc:
-                # RuntimeError User-facing strings we generate (e.g. _friendly_llm_errorInvalid input.
-                # Direct output omits exception class name; other exceptions retain it for localization.
+                # RuntimeError 是我们自己产的用户可读文案（如 _friendly_llm_error），
+                # 直出不带异常类名；其余异常保留类名便于定位
                 message = str(exc) if isinstance(exc, RuntimeError) else f"{type(exc).__name__}: {exc}"
                 events.put({"type": "error", "message": message})
             finally:
@@ -403,7 +403,7 @@ Forward prompt to frontend."This round not saved to history."(audit C2:Only prev
     @app.post("/v1/ask", dependencies=[Depends(require_api_key)])
     def ask(payload: AskInput) -> Any:
         if payload.stream:
-            # Throw inside generator HTTPException Cannot convert to 400,Validate and parse here first. settings
+            # 生成器内抛 HTTPException 无法转成 400,故先在此校验并解析出 settings
             resolved = _resolve_llm_settings(payload)
             return StreamingResponse(
                 _sse_events(payload, resolved),

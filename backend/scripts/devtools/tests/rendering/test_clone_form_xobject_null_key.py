@@ -13,9 +13,9 @@ sys.path.insert(0, str(REPO_SCRIPTS_ROOT))
 from services.rendering.source_cleanup.pdf.xobject_ops import _clone_form_xobject
 
 
-# one form xobject with `/StampId null`(Publisher seal form true form)。
-# Read-only access to pre-existing content. null Construct original value textââpikepdf's Python API disallowed
-# Set dict key to NoneRaw bytes qpdf Rebuild on open. xref。
+# 一个 form xobject 带 `/StampId null`(出版社图章 form 的真实形态)。
+# 只能通过读取已含 null 值的原文构造——pikepdf 的 Python API 不允许把
+# 字典键设成 None。原始字节让 qpdf 打开时重建 xref。
 _PDF_WITH_NULL_FORM_KEY = b"""%PDF-1.7
 1 0 obj
 << /Type /Catalog /Pages 2 0 R >>
@@ -48,12 +48,12 @@ trailer
 def test_clone_form_xobject_skips_null_valued_keys() -> None:
     with pikepdf.open(io.BytesIO(_PDF_WITH_NULL_FORM_KEY)) as pdf:
         form = pdf.pages[0].obj[Name("/Resources")][Name("/XObject")][Name("/Fm0")]
-        # Verify source contains one. null key-value(Otherwise test meaningless)
+        # 确认原文里确实有一个 null 值键(否则测试没意义)
         assert any(value is None for _key, value in form.items())
 
         cloned = _clone_form_xobject(pdf, form)
 
         assert cloned[Name("/Subtype")] == Name("/Form")
         assert list(cloned[Name("/BBox")]) == [0, 0, 10, 10]
-        # null Key removed losslessly.,Clone no longer throws ValueError
+        # null 键被无损剔除,克隆不再抛 ValueError
         assert Name("/StampId") not in cloned

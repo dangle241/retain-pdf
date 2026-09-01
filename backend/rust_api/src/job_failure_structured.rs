@@ -59,7 +59,7 @@ pub(super) fn classify_structured_failure(
         .summary
         .clone()
         .filter(|value| !value.trim().is_empty())
-.unwrap_or_else(|| "Task failed, but no clear root cause identified yet".to_string());
+        .unwrap_or_else(|| "任务失败，但暂未识别出明确根因".to_string());
     let root_cause = structured
         .root_cause
         .clone()
@@ -77,7 +77,7 @@ pub(super) fn classify_structured_failure(
         .suggestion
         .clone()
         .filter(|value| !value.trim().is_empty())
-        .or_else(|| Some("View full tracebackOriginal exception log further investigate".to_string()));
+        .or_else(|| Some("查看完整 traceback、原始异常与日志进一步排查".to_string()));
     let raw_excerpt = structured
         .raw_excerpt
         .clone()
@@ -141,12 +141,12 @@ pub(super) fn classify_provider_auth_failure(
         failed_stage,
         "auth_failed",
         last_error.provider_code.clone(),
-"Authentication failed",
-Some("The API Key / Token used by the current task is invalid, expired, or has insufficient permissions".to_string()),
+        "鉴权失败",
+        Some("当前任务使用的 API Key / Token 无效、过期或权限不足".to_string()),
         false,
         extract_upstream_host(haystack),
         provider_name(diagnostics),
-Some("Check MinerU Token, model API Key, or backend X-API-Key configuration".to_string()),
+        Some("检查 MinerU Token、模型 API Key 或后端 X-API-Key 配置".to_string()),
         last_log_line,
         first_error_excerpt(error, haystack),
         raw_diagnostic_from_text(error, haystack),

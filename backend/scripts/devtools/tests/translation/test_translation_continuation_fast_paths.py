@@ -185,11 +185,11 @@ class TranslationContinuationFastPathTests(unittest.TestCase):
             return_value={
                 "__cg__:cg-010-001": {
                     "decision": "translate",
-                    "translated_text": "This sentence starts and continues.",
+                    "translated_text": "这句话开始并继续。",
                     "final_status": "translated",
                     "member_translations": [
-                        {"item_id": "p010-b001", "translated_text": "This sentence starts"},
-                        {"item_id": "p010-b002", "translated_text": "and continues."},
+                        {"item_id": "p010-b001", "translated_text": "这句话开始"},
+                        {"item_id": "p010-b002", "translated_text": "并继续。"},
                     ],
                 }
             },
@@ -210,7 +210,7 @@ class TranslationContinuationFastPathTests(unittest.TestCase):
 
         payload = result["__cg__:cg-010-001"]
         group_mock.assert_called_once()
-self.assertEqual(payload["translated_text"], "This sentence starts and continues.")
+        self.assertEqual(payload["translated_text"], "这句话开始并继续。")
         self.assertEqual(payload["member_translations"][0]["item_id"], "p010-b001")
         self.assertEqual(payload["translation_diagnostics"]["route_path"], ["block_level", "continuation_group_members"])
         self.assertEqual(payload["translation_diagnostics"]["output_mode_path"], ["json", "member_translations"])
@@ -243,7 +243,7 @@ self.assertEqual(payload["translated_text"], "This sentence starts and continues
         protocol_exc = module.TranslationProtocolError(
             "__cg__:cg-007-003",
             translated_text=(
-                '{"translations":[{"item_id":"__cg__:cg-007-003","translated_text":"Anthropic与OpenAI: On the contrary, a clear signal is thatAIModel providers are capturing more enterprise wallet share."}]}'
+                '{"translations":[{"item_id":"__cg__:cg-007-003","translated_text":"Anthropic与OpenAI：相反，一个明确的信息是，AI模型提供商正在攫取更多的企业钱包份额。"}]}'
             ),
         )
 
@@ -256,7 +256,7 @@ self.assertEqual(payload["translated_text"], "This sentence starts and continues
 
         payload = result["__cg__:cg-007-003"]
         self.assertEqual(payload["decision"], "translate")
-self.assertIn("Anthropic and OpenAI", payload["translated_text"])
+        self.assertIn("Anthropic与OpenAI", payload["translated_text"])
         self.assertEqual(payload["translation_diagnostics"]["degradation_reason"], "protocol_shell_salvaged")
 
     def test_direct_typst_continuation_group_protocol_shell_partial_accepts_body_text(self):
@@ -283,7 +283,7 @@ self.assertIn("Anthropic and OpenAI", payload["translated_text"])
         protocol_exc = module.TranslationProtocolError(
             "__cg__:cg-008-004",
             translated_text=(
-                '{"translations":[{"item_id":"wrong-id","translated_text":"COBOLCode modernization: this is just one data point, so we only highlight it last."}]}'
+                '{"translations":[{"item_id":"wrong-id","translated_text":"COBOL代码现代化：这只是一个数据点，因此我们最后才重点提及。"}]}'
             ),
         )
 
@@ -296,7 +296,7 @@ self.assertIn("Anthropic and OpenAI", payload["translated_text"])
             "validate_batch_result",
             side_effect=module.TranslationProtocolError(
                 "__cg__:cg-008-004",
-translated_text="COBOL code modernization: This is just one data point, so we mention it last.",
+                translated_text="COBOL代码现代化：这只是一个数据点，因此我们最后才重点提及。",
             ),
         ):
             result = _translate_direct_typst_for_test(module, item, context=context)
@@ -385,7 +385,7 @@ translated_text="COBOL code modernization: This is just one data point, so we me
         english_residue = module.EnglishResidueError(
             item["item_id"],
             source_text=item["translation_unit_protected_source_text"],
-            translated_text="This is the first sentence.This is the second sentence with reaction details.",
+            translated_text="这是第一句话。This is the second sentence with reaction details.",
         )
 
         with mock.patch.object(module, "translate_single_item_plain_text", side_effect=english_residue):
@@ -403,7 +403,7 @@ translated_text="COBOL code modernization: This is just one data point, so we me
 
         payload = result[item["item_id"]]
         self.assertEqual(payload["decision"], "translate")
-        self.assertIn("First sentence exists. Remove.", payload["translated_text"])
+        self.assertIn("这是第一句话", payload["translated_text"])
         self.assertEqual(payload["translation_diagnostics"]["degradation_reason"], "english_residue_partial_accept")
         self.assertEqual(payload["translation_diagnostics"]["route_path"], ["block_level", "english_residue_salvage"])
 
@@ -446,7 +446,7 @@ translated_text="COBOL code modernization: This is just one data point, so we me
         english_residue = module.EnglishResidueError(
             item["item_id"],
             source_text=item["translation_unit_protected_source_text"],
-translated_text="This is the first sentence. This is the second sentence with reaction details.",
+            translated_text="这是第一句话。This is the second sentence with reaction details.",
         )
 
         with mock.patch.object(module, "translate_single_item_plain_text", side_effect=english_residue):
@@ -495,7 +495,7 @@ translated_text="This is the first sentence. This is the second sentence with re
         shell_exc = module.TranslationProtocolError(
             item["item_id"],
             source_text=item["translation_unit_protected_source_text"],
-            translated_text='{"translations":[{"item_id":"__cg__:cg-005-007","translated_text":"orbital interaction is only one of several factors"}]}',
+            translated_text='{"translations":[{"item_id":"__cg__:cg-005-007","translated_text":"轨道相互作用仅是若干因素之一。该反应的过渡态因静电相互作用而显著稳定。"}]}',
         )
 
         with mock.patch.object(module, "translate_single_item_plain_text", side_effect=shell_exc):
@@ -512,7 +512,7 @@ translated_text="This is the first sentence. This is the second sentence with re
 
         payload = result[item["item_id"]]
         self.assertEqual(payload["decision"], "translate")
-        self.assertIn("orbital energy levels (Figure", payload["translated_text"])
+        self.assertIn("轨道相互作用仅是若干因素之一", payload["translated_text"])
         self.assertEqual(payload["translation_diagnostics"]["route_path"], ["block_level", "protocol_shell_unwrap"])
 
     def test_continuation_group_with_placeholders_uses_plain_path_first(self):
@@ -547,7 +547,7 @@ translated_text="This is the first sentence. This is the second sentence with re
                 plain_mock.return_value = {
                     item["item_id"]: {
                         "decision": "translate",
-"translated_text": "This consecutive paragraph mentions <f1-c1b/> and <f2-a77/>.",
+                        "translated_text": "该连续段落提到 <f1-c1b/> 与 <f2-a77/>。",
                         "final_status": "translated",
                     }
                 }

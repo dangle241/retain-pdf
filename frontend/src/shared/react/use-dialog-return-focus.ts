@@ -1,27 +1,27 @@
-// Radix Dialog return focus on close (Phase C: shadcn refactor, dialog rendering layer overhaul).
+// Radix Dialog 关闭后的焦点归还补偿(阶段 C:shadcn 改造,dialog 渲染层换血)。
 //
-// Radix default "Return focus to trigger element on close" depends on DialogPrimitive.Trigger record
-// context.triggerRef â but in this project, all dialogs are not "Trigger and Content in same
-// subtree" classic usage of: no rendering of DialogPrimitive.Trigger (trigger buttons are all ordinary
-// <button onClick={...}>,Distributed across HeroUpload/SettingsHubDialog panel/
-// AppShellHeader/EventsTimeline in completely different components such as trigger cards,Status
-// dialogStore.open()/APP_EVENTS/Local useState driven), Radix unknown "DeepSeek
-// Opened me",Thus default onCloseAutoFocus(Try focus triggerRef.current)
-// always a no-op â verified: focus moves to <body>, does not return to user's previous click.
-// button. Root cause and "whether trigger button is in same React subtree as Content" is irrelevant (even within same tree,
-// If unused DialogPrimitive.Trigger,Same no-op),So this project 9 Dialog
-// All need this hook, do not pick and use based on "cross-subtree?".
+// Radix 默认的"关闭后焦点归还触发元素"依赖 DialogPrimitive.Trigger 记录
+// context.triggerRef——但本项目 9 个对话框全部不是"Trigger 和 Content 同一
+// 子树"的经典用法:没有一处渲染 DialogPrimitive.Trigger(触发按钮都是普通
+// <button onClick={...}>,分散在 HeroUpload/SettingsHubDialog 面板/
+// AppShellHeader/EventsTimeline 触发卡片等完全不同的组件里,状态经
+// dialogStore.open()/APP_EVENTS/本地 useState 驱动),Radix 无法知道"是谁
+// 打开了我",于是默认的 onCloseAutoFocus(尝试 focus triggerRef.current)
+// 永远是 no-op——实测验证:关闭后焦点会落到 <body>,不会回到用户刚才点击
+// 的按钮。这个根因和"触发按钮是否与 Content 同一 React 子树"无关(即使同树,
+// 只要没用 DialogPrimitive.Trigger,同样是 no-op),所以本项目 9 个对话框
+// 统一都需要这个 hook,不按"是否跨子树"挑着用。
 //
-// Equivalent semantics added manually here: when open changes from false â true, record current
-// document.activeElement (almost always the trigger button user just clicked). When dialog closes,
-// (DialogPrimitive.Content onCloseAutoFocus) return focus to it, and
-// preventDefault Radix's own default behavior.
+// 这里手动补上等价语义:open 从 false→true 的那一刻,记下当时的
+// document.activeElement(几乎总是用户刚点击的触发按钮),对话框关闭时
+// (DialogPrimitive.Content 的 onCloseAutoFocus)把焦点还给它,并
+// preventDefault 掉 Radix 自己的默认行为。
 //
-// Originally in src/pages/home/state/ (Phase C: 4 batch dialogs present on home page);
-// Phase C finalize batch detail page's EventsTimeline and connect both modalities. After Radix Dialog,
-// this hook is shared across pages (home.bundle.js + detail.bundle.js must bundle it),
-// Move to src/shared/react/ with use-app-event.js/use-store.js/DownloadToastHost.jsx
-// Sibling(Same for latter."Each page independently esbuild Bundle, share source."precedent)。
+// 本文件原先在 src/pages/home/state/ 下(阶段 C 前 4 批对话框都在 home 页);
+// 阶段 C 收官批把 detail 页的 EventsTimeline 两个模态也接入 Radix Dialog 后,
+// 这个 hook 变成跨页共享(home.bundle.js + detail.bundle.js 都要打包它),
+// 挪到 src/shared/react/ 与 use-app-event.js/use-store.js/DownloadToastHost.jsx
+// 同级(后者也是同样"多页面各自 esbuild 打包但共享同一份源码"的先例)。
 
 import { useEffect, useRef } from "react";
 

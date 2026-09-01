@@ -8,7 +8,7 @@ import {
 import { unwrapEnvelope } from "../job/core.js";
 import { fetchMockProtected, submitMockJob, submitMockUpload } from "../mock/index.js";
 
-/** HTTP Mount when request fails status/url loose error type of */
+/** HTTP 请求失败时挂载 status/url 的宽松错误类型 */
 export interface HttpError extends Error {
   status?: number;
   url?: string;
@@ -78,10 +78,10 @@ export async function submitJson(url, payload) {
     const contentType = resp.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
       const errorPayload = await resp.json();
-      throw new Error(`Submission failed: ${resp.status} ${errorPayload.message || JSON.stringify(errorPayload)}${requestContext}`);
+      throw new Error(`提交失败: ${resp.status} ${errorPayload.message || JSON.stringify(errorPayload)}${requestContext}`);
     }
     const text = await resp.text();
-throw new Error(Submission failed: ${resp.status} ${text}${requestContext});
+    throw new Error(`提交失败: ${resp.status} ${text}${requestContext}`);
   }
   if (resp.status === 204) {
     return { ok: true };
@@ -132,14 +132,14 @@ export function submitUploadRequest(url, form, onProgress) {
       const message = typeof xhr.response === "object" && xhr.response
         ? (xhr.response.message || JSON.stringify(xhr.response))
         : (xhr.responseText || "");
-const error = new Error(Submission failed: ${xhr.status} ${message}) as HttpError;
+      const error = new Error(`提交失败: ${xhr.status} ${message}`) as HttpError;
       error.status = xhr.status;
       error.url = url;
       reject(error);
     });
 
     xhr.addEventListener("error", () => {
-const error = new Error(Submission failed: Network error. Current API base is ${apiBase()}, upload address: ${url}, confirm local service started.) as HttpError;
+      const error = new Error(`提交失败: 网络错误。当前 API Base 为 ${apiBase()}，上传地址为 ${url}。请确认本地服务已经启动。`) as HttpError;
       error.url = url;
       reject(error);
     });

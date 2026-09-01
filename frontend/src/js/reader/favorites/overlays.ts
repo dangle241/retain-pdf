@@ -19,7 +19,7 @@ export function showDeleteConfirmation(control, onConfirm, documentRef = control
   const popover = documentRef.createElement("span");
   popover.className = "reader-delete-popover";
   popover.setAttribute?.("role", "dialog");
-  popover.setAttribute?.("aria-label", "Confirm delete screenshot excerpt");
+  popover.setAttribute?.("aria-label", "确认删除截图摘录");
   popover.addEventListener?.("click", (event) => {
     event.preventDefault?.();
     event.stopPropagation?.();
@@ -27,12 +27,12 @@ export function showDeleteConfirmation(control, onConfirm, documentRef = control
 
   const message = documentRef.createElement("span");
   message.className = "reader-delete-popover-text";
-  message.textContent = "Delete";
+  message.textContent = "删除？";
 
   const cancel = documentRef.createElement("button");
   cancel.type = "button";
   cancel.className = "reader-delete-popover-cancel";
-cancel.textContent = "Cancel";
+  cancel.textContent = "取消";
   cancel.addEventListener?.("click", (event) => {
     event.preventDefault?.();
     event.stopPropagation?.();
@@ -43,7 +43,7 @@ cancel.textContent = "Cancel";
   const confirm = documentRef.createElement("button");
   confirm.type = "button";
   confirm.className = "reader-delete-popover-confirm";
-confirm.textContent = "Delete";
+  confirm.textContent = "删除";
   confirm.addEventListener?.("click", (event) => {
     event.preventDefault?.();
     event.stopPropagation?.();
@@ -99,7 +99,7 @@ export function attachSelectionClose(overlay, onClose, {
     const locate = documentRef.createElement("button");
     locate.type = "button";
     locate.className = "reader-selection-locate";
-locate.setAttribute("aria-label", "Locate screenshot position");
+    locate.setAttribute("aria-label", "定位截图位置");
     locate.textContent = "↗";
     let peekStartedAt = 0;
     let isPeeking = false;
@@ -137,7 +137,7 @@ locate.setAttribute("aria-label", "Locate screenshot position");
     const collect = documentRef.createElement("button");
     collect.type = "button";
     collect.className = "reader-selection-collect";
-    collect.setAttribute("aria-label", "Collapse Screenshot Excerpts");
+    collect.setAttribute("aria-label", "收起截图摘录");
     collect.textContent = "−";
     collect.addEventListener("click", (event) => {
       event.preventDefault();
@@ -149,7 +149,7 @@ locate.setAttribute("aria-label", "Locate screenshot position");
   const close = documentRef.createElement("button");
   close.type = "button";
   close.className = "reader-selection-close";
-close.setAttribute("aria-label", "Delete screenshot excerpt");
+  close.setAttribute("aria-label", "删除截图摘录");
   close.textContent = "×";
   close.addEventListener("click", (event) => {
     event.preventDefault();
@@ -177,7 +177,7 @@ export function setOverlayPreview(overlay, previewUrl = "") {
 }
 
 export function selectionSummary(selection: Partial<ReaderSelection> = {}) {
-return `Page ${selection.page || "-"}, selection ${formatRect(selection.rect || {})}`;
+  return `第 ${selection.page || "-"} 页，选区 ${formatRect(selection.rect || {})}`;
 }
 
 export function showSelectionToast(pageElement, rect: Partial<PixelRect>, message) {
@@ -200,7 +200,7 @@ export function showSelectionToast(pageElement, rect: Partial<PixelRect>, messag
   }, 1100);
 }
 
-export function showSourceLocator(pageElement, rect: Partial<PixelRect> | null | undefined, message = "Favorite location") {
+export function showSourceLocator(pageElement, rect: Partial<PixelRect> | null | undefined, message = "收藏位置") {
   if (!pageElement || !rect) {
     return;
   }

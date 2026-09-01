@@ -1,6 +1,6 @@
-// initialize / dispose event binding + idle view + startup routes.
-// Feature in createRuntimeFeatures Mounted.workflow Dialog events in composition
-// before in recent-jobs Binding (see composition.js Comment).
+// initialize / dispose：事件绑定 + idle 视图 + startup 路由。
+// 特性在 createRuntimeFeatures 已挂好；workflow 对话框事件在 composition
+// 里先于 recent-jobs 绑定（见 composition.js 注释）。
 
 import {
   APP_EVENTS,

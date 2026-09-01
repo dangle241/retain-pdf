@@ -24,7 +24,7 @@ def run_initial_continuation_pass(
     emit_stage_progress(
         stage="continuation_review",
         substage="continuation_review",
-        message="Initial contiguous segment consolidation complete.",
+        message="初始连续段整理完成",
         elapsed_ms=int((time.perf_counter() - stage_started) * 1000),
         payload={"page_count": len(page_payloads)},
     )
@@ -45,7 +45,7 @@ def run_continuation_review(
     emit_stage_transition(
         stage="continuation_review",
         substage="continuation_review",
-        message="Review hurdles/Cross-page paragraph",
+        message="开始复核跨栏/跨页连续段",
         progress_current=0,
         progress_total=len(page_payloads),
     )
@@ -62,7 +62,7 @@ def run_continuation_review(
         progress_callback=lambda current, total: emit_stage_progress(
             stage="continuation_review",
             substage="continuation_review",
-message=f"Determining hurdle./Cross-page continuous paragraph, {current}/{total} batches",
+            message=f"正在判断跨栏/跨页连续段，第 {current}/{total} 批",
             progress_current=current,
             progress_total=total,
             payload={"progress_unit": "page"},
@@ -73,7 +73,7 @@ message=f"Determining hurdle./Cross-page continuous paragraph, {current}/{total}
     emit_stage_progress(
         stage="continuation_review",
         substage="continuation_review",
-        message="Hurdles/Cross-page consecutive segment review completed.",
+        message="跨栏/跨页连续段复核完成",
         progress_current=len(page_payloads),
         progress_total=len(page_payloads),
         elapsed_ms=int((time.perf_counter() - review_started) * 1000),

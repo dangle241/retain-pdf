@@ -1,39 +1,39 @@
-// Phase timeline / Event stream: Two trigger cards + Two modals.
-// View is src/js/job-detail/events.js String template JSX Rewrite.(Class name/Mirror structure.);
-// Retain pure logic for event entry view model reuse. status-view-model.js and job/ layer formatting function.
+// 阶段时间线 / 事件流:两张触发卡片 + 两个模态框。
+// 视图为 src/js/job-detail/events.js 字符串模板的 JSX 重写(类名/结构照搬);
+// 事件条目视图模型复用保留的纯逻辑 status-view-model.js 与 job/ 层格式化函数。
 //
-// Dialog rendering layer (Stage C final batch, shadcn refactor): Two modalities from bespoke
+// Dialog 渲染层(阶段 C 收官批,shadcn 改造):两个模态从 bespoke
 // <section className="detail-modal"><div role="dialog" aria-modal="true">
-// Replace with Radix Dialog (DialogPrimitive.Root/Portal/Overlay/Content), unify to
-// home that set of pages desktop-dialog/desktop-shell/desktop-head/desktop-body Visual
-// Skeleton,No longer maintained detail Page-independent. .detail-modal/.detail-modal-panel/
-// .detail-modal-head structure (CSS for these three classes removed accordingly
-// deleted src/styles/pages/detail/modal.css). detail-modal-title/-subtitle/
-// -close/-status these pure layout class names are kept as is(Mount point changed from child of old structure to
-// desktop-head/desktop-body child,Visuals unchanged,Content not shared,Not worth unifying into
-// cross-subtree dialog-close-btn etc. â Especially detail-modal-close stroke color of
-// #d5d7dd and dialog-close-btn #d2d2d7 Literal mismatch. Merge cautiously. Subtle differences. Review changes.
-// But pixelmatch Potential differences) New detail-timeline-dialog/
-// detail-timeline-overlay Override classes replicate old .detail-modal/.detail-modal-panel
-// Pixel-perfect visuals (920px Upper width limit / 82vh High ceiling / 28px Rounded corners / #e5e7eb stroke / Deeper shadow),
-// See definition pages/detail/modal.css。
+// 换成 Radix Dialog(DialogPrimitive.Root/Portal/Overlay/Content),统一到
+// home 页那套 desktop-dialog/desktop-shell/desktop-head/desktop-body 视觉
+// 骨架,不再维持 detail 页独立的 .detail-modal/.detail-modal-panel/
+// .detail-modal-head 结构(这三个类的 CSS 已随之从
+// src/styles/pages/detail/modal.css 删除)。detail-modal-title/-subtitle/
+// -close/-status 这几个纯排版类名原样保留(挂载点从旧结构的子级换成
+// desktop-head/desktop-body 的子级,视觉不变,内容也不共享,不值得再统一成
+// 跨对话框共用的 dialog-close-btn 等——尤其 detail-modal-close 的描边色
+// #d5d7dd 和 dialog-close-btn 的 #d2d2d7 字面值不同,贸然合并会引入肉眼难辨
+// 但 pixelmatch 可能捕捉到的差异)。新增的 detail-timeline-dialog/
+// detail-timeline-overlay 覆盖类复刻旧 .detail-modal/.detail-modal-panel 的
+// 像素级视觉(920px 宽上限/82vh 高上限/28px 圆角/#e5e7eb 描边/更深的阴影),
+// 定义见 pages/detail/modal.css。
 //
-// open Status remains DetailApp.jsx stageHistoryOpen/eventsOpen two useStates
-// (Iron rule:State management untouched.,Swap render layer only),onOpenChange(false) Unify routing to
-// onClose Callback write-back state。
+// open 状态仍然是 DetailApp.jsx 的 stageHistoryOpen/eventsOpen 两个 useState
+// (铁律:不改状态管理本身,只换渲染层),onOpenChange(false) 统一路由到
+// onClose 回调回写 state。
 //
-// Restore focus:Trigger buttons for both modals(StageHistoryTriggerCard/EventsTriggerCard)
-// Although in the same DetailApp Within component tree,Unused.
-// DialogPrimitive.Trigger Package Trigger,Radix default triggerRef Always
-// nullââthis root cause and "Cross Subtree" unrelated (see use-dialog-return-focus.js head
-// Comment), Integrate here too. useDialogReturnFocus, and home page 7 Keep dialog
-// consistent, Not because "Appears in same tree." Assume omissible.
+// 焦点归还:两个模态的触发按钮(StageHistoryTriggerCard/EventsTriggerCard)
+// 虽然和模态本身在同一个 DetailApp 组件树内,但既没有用
+// DialogPrimitive.Trigger 包裹触发按钮,Radix 默认的 triggerRef 也就永远是
+// null——这个根因和"是否跨子树"无关(参见 use-dialog-return-focus.js 头
+// 注释),所以这里同样接入 useDialogReturnFocus,和 home 页 7 个对话框保持
+// 一致,不因为"看起来在同一棵树里"就假设可以省略。
 //
-// body scroll lock: DetailApp.jsx Original handwritten document.body.style.overflow lock
-// Deleted (see corresponding comment in file)ââRadix Dialog modal mode has built-in equivalent lock
-// (react-remove-scroll, auto-lock/unlock with Content mount/uninstall), Mutually exclusive modals
-// (Open only one.,Mask + focus trap Renders other trigger card unreachable.),Won't appear
-// Two mechanisms race concurrently. body Style scenarios.
+// body 滚动锁定:DetailApp.jsx 原有的手写 document.body.style.overflow 锁定
+// 已删除(见该文件对应注释)——Radix Dialog modal 模式自带等价锁定
+// (react-remove-scroll,随 Content 挂载/卸载自动加锁/解锁),两个模态互斥
+// (只要一个打开,遮罩 + focus trap 就会让另一个的触发卡片不可达),不会出现
+// 两套机制同时争抢 body 样式的场景。
 
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useDialogReturnFocus } from "../../../shared/react/use-dialog-return-focus.js";
@@ -45,7 +45,7 @@ import {
   buildJobDetailEventViewModel,
 } from "../external.js";
 
-// —— Copy three private functions verbatim from legacy. events.js,Ensure execution time/payload text byte-for-byte identical ——
+// —— 以下三个私有函数照搬旧 events.js,保证耗时/载荷文案逐字节一致 ——
 
 function parseIsoTime(value) {
   const raw = `${value || ""}`.trim();
@@ -93,10 +93,10 @@ export function StageHistoryTriggerCard({ onOpen }) {
     <article className="detail-card">
       <div className="detail-modal-trigger">
         <div className="detail-trigger-head">
-          <h2>Stage Timeline</h2>
-<button id="detail-open-stage-history-btn" type="button" className="detail-trigger-btn" onClick={onOpen}>View</button>
+          <h2>阶段时间线</h2>
+          <button id="detail-open-stage-history-btn" type="button" className="detail-trigger-btn" onClick={onOpen}>查看</button>
         </div>
-        <p className="detail-trigger-copy">Collapsed by default, prevents page stretching. Expand to view full stage transition history when needed.</p>
+        <p className="detail-trigger-copy">默认收起，不再把整页拉长。需要时再打开查看完整阶段切换记录。</p>
       </div>
     </article>
   );
@@ -107,10 +107,10 @@ export function EventsTriggerCard({ buttonText, onOpen }) {
     <article className="detail-card">
       <div className="detail-modal-trigger">
         <div className="detail-trigger-head">
-<h2>Event Stream</h2>
+          <h2>事件流</h2>
           <button id="detail-open-events-btn" type="button" className="detail-trigger-btn" onClick={onOpen}>{buttonText}</button>
         </div>
-        <p className="detail-trigger-copy">No event stream request by default. Load only on view click to avoid excess traffic on initial share page open.</p>
+        <p className="detail-trigger-copy">默认不请求事件流。只有点击查看时才加载，避免分享页初次打开就消耗过多流量。</p>
       </div>
     </article>
   );
@@ -119,7 +119,7 @@ export function EventsTriggerCard({ buttonText, onOpen }) {
 function DetailModal({ modalId, titleId, title, subtitle, closeButtonId, open, onClose, children }) {
   const { onCloseAutoFocus } = useDialogReturnFocus(open);
 
-// Esc / Backplane click / Close buttons write back via this single callback. DetailApp.jsx useState.
+  // Esc / 背板点击 / 关闭按钮都经这一个回调回写 DetailApp.jsx 的 useState。
   function handleOpenChange(nextOpen) {
     if (!nextOpen) {
       onClose();
@@ -145,7 +145,7 @@ function DetailModal({ modalId, titleId, title, subtitle, closeButtonId, open, o
                 <p className="detail-modal-subtitle">{subtitle}</p>
               </div>
               <DialogPrimitive.Close asChild>
-<button id={closeButtonId} type="button" className="detail-modal-close" aria-label="Close">Ã</button>
+                <button id={closeButtonId} type="button" className="detail-modal-close" aria-label="关闭">×</button>
               </DialogPrimitive.Close>
             </div>
             <div className="desktop-body">
@@ -160,7 +160,7 @@ function DetailModal({ modalId, titleId, title, subtitle, closeButtonId, open, o
 
 function StageHistoryItem({ entry, index, job }) {
   const enterAt = entry?.enter_at ? formatEventTimestamp(entry.enter_at) : "-";
-const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isJobTerminal(job) ? "-" : "In Progress");
+  const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isJobTerminal(job) ? "-" : "进行中");
   const terminalText = entry?.terminal_status ? ` · ${entry.terminal_status}` : "";
   const display = stageHistoryDisplay(entry);
   return (
@@ -181,13 +181,13 @@ export function StageHistoryModal({ open, job, onClose }) {
     <DetailModal
       modalId="detail-stage-history-modal"
       titleId="detail-stage-history-modal-title"
-      title="stage timeline"
-      subtitle="Show entry, exit, duration by phase."
+      title="阶段时间线"
+      subtitle="按阶段展示进入、退出与耗时。"
       closeButtonId="detail-close-stage-history-btn"
       open={open}
       onClose={onClose}
     >
-      <div id="detail-stage-history-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>No stage records</div>
+      <div id="detail-stage-history-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>暂无阶段记录</div>
       <div id="detail-stage-history-list" className={hasItems ? "detail-list" : "detail-list hidden"}>
         {history.map((entry, index) => (
           <StageHistoryItem key={index} entry={entry} index={index} job={job} />
@@ -253,14 +253,14 @@ export function EventsModal({ open, eventsPayload, status, onClose }) {
     <DetailModal
       modalId="detail-events-modal"
       titleId="detail-events-modal-title"
-      title="Event Stream"
-      subtitle="Full event stream requested only on open. Cached after first load."
+      title="事件流"
+      subtitle="只有打开时才会请求完整事件流，首次加载后会在当前页面缓存。"
       closeButtonId="detail-close-events-btn"
       open={open}
       onClose={onClose}
     >
       <div id="detail-events-status" className="detail-modal-status">{status}</div>
-      <div id="detail-events-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>No events</div>
+      <div id="detail-events-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>暂无事件</div>
       <div id="detail-events-list" className={hasItems ? "detail-list" : "detail-list hidden"}>
         {items.map((item, index) => (
           <EventItem key={item?.seq ?? index} item={item} />

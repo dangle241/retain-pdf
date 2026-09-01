@@ -36,30 +36,30 @@ def _body_item() -> dict:
 
 
 def test_extract_direct_typst_protocol_text_handles_fenced_json_translation_key() -> None:
-    raw = '```json\n{"translation": "示例 4.2Single-point energy calculation for water molecules Q-CHEM Input."}\n```'
+    raw = '```json\n{"translation": "示例 4.2：水分子单点能计算的 Q-CHEM 输入。"}\n```'
 
-    assert extract_direct_typst_protocol_text(raw, item_id="p014-b004") == "example 4.2: Q-CHEM input for single-point energy calculation of a water molecule Q-CHEM input."
+    assert extract_direct_typst_protocol_text(raw, item_id="p014-b004") == "示例 4.2：水分子单点能计算的 Q-CHEM 输入。"
 
 
 def test_extract_direct_typst_protocol_text_handles_item_id_mapping() -> None:
     raw = '{"p014-b004": "示例 4.2：水分子单点能计算的 Q-CHEM 输入。"}'
 
-assert extract_direct_typst_protocol_text(raw, item_id="p014-b004") == "Example 4.2: Q-CHEM input for water molecule single-point energy calculation."
+    assert extract_direct_typst_protocol_text(raw, item_id="p014-b004") == "示例 4.2：水分子单点能计算的 Q-CHEM 输入。"
 
 
 def test_canonicalize_batch_result_preserves_group_member_translations() -> None:
     item = _body_item()
     item["item_id"] = "__cg__:cg-014-001"
     item["translation_unit_id"] = "__cg__:cg-014-001"
-    payload = result_entry("translate", "Merged translation.")
+    payload = result_entry("translate", "合并后的译文。")
     payload["member_translations"] = [
-        {"item_id": "p014-b004", "translated_text": "First paragraph translation."},
-        {"item_id": "p014-b005", "translated_text": "Second paragraph translation."},
+        {"item_id": "p014-b004", "translated_text": "第一段译文。"},
+        {"item_id": "p014-b005", "translated_text": "第二段译文。"},
     ]
 
     result = canonicalize_batch_result([item], {item["item_id"]: payload})
 
-    assert result[item["item_id"]]["translated_text"] == "merged translation."
+    assert result[item["item_id"]]["translated_text"] == "合并后的译文。"
     assert result[item["item_id"]]["member_translations"] == payload["member_translations"]
 
 
@@ -107,7 +107,7 @@ def test_repeated_direct_typst_empty_body_uses_sentence_level_fallback() -> None
         return {
             item["item_id"]: {
                 "decision": "translate",
-"translated_text": "Example 4.2: Q-CHEM input for water molecule single-point energy calculation.",
+                "translated_text": "示例 4.2：水分子单点能计算的 Q-CHEM 输入。",
                 "final_status": "partially_translated",
                 "translation_diagnostics": {
                     "route_path": ["block_level", "sentence_level"],
@@ -132,7 +132,7 @@ def test_repeated_direct_typst_empty_body_uses_sentence_level_fallback() -> None
 
     payload = result[item["item_id"]]
     assert payload["decision"] == "translate"
-    assert "Water molecule single-point energy" in payload["translated_text"]
+    assert "水分子单点能" in payload["translated_text"]
 
 
 def test_repeated_direct_typst_empty_body_degrades_when_sentence_level_fails() -> None:
@@ -168,7 +168,7 @@ def test_repeated_direct_typst_empty_body_degrades_when_sentence_level_fails() -
 def test_direct_typst_math_delimiter_failure_uses_llm_repair_before_retry() -> None:
     item = _body_item()
     item["math_mode"] = "direct_typst"
-    broken = "Please at $ m' Maintain grammar around math fragments."
+    broken = "请在 $ m' 数学片段附近保持语法。"
 
     def fail_with_math_delimiter(*args, **kwargs):
         raise MathDelimiterError(
@@ -181,7 +181,7 @@ def test_direct_typst_math_delimiter_failure_uses_llm_repair_before_retry() -> N
         return {
             item["item_id"]: {
                 "decision": "translate",
-                "translated_text": "Please at $ m' $ keep syntax near math fragments.",
+                "translated_text": "请在 $ m' $ 数学片段附近保持语法。",
                 "final_status": "translated",
                 "translation_diagnostics": {
                     "route_path": ["block_level", "direct_typst", "typst_repair"],
@@ -213,7 +213,7 @@ def test_direct_typst_math_delimiter_failure_uses_llm_repair_before_retry() -> N
 def test_direct_typst_no_longer_auto_escapes_manual_style_bare_dollar_variables() -> None:
     item = _body_item()
     item["math_mode"] = "direct_typst"
-translated = "To enable this calculation, set INCDFT = 2 in the $rem section and use the $active_orbitals input section."
+    translated = "要启用该计算，请在 $rem 部分设置 INCDFT = 2，并使用 $active_orbitals 输入段。"
 
     result = canonicalize_batch_result([item], {item["item_id"]: result_entry("translate", translated)})
 

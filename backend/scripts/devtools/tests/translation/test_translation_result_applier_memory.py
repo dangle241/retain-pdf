@@ -38,7 +38,7 @@ def test_result_applier_uses_memory_updater_protocol(tmp_path) -> None:
     assert touched == {0}
     assert len(memory.calls) == 1
     assert memory.calls[0][0] is batch
-assert memory.calls[0][1]["a"]["translated_text"] == "self-consistent field"
+    assert memory.calls[0][1]["a"]["translated_text"] == "自洽场"
 
 
 def test_result_applier_skips_memory_for_immediate_results(tmp_path) -> None:

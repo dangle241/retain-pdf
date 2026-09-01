@@ -3,8 +3,8 @@ import { unwrapEnvelope } from "../job/core.js";
 import { getMockSearchHits } from "../mock/documents.js";
 import { buildApiEndpoint } from "./http.js";
 
-// Full-text search: matched term in snippet is wrapped in [ ], replace display layer with highlight tags.
-// Arbitrary length q All searchable(≥3 Full-text index for characters.,Backend auto-fallback fuzzy match.)。
+// 全文检索(中英文)。命中词在 snippet 里用 [ ] 包裹,由展示层替换为高亮标签。
+// 任意长度的 q 都可查(≥3 字符走全文索引,更短由后端自动回退模糊匹配)。
 export async function searchLibrary(apiPrefix, q, { limit = 20 } = {}) {
   const query = `${q || ""}`.trim();
   if (!query) {
@@ -20,7 +20,7 @@ export async function searchLibrary(apiPrefix, q, { limit = 20 } = {}) {
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`Retrieval failed. Please try again later.(${resp.status})`);
+    throw new Error(`检索失败，请稍后重试。(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }

@@ -71,7 +71,7 @@ def test_caption_and_footnote_density_recovery_uses_same_floor_rule() -> None:
         return {
             "item": {"layout_role": role, "semantic_role": role},
             "inner_bbox": [10.0, 0.0, 220.0, height],
-            "translated_text": "Annotation text is used to test density recovery." * 2,
+            "translated_text": "注释文字用于测试密度恢复。" * 2,
             "formula_map": [],
             "render_kind": "markdown",
             "font_size_pt": 8.4 if role == "caption" else 7.4,
@@ -103,7 +103,7 @@ def test_caption_and_footnote_recovery_do_not_exceed_body_font_reference() -> No
     body = {
         "item": {"layout_role": "paragraph", "semantic_role": "body"},
         "inner_bbox": [10.0, 0.0, 220.0, 30.0],
-        "translated_text": "Body",
+        "translated_text": "正文。",
         "formula_map": [],
         "render_kind": "markdown",
         "font_size_pt": 9.0,
@@ -115,7 +115,7 @@ def test_caption_and_footnote_recovery_do_not_exceed_body_font_reference() -> No
     caption = {
         "item": {"layout_role": "caption", "semantic_role": "caption"},
         "inner_bbox": [10.0, 40.0, 220.0, 100.0],
-        "translated_text": "Figure title text is used to test font size and cannot exceed body text." * 2,
+        "translated_text": "图题文字用于测试字号不能超过正文。" * 2,
         "formula_map": [],
         "render_kind": "markdown",
         "font_size_pt": 8.8,
@@ -124,7 +124,7 @@ def test_caption_and_footnote_recovery_do_not_exceed_body_font_reference() -> No
     footnote = {
         "item": {"layout_role": "footnote", "semantic_role": "footnote"},
         "inner_bbox": [10.0, 110.0, 220.0, 170.0],
-        "translated_text": "Footnote text used to test font size below body text." * 2,
+        "translated_text": "脚注文字用于测试字号低于正文。" * 2,
         "formula_map": [],
         "render_kind": "markdown",
         "font_size_pt": 8.2,

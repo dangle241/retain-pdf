@@ -1,21 +1,21 @@
-/* Color/font semantic contract (source of truth in themes/* Skin file).
+/* 颜色与字体的语义契约（真值在 themes/* 皮肤文件）。
  *
-* Rules:
-* - Components / Utility classes only use var(--bg|--ink|--accent|â¦) semantic names
-* - Skinning = changing data-theme; do not modify components
- * - New skin:themes/<id>.css + themes/index.css One line + shared/theme/registry.ts
-* - See docs/theme-system/ADDING_A_THEME.md
+ * 规则：
+ * - 组件 / 工具类只用 var(--bg|--ink|--accent|…) 语义名
+ * - 换肤 = 换 data-theme，不改组件
+ * - 新增皮肤：themes/<id>.css + themes/index.css 一行 + shared/theme/registry.ts
+ * - 见 docs/theme-system/ADDING_A_THEME.md
  */
 
 @import "./themes/index.css";
 
 :root {
-  /* Fonts and animations are skin-independent, fixed here. */
+  /* 字体与动效与皮肤无关，固定在此 */
   --font-sans: "SF Pro Display", "SF Pro SC", "PingFang SC", "Helvetica Neue", "Noto Sans CJK SC", sans-serif;
   --font-display: "SF Pro Display", "SF Pro SC", "PingFang SC", sans-serif;
   --font-mono: "Iosevka", "JetBrains Mono", monospace;
 
-  /* Animation baseline curve */
+  /* 动效基准曲线 */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);

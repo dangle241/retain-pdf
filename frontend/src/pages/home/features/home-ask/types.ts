@@ -1,6 +1,6 @@
-// Homepage AI Q&A Tab Lightweight type (no reader binding) job)
+// 主页 AI 问答 Tab 的轻量类型（不绑阅读器 job）
 
-/** @ Document */
+/** @ 文档 */
 export type HomeAskDocScope = {
   kind: "document";
   id: string;
@@ -9,7 +9,7 @@ export type HomeAskDocScope = {
   source_filename?: string;
 };
 
-/** @ Collection (expands to document list on send, soft-limited search) */
+/** @ 合集（发送时展开为合集内文档列表，软限定检索） */
 export type HomeAskCollectionScope = {
   kind: "collection";
   id: string;
@@ -19,7 +19,7 @@ export type HomeAskCollectionScope = {
 
 export type HomeAskScope = HomeAskDocScope | HomeAskCollectionScope;
 
-/** @deprecated Support legacy naming */
+/** @deprecated 兼容旧命名 */
 export type HomeAskDocRef = HomeAskDocScope;
 
 export type HomeAskCitation = {
