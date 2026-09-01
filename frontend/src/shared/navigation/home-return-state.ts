@@ -1,10 +1,10 @@
-// 主pages ↔ Reader整pages跳转时的回程Status(滚动 / tab / yesno可 history.back).
-// sessionStorage 按Tagspages隔离, 适合"离开前记下, 回来再resume".
+// Return state when navigating between main page and full‑page Reader (scroll position, tab, whether history.back works).
+// sessionStorage is scoped per tab, suitable for "remember before leaving, resume on return".
 
 export const HOME_RETURN_STORAGE_KEY = "retainpdf.home.return.v1";
 
 export type HomeReturnState = {
-  /** booksTagspagesyes从主pages navigate 进Reader的, Close时应优先 history.back */
+  /** Whether this tab navigated from main page into Reader; on close, prefer history.back */
   allowBack: boolean;
   activeTab: "library" | "categories" | "favorites" | "ask" | string;
   libraryScrollTop: number;
@@ -45,7 +45,7 @@ function readActiveLibraryTab(): string {
   return "library";
 }
 
-/** 离开主pages进Reader前调用: 记下滚动与 tab */
+/** Call before leaving main page into Reader: record scroll position and tab */
 export function captureHomeReturnState(options: { allowBack?: boolean } = {}) {
   if (typeof window === "undefined" || typeof sessionStorage === "undefined") {
     return;
@@ -78,7 +78,7 @@ export function peekHomeReturnState(): HomeReturnState | null {
   }
 }
 
-/** 读出并清除(resume滚动后调用, 避免下次误用) */
+/** Read and clear (call after resuming scroll, to avoid reusing accidentally) */
 export function consumeHomeReturnState(): HomeReturnState | null {
   const state = peekHomeReturnState();
   clearHomeReturnState();

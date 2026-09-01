@@ -1,12 +1,13 @@
-// 舞台计划器: manifest(Unknown JSON) → Rendering计划(纯Data).
+// Stage planner: manifest (unknown JSON) → rendering plan (pure data).
 //
-// DecorStage 组件只消费这里的输出, 不自己parse manifest——校验/降级/路径
-// parseAll收在纯函数里, 方便 node:test 直测(不用 jsdom 挂组件).
+// DecorStage consumes only this output, never parses manifest itself — validation,
+// fallback, and path resolution are kept in pure functions so node:test can run
+// them without jsdom.
 //
-// 降级链(契约 docs/theme-system/DECOR_PACKS.md): 
-// - model 层在图片版舞台/None WebGL/reduced-motion 下 → Rendering fallback 静态图
-// - reduced-motion → 所有 parallax 归零
-// 契约: ./contract.ts · 锚点: ./slots.ts
+// Fallback chain (see docs/theme-system/DECOR_PACKS.md):
+// - model layer under image‑based stage / no WebGL / reduced‑motion → static fallback image
+// - reduced‑motion → all parallax zeroed out
+// Contract: ./contract.ts · Slots: ./slots.ts
 
 import { validateDecorManifest } from "./contract.js";
 import { getDecorSlot, type DecorLayerBand, type DecorSlotId } from "./slots.js";
@@ -15,12 +16,12 @@ export type StageLayerPlan = {
   key: string;
   slot: DecorSlotId;
   band: DecorLayerBand;
-  /** 已拼上 assetBase 的图片地址(model 层在图片版舞台=其 fallback) */
+  /** Image URL with assetBase already prepended (for model layers this is the fallback) */
   src: string;
-  /** 0 = 不动(reduced-motion 下强制 0) */
+  /** 0 = no movement (forced to 0 under reduced‑motion) */
   parallax: number;
   opacity: number;
-  /** 点击图层展示的语录(image 层可选；多句 "\n\n" separated) */
+  /** Quote shown on layer click (image layer optional; multiple quotes separated by "\n\n") */
   clickQuote?: string;
 };
 
@@ -41,9 +42,9 @@ export type StagePlanResult =
   | { ok: false; plan: null; errors: string[] };
 
 export type StagePlanOptions = {
-  /** 装饰包根 URL(不带尾斜杠), 如 "decor/jiangnan" */
+  /** Decor pack root URL (no trailing slash), e.g. "decor/jiangnan" */
   assetBase: string;
-  /** prefers-reduced-motion: parallax 归零(图片版舞台books就不Rendering 3D) */
+  /** prefers‑reduced‑motion: zero parallax (and image‑based stage won't render 3D) */
   reducedMotion?: boolean;
 };
 
@@ -58,7 +59,7 @@ export function planStage(input: unknown, options: StagePlanOptions): StagePlanR
 
   const layers: StageLayerPlan[] = manifest.layers.map((layer, i) => {
     const band = getDecorSlot(layer.slot)?.band ?? "mid";
-    // 图片版舞台: model 层一律走静态降级图(three 引擎接入后再按能力m流)
+    // Image‑based stage: model layers always use static fallback images (three engine will stream later as capability allows)
     const file = layer.type === "model" ? layer.fallback : layer.src;
     return {
       key: `${manifest.id}:${i}:${layer.slot}`,
