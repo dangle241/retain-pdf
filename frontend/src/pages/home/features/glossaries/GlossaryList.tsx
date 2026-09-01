@@ -1,5 +1,5 @@
-// GlossaryList面板(Side-by-side glossary-manager-dialog-template.js 的
-// .glossary-list-panel 区块 + view.js:renderGlossaryList 逐节点镜像).
+// 术语表列表面板(对照 glossary-manager-dialog-template.js 的
+// .glossary-list-panel 区块 + view.js:renderGlossaryList 逐节点镜像)。
 
 import { EmptyState } from "../../../../shared/icons/EmptyState.jsx";
 import { GLOSSARY_DOM_IDS } from "./glossaries-dom-ids.js";
@@ -9,7 +9,7 @@ export function GlossaryList({ items, selectedId, onSelect, onCreateNew }) {
   return (
     <aside className="glossary-list-panel">
       <div className="glossary-panel-head">
-        <strong>List</strong>
+        <strong>列表</strong>
         <button
           id={GLOSSARY_DOM_IDS.newButton}
           type="button"
@@ -33,7 +33,7 @@ export function GlossaryList({ items, selectedId, onSelect, onCreateNew }) {
               onClick={() => onSelect(glossaryId)}
             >
               <strong>{item.name || glossaryId}</strong>
-              <span>{Number(item.entry_count) || 0} entries</span>
+              <span>{Number(item.entry_count) || 0} 条</span>
             </button>
           );
         })}
@@ -42,15 +42,11 @@ export function GlossaryList({ items, selectedId, onSelect, onCreateNew }) {
         {!hasItems ? (
           <EmptyState
             instrument="atom"
-            title="No Glossary"
-            hint="点右上角"新建", 为Domain术语建一份Side-by-side表."
+            title="暂无术语表"
+            hint="点右上角「新建」，为领域术语建一份对照表。"
           />
         ) : null}
       </div>
     </aside>
   );
 }
-
-
-
-
