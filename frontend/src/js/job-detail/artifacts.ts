@@ -102,7 +102,7 @@ export function renderArtifactsManifest(manifestPayload) {
     return;
   }
   const items = Array.isArray(manifestPayload?.items) ? [...manifestPayload.items] : [];
-  summary.textContent = items.length > 0 ? `total ${items.length} items` : "No 已登记产物";
+  summary.textContent = items.length > 0 ? `total ${items.length} items` : "No registered artifacts";
   if (items.length === 0) {
     container.innerHTML = '<div class="detail-empty">No Artifact Manifest</div>';
     return;
@@ -222,7 +222,7 @@ export function renderMarkdownContract({
     return;
   }
   if (!markdownPayload) {
-    setText("detail-markdown-status", "已发布, Loading内容...");
+    setText("detail-markdown-status", "Published, loading content...");
     return;
   }
   const refs = Array.isArray(markdownPayload?.images) && markdownPayload.images.length > 0
@@ -267,7 +267,7 @@ export async function renderMarkdownImagePreview({
   const previews = await Promise.all(previewRefs.map(async (ref) => {
     const absoluteUrl = resolveMarkdownAssetUrl(imagesBaseUrl, ref);
     if (!absoluteUrl) {
-      return { ref, absoluteUrl: "", objectUrl: "", error: "Cannotparse图片地址" };
+      return { ref, absoluteUrl: "", objectUrl: "", error: "Cannot parse image URL" };
     }
     try {
       const resp = await fetchProtected(absoluteUrl);

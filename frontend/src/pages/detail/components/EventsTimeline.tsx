@@ -93,10 +93,10 @@ export function StageHistoryTriggerCard({ onOpen }) {
     <article className="detail-card">
       <div className="detail-modal-trigger">
         <div className="detail-trigger-head">
-          <h2>StageTime线</h2>
+          <h2>Stage Timeline</h2>
           <button id="detail-open-stage-history-btn" type="button" className="detail-trigger-btn" onClick={onOpen}>View</button>
         </div>
-        <p className="detail-trigger-copy">默认收起, 不再把整pages拉长.required时再打开View完整Stage切换记录.</p>
+        <p className="detail-trigger-copy">Collapsed by default to avoid stretching the page. Open when needed to view full stage transition history.</p>
       </div>
     </article>
   );
@@ -107,10 +107,10 @@ export function EventsTriggerCard({ buttonText, onOpen }) {
     <article className="detail-card">
       <div className="detail-modal-trigger">
         <div className="detail-trigger-head">
-          <h2>Events流</h2>
+          <h2>Events Stream</h2>
           <button id="detail-open-events-btn" type="button" className="detail-trigger-btn" onClick={onOpen}>{buttonText}</button>
         </div>
-        <p className="detail-trigger-copy">默认不请求Events流.只有点击View时才加载, 避免sharepages初次打开就消耗过多流量.</p>
+        <p className="detail-trigger-copy">Events stream is not requested by default. Only loaded when View is clicked to avoid excessive bandwidth usage on first page load.</p>
       </div>
     </article>
   );
@@ -181,8 +181,8 @@ export function StageHistoryModal({ open, job, onClose }) {
     <DetailModal
       modalId="detail-stage-history-modal"
       titleId="detail-stage-history-modal-title"
-      title="StageTime线"
-      subtitle="按Stage展示进入, 退出与耗时."
+      title="Stage Timeline"
+      subtitle="Shows entry, exit, and duration per stage."
       closeButtonId="detail-close-stage-history-btn"
       open={open}
       onClose={onClose}
@@ -253,8 +253,8 @@ export function EventsModal({ open, eventsPayload, status, onClose }) {
     <DetailModal
       modalId="detail-events-modal"
       titleId="detail-events-modal-title"
-      title="Events流"
-      subtitle="只有打开时才会请求完整Events流, 首次加载后会在CurrentPages缓存."
+      title="Events Stream"
+      subtitle="Full events stream is requested only when opened. Cached on current page after first load."
       closeButtonId="detail-close-events-btn"
       open={open}
       onClose={onClose}

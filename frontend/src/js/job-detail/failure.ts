@@ -77,7 +77,7 @@ export function renderFailureDebugContext(job) {
     .filter(([, value]) => value);
 
   if (!rows.length) {
-    container.innerHTML = '<div class="detail-empty">No 结构化Failed上下文</div>';
+    container.innerHTML = '<div class="detail-empty">No structured failure context</div>';
     return;
   }
   container.innerHTML = rows.map(([label, value]) => `

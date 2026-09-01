@@ -1,6 +1,6 @@
 export const READER_PROGRESS_COPY = Object.freeze({
   boot: "Preparing side-by-side reader...",
-  metadata: "Loading任务信息...",
+  metadata: "Loading job information...",
   both: "Loading source and translated PDFs...",
   sourceOnly: "Source PDF loaded. Loading translated PDF...",
   translatedOnly: "Translated PDF loaded. Loading source PDF...",

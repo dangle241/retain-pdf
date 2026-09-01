@@ -216,7 +216,7 @@ async function showReaderRegionMarkdown(event, region) {
   showReaderRegionPair(region);
   const binding = readerRegionBinding;
   if (!binding?.jobId || !binding?.fetchTranslationItem || !region?.itemId) {
-    renderReaderMarkdownPopover(event, region, { message: "缺少 item_id, Cannot读取文books" });
+    renderReaderMarkdownPopover(event, region, { message: "Missing item_id, cannot read document text" });
     return;
   }
   const popover = renderReaderMarkdownPopover(event, region, { message: "Loading..." });

@@ -89,7 +89,7 @@ export function createReaderMarkdownPreview({
     const content = `${payload?.content_with_absolute_image_urls || payload?.content || ""}`;
     const imagesBaseUrl = `${payload?.images_base_url || payload?.images_base_path || ""}`.trim();
     if (!content.trim()) {
-      setStatus("该任务No  Markdown 产物");
+      setStatus("This job has no Markdown artifact");
       return false;
     }
     const { marked } = await loadMarked();

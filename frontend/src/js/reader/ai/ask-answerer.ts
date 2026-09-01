@@ -109,7 +109,7 @@ export function createReaderAskAnswerer({
     const documentId = await resolveDocumentId();
     // Reader默认整books问答:反查不到Documents时 fail closed,禁止静默变全Library Search
     if (!documentId && `${jobId || ""}`.trim()) {
-      throw new Error("Cannot关联CurrentDocuments, 暂不能做整books问答.请确认任务已绑定Documents后Retry.");
+      throw new Error("Cannot link current document, cannot do whole-book QA yet. Please confirm the job has a document bound and retry.");
     }
     // document parse后若 storage 里只有 job key,再补写一份 doc key
     if (!conversationId) {

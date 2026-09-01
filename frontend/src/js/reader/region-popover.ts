@@ -33,7 +33,7 @@ export function formatReaderRegionMarkdownPayload(payload) {
   return {
     title: firstText(payload?.item_id, item.item_id, "translation item"),
     primaryLabel: markdown ? "Markdown" : (translated ? "Translation" : "Source"),
-    primaryText: markdown || translated || source || "该区域No 可Display文books",
+    primaryText: markdown || translated || source || "No displayable text for this region",
     source,
     translated,
   };
