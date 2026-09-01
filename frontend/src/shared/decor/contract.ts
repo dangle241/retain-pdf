@@ -1,4 +1,4 @@
-// 装饰包 manifest 契约: Type + 校验 + 资产预算真值.
+// Decor pack manifest contract: type definitions, validation, and asset budgets.
 //
 // 一个"装饰Theme" = 配色皮肤(themes/<id>.css, 既有体系不动)
 //                + 装饰包(public 静态目录下 manifest.json + 资产).
