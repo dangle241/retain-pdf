@@ -28,8 +28,11 @@ RESIDUE_ISSUE_KINDS = {
     "mixed_english_residue",
     "english_residue_warning",
 }
-# 重试链已对同类残留反复重试并放弃接受的标记:agent 修复重复同样的
-# 要求只会得到同样被重验拒绝的结果(实测 8 个候选 6 个失败的主因)。
+# Markers that indicate the retry chain has already retried the same kind
+# of residue and given up on accepting it: re-asking the agent for the same
+# fix just gets the same output that revalidation will reject again (in
+# practice the leading cause of failure among 8 candidates is 6 failures
+# attributable to this).
 RESIDUE_EXHAUSTED_DEGRADATION_REASONS = {
     "english_residue_repeated",
     "english_residue_partial_accept",
@@ -83,8 +86,9 @@ def run_agent_repair_pipeline(
             _record_agent_repair_skip(item, "continuation_group_member", [])
             continue
         if _already_repaired_in_flight(item):
-            # 重试链的定界符修复/乱码重建已经成功处理过,不再追打
-            # 一次 70s 档的 agent 修复调用。
+            # The retry chain's delimiter fix / garbled reconstruction
+            # has already handled this successfully; we do not also fire
+            # a 70s-tier agent repair call on top of it.
             skipped += 1
             _record_agent_repair_skip(item, "already_repaired_in_flight", [])
             continue
@@ -99,8 +103,11 @@ def run_agent_repair_pipeline(
         if not issues:
             continue
         if _is_exhausted_residue_candidate(item, issues):
-            # 候选问题全是英文残留,而重试链已对同一残留反复重试并放弃:
-            # 修复输出仍是同样的英文,重验必拒,纯浪费调用。
+            # The candidate's issues are all English residue, and the
+            # retry chain has already retried that exact residue and given
+            # up: the agent fix would still produce the same English text,
+            # revalidation would still reject it, and the call would be
+            # pure waste.
             skipped += 1
             _record_agent_repair_skip(item, "residue_retries_exhausted", issues)
             continue

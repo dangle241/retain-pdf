@@ -27,8 +27,10 @@ TAGGED_ITEM_OPEN_RE = re.compile(
     r"<<<ITEM\s+item_id=(?P<item_id>[^\s>]+)(?:\s+decision=(?P<decision>[A-Za-z_-]+))?\s*>>>"
 )
 TAGGED_ITEM_END_RE = re.compile(r"<<<END>>>")
-# 模型偶尔会在输出末尾损坏闭合标签(实测过 <<<END>>,少一个 >)。内容
-# 完好只是标签残缺时不能丢条目,按残缺形态宽容剥离。
+# The model occasionally damages the closing tag at the end of its output
+# (observed `<<<END>` with the trailing `>` missing). When the content is
+# intact but only the tag is mangled, we must not drop the item — we
+# strip the tag in its damaged form instead.
 TAGGED_DAMAGED_END_RE = re.compile(r"\s*<{1,3}END>{0,4}\s*$")
 
 
@@ -47,7 +49,8 @@ def parse_translation_payload(content: str) -> dict[str, dict[str, str]]:
         if closed:
             translated_text = segment[: closed.start()].strip()
         else:
-            # 缺失/残缺闭合:下一个开标签或字符串结尾即隐式闭合
+            # Missing or damaged close: the next open tag, or the end of the
+            # string, acts as the implicit close.
             translated_text = TAGGED_DAMAGED_END_RE.sub("", segment).strip()
         result[item_id] = result_entry(decision, translated_text)
     if result:
@@ -143,11 +146,16 @@ def translate_single_item_plain_text_unstructured(
 
 
 def _group_member_payload_defect(item: dict, member_translations: list[dict[str, str]]) -> str:
-    """检查群组 member 译文的协议完整性,返回缺陷描述(空串表示通过)。
+    """Check protocol integrity of a group member translation.
 
-    此前 member id 不做集合校验、逐 member 也不验证定界符:缺 id 会静默
-    退化成几何切分(切错位置文字压错栏),公式跨 member 断开则整体奇偶
-    校验照样通过、渲染各自坏。这里显式校验,让上层有机会重试。
+    Returns a defect description, or an empty string on success.
+
+    Previously, member ids were not validated as a set, and delimiters were
+    not checked per member: a missing id would silently fall back to
+    geometric splitting (slicing in the wrong place and dropping text into
+    the wrong column), and a formula split across two members would still
+    pass the aggregate balance check while the per-member rendering broke.
+    We now validate both explicitly so the caller has a chance to retry.
     """
     expected_ids = [
         str(member_id or "").strip()
@@ -210,8 +218,10 @@ def translate_continuation_group_members(
                 if request_label:
                     print(f"{request_label}: group member json parse failed, retrying: {parse_exc}", flush=True)
                 continue
-            # 最后一轮:JSON 修复不了 LaTeX 转义损坏,抢救 translated_text
-            # 字符串,整体译文仍可用(member 切分退化为几何切分)。
+            # Final attempt: JSON recovery cannot fix corrupted LaTeX
+            # escaping, so we salvage the translated_text string — the overall
+            # translation is still usable and member splitting falls back to
+            # geometric splitting.
             salvaged = extract_string_fields(content, {"translated_text": ("translated_text",)}).get("translated_text", "")
             if not salvaged:
                 raise
@@ -234,8 +244,10 @@ def translate_continuation_group_members(
             if request_label:
                 print(f"{request_label}: group member payload defect, retrying: {defect}", flush=True)
             continue
-        # 重试后仍有缺陷:保留整体译文,丢弃不可信的 member 切分,显式
-        # 交给几何切分兜底(此前是静默走到这一步,现在有日志有重试)。
+        # Defect persists even after retry: keep the aggregate translation
+        # but drop the untrustworthy member splits and hand off explicitly
+        # to geometric splitting as a safety net. (Previously this happened
+        # silently; now it has a log line and a retry pass.)
         if request_label:
             print(f"{request_label}: group member payload defect persists, dropping member splits: {defect}", flush=True)
         member_translations = []

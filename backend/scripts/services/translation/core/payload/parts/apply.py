@@ -230,10 +230,14 @@ def apply_single_translated_entry(
 
 
 def apply_reconstructed_unit_text(items: list[dict], translated_text: str) -> None:
-    # 乱码重建的整单元替换写入:重建输出是成品显示文本(调用方已完成
-    # reasoning 泄漏清洗与占位符还原),整个单元共用同一段译文,
-    # 六个译文字段同值落盘,group_* 与 translation_unit_* 天然保持同步。
-    # 不做邻段泄漏裁剪与 mixed_literal 拼接——那些针对逐项翻译输出。
+    # Whole-unit replacement write for garbled reconstruction: the
+    # reconstruction output is finished display text (the caller has
+    # already done reasoning-leak cleanup and placeholder restoration), so
+    # the entire unit shares one translation. All six translation fields are
+    # written with the same value, which keeps group_* and
+    # translation_unit_* naturally in sync. We do NOT do neighbor-continuation
+    # leak trimming or mixed_literal stitching here — those target
+    # per-item translation output.
     for item in items:
         item["protected_translated_text"] = translated_text
         item["translated_text"] = translated_text

@@ -126,8 +126,10 @@ def _shared_domain_context_path(preview_text: str, *, model: str) -> Path:
 
 
 def _load_shared_domain_context(preview_text: str, *, model: str) -> dict[str, str] | None:
-    # 按内容寻址的跨任务缓存:同一文档换个任务目录重跑,不必重付
-    # 4-5s 的领域识别调用(原有的 per-job 缓存只在同一任务目录内生效)。
+    # Cross-job content-addressed cache: re-running the same document under a
+    # different job directory no longer pays the 4-5s domain-classification
+    # call again. The original per-job cache only worked within a single
+    # job directory.
     path = _shared_domain_context_path(preview_text, model=model)
     try:
         if not path.exists():

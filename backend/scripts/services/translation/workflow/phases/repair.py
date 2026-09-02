@@ -377,9 +377,12 @@ def _fast_agent_repair_limit(
 ) -> int:
     del payload_size
     blocking_untranslated_count = max(0, int(blocking_untranslated_count or 0))
-    # fast 档只在存在阻塞级未译条目时才动用 agent 修复:原先的
-    # broad_budget 会在任务完全干净时也按篇幅跑警告级候选,而这类候选
-    # (英文残留为主)修复成功率极低、重验必拒,纯烧钱。quality 档不变。
+    # The fast tier only invokes agent repair when there are blocking-tier
+    # untranslated items: the previous broad_budget would also run
+    # warning-tier candidates based on document length even when the job was
+    # already clean. Such candidates (mostly English residue) have very low
+    # repair success rates and revalidation always rejects them — pure waste.
+    # The quality tier keeps its existing behavior.
     if blocking_untranslated_count <= 0:
         return 0
     return min(FAST_AGENT_REPAIR_DEFAULT_LIMIT, blocking_untranslated_count)

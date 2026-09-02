@@ -207,8 +207,11 @@ def _repair_item_translation(item: dict, *, runtime: GarbledReconstructionRuntim
 
 
 def _clean_reconstructed_text(text: str, item: dict) -> tuple[str, bool]:
-    # 复用主翻译回填的清洗:剥离模型 reasoning 泄漏,再还原占位符。
-    # 其它翻译/修复路径都经 apply.py 做这两步,唯独乱码重建曾直接落盘模型原始输出。
+    # Reuse the main-translation apply-time cleanup: strip reasoning
+    # leakage from the model output, then restore placeholder tokens. Every
+    # other translation/repair path goes through `apply.py` for these two
+    # steps; only garbled reconstruction used to persist the raw model
+    # output.
     salvaged, salvage_changed = salvage_reasoning_leak(text)
     protected_map = item.get("protected_map") or item.get("formula_map", [])
     return restore_protected_tokens(salvaged, protected_map), salvage_changed
@@ -218,7 +221,8 @@ def _apply_reconstruction(items: list[dict], translated_text: str) -> None:
     if not translated_text or not items:
         return
     cleaned_text, salvaged = _clean_reconstructed_text(translated_text, items[0])
-    # 用清洗后的文本做质量校验:落盘什么就校验什么。
+    # Validate the cleaned text: we validate exactly what we are about to
+    # persist.
     validation_issues = _validate_reconstruction(items[0], cleaned_text)
     if validation_issues:
         for item in items:
@@ -226,8 +230,10 @@ def _apply_reconstruction(items: list[dict], translated_text: str) -> None:
         return
     apply_reconstructed_unit_text(items, cleaned_text)
     for item in items:
-        # 候选资格已保证 should_translate=True(verdict 会把显式 False 挡在
-        # should_skip_model_by_policy 之外),此处写 True 为恒等操作。
+        # Candidate eligibility already guarantees `should_translate=True`
+        # (the verdict excludes explicit False from
+        # `should_skip_model_by_policy`), so writing True here is a no-op
+        # kept for symmetry with the regular translation path.
         mark_translation_required(item, label="llm_reconstructed_garbled")
         set_final_status(item, TRANSLATED_STATUS)
         prior = dict(item.get("translation_diagnostics") or {})

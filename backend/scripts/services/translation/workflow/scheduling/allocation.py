@@ -8,8 +8,10 @@ PREFIX_CACHE_WARMUP_ENV = "RETAIN_TRANSLATION_PREFIX_CACHE_WARMUP"
 
 
 def prefix_cache_warmup_enabled(provider_family: str) -> bool:
-    # 首条请求单独放行,写入 provider 的前缀缓存后再放开全并发。
-    # 仅对支持前缀缓存计价的 deepseek 官方 API 默认开启。
+    # Let only the first request through so the provider's prefix cache is
+    # populated before opening up to full concurrency. Enabled by default
+    # only for the official DeepSeek API, which supports prefix-cache
+    # pricing (i.e. cached-prefix reads are billed lower than fresh input).
     if provider_family != "deepseek_official":
         return False
     value = str(os.environ.get(PREFIX_CACHE_WARMUP_ENV, "") or "").strip().lower()

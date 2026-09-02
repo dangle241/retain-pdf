@@ -1,20 +1,26 @@
 from __future__ import annotations
 
 
-# payload item 上 final_status 的唯一赋值漏斗。
+# Single assignment funnel for `final_status` on a payload item.
 #
-# 状态语义:
-# - ""                    尚未收口(pending)
-# - "translated"          已产出译文
-# - "partially_translated" 译文经降级清洗(reasoning 泄漏 salvage、邻段泄漏裁剪等)
-# - "failed"              翻译失败,等待修复链兜底
-# - "kept_origin"         按策略保留原文
+# Status semantics:
+# - ""                     Not yet finalized (pending)
+# - "translated"           Translation produced
+# - "partially_translated" Translation was salvaged by a degraded cleanup
+#                          pass (reasoning-leak salvage, neighbor-continuation
+#                          leak trimming, etc.)
+# - "failed"               Translation failed, awaiting the repair chain
+# - "kept_origin"          Source text kept per policy
 #
-# 唯一被声明禁止的转移:成功译文不得被降级为 failed。
-# 修复链(乱码重建/agent repair/最终收口)只允许把 failed 拉回成功,反向为违规。
+# The only transition that is explicitly forbidden: a successful translation
+# must never be downgraded to `failed`. The repair chain (garbled
+# reconstruction / agent repair / final funnel) is only allowed to pull
+# `failed` items back to success; the reverse direction is a violation.
 #
-# v1 只观测不拦截:违规照常写入,但在 translation_diagnostics.final_status_violations
-# 留下面包屑。等真实任务证明违规不再出现(或确认属 bug 修掉)后,再升级为硬拦截。
+# v1 is observe-only: violations still write through, but leave a
+# breadcrumb under `translation_diagnostics.final_status_violations`. Once
+# real jobs show the violations no longer occur (or are confirmed bugs
+# and fixed), this will be promoted to a hard block.
 
 PENDING_STATUS = ""
 TRANSLATED_STATUS = "translated"
