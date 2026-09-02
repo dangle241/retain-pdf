@@ -63,7 +63,7 @@ const PdfDocumentPaneInner = forwardRef<HTMLElement, PdfDocumentPaneProps>(
       preloadedFile = null,
       userZoom = 1,
       visible = true,
-      emptyLabel = "No  PDF",
+      emptyLabel = "No PDF",
       scrollRoot = null,
       pageWidthOverride = null,
       rowHeights,
@@ -134,7 +134,7 @@ const PdfDocumentPaneInner = forwardRef<HTMLElement, PdfDocumentPaneProps>(
 
     const handleLoadError = useCallback(
       (err: Error) => {
-        const message = err?.message || "PDF parseFailed";
+        const message = err?.message || "PDF parse failed";
         setDocError(message);
         setNumPages(0);
         onNumPagesChange?.(0, pane);
@@ -170,7 +170,7 @@ const PdfDocumentPaneInner = forwardRef<HTMLElement, PdfDocumentPaneProps>(
         ) : null}
         {loading ? (
           <div className="reader-empty reader-react-pdf-loading" data-reader-pdf-loading={pane}>
-            正在加载 PDF...
+            Loading PDF...
           </div>
         ) : null}
         {file && !fetchError ? (

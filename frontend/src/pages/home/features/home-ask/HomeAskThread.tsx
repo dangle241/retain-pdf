@@ -1,4 +1,4 @@
-// 主pages AI 消息List: 轻量 markdown 预览 + 引用跳Reader
+// Main page AI message list: lightweight markdown preview + citation jump to Reader
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, FlaskConical, ListTree, Loader2, Sparkles } from "lucide-react";
@@ -23,8 +23,8 @@ export const HOME_ASK_SUGGESTIONS: Array<{
   icon: typeof BookOpen;
 }> = [
   {
-    prompt: "最近Added的文献里, 有哪些值得优先阅读的Theme?",
-    label: "浏览LibraryTheme",
+    prompt: "Among recently added papers, which themes are worth reading first?",
+    label: "Browse library themes",
     icon: BookOpen,
   },
   {
@@ -158,7 +158,7 @@ export function HomeAskThread({ messages, isRunning = false }: HomeAskThreadProp
     bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [messages, isRunning]);
 
-  // 空态由 HomeAskView 的 hero 区Rendering(Notion: 问候 + 居中输入 + Suggestion)
+  // Empty state is rendered by HomeAskView's hero area (greeting + centered input + suggestions)
   if (empty) {
     return null;
   }

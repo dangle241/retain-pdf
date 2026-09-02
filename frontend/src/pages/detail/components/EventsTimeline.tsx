@@ -1,39 +1,43 @@
-// StageTime线 / Events流:两张触发卡片 + 两个模态框.
-// View为 src/js/job-detail/events.js 字符串模板的 JSX 重写(类名/结构照搬);
-// Eventsentries目View模型复用保留的纯逻辑 status-view-model.js 与 job/ 层格式化函数.
+// Stage timeline / events stream: two trigger cards + two modals.
+// View is a JSX rewrite of the src/js/job-detail/events.js string templates (class names/structure copied);
+// event-entry view model reuses retained pure-logic status-view-model.js and job/ formatters.
 //
-// Dialog Rendering层(Stage C 收官batches,shadcn 改造):两个模态从 bespoke
+// Dialog rendering layer (Stage C wrap-up, shadcn migration): both modals moved from bespoke
 // <section className="detail-modal"><div role="dialog" aria-modal="true">
-// 换成 Radix Dialog(DialogPrimitive.Root/Portal/Overlay/Content),统一到
-// home pages那套 desktop-dialog/desktop-shell/desktop-head/desktop-body 视觉
-// 骨架,不再维持 detail pages独立的 .detail-modal/.detail-modal-panel/
-// .detail-modal-head 结构(这三个类的 CSS 已随之从
-// src/styles/pages/detail/modal.css Delete).detail-modal-title/-subtitle/
-// -close/-status 这几个纯排版类名原样保留(挂载点从旧结构的子级换成
-// desktop-head/desktop-body 的子级,视觉不变,内容也不total享,不值得再统一成
-// 跨对话框total用的 dialog-close-btn 等——尤其 detail-modal-close 的描边色
-// #d5d7dd 和 dialog-close-btn 的 #d2d2d7 字面值不同,贸然合并会引入肉眼难辨
-// 但 pixelmatch 可能捕捉到的差异).新增的 detail-timeline-dialog/
-// detail-timeline-overlay 覆盖类复刻旧 .detail-modal/.detail-modal-panel 的
-// 像素级视觉(920px 宽上限/82vh 高上限/28px 圆角/#e5e7eb 描边/更深的阴影),
-// 定义见 pages/detail/modal.css.
+// to Radix Dialog (DialogPrimitive.Root/Portal/Overlay/Content), unified onto the
+// home page desktop-dialog/desktop-shell/desktop-head/desktop-body visual
+// skeleton, no longer keeping the detail-page-only .detail-modal/.detail-modal-panel/
+// .detail-modal-head structure (CSS for those three classes was then
+// deleted from src/styles/pages/detail/modal.css). The purely typographic
+// detail-modal-title/-subtitle/-close/-status class names are kept as-is
+// (mount point moved from children of the old structure to children of
+// desktop-head/desktop-body; look is unchanged and content is not shared, so it is
+// not worth unifying into cross-dialog helpers like dialog-close-btn——especially
+// since detail-modal-close's border color #d5d7dd and dialog-close-btn's #d2d2d7
+// are different literals, and a hasty merge would introduce differences that are
+// hard to see by eye but pixelmatch might catch). The new detail-timeline-dialog/
+// detail-timeline-overlay overlay classes clone the pixel-level look of the old
+// .detail-modal/.detail-modal-panel (920px max width / 82vh max height / 28px radius /
+// #e5e7eb border / deeper shadow); defined in pages/detail/modal.css.
 //
-// open Status仍然yes DetailApp.jsx 的 stageHistoryOpen/eventsOpen 两个 useState
-// (铁律:不改StatusManagebooks身,只换Rendering层),onOpenChange(false) 统一路由到
-// onClose 回调回写 state.
+// open state is still DetailApp.jsx's stageHistoryOpen/eventsOpen useState pair
+// (iron rule: do not change state management itself, only the rendering layer);
+// onOpenChange(false) is routed uniformly to the onClose callback that writes state back.
 //
-// 焦点归还:两个模态的触发按钮(StageHistoryTriggerCard/EventsTriggerCard)
-// 虽然和模态books身在同一个 DetailApp 组件树内,但既没有用
-// DialogPrimitive.Trigger 包裹触发按钮,Radix 默认的 triggerRef 也就永远yes
-// null——这个Root Cause和"yesno跨子树"None关(参见 use-dialog-return-focus.js 头
-// 注释),所以这里同样接入 useDialogReturnFocus,和 home pages 7 个对话框保持
-// 一致,不因为"看起来在同一棵树里"就假设可以省略.
+// Focus restore: the two modals' trigger buttons (StageHistoryTriggerCard/EventsTriggerCard)
+// live in the same DetailApp tree as the modals themselves, but the triggers are not
+// wrapped in DialogPrimitive.Trigger, so Radix's default triggerRef is always
+// null——this root cause is unrelated to "whether it crosses subtrees" (see the
+// use-dialog-return-focus.js header comment). So this file also wires
+// useDialogReturnFocus, matching the home page's 7 dialogs; do not assume it can
+// be omitted just because "it looks like one tree".
 //
-// body 滚动锁定:DetailApp.jsx 原有的手写 document.body.style.overflow 锁定
-// Deleted(见该Files对应注释)——Radix Dialog modal 模式自带等价锁定
-// (react-remove-scroll,随 Content 挂载/卸载自动加锁/解锁),两个模态互斥
-// (只要一个打开,遮罩 + focus trap 就会让另一个的触发卡片不可达),不会出现
-// 两套机制同时争抢 body 样式的场景.
+// Body scroll lock: DetailApp.jsx's handwritten document.body.style.overflow lock
+// was deleted (see that file's matching comment)——Radix Dialog modal mode already
+// ships an equivalent lock (react-remove-scroll, auto lock/unlock with Content
+// mount/unmount). The two modals are mutually exclusive (once one is open, overlay +
+// focus trap make the other trigger card unreachable), so two mechanisms will not
+// race body styles.
 
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useDialogReturnFocus } from "../../../shared/react/use-dialog-return-focus.js";
@@ -45,7 +49,7 @@ import {
   buildJobDetailEventViewModel,
 } from "../external.js";
 
-// —— 以下三个私有函数照搬旧 events.js,保证耗时/载荷文案逐字节一致 ——
+// —— The next three private functions copy old events.js so duration/payload copy matches byte-for-byte ——
 
 function parseIsoTime(value) {
   const raw = `${value || ""}`.trim();
@@ -119,7 +123,7 @@ export function EventsTriggerCard({ buttonText, onOpen }) {
 function DetailModal({ modalId, titleId, title, subtitle, closeButtonId, open, onClose, children }) {
   const { onCloseAutoFocus } = useDialogReturnFocus(open);
 
-  // Esc / 背板点击 / Close按钮都经这一个回调回写 DetailApp.jsx 的 useState.
+  // Esc / backdrop click / Close button all write back DetailApp.jsx useState via this one callback.
   function handleOpenChange(nextOpen) {
     if (!nextOpen) {
       onClose();
@@ -187,7 +191,7 @@ export function StageHistoryModal({ open, job, onClose }) {
       open={open}
       onClose={onClose}
     >
-      <div id="detail-stage-history-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>No Stage记录</div>
+      <div id="detail-stage-history-empty" className={hasItems ? "detail-empty hidden" : "detail-empty"}>No Stage Records</div>
       <div id="detail-stage-history-list" className={hasItems ? "detail-list" : "detail-list hidden"}>
         {history.map((entry, index) => (
           <StageHistoryItem key={index} entry={entry} index={index} job={job} />

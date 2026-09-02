@@ -1,5 +1,5 @@
-// 三栏骨架的左右栏拖拽调宽:separatedentries pointer 拖动Live改 CSS 变量,松手持久化.
-// 纯宽度计算(clampColumnWidth)与持久化(load/save)抽出便于单测;DOM 拖拽为薄封装.
+// Three-column layout left/right panel drag-to-resize: live-update CSS vars on pointer drag, persist on release.
+// Pure width calculation (clampColumnWidth) and persistence (load/save) extracted for unit testing; DOM drag is a thin wrapper.
 
 export const READER_COLUMN_LIMITS = {
   left: { min: 180, max: 460, default: 248 },
@@ -8,7 +8,7 @@ export const READER_COLUMN_LIMITS = {
 
 const STORAGE_KEY = "retainpdf-reader-cols-v1";
 
-// 夹取到 [min, max] 的整数像素;非法输入回退到 default.
+// Clamp to [min, max] integer pixels; fall back to default on invalid input.
 export function clampColumnWidth(px, { min, max, default: fallback }) {
   const value = Number(px);
   if (!Number.isFinite(value)) {
@@ -46,7 +46,7 @@ export function saveColumnWidths(widths, storage = globalThis.localStorage || nu
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify({ left: widths.left, right: widths.right }));
   } catch (_err) {
-    // 配额满/隐私模式:静默Failed
+    // Quota full / private mode: silent failure
   }
 }
 
@@ -64,14 +64,14 @@ export function createReaderColumnResizer({
     body?.style?.setProperty?.(name, `${value}px`);
   }
 
-  // 左栏"展开宽度":applied 宽 --reader-left-w 由 CSS 从它派生,折叠时被类覆盖为 0
+  // Left panel "expanded width": applied via --reader-left-w, derived by CSS; overridden to 0 when collapsed
   function applyLeft(px) {
     widths.left = clampColumnWidth(px, READER_COLUMN_LIMITS.left);
     setVar("--reader-left-col", widths.left);
     return widths.left;
   }
 
-  // 右栏"展开宽度"::has(.is-open) 时右栏取用它,收起时右栏为 0(见 CSS)
+  // Right panel "expanded width": used when :has(.is-open), otherwise 0 (see CSS)
   function applyRight(px) {
     widths.right = clampColumnWidth(px, READER_COLUMN_LIMITS.right);
     setVar("--reader-right-col", widths.right);
@@ -125,7 +125,7 @@ export function createReaderColumnResizer({
       event.preventDefault?.();
     });
 
-    // 双击separatedentries:resume该栏默认宽度
+    // Double-click separator: reset this column to default width
     handle.addEventListener("dblclick", () => {
       if (side === "left") {
         applyLeft(READER_COLUMN_LIMITS.left.default);

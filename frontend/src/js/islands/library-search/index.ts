@@ -28,10 +28,10 @@ export interface LibrarySearchAppHandle {
   unmount: () => void;
 }
 
-// React 岛约定(试点):
-// - 宿主yes普通 light-DOM 自定义元素,负责与既有Pages的耦合(监听搜索框, 派发契约Events);
-// - React 应用经动态 import 惰性加载:首个非空查询才拉起,node 测试环境不parse JSX;
-// - Data经 ports 注入,组件内不直接 import api 层.
+// React island convention (pilot):
+// - Host is a normal light-DOM custom element, coupled to the existing page (search box, contract events);
+// - React app lazy-loaded via dynamic import: first non-empty query pulls it in; node tests do not parse JSX;
+// - Data injected via ports; components do not import the API layer directly.
 class LibrarySearchIsland extends HTMLElement {
   querySubscribers: Set<LibrarySearchQuerySubscriber>;
   appPromise: Promise<LibrarySearchAppHandle | null> | null;
@@ -100,7 +100,7 @@ class LibrarySearchIsland extends HTMLElement {
         .then((module) => module.mountLibrarySearchApp(this, this.buildPorts()))
         .catch((error) => {
           this.appPromise = null;
-          // node 测试环境Cannotparse JSX,这里静默降级;浏览器构建产物已内联该模块
+          // Node tests cannot parse JSX; silent fallback here. Browser build already inlines this module.
           console.error("library-search island failed to load", error);
           return null;
         });
@@ -109,9 +109,9 @@ class LibrarySearchIsland extends HTMLElement {
   }
 }
 
-// node --test 环境下部m组件测试直接 import HomeApp.jsx 而不搭建完整 jsdom
-// window(customElements 未定义).守卫不影响真实浏览器行为——customElements
-// 在浏览器/jsdom 里恒存在.
+// Under node --test some component tests import HomeApp.jsx without a full jsdom
+// window (customElements undefined). Guard does not affect real browsers —
+// customElements always exists in browser/jsdom.
 if (typeof customElements !== "undefined" && !customElements.get("library-search-island")) {
   customElements.define("library-search-island", LibrarySearchIsland);
 }

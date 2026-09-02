@@ -37,7 +37,7 @@ export interface RuntimeStatus {
   [key: string]: unknown;
 }
 
-/** Library / recent-jobs 卡片entries目(运行时合并态) */
+/** Library / recent-jobs card item (runtime merged state) */
 export interface LibraryJobItem {
   job_id?: string;
   id?: string;
@@ -121,7 +121,7 @@ function valueOrPrevious<T>(value: T | null | undefined | "", previousValue: T):
   return value === undefined || value === null || value === "" ? previousValue : value;
 }
 
-/** yesno像"用 job_id / mock 名冒充书名"的脏 title */
+/** Whether title looks like a placeholder using job_id / mock name */
 function isPlaceholderBookTitle(title: string, jobId: string) {
   const t = `${title || ""}`.trim();
   const id = `${jobId || ""}`.trim();
@@ -317,7 +317,7 @@ export function mergeLibraryJobItem(
     ...previousItem,
     job_id: jobId,
     id: previousItem.id || jobId,
-    // Documents中心化: Created/补丁必须保留 document_id, no则详情 live 合并对不上Library行
+    // Document centralization: create/patch must preserve document_id, otherwise detail live merge cannot find library row
     document_id: firstNonEmpty(job.document_id, previousItem.document_id),
     active_job_id: firstNonEmpty(job.active_job_id, previousItem.active_job_id, jobId),
     library_only: nextLibraryOnly,
@@ -353,8 +353,8 @@ export function mergeLibraryJobItem(
     stage_detail: stageDetail,
     workflow: firstNonEmpty(job.workflow, job.job_type, previousItem.workflow),
     job_type: firstNonEmpty(job.job_type, job.workflow, previousItem.job_type),
-    // 书目元Data: 轮询/Retry补丁若带 job_id 或 "Mock Retry..." 当Title, 不盖真书名；
-    // 真·改名补丁(title 与 job_id 不同)仍可Updates.
+    // Bibliographic metadata: polling/retry patch carrying job_id or "Mock Retry..." does not overwrite real title;
+    // genuine title change patch (title differs from job_id) still updates.
     title: pickBookTitle(previousItem, job, jobId),
     display_name: pickBookDisplayName(previousItem, job, jobId),
     source_file_name: firstNonEmpty(
@@ -404,7 +404,7 @@ export function mergeRuntimePatches(
   { stageAdapterPort = {} }: RuntimeItemOptions = {},
 ): LibraryJobItem[] {
   const list = Array.isArray(items) ? items : [];
-  // 按 job_id 索引；另建 document_id → 最新 patch(Retry换 id 时用)
+  // Index by job_id; also build document_id -> latest patch map (used when retry swaps id)
   const patchByDocumentId = new Map<string, LibraryJobItem>();
   for (const patch of patches.values()) {
     const docId = firstNonEmpty(patch?.document_id);
@@ -422,7 +422,7 @@ export function mergeRuntimePatches(
     if (!patch) {
       return item;
     }
-    // 用 patch 的 job_id 覆盖(Retry后书架仍yes原位原书)
+    // Override with patch job_id (after retry the bookshelf still preserves book at same position)
     return mergeLibraryJobItem(item, {
       ...patch,
       job_id: firstNonEmpty(patch.job_id, item.job_id),

@@ -1,4 +1,4 @@
-// 组装 HomeServices 对外 bag(HomeApp / useHomeServices 消费).
+// Assemble the HomeServices external bag (consumed by HomeApp / useHomeServices).
 
 import type {
   HomeBridge,
@@ -72,7 +72,7 @@ export function buildHomeServices({
       recentJobsStore: library.recentJobsStatePort.store,
       actions: {
         ...library.recentJobActions,
-        // Grid选任务 → 详情Translation Tab(永不弹 #translation-workflow-dialog)
+        // Grid select task → Detail Translation Tab (never pop #translation-workflow-dialog)
         selectJob: (jobId: string) => {
           library.libraryController.selectJobForDetail(jobId, {
             findItem: (id) => {

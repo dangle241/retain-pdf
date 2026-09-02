@@ -110,8 +110,8 @@ const MOCK_TRANSLATION_ITEMS = [
 ];
 
 export function getMockTranslationSummary(jobId = "") {
-  // 与真实管线落盘形状一致(backend scripts/services/translation/artifacts/io.py):
-  // 统计键yes status_summary,Status枚举为 translated/partially_translated/kept_origin/failed
+  // Matches the real pipeline on-disk shape (backend scripts/services/translation/artifacts/io.py):
+  // stats key is status_summary; status enum is translated/partially_translated/kept_origin/failed.
   const statusSummary = {
     translated: 0,
     partially_translated: 0,

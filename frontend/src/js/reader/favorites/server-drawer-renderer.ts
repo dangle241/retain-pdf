@@ -17,8 +17,8 @@ function formatServerFavoriteDate(createdAt = "") {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-// Cloud favorites区Rendering:与books地Clipped excerptm区展示.
-// 服务端文books一律走 textContent(禁止 innerHTML),防止引文内容注入.
+// Cloud favorites section rendering: displayed alongside local clipped excerpt section.
+// Server text always uses textContent (never innerHTML) to prevent citation content injection.
 export function renderServerFavorites(sectionEl, records = [], {
   onOpenFavorite = null,
   onRemoveFavorite = null,

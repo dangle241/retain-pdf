@@ -116,7 +116,7 @@ function LibrarySearchPanel({ ports }) {
     try {
       await ports.patchDocument(doc.document_id, { reading_status: next });
     } catch (_err) {
-      // 回滚乐观Updates
+      // Roll back optimistic update
       setDocuments((current) => current.map((item) => (
         item.document_id === doc.document_id ? { ...item, reading_status: doc.reading_status } : item
       )));

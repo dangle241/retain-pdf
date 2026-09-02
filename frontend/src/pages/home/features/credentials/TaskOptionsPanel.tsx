@@ -21,7 +21,7 @@ export function TaskOptionsPanel({ hidden = false } = {}) {
       <div className="credential-card-grid credential-card-grid-compact">
         <section className="credential-card">
           <div className="credential-card-head">
-            <h3>任务选items</h3>
+            <h3>Task Options</h3>
           </div>
           <label>
             <span className="developer-label">
@@ -33,8 +33,8 @@ export function TaskOptionsPanel({ hidden = false } = {}) {
               defaultValue="direct_typst"
               ref={(node) => { elementsRef.mathModeSelect = node || null; }}
             >
-              <option value="placeholder">占位保护</option>
-              <option value="direct_typst">直出公式</option>
+              <option value="placeholder">Placeholder</option>
+              <option value="direct_typst">Direct Typst</option>
             </select>
           </label>
           {/* 模型地址/模型名不在旧模板可见布局里,但 dialog-values.js/

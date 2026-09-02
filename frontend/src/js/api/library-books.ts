@@ -46,7 +46,7 @@ export async function deleteLibraryBook(apiPrefix, jobId, { force = false } = {}
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    // 409 = This job is referenced byFavorite引用(Delete保护),message 里带引用数量,必须透传给 UI
+    // 409 = job is referenced by a favorite (delete protection); message includes ref count, must pass through to UI
     const envelope = await resp.json().catch(() => null);
     const error = new Error(`${envelope?.message || "Failed to delete job. Please retry later."}(${resp.status})`) as Error & { status?: number };
     error.status = resp.status;

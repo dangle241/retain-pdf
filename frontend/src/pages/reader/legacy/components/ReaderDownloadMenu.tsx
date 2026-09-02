@@ -57,7 +57,7 @@ export function ReaderDownloadMenu({ context }) {
 
   return (
     <details className="reader-download-menu" ref={menuRef}>
-      <summary className="reader-topbar-action-btn reader-download-trigger" aria-label="Download PDF">下载</summary>
+      <summary className="reader-topbar-action-btn reader-download-trigger" aria-label="Download PDF">Download</summary>
       <div className="reader-download-popover">
         {ACTION_ORDER.map((action) => {
           const url = trimString(urls[action]);
@@ -71,7 +71,7 @@ export function ReaderDownloadMenu({ context }) {
               disabled={!enabled}
               aria-disabled={enabled ? "false" : "true"}
               title={enabled
-                ? `下载${READER_DOWNLOAD_ACTIONS[action]?.label || "PDF"}`
+                ? `Download ${READER_DOWNLOAD_ACTIONS[action]?.label || "PDF"}`
                 : disabledReason(action, urls)}
               data-busy={busyAction === action ? "1" : ""}
               onClick={() => void handleDownload(action, url)}

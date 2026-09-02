@@ -394,11 +394,10 @@ export function mountWorkflowFeature({
     });
   }
 
-  // LibraryDocuments"Translation整books/选定pages码"(F5)复用主Workflow的credentials组装:从Current已配置的
-  // credentials(credentialsStatePort,与对话框yesno打开None关——readSubmitValues 读的yes
-  // credentials state 而非弹窗 DOM)拼出 ocr(PaddleOCR)+ translation(DeepSeek).
-  // 不含 source——后端会从Documents已存的 upload 注入 upload_id.pageRanges 缺省
-  // 空串=整books.
+  // Library document "Translate whole book / selected pages" (F5) reuses main workflow credential assembly:
+  // assembles ocr (PaddleOCR) + translation (DeepSeek) from currently configured credentials (credentialsStatePort,
+  // independent of whether the dialog is open — readSubmitValues reads credentials state, not dialog DOM).
+  // Excludes source — backend injects upload_id from stored document upload. pageRanges defaults to empty string = whole book.
   function buildTranslateJobConfig(pageRanges = "") {
     const developerConfig = developerConfigWithDefaults();
     const submitValues = currentWorkflowSubmitValues();

@@ -28,15 +28,15 @@ export const GLOSSARY_DOM_IDS = Object.freeze({
 });
 
 export const ENTRY_LEVEL_OPTIONS = [
-  ["preserve", "保留"],
+  ["preserve", "Preserve"],
   ["canonical", "Fixed translation"],
-  ["preferred", "偏好译法"],
+  ["preferred", "Preferred"],
 ];
 
 export const MATCH_MODE_OPTIONS = [
-  ["case_insensitive", "忽略Size写"],
-  ["exact", "精确"],
-  ["regex", "正则"],
+  ["case_insensitive", "Ignore case"],
+  ["exact", "Exact"],
+  ["regex", "Regex"],
 ];
 
 

@@ -172,7 +172,7 @@ export function HomeAskComposer({
 
   const scopeHint = (() => {
     if (missingLlmKey) return "Enter a model API key in Settings -> API Settings first";
-    if (!scopes.length) return "Full library · @ article or collection";
+    if (!scopes.length) return "Full library · @ Article or Collection";
     const cols = scopes.filter((s) => s.kind === "collection").length;
     const docs = scopes.filter((s) => s.kind === "document").length;
     const parts: string[] = [];
@@ -190,7 +190,7 @@ export function HomeAskComposer({
             type="button"
             className="home-ask-key-banner-btn"
             onClick={() => {
-              // 与Upload门禁一致: 打开"Settings → API Settings"(唯一常规入口)
+              // Same as upload gate: open "Settings → API Settings" (the only regular entry)
               document.dispatchEvent(
                 new CustomEvent("retainpdf:open-browser-credentials"),
               );
@@ -230,7 +230,7 @@ export function HomeAskComposer({
       ) : null}
 
       <div className="home-ask-composer-shell" aria-disabled={missingLlmKey || undefined}>
-        {/* 锁定层: 挡住一切输入(比仅 disabled 更稳) */}
+        {/* Lock layer: blocks all input (more robust than disabled alone) */}
         {missingLlmKey ? (
           <div
             className="home-ask-composer-lock"
@@ -254,10 +254,10 @@ export function HomeAskComposer({
             missingLlmKey
               ? "Configure a model API key first..."
               : scopes.length
-                ? "继续提问... @ 可再指定Article或Collection"
+                ? "Ask follow-up... @ to add Article or Collection"
                 : variant === "hero"
-                  ? "Ask AI anything... 输入 @ 指定Article或Collection"
-                  : "继续提问... 输入 @ 指定Article或Collection"
+                  ? "Ask AI anything... type @ to pick Article or Collection"
+                  : "Ask follow-up... type @ to pick Article or Collection"
           }
           onChange={(e) => {
             if (missingLlmKey) return;
@@ -296,7 +296,7 @@ export function HomeAskComposer({
         />
 
         {pickerOpen ? (
-          <div className="home-ask-picker" role="listbox" id={listId} aria-label="SelectDocuments或Collection">
+          <div className="home-ask-picker" role="listbox" id={listId} aria-label="Select Article or Collection">
             {loadingOpts && !optionsLoaded ? (
               <div className="home-ask-picker-empty">
                 <Loader2 className="home-ask-spin" size={14} aria-hidden />
@@ -304,7 +304,7 @@ export function HomeAskComposer({
               </div>
             ) : filtered.length === 0 ? (
               <div className="home-ask-picker-empty">
-                {optionsLoaded ? "没有匹配的Article或Collection" : "No data yet"}
+                {optionsLoaded ? "No matching Article or Collection" : "No data yet"}
               </div>
             ) : (
               filtered.map((item, index) => (
@@ -336,7 +336,7 @@ export function HomeAskComposer({
             {scopes.length >= MAX_SCOPES ? (
               <div className="home-ask-picker-hint">Select up to {MAX_SCOPES} scopes</div>
             ) : (
-              <div className="home-ask-picker-hint">Collection会展开其中的文献再Search</div>
+              <div className="home-ask-picker-hint">Collections expand their documents before searching</div>
             )}
           </div>
         ) : null}

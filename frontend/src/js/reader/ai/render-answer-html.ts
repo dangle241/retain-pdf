@@ -1,13 +1,13 @@
-// AI 回答最终Rendering: 保护 [n] 引用 → Markdown + 公式 → 还原 [n].
-// 流式Stage用轻量预览, 避免反复 MathJax / 整pages innerHTML.
+// Final AI answer rendering: protect [n] citations → Markdown + math → restore [n].
+// Streaming stage uses lightweight preview to avoid repeated MathJax / full innerHTML rewrites.
 //
-// 安全模型(审计 P0-1 修复, 对齐 legacy markdown-render.ts 的两层防御): 
-// 1. parse 期: 独立 Marked 实例的 renderer.html 把模型输出的原始 HTML All
-//    转义成文books——iframe srcdoc / object / embed 等向量在源头就变成字面量.
-// 2. DOM 期: template parse后二次清除脚books类节点, on* 属性, javascript: 链接
-//    (双保险, 兜 marked 行为变化与 MathJax 之外的任何漏网).
-// 回答正文最终经 ReaderAssistantThread 的 root.innerHTML 注入, 此Filesyes
-// 唯一的消毒关卡——改动必须过 tests/render-answer-html.test.mjs 的向量锁.
+// Security model (Audit P0-1 fix, aligned with legacy markdown-render.ts two-layer defense):
+// 1. Parse phase: standalone Marked instance renderer.html escapes all raw model HTML output
+//    into text — iframe srcdoc / object / embed vectors become literals at source.
+// 2. DOM phase: post-template parse removes script-like nodes, on* attributes, javascript: links
+//    (double insurance against marked behavior changes and anything MathJax might miss).
+// Answer body is finally injected via ReaderAssistantThread root.innerHTML; this file is the
+// sole sanitization gate — changes must pass tests/render-answer-html.test.mjs vector lock.
 
 import { Marked } from "marked";
 import { parseMarkdownWithMath } from "../markdown-math.js";
@@ -24,7 +24,7 @@ function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;");
 }
 
-/** 抽出 [1] [2]..., 避免 marked 当成 reference link. */
+/** Extract [1] [2]... to prevent marked from treating them as reference links. */
 export function protectNumericCitations(source: string): {
   text: string;
   refs: string[];
@@ -49,7 +49,7 @@ export function restoreNumericCitations(html: string, refs: string[]): string {
   );
 }
 
-/** 流式预览: 轻量转义 + new line, 保留 [n] 字面量. */
+/** Streaming preview: lightweight escape + newlines, preserving [n] literals. */
 export function renderStreamingPreviewHtml(text: string): string {
   const escaped = escapeHtml(text || "");
   return escaped
@@ -58,14 +58,14 @@ export function renderStreamingPreviewHtml(text: string): string {
     .replace(/\n/g, "<br />");
 }
 
-/** marked v18 renderer.html 的入参兼容(token 对象或字符串) */
+/** marked v18 renderer.html input compatibility (token object or string) */
 function rawHtmlText(input: unknown): string {
   if (typeof input === "string") return input;
   const token = input as { raw?: string; text?: string } | null;
   return `${token?.raw ?? token?.text ?? ""}`;
 }
 
-// 独立实例: renderer.html 全转义 = 第一层防御；不污染全局 marked 配置
+// Standalone instance: renderer.html full escape = first layer of defense; does not pollute global marked config
 const answerMarked = new Marked();
 answerMarked.setOptions({ gfm: true, breaks: true });
 answerMarked.use({
@@ -79,14 +79,14 @@ const DANGEROUS_URL_RE = /^\s*(?:javascript|vbscript|data:text\/html)/i;
 function sanitizeHtml(html: string): string {
   const doc = globalThis.document;
   if (!doc) {
-    // None DOM 环境(理论上不发生: books函数只在浏览器Rendering路径调用)——
-    // 宁可全转义Display源码, 不可原样放行
+    // No DOM environment (should not happen: this function is only called in browser render path) —
+    // prefer fully escaped source display over passing raw HTML through
     return escapeHtml(html);
   }
   const template = doc.createElement("template");
   template.innerHTML = html;
   const content = template.content;
-  // 第二层防御: 即便 renderer.html 漏网也Remove脚books类节点
+  // Second layer of defense: remove script-like nodes even if renderer.html missed them
   content
     .querySelectorAll("script, iframe, object, embed, base, link, meta, form")
     .forEach((node) => node.remove());
@@ -104,7 +104,7 @@ function sanitizeHtml(html: string): string {
         node.removeAttribute(attribute.name);
         continue;
       }
-      // 去掉 target=_blank: 桌面 Electron 会把它当成 window.open → openExternal
+      // Remove target=_blank: desktop Electron treats it as window.open → openExternal
       if (name === "target") {
         node.removeAttribute(attribute.name);
       }
@@ -113,7 +113,7 @@ function sanitizeHtml(html: string): string {
   return template.innerHTML;
 }
 
-/** branch换会话会换 message id 但正文相同；缓存避免 remount 时闪"pending→最终". */
+/** Branch/session switch changes message id but body stays same; cache avoids "pending→final" flash on remount. */
 const FINAL_HTML_CACHE = new Map<string, string>();
 const FINAL_HTML_CACHE_MAX = 48;
 
@@ -136,7 +136,7 @@ function putFinalAnswerHtmlCache(text: string, html: string): void {
 }
 
 /**
- * 最终Answer HTML: 保护引用 → 保护公式 → marked → MathJax → 还原引用.
+ * Final answer HTML: protect citations → protect math → marked → MathJax → restore citations.
  */
 export async function renderFinalAnswerHtml(text: string): Promise<string> {
   const src = `${text || ""}`;

@@ -1,10 +1,11 @@
-/* 合集管理弹窗（从 components.utilities 拆出） */
+/* Collection management dialog (split from components.utilities) */
 
 
-/* CollectionManageDialog(分类文件夹 新建/管理弹窗)——名称输入镜像
-   professional-glossary-field 的字段样式(span 标题 + 12px 圆角输入),勾选
-   清单是本项目第一处 checkbox 列表,没有现成样式可直接复用,新写一份和
-   lib-search-hit/recent-job-delete-popover 同一视觉语言的浅色卡片列表。 */
+/* CollectionManageDialog (category folder new/manage dialog) — name input mirrors
+   professional-glossary-field's field style (span title + 12px rounded input), and
+   the checkbox list is the project's first checkbox list with no existing style
+   to reuse, so a new light card list is written in the same visual language as
+   lib-search-hit/recent-job-delete-popover. */
 @utility collection-name-field {
   display: grid;
   gap: 8px;
@@ -112,7 +113,7 @@
   background: color-mix(in srgb, var(--bg) 55%, var(--paper));
 }
 
-/* 合集管理弹窗宽度略收 */
+/* Collection management dialog width slightly tightened */
 @utility collection-manage-dialog {
   width: min(480px, calc(100vw - 24px));
 }

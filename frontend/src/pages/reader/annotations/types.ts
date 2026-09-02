@@ -1,10 +1,10 @@
-// 新Readerannotations模型(与旧 favorites / selection-favorites None关)
+// New Reader annotations model (unrelated to the legacy favorites / selection-favorites)
 
 export type ReaderNotePane = "source" | "translated";
 
 export type ReaderNote = {
   id: string;
-  /** 1-based pages码 */
+  /** 1-based page number */
   page: number;
   pane: ReaderNotePane;
   quote: string;

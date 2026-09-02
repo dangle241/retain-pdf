@@ -1,4 +1,4 @@
-// Markdown 悬浮预览: 任务识别/Translation Markdown 产物
+// Markdown floating preview: task recognition / translation Markdown output
 
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { FileCode2 } from "lucide-react";
@@ -101,7 +101,7 @@ export function ReaderMarkdownPanel({
         template.innerHTML = html;
         sanitizeRenderedMarkdown(template.content);
         template.content.querySelectorAll("img[src]").forEach((img) => {
-          // 相对 images/... 用 base parse成 API 绝对地址, 避免挂到 reader.html 同源下 404
+          // Resolve relative images/... against base to API absolute URLs to avoid 404 under reader.html origin
           const raw = img.getAttribute("src") || "";
           const resolved = resolveMarkdownAssetUrl(imagesBaseUrl, raw) || raw;
           img.setAttribute("data-reader-md-src", resolved);
@@ -111,7 +111,7 @@ export function ReaderMarkdownPanel({
         contentRef.current.classList.remove("hidden");
         setStatus("");
 
-        // 受保护图片 → 带 X-API-Key 拉 blob(<img> Cannot带鉴权头)
+        // Protected images → fetch blob with X-API-Key (<img> cannot carry auth headers)
         const images = [...contentRef.current.querySelectorAll("img[data-reader-md-src]")];
         let failed = 0;
         await Promise.allSettled(images.map(async (img) => {
@@ -151,14 +151,14 @@ export function ReaderMarkdownPanel({
       id="reader-markdown-panel"
       open={open}
       title="Markdown"
-      subtitle="识别与Translation产出 · 拖动可移动"
+      subtitle="Recognition & translation output · drag to move"
       titleIcon={<FileCode2 size={14} strokeWidth={2.25} aria-hidden />}
       storageKey="retainpdf.reader.markdown-float.pos.v1"
       ariaLabel="Markdown preview"
       width={420}
       onClose={onClose}
       toolbar={(
-        <span className="reader-notes-count">{status || "已加载"}</span>
+        <span className="reader-notes-count">{status || "Loaded"}</span>
       )}
     >
       {status && !contentRef.current?.childNodes?.length ? (

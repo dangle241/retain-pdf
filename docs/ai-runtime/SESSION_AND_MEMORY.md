@@ -181,7 +181,7 @@ assemble_memory(
 5. assemble messages：
    [ system = skill.system_prompt + scope_lock_text ]
    [ developer? = skill.developer ]
-   if S: [ {role:user, content: "以下是更早对话的摘要，请当作已知背景：\n"+S.content } ]
+if S: [ {role:user, content: "The following is a summary of earlier conversation, please treat as known background:\n"+S.content } ]
           [ {role:assistant, content: "Ready." } ]  # Optional stable prefix
    for m in W: append role/content
    if E:  append Hidden item revealed./user Tool-style context? → No;

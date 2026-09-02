@@ -18,11 +18,11 @@ export function TranslationDebugTab({ translation, controller }) {
       <div className="status-panel-head">
         <h3>Translation Debug</h3>
         <span id={ids.debugStatus} className="status-panel-note">
-          {hidden ? "No Translation调试Data" : "按 item 排查为什么没Translation, 为什么Source retained"}
+          {hidden ? "No translation debug data" : "Inspect per-item reasons for missing translation or retained source text"}
         </span>
       </div>
       <div id={ids.debugEmpty} className={hidden ? "events-empty" : "events-empty hidden"}>
-        {translation.emptyMessage || "No Translation调试Data"}
+        {translation.emptyMessage || "No translation debug data"}
       </div>
       <div id={ids.debugContent} className={hidden ? "translation-debug-content hidden" : "translation-debug-content"}>
         <TranslationSummary translation={translation} />

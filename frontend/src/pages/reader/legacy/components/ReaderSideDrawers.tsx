@@ -25,21 +25,21 @@ function drawerProps(active, key) {
 export function ReaderFavoritesDrawer({ drawerStore }) {
   const active = useDrawerActive(drawerStore);
   return (
-    <aside id="reader-favorites-drawer" aria-label="阅读Favorite" {...drawerProps(active, "favorites")}>
+    <aside id="reader-favorites-drawer" aria-label="Reading favorites" {...drawerProps(active, "favorites")}>
       <div className="reader-side-drawer-head">
         <div>
           <strong>Clipped excerpt</strong>
-          <span>双击框selection域收进这里</span>
+          <span>Double-click a selection area to add it here</span>
         </div>
         <button
           id="reader-favorites-close-btn"
           type="button"
           className="reader-side-drawer-close"
-          aria-label="CloseFavorite"
+          aria-label="Close favorites"
           onClick={() => drawerStore.close("favorites")}
         >×</button>
       </div>
-      {/* List由 selection-favorites → favorites/drawer-renderer 命令式Rendering(容器恒定叶子) */}
+      {/* List is rendered imperatively by selection-favorites → favorites/drawer-renderer (container is a stable leaf) */}
       <div id="reader-favorites-list" className="reader-favorites-list"></div>
     </aside>
   );
@@ -62,17 +62,17 @@ export function ReaderAnnotationsDrawer({ drawerStore, ports }) {
     };
   }, [ports, drawerStore]);
   return (
-    <aside id="reader-annotations-drawer" aria-label="annotations" {...drawerProps(active, "annotations")}>
+    <aside id="reader-annotations-drawer" aria-label="Annotations" {...drawerProps(active, "annotations")}>
       <div className="reader-side-drawer-head">
         <div>
-          <strong>annotations</strong>
-          <span>框选SourceCreated,支持Note与导出</span>
+          <strong>Annotations</strong>
+          <span>Select source text to create, supports notes and export</span>
         </div>
         <button
           id="reader-annotations-close-btn"
           type="button"
           className="reader-side-drawer-close"
-          aria-label="Closeannotations"
+          aria-label="Close annotations"
           onClick={() => drawerStore.close("annotations")}
         >×</button>
       </div>
@@ -86,21 +86,21 @@ export function ReaderAnnotationsDrawer({ drawerStore, ports }) {
 export function ReaderMarkdownDrawer({ drawerStore }) {
   const active = useDrawerActive(drawerStore);
   return (
-    <aside id="reader-markdown-drawer" aria-label="Markdown 预览" {...drawerProps(active, "markdown")}>
+    <aside id="reader-markdown-drawer" aria-label="Markdown preview" {...drawerProps(active, "markdown")}>
       <div className="reader-side-drawer-head">
         <div>
-          <strong>Markdown 预览</strong>
-          <span>识别与Translation产出的 Markdown 文books</span>
+          <strong>Markdown preview</strong>
+          <span>Markdown text from recognition and translation</span>
         </div>
         <button
           id="reader-markdown-close-btn"
           type="button"
           className="reader-side-drawer-close"
-          aria-label="Close Markdown 预览"
+          aria-label="Close Markdown preview"
           onClick={() => drawerStore.close("markdown")}
         >×</button>
       </div>
-      {/* Status行与正文由 markdown-preview.js 命令式驱动(容器恒定叶子) */}
+      {/* Status line and body are driven imperatively by markdown-preview.js (container is a stable leaf) */}
       <div className="reader-markdown-body">
         <div id="reader-markdown-status" className="reader-markdown-status">Not loaded yet</div>
         <article id="reader-markdown-content" className="reader-markdown-content hidden"></article>
@@ -112,20 +112,20 @@ export function ReaderMarkdownDrawer({ drawerStore }) {
 export function ReaderAiDrawer({ drawerStore, chatPorts }) {
   const active = useDrawerActive(drawerStore);
   return (
-    <aside id="reader-ai-drawer" aria-label="阅读问答" {...drawerProps(active, "ai")}>
+    <aside id="reader-ai-drawer" aria-label="Reading Q&A" {...drawerProps(active, "ai")}>
       <div className="reader-side-drawer-head">
         <div>
-          <strong>阅读问答</strong>
-          <span>基于CurrentDocuments提问, 可切换Question scope</span>
+          <strong>Reading Q&A</strong>
+          <span>Ask questions about the current document, switch question scope</span>
         </div>
       </div>
       <div className="reader-ai-body">
-        {/* Scope切换按钮与上下文行由 ai-context.js 命令式驱动(静态骨架,React 不重Rendering) */}
+        {/* Scope toggle buttons and context line are driven imperatively by ai-context.js (static skeleton, React does not re-render) */}
         <div className="reader-ai-scope-block">
           <div className="reader-ai-scope" role="group" aria-label="Question scope">
-            <button type="button" data-reader-ai-scope="document" className="is-active" aria-pressed="true">整份Documents</button>
+            <button type="button" data-reader-ai-scope="document" className="is-active" aria-pressed="true">Entire document</button>
             <button type="button" data-reader-ai-scope="page" aria-pressed="false">Current page</button>
-            <button type="button" data-reader-ai-scope="selection" aria-pressed="false">selection</button>
+            <button type="button" data-reader-ai-scope="selection" aria-pressed="false">Selection</button>
           </div>
           <div id="reader-ai-context" className="reader-ai-context">Current scope: entire document</div>
         </div>

@@ -294,11 +294,11 @@ export function bindReaderRegionHover({
   scheduleRegionOverlayRender();
 }
 
-// ===== 锚点Locate与selection取文(Favorite/搜索命中/annotationstotal用的前置能力) =====
+// ===== Anchor location & selection text extraction (prerequisites for favorites/search hits/annotations) =====
 
-// 块 ID 在两套产物里补零位数不同:regions 的 itemId yes 3 位(p001-b002),
-// 服务端 FTS/Favorite/引用的 block_id yes 4 位(p001-b0002).统一归一成
-// "p<pages>-b<块>" 的纯数字键再比较,no则跨系统锚点永远匹配不上.
+// Block IDs have different zero-padding widths across two systems: region itemId is 3 digits (p001-b002),
+// server FTS/favorites/citation block_id is 4 digits (p001-b0002). Normalize both to
+// "p<page>-b<block>" pure numeric keys for comparison, otherwise cross-system anchors never match.
 const BLOCK_KEY_RE = /^p0*(\d+)-b0*(\d+)$/i;
 
 export function normalizeBlockKey(blockId) {
@@ -306,8 +306,8 @@ export function normalizeBlockKey(blockId) {
   return match ? `p${Number(match[1])}-b${Number(match[2])}` : `${blockId || ""}`.trim();
 }
 
-// 按 (pageIdx, blockId) 锚点滚动到原位并短暂高亮命中区域.
-// blockId ↔ region.itemId(补零位数不敏感);找不到区域时回退为整pagesLocate.
+// Scroll to anchor (pageIdx, blockId) and briefly highlight the matching region.
+// blockId ↔ region.itemId (zero-padding insensitive); falls back to whole-page locate if region not found.
 export function jumpToReaderAnchor(anchor: PageAnchor = {}) {
   const binding = readerRegionBinding;
   const blockKey = normalizeBlockKey(anchor?.blockId);
@@ -337,8 +337,8 @@ export function jumpToReaderAnchor(anchor: PageAnchor = {}) {
   return true;
 }
 
-// 从Sourcepagesselection矩形提取引文:命中与selection相交的 region,拼出 quote 文books与主 block.
-// selection rect 为相对Pages元素的像素坐标(selection-favorites 的坐标系).
+// Extract citation from source page selection rect: find regions intersecting the selection, assemble quote text + primary block.
+// Selection rect is in pixel coordinates relative to the page element (selection-favorites coordinate system).
 export function resolveSelectionQuote({ page = 0, rect = null }: {
   page?: number;
   rect?: PixelRect | null;

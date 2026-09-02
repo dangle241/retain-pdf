@@ -8,7 +8,7 @@ import {
 } from "../../config/persisted-config.js";
 import { defaultCredentialsStatePort } from "../../features/credentials/default-state-port.js";
 
-/** 取第一个 trim 后非空的字符串；空白 / 空串不算有效credentials. */
+/** Return first non-empty string after trim; whitespace/empty strings are not valid credentials. */
 function firstNonEmpty(...candidates: unknown[]): string {
   for (const candidate of candidates) {
     const value = `${candidate ?? ""}`.trim();
@@ -20,9 +20,9 @@ function firstNonEmpty(...candidates: unknown[]): string {
 }
 
 /**
- * 读取"Settings → API Settings"里的模型 API Key.
- * 优先级: 内存 credentials Status → 持久化配置(桌面 snapshot / localStorage).
- * 不读 runtime-config key.
+ * Read model API key from "Settings → API Settings".
+ * Priority: in-memory credentials state → persisted config (desktop snapshot / localStorage).
+ * Does not read runtime-config key.
  */
 export function readSettingsModelApiKey(
   browserConfig = loadBrowserStoredConfig(),
@@ -43,7 +43,7 @@ export function resolveReaderAiConfig({
   browserConfig = loadBrowserStoredConfig(),
   developerConfig = loadDeveloperStoredConfig(),
 } = {}) {
-  // 模型 Key: 仅用户Settings；baseUrl / model 可回退 runtime 默认(非key)
+  // Model Key: user Settings only; baseUrl/model may fall back to runtime defaults (not key)
   return {
     apiKey: readSettingsModelApiKey(browserConfig),
     baseUrl: firstNonEmpty(developerConfig?.baseUrl, defaultModelBaseUrl()),
@@ -52,12 +52,12 @@ export function resolveReaderAiConfig({
   };
 }
 
-/** yesno已在Settings中配置下游模型 API Key(对话前置门禁). */
+/** Whether a downstream model API key has been configured in Settings (pre-conversation gate). */
 export function hasModelApiKey(): boolean {
   return Boolean(readSettingsModelApiKey());
 }
 
-/** credentialsSave后派发, 供 AI 输入门禁立刻刷新. */
+/** Dispatched after credentials save so AI input gate refreshes immediately. */
 export const CREDENTIALS_CHANGED_EVENT = "retainpdf:credentials-changed";
 
 export function notifyCredentialsChanged(): void {

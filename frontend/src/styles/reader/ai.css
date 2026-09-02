@@ -144,7 +144,7 @@
   line-height: 1.55;
 }
 
-/* Markdown 渲染后的块级元素排版(回答气泡内) */
+/* Block typography after Markdown render (inside answer bubble) */
 .reader-ai-message-body-el > *:first-child {
   margin-top: 0;
 }
@@ -214,13 +214,13 @@
   color: var(--accent);
 }
 
-/* agentic 问答:检索过程提示行 */
+/* Agentic QA: retrieval progress prompt line */
 .reader-ai-message-progress .reader-ai-message-body-el {
   color: var(--muted);
   font-style: italic;
 }
 
-/* 回答正文里的 [n] 引用标记(点击跳原文锚点) */
+/* [n] citation marker in answer body (click jumps to source anchor) */
 .reader-ai-citation-ref {
   display: inline;
   margin: 0 1px;
@@ -242,7 +242,7 @@
   color: var(--paper);
 }
 
-/* 回答底部引用脚注列表 */
+/* Citation footnote list at answer bottom */
 .reader-ai-citations {
   display: grid;
   gap: 4px;
@@ -273,7 +273,7 @@
   color: var(--ink);
 }
 
-/* 引用行：页面缩略图 + 摘录文字（answer-enhance renderCitationFooter 动态创建） */
+/* Citation row: page thumbnail + excerpt text (created dynamically by answer-enhance renderCitationFooter) */
 .reader-ai-citation-thumb {
   width: 34px;
   height: 44px;

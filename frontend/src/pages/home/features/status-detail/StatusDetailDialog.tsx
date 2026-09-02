@@ -125,7 +125,7 @@ function OverviewPanel({ overview, active }) {
         <DetailItem id={ids.runtime.mathMode} label="Formula Mode" value={runtime.mathMode} />
       </div>
       <div className="status-panel detail-stage-panel">
-        <div className="status-panel-head"><h3>过程Time线</h3></div>
+        <div className="status-panel-head"><h3>Stage Timeline</h3></div>
         <StageHistoryList job={overview.job} finishedAtFallback={overview.finishedAtFallback} />
       </div>
     </TabsPrimitive.Content>
@@ -184,10 +184,10 @@ function EventsPanel({ overview, active }) {
     >
       <div className="status-panel">
         <div className="status-panel-head">
-          <h3>Events流</h3>
+          <h3>Events</h3>
           <span id={ids.events.status} className="status-panel-note">{eventsStatusText(overview.eventsPayload)}</span>
         </div>
-        <p className="events-lead">按Time倒序展示最近Events, 适合Locate任务卡在哪个Stage以及最后一次Failed前发生了什么.</p>
+        <p className="events-lead">Recent events shown in reverse chronological order. Useful for locating which stage a task is stuck in and what happened before the last failure.</p>
         <EventsList eventsPayload={overview.eventsPayload} />
       </div>
     </TabsPrimitive.Content>

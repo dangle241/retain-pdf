@@ -1,8 +1,9 @@
-"""agentic 检索问答的薄循环。
+"""Thin loop for agentic retrieval-based Q&A.
 
-刻意不用 agent 框架:单 provider(DeepSeek 兼容端点)、单用户本地
-服务,裸 function calling 循环 ~200 行即可,超时/轮数/引用编号全部
-自持。工具定义与主流 SDK 同构(tools.py),将来要迁移只换这层外壳。
+Intentionally avoids agent frameworks: single provider (DeepSeek-compatible endpoint),
+single-user local service. A bare function-calling loop of ~200 lines handles timeouts,
+round limits, and citation numbering autonomously. Tool definitions are isomorphic to
+mainstream SDKs (tools.py); migrating later only requires swapping this outer shell.
 """
 
 from __future__ import annotations
@@ -33,7 +34,8 @@ SYSTEM_PROMPT = """你是 RetainPDF 图书馆的文献问答助手。用户的�
 - 用中文回答,术语保留原文。简洁、直接,不要复述工具原始 JSON。"""
 
 CITATION_RE = re.compile(r"\[(\d+)\]")
-# 模型偶发把内部 block_id 写进正文,收尾时清掉或映射成 [n]
+# The model occasionally writes internal block_ids into the answer text;
+# clean them up or map them to [n] during finalization.
 BLOCK_ID_BRACKET_RE = re.compile(r"\[\s*(p\d+[-_]b\d+)\s*\]", re.IGNORECASE)
 BLOCK_ID_BARE_RE = re.compile(r"(?<![\w/])(p\d+[-_]b\d+)(?![\w/])", re.IGNORECASE)
 
@@ -63,21 +65,24 @@ def assemble_streaming_message(
     lines: Iterable[str | bytes],
     on_delta: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
-    """把 DeepSeek 流式 SSE 组装成与非流式同构的 message dict。
+    """Assemble DeepSeek streaming SSE chunks into a message dict isomorphic to the non-streaming format.
 
-    逐行解析 `data: {json}`(末尾 `data: [DONE]` 终止),累积 content 与按
-    index 拼接的 tool_calls。只有当整轮没有出现 tool_calls(纯回答轮)时,
-    才对每个 content 增量调用 on_delta——工具调用轮不 emit answer_delta。
-    返回 `{"role":"assistant","content":..., "tool_calls":[...]}`,使 agent
-    循环无需感知流式与否。
+    Parses `data: {json}` lines (terminated by `data: [DONE]`), accumulates content, and
+    concatenates tool_calls by index. Only when the entire round contains no tool_calls
+    (a pure answer round) does it invoke on_delta for each content increment — tool-call
+    rounds do not emit answer_delta.
+    Returns `{"role":"assistant","content":..., "tool_calls":[...]}`, so the agent
+    loop need not distinguish streaming from non-streaming.
     """
     content_parts: list[str] = []
     tool_calls: dict[int, dict[str, Any]] = {}
     saw_tool_calls = False
-    # 审计 A3：模型可能在同一轮先吐 content 前言再吐 tool_calls——立即 emit
-    # 会把"让我搜索…"这类脏前言当答案流给前端（done 时又被覆盖，闪烁）。
-    # 前 HOLDBACK_CHARS 个字符先缓冲定性：出现 tool_calls → 静默丢弃；
-    # 攒满仍无 tool_calls → 判为纯回答轮，flush 后转直通（延迟仅数 token）。
+    # Audit A3: The model may emit a content preamble before tool_calls in the same round.
+    # Emitting immediately would stream dirty preambles like "Let me search…" to the frontend
+    # (overwritten at done, causing flicker).
+    # Buffer the first HOLDBACK_CHARS to qualify: if tool_calls appear → silently discard;
+    # if buffer fills without tool_calls → classify as a pure-answer round, flush, then go direct
+    # (delay is only a few tokens).
     holdback_chars = 64
     pending: list[str] = []
     pending_flushed = False
@@ -108,7 +113,7 @@ def assemble_streaming_message(
         delta_tool_calls = delta.get("tool_calls") or []
         if delta_tool_calls:
             if not saw_tool_calls:
-                pending.clear()  # 工具轮：丢弃未定性的 content 前言，不发给前端
+                pending.clear()  # Tool round: discard unqualified content preamble, do not send to frontend
             saw_tool_calls = True
             for call in delta_tool_calls:
                 index = call.get("index", 0)
@@ -135,7 +140,7 @@ def assemble_streaming_message(
                     pending.append(piece)
                     if sum(len(p) for p in pending) >= holdback_chars:
                         _flush_pending()
-    # 短纯回答（不足缓冲阈值）在流结束时补发
+    # Short pure answers (below the holdback threshold) are flushed at stream end
     if not saw_tool_calls and not pending_flushed:
         _flush_pending()
     message: dict[str, Any] = {"role": "assistant", "content": "".join(content_parts)}
@@ -145,10 +150,10 @@ def assemble_streaming_message(
 
 
 def _friendly_llm_error(status_code: int, detail: str = "") -> RuntimeError:
-    """把上游 LLM 的 HTTP 错误翻译成用户能行动的中文（审计 C1）。
+    """Translate upstream LLM HTTP errors into actionable Chinese messages (Audit C1).
 
-    原样透出的 HTTPStatusError 会把内部 URL 直接糊进聊天气泡，且
-    402(余额不足)/429(限流) 这类关键状态无任何指引。
+    Passing through HTTPStatusError raw would paste internal URLs into chat bubbles, and
+    critical statuses like 402 (insufficient balance) / 429 (rate-limited) would carry no guidance.
     """
     hint = {
         400: "请求被模型服务拒绝（参数或上下文过长）",
@@ -177,7 +182,7 @@ def build_deepseek_chat_fn(
 ) -> ChatFn:
     http = client or httpx.Client(timeout=settings.llm_timeout_s)
     url = f"{settings.llm_base_url}/chat/completions"
-    # 空 key 会变成非法 HTTP 头 `Bearer `（httpx LocalProtocolError）
+    # An empty key would produce an illegal HTTP header `Bearer ` (httpx LocalProtocolError)
     api_key = f"{settings.llm_api_key or ''}".strip()
     if not api_key:
         def _missing_key(_messages: list[dict[str, Any]], _tools: list[dict[str, Any]]) -> dict[str, Any]:
@@ -200,12 +205,12 @@ def build_deepseek_chat_fn(
             if response.status_code >= 400:
                 raise _friendly_llm_error(response.status_code, response.text)
             return response.json()["choices"][0]["message"]
-        # 流式:逐 token 经 on_delta 推给上层,同时组装出同构 message 返回
+        # Streaming: push tokens to upper layer via on_delta, while assembling an isomorphic message to return
         body["stream"] = True
         with http.stream("POST", url, headers=headers, json=body) as response:
             if response.status_code >= 400:
-                # stream 模式 body 未读:先读回错误详情再抛（原实现 raise_for_status
-                # 在读 body 前抛,DeepSeek 的错误 JSON 详情直接丢失）
+                # In stream mode the body is unread: read error details before throwing
+                # (original raise_for_status threw before reading body, losing DeepSeek error JSON details)
                 try:
                     detail = response.read().decode("utf-8", errors="replace")
                 except Exception:
@@ -238,14 +243,14 @@ class RetrievalAgent:
         chat_fn: ChatFn | None = None,
         history: list[dict[str, str]] | None = None,
     ) -> AskResult:
-        # chat_fn 覆盖:按请求携带的 LLM key 构造的临时应答器;缺省用启动期的
+        # chat_fn override: a temporary responder built from the per-request LLM key; defaults to startup instance
         emit = on_event or (lambda event: None)
         chat = chat_fn or self._chat
         scoped_document_id = document_id.strip()
         scoped_job_id = job_id.strip()
         user_content = question.strip()
         if scoped_document_id:
-            # 硬范围说明 + 工具层强制注入 document_id(见 _scope_tool_arguments)
+            # Hard scope hint + tool-layer forced injection of document_id (see _scope_tool_arguments)
             user_content = (
                 f"(限定文档 document_id={scoped_document_id}"
                 f"{f', job_id={scoped_job_id}' if scoped_job_id else ''}"
@@ -255,7 +260,7 @@ class RetrievalAgent:
         messages: list[dict[str, Any]] = [
             {"role": "system", "content": SYSTEM_PROMPT},
         ]
-        # 多轮对话:注入既往轮次(只保留 role/content,工具轨迹不回放)
+        # Multi-turn dialogue: inject previous turns (keep only role/content, tool traces are not replayed)
         for turn in history or []:
             role = str(turn.get("role") or "")
             content = str(turn.get("content") or "").strip()
@@ -265,7 +270,7 @@ class RetrievalAgent:
         citations: dict[int, Citation] = {}
         trace: list[dict[str, Any]] = []
         next_ref = 1
-        # 整本问答：不暴露 list_documents，避免模型去「浏览图书馆」
+        # Whole-book Q&A: do not expose list_documents, preventing the model from "browsing the library"
         tool_specs = _tool_specs_for_scope(self._registry, scoped_document_id)
 
         for round_index in range(1, self._max_tool_rounds + 1):
@@ -290,7 +295,7 @@ class RetrievalAgent:
             )
             for call in tool_calls:
                 name = call.get("function", {}).get("name", "")
-                # 整本会话硬挡跨库工具
+                # Whole-book session hard-blocks cross-library tools
                 if scoped_document_id and name == "list_documents":
                     result = {
                         "error": "整本问答不允许浏览图书馆，请用 search_fulltext / read_blocks。",
@@ -322,7 +327,7 @@ class RetrievalAgent:
                 result = self._registry.invoke(name, arguments)
                 next_ref = _assign_refs(result, citations, next_ref)
                 trace.append({"round": round_index, "tool": name, "arguments": arguments})
-                # 给模型的 payload 去掉 block_id 等内部字段,避免它抄成 [p002-b0004]
+                # Strip internal fields like block_id from the payload sent to the model, so it doesn't copy them as [p002-b0004]
                 messages.append(
                     {
                         "role": "tool",
@@ -333,16 +338,16 @@ class RetrievalAgent:
                     }
                 )
 
-        # 轮数耗尽:强制模型基于已有证据收尾(不给工具)
+        # Rounds exhausted: force the model to conclude based on existing evidence (no tools)
         messages.append(
             {
                 "role": "user",
                 "content": "请基于以上已检索到的证据直接给出最终回答,不要再调用工具。引用只用 [n]。",
             }
         )
-        # 必须用请求级 chat（chat_fn or self._chat）：env 不配 key、前端按请求
-        # 传 key 的部署形态下 self._chat 是 _missing_key——跑满工具轮的问题
-        # 会在收尾轮误报"缺少 LLM API Key"（审计 A1）。
+        # Must use request-level chat (chat_fn or self._chat): in deployments where env has no key
+        # and the frontend passes a per-request key, self._chat is _missing_key — a question that
+        # exhausts tool rounds would falsely report "缺少 LLM API Key" in the final round (Audit A1).
         message = chat(messages, [])
         answer = _sanitize_answer_text(str(message.get("content") or "").strip(), citations)
         return AskResult(
@@ -360,7 +365,7 @@ def _scope_tool_arguments(
     document_id: str = "",
     job_id: str = "",
 ) -> dict[str, Any]:
-    """整本问答时强制工具落在当前文档/任务,不依赖模型自觉传参。"""
+    """Force tools to target the current document/task during whole-book Q&A, without relying on the model to pass parameters voluntarily."""
     if not document_id:
         return arguments
     scoped = dict(arguments)
@@ -372,7 +377,7 @@ def _scope_tool_arguments(
 
 
 def _tool_specs_for_scope(registry: ToolRegistry, document_id: str = "") -> list[dict[str, Any]]:
-    """整本问答时从工具列表拿掉 list_documents，减少无意义的「浏览图书馆」。"""
+    """Remove list_documents from the tool list during whole-book Q&A to reduce meaningless "library browsing"."""
     specs = registry.specs()
     if not document_id.strip():
         return specs
@@ -386,11 +391,11 @@ def _tool_specs_for_scope(registry: ToolRegistry, document_id: str = "") -> list
 
 
 def _assign_refs(result: dict[str, Any], citations: dict[int, Citation], next_ref: int) -> int:
-    """给带锚点的工具结果编引用号,并把编号写回结果(内部仍保留 block_id 供 Citation)。"""
+    """Assign citation numbers to anchored tool results and write the numbers back into the results (block_id is still kept internally for Citation)."""
     anchored: list[dict[str, Any]] = []
     anchored.extend(result.get("hits") or [])
     anchored.extend(result.get("favorites") or [])
-    # read_blocks: 外层锚点写回每个 block
+    # read_blocks: write outer anchor back into each block
     blocks = result.get("blocks")
     if isinstance(blocks, list):
         rewritten_blocks: list[dict[str, Any]] = []
@@ -434,7 +439,7 @@ def _assign_refs(result: dict[str, Any], citations: dict[int, Citation], next_re
 
 
 def _public_anchor(entry: dict[str, Any]) -> dict[str, Any] | None:
-    """模型可见的锚点:只有 ref / page(1 基) / snippet,无内部 ID。"""
+    """Anchor visible to the model: only ref / page (1-based) / snippet, no internal IDs."""
     ref = entry.get("ref")
     if ref is None:
         return None
@@ -460,7 +465,7 @@ def _public_anchor(entry: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def _public_tool_payload(result: dict[str, Any]) -> dict[str, Any]:
-    """工具原始结果 → 模型上下文。剥离 block_id/job_id 等,避免抄进回答。"""
+    """Tool raw result → model context. Strip block_id/job_id etc. to prevent them from being copied into the answer."""
     if not isinstance(result, dict):
         return {"error": "invalid tool result"}
     if result.get("error"):
@@ -470,7 +475,7 @@ def _public_tool_payload(result: dict[str, Any]) -> dict[str, Any]:
     if result.get("hint"):
         public["hint"] = str(result.get("hint"))
     if result.get("document_id"):
-        # 仅在需要确认范围时给文档 id,一般整本会话已锁定
+        # Only expose document id when scope confirmation is needed; whole-book sessions are already locked
         public["scoped"] = True
 
     hits = result.get("hits")
@@ -513,7 +518,7 @@ def _public_tool_payload(result: dict[str, Any]) -> dict[str, Any]:
     if isinstance(images, list) and images:
         public["image_urls"] = [str(u) for u in images[:8]]
 
-    # search 命中上挂的 image_urls 已在 hits 剥离时丢掉;从原始 hits 收集
+    # image_urls attached to search hits were lost when hits were stripped; collect from raw hits
     if isinstance(hits, list):
         img_urls: list[str] = []
         for hit in hits:
@@ -534,7 +539,7 @@ def _public_tool_payload(result: dict[str, Any]) -> dict[str, Any]:
 
 
 def _sanitize_answer_text(answer: str, citations: dict[int, Citation]) -> str:
-    """把正文里的 [p002-b0004] / 裸 block_id 映射成 [n] 或删掉。"""
+    """Map [p002-b0004] / bare block_id in the answer text to [n] or remove them."""
     if not answer:
         return answer
     by_block = {
@@ -555,14 +560,14 @@ def _sanitize_answer_text(answer: str, citations: dict[int, Citation]) -> str:
 
     cleaned = BLOCK_ID_BRACKET_RE.sub(repl_bracket, answer)
     cleaned = BLOCK_ID_BARE_RE.sub(repl_bare, cleaned)
-    # 压缩因删除产生的多余空白
+    # Collapse excess whitespace caused by deletions
     cleaned = re.sub(r"[ \t]{2,}", " ", cleaned)
     cleaned = re.sub(r" *\n", "\n", cleaned)
     return cleaned.strip()
 
 
 def _referenced_citations(answer: str, citations: dict[int, Citation]) -> list[Citation]:
-    # 按正文出现顺序保留 [n]，避免 sorted 打乱阅读顺序
+    # Preserve [n] in the order they appear in the answer text, avoiding sorted() from disrupting reading order
     ordered_refs: list[int] = []
     seen: set[int] = set()
     for match in CITATION_RE.findall(answer):
@@ -572,7 +577,7 @@ def _referenced_citations(answer: str, citations: dict[int, Citation]) -> list[C
         seen.add(ref)
         ordered_refs.append(ref)
     selected = [citations[ref] for ref in ordered_refs]
-    # 模型没标 [n] 时：按页去重，最多 3 条，避免前端甩一长串
+    # When the model omits [n]: deduplicate by page, cap at 3, to avoid dumping a long list to the frontend
     if not selected and citations:
         picked: list[Citation] = []
         pages: set[int] = set()

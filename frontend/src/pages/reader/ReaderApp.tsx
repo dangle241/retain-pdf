@@ -1,4 +1,4 @@
-// Reader编排根: 默认 react-pdf 引擎；?engine=legacy 回退命令式 boot.
+// Reader orchestration root: defaults to react-pdf engine; ?engine=legacy falls back to imperative boot.
 
 import { useMemo, useState } from "react";
 import { ReaderBootLoading } from "./legacy/components/ReaderBootLoading.jsx";
@@ -24,7 +24,7 @@ function resolveReaderEngine(search = globalThis.location?.search || "") {
   if (engine === "legacy" || engine === "classic") {
     return "legacy";
   }
-  // 默认全 React + react-pdf
+  // Default: fully React + react-pdf
   return "react-pdf";
 }
 

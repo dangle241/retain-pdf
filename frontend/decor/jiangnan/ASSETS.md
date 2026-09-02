@@ -69,7 +69,7 @@ Do not generate text image. Current copy: 「10k books / Roam through millennia�
 
 ## 4. Empty anchor (place new assets here)
 
-按 manifest Add line `{ "type": "image", "slot": "<id>", "src": "<文件>" }` Just:
+Add the line `{ "type": "image", "slot": "<id>", "src": "<file>" }` to the manifest:
 
 | slot | Screen position | Drawing recommended. | Suitable Content |
 |---|---|---|---|

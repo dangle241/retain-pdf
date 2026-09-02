@@ -1,7 +1,7 @@
-/* 翻译工作流对话框 / 页码范围 / 术语表字段（从 components.utilities 拆出） */
+/* Translation workflow dialog / Page range / Glossary field (split from components.utilities) */
 
 @utility translation-workflow-dialog {
-  /* 阶段 C(shadcn 改造):这个类现在挂在 Radix DialogPrimitive.Content 上——
+  /* Stage C (shadcn refactor): this class is now applied to Radix DialogPrimitive.Content —
      Content 和 Overlay 是两个独立的兄弟元素(不再是同一个 <div> 身兼背板+
      内容两职),背板的半透明模糊背景移到下面新增的 translation-workflow-overlay
      工具类(挂在 DialogPrimitive.Overlay 上)。z-index 从旧世界的 90 提到

@@ -19,7 +19,7 @@ function TranslationItemCard({ item, active, onSelect }) {
   const finalStatus = finalStatusOf(item);
   const errorTypes = errorTypesOf(item);
   const metaBits = [
-    `Page ${pageNumberOf(item)} pages`,
+    `Page ${pageNumberOf(item)}`,
     item.block_type || "",
     item.classification_label || "",
   ].filter(Boolean).join(" · ");
@@ -52,11 +52,11 @@ export function TranslationItemsPanel({ translation, onSelect, onChangePage }) {
   const totalPages = total > 0 ? Math.ceil(total / Math.max(limit, 1)) : 0;
   const currentPage = total > 0 ? Math.floor(offset / Math.max(limit, 1)) + 1 : 0;
   const meta = loading
-    ? "读取中..."
-    : `total ${total} entries, bookspages ${list.length} entries, offset ${offset}, limit ${limit}`;
+    ? "Loading..."
+    : `Total ${total} entries, showing ${list.length} entries, offset ${offset}, limit ${limit}`;
   const pageLabel = loading
-    ? "读取中..."
-    : total > 0 ? `Page ${currentPage} / ${totalPages} pages` : "Page 0 / 0 pages";
+    ? "Loading..."
+    : total > 0 ? `Page ${currentPage} / ${totalPages}` : "Page 0 / 0";
   const canPrev = offset > 0;
   const canNext = offset + list.length < total;
   const hasItems = list.length > 0;
@@ -66,9 +66,9 @@ export function TranslationItemsPanel({ translation, onSelect, onChangePage }) {
     <section className="translation-debug-column translation-debug-column-list">
       <div className="translation-debug-subhead"><h4>Item List</h4><span id={ids.itemsMeta} className="status-panel-note">{meta}</span></div>
       <div className="translation-panel-body">
-        <div id={ids.itemsLoading} className={loading ? "events-empty" : "events-empty hidden"}>LoadingTranslation item...</div>
+        <div id={ids.itemsLoading} className={loading ? "events-empty" : "events-empty hidden"}>Loading translation items...</div>
         <div id={ids.itemsEmpty} className={!loading && !hasItems ? "events-empty" : "events-empty hidden"}>
-          {translation.itemsErrorText || "没有匹配的Translation item"}
+          {translation.itemsErrorText || "No matching translation items"}
         </div>
         <div id={ids.itemsList} className={!loading && hasItems ? "translation-items-list" : "translation-items-list hidden"}>
           {list.map((item) => (
@@ -88,7 +88,7 @@ export function TranslationItemsPanel({ translation, onSelect, onChangePage }) {
           className="button-link secondary"
           disabled={loading || !canPrev}
           onClick={() => onChangePage("prev")}
-        >上一pages</button>
+        >Previous</button>
         <span id={ids.itemsPage} className="status-panel-note">{pageLabel}</span>
         <button
           id={ids.itemsNext}
@@ -96,7 +96,7 @@ export function TranslationItemsPanel({ translation, onSelect, onChangePage }) {
           className="button-link secondary"
           disabled={loading || !canNext}
           onClick={() => onChangePage("next")}
-        >下一pages</button>
+        >Next</button>
       </div>
     </section>
   );

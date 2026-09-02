@@ -1,5 +1,5 @@
-// Reader AI 会话 ID books地缓存:按 job / document 复用 conversation_id,实现多轮.
-// 真源仍yes Rust ai_conversations;这里只做客户端粘性,避免每问新建会话.
+// Reader AI conversation ID local cache: reuse conversation_id per job/document for multi-turn.
+// Source of truth remains Rust ai_conversations; this only provides client-side stickiness to avoid creating a new session per question.
 
 const STORAGE_PREFIX = "retainpdf.reader.ai.conversation.v1:";
 
@@ -55,7 +55,7 @@ export function saveStoredConversationId(
   try {
     store.setItem(conversationStorageKey(scope), id);
   } catch {
-    // quota / private mode — 忽略,books轮仍Ready内存态
+    // quota / private mode — ignore; current turn still works from in-memory state
   }
 }
 

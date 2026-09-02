@@ -77,8 +77,8 @@ function AnnotationItem({ annotation, onJump, onDelete, onSaveNote }) {
   );
 }
 
-// 具名导出:reader pages(src/pages/reader)已打包,直接复用组件源码Rendering进
-// annotations抽屉(Phase 2b);mountReaderAnnotationsApp 保留给组件级测试当挂载入口.
+// Named export: reader page (src/pages/reader) is bundled; reuse component source for rendering
+// annotations drawer (Phase 2b); mountReaderAnnotationsApp kept as mount entry for component tests.
 export function ReaderAnnotationsPanel({ ports }) {
   const [open, setOpen] = useState(false);
   const [annotations, setAnnotations] = useState([]);
@@ -112,7 +112,7 @@ export function ReaderAnnotationsPanel({ ports }) {
 
   useEffect(() => ports.subscribeOpen((visible) => setOpen(Boolean(visible))), [ports]);
 
-  // 首次可见时加载,之后每次重新变为可见时刷新
+  // Load on first visibility, then refresh each time it becomes visible again
   useEffect(() => {
     if (open) {
       load();
@@ -135,7 +135,7 @@ export function ReaderAnnotationsPanel({ ports }) {
   }, [ports, annotations]);
 
   const handleDelete = useCallback(async (annotation) => {
-    // 乐观Remove,Failedresume
+    // Optimistic remove, restore on failure
     setAnnotations((current) => current.filter((item) => item.favoriteId !== annotation.favoriteId));
     let ok = false;
     try {
@@ -154,7 +154,7 @@ export function ReaderAnnotationsPanel({ ports }) {
 
   const handleSaveNote = useCallback(async (annotation, note) => {
     const previousNote = annotation.note;
-    // 乐观Updates,Failed回滚
+    // Optimistic update, roll back on failure
     setAnnotations((current) => current.map((item) => (
       item.favoriteId === annotation.favoriteId ? { ...item, note } : item
     )));

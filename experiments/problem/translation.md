@@ -312,7 +312,7 @@ translate
 
 LLM repair Must be repeated after. validator。
 
-Do not blur this boundary. Just LLM Participate in generation; result must pass. validator。Structured output 和 validator It is the core defense line of the production system, not prompt Accessory. Structured output reduces parsing and format drift risk, but still requires. schema validation and business rule validation.[Cohere, Validating Outputs, https://cohere.com/llmu/validating-llm-outputs, Access date 2026-05-27][[1]](https://cohere.com/llmu/validating-llm-outputs)
+Do not blur this boundary. If an LLM participates in generation, the result must pass validator. Structured output and validator are the core defense lines of the production system, not prompt accessories. Structured output reduces parsing and format drift risk, but still requires schema validation and business rule validation. [Cohere, Validating Outputs, https://cohere.com/llmu/validating-llm-outputs, Access date 2026-05-27][[1]](https://cohere.com/llmu/validating-llm-outputs)
 
 ## 5.1 repair Input should be minimal
 
@@ -526,9 +526,9 @@ Terminology consistency should not rely on putting all glossary Insert prompt。
 
 Should implement layering + retrieval + distinguish hard/soft constraints.
 
-Translation memory 和 glossary Two distinct items:TM Reuse translated segments,glossary Glossaries and specified translations both improve consistency, but serve different purposes.[Language Scientific, WhatShould implement **layering + retrieval + hard/soft constraint differentiation**.s The Difference Between Translation Memory and Glossary, https://www.languagescientific.com/whats-the-difference-between-translation-memory-tm-and-a-glossary/, 访问日期 2026-05-27][[3]](https://www.languagescientific.com/whats-the-difference-between-translation-memory-tm-and-a-glossary/)
+Translation memory and glossary are two distinct items: TM reuses translated segments, glossaries and specified translations both improve consistency, but serve different purposes. Should implement layering + retrieval + hard/soft constraint differentiation. [Language Scientific, What is The Difference Between Translation Memory and Glossary, https://www.languagescientific.com/whats-the-difference-between-translation-memory-tm-and-a-glossary/, Access date 2026-05-27][[3]](https://www.languagescientific.com/whats-the-difference-between-translation-memory-tm-and-a-glossary/)
 
-CAT/TMS Tools also typically glossary、translation memory、tag 或 placeholder QA Handle separately.[Smartcat, Translation memories glossaries, https://help.smartcat.com/6987550190610-leveraging-smartcat-linguistic-assets/, access date 2026-05-27][[4]](https://help.smartcat.com/6987550190610-leveraging-smartcat-linguistic-assets/)
+CAT/TMS tools also typically handle glossary, translation memory, and tag or placeholder QA separately. [Smartcat, Leveraging Linguistic Assets, https://help.smartcat.com/6987550190610-leveraging-smartcat-linguistic-assets/, Access date 2026-05-27][[4]](https://help.smartcat.com/6987550190610-leveraging-smartcat-linguistic-assets/)
 
 ## 7.1 Recommended priority
 
@@ -606,7 +606,7 @@ If a preferred term appears in source:
   target On miss, P2 diagnostics
 ```
 
-Terms QA、placeholder QA Common translation quality check item.[Phrase, Quality Assurance Strings, https://support.phrase.com/hc/en-us/articles/5820046486684-Quality-Assurance-Strings, 访问日期 2026-05-27][[5]](https://support.phrase.com/hc/en-us/articles/5820046486684-Quality-Assurance-Strings)
+Terms QA and placeholder QA are common translation quality check items. [Phrase, Quality Assurance Strings, https://support.phrase.com/hc/en-us/articles/5820046486684-Quality-Assurance-Strings, Access date 2026-05-27][[5]](https://support.phrase.com/hc/en-us/articles/5820046486684-Quality-Assurance-Strings)
 
 # 8. translation memory Concurrent update
 
@@ -785,7 +785,7 @@ Oscillator strength ⟦MATH_001⟧ defined by ⟦REF_001⟧.
 Then restore:
 
 ```
-振子强度 $f$ 由 Eq. (3) 定义。
+Oscillator strength $f$ is defined by Eq. (3).
 ```
 
 If you wish “Eq. (3)” also localized as "Eq. (3)Don't protect the entire thing. `Eq. (3)`, instead split into:
@@ -910,7 +910,7 @@ hedged_request_count
 cancelled_request_count
 ```
 
-Focus on p95/p99, don't just look at the average. Tail latency is inherently a distribution problem; a small number of straggler Can drag down overall completion time.[Tail Latency Study, https://accelazh.github.io/storage/Tail-Latency-Study, 访问日期 2026-05-27][[7]](https://accelazh.github.io/storage/Tail-Latency-Study)
+Focus on p95/p99, do not just look at the average. Tail latency is inherently a distribution problem; a small number of stragglers can drag down overall completion time. [Tail Latency Study, https://accelazh.github.io/storage/Tail-Latency-Study, Access date 2026-05-27][[7]](https://accelazh.github.io/storage/Tail-Latency-Study)
 
 ## 12.2 Translation quality metrics
 

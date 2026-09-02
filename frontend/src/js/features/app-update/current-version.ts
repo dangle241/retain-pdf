@@ -1,11 +1,10 @@
-// 3b app-update React 化(蓝图 §5)唯一的 APP_VERSION 出口.
+// Sole APP_VERSION export for 3b app-update React migration (Blueprint §5).
 //
-// 直接 re-export generated/app-version.js 的 APP_VERSION——
-// architecture-boundaries 门禁禁止 src/pages/**, src/shared/** 直接 import
-// src/js/generated/**(预Compile/生成产物).这个薄 re-export Filesbooks身仍在旧
-// 世界(src/js/features/app-update/),不受该门禁约束;新世界从这里间接拿到
-// 版books号,不Copy字面量, 不违反门禁,版books号Updates脚books(generate-app-version.mjs)
-// 改一处两边同时生效.
+// Directly re-exports APP_VERSION from generated/app-version.js.
+// Architecture boundary guards disallow src/pages/**, src/shared/** from importing
+// src/js/generated/** directly. This thin re-export file lives in the legacy realm
+// (src/js/features/app-update/) and is exempt; new code imports version here indirectly
+// without duplicating literals or violating boundaries. generate-app-version.mjs updates both.
 
 export { APP_VERSION } from "../../generated/app-version.js";
 

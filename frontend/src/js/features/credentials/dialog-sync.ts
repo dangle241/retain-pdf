@@ -20,7 +20,7 @@ export function syncCredentialDialogFields({
     paddleInput.value = credentials.paddleToken || "";
   }
   if (apiKeyInput) {
-    // 只展示Settings里已存的 Key, 不从 runtime 回填(避免"Settings空白却仍能问答")
+    // Only display keys already saved in settings, avoid backfilling from runtime (avoids "blank settings yet Q&A works")
     void defaultModelApiKey;
     apiKeyInput.value = `${credentials.modelApiKey || ""}`.trim();
   }

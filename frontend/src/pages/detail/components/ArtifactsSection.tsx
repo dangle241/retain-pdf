@@ -1,11 +1,13 @@
-// Artifact Manifest卡片 + Markdown 预览卡片.
+// Artifact Manifest card + Markdown preview card.
 //
-// #detail-artifacts-summary / #detail-artifacts-list 与
-// #detail-markdown-image-grid / #detail-markdown-image-empty yes"命令式孤岛":
-// 内容由保留的旧模块 src/js/job-detail/artifacts.js(经 overview-renderer.js /
-// markdown-flow.js)在Data加载后以 innerHTML / classList 写入.React 侧只Rendering
-// 与旧 detail.html 一致的静态初始骨架,且虚拟 DOM 恒定不变,重Rendering不会
-// 覆盖命令式写入.Markdown 卡片其余文books字段走 setText 适配(React state).
+// #detail-artifacts-summary / #detail-artifacts-list and
+// #detail-markdown-image-grid / #detail-markdown-image-empty are "imperative islands":
+// their content is written via innerHTML / classList by the retained legacy modules
+// src/js/job-detail/artifacts.js (via overview-renderer.js / markdown-flow.js) after
+// data load. The React side only renders the static initial skeleton that matches
+// the old detail.html, and the virtual DOM is immutable, so re-renders will not
+// overwrite the imperative writes. Other Markdown card text fields go through the
+// setText adapter (React state).
 
 import { memo } from "react";
 import { MetaRow } from "./JobSummaryCard.jsx";

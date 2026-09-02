@@ -40,8 +40,8 @@ function ItemDetailBody({ payload }) {
         <InfoRow label="degradation_reason" value={degradationReasonOf(item) || "-"} />
       </div>
       <TextBlock label="Source" value={item.source_text || ""} />
-      <TextBlock label="落盘Translation" value={item.translated_text || item.translation_unit_translated_text || item.group_translated_text || ""} />
-      <TextBlock label="保护后Translation" value={item.protected_translated_text || item.translation_unit_protected_translated_text || item.group_protected_translated_text || ""} />
+      <TextBlock label="Persisted Translation" value={item.translated_text || item.translation_unit_translated_text || item.group_translated_text || ""} />
+      <TextBlock label="Protected Translation" value={item.protected_translated_text || item.translation_unit_protected_translated_text || item.group_protected_translated_text || ""} />
       <TextBlock label="translation_diagnostics" value={diagnostics || {}} />
     </>
   );
@@ -66,9 +66,9 @@ export function TranslationItemDetailPanel({ translation, onReplay }) {
   const emptyText = translation.itemErrorText
     || (translation.selectedItemId ? "Select an item on the left" : "No item is ready to view");
   const meta = loading
-    ? "读取中..."
+    ? "Loading..."
     : hasItem
-      ? `${payload.item_id || payload.item?.item_id || "-"} · Page ${pageNumberOf(payload, pageNumberOf(payload.item))} pages`
+      ? `${payload.item_id || payload.item?.item_id || "-"} · Page ${pageNumberOf(payload, pageNumberOf(payload.item))}`
       : "-";
   const ids = STATUS_DETAIL_DIALOG_IDS.translation;
 
@@ -77,21 +77,21 @@ export function TranslationItemDetailPanel({ translation, onReplay }) {
   const replayStatus = translation.replayLoading
     ? "Replaying..."
     : hasReplayResult
-      ? (replay.payload.replay_error ? "重放返回错误" : "重放Done")
+      ? (replay.payload.replay_error ? "Replay returned error" : "Replay done")
       : (translation.replayErrorText || "-");
 
   return (
     <section className="translation-debug-column translation-debug-column-detail">
-      <div className="translation-debug-subhead"><h4>Item 详情</h4><span id={ids.itemMeta} className="status-panel-note">{meta}</span></div>
+      <div className="translation-debug-subhead"><h4>Item Details</h4><span id={ids.itemMeta} className="status-panel-note">{meta}</span></div>
       <div className="translation-panel-body translation-panel-body-detail">
-        <div id={ids.itemLoading} className={loading ? "events-empty" : "events-empty hidden"}>Loading item 详情...</div>
+        <div id={ids.itemLoading} className={loading ? "events-empty" : "events-empty hidden"}>Loading item details...</div>
         <div id={ids.itemEmpty} className={!loading && !hasItem ? "events-empty" : "events-empty hidden"}>{emptyText}</div>
         <div id={ids.itemDetail} className={!loading && hasItem ? "translation-item-detail" : "translation-item-detail hidden"}>
           {!loading && hasItem ? <ItemDetailBody payload={payload} /> : null}
         </div>
       </div>
       <div className="translation-replay-actions">
-        <button id={ids.itemReplay} type="button" className="button-link secondary" disabled={!hasItem} onClick={onReplay}>重放Current item</button>
+        <button id={ids.itemReplay} type="button" className="button-link secondary" disabled={!hasItem} onClick={onReplay}>Replay current item</button>
         <span id={ids.replayStatus} className="status-panel-note">{replayStatus}</span>
       </div>
       <div id={ids.replayResult} className={hasReplayResult ? "translation-replay-result" : "translation-replay-result hidden"}>

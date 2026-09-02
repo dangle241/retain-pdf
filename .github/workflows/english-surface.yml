@@ -1,0 +1,37 @@
+name: English Surface Check
+on:
+  push:
+    paths:
+      - 'frontend/**'
+      - 'frontend-react/**'
+      - 'backend/**/*.md'
+      - 'doc/**'
+      - 'docs/**'
+      - 'experiments/**/*.md'
+      - 'tools/check-english-surface.mjs'
+      - 'tools/translation-english-allowlist.json'
+      - '.github/workflows/english-surface.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - 'frontend-react/**'
+      - 'backend/**/*.md'
+      - 'doc/**'
+      - 'docs/**'
+      - 'experiments/**/*.md'
+      - 'tools/check-english-surface.mjs'
+      - 'tools/translation-english-allowlist.json'
+      - '.github/workflows/english-surface.yml'
+
+jobs:
+  check-surface:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run English Surface Check
+        run: |
+          npm install # Install any necessary tools if needed, though check-english-surface.mjs is vanilla
+          node tools/check-english-surface.mjs

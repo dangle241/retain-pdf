@@ -1,6 +1,6 @@
-// 组合根下发通道:单个pages级 Context(总计划"Status策略"Page 3 entries).
-// entry.jsx 先建 composition,再经 <HomeServicesProvider> 灌给组件树;
-// 不做 per-feature Context.
+// Composition root distribution channel: a single page-level Context (master plan "Status Strategy", section 3).
+// entry.jsx creates the composition first, then injects it into the component tree via <HomeServicesProvider>;
+// no per-feature Context.
 
 import { createContext, useContext } from "react";
 import type { HomeServices } from "./composition/types.js";
@@ -11,7 +11,7 @@ export const HomeServicesProvider = HomeServicesContext.Provider;
 export function useHomeServices(): HomeServices {
   const services = useContext(HomeServicesContext);
   if (!services) {
-    throw new Error("useHomeServices 必须在 <HomeServicesProvider> 内使用(entry.jsx 先建 composition)");
+    throw new Error("useHomeServices must be used inside <HomeServicesProvider> (entry.jsx creates the composition first)");
   }
   return services;
 }

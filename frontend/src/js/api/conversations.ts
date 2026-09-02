@@ -1,4 +1,4 @@
-// AI 会话 CRUD: 对接 Rust /api/v1/ai/conversations(含 parent_id / head_id branch树).
+// AI conversation CRUD: talks to Rust /api/v1/ai/conversations (parent_id / head_id branch tree).
 
 import { API_PREFIX } from "../config/api-constants.js";
 import { buildApiHeaders, isMockMode } from "../config/runtime.js";
@@ -161,7 +161,7 @@ export async function patchConversation(
       head_id: payload.head_id || "",
     };
   }
-  // 只发有值的字段: 空 head_id 不必带(旧服务/校验更稳)
+  // Only send populated fields: omit empty head_id (safer for old servers / validation)
   const body: Record<string, string> = {};
   const head = `${payload.head_id || ""}`.trim();
   const title = `${payload.title || ""}`.trim();
@@ -228,7 +228,7 @@ export async function appendConversationMessage(
   );
 }
 
-/** 去掉 fork-n- / branch · 前缀, 得到原始对话名. */
+/** Strip fork-n- / branch · prefix to recover the original conversation name. */
 export function baseConversationTitle(title: string): string {
   let t = `${title || ""}`.replace(/\s+/g, " ").trim();
   if (!t) return "Untitled conversation";
@@ -239,8 +239,8 @@ export function baseConversationTitle(title: string): string {
 }
 
 /**
- * 生成 fork Title: fork-n-xxx
- * n 为相对同一原始名已有 fork 的递增序号；xxx 为原对话名.
+ * Build fork title: fork-n-xxx
+ * n is the next increment among existing forks of the same original name; xxx is the original name.
  */
 export function nextForkConversationTitle(
   sourceTitle: string,
@@ -257,13 +257,13 @@ export function nextForkConversationTitle(
     if (Number.isFinite(n) && n > maxN) maxN = n;
   }
   const title = `fork-${maxN + 1}-${base}`;
-  // DB/UI Title不宜过长
+  // DB/UI title should not be too long
   return title.length > 80 ? `${title.slice(0, 79).trim()}...` : title;
 }
 
 /**
- * 从Answer处m叉成"新会话窗口": 
- * 把 root→fork 路径Copy到新 conversation(新 message_id), 原会话不动.
+ * Fork from an answer into a "new conversation window":
+ * copy root→fork path into a new conversation (new message_id); original session unchanged.
  */
 export async function forkConversationFromPath(
   options: {
@@ -296,7 +296,7 @@ export async function forkConversationFromPath(
   );
   const convId = conversation.conversation_id;
 
-  // message_id 全局唯一, 必须重映射
+  // message_id is globally unique; must remap
   const idMap = new Map<string, string>();
   const makeId = (role: string, i: number) =>
     `fork-${role[0] || "m"}-${Date.now().toString(36)}-${i}-${Math.random().toString(36).slice(2, 7)}`;
@@ -310,7 +310,7 @@ export async function forkConversationFromPath(
     const m = path[i];
     const newId = idMap.get(m.id)!;
     const parentRaw = m.parentId ? idMap.get(m.parentId) || "" : "";
-    // 路径上若 parent 未映射(不应发生), 按线性挂上一entries
+    // If parent is unmapped on the path (should not happen), hang linearly on previous item
     const parentId =
       parentRaw
       || (i > 0 ? idMap.get(path[i - 1].id) || "" : "");
@@ -361,7 +361,7 @@ export async function forkConversationFromPath(
   };
 }
 
-/** 服务端消息 → 前端branch树 items. */
+/** Server messages → frontend branch-tree items. */
 export function messagesToBranchItems(messages: MessageRecord[]): Array<{
   parentId: string | null;
   message: {
@@ -400,7 +400,7 @@ export function messagesToBranchItems(messages: MessageRecord[]): Array<{
         role,
         content: m.content || "",
         ...(citations ? { citations } : {}),
-        // assistant-ui: status 仅允许 assistant；user 带 status 会直接 throw
+        // assistant-ui: status allowed only on assistant; user with status throws
         ...(role === "assistant"
           ? { status: { type: "complete", reason: "stop" } }
           : {}),

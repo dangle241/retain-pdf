@@ -40,7 +40,7 @@ export async function loadProtectedPdfFile(
   }
   const response = await fetchResource(normalized);
   if (!response.ok) {
-    const err = new Error(`读取 PDF Failed (${response.status})`) as Error & { status?: number };
+    const err = new Error(`Failed to read PDF (${response.status})`) as Error & { status?: number };
     err.status = response.status;
     throw err;
   }

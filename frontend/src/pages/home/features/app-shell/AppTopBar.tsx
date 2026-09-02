@@ -21,8 +21,8 @@ export function AppTopBar({ activeTab, onTabChange }) {
           <span>RetainPDF</span>
         </a>
         <div className="hero-actions hidden" aria-hidden="true">
-          <button id="developer-btn" type="button" className="secondary hidden" aria-hidden="true">开发者</button>
-          <button id="open-output-btn" type="button" className="secondary hidden">打开输出目录</button>
+          <button id="developer-btn" type="button" className="secondary hidden" aria-hidden="true">Developer</button>
+          <button id="open-output-btn" type="button" className="secondary hidden">Open Output Directory</button>
         </div>
         <div className="library-topbar-spacer" aria-hidden="true" />
         <LibraryTopTabs active={activeTab} onChange={onTabChange} />

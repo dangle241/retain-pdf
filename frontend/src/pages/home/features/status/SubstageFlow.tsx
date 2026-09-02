@@ -20,7 +20,7 @@ export function SubstageFlow({ selectedStageKey, selectedIsCurrent, snapshot, se
   return (
     <div
       className={`status-substage-flow${viewModel.hidden ? " hidden" : ""}`}
-      aria-label="任务子Stage"
+      aria-label="Task substages"
       style={{ ["--status-substage-count"]: `${viewModel.cssCount}` } as CSSProperties}
     >
       {viewModel.items.map((item) => (

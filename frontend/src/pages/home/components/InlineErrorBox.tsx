@@ -1,8 +1,8 @@
-// 行内错误盒(React 版 <inline-error-box>,Side-by-side components/feedback/inline-error-box.js).
+// Inline error box (React version of <inline-error-box>, mirrors legacy components/feedback/inline-error-box.js).
 //
-// Data源:text store 的 "error-box" 槽位(镜像 ui/text.js 的 setText("error-box") 特例).
-// value 为 error-diagnostic 对象时展开"View诊断 + Copy Diagnostics";字符串时纯文books.
-// 保留 <inline-error-box> Tags与 log/error-box/inline-error-box 类(CSS 平权).
+// Data source: the "error-box" slot of the text store (mirrors the setText("error-box") special case from ui/text.js).
+// When value is an error-diagnostic object, expands "View Diagnostics + Copy Diagnostics"; otherwise pure text.
+// Preserve the <inline-error-box> tag and log/error-box/inline-error-box classes (CSS parity).
 
 import { useState } from "react";
 import { messageForErrorBox } from "../../../js/utils/error-diagnostics.js";
@@ -45,7 +45,7 @@ export function InlineErrorBox() {
           <div className="inline-error-summary">{summary}</div>
           <div className="inline-error-actions">
             <details className="inline-error-details">
-              <summary>View诊断</summary>
+              <summary>View Diagnostics</summary>
               <pre>{diagnostic}</pre>
             </details>
             <button type="button" className="inline-error-copy-btn" onClick={handleCopy}>

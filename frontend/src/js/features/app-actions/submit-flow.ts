@@ -8,7 +8,7 @@ import { APP_EVENTS } from "../../contracts/app-contract.js";
 
 export const DEEPSEEK_BALANCE_CHECK_TIMEOUT_MS = 12000;
 
-/** DeepSeek Balance/预算快照(workflow budget 侧). */
+/** DeepSeek balance/budget snapshot (workflow budget side). */
 export interface BudgetStateSnapshot {
   visible?: boolean;
   blocking?: boolean;
@@ -55,7 +55,7 @@ export interface WindowRefLike {
   setTimeout?: (handler: TimerHandler, timeout?: number, ...args: unknown[]) => number;
 }
 
-/** setText 接收 string 或 diagnostic 对象(error-box 侧再格式化). */
+/** setText accepts string or diagnostic object (formatted on error-box side). */
 export type SetTextFn = (id: string, text?: unknown) => void;
 
 export interface NeedsDeepSeekBudgetCheckOptions {
@@ -322,9 +322,9 @@ export function publishSubmitSuccess({
   windowRef = globalThis.window,
   now = () => new Date().toISOString(),
 }: PublishSubmitSuccessOptions = {}) {
-  // CreatedEvents已 insert+hydrate；不再 200/1500/4000 三次 force 整pages刷(叠乘闪烁)
+  // Created event already inserted + hydrated; avoid 200/1500/4000 full-page force reloads (compounding flickers)
   libraryEventPort?.publishJobCreated?.(payload);
-  // 单次延迟 soft 对齐Documents投影(soft reset 保留旧 items；不 force 绕过 workflow suspend)
+  // Single delayed soft alignment with document projection (soft reset keeps old items; unforced does not bypass workflow suspend)
   windowRef?.setTimeout?.(() => {
     libraryEventPort?.requestRefresh?.({ delay: 0, force: false });
   }, 800);

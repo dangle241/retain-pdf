@@ -30,8 +30,8 @@ Based on current `doc/reference/LLM_api/DeepSeek` directory documentation, and o
 
 ## 4. Related docs
 
-- [模型 & 价格](./模型%20%26%20价格.md)
+- [Models & Pricing](./Models%20%26%20Pricing.md)
 - [JSON_output](./JSON_output.md)
 - [Tool Calls](./Tool%20Calls.md)
 - [Error Codes](./éè¯¯ç .md)
-- [Token 用量计算](./Token%20用量计算.md)
+- [Token usage calculation](./Token%20Usage%20Calculation.md)

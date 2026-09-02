@@ -1,15 +1,15 @@
-/* 阅读器 Legacy 附加包 → dist/css/reader-legacy.css
+/* Reader legacy add-on pack → dist/css/reader-legacy.css
  *
- * 仅在 ?engine=legacy|classic 时由 src/pages/reader/entry.tsx 注入。
- * 默认 react-pdf 路径不加载本文件。
+ * Injected by src/pages/reader/entry.tsx only when ?engine=legacy|classic.
+ * Default react-pdf path does not load this file.
  *
- * 假定 dist/css/reader.css 已加载（tokens / base / layout / chrome / content）。
- * 本包只追加：三栏布局、legacy 顶栏动作、抽屉 / 选区 / 旧 AI / 旧批注。
+ * Assumes dist/css/reader.css is already loaded (tokens / base / layout / chrome / content).
+ * This pack only adds: three-column layout, legacy topbar actions, drawer / selection / old AI / old annotations.
  */
 @import "tailwindcss";
 @import "../core/tailwind-theme.css";
 
-/* 内容扫描：legacy 壳 + 命令式 reader 岛 + 旧批注 island */
+/* Content scan: legacy shell + imperative reader island + old annotations island */
 @source "../../pages/reader/legacy/**/*.{js,jsx,ts,tsx}";
 @source "../../js/reader/**/*.{js,ts,tsx}";
 @source "../../js/islands/reader-annotations/**/*.{js,jsx,ts,tsx}";
@@ -17,17 +17,17 @@
 
 @layer pages;
 
-/* 三栏 / pdf.js 宿主 / 底栏 HUD / 窄屏三栏退化 */
+/* Three-column / pdf.js host / bottom HUD / narrow three-column collapse */
 @import "../reader/layout-legacy.css" layer(pages);
-/* 顶栏动作组 / 下载菜单 / chrome-muted */
+/* Topbar action group / download menu / chrome-muted */
 @import "../reader/chrome-legacy.css" layer(pages);
 
-/* 旧批注抽屉（@utility → 需 tailwind 扫描 island class） */
+/* Old annotations drawer (@utility → Tailwind must scan island classes) */
 @import "../reader/annotations.css";
 
-/* 右侧工具抽屉 chrome */
+/* Right tool-drawer chrome */
 @import "../reader/side-drawer.css" layer(pages);
-/* 摘录 / 框选 / 抽屉 AI / Markdown 抽屉 / 区域 popover */
+/* Clippings / region select / drawer AI / Markdown drawer / region popover */
 @import "../reader/favorites.css" layer(pages);
 @import "../reader/selection.css" layer(pages);
 @import "../reader/ai.css" layer(pages);

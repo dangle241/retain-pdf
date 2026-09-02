@@ -190,15 +190,17 @@
 }
 
 /*
-  危险区修复(Tailwind v4 迁移):`.status-head-btn` 在整个代码库里只和
-  `.status-action-btn` 成对出现(StatusCard.jsx 的取消/详情按钮),
-  min-height/font-size 两边都定义、值不一样——v3 里靠同文件源码序(
-  status-action-btn 写在后面)tie-break,status-action-btn 的 32px/12px 胜出,
-  status-head-btn 这份 28px/11px 一直是死代码。v4 下顺序不再保证跟随源码序
-  (与前面几处 library-grid/library-brand-link 同一模式),实测迁移后
-  status-head-btn 反而胜出,按钮变矮变小。这里去掉冲突的 min-height/
-  font-size,尺寸完全交给 status-action-btn 一处定义;padding-inline 没有
-  与 status-action-btn 的 padding 冲突过(未观测到差异),保留。
+  Danger-zone fix (Tailwind v4 migration): across the codebase `.status-head-btn`
+  only ever appears paired with `.status-action-btn` (the cancel/detail buttons
+  in StatusCard.jsx), and both sides define min-height/font-size with different
+  values — in v3 ties were broken by same-file source order (status-action-btn
+  is written later) so status-action-btn's 32px/12px won, and status-head-btn's
+  28px/11px has always been dead code. In v4 order no longer tracks source
+  order (same pattern as the library-grid / library-brand-link fixes earlier),
+  and after migration status-head-btn actually wins, making the buttons shorter
+  and smaller. The conflicting min-height / font-size are removed; sizing is
+  entirely delegated to status-action-btn; padding-inline has no observed
+  conflict with status-action-btn's padding, so it's kept.
 */
 @utility status-head-btn {
   padding-inline: var(--status-head-btn-padding, 10px);
@@ -294,7 +296,7 @@
   }
 
   &.is-active {
-    /* text-white 会在 night（ink 为浅色）下糊掉，语义应为 paper */
+    /* text-white would smear under night theme (where ink is light) — the semantic intent is paper */
     @apply bg-[var(--ink)] text-[var(--paper)];
     box-shadow: 0 10px 24px color-mix(in srgb, var(--ink) 14%, transparent);
   }
@@ -314,9 +316,11 @@
   }
 }
 
-/* 阶段态 class（is-done / is-active / is-selected / is-disabled）
- * 只挂在父 @utility 的 &.is-* 嵌套上，禁止再注册短名全局 @utility is-*，
- * 避免与其它模块抢 .is-active 等全局类。substage 见下方 status-substage-step。 */
+/* Stage-state classes (is-done / is-active / is-selected / is-disabled)
+ * Only attached as &.is-* nests inside the parent @utility; do not register
+ * short-named global @utility is-* again, to avoid competing with other
+ * modules' global .is-active etc. Substage: see status-substage-step below.
+ */
 
 @utility status-stage-error-summary {
   grid-area: error;

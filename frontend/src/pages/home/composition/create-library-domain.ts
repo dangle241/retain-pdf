@@ -57,9 +57,9 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
     apiPrefix: API_PREFIX,
   });
 
-  // 下层 port 工厂 `= {}` 默认参会丢掉None默认字段(openJob / closeDialog 等).
+  // The lower-layer port factory's `= {}` default parameter drops fields without defaults (openJob / closeDialog etc.).
   const recentJobsJobRuntimePort = createRecentJobsRuntimePort({
-    // Grid点任务: 仅 silent 轮询(Progress在详情 Tab)；不抬主工作流
+    // Grid click on task: only silent polling (progress shown in Detail tab); do not raise the main workflow
     openJob: (jobId: string) => (
       features.jobRuntimeFeature.startPolling(jobId, {
         silent: true,
@@ -67,7 +67,7 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
         publishLibrary: false,
       })
     ),
-    // 冷Startresume活跃任务: silent, 不抬主Status区, 不刷库 create Events
+    // Cold-start resume of an active task: silent, do not raise the main Status area, do not fire library create events
     recoverJob: (jobId: string) => (
       features.jobRuntimeFeature.startPolling(jobId, { silent: true })
     ),
@@ -78,7 +78,7 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
     openReader: (jobId: string, anchor: ReaderAnchor = null) => {
       const normalizedJobId = `${jobId || ""}`.trim();
       if (!normalizedJobId) return;
-      // Reader不required抬主工作流区 / 刷库 create；silent 盯 job 即可
+      // Reader does not need to raise the main workflow area / library create; silent watch on the job is enough
       features.jobRuntimeFeature.startPolling(normalizedJobId, { silent: true });
       documentRef.dispatchEvent(new globalThis.CustomEvent(APP_EVENTS.openReaderRequested, {
         detail: {
@@ -98,7 +98,7 @@ export function createLibraryDomain({ features, documentRef, statusArea }: Creat
     doc: documentRef,
   });
 
-  // startPolling/openReader/closeRecentJobsDialog 可由 navigationPort 兜底；签名仍标必填.
+  // startPolling/openReader/closeRecentJobsDialog can be backed by navigationPort; the signature still marks them as required.
   const recentJobActions = createRecentJobActions({
     apiPrefix: API_PREFIX,
     deleteLibraryBook,

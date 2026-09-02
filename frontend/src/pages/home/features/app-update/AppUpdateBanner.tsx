@@ -63,9 +63,9 @@ export function AppUpdateBanner() {
 
   const hasUpdate = Boolean(state.hasUpdate);
   const panel = state.panel;
-  const notesText = formatReleaseNotes(panel.body) || "No Updates说明.";
+  const notesText = formatReleaseNotes(panel.body) || "No update notes available.";
   const versionText = panel.latestVersion
-    ? `Current ${panel.currentVersion} · 最新 ${panel.latestVersion}`
+    ? `Current ${panel.currentVersion} · Latest ${panel.latestVersion}`
     : `Current ${panel.currentVersion}`;
   const statusText = `${state.statusText || ""}`;
 
@@ -74,12 +74,12 @@ export function AppUpdateBanner() {
       <Button
         id={APP_UPDATE_IDS.button}
         className={`app-settings-action app-update-btn${hasUpdate ? " has-update" : ""}`}
-        aria-label="检查Updates"
+        aria-label="Check for Updates"
         title={state.buttonTitle}
         data-update-state={state.buttonState}
         onClick={() => setDialogOpen(true)}
       >
-        检查Updates
+        Check for Updates
         <span className="app-update-dot" aria-hidden="true"></span>
       </Button>
       <DialogPrimitive.Root open={dialogOpen} onOpenChange={handleOpenChange}>
@@ -112,7 +112,7 @@ export function AppUpdateBanner() {
                   className="home-action-btn secondary"
                   onClick={() => handlersRef.current?.onCheck?.()}
                 >
-                  重新检查
+                  Recheck
                 </Button>
                 <a
                   className={`app-update-link${panel.htmlUrl ? "" : " hidden"}`}
@@ -120,7 +120,7 @@ export function AppUpdateBanner() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  打开 Release
+                  Open Release
                 </a>
               </div>
             </div>

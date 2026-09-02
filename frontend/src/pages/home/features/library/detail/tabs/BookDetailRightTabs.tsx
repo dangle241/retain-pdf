@@ -1,5 +1,5 @@
-// 详情右栏 Tab 切换壳: 图标 + 短文案；选中黑底白字.
-// 样式见 library-shell.css(.book-detail-right-tab.is-active).
+// Book detail right panel tab switcher shell: icon + short label; active state is black background with white text.
+// Styles see library-shell.css (.book-detail-right-tab.is-active).
 
 import { useEffect, useState } from "react";
 import { Tabs as TabsPrimitive } from "radix-ui";
@@ -35,9 +35,9 @@ function IconMore(props) {
   );
 }
 
-// shortLabel 用于按钮Display, 避免挤占Close钮；title 完整名称给悬停/None障碍
+// shortLabel is used for button display to avoid crowding the close button; title gives the full name for hover / accessibility
 export const BOOK_DETAIL_TABS = Object.freeze([
-  { id: "overview", label: "Overview", title: "书籍Overview", Icon: IconBook },
+  { id: "overview", label: "Overview", title: "Book overview", Icon: IconBook },
   { id: "translate", label: "Translation", title: "Translation", Icon: IconTranslate },
   { id: "more", label: "More", title: "Other Actions", Icon: IconMore },
 ]);
@@ -109,7 +109,7 @@ export function BookDetailRightTabs({
         })}
       </TabsPrimitive.List>
 
-      {/* forceMount: 面板始终在 DOM(用 CSS 隐藏), 便于测试Locate + 保留表单Status */}
+      {/* forceMount: panel always stays in DOM (hidden via CSS), convenient for test locating + preserving form state */}
       <TabsPrimitive.Content
         value="overview"
         forceMount

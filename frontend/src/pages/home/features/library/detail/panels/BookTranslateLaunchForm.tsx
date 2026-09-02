@@ -1,5 +1,5 @@
-// 详情"Translation"Tab: 发起 / Translate Again表单.
-// 从原 TranslateWorkspacePanel 抽出；书已在馆, None需 WorkflowPanel Upload瓦片.
+// Book detail "Translation" tab: launch / Translate Again form.
+// Extracted from the original TranslateWorkspacePanel; book is already in the library, no WorkflowPanel upload tile needed.
 
 import { btn, IconLanguages } from "./ui.jsx";
 
@@ -60,7 +60,7 @@ export function BookTranslateLaunchForm({
               checked={rangeOn}
               onChange={(e) => onRangeOnChange(e.target.checked)}
             />
-            指定pages码Scope(不勾选 = 整booksTranslation)
+            Specify page scope (unchecked = translate entire book)
           </label>
           {rangeOn ? (
             <div className="flex items-center gap-2">
@@ -99,17 +99,17 @@ export function BookTranslateLaunchForm({
               : rangeOn
                 ? "Translate selected pages"
                 : statusTone === "failed"
-                  ? "Translate Again整books"
-                  : "Translation整books"}
+                  ? "Translate entire book again"
+                  : "Translate entire book"}
           </button>
         </div>
       ) : readerAvailable ? (
         <p className="text-xs text-muted-foreground">
-          TranslatedDone.上方为books书Job Progress；左侧可"Side-by-side Reader".
+          Translation complete. The job progress is shown above; open the side-by-side reader on the left.
         </p>
       ) : isActive ? (
         <p className="text-xs text-muted-foreground">
-          TranslationIn progress, Progress在books Tab 内自动刷新.Done后可在左侧Side-by-side Reader.
+          Translation in progress; progress auto-refreshes in this tab. Once done, you can open the side-by-side reader on the left.
         </p>
       ) : null}
     </div>

@@ -57,8 +57,8 @@ export async function fetchDocumentList(
   return unwrapEnvelope<MockDocumentListResult>(await resp.json());
 }
 
-// 按任意 job_id(含History run)直查其所属Documents,后端负责parse——前端不再扫List反查.
-// 返回该Documents记录或 null(job 不属于任何Documents时).
+// Look up owning document by any job_id (including history runs); backend parses — frontend no longer scans the list.
+// Returns that document record or null (job belongs to no document).
 export async function fetchDocumentByJobId(
   apiPrefix: string,
   jobId: string,
@@ -108,7 +108,7 @@ export async function fetchDocument(
   return unwrapEnvelope<DocumentRecord>(await resp.json());
 }
 
-// body 支持 { title?, reading_status?, tags? };tags yes整体替换语义(传 [] 即清空)
+// Body supports { title?, reading_status?, tags? }; tags is replace-all (pass [] to clear)
 export async function patchDocument(
   apiPrefix: string,
   documentId: string,
@@ -136,8 +136,8 @@ export async function patchDocument(
   return unwrapEnvelope<DocumentRecord>(await resp.json());
 }
 
-// Documents级Delete:删掉 document + 名下所有 job/upload/Files(后端 DELETE /documents/:id).
-// 被Favorite引用时后端返回 409(force 可覆盖运行中的 job,不覆盖Favorite保护).
+// Document-level delete: removes document + all jobs/uploads/files under it (backend DELETE /documents/:id).
+// 409 when referenced by a favorite (force can override running jobs, not favorite protection).
 export async function deleteDocument(apiPrefix, documentId, { force = false } = {}) {
   const normalized = `${documentId || ""}`.trim();
   if (!normalized) {
@@ -160,9 +160,9 @@ export async function deleteDocument(apiPrefix, documentId, { force = false } = 
   return unwrapEnvelope(await resp.json());
 }
 
-// 对LibraryDocuments发起"以后再翻":复用Documents已存的 upload 起 book Translation job.
-// 后端 translate_document 会注入该Documents的 upload_id 并把 workflow 归一到 book/translate,
-// 前端只需带一个最小 CreateJobInput(workflow 缺省即 book).返回 JobSubmissionView.
+// "Translate later" for a library document: reuse stored upload to start a book translation job.
+// Backend translate_document injects that document's upload_id and normalizes workflow to book/translate;
+// frontend only sends a minimal CreateJobInput (workflow defaults to book). Returns JobSubmissionView.
 export async function translateDocument(
   apiPrefix: string,
   documentId: string,

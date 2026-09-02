@@ -62,7 +62,7 @@ export function ProgressBlock({ renderOptions }: ProgressBlockProps) {
           <span id={ids.progressPercent} className="status-progress-percent">{footPercentText}</span>
         </div>
       </div>
-      <div className="status-progress-ring-wrap" aria-label="Job Progress百m比">
+      <div className="status-progress-ring-wrap" aria-label="Job Progress Percentage">
         <div
           id={ids.progressRing}
           className={`status-progress-ring${indeterminate ? " is-indeterminate" : ""}`}

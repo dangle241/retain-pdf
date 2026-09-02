@@ -44,7 +44,7 @@ export function StageHistoryList({ job, finishedAtFallback = "" }) {
   const ids = STATUS_DETAIL_DIALOG_IDS.stageHistory;
   return (
     <>
-      <div id={ids.empty} className={hasItems ? "events-empty hidden" : "events-empty"}>No Stage记录</div>
+      <div id={ids.empty} className={hasItems ? "events-empty hidden" : "events-empty"}>No stage records</div>
       <div id={ids.list} className={hasItems ? "stage-history-list" : "stage-history-list hidden"}>
         {history.map((entry, index) => (
           <StageHistoryItem

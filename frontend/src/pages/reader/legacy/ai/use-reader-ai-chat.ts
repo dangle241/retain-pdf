@@ -1,11 +1,12 @@
-// AI Q&A编排 hook:旧 src/js/reader/ai/chat.js(608 行 DOM 控制器)的 React 化重写.
-// 编排语义原样照搬——提交Workflow(Progress态→流式增量→finalize 富Rendering), 502 books地回退, 
-// 多轮上下文截断(12 entries), 多会话持久化(chat-history-store), 会话栏刷新规则.
-// 气泡骨架由 React Rendering(见 ReaderAiChat.jsx),正文内容经 answer-view 的
-// message view 句柄命令式写入;appendMessage 用 flushSync 确保句柄立即Ready.
+// AI Q&A orchestration hook: React rewrite of the legacy src/js/reader/ai/chat.js (608-line DOM controller).
+// Orchestration semantics copied verbatim — submit workflow (progress state → streaming deltas → finalize rich render),
+// 502 local fallback, multi-turn context truncation (12 entries), multi-conversation persistence (chat-history-store),
+// session bar refresh rules.
+// Bubble skeletons are rendered by React (see ReaderAiChat.jsx); the body content is written imperatively via the
+// message view handle in answer-view; appendMessage uses flushSync to ensure the handle is ready immediately.
 //
-// ports 为 null 时(boot 尚未就绪)composer 呈"Preparing..."静默态;ports 到位后
-// 自动 restore(resume上次会话)→ prepare(连接后端/加载 Markdown).
+// When ports are null (boot not yet ready), the composer shows the "Preparing..." silent state; once ports are available,
+// it auto-restores (resumes last session) → prepare (connects backend / loads Markdown).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
@@ -22,7 +23,7 @@ import {
   streamMessageText,
 } from "./answer-view.js";
 
-// 仅在 AI service not running(反代 502)时回退到books地 Markdown Search
+// Only fall back to local Markdown search when the AI service is not running (proxy 502)
 function shouldFallbackToLocal(error) {
   return error?.status === 502 || /\b502\b/.test(`${error?.message || ""}`);
 }
@@ -49,7 +50,7 @@ export function useReaderAiChat(ports) {
   const threadRef = useRef(null);
   const inputRef = useRef("");
   inputRef.current = input;
-  // 多轮上下文与可持久化快照(与旧 chat.js 的 history/turns 同义)
+  // Multi-turn context and persistable snapshot (synonymous with history/turns in legacy chat.js)
   const historyRef = useRef([]);
   const turnsRef = useRef([]);
 
@@ -74,7 +75,7 @@ export function useReaderAiChat(ports) {
     }
   }, []);
 
-  // 追加一entries气泡并sync提交 DOM(flushSync),返回带 view 句柄的entries目
+  // Append a bubble entry and synchronously commit to the DOM (flushSync), returns the entry with its view handle
   const appendMessage = useCallback(({ role = "assistant", title = "" }: { role?: string; title?: string } = {}) => {
     messageSeq += 1;
     const entry = {
@@ -90,7 +91,7 @@ export function useReaderAiChat(ports) {
     return entry;
   }, [scrollThread]);
 
-  // 清空内存态与线程(不动 storage),供resume/切换/新建复用
+  // Clear in-memory state and thread (does not touch storage), reused by restore/switch/new
   const resetThread = useCallback(() => {
     turnsRef.current.length = 0;
     historyRef.current.length = 0;
@@ -99,7 +100,7 @@ export function useReaderAiChat(ports) {
     });
   }, []);
 
-  // 刷New conversation切换栏:下拉选items, Current会话, 按会话数显隐Delete按钮
+  // Refresh New-conversation switch bar: dropdown items, current session, show/hide Delete button by session count
   const refreshSessionBar = useCallback(() => {
     setSessionBar({
       sessions: historyStore?.listSessions?.() || [],
@@ -112,7 +113,7 @@ export function useReaderAiChat(ports) {
     refreshSessionBar();
   }, [historyStore, refreshSessionBar]);
 
-  // 把一份持久化快照Rendering进线程:重Rendering气泡 + 回填多轮上下文
+  // Render a persisted snapshot into the thread: re-render bubbles + refill multi-turn context
   const renderStored = useCallback(async (stored = { messages: [], history: [] }) => {
     resetThread();
     if (Array.isArray(stored.history)) {
@@ -136,7 +137,7 @@ export function useReaderAiChat(ports) {
     return turnsRef.current.length > 0;
   }, [appendMessage, jumpToCitation, resetThread, scrollThread]);
 
-  // resume上次会话(Reader重开时)
+  // Resume last session (when Reader is reopened)
   const restore = useCallback(async () => {
     const restored = await renderStored(historyStore?.load?.() || { messages: [], history: [] });
     refreshSessionBar();
@@ -222,7 +223,7 @@ export function useReaderAiChat(ports) {
         history: historyRef.current,
         jobId,
         onToolEvent: (event) => showProgress(describeToolEvent(event)),
-        // 流式增量:首个 token 到达即清Progress态,逐step把累积文books按 Markdown Rendering(节流)
+        // Streaming delta: clear progress state on first token arrival, render accumulated text by Markdown step-by-step (throttled)
         onAnswerDelta: (fullText) => {
           streamed = true;
           setMessageProgress(assistantView, false);
@@ -237,11 +238,11 @@ export function useReaderAiChat(ports) {
       const answerText = fallback
         ? `${result.answer}\n\n_在线服务暂不Ready, 以上来自books地DocumentsSearch._${reason ? `(${reason})` : ""}`
         : result.answer;
-      // 未走流式(books地Search/非流式后端)且None引用时保留字符动画;no则直接 finalize
+      // No streaming (local search / non-streaming backend) and no citations: keep the typewriter animation; otherwise finalize directly
       if (!streamed && !hasAgenticCitations(result.citations) && !fallback) {
         await streamMessageText(assistantView, answerText, []);
       }
-      // 最终:Markdown Rendering + [n] 引用按钮 + 脚注(替换流式期间的纯文books)
+      // Final: Markdown render + [n] citation buttons + footnotes (replace plain text from the streaming phase)
       await renderRichAnswer(assistantView, answerText, result.citations, { jumpToCitation });
       scrollThread();
       remember("assistant", result.answer || answerText);
@@ -254,13 +255,13 @@ export function useReaderAiChat(ports) {
       setMessageProgress(assistantView, false);
       renderMessageText(assistantView, error?.message || "Failed to generate an answer. Please retry.", []);
       setComposerState("ready", "Failed, 可修改Question后Retry");
-      // Failed的Assistant气泡不入 turns/持久化,用户Question已入 turns——补存以保留提问
+      // Failed Assistant bubble does not go into turns/persistence, but the user question already did — persist to keep the question
       persist();
       return null;
     }
   }, [aiContext, answerWithFallback, appendMessage, jobId, jumpToCitation, persist, primaryAnswerer, remember, remoteAnswerer, scrollThread, setComposerState]);
 
-  // 新建对话:先存Current,再开一entries空会话并Rendering空线程
+  // New conversation: save current, open an empty session, render empty thread
   const newConversation = useCallback(async () => {
     persist();
     historyStore?.newSession?.();
@@ -268,7 +269,7 @@ export function useReaderAiChat(ports) {
     refreshSessionBar();
   }, [historyStore, persist, refreshSessionBar, renderStored]);
 
-  // 切换到指定History会话:先存Current,再载入目标会话重Rendering
+  // Switch to the specified history session: save current, then load the target session and re-render
   const switchConversation = useCallback(async (id) => {
     persist();
     const stored = historyStore?.switchSession?.(id) || { messages: [], history: [] };
@@ -276,16 +277,16 @@ export function useReaderAiChat(ports) {
     refreshSessionBar();
   }, [historyStore, persist, refreshSessionBar, renderStored]);
 
-  // Delete指定(默认Current)会话,自动切到最近的一entries或补一entries空会话
+  // Delete the specified (default current) session; auto-switch to the most recent session or fill in an empty one
   const deleteConversation = useCallback(async (id?: string) => {
     const stored = historyStore?.deleteSession?.(id) || { messages: [], history: [] };
     await renderStored(stored);
     refreshSessionBar();
   }, [historyStore, refreshSessionBar, renderStored]);
 
-  // ports 就绪后:先resumeHistory(重开Reader可见上次对话),再连接后端.
-  // 经 setTimeout(0) 跳出 React 提交期——restore 里的 flushSync 不允许在
-  // lifecycle 内调用(React 会告警且Cannotsync冲刷).
+  // Once ports are ready: first restore history (reopening Reader shows the last conversation), then connect backend.
+  // Bounce out of React's commit phase via setTimeout(0) — the flushSync inside restore is not allowed
+  // to be called within a lifecycle (React would warn and the synchronous flush cannot proceed).
   const bootedRef = useRef(false);
   useEffect(() => {
     if (!ports || bootedRef.current) {
@@ -293,8 +294,8 @@ export function useReaderAiChat(ports) {
     }
     bootedRef.current = true;
     const timer = setTimeout(() => {
-      // 若延迟期间用户已开始对话(实际只有自动化驱动能到这个时序),
-      // 跳过resume——restore 的 resetThread 会清掉刚产生的气泡.
+      // If the user starts a conversation during the delay (only automation can hit this timing),
+      // skip restore — restore's resetThread would wipe newly produced bubbles.
       const boot = turnsRef.current.length ? Promise.resolve(false) : restore();
       void boot.finally(() => {
         void prepare();

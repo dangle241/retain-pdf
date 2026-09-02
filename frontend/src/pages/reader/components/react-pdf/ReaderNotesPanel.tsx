@@ -1,4 +1,4 @@
-// annotations悬浮窗: List / Note / Delete / 导出 / Locate
+// Annotations floating panel: list / note / delete / export / locate
 
 import { useEffect, useState } from "react";
 import { StickyNote } from "lucide-react";
@@ -82,7 +82,7 @@ function NoteItem({
           type="button"
           className="reader-notes-note"
           onClick={() => setEditing(true)}
-          title="点击Edit"
+          title="Click to edit"
         >
           {note.note}
         </button>
@@ -111,11 +111,11 @@ export function ReaderNotesPanel({
     <ReaderFloatShell
       id="reader-notes-panel"
       open={open}
-      title="annotations"
-      subtitle="选中 PDF 文字后可添加 · books地Save"
+      title="Annotations"
+      subtitle="Select PDF text to add · saved locally"
       titleIcon={<StickyNote size={14} strokeWidth={2.25} aria-hidden />}
       storageKey="retainpdf.reader.notes-float.pos.v1"
-      ariaLabel="annotations"
+      ariaLabel="Annotations"
       onClose={onClose}
       toolbar={(
         <>
@@ -139,7 +139,7 @@ export function ReaderNotesPanel({
     >
       {count === 0 ? (
         <p className="reader-notes-empty">
-          No annotations.在 PDF 上拖选文字, 点"添加annotations".
+          No annotations. Drag to select text on the PDF, then click "Add annotation".
         </p>
       ) : (
         groups.map((group) => (

@@ -1,5 +1,5 @@
-// 可拖动悬浮Tools钮(FAB): 点击展开菜单, 拖动改位置.
-// 菜单: annotations + 下载(原始 / Translation / Side-by-side).
+// Draggable floating action button (FAB): tap to expand menu, drag to reposition.
+// Menu: annotations + download (Source / Translation / Side-by-side).
 
 import {
   useCallback,
@@ -64,7 +64,7 @@ const DOWNLOAD_SHORT: Record<DownloadAction, string> = {
 type FabPos = { x: number; y: number };
 
 export type ReaderFabProps = {
-  /** Current打开的Tools id；null 表示都关 */
+  /** Currently open tool id; null means all closed */
   activeTool: ReaderToolId | null;
   notesCount: number;
   sourceOnly: boolean;
@@ -281,17 +281,17 @@ export function ReaderFab({
           id={menuId}
           className="reader-fab-menu"
           role="menu"
-          aria-label="阅读Tools"
+          aria-label="Reader tools"
         >
           <header className="reader-fab-menu-head">
             <div className="reader-fab-menu-head-text">
               <strong>Tools</strong>
-              <span>拖动圆钮可移动</span>
+              <span>Drag the round button to move</span>
             </div>
             <button
               type="button"
               className="reader-fab-menu-close"
-              aria-label="Close菜单"
+              aria-label="Close menu"
               onClick={() => setOpen(false)}
             >
               <X size={14} strokeWidth={2.5} aria-hidden />
@@ -304,10 +304,10 @@ export function ReaderFab({
             const disabled = tool.needsJob && sourceOnly;
             let sub = isActive ? tool.subOpen : tool.subIdle;
             if (tool.id === "notes" && !isActive && notesCount > 0) {
-              sub = `${notesCount} entriesannotations`;
+              sub = `${notesCount} annotation${notesCount > 1 ? "s" : ""}`;
             }
             if (disabled) {
-              sub = "需打开任务阅读";
+              sub = "Open a job to use this tool";
             }
             return (
               <button
@@ -334,7 +334,7 @@ export function ReaderFab({
             );
           })}
 
-          <div className="reader-fab-section" role="group" aria-label="下载">
+          <div className="reader-fab-section" role="group" aria-label="Download">
             <div className="reader-fab-section-head">
               <Download size={12} strokeWidth={2.5} aria-hidden />
               <span>Download PDF</span>
@@ -355,7 +355,7 @@ export function ReaderFab({
                     id={`reader-fab-download-${action}`}
                     className={`reader-fab-chip${busy ? " is-busy" : ""}${enabled ? "" : " is-disabled"}`}
                     disabled={!enabled}
-                    title={enabled ? `下载${meta.label}` : reason}
+                    title={enabled ? `Download ${meta.label}` : reason}
                     onClick={() => void handleDownload(action)}
                     style={{ ["--fab-i" as string]: index }}
                   >
@@ -371,7 +371,7 @@ export function ReaderFab({
               })}
             </div>
             {downloadItems.every((a) => !trimReaderDownloadString(urls[a])) ? (
-              <p className="reader-fab-empty">产物尚未就绪</p>
+              <p className="reader-fab-empty">Artifacts not ready yet</p>
             ) : null}
           </div>
         </div>
@@ -380,7 +380,7 @@ export function ReaderFab({
       <button
         type="button"
         className={`reader-fab-trigger${open ? " is-open" : ""}${activeTool ? " has-notes" : ""}`}
-        aria-label={open ? "收起Tools菜单" : "打开Tools菜单"}
+        aria-label={open ? "Collapse tools menu" : "Open tools menu"}
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         aria-haspopup="menu"

@@ -96,19 +96,19 @@ export async function mountPdfViewer({
   try {
     pdfDocument = await loadPdfDocument({ itemOrUrl, fetchProtected });
   } catch (error) {
-    // loadPdfDocument 内部对 pdfjsLib.getDocument(...).promise 没有兜底——
-    // 404/CORS/损坏的 PDF 会在这里 reject,原来直接向上抛,最终被
-    // mountReaderPdfPair 的 Promise.allSettled 吞掉,控制台不留任何痕迹,
-    // 用户只会看到"这块 PDF 不Display"却None从判断yes哪一种原因.这里补上日志,
-    // 不改变外部可见行为(仍然落到下面的空Status展示).
+    // loadPdfDocument has no catch for pdfjsLib.getDocument(...).promise —
+    // 404/CORS/corrupted PDFs reject here; previously thrown directly, swallowed by
+    // mountReaderPdfPair's Promise.allSettled leaving no console trace,
+    // user only sees "PDF not displaying" with no way to distinguish the cause. Added logging here,
+    // does not change external behavior (still falls through to empty status display).
     console.error(`[reader] ${label || key} failed to load`, error);
     showReaderPaneEmpty(key, emptyId);
     return null;
   }
   if (!pdfDocument) {
-    // loadPdfDocument 在"没有Ready URL"时静默返回 null(没有 URL 可parse,
-    // 或 itemOrUrl books身yes空字符串)——同样补一entries日志,方便区m"没有 URL"
-    // 和上面 catch 到的"有 URL 但failed to load"这两种不同原因.
+    // loadPdfDocument silently returns null when no ready URL (no URL to parse,
+    // or itemOrUrl is empty string) — also added a log to distinguish "no URL"
+    // from "has URL but failed to load" caught above.
     console.warn(`[reader] ${label || key} has no ready resource URL; skipping mount`, { itemOrUrl });
     showReaderPaneEmpty(key, emptyId);
     return null;

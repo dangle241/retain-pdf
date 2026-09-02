@@ -1,4 +1,4 @@
-// Excerpt悬浮窗: CurrentDocuments的服务端FavoriteList(对齐 legacy 云端区)
+// Excerpt floating panel: current document's server-side favorites list (legacy cloud section)
 
 import { useCallback, useEffect, useState } from "react";
 import { Bookmark } from "lucide-react";
@@ -42,7 +42,7 @@ export function ReaderFavoritesPanel({
   const reload = useCallback(async () => {
     if (!jobId && !documentId) {
       setItems([]);
-      setError("Current没有可关联的Documents");
+      setError("No associated document currently available");
       return;
     }
     setLoading(true);
@@ -60,7 +60,7 @@ export function ReaderFavoritesPanel({
       }
       setItems(list);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "读取ExcerptFailed");
+      setError(err instanceof Error ? err.message : "Failed to load excerpts");
       setItems([]);
     } finally {
       setLoading(false);
@@ -76,11 +76,11 @@ export function ReaderFavoritesPanel({
     <ReaderFloatShell
       id="reader-favorites-panel"
       open={open}
-      title="Excerpt"
-      subtitle="books书Cloud favorites · books地Save"
+      title="Excerpts"
+      subtitle="Cloud favorites · Local save"
       titleIcon={<Bookmark size={14} strokeWidth={2.25} aria-hidden />}
       storageKey="retainpdf.reader.favorites-float.pos.v1"
-      ariaLabel="Excerpt"
+      ariaLabel="Excerpts"
       onClose={onClose}
       toolbar={(
         <>
@@ -93,7 +93,7 @@ export function ReaderFavoritesPanel({
             disabled={loading}
             onClick={() => void reload()}
           >
-            刷新
+            Refresh
           </button>
         </>
       )}
@@ -101,10 +101,10 @@ export function ReaderFavoritesPanel({
       {error ? (
         <p className="reader-notes-empty" role="alert">{error}</p>
       ) : loading ? (
-        <p className="reader-notes-empty">正在加载Excerpt...</p>
+        <p className="reader-notes-empty">Loading excerpts...</p>
       ) : items.length === 0 ? (
         <p className="reader-notes-empty">
-          No Excerpt.在阅读时选中文字添加annotations, 或从主pagesFavorite跳转过来.
+          No excerpts. Select text while reading to add annotations, or jump here from the main page favorites.
         </p>
       ) : (
         items.map((item) => (

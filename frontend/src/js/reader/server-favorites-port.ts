@@ -9,9 +9,9 @@ import type {
   ServerFavoriteRaw,
 } from "./types.js";
 
-// 服务端Favorite → ReaderView记录:snake_case 转 camelCase,
-// page_idx 与 jumpToReaderAnchor 的 pageIdx 同为 0 基.
-// 缺 favorite_id 或 quote_text 的脏Data直接丢弃(返回 null).
+// Server favorite → Reader view record: snake_case to camelCase,
+// page_idx is 0-based, matching jumpToReaderAnchor pageIdx.
+// Drop dirty data lacking favorite_id or quote_text (return null).
 export function normalizeServerFavorite(raw: ServerFavoriteRaw = {}): ServerFavorite | null {
   const favoriteId = `${raw?.favorite_id || ""}`.trim();
   const quoteText = `${raw?.quote_text || ""}`.trim();
@@ -33,7 +33,7 @@ export function normalizeServerFavorite(raw: ServerFavoriteRaw = {}): ServerFavo
   };
 }
 
-// books地记录sync成功后带 serverFavoriteId;云端区不重复展示这些Favorite.
+// Local records carry serverFavoriteId after sync; avoid re-displaying them in cloud section.
 export function dedupeServerFavorites(
   serverFavorites: ServerFavorite[] = [],
   localItems: FavoriteItem[] = [],
@@ -47,9 +47,9 @@ export function dedupeServerFavorites(
     .filter((favorite) => favorite?.favoriteId && !syncedIds.has(favorite.favoriteId));
 }
 
-// 把ReaderFavoritesync到后端 favorites.
-// document_id 经后端 GET /documents?job_id= 直查(含History run),前端不再扫List反查.
-// 所有服务端调用尽力而为:Failed仅记录日志,Readerbooks地Tools不受影响.
+// Sync Reader favorite to backend favorites.
+// document_id resolved via backend GET /documents?job_id= (includes history runs); frontend no longer scans list.
+// All server calls best-effort: failures only logged, local Reader tools unaffected.
 export function createReaderServerFavoritesPort({
   jobId = "",
   apiPrefix = API_PREFIX,
@@ -81,7 +81,7 @@ export function createReaderServerFavoritesPort({
       return null;
     }
     try {
-      // 写路径只给 job_id,后端parse所属Documents(History run 也能Favorite)
+      // Write path only sends job_id; backend resolves owning document (history runs favoritable too)
       const favorite = await submitFavorite(apiPrefix, {
         job_id: jobId,
         page_idx: Number(quote.pageIdx) || 0,
@@ -90,16 +90,16 @@ export function createReaderServerFavoritesPort({
         translated_quote_text: `${quote.translatedQuoteText || ""}`,
         kind: "sentence",
       });
-      console.info("Favorite已sync到服务端", favorite?.favorite_id || "");
+      console.info("Favorite synced to server", favorite?.favorite_id || "");
       return favorite;
     } catch (error) {
-      console.error("syncFavorite到服务端Failed", error);
+      console.error("syncFavorite to server failed", error);
       return null;
     }
   }
 
-  // 拉取CurrentDocuments的服务端Favorite并归一化;离线/parse不到Documents时静默返回空.
-  // mock 模式不短路:api 层自带 mock branch,基线与 e2e 依赖 mock 全WorkflowReady.
+  // Pull current document's server favorites and normalize; silently return empty on offline/unresolvable document.
+// mock mode not short-circuited: API layer provides mock branch, baseline/e2e rely on full mock workflow.
   async function loadServerFavorites(): Promise<ServerFavorite[]> {
     const documentId = await resolveDocumentId();
     if (!documentId) {
@@ -116,7 +116,7 @@ export function createReaderServerFavoritesPort({
     }
   }
 
-  // Delete服务端Favorite,成功返回 true;Failed仅记录日志返回 false(不阻塞books地Workflow).
+  // Delete server favorite, returns true on success; failures only logged and return false (does not block local workflow).
   async function removeServerFavorite(favoriteId: string) {
     const normalized = `${favoriteId || ""}`.trim();
     if (!normalized) {
@@ -131,8 +131,8 @@ export function createReaderServerFavoritesPort({
     }
   }
 
-  // 规范没有Favorite PATCH:改Note = 同锚点重建 + 删旧.先建后删,Failed不丢Data.
-  // 写路径只给 job_id,后端parse所属Documents.
+  // Spec has no favorite PATCH: editing note = recreate at same anchor + delete old. Create then delete; failure loses no data.
+// Write path only sends job_id; backend resolves owning document.
   async function recreateFavoriteNote(annotation: Partial<ServerFavorite> = {}, note = "") {
     if (!annotation?.favoriteId) {
       return null;
@@ -150,7 +150,7 @@ export function createReaderServerFavoritesPort({
       await removeServerFavorite(annotation.favoriteId);
       return normalizeServerFavorite(created);
     } catch (error) {
-      console.error("UpdatesannotationsNoteFailed", error);
+      console.error("Update annotation note failed", error);
       return null;
     }
   }

@@ -1,5 +1,5 @@
-// 多会话对话Manage的纯逻辑:Title派生, SummarySort, 上限截断.
-// None DOM, None storage,便于单测;store 与 chat 控制器total用同一套语义.
+// Pure logic for multi-session management: title derivation, summary sorting, cap truncation.
+// No DOM, no storage, easy to unit test; store and chat controller share the same semantics.
 
 import type {
   ReaderAiChatSession,
@@ -10,7 +10,7 @@ import type {
 export const MAX_SESSIONS = 20;
 const TITLE_MAX = 18;
 
-// 会话Title:取首entries用户消息(清洗空白后裁剪);None用户消息则回退占位.
+// Session title: take first user message (trimmed); fall back to placeholder if none.
 export function deriveSessionTitle(session: ReaderAiChatSession = {}) {
   const messages = Array.isArray(session?.messages) ? session.messages : [];
   const firstUser = messages.find(
@@ -23,7 +23,7 @@ export function deriveSessionTitle(session: ReaderAiChatSession = {}) {
   return raw.length > TITLE_MAX ? `${raw.slice(0, TITLE_MAX).trim()}...` : raw;
 }
 
-// 会话Summary:按 updatedAt 倒序(新在前),标记 active,供下拉Rendering.
+// Session summary: sort by updatedAt descending (newest first), mark active, for dropdown rendering.
 export function summarizeSessions({
   sessions = [],
   activeId = "",
@@ -40,7 +40,7 @@ export function summarizeSessions({
     .sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
-// 上限截断:保留Recently updated的 max 个;active 会话始终保留(挤掉最旧的一个).
+// Cap truncation: keep the most recently updated max sessions; active session is always retained (evicts the oldest).
 export function trimSessions(
   { sessions = [], activeId = "" }: ReaderAiSessionsBag = {},
   max = MAX_SESSIONS,

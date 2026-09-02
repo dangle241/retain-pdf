@@ -59,7 +59,7 @@ Anchor shadow faker than prop.`-define webp:alpha-quality=95 -quality 85`。
 
 ### 3.3 master.webp (right-bottom-fg Puzzle Master Solo ← asset 02)
 
-- 出图：**600×840** Transparent character high 800Canvas 95%Bottom-right aligned, bottom edge. 220px Ground fog grounding.
+- Output: **600x840** Transparent character height 800, canvas 95%, bottom-right aligned, bottom edge. 220px ground fog grounding.
 - was scholar Group member; now single-person zoom per visual inspection requirements; hang **right-bottom-fg**（fg Bring,
   Press on top of the panel, avoid robe corner slipping into panel edge), and bring `clickQuote` two quotes from Mozi
   (Click character carousel: Weak will, no wisdom; faithless, no achievement.) / Promote the benefits of all under heaven; eliminate the harms of all under heaven.

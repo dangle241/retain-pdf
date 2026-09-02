@@ -1,4 +1,4 @@
-// app-actions(提交任务 / 桌面输出目录).
+// app-actions (submit task / desktop output directory).
 
 import {
   API_PREFIX,
@@ -49,7 +49,7 @@ type CreateAppActionsArgs = {
   jobRuntimeState: Record<string, unknown>;
   statusCardPresenter: StatusCardPresenterPort;
   libraryEventPort: LibraryEventPort;
-  /** 常规credentials入口: Open Settings → API, 避免与First-run setup弹窗双轨 */
+  /** Normal credentials entry: Open Settings → API, to avoid dual-path with the First-run setup dialog */
   settingsHubDialogStore?: SettingsHubDialogStore | null;
 };
 
@@ -86,13 +86,13 @@ export function createAppActions({
     },
   };
 
-  // credentials / workflow 在books函数调用前已挂到 features
+  // credentials / workflow have been mounted on features before this function is called
   const creds = () => features.browserCredentialsFeature;
   const workflow = () => features.workflowFeature;
   const upload = () => features.uploadFeature;
   const jobRuntime = () => features.jobRuntimeFeature;
 
-  // apiBase 可由 configPort 替代；下层签名仍标成必填.
+  // apiBase can be replaced by configPort; the lower-layer signature is still marked as required.
   const appActionsFeature = mountAppActionsFeature({
     state: jobRuntimeState,
     uploadStatePort,
@@ -124,7 +124,7 @@ export function createAppActions({
           creds().openBrowserCredentialsDialog({ setupMode: true });
           return;
         }
-        // 常规缺 Key: Settings → API(与 UI Events路由一致)
+        // Normal missing key: Settings → API (aligned with UI events routing)
         if (settingsHubDialogStore?.open) {
           settingsHubDialogStore.open({ tab: "api" });
           return;

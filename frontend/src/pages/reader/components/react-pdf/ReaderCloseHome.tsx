@@ -1,8 +1,8 @@
-// Reader"返回主pages"
+// Reader "return to home page"
 //
-// 1) 软打开(主pages SoftReaderHost iframe)→ postMessage 父pages history.back, 主pages不刷新
-// 2) 独立 reader.html 且从主pages assign 进来 → history.back
-// 3) 深链直达 → location.assign(index.html)
+// 1) Soft open (home page SoftReaderHost iframe) → postMessage parent page history.back, home page does not refresh
+// 2) Standalone reader.html entered from home page assign → history.back
+// 3) Deep link direct → location.assign(index.html)
 
 import { X } from "lucide-react";
 import { peekHomeReturnState } from "../../../../shared/navigation/home-return-state.js";
@@ -26,11 +26,11 @@ function requestSoftHostClose(): boolean {
   }
 }
 
-/** 从阅读pages回主pages */
+/** Navigate from reader page back to home page */
 export function navigateReaderToHome() {
   if (typeof window === "undefined") return;
 
-  // 软阅读层: 让父pages卸层, 绝不在 iframe 里 assign 主pages
+  // Soft reader layer: ask parent to unload layer, never assign home page inside iframe
   if (requestSoftHostClose()) {
     return;
   }
@@ -65,8 +65,8 @@ export function ReaderCloseHome() {
       id="reader-close-home-btn"
       type="button"
       className="reader-close-home-btn"
-      aria-label="返回主pages"
-      title="返回主pages"
+      aria-label="Return to home page"
+      title="Return to home page"
       onClick={navigateReaderToHome}
     >
       <X className="reader-close-home-icon" size={18} strokeWidth={2.25} aria-hidden />

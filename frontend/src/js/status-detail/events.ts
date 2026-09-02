@@ -24,7 +24,7 @@ function formatEventPayload(payload) {
 
 export function buildEventsPresentation(eventsPayload) {
   const items = Array.isArray(eventsPayload?.items) ? eventsPayload.items : [];
-  // 文案承诺“按Time倒序”,这里显式Sort,不依赖后端返回顺序
+  // UI promises "newest first"; sort explicitly and do not rely on backend order
   const entries = items
     .map((item) => ({ item, record: normalizedStageEventRecord(item) }))
     .sort((a, b) => (Date.parse(b.record.timestamp) || 0) - (Date.parse(a.record.timestamp) || 0));

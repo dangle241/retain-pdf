@@ -7,8 +7,8 @@ import {
 } from "../mock/documents.js";
 import { buildApiEndpoint } from "./http.js";
 
-// 必填:document_id, page_idx, block_id, quote_text(引文快照).
-// job_id 不传时后端锚定Documents的 active_job_id——Reader里Favorite推荐不传.
+// Required: document_id, page_idx, block_id, quote_text (citation snapshot).
+// If job_id omitted, backend anchors to the document's active_job_id — Reader favorites should omit it.
 export async function createFavorite(apiPrefix, payload = {}) {
   if (isMockMode()) {
     return createMockFavorite(payload);
@@ -28,7 +28,7 @@ export async function createFavorite(apiPrefix, payload = {}) {
   return unwrapEnvelope(await resp.json());
 }
 
-// 传 documentId 时按pages码Sort;不传 = AllFavorite,按Time倒序
+// With documentId: sort by page number; without: all favorites, newest first
 export async function fetchFavorites(apiPrefix, { documentId = "" } = {}) {
   if (isMockMode()) {
     return getMockFavorites({ documentId });

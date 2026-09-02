@@ -178,7 +178,7 @@ export function createUploadStatePort(targetState: Partial<UploadState> = {}): U
 
 let defaultUploadStatePort: UploadStatePort | null = null;
 
-// 唯一的默认实例:多个挂载点total享同一份UploadStatus(取代旧全局 state 的会合点角色)
+// Sole default instance: multiple mount points share the same upload state (replaces legacy global state hub)
 export function getUploadStatePort(): UploadStatePort {
   return getDefaultUploadStatePort();
 }

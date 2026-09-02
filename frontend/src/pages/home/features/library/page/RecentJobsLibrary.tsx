@@ -37,7 +37,7 @@ function sortItems(items, sortMode) {
     case "created": return arr.sort(desc("added_at"));
     case "opened": return arr.sort(desc("last_opened_at"));
     case "title":
-      return arr.sort((a, b) => `${a?.title || a?.display_name || ""}`.localeCompare(`${b?.title || b?.display_name || ""}`, "zh-CN"));
+      return arr.sort((a, b) => `${a?.title || a?.display_name || ""}`.localeCompare(`${b?.title || b?.display_name || ""}`, "en-US"));
     case "updated":
     default:
       return arr.sort(desc("updated_at"));
@@ -113,7 +113,7 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
       else if (s === "succeeded") counts.done += 1;
       else if (s === "failed") counts.failed += 1;
     }
-    return { tags: [...tagSet].sort((a: string, b: string) => a.localeCompare(b, "zh-CN")), statusCounts: counts };
+    return { tags: [...tagSet].sort((a: string, b: string) => a.localeCompare(b, "en-US")), statusCounts: counts };
   }, [items]);
 
   const visibleItems = useMemo(() => {
@@ -138,16 +138,16 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
   async function handleBatchDelete() {
     const ids = [...selectedIds];
     if (!ids.length || batchBusy) return;
-    if (!window.confirm(`确定Delete选中的 ${ids.length} documents?This cannot be resumed.`)) return;
+    if (!window.confirm(`Delete the selected ${ids.length} documents? This cannot be undone.`)) return;
     setBatchBusy(true);
     try {
       const { confirmed, failed } = await actions.deleteDocuments(ids);
       if (failed === 0) toast.success(`Deleted ${confirmed} documents`);
       else if (confirmed > 0) toast.warning(`Deleted ${confirmed} documents, ${failed} documentsFailed`);
-      else toast.error("DeleteFailed, Please retry later");
+      else toast.error("Delete failed. Please try again later.");
       setBatchMode(false);
     } catch (err) {
-      toast.error(err?.message || "DeleteFailed, Please retry later");
+      toast.error(err?.message || "Delete failed. Please try again later.");
     } finally {
       setBatchBusy(false);
     }
@@ -159,10 +159,10 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
     setBatchBusy(true);
     try {
       await services.collections.controller.addDocuments(collectionId, ids);
-      toast.success(`已Add to collection, total ${ids.length} documents`);
+      toast.success(`Added to collection, total ${ids.length} documents`);
       setBatchMode(false);
     } catch (err) {
-      toast.error(err?.message || "Add to collectionFailed, Please retry later");
+      toast.error(err?.message || "Add to collection failed. Please try again later.");
     } finally {
       setBatchBusy(false);
     }

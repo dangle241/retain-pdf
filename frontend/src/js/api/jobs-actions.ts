@@ -13,8 +13,8 @@ import { buildJobDetailEndpoint, submitJson } from "./http.js";
 
 export async function fetchJobDiagnostics(jobId, apiPrefix) {
   if (isMockMode()) {
-    // 与 mock/job.js 的 failure 字段保持同源,避免详情弹窗(读 job.failure)
-    // 与 detail pages(读books端点)在 mock 下Display不一致
+    // Keep failure field in sync with mock/job.js so detail popup (reads job.failure)
+    // and detail page (reads books endpoint) stay consistent under mock
     if (currentMockScenario() !== "failed") {
       return null;
     }
@@ -105,9 +105,9 @@ export async function retryJobStage(jobId, apiPrefix, stage, payload = {}) {
     throw new Error("Stage retry failed: missing stage");
   }
   if (isMockMode()) {
-    // 从指定Stage起跑；务必绑回原 document, no则书架会多一张"job_id 空壳卡"
+    // Restart from given stage; must re-bind original document or shelf grows a job_id shell card
     const bookMeta = payload && typeof payload === "object" ? payload : {};
-    // snapshot 常缺 document_id: 用源 job → Documents表反查
+    // Snapshot often lacks document_id: reverse-lookup via source job → documents table
     const linkedDoc = getMockDocumentByJobId(jobId);
     const documentId = `${bookMeta.document_id || linkedDoc?.document_id || ""}`.trim();
     const bookTitle = `${bookMeta.title || bookMeta.display_name || linkedDoc?.title || ""}`.trim();
@@ -147,7 +147,7 @@ export async function retryJobStage(jobId, apiPrefix, stage, payload = {}) {
     stage: normalizedStage,
     ...payload,
   });
-  // 真实后端不回书目字段: 补上 source/document/Title, 避免书架插 job_id 空壳卡
+  // Real backend omits bibliographic fields: fill source/document/title so shelf does not insert a job_id shell card
   const bookMeta = payload && typeof payload === "object" ? payload : {};
   const nextJobId = `${result?.job_id || result?.id || jobId}`.trim();
   return {

@@ -34,5 +34,25 @@
   {
     "path": "frontend/src/shared/decor/",
     "reason": "Decor pack contracts contain internal slot metadata and legacy theme names; UI labels are translated elsewhere."
+  },
+  {
+    "path": "frontend/src/js/api/ai.ts",
+    "text": "if (resp.status === 400 && /LLM|模型\\s*API\\s*Key|api key/i.test(message)) {",
+    "reason": "Regex intentionally matches backend Chinese error text for compatibility."
+  },
+  {
+    "path": "frontend/src/js/features/documents-library/document-card-item.ts",
+    "text": "|| /^Mock(\\s|重试|-|_)/i.test(book) // \"重试\" (retry) is intentionally kept as part of the regex pattern",
+    "reason": "Regex pattern intentionally contains Chinese '重试' for mock data matching."
+  },
+  {
+    "path": "backend/ai_service/retainpdf_ai/memory/compress.py",
+    "text": "SUMMARY_PREFIX = \"【对话摘要】\"",
+    "reason": "Protocol marker tested by test suite; changing it breaks memory compression contract."
+  },
+  {
+    "path": "doc/reference/LLM_api/DeepSeek/Tool Calls.md",
+    "text": "$ref 和 $def",
+    "reason": "Technical documentation referencing JSON Schema keywords in Chinese explanation."
   }
 ]

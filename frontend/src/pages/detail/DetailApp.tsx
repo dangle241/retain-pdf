@@ -1,15 +1,15 @@
-// Job Detailspages React 编排根(旧 src/js/job-detail/index.js + view.js +
-// modal-bindings.js + downloads.js + events.js Start器的重写).
+// Job Details page React orchestration root (rewrite of the old src/js/job-detail/index.js + view.js +
+// modal-bindings.js + downloads.js + events.js starter).
 //
-// Status策略(按现状语义,不引入 store):
-// - 旧世界纯逻辑(overview-renderer / markdown-flow / summary / action-links /
-//   resume 等)通过 setText/setActionLink/setEventsStatus 回调写文案——这里把
-//   回调实现为 React state(texts/links 两张映射表),JSX 按 id 取值Rendering;
-// - Artifact Manifest, Failed调试上下文, Markdown 图片Grid仍由保留的旧模块
-//   (artifacts.js / failure.js,经 overview-renderer / markdown-flow)在挂载后
-//   命令式 innerHTML 写入 React Rendering出的叶子容器(见各组件注释);
-// - 模态框开合, Events流加载, 受保护下载改为 React Manage(原 view.js /
-//   modal-bindings.js / events.js Start器 / downloads.js 的职责).
+// State strategy (current semantics, no store introduced):
+// - Old-world pure logic (overview-renderer / markdown-flow / summary / action-links /
+//   resume, etc.) writes copy via setText/setActionLink/setEventsStatus callbacks——here those
+//   callbacks become React state (texts/links maps) and JSX reads by id;
+// - Artifact Manifest, failure debug context, and Markdown image Grid still come from retained old modules
+//   (artifacts.js / failure.js, via overview-renderer / markdown-flow) which after mount
+//   write innerHTML into the leaf containers React rendered (see each component's comments);
+// - Modal open/close, events-stream loading, and protected downloads are React-managed (the old view.js /
+//   modal-bindings.js / events.js starter / downloads.js responsibilities).
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DetailHeader } from "./components/DetailHeader.jsx";
@@ -69,12 +69,12 @@ export function DetailApp({
   const [eventsStatus, setEventsStatus] = useState("Not loaded yet");
   const [openEventsText, setOpenEventsText] = useState("Load on demand");
 
-  // 旧 view.js setDetailText 语义:value ?? "-"
+  // Old view.js setDetailText semantics: value ?? "-"
   const setText = useCallback((id, value) => {
     setTexts((prev) => ({ ...prev, [id]: value ?? "-" }));
   }, []);
 
-  // 旧 view.js setDetailActionLink 语义:href/disabled/aria-disabled 三件套
+  // Old view.js setDetailActionLink semantics: href/disabled/aria-disabled trio
   const setActionLink = useCallback((id, url, enabled) => {
     setLinks((prev) => ({ ...prev, [id]: { url, enabled: Boolean(enabled) } }));
   }, []);
@@ -84,7 +84,7 @@ export function DetailApp({
     [texts],
   );
 
-  // Pages加载编排:旧 index.js initializePage 的 hooks 重建
+  // Page-load orchestration: rebuild of old index.js initializePage hooks
   const startedRef = useRef(false);
   useEffect(() => {
     if (startedRef.current) {
@@ -140,32 +140,34 @@ export function DetailApp({
         state,
       });
     })().catch((error) => {
-      // 旧 createPageRuntime onError 语义:初始化异常写入头部提示
+      // Old createPageRuntime onError semantics: write init errors into the header note
       setText("detail-head-note", error.message || String(error));
     });
-    // 只在挂载时执行一次;端口在Pages生命周期内不变
+    // Run once on mount; ports stay stable for the page lifetime
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 旧 modal-bindings.js:Escape CloseAll模态框.
+  // Old modal-bindings.js: Escape closes all modals.
   //
-  // Stage C 收官batches(shadcn 改造)决策:两个模态换成 Radix Dialog 后保留这entries
-  // "Noneentries件关两个"的手写监听,不改成"只关Current打开的那个".理由:两个模态各自
-  // yes fixed inset-0 的独立 Radix Root/Content,打开时会用 DismissableLayer
-  // 抢占式接管焦点(focus trap)——StageHistoryModal 打开时其触发卡片
-  // (EventsTriggerCard)完全被遮罩盖住且不可聚焦/不可点击,反之亦然,所以两个
-  // 模态在booksPages结构下永远互斥(同一时刻至多一个 open=true).这意味着
-  // "关两个"和"只关Current这个"在所有可达Status下结果恒等——setStageHistoryOpen/
-  // setEventsOpen 对已经yes false 的一侧调用yes幂等 no-op,不会有 double-fire
-  // 语义坍缩的风险(不同于 TranslationWorkflowDialog 的两段式Close那种真正会
-  // 被"多调一次"破坏语义的场景).保留原样yes这batches改造里风险最低的Select,不
-  // 引入新branch去做一个在Current UI 下不可观测的行为收紧.
+  // Stage C wrap-up (shadcn migration) decision: after both modals became Radix Dialog,
+  // keep this "unconditionally close both" handwritten listener instead of "only close
+  // the currently open one". Reason: each modal is its own fixed inset-0 Radix Root/Content
+  // and, when open, preemptively takes focus (focus trap) via DismissableLayer——when
+  // StageHistoryModal is open its trigger card (EventsTriggerCard) is fully covered by
+  // the overlay and cannot be focused/clicked, and vice versa, so the two modals are
+  // always mutually exclusive on this page (at most one open=true at a time). That means
+  // "close both" and "close only the current one" are equivalent in every reachable
+  // state——setStageHistoryOpen / setEventsOpen on a side that is already false is an
+  // idempotent no-op, with no double-fire semantic-collapse risk (unlike
+  // TranslationWorkflowDialog's two-step close, which a "call once extra" would actually
+  // break). Keeping the original is the lowest-risk choice in this batch; do not add a
+  // new branch to tighten behavior that is unobservable under the current UI.
   //
-  // 这entries监听和 Radix 自己的 Escape 处理(DismissableLayer,capture Stage)会
-  // 在同一次按键里都跑一遍:Radix 先对"Current打开的那个"调用 onOpenChange(false)
-  // (对应的 setXxxOpen(false) 生效),随后这里的 bubble Stage监听器对两个都调
-  // 一次 setXxxOpen(false)——已经yes false 的一侧yes no-op,不产生额外Rendering或
-  // 副作用,两套机制不冲突.
+  // This listener and Radix's own Escape handling (DismissableLayer, capture stage) both
+  // run on the same keypress: Radix first calls onOpenChange(false) for "the currently
+  // open one" (the matching setXxxOpen(false) takes effect), then this bubble-stage
+  // listener calls setXxxOpen(false) on both——the already-false side is a no-op, with no
+  // extra render or side effect, so the two mechanisms do not conflict.
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key !== "Escape") {
@@ -178,19 +180,20 @@ export function DetailApp({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // 旧 view.js setDetailModalOpen 的 body 滚动锁定手写实现Deleted:Radix Dialog
-  // modal 模式(默认)自带等价的 body 滚动锁定(react-remove-scroll,挂在
-  // DialogPrimitive.Content 上,随 Content 真实 mount/unmount 生命周期自动
-  // 加锁/解锁,见 EventsTimeline.jsx 的 DetailModal).留着这entries手写
-  // document.body.style.overflow 赋值会和 Radix 自己的锁定机制形成两个独立
-  // writer 同时争抢同一个 CSS 属性——react-remove-scroll 内部会记住"加锁前
-  // 的原始 overflow 值"并在解锁时精确resume,若这里再直接赋值/清空,可能会在
-  // 解锁时机不一致的边界情况下把这个属性重置成与 Radix 记忆不一致的值(表现
-  // 为关掉一个模态后 body 仍然滚动不了,或反过来).两个模态互斥(同上), 
-  // Radix 的锁定粒度按需(对应 Content yesno挂载)已经完全覆盖旧实现想要的
-  // 语义,不required再手写.
+  // Old view.js setDetailModalOpen handwritten body-scroll lock deleted: Radix Dialog
+  // modal mode (default) already ships an equivalent body-scroll lock (react-remove-scroll,
+  // attached to DialogPrimitive.Content, auto lock/unlock with Content's real
+  // mount/unmount lifecycle; see DetailModal in EventsTimeline.jsx). Keeping this
+  // handwritten document.body.style.overflow assignment would create two independent
+  // writers racing the same CSS property——react-remove-scroll remembers the overflow
+  // value from before lock and restores it exactly on unlock; assigning/clearing it
+  // here can, on unlock-timing edge cases, reset the property to a value that disagrees
+  // with Radix's memory (body still cannot scroll after closing a modal, or the reverse).
+  // The two modals are mutually exclusive (as above); Radix's on-demand lock granularity
+  // (whether the matching Content is mounted) already covers the old implementation's
+  // intended semantics, so no handwritten lock is needed.
 
-  // 旧 events.js fetchAllJobEvents + ensureEventsLoaded(mpages拉全量 + pages内缓存)
+  // Old events.js fetchAllJobEvents + ensureEventsLoaded (paginate the full set + in-page cache)
   const ensureEventsLoaded = useCallback(async () => {
     const state = pageStateRef.current;
     if (state.eventsPayload) {
@@ -248,11 +251,11 @@ export function DetailApp({
       setEventsStatus(eventsStatusText(payload));
       setOpenEventsText("View");
     } catch (_error) {
-      // Failed文案已在 ensureEventsLoaded 中写入
+      // Failure copy is already written in ensureEventsLoaded
     }
   }, [ensureEventsLoaded]);
 
-  // 旧 downloads.js bindProtectedDownloadLink 的 React Events重写
+  // React event rewrite of old downloads.js bindProtectedDownloadLink
   const handleProtectedDownload = useCallback((fallbackNameFactory) => async (event) => {
     const link = event.currentTarget;
     const enabled = link?.getAttribute("aria-disabled") !== "true";

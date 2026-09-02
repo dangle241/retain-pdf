@@ -1,6 +1,6 @@
-// Reader键盘快捷键(输入框内不抢键).
-// j/↓/PageDown 下pages · k/↑/PageUp 上pages · Home/End 首末pages
-// +/- 缩放 · 0 重置模式默认缩放 · 1/2/3 Source/Translation/Side-by-side
+// Reader keyboard shortcuts (do not steal keys inside input fields).
+// j/Down/PageDown = next page · k/Up/PageUp = prev page · Home/End = first/last page
+// +/- zoom · 0 reset to mode default zoom · 1/2/3 Source/Translation/Side-by-side
 
 import { useEffect } from "react";
 import type { ReaderMode } from "./use-reader-session.js";
@@ -65,7 +65,7 @@ export function useReaderKeyboard(api: ReaderKeyboardApi) {
       const key = event.key;
       const lower = key.length === 1 ? key.toLowerCase() : key;
 
-      // 模式
+      // Mode
       if (lower === "1") {
         event.preventDefault();
         setMode("source");
@@ -82,7 +82,7 @@ export function useReaderKeyboard(api: ReaderKeyboardApi) {
         return;
       }
 
-      // 缩放
+      // Zoom
       if (key === "+" || key === "=") {
         event.preventDefault();
         onZoomChange(stepReaderZoom(userZoom, 1));
@@ -99,7 +99,7 @@ export function useReaderKeyboard(api: ReaderKeyboardApi) {
         return;
       }
 
-      // 翻pages
+      // Page flip
       if (numPages <= 0) {
         return;
       }

@@ -12,9 +12,9 @@ export type ReaderCompareGridProps = {
   shellEl: HTMLElement | null;
   userZoom: number;
   compareMode: boolean;
-  /** 阅读区全宽(shell), 用于 zoom% 相对整屏计算 */
+  /** Reader area full width (shell), used for zoom% relative to full screen */
   shellWidth: number;
-  /** @deprecated 保留兼容, pages宽不再用半栏 */
+  /** @deprecated kept for compatibility, page width no longer uses half column */
   compareColWidth?: number;
   rowHeights?: PageRowHeights;
   mountSource: boolean;
@@ -76,7 +76,7 @@ export function ReaderCompareGrid(props: ReaderCompareGridProps): JSX.Element {
             onMetrics={onMetrics}
             emptyLabel={
               sourceOnly
-                ? "源Files不Ready: 该Documents没有可读取的Source PDF."
+                ? "Source file not ready: this document has no readable source PDF."
                 : "No Source PDF"
             }
             onNumPagesChange={onNumPagesChange}

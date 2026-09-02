@@ -13,9 +13,9 @@ It is not RetainPDF Mainstream protocol docs not needed. Reference directory: "I
 Priority reading
 
 1. RetainPDF integration recommendations
-2. [First API call](./DeepSeek/首次调用%20API.md)
-3. [Models & Pricing](./DeepSeek/模型%20&%20价格.md)
-4. [Token usage calculation](./DeepSeek/Token%20用量计算.md)
+2. [First API call](./DeepSeek/First%20API%20Call.md)
+3. [Models & Pricing](./DeepSeek/Models%20%26%20Pricing.md)
+4. [Token usage calculation](./DeepSeek/Token%20Usage%20Calculation.md)
 5. JSON output
 6. Error codes
 
@@ -24,7 +24,7 @@ Supplementary materials:
 - Multi-turn dialogue
 - Thinking mode
 - [Tool Calls](./DeepSeek/Tool%20Calls.md)
-- [接入 Coding Agents](./DeepSeek/接入%20Coding%20Agents.md)
+- [Integrate with Coding Agents](./DeepSeek/Integrate%20with%20Coding%20Agents.md)
 - Query balance
 
 ## Internal Implementation Entry Points

@@ -6,7 +6,7 @@ export function currentMockScenario() {
     succeeded: "done",
     complete: "done",
     completed: "done",
-    // demo: books地演示推荐入口；静态List用 parallel, 提交Translation走 live 推进
+    // demo: recommended local-demo entry; static list uses parallel, translation submit walks a live job.
     demo: "parallel",
     live: "parallel",
   };

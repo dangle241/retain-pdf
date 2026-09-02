@@ -22,10 +22,10 @@ function preferNonEmpty(primary = "", fallback = "") {
 }
 
 /**
- * 读取用户credentials: 
- * - 浏览器: localStorage
- * - 桌面: desktop snapshot 与 localStorage shadow 合并(非空优先)
- *   避免"刚Save进 shadow / state, 但 snapshot 仍yes空 Key"导致 AI 门禁误锁.
+ * Read user credentials:
+ * - Browser: localStorage
+ * - Desktop: merge desktop snapshot with localStorage shadow (non-empty wins)
+ *   to avoid AI gate locking when shadow/state just saved a key but snapshot is still empty.
  */
 export function loadBrowserStoredConfig() {
   const fromStorage = normalizeBrowserStoredConfig(readBrowserStoredConfig());

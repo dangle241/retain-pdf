@@ -1,12 +1,12 @@
-// Upload瓦片家族(Side-by-side partials/main-content.html 的 .upload-tile-hero 区块逐 id 镜像).
+// Upload tile family (Side-by-side partials/main-content.html .upload-tile-hero block mirrored by id).
 //
-// ViewStatusAll来自 upload/workflow 两个View store(纯逻辑控制器写入);
-// 交互镜像旧 bindMainShellEvents + bindUploadTilePicker:
-// - 瓦片空白处点击 → 触发FilesSelect(按钮/链接/输入除外)
-// - #file click → prepareFilePicker(清空 value,保证重选同名Files也触发 change)
+// All view status comes from upload/workflow view stores (written by pure logic controllers);
+// interactions mirror old bindMainShellEvents + bindUploadTilePicker:
+// - tile blank area click → trigger file select (except buttons/links/inputs)
+// - #file click → prepareFilePicker (clear value so re-selecting same file still triggers change)
 // - #file change → uploadFeature.handleFileSelected()
-// - pages码区间 input → uploadFeature.constrainPageRanges({source})
-// - #credential-gate-action → openBrowserCredentials(非 setupMode → Settings → API)
+// - page range input → uploadFeature.constrainPageRanges({source})
+// - #credential-gate-action → openBrowserCredentials (non-setupMode → Settings → API)
 
 import { useCallback } from "react";
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
@@ -120,7 +120,7 @@ export function HeroUpload() {
     services.uploadDomRefs.fileInput = node;
   }, [services]);
 
-  // 镜像 bindUploadTilePicker:空白处点击代理到FilesSelect
+  // Mirror bindUploadTilePicker: blank-area click proxies to file select
   function handleTileClick(event) {
     const target = event.target;
     if (!(target instanceof HTMLElement)) {
@@ -199,7 +199,7 @@ export function HeroUpload() {
         <TranslationBudgetNote budget={workflow.budget} />
       </div>
 
-      {/* UploadDone后给出明确二选一: Translate directly(提交 job)/ 仅Favorite(关对话框Added) */}
+      {/* After upload done, present a clear choice: Translate directly (submit job) / Add to favorites only (close dialog, added) */}
       <div
         id="upload-ready-hint"
         className={`upload-ready-hint${upload.ready ? "" : " hidden"}`}
@@ -228,7 +228,7 @@ export function HeroUpload() {
             title="Add to library only without starting translation"
             onClick={() => services.library.actions.storeOnly?.()}
           >
-            仅Favorite
+            Add to favorites
           </button>
           <button
             id="submit-btn"

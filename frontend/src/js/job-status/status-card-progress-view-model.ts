@@ -1,4 +1,4 @@
-/** Status卡 snapshot 中与Progress展示相关的字段 */
+/** Progress-related fields in status card snapshot */
 export interface StatusCardProgressSnapshot {
   status?: string;
   progressPercent?: number | null;
@@ -6,7 +6,7 @@ export interface StatusCardProgressSnapshot {
   [key: string]: unknown;
 }
 
-/** selectedProgress / previous Progressm片(stageProgressByKey items) */
+/** selectedProgress / previous progress slices (stageProgressByKey items) */
 export interface StatusCardSelectedProgress {
   current?: number | null;
   total?: number | null;

@@ -18,25 +18,31 @@
   @apply flex justify-center;
 }
 
-/* 危险区修复:这条规则是"图书馆网格"改造成 PDF_MD_lib 风格 React 卡片
-   (RecentJobCard.jsx/BookListRow.jsx)之前、旧卡片结构用的布局规则。新卡片
-   完全靠自己 JSX 里的 Tailwind 类摆版(aspect-[3/4] 封面 + 下方标题区,纯
-   block 流,不需要 grid),但根节点仍然带着 `.recent-job-item` 这个 class
-   名当测试/契约锚点——于是这条 `@apply grid ... items-stretch ...` 依然
-   生效,把新卡片的根节点变成 display:grid。旧结构里两个子节点(封面+标题)
-   靠 items-stretch 撑满没问题,但新结构的封面 div 本身用 aspect-[3/4] 定
-   高宽比,在"无显式 grid-template-columns"的隐式单列网格里,轨道宽度会
-   按内容(真实封面图的内在尺寸)算而不是拉伸到父容器宽度——实测:同一行
-   里有真实封面图的卡片,封面宽度会比只有占位图标的卡片宽出 20%~30%,
-   连带高度也跟着变(浏览器里逐卡片量过 aspect-[3/4] 容器的 rect,数字对得
-   上"宽度算错→高度跟着算错")。因为嵌套选择器里引用的
-   `.recent-job-hover-actions`/`.recent-job-delete`/`.recent-job-status`/
-   `.is-active-job`/`.is-confirming-delete` 在新卡片里全部不存在(旧卡片
-   的删除/翻译/状态文字这轮已经搬进书籍详情弹窗,参见 RecentJobCard.jsx 顶部
-   注释),整条规则纯粹是历史包袱,直接清空——`.recent-job-item` 这个 class
-   名继续留在 JSX 里当锚点,只是不再挂载任何 CSS。 */
+/* Danger-zone fix: this rule is the layout used by the old card structure
+   before "library grid" was reworked into the PDF_MD_lib-style React cards
+   (RecentJobCard.jsx/BookListRow.jsx). The new cards lay themselves out
+   entirely via Tailwind classes in their JSX (aspect-[3/4] cover + title
+   block below, plain block flow, no grid needed), but the root node still
+   carries `.recent-job-item` as a class name anchor for tests/contract.
+   So this `@apply grid ... items-stretch ...` still takes effect and
+   turns the new card root into display:grid. In the old structure the two
+   child nodes (cover + title) safely stretched via items-stretch, but in
+   the new structure the cover div uses aspect-[3/4] for height/width ratio,
+   and inside an implicit single-column grid with no explicit grid-template-
+   columns, the track width is computed from content (the cover image's
+   intrinsic size) instead of stretching to the parent width — in practice:
+   cards with a real cover image ended up 20%~30% wider than cards with
+   only the placeholder icon, and the height followed (manually measured
+   aspect-[3/4] rects in the browser match "wrong width → wrong height").
+   Since the nested selectors reference `.recent-job-hover-actions`/
+   `.recent-job-delete`/`.recent-job-status`/`.is-active-job`/
+   `.is-confirming-delete`, none of which exist in the new cards (the old
+   card's delete/translate/status text moved into the book detail dialog
+   this round — see the top comment in RecentJobCard.jsx), this whole
+   rule is historical baggage; clear it out — `.recent-job-item` stays as
+   a class name anchor in JSX, but no longer carries any CSS. */
 @utility recent-job-item {
-  /* 空占位:见上方注释——只当 class 名锚点，不挂样式。*/
+  /* Empty placeholder: see the comment above — serves only as a class name anchor, no styles attached. */
   box-sizing: border-box;
 }
 
@@ -45,20 +51,27 @@
 }
 
 /*
-  危险区修复(Tailwind v4 迁移):v3 原文件里 `.recent-job-cover` 的基础声明
-  和 `.recent-job-item:hover .recent-job-cover` 的 hover 覆盖是两条独立的
-  平级规则(hover 规则复合选择器特异度更高,天然覆盖 base,不依赖声明顺序)。
-  迁移工具把 hover 规则重写成 `@utility recent-job-cover {}` 内部的嵌套写法
-  `.recent-job-item:hover & { transform...; box-shadow...; }`,而这个嵌套块
-  和外层 base 声明里的 `box-shadow` 属性同名——触发 Tailwind v4 @utility 编译
-  器一个合并 bug:编译产物里裸 `.recent-job-cover{}` 的 base 声明(position/
-  display/aspect-ratio/width/place-items/overflow/border-radius/background/
-  transition 等)整体丢失,只剩嵌套块残留的 transform/box-shadow,导致封面图
-  容器在 v4 下高度塌陷为 0(可见于 home 视觉基线里 recent-job-cover 完全不
-  占位)。这里改回和 v3 等价的结构:base 声明保留在 `@utility` 内,hover 覆盖
-  拆成下面独立的平级复合选择器规则(不嵌套),规避该合并 bug;
-  `&.has-image .recent-job-cover-fallback` 同理拆出为独立规则,避免同一个
-  bug 模式再次触发。
+  Danger-zone fix (Tailwind v4 migration): in v3 the original file had
+  `.recent-job-cover`'s base declaration and `.recent-job-item:hover
+  .recent-job-cover`'s hover override as two separate sibling rules
+  (the hover rule's compound selector has higher specificity, naturally
+  overriding the base without relying on declaration order). The migration
+  tool rewrote the hover rule into a nested block inside
+  `@utility recent-job-cover {}` as `.recent-job-item:hover & { transform...;
+  box-shadow...; }`, and this nested block shares the `box-shadow` name
+  with the outer base declaration — triggering a Tailwind v4 @utility
+  compiler merging bug: in the compiled output the bare `.recent-job-cover{}`
+  base declaration (position/display/aspect-ratio/width/place-items/
+  overflow/border-radius/background/transition etc.) is entirely lost,
+  leaving only the transform/box-shadow from the nested block, which
+  collapses the cover container's height to 0 under v4 (visible in the
+  home visual baseline where recent-job-cover occupies no space at all).
+  Restored here to a v3-equivalent structure: the base declaration stays
+  inside `@utility`, and the hover override is split into a standalone
+  compound-selector rule below (not nested), sidestepping the merging bug;
+  the same applies to `&.has-image .recent-job-cover-fallback`, also
+  extracted as an independent rule to avoid retriggering the same bug
+  pattern.
 */
 @utility recent-job-cover {
   @apply relative grid aspect-[3/4] w-full place-items-center overflow-hidden rounded-[10px];
@@ -84,8 +97,7 @@
   opacity: 0;
 }
 
-/* flex(而非 grid place-items-center):馆藏文档卡有两个悬浮按钮(读原文 + 翻译),
-   grid 会把它们竖着堆成两行;flex 居中对"只有一个按钮"的已翻译卡片视觉完全等价。 */
+/* flex (not grid place-items-center): the library document card has two hover buttons (read original + translate), and grid would stack them vertically into two rows; flex centering is visually equivalent for already-translated cards that only have one button. */
 @utility recent-job-hover-actions {
   @apply pointer-events-none absolute inset-0 z-[4] flex items-center justify-center gap-2 bg-[var(--ink)]/0 opacity-0;
   transition:
@@ -198,13 +210,15 @@
   min-width: 0;
 }
 
-/* 同上一条 recent-job-item 的危险区修复:`.recent-job-id`/`.recent-job-real-id`
-   也是旧卡片遗留、新卡片(RecentJobCard.jsx/BookListRow.jsx)当锚点继续沿用
-   class 名。旧规则的 `truncate`(单行省略)会和新 JSX 里的 `line-clamp-2`
-   (两行截断)打架,字号(`text-xs`/`text-[10px]`)也和 BookListRow 想要的
-   `text-sm` 冲突——两条规则都是单类选择器、特异度相同,谁赢看编译产物里的
-   源码序,不可控。清空,新卡片自己的 Tailwind 类已经把字号/行高/颜色/截断
-   方式都定好了。 */
+/* Same danger-zone fix as the previous recent-job-item: `.recent-job-id`/
+   `.recent-job-real-id` are also leftover from old cards; the new cards
+   (RecentJobCard.jsx/BookListRow.jsx) keep the class names as anchors.
+   The old rules' `truncate` (single-line ellipsis) fights the new JSX's
+   `line-clamp-2` (two-line clamp), and the font sizes (`text-xs`/`text-[10px]`)
+   collide with BookListRow's desired `text-sm` — both rules are single-class
+   selectors with equal specificity, so the winner depends on the compiled
+   output's source order, which is uncontrollable. Cleared: the new cards'
+   own Tailwind classes already fix font size/line-height/color/ellipsis. */
 @utility recent-job-id {
   box-sizing: border-box;
 }
@@ -397,18 +411,22 @@
 }
 
 @utility status-detail-dialog {
-  /* 阶段 C(shadcn 改造):z-index 从共享的 desktop-dialog(101)提到 111——
-     StatusDetailDialog 的唯一打开入口(StatusCard 的"详情"按钮)必然嵌在已经
-     打开的 TranslationWorkflowDialog(Content z-101/Overlay z-100)内部,两者
-     都换成 Radix Dialog(常规 DOM 层叠,不再是原生 <dialog> 的浏览器 top-layer
-     promotion)后,若沿用相同的 101/100,StatusDetailDialog 自己的背板
-     (Overlay z-100)会因为 z-index 小于 TranslationWorkflowDialog 的 Content
-     (101)而盖不住它,导致"嵌套打开时背景应叠加变暗"这个原生 <dialog> 免费带来
-     的视觉效果丢失(fresh Playwright + 12 条视觉基线复现过:status-dialog-failed/
-     status-dialog-translation 差异一度达到 40%)。这里连同下面新增的
-     status-detail-dialog-overlay 一起垫高层级,确保永远盖过
-     TranslationWorkflowDialog(以及其余仍是 101/100 的 Credentials/Glossaries/
-     SettingsHub/AppUpdate,留出余量以防万一同时打开)。 */
+  /* Stage C (shadcn refactor): raise z-index from the shared desktop-dialog
+     (101) to 111 — StatusDetailDialog's only open entry point (the "Detail"
+     button on StatusCard) is always nested inside an already-open
+     TranslationWorkflowDialog (Content z-101 / Overlay z-100), and after
+     both switched to Radix Dialog (normal DOM stacking, no longer the
+     native <dialog> browser top-layer promotion), keeping the same 101/100
+     would mean StatusDetailDialog's own backplate (Overlay z-100) is
+     below TranslationWorkflowDialog's Content (101), so the "nested open
+     backgrounds should darken and stack" effect that the native <dialog>
+     gave for free would be lost (reproduced on fresh Playwright with 12
+     visual baselines: status-dialog-failed / status-dialog-translation
+     divergence once hit 40%). Bumped here together with the new
+     status-detail-dialog-overlay below, so it always covers
+     TranslationWorkflowDialog (and the other still-101/100 dialogs like
+     Credentials/Glossaries/SettingsHub/AppUpdate, leaving headroom in case
+     they ever open simultaneously). */
   z-index: 111;
   width: min(960px, calc(100vw - 32px));
   height: min(760px, calc(100vh - 48px));

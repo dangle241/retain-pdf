@@ -171,7 +171,7 @@ export function createReaderSelectionFavorites({
       onRemoveFavorite: removeFavorite,
       onUpdateFavorite: updateFavoriteMetadata,
     });
-    // renderFavorites 只按books地entries目切换 is-populated,云端区在其后统一修正
+    // renderFavorites only toggles is-populated by local entry count; cloud section corrected afterwards
     renderServerSection();
     if (preserveScroll && listEl) {
       listEl.scrollTop = scrollTop;
@@ -179,7 +179,7 @@ export function createReaderSelectionFavorites({
     }
   }
 
-  // ===== Cloud favorites区(服务端 favorites,与books地Clipped excerptm区total存) =====
+  // ===== Cloud favorites section (server favorites, coexists with local clipped excerpt section) =====
 
   function ensureServerSectionEl() {
     if (!listEl) {
@@ -207,7 +207,7 @@ export function createReaderSelectionFavorites({
     if (!section) {
       return;
     }
-    // 已sync为 serverFavoriteId 的books地记录不在云端区重复展示
+    // Local records already synced as serverFavoriteId are not re-displayed in cloud section
     const records = dedupeServerFavorites(serverFavorites, store.list());
     renderServerFavorites(section, records, {
       onOpenFavorite: (record) => {
@@ -245,7 +245,7 @@ export function createReaderSelectionFavorites({
     renderServerSection();
   }
 
-  // books地Delete即时生效;若该记录已sync到服务端,顺带DeleteCloud favorites(尽力而为).
+  // Local delete takes effect immediately; if record synced to server, also delete cloud favorite (best-effort).
   function deleteStoredFavorite(id) {
     if (!id || !store?.save) {
       return;
@@ -587,15 +587,15 @@ export function createReaderSelectionFavorites({
     setOverlayPreview(selection.overlay, item.previewUrl);
     pinnedSelections.set(selection.id, selection);
     const nextItems = store.add(item);
-    // selection取文:命中Source region 时把引文快照sync到服务端Favorite(quote 为空则仅books地)
+    // Selection text extraction: sync citation snapshot to server favorite when source region hit (empty quote stays local)
     if (resolveQuote && serverFavoritesPort) {
       const quote = resolveQuote({
         page: selection.page,
         rect: selection.sourceRect || selection.rect,
       });
       if (quote) {
-        // sync成功后把 favorite_id 回写到books地记录,后续books地Delete可级联删云端,
-        // 云端区也据此去重,不重复展示同一entriesFavorite.
+        // On sync success, write favorite_id back to local record so later local delete can cascade to cloud,
+        // cloud section also dedupes by it, avoiding duplicate display of the same favorite.
         void serverFavoritesPort.syncFavorite(quote).then((favorite) => {
           const favoriteId = `${favorite?.favorite_id || ""}`.trim();
           if (!favoriteId || !store?.save) {
@@ -605,7 +605,7 @@ export function createReaderSelectionFavorites({
             stored.id === item.id ? { ...stored, serverFavoriteId: favoriteId } : stored
           )));
           void refreshServerFavorites();
-        }).catch((error) => console.warn("syncFavorite到服务端Failed", error));
+        }).catch((error) => console.warn("syncFavorite to server failed", error));
       }
     }
     syncDrawer();
@@ -771,7 +771,7 @@ export function createReaderSelectionFavorites({
       activeSelection = activeSelection || null;
     });
     syncDrawer();
-    // bindEvents 在 regions 加载Done后调用,此时拉取服务端Favorite填充云端区
+    // bindEvents called after regions load finishes; then pull server favorites to populate cloud section
     void refreshServerFavorites();
   }
 

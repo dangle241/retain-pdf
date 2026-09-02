@@ -1,12 +1,13 @@
-// statusCard 快照 + 书架 live item 合并.
+// statusCard snapshot + bookshelf live item merge.
 //
-// Question: attachJobProgress → startPolling 首帧会推 placeholder
-// (status=queued, stage_detail=Loading...), Complete书会被盖成queued.
-// books函数把书架 item 的终态/Progress补回 snapshot, 详情与主Workflowtotal用一处.
+// Question: attachJobProgress → startPolling first frame pushes placeholder
+// (status=queued, stage_detail=Loading...), Complete book gets overwritten as queued.
+// This function patches the bookshelf item's final state/progress back into snapshot,
+// shared by details and main workflow total.
 
 import type { StatusCardJobRecord, StatusCardSnapshot } from "./status-card-store.js";
 
-/** 书架 live 行(library item)上与Progress合并相关的字段 */
+/** Bookshelf live row (library item) fields related to progress merging */
 export type StatusCardFallbackItem = {
   job_id?: string;
   status?: string;
@@ -26,7 +27,7 @@ export type StatusCardFallbackItem = {
 
 /**
  * @param snapshot statusCardStore.snapshot
- * @param fallbackItem 书架 item
+ * @param fallbackItem bookshelf item
  */
 export function mergeSnapshotWithFallback(
   snapshot: StatusCardSnapshot | null | undefined,
@@ -73,7 +74,7 @@ export function mergeSnapshotWithFallback(
           job_id: itemJob,
           status: "succeeded",
           stage: "finished",
-          stage_detail: (fallbackItem.stage_detail as string) || "任务Done",
+          stage_detail: (fallbackItem.stage_detail as string) || "Task done",
           progress: {
             percent: 100,
             current: itemCurrent || 100,
@@ -92,7 +93,7 @@ export function mergeSnapshotWithFallback(
       stageKey: "done",
       label: "Done",
       value: "Translation PDF has been generated",
-      detail: `${fallbackItem.stage_detail || "任务Done"}`.trim(),
+      detail: `${fallbackItem.stage_detail || "Task done"}`.trim(),
       displayPercent: 100,
       progressPercent: 100,
       progressCurrent: Number.isFinite(itemCurrent) ? itemCurrent : 100,
@@ -115,7 +116,7 @@ export function mergeSnapshotWithFallback(
       jobId: itemJob,
       status: "failed",
       label: "Failed",
-      value: "任务Failed",
+      value: "Task failed",
       detail: `${fallbackItem.stage_detail || ""}`.trim(),
       cancelEnabled: false,
     };
@@ -139,11 +140,11 @@ export function mergeSnapshotWithFallback(
   return snapshot;
 }
 
-/** 书架 live 行yesno为 startPolling 首帧占位(Dialog 层与 snapshot 层total用) */
+/** Whether bookshelf live row is a startPolling first-frame placeholder (used by dialog and snapshot layers) */
 export function isPollingBootstrapPlaceholder(item: StatusCardFallbackItem = {}): boolean {
   const status = `${item.status || ""}`.trim();
   const detail = `${item.stage_detail || item.detail || ""}`;
-  return status === "queued" && detail.includes("Loading任务Status");
+  return status === "queued" && detail.includes("Loading task status");
 }
 
 

@@ -1,4 +1,4 @@
-// 选文浮entries: 添加annotations(新Reader专用)
+// Text-selection floating toolbar: add annotation (new reader only)
 
 import { StickyNote, X } from "lucide-react";
 import type { ReaderTextSelection } from "../../hooks/use-reader-text-selection.js";
@@ -29,7 +29,7 @@ export function ReaderSelectionToolbar({
   const midX = selection.rect.left + selection.rect.width / 2;
   const left = Math.min(Math.max(16, midX), vw - 16);
 
-  // 优先selection上方；空间不够则翻到下方
+  // Prefer above selection; flip below if not enough space
   const preferAbove = selection.rect.top > 72;
   const top = preferAbove
     ? Math.max(12, selection.rect.top - 8)
@@ -66,7 +66,7 @@ export function ReaderSelectionToolbar({
             onClick={() => onAddNote(selection)}
           >
             <StickyNote size={15} strokeWidth={2.25} aria-hidden />
-            <span>添加annotations</span>
+            <span>Add annotation</span>
           </button>
           <button
             type="button"

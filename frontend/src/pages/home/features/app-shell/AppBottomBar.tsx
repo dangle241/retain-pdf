@@ -26,7 +26,7 @@ export function AppBottomBar({ showSearch = true, hidden = false }) {
   const { query, onSearchChange } = useLibrarySearchBinding();
 
   return (
-    <div className={`library-bottom-bar${hidden ? " is-hidden" : ""}`} aria-label="快捷Action栏">
+    <div className={`library-bottom-bar${hidden ? " is-hidden" : ""}`} aria-label="Quick Action Bar">
       <button
         id="library-add-pdf-btn"
         type="button"
@@ -54,7 +54,7 @@ export function AppBottomBar({ showSearch = true, hidden = false }) {
             id="library-search-input"
             type="search"
             autoComplete="off"
-            placeholder="Search Books, 任务或日期"
+            placeholder="Search books, tasks, or dates"
             aria-label="Search Books"
             value={query}
             onChange={onSearchChange}

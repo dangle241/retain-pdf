@@ -1,4 +1,4 @@
-// Notion 式左侧History: 可折叠 + Rename + 按Timem组
+// Notion-style left History: collapsible + Rename + grouped by time
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -90,7 +90,7 @@ export function HomeAskSidebar({
   const startRename = (s: HomeAskSession) => {
     if (busy) return;
     setEditingId(s.id);
-    // Edit框展示存储原名(含 fork-n- 前缀时也允许整段改)
+    // Edit box shows the stored original name (allow full edit even with fork-n- prefix)
     setEditTitle(s.title || "");
   };
 
@@ -150,7 +150,7 @@ export function HomeAskSidebar({
             type="button"
             className="home-ask-sidebar-icon-btn home-ask-sidebar-collapse"
             title="Collapse sidebar"
-            aria-label="折叠Conversation history"
+            aria-label="Collapse conversation history"
             aria-expanded={true}
             onClick={() => onCollapsedChange?.(true)}
           >
@@ -171,9 +171,9 @@ export function HomeAskSidebar({
 
       <div className="home-ask-sidebar-scroll">
         {loading && sessions.length === 0 ? (
-          <p className="home-ask-sidebar-empty">加载History...</p>
+          <p className="home-ask-sidebar-empty">Loading history...</p>
         ) : sessions.length === 0 ? (
-          <p className="home-ask-sidebar-empty">No History对话</p>
+          <p className="home-ask-sidebar-empty">No conversations</p>
         ) : (
           groups.map((g) => (
             <div key={g.label} className="home-ask-sidebar-group">

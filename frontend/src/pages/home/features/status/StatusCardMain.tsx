@@ -74,8 +74,8 @@ export function StatusCardMain({
                 id={ids.cancelButton}
                 type="button"
                 className="status-action-btn status-head-btn status-head-cancel"
-                aria-label="Cancel任务"
-                title="Cancel任务"
+                aria-label="Cancel task"
+                title="Cancel task"
                 disabled={!snapshot.cancelEnabled || cancelDisabled}
                 onClick={() => cancelCurrentJob?.()}
               >
@@ -95,7 +95,7 @@ export function StatusCardMain({
                 title="Job Details"
                 onClick={openDetail}
               >
-                <span>详情</span>
+                <span>Details</span>
               </button>
             </div>
 
@@ -117,7 +117,7 @@ export function StatusCardMain({
                 <div
                   id="status-stage-animation"
                   className={`status-stage-animation${lottie.hasStageAnimation ? "" : " hidden"}`}
-                  aria-label="任务Stage动画"
+                  aria-label="Task stage animation"
                 >
                   <div
                     id="status-stage-lottie"

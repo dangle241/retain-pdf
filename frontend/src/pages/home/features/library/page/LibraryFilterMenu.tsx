@@ -91,7 +91,7 @@ export function LibraryFilterMenu({
               type="button"
               onClick={() => { setStatusFilter("all"); setTagFilter(""); }}
               className="mt-4 text-xs text-muted-foreground hover:text-foreground hover:underline"
-            >清空Filter</button>
+            >Clear filters</button>
           ) : null}
         </div>
       ) : null}

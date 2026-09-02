@@ -48,7 +48,7 @@ jobs:
         working-directory: frontend
         run: |
           npm ci
-          # @tailwindcss/oxide 需本机原生绑定；npm optionalDeps 偶发漏装时补齐
+          # @tailwindcss/oxide needs native binding; install manually when npm optionalDeps occasionally miss it
           node -e "require('@tailwindcss/oxide')" \
             || npm install --no-save --no-package-lock "@tailwindcss/oxide@$(node -p "require('./node_modules/@tailwindcss/oxide/package.json').version")"
 

@@ -1,8 +1,9 @@
-/* 主页领域 UI 工具类（从 components.utilities 拆出）
+/* Home-page domain UI utilities (split from components.utilities)
  *
- * 仅 entries/home.css import。含 status-card 配套、凭据/表单、inline-error、
- * app-button 等。部分 @utility 在源码中已无 class 引用（dead），暂保留以免
- * 遗漏运行时/旧模板生成类名；可后续再清。
+ * Imported only by entries/home.css. Includes status-card companions, credentials/
+ * forms, inline-error, app-button, etc. Some @utility rules have no class
+ * reference in source anymore (dead); they are kept for now to avoid missing
+ * runtime/legacy template-generated class names, and can be cleaned up later.
  */
 
 
@@ -19,9 +20,10 @@
     display: none;
   }
 
-  /* 全局 .hidden{display:none!important} 已在 components.css 里以普通规则
-     恢复,这里不再重复裸声明(Tailwind 会丢弃 @utility 对内置工具类裸类名
-     层级的重新声明,详见 components.css 里的说明)。 */
+  /* The global .hidden{display:none!important} is already restored as a plain
+     rule in components.css, so the bare declaration is not duplicated here
+     (Tailwind drops @utility redeclarations of bare built-in utility class
+     names; see the note in components.css for details). */
 }
 
 
@@ -51,15 +53,17 @@
 
 
 /*
-  危险区修复(Tailwind v4 迁移):`.status-card` 在 components.utilities.css
-  (旧版固定 448px 高的 grid 布局)和 status-card.css(现役的
-  `block h-full w-full ...` 弹性布局,StatusCard.jsx 唯一实际渲染的版本)
-  里各定义一份、display/height/width/max-width/overflow/background/color/
-  box-shadow/padding 等大量属性同名冲突——v3 靠源码序 tie-break,
-  status-card.css 后写胜出(display:block,依赖 h-full 撑满父容器);
-  旧版 448px 定高 grid 版本一直是死代码。v4 顺序不保真源码序,实测迁移后
-  旧版反而胜出,`.status-card-shell` 塌陷。这里去掉冲突的布局/外观声明,
-  只保留不冲突的 `position: relative` 与 `@apply mx-auto`。
+  Danger-zone fix (Tailwind v4 migration): `.status-card` is defined in both
+  components.utilities.css (the legacy fixed 448px-height grid layout) and
+  status-card.css (the active `block h-full w-full ...` flex layout, the only
+  one StatusCard.jsx actually renders) — many same-named properties collide
+  (display/height/width/max-width/overflow/background/color/box-shadow/
+  padding). v3 broke ties by source order, so status-card.css won (display:
+  block, relying on h-full to fill the parent); the legacy 448px fixed-height
+  grid version was dead code. v4 doesn't preserve source order, and after
+  migration the legacy version wins, causing `.status-card-shell` to collapse.
+  Here, conflicting layout/appearance declarations are removed, leaving only
+  the non-conflicting `position: relative` and `@apply mx-auto`.
 */
 @utility status-card {
   @apply mx-auto;
@@ -208,7 +212,7 @@
 }
 
 
-/* 自定义 grid/two：主页表单布局遗留；与 Tailwind 内置 grid 同名，仅 home entry 覆盖 */
+/* Custom grid/two: legacy from the home page form layout; shares its name with Tailwind's built-in grid; only the home entry overrides here */
 @utility grid {
   display: grid;
   gap: 1rem;
@@ -273,7 +277,7 @@
 
 @utility app-button {
   @apply inline-flex min-h-12 items-center justify-center px-5 text-[15px] font-semibold no-underline transition;
-  /* 形态/主色走 L3 token（themes/_component-defaults.css），皮肤可换按钮气质 */
+  /* Shape/primary color follows L3 tokens (themes/_component-defaults.css); the skin can swap button character */
   border-radius: var(--btn-radius);
   border: 1px solid transparent;
   background: var(--btn-primary-bg);
@@ -302,7 +306,7 @@
     filter: none;
   }
 
-  /* 危险操作：删除合集等 */
+  /* Dangerous action: delete collection etc. */
   &.danger {
     background: var(--danger);
     border-color: var(--danger);

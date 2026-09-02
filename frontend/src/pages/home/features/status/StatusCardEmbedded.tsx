@@ -101,13 +101,13 @@ function isRedundantDoneDetail(detail: string, value: string, title: string) {
   const compact = d.replace(/\s+/g, "");
   const redundant = new Set([
     "Rendering complete",
-    "任务Done",
-    "处理Done",
+    "Task Done",
+    "Processing Done",
     "Complete",
     "Done",
-    "TranslationPDF已生成",
-    "可以Side-by-side Reader",
-    "处理Done, 可以Side-by-side Reader",
+    "Translation PDF generated",
+    "Side-by-side Reader available",
+    "Processing done, Side-by-side Reader available",
   ]);
   if (redundant.has(compact)) return true;
   if (compact === `${value || ""}`.trim().replace(/\s+/g, "")) return true;
@@ -142,7 +142,7 @@ function resolveSelectedRetry(options: {
     return {
       label: action?.label || meta.label,
       dispatchStage: meta.dispatchStage,
-      title: "从 OCR Run Again",
+      title: "Run OCR again",
     };
   }
   const enabled = Boolean(action?.canRetry) || failed || succeeded;
@@ -251,7 +251,7 @@ export function StatusCardEmbedded({
               id={ids.cancelButton}
               type="button"
               className="bd-job-status-btn"
-              aria-label="Cancel任务"
+              aria-label="Cancel task"
               disabled={!cancelEnabled || cancelDisabled}
               onClick={() => cancelCurrentJob?.()}
             >
@@ -270,7 +270,7 @@ export function StatusCardEmbedded({
               aria-label="Job Details"
               onClick={openDetail}
             >
-              详情
+              Details
             </button>
           </div>
 
@@ -316,7 +316,7 @@ export function StatusCardEmbedded({
                   id={ids.progressBar}
                   className={`bd-job-status-bar${succeeded ? " is-done" : ""}${failed ? " is-failed" : ""}`}
                   role="progressbar"
-                  aria-label="TranslationProgress"
+                  aria-label="Translation Progress"
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={rounded}

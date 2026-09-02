@@ -98,20 +98,20 @@ export function GlossariesDialog() {
 
               <section className="glossary-editor-panel">
                 <label className="glossary-name-field">
-                  <span>名称</span>
+                  <span>Name</span>
                   <input
                     id={GLOSSARY_DOM_IDS.nameInput}
                     type="text"
                     autoComplete="off"
-                    placeholder="例如 量子化学术语"
+                    placeholder="e.g. Quantum Chemistry Terms"
                     value={view.draft.name}
                     onChange={(event) => store.actions.setName(event.target.value)}
                   />
                 </label>
                 <div className="glossary-toolbar">
-                  <Button id={GLOSSARY_DOM_IDS.addRowButton} className="app-button secondary" onClick={() => handlers?.addRow?.()}>添加</Button>
+                  <Button id={GLOSSARY_DOM_IDS.addRowButton} className="app-button secondary" onClick={() => handlers?.addRow?.()}>Add</Button>
                   <Button id={GLOSSARY_DOM_IDS.importButton} className="app-button secondary" onClick={() => handlers?.showImport?.()}>CSV</Button>
-                  <Button id={GLOSSARY_DOM_IDS.exportButton} className="app-button secondary" onClick={() => handlers?.exportCurrent?.()}>导出</Button>
+                  <Button id={GLOSSARY_DOM_IDS.exportButton} className="app-button secondary" onClick={() => handlers?.exportCurrent?.()}>Export</Button>
                   <Button id={GLOSSARY_DOM_IDS.deleteButton} className="app-button secondary danger" onClick={() => handlers?.deleteCurrent?.()}>Delete</Button>
                 </div>
                 <div className="glossary-editor-scroll">

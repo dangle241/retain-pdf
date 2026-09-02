@@ -16,7 +16,7 @@ export function persistBrowserCredentialsFromDialog({
   saveBrowserStoredConfig,
   values,
 }: any) {
-  // 直接持久化表单结果, 避免再从 state/DOM 回读时拿到旧值
+  // Directly persist form values to avoid reading stale values back from state/DOM
   const next = buildBrowserCredentialConfig({
     values,
     currentOcrProvider,
@@ -43,7 +43,7 @@ export async function persistDesktopCredentialsFromDialog({
 }: any) {
   const provider = currentOcrProvider();
   const paddleToken = values.paddleToken;
-  // 与浏览器一致: 只存用户在Settings里填的 Key, 不从 runtime 静默回填
+  // Same as browser: only store user-provided keys from settings, do not backfill silently from runtime
   void defaultModelApiKey;
   const modelApiKey = `${values.modelApiKey || ""}`.trim();
   await saveDesktopConfig?.(

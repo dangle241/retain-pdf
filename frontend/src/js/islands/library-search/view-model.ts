@@ -1,6 +1,6 @@
-// Library Search岛的纯逻辑层:不碰 DOM/React,便于 node 单测
+// Pure logic for the Library Search island: no DOM/React, easy to unit test in node.
 
-// 后端 snippet 用 [ ] 包裹命中词,拆成m段供展示层Rendering <mark>
+// Backend snippet wraps hits in [ ]; split into segments so the UI can render <mark>
 export function highlightSegments(snippet = "") {
   const text = `${snippet || ""}`;
   const segments = [];

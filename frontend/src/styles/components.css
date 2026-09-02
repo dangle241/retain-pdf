@@ -38,21 +38,23 @@
   }
 
   /*
-    危险区修复(Tailwind v4 迁移):这条全局强制覆盖原本是普通 CSS 规则
-    `.hidden { display: none !important; }`,专门用来压过各组件自己的
-    `display` 声明(如 detail 页事件流模态内部 `.detail-list{display:grid}`
-    这类"空态/列表二选一"的容器——阶段 C 收官批把模态外层结构换成 Radix
-    Dialog 后,原来举例的 `.detail-modal{display:grid}` 本身已随之删除,但
-    `.detail-list`/`.detail-empty` 这类内层切换仍然依赖这条规则)。
-    迁移工具把它错误地拆并进了多个 `@utility hidden { &.xxx {...} }` 块
-    (src/styles/{components,upload-workflow,credential-settings,status-card}
-    .utilities.css/.css),而 "hidden" 是 Tailwind 内置保留的工具类名——
-    Tailwind 会丢弃自定义 @utility 里对内置工具类"裸类名"层级的重新声明,
-    只保留嵌套的复合选择器变体,导致裸 `.hidden` 的 `!important` 静默丢失,
-    所有仅靠 `.hidden` 隐藏、且和某个更高特异度/正常声明的容器样式冲突的元素
-    (如 detail 事件流/阶段时间线模态)在 v4 下会一直可见。
-    这里显式恢复为普通规则(不用 @utility),!important 对 normal 声明的
-    优先级判定与 CSS 层(layer)无关,能确保始终生效。
+    Danger-zone fix (Tailwind v4 migration): this global force-override was an
+    ordinary CSS rule `.hidden { display: none !important; }`, used to beat
+    components' own `display` (e.g. `.detail-list{display:grid}` inside the
+    detail-page events modal — empty vs list toggle. After the phase C wrap-up
+    swapped the modal shell to Radix Dialog, the example
+    `.detail-modal{display:grid}` was deleted, but inner toggles like
+    `.detail-list`/`.detail-empty` still depend on this rule).
+    The migrator wrongly folded it into several `@utility hidden { &.xxx {...} }`
+    blocks (src/styles/{components,upload-workflow,credential-settings,status-card}
+    .utilities.css/.css). "hidden" is a Tailwind built-in reserved utility —
+    Tailwind drops custom @utility re-declarations at the bare-class-name
+    layer of built-ins and keeps only nested compound variants, so the bare
+    `.hidden` `!important` silently vanished. Anything hidden only via
+    `.hidden` that also conflicts with a higher-specificity / normal container
+    rule (e.g. detail events / stage-timeline modals) stayed visible under v4.
+    Restore as an ordinary rule (not @utility); !important vs normal
+    declarations is independent of CSS layers, so it always wins.
   */
   .hidden {
     display: none !important;
@@ -82,18 +84,20 @@
   }
 }
 /*
-  危险区修复(Tailwind v4 迁移):这批自定义元素标签选择器(display:block 默认
-  兜底)在 v3 里和其余手写 CSS 一样是普通、未分层规则,和更具体的
-  class 选择器(如 `.app-shell-header{display:flex}`,来自 @utility)同台
-  按特异度比较——class(0,1,0)始终压过 tag(0,0,1),v3 下没有问题。
-  v4 给 @utility 生成的规则强制套上原生 CSS Cascade Layers(`@layer
-  utilities`),而这块标签选择器规则还留在任何 layer 之外——css 层叠规则里
-  "未分层" 在普通优先级声明下永远压过"已分层"，与特异度无关,导致这里的
-  `display:block` 反而压过更具体的 `.app-shell-header{display:flex}`,
-  首页顶栏从 flex 布局退化成 block,`.topbar` 不再被 `align-items:center`
-  垂直居中(顶栏在 home/library-search-island 视觉基线里整体上移约 5.6px,
-  文字/图标位置随之偏移)。这里把这批规则也放进 `@layer base`,让它和
-  @utility 生成的规则同层比较特异度,恢复 v3 的比较结果(class 压过 tag)。
+  Danger-zone fix (Tailwind v4 migration): these custom-element tag selectors
+  (display:block fallback) were ordinary unlayered rules in v3, like the rest
+  of the handwritten CSS, and competed by specificity with more specific class
+  selectors (e.g. `.app-shell-header{display:flex}` from @utility) —
+  class(0,1,0) always beats tag(0,0,1); v3 was fine.
+  v4 wraps @utility output in native CSS Cascade Layers (`@layer utilities`),
+  while these tag rules stayed outside any layer — unlayered always beats
+  layered at normal importance, regardless of specificity, so `display:block`
+  here overrode the more specific `.app-shell-header{display:flex}`. Home
+  topbar dropped from flex to block; `.topbar` lost `align-items:center`
+  vertical centering (topbar in the home/library-search-island visual
+  baseline shifted up ~5.6px; text/icons followed). Put these rules in
+  `@layer base` so they compete with @utility output in the same layer and
+  restore the v3 result (class beats tag).
 */
 @layer base {
   app-shell-header,

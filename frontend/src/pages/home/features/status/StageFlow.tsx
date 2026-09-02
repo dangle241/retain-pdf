@@ -44,7 +44,7 @@ export function StageFlow({
   const activeIndex = statusStageIndex(normalized);
 
   return (
-    <div id={flowId || undefined} className="status-stage-flow" role="tablist" aria-label="任务Workflow">
+    <div id={flowId || undefined} className="status-stage-flow" role="tablist" aria-label="Task Workflow">
       {STATUS_STAGE_FLOW.map((stageKey) => {
         const stepIndex = statusStageIndex(stageKey);
         const isDone = activeIndex >= 0 && stepIndex >= 0 && stepIndex < activeIndex;

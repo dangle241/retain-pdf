@@ -1,9 +1,10 @@
-// 详情pages hero 区:Title/share提示, 四个动作链接, 断点resume按钮, 任务元信息.
-// DOM 结构与类名照搬旧 detail.html,保证像素平权.
+// Detail page hero area: title/share note, four action links, breakpoint resume button, task meta-info.
+// DOM structure and class names copied from the old detail.html for pixel parity.
 //
-// 注意:#detail-rerun-btn 的 disabled 由旧世界逻辑(overview-renderer.js /
-// resume.js bindRerunButton)在挂载后命令式Manage;JSX 里恒定Rendering disabled,
-// React 后续重Rendering不会碰它(虚拟 DOM None diff),命令式写入得以保留.
+// Note: the `disabled` of #detail-rerun-btn is managed imperatively by legacy logic
+// (overview-renderer.js / resume.js bindRerunButton) after mount. JSX always renders it as
+// disabled, and React re-renders will not touch it (virtual DOM has no diff), so the
+// imperative write is preserved.
 
 import { MetaRow } from "./JobSummaryCard.jsx";
 

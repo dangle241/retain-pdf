@@ -1,5 +1,5 @@
-/* 阅读器正文区：markdown 表面 token / 源文档只读态。
- * 功能模块见 entries/reader.css；三栏窄屏见 layout-legacy.css。
+/* Reader body area: markdown surface tokens / source doc read-only state.
+ * Functional modules: entries/reader.css; three-column narrow screen: layout-legacy.css.
  */
 
 .reader-markdown {
@@ -28,9 +28,10 @@
   color: var(--ink);
 }
 
-/* 馆藏文档"读原文"只读态(F4):没有 job,所有吃 jobId 的入口都不该出现——
-   译文/对照两个模式 tab、Markdown/摘录/批注/AI 问答/下载工具组全部隐藏,
-   只留原文单栏。根节点的 .reader-source-only 由 use-reader-boot.js 打上。 */
+/* Collection doc "read source" read-only state (F4): no job, so all entry points
+   consuming jobId must stay hidden — translation/compare mode tabs,
+   Markdown/excerpts/annotations/AI QA/download tools all hidden; keep only
+   the single source column. Root .reader-source-only is set by use-reader-boot.js. */
 .reader-source-only .reader-topbar-actions,
 .reader-source-only .reader-tab[data-reader-mode="translated"],
 .reader-source-only .reader-tab[data-reader-mode="compare"] {

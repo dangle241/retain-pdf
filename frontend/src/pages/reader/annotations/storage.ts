@@ -1,4 +1,4 @@
-// books地持久化annotations(localStorage).不接旧 favorites API.
+// Local persistence for annotations (localStorage). Does not connect to the legacy favorites API.
 
 import {
   notesStorageKey,

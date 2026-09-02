@@ -1,4 +1,4 @@
-// 右栏: Title / Authors / Tags + Edit表单.
+// Right panel: Title / Authors / Tags + edit form.
 
 import { btn } from "./ui.jsx";
 
@@ -10,7 +10,7 @@ import { btn } from "./ui.jsx";
  * @param {string[]} props.tags
  * @param {string[]} props.authors
  * @param {string|number|null|undefined} props.year
- * @param {string} props.displayTitle 展示用Title
+ * @param {string} props.displayTitle displayed title
  * @param {string} props.busy
  * @param {() => void} props.onStartEdit
  * @param {() => void} props.onCancelEdit
@@ -47,7 +47,7 @@ export function TitleMetaPanel({
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
             />
             <div>
-              <p className="mb-1 text-xs text-muted-foreground">Tags(逗号或顿号separated)</p>
+              <p className="mb-1 text-xs text-muted-foreground">Tags (comma or enumeration mark separated)</p>
               <input
                 id="book-detail-tags-input"
                 type="text"
@@ -80,7 +80,7 @@ export function TitleMetaPanel({
               {displayTitle || "-"}
             </h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {authors.length ? authors.join(", ") : "UnknownAuthors"}
+              {authors.length ? authors.join(", ") : "Unknown authors"}
               {year ? ` · ${year}` : ""}
             </p>
             {tags.length ? (

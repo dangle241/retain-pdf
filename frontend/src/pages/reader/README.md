@@ -33,7 +33,7 @@ Rollback:`?engine=legacy`（`ReaderApp` Internal branch + `legacy/**` + `src/js/
 | Layer | Path | Where to put new features? |
 |----|------|------------|
 | **A New engine** | `hooks/`、`pdf/`、`annotations/`、`components/react-pdf/` | Annotation, zoom, comparison, scroll anchor |
-| **B 共享** | `external.ts` → `js/reader/{data,config,resource,…}` | Session-only/Resources/URLdo not write UI |
+| **B Shared** | `external.ts` -> `js/reader/{data,config,resource,...}` | Session-only/Resources/URL, does not write UI |
 | **C legacy** | `legacy/**` + `js/reader/**` Main force | **Do not** define features. Scope? Value? |
 
 ## Layout

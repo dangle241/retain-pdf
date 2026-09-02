@@ -3,8 +3,8 @@ import { unwrapEnvelope } from "../job/core.js";
 import { getMockSearchHits } from "../mock/documents.js";
 import { buildApiEndpoint } from "./http.js";
 
-// 全文Search(中英文).命中词在 snippet 里用 [ ] 包裹,由展示层替换为高亮Tags.
-// 任意长度的 q 都可查(≥3 字符走全文索引,更短由后端自动回退模糊匹配).
+// Full-text search (Chinese/English). Hits wrap matched words in [ ] in snippet; UI replaces with highlight tags.
+// Any-length q is allowed (≥3 chars uses full-text index; shorter auto-falls back to fuzzy match on backend).
 export async function searchLibrary(apiPrefix, q, { limit = 20 } = {}) {
   const query = `${q || ""}`.trim();
   if (!query) {

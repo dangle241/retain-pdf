@@ -6,10 +6,10 @@
 export function ReaderColumnChrome() {
   return (
     <>
-      <div id="reader-col-resizer-left" className="reader-col-resizer reader-col-resizer-left" role="separator" aria-orientation="vertical" aria-label="拖动调整左栏宽度" title="拖动调整宽度, 双击复位"></div>
-      <div id="reader-col-resizer-right" className="reader-col-resizer reader-col-resizer-right" role="separator" aria-orientation="vertical" aria-label="拖动调整右栏宽度" title="拖动调整宽度, 双击复位"></div>
-      <button id="reader-left-collapse-btn" type="button" className="reader-col-collapse reader-col-collapse-left" aria-label="折叠左栏" aria-expanded="true" title="折叠 / 展开左栏"></button>
-      <button id="reader-right-collapse-btn" type="button" className="reader-col-collapse reader-col-collapse-right" aria-label="折叠右栏" aria-expanded="true" title="折叠 / 展开右栏"></button>
+      <div id="reader-col-resizer-left" className="reader-col-resizer reader-col-resizer-left" role="separator" aria-orientation="vertical" aria-label="Drag to resize left panel width" title="Drag to resize width, double-click to reset"></div>
+      <div id="reader-col-resizer-right" className="reader-col-resizer reader-col-resizer-right" role="separator" aria-orientation="vertical" aria-label="Drag to resize right panel width" title="Drag to resize width, double-click to reset"></div>
+      <button id="reader-left-collapse-btn" type="button" className="reader-col-collapse reader-col-collapse-left" aria-label="Collapse left panel" aria-expanded="true" title="Collapse / expand left panel"></button>
+      <button id="reader-right-collapse-btn" type="button" className="reader-col-collapse reader-col-collapse-right" aria-label="Collapse right panel" aria-expanded="true" title="Collapse / expand right panel"></button>
     </>
   );
 }

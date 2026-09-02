@@ -12,9 +12,9 @@ import {
   saveStoredConversationId,
 } from "./conversation-store.js";
 
-// Reader问答的 agentic 应答器:走 /api/v1/ai/ask(带 SSE 过程Events与可跳转引用).
-// document_id 经后端 GET /documents?job_id= 直查(含History run),查不到时 fail closed.
-// conversation_id books地粘性 + 服务端 auto-create / done 回传,实现多轮.
+// Reader QA agentic responder: uses /api/v1/ai/ask (with SSE progress events and jumpable citations).
+// document_id is fetched via backend GET /documents?job_id= (including history runs); fails closed if not found.
+// conversation_id has local stickiness + server-side auto-create/done callback for multi-turn support.
 
 const QUOTE_MAX_LENGTH = 240;
 
@@ -53,11 +53,11 @@ export function createReaderAskAnswerer({
   ask = askLibraryAi,
   documentByJobId = fetchDocumentByJobId,
   resolveQuote = null,
-  // 前端credentialsSettings里的模型 API Key(与TranslationWorkflow同源),按请求随问答一起传给后端
+  // Frontend credentials model API key (same source as TranslationWorkflow), sent with each QA request to backend
   llmConfig = resolveReaderAiConfig,
 } = {}) {
   let documentIdPromise = null;
-  // 内存优先,localStorage 兜底(跨刷新)
+  // Memory first, localStorage fallback (across refreshes)
   let conversationId = loadStoredConversationId({ jobId });
 
   function resolveDocumentId() {
@@ -93,25 +93,25 @@ export function createReaderAskAnswerer({
     regenerate = false,
     userMessageId = "",
     assistantMessageId = "",
-    /** Cancel信号: 中止 SSE；aborted 后不回写会话粘性(防旧流污染新会话) */
+    /** Cancel signal: abort SSE; do not write back session stickiness after abort (prevent old stream polluting new session) */
     signal = null,
   } = {}) {
     const scopedQuestion = buildScopedQuestion({ context, question, resolveQuote, scope });
     if (!scopedQuestion) {
       throw new Error("Enter a question.");
     }
-    // credentials门禁必须在任何网络请求之前: no则用户会先看到"Search中"再报缺 Key
+    // Credentials gate must run before any network request; otherwise user sees "Searching..." then missing key error.
     const config = typeof llmConfig === "function" ? llmConfig() : (llmConfig || {});
     const apiKey = `${config.apiKey || ""}`.trim();
     if (!apiKey) {
       throw new Error(MISSING_MODEL_API_KEY_MESSAGE);
     }
     const documentId = await resolveDocumentId();
-    // Reader默认整books问答:反查不到Documents时 fail closed,禁止静默变全Library Search
+    // Reader defaults to whole-book QA: fail closed if document not found; do not silently fall back to full Library Search
     if (!documentId && `${jobId || ""}`.trim()) {
       throw new Error("Cannot link current document, cannot do whole-book QA yet. Please confirm the job has a document bound and retry.");
     }
-    // document parse后若 storage 里只有 job key,再补写一份 doc key
+    // After document parsing, if storage only has job key, supplement with doc key
     if (!conversationId) {
       conversationId = loadStoredConversationId({ jobId, documentId });
     }
@@ -132,8 +132,8 @@ export function createReaderAskAnswerer({
       signal,
     });
     const nextConversationId = `${(result as { conversationId?: string })?.conversationId || ""}`.trim();
-    // aborted 的旧流禁止回写粘性: no则"Generating切会话"会被 done Events把
-    // conversation_id 拽回旧会话, 下一问落错线程(审计 P0-4)
+    // Aborted old streams must not write back stickiness; otherwise "Generating session switch" would have its
+    // conversation_id pulled back to the old session by done events, causing the next question to land on the wrong thread (Audit P0-4)
     if (nextConversationId && !(signal as AbortSignal | null)?.aborted) {
       rememberConversationId(nextConversationId, documentId);
     }
@@ -160,7 +160,7 @@ export function createReaderAskAnswerer({
     },
     getDocumentId: () => resolveDocumentId(),
     ensureLoaded: async () => {
-      // Prewarm document_id;Failed在 answer 时再报错
+      // Prewarm document_id; report errors only when answering
       const documentId = await resolveDocumentId();
       return Boolean(documentId);
     },

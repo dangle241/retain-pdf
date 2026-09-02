@@ -40,7 +40,7 @@ export function createRecentJobActions({
     navigationPort.openJob(normalizedJobId);
   }
 
-  // 409 = Delete保护:This job is referenced byFavorite引用,不能自动 force,必须让用户先处理Favorite
+  // 409 = Delete protection: document is referenced by favorites, cannot force automatically, user must handle favorites first
   function friendlyDeleteError(error) {
     const message = `${error?.message || error || ""}`;
     if (error?.status === 409 || message.includes("(409)")) {

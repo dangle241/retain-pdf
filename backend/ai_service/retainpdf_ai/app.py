@@ -1,4 +1,4 @@
-"""FastAPI 应用:认证 + /v1/ask + 健康检查。"""
+"""FastAPI app: auth + /v1/ask + health check."""
 
 from __future__ import annotations
 
@@ -23,24 +23,24 @@ from .tools import build_default_registry
 class AskInput(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
     document_id: str = ""
-    # 可只传 job_id(含历史 run):由服务端解析所属文档,避免前端靠
-    # active_job_id 反查在历史 job 上静默失配、问答退化为全库检索
+    # Can pass only job_id (includes historical runs): server resolves the owning document to avoid
+    # frontend silent mismatch when looking up active_job_id against historical jobs, which degrades Q&A to full-library search.
     job_id: str = ""
-    # 多轮对话:传会话 ID 则注入既往轮次为上下文,并在完成后把
-    # user/assistant 两条经 Rust API 回写(单写入者不破)。
-    # 缺省时若能连上 Rust 会 auto-create,并在 done 回传 conversation_id。
+    # Multi-turn dialogue: pass conversation ID to inject previous turns as context; after completion
+    # write back user/assistant pair via Rust API (single writer invariant preserved).
+    # When omitted, auto-create via Rust if reachable, and return conversation_id in done.
     conversation_id: str = ""
-    # 消息树:新 user 的 parent(当前 head);重试时 = 被重试的 user 消息 id。
+    # Message tree: new user parent = current head; retry = the retried user message id.
     parent_id: str = ""
-    # 重新生成:只挂新 assistant 到 parent_id(user),不再写 user。
+    # Regenerate: only attach new assistant to parent_id (user), do not rewrite user.
     regenerate: bool = False
-    # 客户端稳定消息 id,与前端 store / assistant-ui 对齐。
+    # Client-stable message id, aligned with frontend store / assistant-ui.
     user_message_id: str = ""
     assistant_message_id: str = ""
     stream: bool = False
-    # B2: 强制触发抽取式压缩（测试/调试）
+    # B2: force trigger extractive compression (test/debug)
     force_compress: bool = False
-    # 前端按请求传入的 LLM 凭据:留空则回退启动期 env 配置
+    # Per-request LLM credentials from frontend: fall back to startup env config if left empty
     llm_api_key: str = ""
     llm_base_url: str = ""
     llm_model: str = ""
@@ -53,7 +53,7 @@ def build_app(
 ) -> FastAPI:
     settings = settings or load_settings()
     if agent is None:
-        # LLM key 不再强制:允许留空 env,由前端按请求传入(见 AskInput.llm_api_key)
+        # LLM key is no longer mandatory: env may be empty, frontend passes per-request (see AskInput.llm_api_key)
         if not settings.rust_api_key:
             raise RuntimeError("RETAIN_AI_RUST_API_KEY is required")
         rust = rust or RustApiClient(settings)
@@ -76,7 +76,7 @@ def build_app(
         return str((document or {}).get("document_id") or "")
 
     def ensure_conversation_id(payload: AskInput, document_id: str) -> str:
-        """B1: 有 conversation_id 则用;否则经 Rust auto-create 并返回新 id。"""
+        """B1: use existing conversation_id; otherwise auto-create via Rust and return the new id."""
         existing = payload.conversation_id.strip()
         if existing:
             return existing
@@ -86,7 +86,7 @@ def build_app(
         if len(title) > 48:
             title = f"{title[:48].rstrip()}…"
         if not title:
-            title = "阅读问答"
+            title = "Reading Q&A"
         try:
             created = rust.create_conversation(title=title, document_id=document_id or "")
             return str((created or {}).get("conversation_id") or "").strip()
@@ -100,9 +100,9 @@ def build_app(
         *,
         stop_at: str = "",
     ) -> list[dict[str, Any]]:
-        """从 head(或 stop_at)沿 parent_id 回溯,返回根→叶路径。
+        """Backtrack from head (or stop_at) along parent_id, returning root→leaf path.
 
-        无 parent / message_id 的旧数据按 seq 串成线性链。
+        Old data without parent / message_id is chained linearly by seq.
         """
         if not messages:
             return []
@@ -110,7 +110,7 @@ def build_app(
             messages,
             key=lambda m: int(m.get("seq") or 0) if str(m.get("seq") or "").strip() else 0,
         )
-        # 合成稳定 id + 线性 parent,保证无树字段时退化为整条 transcript
+        # Synthesize stable id + linear parent, ensuring fallback to full transcript when tree fields are absent
         by_id: dict[str, dict[str, Any]] = {}
         prev_id = ""
         for index, raw in enumerate(ordered):
@@ -175,13 +175,13 @@ def build_app(
         force_compress: bool = False,
         stop_at: str = "",
     ) -> tuple[list[dict[str, str]], dict[str, Any] | None, dict[str, Any], str]:
-        """压缩(可选) + 组装 history；返回 (history, compress_event|None, memory_debug, summary_id)。
+        """Compress (optional) + assemble history; returns (history, compress_event|None, memory_debug, summary_id).
 
-        summary_id 非空时,调用方必须把本轮 user(或 regenerate 的 assistant)挂在
-        它下面——摘要只有落在 head 路径上,下一轮 load_transcript 才读得回来。
-        旧实现摘要以 set_head=False 挂在 head 下、user 又同样挂在 head 下,
-        摘要成了 user 的兄弟节点(死分支):永远读不回 → 每轮重新压缩 + 再写一条
-        孤儿摘要(审计 A2)。
+        When summary_id is non-empty, the caller must attach this turn's user (or regenerate assistant)
+        under it -- only when the summary lands on the head path can load_transcript read it back next round.
+        Old implementation hung summary with set_head=False under head, and user also under head,
+        making summary a sibling of user (dead branch): never readable back -> re-compress every round + write another
+        orphan summary (Audit A2).
         """
         transcript = load_transcript(conversation_id, stop_at=stop_at)
         compress = maybe_compress_transcript(
@@ -207,7 +207,7 @@ def build_app(
                 compress_event = compress.event
             except Exception as exc:
                 print(f"[retainpdf-ai] persist summary failed: {exc}", flush=True)
-                # 持久化失败仍用内存 working 视图完成本轮
+                # Persist failure: still complete this round using the in-memory working view
         assembled = assemble_history(
             working,
             window_turns=settings.memory_window_turns,
@@ -227,15 +227,15 @@ def build_app(
         *,
         chain_parent_id: str = "",
     ) -> None:
-        """尽力而为的历史回写:失败只记日志,不影响返回。
+        """Best-effort history write-back: failure is only logged, does not affect the response.
 
-        正常轮: user(parent=chain_parent_id|payload.parent_id|head) + assistant(parent=user)。
-        regenerate: 仅 assistant(parent=chain_parent_id|payload.parent_id 的 user 节点)。
-        chain_parent_id = prepare_memory 刚落库的摘要节点 id:传入时本轮消息以
-        摘要为 parent,把摘要接进 head 路径(否则摘要成死分支,见 prepare_memory 注释)。
+        Normal turn: user(parent=chain_parent_id|payload.parent_id|head) + assistant(parent=user).
+        Regenerate: only assistant(parent=chain_parent_id|payload.parent_id user node).
+        chain_parent_id = summary node id just persisted by prepare_memory: when passed, this turn's messages use
+        the summary as parent, linking the summary into the head path (otherwise summary becomes a dead branch, see prepare_memory comment).
 
-        返回是否成功持久化(无会话可写=True,不算失败);False 会经 done.persisted
-        透传给前端提示"本轮未存入历史"(审计 C2:此前失败只 print,用户无感知)。
+        Returns whether persistence succeeded (no conversation to write = True, not a failure); False is passed through
+        via done.persisted to inform the frontend "this turn was not saved to history" (Audit C2: previously failures were only printed, invisible to users).
         """
         if not conversation_id or rust is None:
             return True
@@ -247,7 +247,7 @@ def build_app(
             tool_trace_json = json.dumps(result.tool_trace, ensure_ascii=False)
             model = payload.llm_model or settings.llm_model
             if payload.regenerate:
-                # 重试: parent_id 必须是 user 消息
+                # Retry: parent_id must be a user message
                 user_parent = parent_hint
                 rust.append_conversation_message(
                     conversation_id,
@@ -318,8 +318,8 @@ def build_app(
         return payload
 
     def _resolve_llm_settings(payload: AskInput) -> Settings:
-        # 前端按请求携带 LLM key/base/model 时覆盖启动期配置;三者留空则回退 env。
-        # 缺 key 直接报错,避免打到上游才 401。
+        # When frontend passes LLM key/base/model per-request, override startup config; fall back to env if all three are empty.
+        # Missing key is rejected immediately to avoid hitting upstream and getting 401.
         api_key = (payload.llm_api_key or settings.llm_api_key).strip()
         if not api_key:
             raise HTTPException(status_code=400, detail="缺少 LLM API Key:请在前端凭据设置中填写模型 API Key。")
@@ -331,20 +331,20 @@ def build_app(
         )
 
     def _request_chat_fn(payload: AskInput):
-        # 非流式路径:请求未覆盖任何 LLM 参数时回退启动期 chat_fn(返回 None)。
-        resolved = _resolve_llm_settings(payload)  # 顺带做缺 key 守卫
+        # Non-streaming path: fall back to startup chat_fn (returns None) when the request does not override any LLM params.
+        resolved = _resolve_llm_settings(payload)  # Also guards against missing key
         if not payload.llm_api_key and not payload.llm_base_url and not payload.llm_model:
             return None
         return build_deepseek_chat_fn(resolved)
 
     def _sse_events(payload: AskInput, resolved: Settings) -> Iterator[str]:
-        # agent 循环是同步阻塞的,放到工作线程,经队列推事件——
-        # 前端在首个工具调用(~2s)就能看到"正在检索…"的过程感;
-        # 最终回答轮经 on_delta 逐 token 推 answer_delta。
+        # The agent loop is synchronous blocking; offload to a worker thread and push events via queue --
+        # frontend sees a "searching..." sense of progress within ~2s of the first tool call;
+        # final answer round streams answer_delta token-by-token via on_delta.
         events: queue.Queue[dict[str, Any] | None] = queue.Queue()
         document_id = resolve_document_id(payload)
         conversation_id = ensure_conversation_id(payload, document_id)
-        # regenerate: 上下文停在 user 节点;正常续写:走当前 head 路径
+        # regenerate: context stops at user node; normal continuation: follow current head path
         memory_stop = (
             payload.parent_id.strip()
             if payload.regenerate and payload.parent_id.strip()
@@ -355,7 +355,7 @@ def build_app(
             force_compress=bool(payload.force_compress),
             stop_at=memory_stop,
         )
-        # SSE 路径总是用带 on_delta 的流式 chat_fn:增量文本进事件队列。
+        # SSE path always uses streaming chat_fn with on_delta: incremental text goes into the event queue.
         chat_fn = build_deepseek_chat_fn(
             resolved,
             on_delta=lambda text: events.put({"type": "answer_delta", "text": text}),
@@ -386,8 +386,8 @@ def build_app(
                     }
                 )
             except Exception as exc:
-                # RuntimeError 是我们自己产的用户可读文案（如 _friendly_llm_error），
-                # 直出不带异常类名；其余异常保留类名便于定位
+                # RuntimeError is our own user-readable text (e.g. _friendly_llm_error),
+                # emit as-is without exception class name; other exceptions keep the class name for easier diagnosis.
                 message = str(exc) if isinstance(exc, RuntimeError) else f"{type(exc).__name__}: {exc}"
                 events.put({"type": "error", "message": message})
             finally:
@@ -403,7 +403,7 @@ def build_app(
     @app.post("/v1/ask", dependencies=[Depends(require_api_key)])
     def ask(payload: AskInput) -> Any:
         if payload.stream:
-            # 生成器内抛 HTTPException 无法转成 400,故先在此校验并解析出 settings
+            # HTTPException thrown inside a generator cannot become 400, so validate and resolve settings here first.
             resolved = _resolve_llm_settings(payload)
             return StreamingResponse(
                 _sse_events(payload, resolved),
@@ -443,3 +443,20 @@ def build_app(
         }
 
     return app
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

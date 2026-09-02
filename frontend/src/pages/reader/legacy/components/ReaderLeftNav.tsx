@@ -2,11 +2,11 @@
 
 export function ReaderLeftNav() {
   return (
-    <aside id="reader-col-left" className="reader-col-left" aria-label="导航">
-      <div className="reader-col-left-head">导航</div>
+    <aside id="reader-col-left" className="reader-col-left" aria-label="Navigation">
+      <div className="reader-col-left-head">Navigation</div>
       <div className="reader-col-left-body">
-        <p className="reader-col-left-placeholder">占位区</p>
-        <p className="reader-col-left-hint">后续放Excerpt / annotations汇总</p>
+        <p className="reader-col-left-placeholder">Placeholder</p>
+        <p className="reader-col-left-hint">Excerpt / annotations summary will go here</p>
       </div>
     </aside>
   );

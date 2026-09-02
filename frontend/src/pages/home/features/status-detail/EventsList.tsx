@@ -65,7 +65,7 @@ function EventItem({ item }) {
 
 export function EventsList({ eventsPayload }) {
   const items = Array.isArray(eventsPayload?.items) ? eventsPayload.items : [];
-  // 文案承诺"按Time倒序",这里显式Sort,不依赖后端返回顺序(照搬 events.js)
+  // Sort explicitly by time descending; do not rely on backend order (same as events.js)
   const entries = items
     .map((item) => ({ item, record: normalizedStageEventRecord(item) }))
     .sort((a, b) => (Date.parse(b.record.timestamp) || 0) - (Date.parse(a.record.timestamp) || 0));
@@ -87,7 +87,7 @@ export function EventsList({ eventsPayload }) {
 
 export function eventsStatusText(eventsPayload) {
   const items = Array.isArray(eventsPayload?.items) ? eventsPayload.items : [];
-  return items.length > 0 ? `最近 ${items.length} entries` : "No Events";
+  return items.length > 0 ? `Last ${items.length} entries` : "No Events";
 }
 
 

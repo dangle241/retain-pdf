@@ -112,7 +112,7 @@ curl --location --request POST 'https://mineru.net/api/v4/extract/task' \
 Request body parameter description
 
 Parameter   Type   Required   Example   Description
-url	string	是	https://static.openxlab.org.cn/
+url	string	yes	https://static.openxlab.org.cn/
 opendatalab/pdf/demo.pdf   File URL, supports .pdf, .doc, .docx, .ppt, .pptx, images (png/jpg/jpeg/jp2/webp/gif/bmp), .html multiple formats
 is_ocr   bool   No   false   Whether to enable OCR, default false, only effective for pipeline, vlm models
 enable_formula   bool   No   true   Whether to enable formula recognition, default true, only effective for pipeline, vlm models. Note: for vlm model, this parameter only affects inline formula parsing.

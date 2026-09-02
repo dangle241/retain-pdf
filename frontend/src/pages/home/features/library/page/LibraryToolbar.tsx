@@ -68,7 +68,7 @@ export function LibraryToolbar({
             <select
               value={sortMode}
               onChange={(e) => setSortMode(e.target.value)}
-              aria-label="Sort方式"
+              aria-label="Sort by"
               className="h-full max-w-[7.5rem] cursor-pointer rounded-none border-0 bg-transparent py-0 pl-0 pr-5 text-xs text-foreground/90 outline-none"
             >
               {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}

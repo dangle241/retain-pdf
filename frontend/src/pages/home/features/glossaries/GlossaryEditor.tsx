@@ -15,11 +15,11 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
       <table className="glossary-table">
         <thead>
           <tr>
-            <th className="glossary-col-source">原词</th>
+            <th className="glossary-col-source">Source</th>
             <th className="glossary-col-target">Translation</th>
-            <th className="glossary-col-note">备注</th>
+            <th className="glossary-col-note">Note</th>
             <th className="glossary-col-level">Type</th>
-            <th className="glossary-col-match">匹配</th>
+            <th className="glossary-col-match">Match</th>
             <th className="glossary-col-action"></th>
           </tr>
         </thead>
@@ -40,7 +40,7 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
                 <input
                   type="text"
                   className="glossary-entry-target"
-                  placeholder="可留空"
+                  placeholder="Optional"
                   value={row.target}
                   onChange={(event) => onFieldChange(index, "target", event.target.value)}
                 />
@@ -49,7 +49,7 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
                 <input
                   type="text"
                   className="glossary-entry-note"
-                  placeholder="可选"
+                  placeholder="Optional"
                   value={row.note}
                   onChange={(event) => onFieldChange(index, "note", event.target.value)}
                 />
@@ -80,7 +80,7 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
                 <button
                   type="button"
                   className="glossary-entry-remove secondary"
-                  aria-label="Delete词entries"
+                  aria-label="Delete entry"
                   onClick={() => onRemoveRow(index)}
                 >
                   ×
@@ -94,8 +94,8 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
         {!hasEntries ? (
           <EmptyState
             instrument="spectrum"
-            title="No 词entries"
-            hint="添加原词与Translation, Translation时会优先用你的术语."
+            title="No entries"
+            hint="Add source terms and translations; they will be prioritized during translation."
           />
         ) : null}
       </div>

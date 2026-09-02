@@ -82,7 +82,7 @@ CSS：
 
 ```css
 :root,
-[data-theme="classic"] { /* classic 值 */ }
+[data-theme="classic"] { /* classic values */ }
 
 [data-theme="jiangnan"] { /* Override semantic tokens token */ }
 ```

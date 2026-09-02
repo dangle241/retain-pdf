@@ -25,7 +25,7 @@ const { browser: BROWSER_IDS } = CREDENTIAL_DOM_IDS;
 
 const TABS = [
   { id: "api", label: "API Settings" },
-  { id: "task", label: "任务选items" },
+  { id: "task", label: "Task Options" },
 ];
 
 export function CredentialsWorkbench() {

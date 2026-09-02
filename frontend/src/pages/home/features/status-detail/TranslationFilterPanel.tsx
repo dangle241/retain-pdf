@@ -42,7 +42,7 @@ export function TranslationFilterPanel({ query, onApply }) {
           <input
             id={ids.filterQuery}
             type="search"
-            placeholder="输入 item_id, 路由, Source片段"
+            placeholder="Enter item_id, route, or source snippet"
             value={q}
             onChange={(event) => setQ(event.target.value)}
             onKeyDown={(event) => {
@@ -53,7 +53,7 @@ export function TranslationFilterPanel({ query, onApply }) {
             }}
           />
         </label>
-        <button id={ids.filterApply} type="button" className="button-link secondary" onClick={submit}>刷新</button>
+        <button id={ids.filterApply} type="button" className="button-link secondary" onClick={submit}>Refresh</button>
       </div>
     </section>
   );

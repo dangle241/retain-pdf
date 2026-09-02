@@ -48,8 +48,8 @@ export function createReaderDataPort({
     return loadTranslationItem(jobId, itemId, apiPrefix);
   }
 
-  // 优先 /markdown/document: 带 content_with_absolute_image_urls, 图片可按 API 地址鉴权拉取.
-  // /markdown 仅有相对 images/..., 在 reader pages上会parse到静态源 404 →"Image is not ready".
+  // Prefer /markdown/document: includes content_with_absolute_image_urls so images can be fetched with API auth.
+  // /markdown only has relative images/... which resolves to static 404 on reader page → "Image is not ready".
   async function loadMarkdownPayload(jobId) {
     try {
       const documentPayload = await loadMarkdownDocument(jobId, apiPrefix);

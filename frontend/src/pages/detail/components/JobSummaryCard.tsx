@@ -1,5 +1,4 @@
-// 元信息卡片:"Run Information""Failure Diagnostics"total用的 label/value 行式卡片,
-// 以及"Tips / Errors"纯文books卡片.类名与旧 detail.html 完全一致.
+// Meta-info card: "Run Information" / "Failure Diagnostics" etc., label/value row-style cards, plus a "Tips / Errors" plain-text card. Class names match the old detail.html exactly.
 
 export function MetaRow({ label, id, mono = false, value }) {
   return (

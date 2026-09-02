@@ -68,8 +68,8 @@ export function scheduleSecondaryResourceFetches({
           context: renderContextPort.currentFor(jobId),
           source: "events",
         });
-        // events 副资源只喂 StatusCard/Detail；Library卡片由主 poll Updates, 
-        // 避免 1s 双路 publishJobUpdated 导致Grid抖.
+        // events secondary resource only feeds StatusCard/Detail; Library card updated by main poll
+        // to avoid dual publishJobUpdated calls causing grid jitter.
       })
       .catch(() => {
         // Event stream is secondary; keep main status usable even if events fail.

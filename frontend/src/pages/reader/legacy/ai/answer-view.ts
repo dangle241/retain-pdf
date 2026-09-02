@@ -1,21 +1,22 @@
-// AI 气泡正文的命令式Rendering层:从旧 src/js/reader/ai/chat.js 原样搬运语义——
-// 流式 Markdown 节流Rendering(~90ms), [n] 引用按钮就地注入, 引用脚注List, 
-// 字符打字机动画, tool Events文案.React 只Rendering气泡骨架(article/label/body),
-// 正文内容(Markdown DOM/引用按钮)不进虚拟 DOM,All经 message view 句柄写入.
+// Imperative rendering layer for AI bubble bodies: copied verbatim from legacy src/js/reader/ai/chat.js —
+// streaming Markdown throttled render (~90ms), [n] citation buttons injected in place, citation footnote list,
+// character typewriter animation, tool event text. React only renders the bubble skeleton (article/label/body);
+// body content (Markdown DOM / citation buttons) does not go into the virtual DOM; everything is written
+// via the message view handle.
 //
-// message view 句柄:{ root, body } 指向 React 已提交的气泡元素
-// (root=article,body=.reader-ai-message-body-el),由组件 ref 回调填充.
+// message view handle: { root, body } pointing to the React-committed bubble elements
+// (root = article, body = .reader-ai-message-body-el), filled by component ref callbacks.
 
 import { renderAiMarkdownFragment } from "../../../../js/reader/markdown-render.js";
 import type { PageAnchor } from "../../../../js/reader/types.js";
 
-// agentic ToolsEvents的语义化文案(/api/v1/ai/ask 的 tool Events)
-// 整books问答前端会过滤 list_documents；文案也避免"Library"感
+// Semantic copy for agentic tool events (tool events from /api/v1/ai/ask)
+// The frontend filters list_documents for the entire conversation; copy also avoids the "library" feel
 const TOOL_EVENT_LABELS: Record<string, string> = {
-  list_documents: "确认Documents信息",
-  read_blocks: "阅读相关Paragraph",
-  search_favorites: "查找Favorite",
-  search_fulltext: "SearchDocuments内容",
+  list_documents: "Confirm document information",
+  read_blocks: "Read relevant paragraphs",
+  search_favorites: "Search favorites",
+  search_fulltext: "Search document content",
 };
 
 const PROGRESS_CLASS = "reader-ai-message-progress";
@@ -60,7 +61,7 @@ export interface RenderRichAnswerOptions {
 }
 
 function nowMs() {
-  // Date.now() 在部m受限环境不Ready,退化为 0(节流退化为每次都Rendering,仍正确)
+  // Date.now() may not be available in some restricted environments; fall back to 0 (throttling degrades to per-call rendering, still correct)
   try {
     return Date.now();
   } catch (_err) {
@@ -108,13 +109,13 @@ export function formatCitations(citations = []) {
 
 export function describeToolEvent(event: AiToolEvent = {}) {
   const tool = `${event?.tool || ""}`.trim();
-  // 整books问答不展示"浏览Library"类Progress
+  // Entire conversation: do not show "browsing library"-style progress
   if (tool === "list_documents") {
     return "";
   }
   const label = TOOL_EVENT_LABELS[tool] || tool;
   const action = label ? `正在${label}...` : "Searching documents...";
-  // 不再强调"Page n 轮", 更像普通聊天Progress
+  // No longer emphasizing "Page n round"; more like ordinary chat progress
   return action;
 }
 
@@ -129,7 +130,7 @@ export function setMessageProgress(view, on) {
   view?.root?.classList?.toggle?.(PROGRESS_CLASS, Boolean(on));
 }
 
-// 字符打字机动画(非流式回答且None agentic 引用时保留的旧观感)
+// Character typewriter animation (preserved old feel when no streaming answer and no agentic citations)
 export function streamMessageText(view, text = "", citations = [], { chunkSize = 3, intervalMs = 12 }: StreamMessageOptions = {}) {
   if (!view?.body) {
     return Promise.resolve();
@@ -172,9 +173,10 @@ function createCitationButton(documentRef, { className, text, citation, jumpToCi
   return button;
 }
 
-// 遍历容器内的文books节点,把 [n] 标记就地替换为可点击引用按钮.
-// 与 Markdown Rendering解耦:None论正文yes marked 产出的 DOM 还yes纯文books回退,都能加引用.
-// 跳过 code/pre 内的文books(代码里的 [n] 不yes引用).
+// Walk text nodes inside the container, replacing [n] markers in place with clickable citation buttons.
+// Decoupled from Markdown rendering: whether the body is the DOM produced by marked or a plain-text
+// fallback, citations can be added either way.
+// Skip text inside code/pre ([n] inside code is not a citation).
 function injectCitationButtons(container, citationByRef, documentRef, jumpToCitation) {
   if (!citationByRef.size || !container?.querySelectorAll) {
     return;
@@ -219,8 +221,10 @@ function injectCitationButtons(container, citationByRef, documentRef, jumpToCita
   }
 }
 
-// 把Answer文booksRendering进气泡:优先 Markdown(浏览器),marked 不Ready时回退纯文books节点.
-// 随后注入 [n] 引用按钮与引用脚注List.全程 best-effort,任何一stepFailed都降级.
+// Render the answer text into the bubble: prefer Markdown (browser); if marked is not ready,
+// fall back to plain text nodes.
+// Then inject [n] citation buttons and the citation footnote list. Best-effort throughout;
+// any step that fails degrades.
 export async function renderRichAnswer(view, text = "", citations = [], { jumpToCitation = null }: RenderRichAnswerOptions = {}) {
   const body = view?.body;
   if (!body) {
@@ -234,10 +238,10 @@ export async function renderRichAnswer(view, text = "", citations = [], { jumpTo
     }
   }
 
-  // 非 agentic 引用(books地 Markdown Search的Title式引用)作为尾部"引用: "文books块保留
+  // Non-agentic citations (title-style citations from local Markdown search) are kept as a trailing "Citations:" text block
   const plainCitationText = citationByRef.size ? "" : formatCitations(citations);
 
-  // 1) 正文:Markdown → fragment,Failed则纯文books
+  // 1) Body: Markdown → fragment; on failure, plain text
   let rendered = false;
   if (typeof body.replaceChildren === "function" && documentRef.createElement) {
     try {
@@ -255,10 +259,10 @@ export async function renderRichAnswer(view, text = "", citations = [], { jumpTo
     body.textContent = `${text}${plainCitationText}`;
   }
 
-  // 2) [n] 引用按钮就地注入(解耦 marked)
+  // 2) Inject [n] citation buttons in place (decoupled from marked)
   injectCitationButtons(body, citationByRef, documentRef, jumpToCitation);
 
-  // 3) 引用脚注List(挂在气泡 article 上,与正文平级)
+  // 3) Citation footnote list (attached to the bubble article, sibling to the body)
   const messageEl = view.root;
   if (!citationByRef.size || typeof messageEl?.appendChild !== "function") {
     return;
@@ -279,9 +283,9 @@ export async function renderRichAnswer(view, text = "", citations = [], { jumpTo
   messageEl.appendChild(footer);
 }
 
-// 流式期间的 Markdown 增量Rendering:按Time节流(~90ms),避免逐 token 重parse卡顿.
-// 返回 { push(fullText), stop() }:push 排入最新累积文books,stop Cancel挂起的节流Rendering
-// (finalize 前调用,避免晚触发覆盖引用按钮).
+// Streaming Markdown incremental rendering: throttled by time (~90ms) to avoid per-token re-parse stalls.
+// Returns { push(fullText), stop() }: push queues the latest accumulated text, stop cancels any
+// pending throttled render (call before finalize to avoid late triggers overwriting citation buttons).
 export function createStreamingMarkdownRenderer(view, throttleMs = 90) {
   let latest = "";
   let rendering = false;
@@ -298,7 +302,7 @@ export function createStreamingMarkdownRenderer(view, throttleMs = 90) {
     dirty = false;
     lastAt = nowMs();
     const text = latest;
-    // 流式期间只Rendering正文 Markdown,引用按钮/脚注留到 finalize
+    // During streaming only render the body Markdown; citation buttons / footnotes wait until finalize
     await renderRichAnswer(view, text, [], {});
     rendering = false;
     if (dirty) {

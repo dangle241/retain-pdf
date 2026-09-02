@@ -1,4 +1,4 @@
-// React-pdf ReaderView: 逻辑在 useReaderReactController；Tools为悬浮窗(对齐 legacy 四件套).
+// React-pdf ReaderView: logic lives in useReaderReactController; tools are floating windows (aligned with the legacy quartet).
 
 import { useCallback } from "react";
 import { useReaderReactController } from "./hooks/use-reader-react-controller.js";
@@ -26,17 +26,17 @@ export function ReaderAppReactPdf() {
     tools.close();
   }, [tools]);
 
-  // citation.page_idx 0 基；兼容 page / block_id(p00N)；Readerpages码 1 基
+  // citation.page_idx is 0-based; also accept page / block_id (p00N); Reader page numbers are 1-based
   const jumpCitation = useCallback((citation: {
     page_idx?: number;
     page?: number;
     block_id?: string;
   } | number) => {
-    // branch/切会话锁定期: 绝不跳 PDF(体感像整pages刷新+跳转)
+    // branch / session-switch lock window: never jump the PDF (feels like a full-page refresh + navigate)
     if (isReaderAiNavigationLocked()) return;
     let page1: number | null = null;
     if (typeof citation === "number") {
-      // 约定: 直接传数字时为 0 基 idx
+      // Convention: a bare number is a 0-based idx
       if (Number.isFinite(citation) && citation >= 0) {
         page1 = Math.floor(citation) + 1;
       }
@@ -44,7 +44,7 @@ export function ReaderAppReactPdf() {
       const raw = citation.page_idx ?? citation.page;
       if (raw !== undefined && raw !== null && `${raw}`.trim() !== "" && Number.isFinite(Number(raw))) {
         const n = Number(raw);
-        // page_idx 常为 0 基；若像 1..N 且 block 也像 1 基则仍按 0 基 +1(与 FTS 一致)
+        // page_idx is usually 0-based; if it looks like 1..N and the block also looks 1-based, still treat as 0-based +1 (matches FTS)
         page1 = Math.floor(n) + 1;
       } else {
         const m = `${citation.block_id || ""}`.match(/(?:^|[^0-9])p0*([1-9]\d*)(?:-|_|\b)/i);
@@ -64,7 +64,7 @@ export function ReaderAppReactPdf() {
         percent={boot.percent}
       />
 
-      {/* 整pagesReader: 右上角Close → 回主pages(替代旧 iframe 宿主Close钮) */}
+      {/* Full-page Reader: top-right Close → back to home (replaces the old iframe-host Close button) */}
       <ReaderCloseHome />
 
       <ReaderModeTabs

@@ -46,7 +46,7 @@ export async function createCollection(apiPrefix, { name, parentId = "" }: any =
   };
 }
 
-// body 支持 { name?, sort_order? }
+// Body supports { name?, sort_order? }
 export async function patchCollection(apiPrefix, collectionId, payload = {}) {
   const normalized = `${collectionId || ""}`.trim();
   if (!normalized) {

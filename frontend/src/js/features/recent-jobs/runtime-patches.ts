@@ -109,11 +109,11 @@ function shouldKeepPreviousRuntimePatch(
   if (isJobTerminal(next) || (isTerminalStatus(next.status) && next.status !== "succeeded")) {
     return false;
   }
-  // Retry / 再Translation会换 job_id: 这yes新一轮, 绝不能继承旧终态(no则主pages卡卡在"Translated"不转圈)
+  // Retry / retranslation swaps job_id: this is a new run, must not inherit previous terminal state
   if (!sameRuntimeJobId(previous, next)) {
     return false;
   }
-  // 同 job 终态后偶发非终态脏轮询: 保留终态, 避免卡片回退
+  // Occasional non-terminal dirty poll after terminal state for same job: preserve terminal state to prevent card regression
   if (isJobTerminal(previous) && !isJobTerminal(next)) {
     return true;
   }
@@ -146,7 +146,7 @@ function identityFieldsFromPrevious(
   previous: RuntimeJobPatch = {},
   next: RuntimeJobPatch = {},
 ): Partial<RuntimeJobPatch> {
-  // 换 job_id 时仍保留书目身份, 避免轮询包缺字段时补丁丢 document_id/封面
+  // Preserve book identity across job_id changes to prevent losing document_id/cover when polling payload misses fields
   return {
     document_id: firstNonEmpty(next.document_id, previous.document_id) || undefined,
     title: firstNonEmpty(next.title, previous.title) || undefined,
@@ -165,7 +165,7 @@ function mergeRuntimePatch(
   if (!previous) {
     return next;
   }
-  // 新 job(Retry): 全量采用 next 的运行态, 只继承书目身份字段
+  // New job (retry): adopt next runtime state in full, inherit identity fields only
   if (!sameRuntimeJobId(previous, next)) {
     return {
       ...next,
@@ -179,7 +179,7 @@ function mergeRuntimePatch(
     };
   }
   const previousProgress = progressOfPatch(previous);
-  // 仅同 job_id 才可能保留旧 status(终态防回退 / active 盖过 queued)
+  // Only same job_id can retain old status (terminal state anti-regression / active over queued)
   const previousTerminal = isJobTerminal(previous) && !isJobTerminal(next);
   const previousActiveOverQueued = `${next.status || ""}`.trim() === "queued" && isRecentJobActive(previous);
   const keepPreviousRuntimeState = previousTerminal || previousActiveOverQueued;
@@ -230,7 +230,7 @@ export function createRecentJobsRuntimePatches({
   const runtimeCreatedJobIds = new Set<string>();
 
   function apply(items: LibraryJobItem[] | null | undefined) {
-    // 先把 patches 按 document_id 并进Listitems(Retry换 job_id 时不丢原卡)
+    // Merge patches by document_id into list items first (keeps original card when retry swaps job_id)
     const mergedItems = mergeRuntimePatches(items, runtimeJobPatches, { stageAdapterPort });
     const presentJobIds = new Set(
       mergedItems
@@ -242,8 +242,8 @@ export function createRecentJobsRuntimePatches({
         .map((item) => `${item?.document_id || ""}`.trim())
         .filter(Boolean),
     );
-    // 仅"全新Documents"才 prepend；同一 document 已在List里绝不再插第二张.
-    // 带 source_job_id 的yesStageRetry血缘, 绝不能当新书插(no则主pages多一张 job_id 空壳).
+    // Prepend only genuinely new documents; never insert duplicate if document already in list.
+    // Items with source_job_id are stage retries, never insert as new cards (avoids empty job_id placeholder on main page).
     const missingCreatedItems = Array.from(runtimeCreatedJobIds)
       .filter((createdJobId: string) => {
         if (presentJobIds.has(createdJobId)) return false;
@@ -270,7 +270,7 @@ export function createRecentJobsRuntimePatches({
   ) {
     const byJob = items.findIndex((item) => `${item?.job_id || ""}`.trim() === jobId);
     if (byJob >= 0) return byJob;
-    // StageRetry会换新 job_id: 用 source_job_id / document_id / active_job_id 找回原书卡片
+    // Stage retry gets new job_id: find original book card via source_job_id / document_id / active_job_id
     const sourceJobId = `${(job as RuntimeJobPatch)?.source_job_id || ""}`.trim();
     if (sourceJobId) {
       const bySource = items.findIndex((item) => {
@@ -288,7 +288,7 @@ export function createRecentJobsRuntimePatches({
     return -1;
   }
 
-  /** 补丁必须带上原卡书目身份, no则终态 refresh 会把"换 id 的Retry"当成新建空壳卡 prepend */
+  /** Patches must carry original book identity, otherwise terminal refresh prepends a new empty card */
   function stampBookIdentity(
     patch: RuntimeJobPatch,
     previousItem: LibraryJobItem | null | undefined,
@@ -296,11 +296,11 @@ export function createRecentJobsRuntimePatches({
   ): RuntimeJobPatch {
     const prev = previousItem || {};
     const currentJobId = firstNonEmpty(patch.job_id, job.job_id);
-    // source_job_id 仅表示"Retry前的旧 job"；不可写成Current id 自己
+    // source_job_id only denotes the previous job before retry; must not equal current id
     const rawSource = firstNonEmpty(
       (patch as RuntimeJobPatch).source_job_id,
       (job as RuntimeJobPatch).source_job_id,
-      // 仅当就地换 id 时才把旧 job_id 记作 source
+      // Record previous job_id as source only when swapping id in-place
       (prev.job_id && currentJobId && prev.job_id !== currentJobId ? prev.job_id : ""),
     );
     const sourceJobId = rawSource && rawSource !== currentJobId ? rawSource : undefined;
@@ -327,7 +327,7 @@ export function createRecentJobsRuntimePatches({
       ? `${state.items[index]?.job_id || ""}`.trim()
       : "";
     const previousItem = index >= 0 ? state.items[index] : null;
-    // 补丁 map: Retry换 id 时把旧 patch 并过来；再盖上原卡书目身份
+    // Patch map: merge previous patch when retry swaps id; stamp original book identity
     const previousPatch = previousJobId && previousJobId !== jobId
       ? runtimeJobPatches.get(previousJobId)
       : runtimeJobPatches.get(jobId);
@@ -337,11 +337,11 @@ export function createRecentJobsRuntimePatches({
     if (previousJobId && previousJobId !== jobId) {
       runtimeJobPatches.delete(previousJobId);
       runtimeCreatedJobIds.delete(previousJobId);
-      // 就地改原卡: 绝不能标成 created, no则 soft refresh 会 prepend 一张 job_id 空壳
+      // In-place update to original card: never mark created to prevent soft refresh prepending empty card
     }
     if (index < 0) {
-      // 仍找不到原卡时: 若带 document_id 但补丁缺书名, 不要 insert 空壳
-      // (no则主pages会出现"转圈 + job_id"占位卡, 原书还在)
+      // If card still not found: do not insert empty placeholder when document_id is present but title is missing
+      // (avoids temporary spinning placeholder card appearing alongside original book)
       const title = `${patch.title || patch.display_name || ""}`.trim();
       const hasBookIdentity = Boolean(
         `${patch.document_id || ""}`.trim()
@@ -363,10 +363,10 @@ export function createRecentJobsRuntimePatches({
       active_job_id: jobId,
       document_id: firstNonEmpty(patch.document_id, previousItem?.document_id),
     }, { stageAdapterPort });
-    // 再写回补丁, 保证 refresh 合并时有 document_id/真书名
+    // Write patch back to guarantee document_id/real title present during refresh merge
     runtimeJobPatches.set(jobId, stampBookIdentity(patch, nextItem, job));
     invalidateRecentJobImages(previousItem || {}, nextItem);
-    // job_id 变更时 replaceItem 按新 id 匹配会Failed, 必须整表替换该行
+    // When job_id changes, replaceItem matching new id would fail; replace whole row instead
     if (previousJobId && previousJobId !== jobId && typeof statePort.setItems === "function") {
       const nextItems = state.items.map((item, i) => (i === index ? nextItem : item));
       statePort.setItems(nextItems);
@@ -387,7 +387,7 @@ export function createRecentJobsRuntimePatches({
     if (!jobId) {
       return;
     }
-    // 核心: 有 document_id / source_job_id 且书架已有该书 → 就地 update, 绝不 prepend 新卡
+    // Core: when document_id / source_job_id present and shelf already has that book, update in place rather than prepending
     const state = statePort.getSnapshot();
     const existingIndex = findItemIndex(state.items, job, jobId);
     if (existingIndex >= 0) {
@@ -399,7 +399,7 @@ export function createRecentJobsRuntimePatches({
       });
       return;
     }
-    // Library合成 id `doc:<documentId>`: 按 document 再找一次
+    // Library synthetic id `doc:<documentId>`: search by document again
     const documentId = `${job?.document_id || ""}`.trim();
     if (documentId) {
       const syntheticId = `doc:${documentId}`;

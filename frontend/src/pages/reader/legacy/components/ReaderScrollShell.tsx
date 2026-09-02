@@ -34,7 +34,7 @@ export function ReaderScrollShell() {
           <PdfPane pane="source" />
           <Separator
             id="reader-grid-separator"
-            aria-label="调整Source/Translation面板宽度"
+            aria-label="Adjust source/translation panel width"
             style={{ width: 0, minWidth: 0, flexBasis: 0 }}
           />
           <PdfPane pane="translated" />

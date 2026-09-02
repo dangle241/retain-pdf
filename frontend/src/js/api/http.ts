@@ -8,7 +8,7 @@ import {
 import { unwrapEnvelope } from "../job/core.js";
 import { fetchMockProtected, submitMockJob, submitMockUpload } from "../mock/index.js";
 
-/** HTTP 请求Failed时挂载 status/url 的宽松错误Type */
+/** Loose error type that carries status/url when an HTTP request fails */
 export interface HttpError extends Error {
   status?: number;
   url?: string;

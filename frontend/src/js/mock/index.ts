@@ -52,17 +52,17 @@ function enrichJobWithDocument(job: JobLike | LibraryCardItem, jobId: string) {
 
 export function getMockJobPayload(jobId = ""): JobLike {
   const id = `${jobId || ""}`.trim();
-  // 提交Translation产生的 live job: 按墙钟推进(详情 Tab Progress动画)
+  // Live job from a translation submit: advances on wall-clock time (detail-tab progress animation).
   const live = buildLiveMockJobPayload(id);
   if (live) {
     return enrichJobWithDocument(live, id) as JobLike;
   }
-  // 主 mock job: 跟 URL ?mock= 场景
+  // Primary mock job: follows the URL ?mock= scenario.
   if (!id || id === MOCK_JOB_ID) {
     return enrichJobWithDocument(buildMockJobPayload(), id || MOCK_JOB_ID) as JobLike;
   }
-  // Documents中心合成的 active_job_id(如 20260520-att-001): 返回终态完整 payload, 
-  // 让Book Details嵌入的 StatusCard 能拉到与真实成功 job 同形的Data(Stage流/产物就绪).
+  // Synthesized active_job_id from documents center (e.g. 20260520-att-001): return a complete terminal payload
+  // so the StatusCard embedded in Book Details can fetch data shaped like a real successful job (stage flow / artifacts ready).
   const book = synthesizeMockBook(id);
   return {
     ...buildMockJobPayload("done"),
@@ -86,8 +86,8 @@ export function getMockJobArtifactsManifest() {
   return buildMockManifest();
 }
 
-// Documents中心Grid(F2)会用 library/books?job_ids= Batch取"Translated mock Documents"的活态.
-// 优先从 mock Documents表取真书名/封面, 禁止再用 job_id.pdf 当Title(空封面Root Cause之一).
+// Documents-center grid (F2) batch-fetches live state of "translated mock documents" via library/books?job_ids=.
+// Prefer real title/cover from the mock documents table; never use job_id.pdf as title (one root cause of empty covers).
 function synthesizeMockBook(jobId: string): LibraryCardItem {
   const doc = getMockDocumentByJobId(jobId);
   const title = doc?.title || doc?.source_filename || "TranslatedDocuments";
@@ -148,7 +148,7 @@ export function getMockJobList({ jobIds = [] }: MockJobListQuery = {}): MockJobL
 }
 
 export function submitMockJob(): JobLike {
-  // Upload流"开始Translation"也走 live 任务, 才能在Status区看到推进动画
+  // Upload-flow "start translation" also uses a live job so the status area shows the advance animation.
   const live = registerLiveMockJob({
     title: "Mock UploadTranslation",
     pageCount: 12,

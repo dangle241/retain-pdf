@@ -17,10 +17,9 @@ function normalizedJobId(value) {
   return `${value || ""}`.trim();
 }
 
-// documents: /documents 返回的Documents数组
-// fetchLibraryBookList: (apiPrefix, { jobIds, limit }: any) => { items } 端口(可缺省)
-// 返回:与 documents 等长, 同序的卡片 item 数组(Translated叠加 book 活态,Library走
-// 合成 job_id).
+// documents: array from /documents
+// fetchLibraryBookList: (apiPrefix, { jobIds, limit }: any) => { items } port (optional)
+// Returns: same-length, same-order card items (Translated overlays live book state; Library uses a synthetic job_id).
 export async function shapeDocumentsWithBooks(documents, { fetchLibraryBookList, apiPrefix }: any = {}) {
   const docs = Array.isArray(documents) ? documents : [];
   const jobIds = docs.map((doc) => normalizedJobId(doc?.active_job_id)).filter(Boolean);

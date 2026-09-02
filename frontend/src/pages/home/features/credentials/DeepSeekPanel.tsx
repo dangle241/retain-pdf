@@ -74,7 +74,7 @@ export function DeepSeekPanel() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          充值
+          Top Up
         </a>
       </div>
     </section>

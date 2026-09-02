@@ -1,9 +1,10 @@
-// artifact-download-busy-store.js → React 订阅 hook,按 actionId 取切片
-// (蓝图 §7.5 方案二核心机制).getSnapshot 用 useCallback 缓存,只在
-// store/actionId 变化时换函数身份;store.getActionState(actionId) 在该
-// actionId 未变化时返回同一个对象引用(IDLE 常量或未改动的 busy m片),
-// 配合 useSyncExternalStore 做到"只有自己的 actionId 变化才重Rendering", 
-// 不随祖先(StatusCard/StatusDetailDialog)高频轮询重Rendering而被覆盖或抖动.
+// artifact-download-busy-store.js → React subscription hook, fetches a slice by actionId
+// (blueprint §7.5 option 2 core mechanism). getSnapshot is memoized via useCallback, only changing
+// function identity when store/actionId changes; store.getActionState(actionId) returns the same
+// object reference when that actionId is unchanged (the IDLE constant or an unmodified busy slice),
+// working with useSyncExternalStore to achieve "only my own actionId change triggers a re-render",
+// avoiding overwriting or jitter from high-frequency polling re-renders triggered by ancestors
+// (StatusCard/StatusDetailDialog).
 
 import { useCallback, useSyncExternalStore } from "react";
 import type { ArtifactBusySlice, ArtifactDownloadBusyStore } from "./artifact-download-busy-store.js";

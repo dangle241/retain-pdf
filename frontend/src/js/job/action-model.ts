@@ -23,7 +23,7 @@ export function buildReaderPageUrl(jobId, anchor = null) {
   if (`${anchor?.blockId || ""}`.trim()) {
     url.searchParams.set("block_id", `${anchor.blockId}`.trim());
   }
-  // iframe yes独立Documents,mock 场景required显式透传,no则嵌入式Reader会请求真实后端
+  // iframe is a separate document; mock must be forwarded or the embedded reader hits the real backend
   const mock = `${new URL(currentWindowHref()).searchParams.get("mock") || ""}`.trim();
   if (mock) {
     url.searchParams.set("mock", mock);

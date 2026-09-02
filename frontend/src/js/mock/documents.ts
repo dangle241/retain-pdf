@@ -117,8 +117,8 @@ export interface MockSearchHit {
 
 type HttpStatusError = Error & { status?: number };
 
-// 与后端 documents Data层形状一致(见后端对接说明):
-// document = 按内容哈希去重的稳定身份,job yesDocuments名下的处理记录
+// Matches the backend documents data-layer shape (see backend integration notes):
+// document = stable identity deduped by content hash; job is a processing record under the document.
 function buildMockDocuments(): MockDocument[] {
   return [
     {
@@ -157,8 +157,8 @@ function buildMockDocuments(): MockDocument[] {
       added_at: "2026-06-08T14:00:00Z",
       updated_at: "2026-06-08T14:00:00Z",
     },
-    // Library态(只Added, Not translated):active_job_id 为空.Documents中心Grid要能Display它们,
-    // Reader要能只Read Source,卡片要能"以后再翻".
+    // Library-only state (added, not translated): active_job_id is empty. Documents-center grid must display them;
+    // Reader must support source-only reading; cards must support "read later".
     {
       document_id: "doc-ref-6a1f2c",
       title: "Reaxys Retrosynthesis 手册(仅Library)",
@@ -186,8 +186,8 @@ function buildMockDocuments(): MockDocument[] {
   ];
 }
 
-// 镜像后端 with_document_media_urls.封面/缩略图走 mock://, 
-// 避免 /api/v1/documents/.../cover 在纯前端 mock 下 404 导致空封面.
+// Mirrors backend with_document_media_urls. Cover/thumbnail use mock://
+// so /api/v1/documents/.../cover does not 404 (empty cover) in pure frontend mock.
 export const MOCK_DOCUMENT_SOURCE_PDF_URL = "mock://document-source.pdf";
 export const MOCK_DOCUMENT_COVER_URL = "mock://document-cover.png";
 export const MOCK_DOCUMENT_THUMB_URL = "mock://document-thumb.png";
@@ -244,8 +244,8 @@ export function getMockDocument(documentId: string): MockDocumentWithMedia {
   return withMockDocumentMediaUrls(found);
 }
 
-// 后端按 job_id 直查所属Documents:active_job_id 命中当然算,
-// History run(同一Documents的旧Translation记录)也应parse到同一Documents——用一张History映射证明这entries路Ready.
+// Backend looks up the owning document by job_id: an active_job_id hit counts,
+// and a historical run (older translation record on the same document) must resolve to the same document — one history map proves this path is ready.
 const MOCK_HISTORICAL_JOB_TO_DOCUMENT: Record<string, string> = {
   "mock-job-20260101-old": MOCK_DOCUMENT_ID,
 };
@@ -268,8 +268,8 @@ export function getMockDocumentByJobId(jobId: string): MockDocumentWithMedia | n
 }
 
 /**
- * Retry/新 job 绑定到Documents: Updates active_job_id, 并登记History映射, 
- * 使 getMockDocumentByJobId(新 id) 仍能取到书名/封面.
+ * Bind a retry / new job to a document: updates active_job_id and registers a history mapping
+ * so getMockDocumentByJobId(new id) still returns the title/cover.
  */
 export function bindMockDocumentActiveJob(
   documentId?: string | null,
@@ -295,8 +295,8 @@ export function bindMockDocumentActiveJob(
   return withMockDocumentMediaUrls(found);
 }
 
-// mock 版 DELETE /documents/:id:从 mock Documents表Remove该Documents(连同其Collection成员关系).
-// 被Favorite引用时抛 409(镜像后端Favorite保护).
+// Mock DELETE /documents/:id: remove the document from the mock documents table (and its collection membership).
+// Throws 409 if referenced by a favorite (mirrors backend favorite protection).
 export function deleteMockDocument(documentId: string): {
   deleted: boolean;
   document_id: string;
@@ -344,16 +344,16 @@ export function patchMockDocument(
     found.reading_status = readingStatus;
   }
   if (tags !== undefined) {
-    // 整体替换语义
+    // Replace-all semantics
     found.tags = Array.isArray(tags) ? tags.map((item) => `${item}`) : [];
   }
   found.updated_at = new Date().toISOString();
   return withMockDocumentMediaUrls(found);
 }
 
-// mock 版 POST /documents/:id/translate: 登记 live 可推进任务, 
-// 轮询 getMockJobPayload 会随Time走 OCR→Translation→Rendering→Done(见 mock/live-jobs).
-// 运行中再次提交 → 409；已终态可重新提交(方便反复演示).
+// Mock POST /documents/:id/translate: register a live advanceable job.
+// Polling getMockJobPayload walks OCR→Translation→Rendering→Done over wall-clock time (see mock/live-jobs).
+// Re-submit while running → 409; terminal jobs may be re-submitted (for repeated demos).
 export function translateMockDocument(documentId: string): JobSubmissionView {
   const found = documents().find((item) => item.document_id === documentId);
   if (!found) {
@@ -381,10 +381,10 @@ export function translateMockDocument(documentId: string): JobSubmissionView {
   };
 }
 
-// ===== Category(Collection):建Files夹给 PDF m组 =====
-// 与 js/api/collections.js 同构(collection_id/name/parent_id/sort_order/
-// created_at/document_count);membership 单独存一张 collection_id → Set<document_id>
-// 表,和真实后端 collection_documents 表同样的建模方式.
+// ===== Category (Collection): folders for grouping PDFs =====
+// Same shape as js/api/collections.js (collection_id/name/parent_id/sort_order/
+// created_at/document_count); membership lives in a separate collection_id → Set<document_id>
+// table, matching the real backend collection_documents table.
 
 let mockCollections: MockCollection[] | null = null;
 let mockCollectionMembership: Map<string, Set<string>> | null = null;
@@ -396,9 +396,9 @@ function seedMockCollections(): void {
     { collection_id: "col-001", name: "化学", parent_id: null, sort_order: 0, created_at: "2026-06-01T10:30:00Z" },
     { collection_id: "col-002", name: "机器学习", parent_id: null, sort_order: 1, created_at: "2026-06-08T15:00:00Z" },
   ];
-  // mock 的"Recent Jobs"List(js/mock/index.js#getMockJobList)目前只有 MOCK_JOB_ID
-  // 这一entries真实Data,doc-1b8c52d9a304/doc-77e0fa3c1d55 的 active_job_id 在
-  // job List里查不到——"机器学习"Files夹留空,顺便覆盖"空Files夹"这个真实 UI 态.
+  // Mock "Recent Jobs" list (js/mock/index.js#getMockJobList) currently has real data only for MOCK_JOB_ID;
+  // active_job_id of doc-1b8c52d9a304 / doc-77e0fa3c1d55 is not in the job list —
+  // leave the "机器学习" folder empty, also covering the empty-folder UI state.
   mockCollectionMembership = new Map([
     ["col-001", new Set([MOCK_DOCUMENT_ID])],
     ["col-002", new Set()],
@@ -439,7 +439,7 @@ export function createMockCollection({
   if (!trimmed) {
     throw new Error("name must not be empty. (400)");
   }
-  collectionsList(); // 确保种子Data与 collectionSeq 初始化
+  collectionsList(); // Ensure seed data and collectionSeq are initialized
   collectionSeq += 1;
   const record: MockCollection = {
     collection_id: `col-${String(collectionSeq).padStart(3, "0")}`,
@@ -562,19 +562,19 @@ function favorites(): MockFavorite[] {
 export function createMockFavorite(payload: MockFavoriteCreatePayload = {}): MockFavorite {
   const quoteText = `${payload.quote_text || ""}`.trim();
   const jobId = `${payload.job_id || ""}`.trim();
-  // document_id 可缺省:给了 job_id 时后端parse所属Documents(含History run).二者至少有一.
+  // document_id is optional: with job_id the backend resolves the owning document (including historical runs). At least one is required.
   const doc = `${payload.document_id || ""}`.trim()
     ? documents().find((item) => item.document_id === `${payload.document_id}`.trim())
     : (jobId ? getMockDocumentByJobId(jobId) : null);
   if (!doc || payload.page_idx === undefined || !payload.block_id || !quoteText) {
     throw new Error("document_id 或 job_id, page_idx, block_id, quote_text 为必填.(400)");
   }
-  favorites(); // 先确保种子Data与 favoriteSeq 初始化,再m配新 id
+  favorites(); // Ensure seed data and favoriteSeq are initialized, then allocate a new id
   favoriteSeq += 1;
   const favorite: MockFavorite = {
     favorite_id: `fav-${String(favoriteSeq).padStart(3, "0")}`,
     document_id: doc.document_id,
-    // job_id 不传时锚定Documents的 active_job_id
+    // When job_id is omitted, pin to the document's active_job_id
     job_id: jobId || doc.active_job_id || "",
     page_idx: Number(payload.page_idx) || 0,
     block_id: `${payload.block_id}`,
@@ -615,7 +615,7 @@ export function countMockFavoritesByJob(jobId: string): number {
   return favorites().filter((item) => item.job_id === `${jobId || ""}`.trim()).length;
 }
 
-// ===== 全文Search =====
+// ===== Full-text search =====
 
 export function getMockSearchHits(
   q = "",
@@ -646,7 +646,7 @@ export function getMockSearchHits(
   return { hits: hits.slice(0, limit) };
 }
 
-// ===== 阅读区域(锚点/selection取文 e2e 用) =====
+// ===== Reader regions (anchors / selection-to-text, for e2e) =====
 
 export function getMockReaderRegions() {
   return {

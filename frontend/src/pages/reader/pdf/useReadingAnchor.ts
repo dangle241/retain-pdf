@@ -1,5 +1,5 @@
-// 模式切换 / jump to page时的阅读锚点锁定与resume.
-// 关键规则: 切换前锁定 progress, resume期间禁止 scroll 写回锚点, 且绝不 re-measure.
+// Reading anchor lock and restore on mode switch / jump to page.
+// Key rules: lock progress before switching, forbid scroll from writing back the anchor during restore, and never re-measure.
 
 import { useCallback, useEffect, useRef } from "react";
 import type { RefObject } from "react";
@@ -45,11 +45,11 @@ export function useReadingAnchor(
 } {
   const { primaryPane, mode, enabled = true } = options;
 
-  /** 用户真实阅读锚点(仅用户滚动 / 跳转 / resumeDone后Updates) */
+  /** User's real reading anchor (only updated by user scroll / jump / restore complete) */
   const anchorRef = useRef<PageScrollProgress>({ page: 1, fraction: 0 });
-  /** books次resume锁定的锚点(不被中间 scroll Events污染) */
+  /** Anchor locked for this restore cycle (not polluted by intermediate scroll events) */
   const pendingRestoreRef = useRef<PageScrollProgress | null>(null);
-  /** resume中: 禁止 scroll 写回 anchor */
+  /** During restore: forbid scroll from writing back the anchor */
   const restoringRef = useRef(false);
   const prevModeRef = useRef(mode);
   const cancelRestoreRef = useRef<(() => void) | null>(null);
@@ -69,20 +69,20 @@ export function useReadingAnchor(
   }, []);
 
   const finishRestore = useCallback((locked: PageScrollProgress) => {
-    // resumeDone: 锚点钉回锁定值, 再允许滚动Updates
+    // Restore complete: pin the anchor back to the locked value, then allow scroll updates
     anchorRef.current = cloneProgress(locked);
     pendingRestoreRef.current = null;
     if (unfreezeTimerRef.current != null) {
       clearTimeout(unfreezeTimerRef.current);
     }
-    // 稍后再解冻, 避免最后一次程序化 scroll Events写脏锚点
+    // Unfreeze after a short delay to avoid the last programmatic scroll event dirtying the anchor
     unfreezeTimerRef.current = setTimeout(() => {
       unfreezeTimerRef.current = null;
       restoringRef.current = false;
     }, UNFREEZE_DELAY_MS);
   }, []);
 
-  // 仅用户滚动时Updates锚点；resume期间一律忽略
+  // Only update the anchor on user scroll; ignore everything during restore
   useEffect(() => {
     if (!enabled) {
       return;
@@ -128,7 +128,7 @@ export function useReadingAnchor(
     };
   }, [enabled, mode, primaryPane, shellRef]);
 
-  // 模式切换后: 只用 pending 锁定锚点resume, 绝不重新 measure
+  // After mode switch: only restore by the pending locked anchor, never re-measure
   useEffect(() => {
     if (prevModeRef.current === mode) {
       return;
@@ -146,7 +146,7 @@ export function useReadingAnchor(
       ? cloneProgress(pendingRestoreRef.current)
       : cloneProgress(anchorRef.current);
 
-    // 再次确保冻结(应对严格模式下 effect rerun)
+    // Ensure frozen again (handles effect rerun under StrictMode)
     restoringRef.current = true;
     pendingRestoreRef.current = locked;
     anchorRef.current = locked;
@@ -158,13 +158,13 @@ export function useReadingAnchor(
       {
         behavior: "auto",
         pane: primaryPane,
-        // 等pages宽/行高sync后再钉；同一 locked 幂等, 不会越滚越远
+        // Wait for page width / line-height sync before pinning; the same locked value is idempotent and won't keep scrolling
         delaysMs: MODE_RESTORE_DELAYS_MS,
         onDone: () => finishRestore(locked),
       },
     );
 
-    // 兜底解冻
+    // Fallback unfreeze
     safetyTimerRef.current = setTimeout(() => {
       safetyTimerRef.current = null;
       finishRestore(locked);
@@ -197,9 +197,9 @@ export function useReadingAnchor(
   }, [shellRef]);
 
   const beginModeSwitch = useCallback((): PageScrollProgress => {
-    // 1) 先冻结, 防止 setMode 后布局钳位 scrollTop 触发的 scroll 写脏锚点
+    // 1) Freeze first, to prevent scroll triggered by scrollTop clamp during layout changes after setMode from dirtying the anchor
     restoringRef.current = true;
-    // 2) 在布局变化前锁定Current位置
+    // 2) Lock the current position before the layout change
     const measured = measurePageScrollProgress(
       shellRef.current,
       primaryPaneRef.current,

@@ -66,7 +66,7 @@ export function CollectionManageDialog() {
         if (cancelled) {
           return;
         }
-        setError(err?.message || "加载书目Failed, Please retry later.");
+        setError(err?.message || "Failed to load documents. Please retry later.");
       })
       .finally(() => {
         if (cancelled) {
@@ -98,7 +98,7 @@ export function CollectionManageDialog() {
   async function handleSave() {
     const trimmed = name.trim();
     if (!trimmed) {
-      setError("请输入Collection名称.");
+      setError("Please enter a collection name.");
       return;
     }
     setSaving(true);
@@ -124,7 +124,7 @@ export function CollectionManageDialog() {
       reloadSignal.actions.bump();
       dialogStore.close();
     } catch (err) {
-      setError(err?.message || (isCreate ? "New collectionFailed, Please retry later." : "SaveFailed, Please retry later."));
+      setError(err?.message || (isCreate ? "Failed to create collection. Please retry later." : "Failed to save collection. Please retry later."));
     } finally {
       setSaving(false);
     }
@@ -142,7 +142,7 @@ export function CollectionManageDialog() {
       reloadSignal.actions.bump();
       dialogStore.close();
     } catch (err) {
-      setError(err?.message || "DeleteCollectionFailed, Please retry later.");
+      setError(err?.message || "Failed to delete collection. Please retry later.");
       setSaving(false);
     }
   }
@@ -167,22 +167,22 @@ export function CollectionManageDialog() {
             </div>
             <div className="desktop-body collection-manage-body">
               <label className="collection-name-field">
-                <span>名称</span>
+                <span>Name</span>
                 <input
                   id="collection-name-input"
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="例如: 化学"
+                  placeholder="e.g., Chemistry"
                   autoFocus
                 />
               </label>
               <div className="collection-doc-picker">
-                <p className="muted">从书库勾选加入这个Collection的书</p>
+                <p className="muted">Select books from the library to add to this collection</p>
                 {loading ? (
-                  <div className="collection-doc-list-empty">正在加载书目...</div>
+                  <div className="collection-doc-list-empty">Loading documents...</div>
                 ) : allDocuments.length === 0 ? (
-                  <div className="collection-doc-list-empty">书库还没有书</div>
+                  <div className="collection-doc-list-empty">The library has no books yet</div>
                 ) : (
                   <ul className="collection-doc-list">
                     {allDocuments.map((doc) => (
@@ -210,7 +210,7 @@ export function CollectionManageDialog() {
                   disabled={saving}
                   onClick={handleDelete}
                 >
-                  {confirmingDelete ? "确认Delete?" : "DeleteCollection"}
+                  {confirmingDelete ? "Confirm Delete?" : "Delete Collection"}
                 </Button>
               ) : <span />}
               <Button
