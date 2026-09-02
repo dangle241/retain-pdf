@@ -31,13 +31,15 @@ pub fn normalize_relative_data_path(path: &Path) -> Result<String> {
 }
 
 pub fn to_relative_data_path(data_root: &Path, path: &Path) -> Result<String> {
-    // path 可能是三种形态之一:
-    //   (a) DATA_ROOT 下的绝对文件系统路径(如 /abs/data/jobs/x);
-    //   (b) 由 data_root 拼出来、但本身仍是相对的路径——当 DATA_ROOT 配成相对
-    //       值(如 dev 环境的 `../../data`)时, uploads_dir.join(...) 会得到
-    //       `../../data/uploads/x` 这种带 `..` 的相对路径;
-    //   (c) 已经是作业相对路径(如 jobs/x/source.pdf)。
-    // 先无条件尝试剥掉 data_root 前缀:(a)(b) 都会因此收敛成作业相对形态。
+    // The path can take one of three forms:
+    //   (a) an absolute filesystem path under DATA_ROOT (e.g. /abs/data/jobs/x);
+    //   (b) a path constructed from data_root that is still relative — when
+    //       DATA_ROOT is set to a relative value (e.g. dev env `../../data`),
+    //       uploads_dir.join(...) results in a path containing `..` (e.g.
+    //       `../../data/uploads/x`);
+    //   (c) an already job-relative path (e.g. jobs/x/source.pdf).
+    // First, unconditionally try to strip the data-root prefix: this converges
+    // (a) and (b) into a job-relative form.
     if let Ok(relative) = path.strip_prefix(data_root) {
         return normalize_relative_data_path(relative);
     }

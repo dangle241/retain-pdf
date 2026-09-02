@@ -1,8 +1,11 @@
-//! 资产存储(收藏截图等二进制附件)与 AI 问答会话历史。
+//! Asset storage (binary attachments such as favorite screenshots) and
+//! AI chat session history.
 //!
-//! 资产是内容寻址的:asset_id = sha256(文件字节),文件落
-//! data_root/assets/<前2位>/<hash>,重复上传自动归并,URL 永久可缓存。
-//! 会话遵循"软锚点"原则:引用只存 JSON 快照,不做 job 删除保护。
+//! Assets are content-addressed: `asset_id = sha256(file_bytes)`, files
+//! land at `data_root/assets/<first 2 chars>/<hash>`, duplicate uploads
+//! merge automatically, and the URL is cacheable forever.
+//! Conversations follow the "soft anchor" rule: citations only persist as
+//! a JSON snapshot, with no job-deletion protection.
 //!
 //! All handlers go through library_api (PR5).
 
@@ -65,7 +68,7 @@ pub async fn download_asset_route(
     Ok((
         [
             (header::CONTENT_TYPE, asset.mime),
-            // 内容寻址 → 永久缓存安全
+            // Content-addressed → permanent cache safe
             (
                 header::CACHE_CONTROL,
                 "public, max-age=31536000, immutable".to_string(),

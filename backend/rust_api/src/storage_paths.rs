@@ -65,11 +65,16 @@ mod tests {
 
     #[test]
     fn to_relative_handles_relative_data_root() {
-        // 回归:DATA_ROOT 配成相对值(dev 环境 RUST_API_DATA_ROOT=../../data)时,
-        // resolve_typst_source 之类会拼出 `../../data/jobs/x/...book-overlay.typ`
-        // 这种带 `..` 的相对路径,再喂回 to_relative_data_path 做相对化。旧实现
-        // 只对绝对路径 strip_prefix,这里会落到 `..` 校验被拒,导致产物清单
-        // 接口 500、阅读器报"对照阅读加载失败"。现在无条件先剥 data_root 前缀。
+        // Regression: when `DATA_ROOT` is set to a relative value
+        // (dev env `RUST_API_DATA_ROOT=../../data`), helpers like
+        // `resolve_typst_source` build paths such as
+        // `../../data/jobs/x/.../book-overlay.typ` and feed them back
+        // into `to_relative_data_path`. The previous implementation only
+        // stripped the prefix from absolute paths; the `..` validation
+        // rejected these, returning HTTP 500 from the artifact-manifest
+        // endpoint and the reader would report "failed to load the
+        // parallel-reading view". We now strip the data-root prefix
+        // unconditionally.
         let data_root = Path::new("../../data");
         let joined = data_root.join("jobs/job-1/rendered/typst/book-overlays/book-overlay.typ");
         assert_eq!(
@@ -80,8 +85,10 @@ mod tests {
 
     #[test]
     fn to_relative_passes_through_already_job_relative_path() {
-        // 已经是作业相对路径的情形(如 job 记录里存的 source_pdf)剥不掉 data_root
-        // 前缀,应原样规范化返回,不受上面改动影响。
+        // A path that is already job-relative (e.g. `source_pdf` stored
+        // on the job record) cannot have the data-root prefix stripped,
+        // so it should be returned normalized unchanged — unaffected by
+        // the previous change.
         let data_root = Path::new("../../data");
         assert_eq!(
             to_relative_data_path(data_root, Path::new("jobs/job-1/source/in.pdf"))
@@ -92,7 +99,8 @@ mod tests {
 
     #[test]
     fn to_relative_rejects_absolute_path_outside_data_root() {
-        // 绝对路径但不在 DATA_ROOT 下,仍应报错(保持旧行为)。
+        // An absolute path that does not live under `DATA_ROOT` must
+        // still be rejected (preserves the old behavior).
         let data_root = Path::new("/tmp/data-root");
         assert!(to_relative_data_path(data_root, Path::new("/etc/passwd")).is_err());
     }

@@ -1,8 +1,10 @@
-//! retainpdf-ai 服务的反向代理。
+//! Reverse proxy in front of the retainpdf-ai service.
 //!
-//! 前端保持单一入口(Rust API)与单一 X-API-Key:本路由把请求转发到
-//! 常驻 AI 服务并透传客户端的 X-API-Key(两个服务共享同一 key 集合即可,
-//! 零新增前端配置)。SSE 流式响应按字节流透传。
+//! The frontend keeps a single entry point (the Rust API) and a single
+//! `X-API-Key`: this route forwards requests to the long-lived AI
+//! service and passes the client's `X-API-Key` through (the two services
+//! share the same key set, so the frontend needs zero new config). SSE
+//! streaming responses are proxied byte-for-byte.
 
 use axum::body::Body;
 use axum::extract::Json;
@@ -14,8 +16,9 @@ use crate::error::AppError;
 
 static PROXY_CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
     reqwest::Client::builder()
-        // 上游 agent 循环最长可跑数分钟;连接超时短、整体不设上限,
-        // 由上游自身的轮数/超时护栏兜底。
+        // The upstream agent loop can run for several minutes; we use a
+        // short connect timeout and no overall request cap, relying on
+        // the upstream's own turn-count / timeout guards.
         .connect_timeout(std::time::Duration::from_secs(3))
         .build()
         .expect("build ai proxy client")

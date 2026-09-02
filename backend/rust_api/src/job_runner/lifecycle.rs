@@ -133,9 +133,11 @@ async fn run_job(deps: ProcessRuntimeDeps, job_id: String) -> Result<()> {
     Ok(())
 }
 
-/// 任务终态后的图书馆维护:job 归属 document、置 active_job_id、重建
-/// 该文档的 FTS 全文索引。全部尽力而为——FTS 是可重建的派生索引,
-/// 这里失败只记日志,绝不影响任务状态。
+/// Library maintenance after a job reaches a terminal state: attach
+/// the job to its document, set `active_job_id`, and rebuild that
+/// document's FTS full-text index. Everything is best-effort — the FTS
+/// index is a rebuildable derived view, so any failure here is just
+/// logged and never affects the job's status.
 fn update_document_after_job(deps: &ProcessRuntimeDeps, job: &JobRuntimeState) {
     let Some(upload_id) = job.upload_id.as_deref().filter(|id| !id.is_empty()) else {
         return;

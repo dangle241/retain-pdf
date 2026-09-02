@@ -90,7 +90,8 @@ pub async fn store_pdf_upload(
         content_hash,
     };
     db.save_upload(&record)?;
-    // 内容哈希即文档身份:同一 PDF 重复上传归并到同一 document
+    // Content hash equals the document identity: multiple uploads of the
+    // same PDF are merged into a single document.
     db.upsert_document_from_upload(&record)?;
     Ok(record)
 }

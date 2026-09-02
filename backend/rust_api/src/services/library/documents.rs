@@ -112,12 +112,15 @@ pub fn get_document(
     Ok(with_document_media_urls(document, base_url))
 }
 
-/// 彻底删除一篇文档:文档行 + 名下所有 job(含 -ocr 子 job)+ upload(s) +
-/// 磁盘文件。沿用馆藏删除的收藏保护——被收藏引用则 409(force 不绕过,
-/// 与 delete_library_book 一致;force 仅绕过"运行中 job 不可删")。
+/// Thoroughly delete a document: the document row + all its jobs
+/// (including `-ocr` sub-jobs) + upload(s) + on-disk files. Follows
+/// the library-deletion favorite-protection logic — if it's referenced
+/// by any favorite, return 409 (force does not bypass this, keeping it
+/// consistent with `delete_library_book`; force only bypasses the
+/// "cannot delete running job" check).
 ///
-/// "只入库不翻译"进来的文档没有 book job,也能经此彻底删除(是它唯一的
-/// 删除入口)。
+/// Documents that were "catalogued only" (no book job) can still be
+/// thoroughly deleted here (this is their only deletion entry point).
 pub fn delete_document(
     deps: &LibraryDeps<'_>,
     document_id: &str,
@@ -128,7 +131,8 @@ pub fn delete_document(
         .get_document(document_id)
         .map_err(|_| AppError::not_found(format!("document not found: {document_id}")))?;
 
-    // 收藏保护:文档一删,其锚点全断,拒绝无声销毁用户策展内容
+    // Favorite protection: deleting a document would break all its
+    // anchors; we refuse to silently destroy user-curated content.
     let favorites = deps.db.favorites_count_for_document(document_id)?;
     if favorites > 0 {
         return Err(AppError::conflict(format!(
@@ -136,7 +140,8 @@ pub fn delete_document(
         )));
     }
 
-    // 收集名下所有 job:jobs.document_id 关联的 + 每个的 -ocr 子 job
+    // Collect all jobs under the document: those linked via
+    // `jobs.document_id` plus each one's `-ocr` sub-job.
     let mut job_ids = deps.db.job_ids_for_document(document_id)?;
     for job_id in job_ids.clone() {
         let child = format!("{job_id}-ocr");
@@ -145,7 +150,7 @@ pub fn delete_document(
         }
     }
 
-    // 逐个校验可删(运行中的 job 需 force)
+    // Validate each job for deletability (running jobs require `force`).
     let mut jobs = Vec::new();
     for job_id in &job_ids {
         if let Ok(job) = deps.db.get_job(job_id) {
@@ -162,7 +167,7 @@ pub fn delete_document(
         removed_jobs.push(job.job_id.clone());
     }
 
-    // 删除 upload 记录与其磁盘目录(uploads/<upload_id>/...)
+    // Delete upload records and their on-disk directories (`uploads/<upload_id>/...`).
     for upload in deps.db.uploads_for_document(document_id)? {
         let stored = PathBuf::from(&upload.stored_path);
         if let Some(parent) = stored.parent() {
@@ -173,7 +178,8 @@ pub fn delete_document(
         deps.db.delete_upload(&upload.upload_id)?;
     }
 
-    // 最后删文档行(FK 级联 tags/collection_documents;ai_conversations 置 NULL)+ FTS
+    // Finally delete the document row (FK cascade cleans tags/collection_documents;
+    // ai_conversations is set to NULL) + FTS rows.
     let deleted = deps.db.delete_document(document_id)?;
 
     Ok(DocumentDeleteResultView {

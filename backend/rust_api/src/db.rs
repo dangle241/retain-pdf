@@ -203,7 +203,8 @@ impl Db {
             CREATE INDEX IF NOT EXISTS idx_glossaries_updated_at ON glossaries(updated_at DESC);
             "#,
         )?;
-        // 图书馆表走版本化迁移,随 schema 保证存在(不依赖 init 被调用)
+        // Library tables follow the versioned-migration path; the schema
+        // ensures they exist (without depending on `init` being called).
         run_versioned_migrations(&conn)?;
         *ready = true;
         Ok(())

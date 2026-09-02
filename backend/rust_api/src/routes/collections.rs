@@ -1,5 +1,7 @@
-//! 分类文件夹(合集)CRUD——collections/collection_documents 表早已随图书馆
-//! 数据层建好(见 db/schema.rs),这里只是补上一直缺失的路由层。
+//! CRUD for collection folders — the `collections` / `collection_documents`
+//! tables were already created with the library data layer (see
+//! `db/schema.rs`). This file just adds the routing layer that was
+//! missing.
 //!
 //! All handlers go through library_api (PR5).
 

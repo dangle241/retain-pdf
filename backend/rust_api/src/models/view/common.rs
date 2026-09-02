@@ -102,9 +102,10 @@ pub struct ListJobsQuery {
     pub provider: Option<String>,
     #[serde(default)]
     pub q: Option<String>,
-    /// 逗号分隔的 job_id 白名单(可选)。分类文件夹展开时用它把
-    /// `GET /api/v1/documents?collection_id=` 解出的 active_job_id 集合
-    /// 转成图书馆卡片数据——不传时行为与现状完全一致。
+    /// Comma-separated `job_id` allowlist (optional). When expanding a
+    /// collection folder, this is used to map the `active_job_id` set
+    /// resolved via `GET /api/v1/documents?collection_id=` into library card
+    /// data — if omitted, behavior remains consistent with current state.
     #[serde(default)]
     pub job_ids: Option<String>,
 }

@@ -10,7 +10,8 @@ use crate::storage_paths::resolve_data_path;
 use super::Db;
 
 impl Db {
-    /// 上传即建档:同一内容哈希只有一个 document,重复上传仅刷新时间与文件名。
+    /// Upload-as-document: a single document exists per content hash;
+    /// a repeat upload only refreshes the timestamp and file name.
     pub fn upsert_document_from_upload(&self, upload: &UploadRecord) -> Result<()> {
         if upload.content_hash.is_empty() {
             return Ok(());
@@ -47,9 +48,12 @@ impl Db {
         Ok(record)
     }
 
-    /// 任意 job_id(含历史 run 与 -ocr 子任务)→ 所属 document。
-    /// 前端打开历史 job 时不能再靠 active_job_id 反查——那只匹配当前
-    /// 生效 run,历史 run 会静默失配(收藏不入库、问答退化全库)。
+    /// Look up the document that owns any `job_id` (including historical
+    /// runs and `-ocr` sub-tasks). The frontend opening a historical job
+    /// can no longer reverse-lookup via `active_job_id` — that only
+    /// matches the currently-active run, so historical runs would
+    /// silently mismatch (favorites not saved, AI Q&A falling back to
+    /// the whole library).
     pub fn get_document_by_job_id(&self, job_id: &str) -> Result<Option<DocumentRecord>> {
         let conn = self.connect()?;
         let document_id: Option<String> = conn
@@ -90,8 +94,10 @@ impl Db {
         collection_id: Option<&str>,
     ) -> Result<Vec<DocumentRecord>> {
         let conn = self.connect()?;
-        // 防御性:图书馆列表永不返回无 upload 支撑的孤儿文档(源文件已丢的
-        // 僵尸卡)。"只入库"文档有 upload 只是没 job,不受影响。
+        // Defensive: the library list must never return orphan documents
+        // that have no upload backing them (zombie cards whose source
+        // file has already been GC'd). "Catalogued only" documents have
+        // an upload but no job, and are unaffected.
         let mut clauses: Vec<String> = vec![
             "EXISTS (SELECT 1 FROM uploads u WHERE u.content_hash = d.document_id AND u.content_hash <> '')"
                 .to_string(),
@@ -184,7 +190,8 @@ impl Db {
         Ok(record)
     }
 
-    /// 把 job 归属到 document(经 upload.content_hash),返回 document_id。
+    /// Attach a job to its document (via `upload.content_hash`); returns
+    /// the resolved `document_id`.
     pub fn link_job_to_document(&self, job_id: &str, upload_id: &str) -> Result<Option<String>> {
         let conn = self.connect()?;
         let document_id: Option<String> = conn
@@ -204,7 +211,9 @@ impl Db {
         Ok(Some(document_id))
     }
 
-    /// 按 document_id(= content_hash) 找到最近一次上传记录，用于源 PDF / 封面 / 重译。
+    /// Look up the most recent upload for a `document_id` (which equals
+    /// `content_hash`), used to fetch the source PDF, cover, and trigger
+    /// re-translation.
     pub fn find_upload_for_document(&self, document_id: &str) -> Result<Option<UploadRecord>> {
         let conn = self.connect()?;
         let upload = conn
@@ -243,7 +252,7 @@ impl Db {
         }))
     }
 
-    /// 该文档名下的所有 job_id(经 jobs.document_id 关联)。
+    /// All `job_id`s under this document, joined via `jobs.document_id`.
     pub fn job_ids_for_document(&self, document_id: &str) -> Result<Vec<String>> {
         let conn = self.connect()?;
         let mut stmt =
@@ -256,8 +265,10 @@ impl Db {
         Ok(ids)
     }
 
-    /// 该文档对应的所有 upload 记录(可能同一文件多次上传成多个 upload_id),
-    /// stored_path 解析为绝对路径供删除磁盘文件。
+    /// All `upload` records for this document (the same file may have
+    /// been uploaded multiple times, producing multiple `upload_id`s);
+    /// `stored_path` is resolved to an absolute path so the on-disk file
+    /// can be deleted.
     pub fn uploads_for_document(&self, document_id: &str) -> Result<Vec<UploadRecord>> {
         let conn = self.connect()?;
         let mut stmt = conn.prepare(
@@ -310,8 +321,9 @@ impl Db {
         Ok(count as u64)
     }
 
-    /// 删除文档行(FK 级联清 favorites/document_tags/collection_documents,
-    /// ai_conversations.document_id 置 NULL)+ 派生的 blocks_fts 行。
+    /// Delete the document row (FK cascade clears `favorites`,
+    /// `document_tags`, `collection_documents`; `ai_conversations.document_id`
+    /// is set to NULL) plus the derived `blocks_fts` rows.
     pub fn delete_document(&self, document_id: &str) -> Result<bool> {
         let conn = self.connect()?;
         conn.execute(
@@ -325,8 +337,11 @@ impl Db {
         Ok(changed > 0)
     }
 
-    /// 修复悬空的 active_job_id:若它指向的 job 已不存在,重指该文档下最新的
-    /// 成功 book job;没有则置 NULL(降级为干净馆藏)。删 job 后必调,防僵尸卡。
+    /// Repair a dangling `active_job_id`: if the job it points to no
+    /// longer exists, redirect it to the most recent successful book job
+    /// under the same document, or set it to NULL (downgrade to a
+    /// clean library entry). Must be called after deleting a job, to
+    /// avoid zombie cards.
     pub fn reconcile_document_active_job(&self, document_id: &str) -> Result<()> {
         let conn = self.connect()?;
         conn.execute(
@@ -368,7 +383,8 @@ impl Db {
         Ok(())
     }
 
-    /// 整体重建某文档的 FTS 行(派生索引,幂等)。
+    /// Rebuild the FTS rows for a document in full (the index is
+    /// derived and the operation is idempotent).
     pub fn replace_document_fts(
         &self,
         document_id: &str,
@@ -404,8 +420,10 @@ impl Db {
         Ok(())
     }
 
-    /// 全文检索。trigram 分词要求查询 ≥3 字符,更短的查询回退 LIKE 扫描。
-    /// `document_id` 非空时只搜该文档（阅读器 / AI 整本问答）。
+    /// Full-text search. Trigram tokenization needs a query of at least
+    /// 3 characters; shorter queries fall back to a LIKE scan. When
+    /// `document_id` is set, the search is restricted to that document
+    /// (used by the reader and the AI "ask the whole book" flow).
     pub fn search_blocks(
         &self,
         query: &str,
@@ -564,7 +582,8 @@ impl Db {
         Ok(changed > 0)
     }
 
-    /// 被收藏锚点引用的 job 不允许单独删除(锚点块空间保护)。
+    /// Jobs referenced by favorite anchors cannot be deleted standalone
+    /// (protects the block space that the favorite points to).
     pub fn favorites_referencing_job(&self, job_id: &str) -> Result<u64> {
         let conn = self.connect()?;
         let count: i64 = conn.query_row(
@@ -575,8 +594,9 @@ impl Db {
         Ok(count as u64)
     }
 
-    /// 存量回填:老库升级为图书馆模型。幂等且只在有缺口时做事,
-    /// 稳态启动只付几条 COUNT 的代价。
+    /// Backfill: upgrade older databases to the library model. The
+    /// operation is idempotent and only does work where there are gaps,
+    /// so a steady-state startup pays only the cost of a few COUNTs.
     pub(super) fn backfill_library_records(&self) -> Result<()> {
         self.backfill_upload_hashes()?;
         self.backfill_job_document_links()?;
@@ -586,11 +606,15 @@ impl Db {
         Ok(())
     }
 
-    /// 一次性清理孤儿文档:没有任何 upload 支撑(源文件早被 retention GC 掉)
-    /// 的文档行,是永远打不开的僵尸卡。只清没有收藏引用的——有收藏的降级
-    /// 数据保留给用户经 DELETE /documents/:id 显式处理,不无声销毁策展内容。
-    /// root-cause(retention 不再删 document-backed upload)已堵住新孤儿产生,
-    /// 此清理只处理历史遗留。
+    /// One-shot cleanup of orphan documents: document rows with no
+    /// upload backing them (the source file was already GC'd by the
+    /// retention sweep) are zombie cards that can never be opened. We
+    /// only remove orphans that no favorite references — entries with
+    /// favorites are downgraded data, kept for the user to delete via
+    /// `DELETE /documents/:id` so we never silently destroy curated
+    /// content. The root cause (retention no longer deleting
+    /// document-backed uploads) has been fixed, so this cleanup only
+    /// handles historical leftovers.
     fn cleanup_orphan_documents(&self) -> Result<()> {
         let conn = self.connect()?;
         let orphan_ids: Vec<String> = {
@@ -735,7 +759,8 @@ impl Db {
     }
 }
 
-/// sha2 0.11 的输出类型不再实现 LowerHex,统一走手动十六进制编码。
+/// The output type of `sha2` 0.11 no longer implements `LowerHex`, so
+/// we standardize on manual hex encoding.
 pub fn sha256_hex(bytes: &[u8]) -> String {
     use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
@@ -837,12 +862,14 @@ fn row_to_favorite(row: &rusqlite::Row<'_>) -> rusqlite::Result<FavoriteRecord> 
     })
 }
 
-/// 从任务产物目录构建某文档的 FTS 行:
-/// - `ocr/normalized/document.v1.json` 提供 source_text 与规范 block_id;
-/// - `translated/page-*.json` 提供 translated_text,按 (page_idx, block_idx)
-///   数字索引对齐(译文 item_id 与规范 block_id 的零填充位数不同,不能按
-///   字符串对齐)。
-/// 译文缺失时只索引原文。
+/// Build FTS rows for a document from its job's artifact directory:
+/// - `ocr/normalized/document.v1.json` provides `source_text` and the
+///   canonical `block_id`s.
+/// - `translated/page-*.json` provides `translated_text`; the rows are
+///   aligned by the numeric `(page_idx, block_idx)` pair (the translation
+///   `item_id` and the canonical `block_id` use different zero-padding
+///   widths and cannot be aligned as strings).
+/// When a translation is missing, only the source text is indexed.
 pub fn build_fts_rows_from_job_dir(job_root: &Path) -> Result<Vec<FtsBlockRow>> {
     let normalized_path = job_root.join("ocr").join("normalized").join("document.v1.json");
     let raw = std::fs::read_to_string(&normalized_path)
@@ -1017,7 +1044,8 @@ mod tests {
         let version: i64 = conn
             .query_row("PRAGMA user_version", [], |row| row.get(0))
             .expect("user_version");
-        // 与迁移数组长度同步:v1 图书馆地基 + v2 资产/会话
+        // Stays in sync with the migration list length: v1 library
+        // foundation + v2 assets / sessions.
         assert_eq!(version, 2);
     }
 
@@ -1027,7 +1055,8 @@ mod tests {
         let db = fs.db();
         db.init().expect("init");
         let hash = sha256_hex(b"same pdf bytes");
-        // 生产路径:save_upload 先于 upsert_document(列表过滤依赖 upload 存在)
+        // Production path: `save_upload` runs before `upsert_document`
+        // (the list filter depends on the upload row already existing).
         let up1 = upload_with_hash("up-1", &hash);
         db.save_upload(&up1).expect("save up-1");
         db.upsert_document_from_upload(&up1).expect("first upsert");
@@ -1083,10 +1112,11 @@ mod tests {
         assert_eq!(hits[0].document_id, hash);
         assert_eq!(hits[0].page_idx, 2);
         assert_eq!(hits[0].block_id, "p003-b0001");
-        // 2 字符查询走 LIKE 回退
+        // 2-character queries fall back to LIKE scanning.
         let short_hits = db.search_blocks("光谱", 10, None).expect("search short");
         assert_eq!(short_hits.len(), 1);
-        // 单文档过滤：不存在的 document_id 应无命中
+        // Single-document filter: an unknown `document_id` must produce
+        // zero hits.
         let scoped_miss = db
             .search_blocks("光学光谱", 10, Some("no-such-doc"))
             .expect("search scoped miss");
@@ -1095,7 +1125,7 @@ mod tests {
             .search_blocks("光学光谱", 10, Some(&hash))
             .expect("search scoped hit");
         assert_eq!(scoped_hit.len(), 1);
-        // 重建幂等:再次替换后仍只有一行
+        // Idempotent rebuild: replacing again still leaves only one row.
         db.replace_document_fts(
             &hash,
             "job-2",
