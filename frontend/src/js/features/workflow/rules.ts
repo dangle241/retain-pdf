@@ -48,7 +48,7 @@ export function workflowUsesRenderStage(workflow, constants) {
 }
 
 export function workflowSubmitLabel(workflow, constants) {
-  // UI 文案: Upload弹窗主按钮"Translate directly"；render 仍用"Start rendering"
+  // UI copy: Upload dialog main button "Translate directly"; render still uses "Start rendering"
   switch (workflow) {
     case constants.WORKFLOW_RENDER:
       return "Start rendering";

@@ -1,14 +1,15 @@
-// "一batchesDocuments → 一batchesGrid卡片 item"的唯一编排(重构②).
+// The single orchestration to turn a batch of Documents into a batch of grid card items (refactor ②).
 //
-// 之前这套"收集有 active_job_id 的Documents → Batch取 library/books 活态 → 建
-// bookMap → 逐documents shapeDocumentCardItem"的编排被抄了两份:Library主Grid
-// (document-library-source.js)和Collection展开(collections/controller.js).两份
-// 发散yes"Empty collection" bug 的根源——Collection那份yes F2 Documents中心化之前的旧拷贝,自己
-// filter 掉了LibraryDocuments.收成这一个函数后,任何"列一batchesDocuments成卡片"的界面
-// (Library/Collection/搜索/未来的新入口)都穿过它,不会再各自发散.
+// Previously, this orchestration "collect documents with active_job_id → batch fetch library/books
+// live state → build bookMap → shapeDocumentCardItem per document" was duplicated in two places:
+// the Library main grid (document-library-source.js) and Collection expansion
+// (collections/controller.js). The divergence caused the "Empty collection" bug — the Collection
+// copy was an older pre-F2 document-centric code that filtered out library documents.
+// By consolidating into this one function, any interface that lists a batch of documents as cards
+// (Library/Collection/search/future entry points) goes through it, preventing future divergence.
 //
-// 只负责 documents → cards 的映射(保序,不去重/不mpages/不搜索过滤——那些yes
-// 各消费方自己的关切,留在调用方).
+// Only responsible for documents → cards mapping (preserves order, no dedupe/paging/search filtering
+// — those are the concerns of each consumer, left to the caller).
 
 import { shapeDocumentCardItem } from "./document-card-item.js";
 
