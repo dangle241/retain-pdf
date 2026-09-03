@@ -103,7 +103,7 @@ All these should be provider-specific artifactnot the main process prerequisite.
 
 provider Once the layer artifact is written to disk, the next step does one thing only:
 
-- Call document_schema adapter to provide source text for translation.
+- Call the document_schema adapter to normalize the raw payload.
   - `document.v1.json`
   - `document.v1.report.json`
 
@@ -207,7 +207,7 @@ Do not include in the short term. `services/mineru/` continue expanding into the
 
 A more stable approach:
 
-- explicitly downgrade it toMinerU provider Provide source text to translate.
+- explicitly downgrade it to the MinerU provider.
 - Add this one. `ocr_provider/README.md` General convention.
 - subsequent new OCR API When, first align with this convention, then decide the directory and adapter
 

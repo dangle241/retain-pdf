@@ -191,7 +191,7 @@ Design has two layers:
 - Run actual again. promptfoo current-replay
   - `python backend/scripts/devtools/promptfoo/run_eval.py`
 
-### Missing context. Provide source text or code snippet to explain "why". GitHub CI does not depend on `data/jobs/`
+### Why the CI does not depend on `data/jobs/`
 
 GitHub runner checkout Default cannot access your local. `data/jobs/...` Working directory, so case artifact Will now also freeze:
 

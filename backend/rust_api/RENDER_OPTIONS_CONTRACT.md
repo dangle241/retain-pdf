@@ -14,7 +14,7 @@ This document specifies. Rust API External inbound `render` Parameters. Principl
 | `render.compile_workers` | integer | `0` | `>= 0` | Typst Concurrent compilation.`0` Indicates use. worker default strategy. |
 | `render.typst_font_family` | string | `Source Han Serif SC` | Unstructured string | Typst Default Chinese font family. |
 | `render.pdf_compress_dpi` | integer | `0` | `>= 0` | PDF image compression DPI. `0` Indicates no additional image compression. |
-| `render.translated_pdf_name` | string | `""` | Any filename string | Provide source text. PDF Filename. Empty value uses backend default naming. |
+| `render.translated_pdf_name` | string | `""` | Any filename string | Output PDF filename. An empty value uses the backend default naming. |
 | `render.body_font_size_factor` | number | `0.95` | `> 0` and finite | Global body font size scaling. |
 | `render.body_leading_factor` | number | `1.08` | `> 0` and finite | Global body line spacing multiplier. |
 | `render.font_unify_mode` | string | `role_min` | `role_min`, `off` | Font consistency strategy.`role_min` Normalize roles to stable baseline.`off` Turn off unified but do not turn off fit/Collision/Background rules. |
@@ -42,7 +42,7 @@ Set default policy. Render pre. pikepdf deletes original PDF content stream Text
 used by default `pikepdf_text_strip` reason:
 
 - Minimize original text leaking from Typst Probability of background block edge bleed.
-- pikepdf path changes. text-op Delete older than PyMuPDF redaction more suitable for formal PDF Provide source text for translation.
+- The pikepdf path is changing. Removing `text-op` is more suitable for the formal PDF redaction step than relying on PyMuPDF.
 - `formula` / `display_formula` bbox Reserved as protected area. Visual masking still by... Typst Background block fallback.
 - If a certain category PDF Deletion is riskier; set explicitly. `typst_fill` Overwrite only.
 

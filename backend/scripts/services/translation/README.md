@@ -343,7 +343,7 @@ Current agent is not a standalone process, not a new provider gateway, but a tra
 Implemented roles:
 
 - `TerminologyAgent`
-  Provide source text for translation. prompt。
+  The TerminologyAgent prompt: produces term candidates.
 - `ConsistencyReviewerAgent`
   Perform rule-based quality checks on translation output, e.g., untranslated English remnants.placeholder inconsistency, missing terms.
 - `RepairAgent`

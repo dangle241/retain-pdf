@@ -52,7 +52,7 @@ Not done here:
   - `ocr/unpacked/layout.json`
   - `ocr/normalized/document.v1.json`
   - `ocr/normalized/document.v1.report.json`
-- Provide source text./Main render pipeline defaults require and prioritize. `ocr/normalized/document.v1.json`
+- The main render pipeline defaults to and prioritizes `ocr/normalized/document.v1.json`.
 - `ocr/unpacked/layout.json` Reserved for adapters, debugging, and backtracking; no longer implicit in the main path. fallback
 - `content_list_v2.json` Currently for experiment and adaptation only, not the main path.
 - If you only want to provider / defaults / validation Show summary, read first. `document.v1.report.json`

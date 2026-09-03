@@ -406,7 +406,7 @@ curl -X POST \
 Current Cancellation Rules:
 
 - Cancel if task still queued.
-- If the task remains. provider Phase, stop subsequent polling./Provide source text to translate.
+- If the task is still in the provider phase, stop subsequent polling.
 - If the task has already entered `normalizing`Will complete current first. normalizeDiscard normalized outputs, then mark. `canceled`
 
 ## 10. Current directory persistence convention

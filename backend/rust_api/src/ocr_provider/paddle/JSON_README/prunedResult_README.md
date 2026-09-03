@@ -53,7 +53,7 @@ This README For `rust_api/src/ocr_provider/paddle/json_full.json` in `layoutPars
 - Suggest adapter treat `layout_det_res` as original detection trace:
 - Can store in normalized document `meta.raw_traces.layout_det_res` with `boxes` logging label and score.
 - `coordinate` / `polygon_points` correspond to `parsing_res_list` geometry; can verify consistency between the two (e.g. `merge_layout_blocks` causing differences).
-  - `score` Writable trace rather than normalized block Provide source text. `document.normalization_trace` For troubleshooting missed detections./False positive
+  - `score` is a writable trace rather than a normalized block. Use `document.normalization_trace` for troubleshooting missed detections or false positives.
 
 ## Adaptation Suggestions
 
