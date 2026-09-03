@@ -1,13 +1,11 @@
-// AppUpdateBanner 的纯视图态 + 与 features/app-update/controller.js(kept
-// 控制器)对接的 store 驱动 viewPort(蓝图 §5,镜像
-// credentials-view-store.js/glossaries-store.js 的写法)。
+// Pure view state for AppUpdateBanner + store-driven viewPort wired to features/app-update/controller.js (kept).
+// Mirrors credentials-view-store.js / glossaries-store.js (Blueprint §5).
 //
-// 旧世界 update-view-port.js/view.js 全部是 DOM 直写(死,不 import);这里用
-// 同名方法签名(bindButton/setChecking/setReady/setAvailable/setLatest/
-// setError)重新实现,只是"写"的目的地从 DOM 换成 store。逐字段行为抄自
-// src/js/features/app-update/view.js:88-166(setUpdateChecking/setUpdateReady/
-// setUpdateAvailable/setUpdateLatest/setUpdateError),controller.js
-// (checkForUpdates 编排 + 24h 缓存)一行不改地复用。
+// Legacy update-view-port.js/view.js were DOM direct-write (dead, not imported); here we re-implement
+// with the same method signatures (bindButton/setChecking/setReady/setAvailable/setLatest/setError),
+// only changing the write destination from DOM to store. Field behavior copied from
+// src/js/features/app-update/view.js:88-166 (setUpdateChecking/setUpdateReady/setUpdateAvailable/
+// setUpdateLatest/setUpdateError); controller.js (checkForUpdates orchestration + 24h cache) reused verbatim.
 
 import { APP_UPDATE_STATES } from "./app-update-contract.js";
 import type { HandlersBag } from "../../composition/types.js";
@@ -42,7 +40,7 @@ export type AppUpdateViewActions = {
 
 export type AppUpdateViewStore = Store<AppUpdateViewState, AppUpdateViewActions>;
 
-/** setAvailable / setLatest 的发布信息载荷 */
+/** Release info payload for setAvailable / setLatest */
 export type AppUpdateReleaseInfo = {
   latestVersion?: string;
   currentVersion?: string;
@@ -52,7 +50,7 @@ export type AppUpdateReleaseInfo = {
 };
 
 function panelOf({
-  title = "检查更新",
+  title = "Check updates",
   body = "",
   latestVersion = "",
   currentVersion = APP_VERSION,
@@ -67,11 +65,11 @@ export function createAppUpdateViewFeature() {
     initialState: {
       buttonState: APP_UPDATE_STATES.idle,
       hasUpdate: false,
-      buttonTitle: "检查更新",
+      buttonTitle: "Check for updates",
       statusText: "",
       panel: panelOf({
-        title: "检查更新",
-        body: "点击“重新检查”从 GitHub Releases 获取最新版本。",
+        title: "Check for updates",
+        body: "Click \"Recheck\" to get the latest version from GitHub Releases.",
       }),
     },
     actions: {
@@ -87,34 +85,34 @@ export function createAppUpdateViewFeature() {
     bindButton: (handlers: HandlersBag) => {
       handlersRef.current = handlers;
     },
-    // 抄自 view.js:88-100(setUpdateChecking)
+    // Copied from view.js:88-100 (setUpdateChecking)
     setChecking: () => store.actions.apply({
       buttonState: APP_UPDATE_STATES.checking,
       hasUpdate: store.getSnapshot().hasUpdate,
-      buttonTitle: "正在检查更新",
-      statusText: "正在检查 GitHub Releases...",
+      buttonTitle: "Checking for updates",
+      statusText: "Checking GitHub Releases...",
       panel: panelOf({
-        title: "正在检查更新",
-        body: "正在连接 GitHub Releases...",
+        title: "Checking for updates",
+        body: "Connecting to GitHub Releases...",
       }),
     }),
-    // 抄自 view.js:102-115(setUpdateReady)
+    // Copied from view.js:102-115 (setUpdateReady)
     setReady: () => store.actions.apply({
       buttonState: APP_UPDATE_STATES.idle,
       hasUpdate: false,
-      buttonTitle: "检查更新",
+      buttonTitle: "Check for updates",
       statusText: "",
       panel: panelOf({
-        title: "检查更新",
-        body: "点击“重新检查”从 GitHub Releases 获取最新版本。",
+        title: "Check for updates",
+        body: "Click \"Recheck\" to get the latest version from GitHub Releases.",
       }),
     }),
-    // 抄自 view.js:117-133(setUpdateAvailable)
+    // Copied from view.js:117-133 (setUpdateAvailable)
     setAvailable: (info: AppUpdateReleaseInfo = {}) => store.actions.apply({
       buttonState: APP_UPDATE_STATES.available,
       hasUpdate: true,
-      buttonTitle: `发现新版本 ${info.latestVersion}`,
-      statusText: "发现新版本",
+      buttonTitle: `New version found: ${info.latestVersion}`,
+      statusText: "New version found",
       panel: panelOf({
         title: info.title || `RetainPDF ${info.latestVersion}`,
         body: info.body,
@@ -123,29 +121,29 @@ export function createAppUpdateViewFeature() {
         htmlUrl: info.htmlUrl,
       }),
     }),
-    // 抄自 view.js:135-151(setUpdateLatest)
+    // Copied from view.js:135-151 (setUpdateLatest)
     setLatest: (info?: AppUpdateReleaseInfo | null) => store.actions.apply({
       buttonState: APP_UPDATE_STATES.latest,
       hasUpdate: false,
-      buttonTitle: "已是最新版本",
-      statusText: "已是最新版本",
+      buttonTitle: "Already on latest version",
+      statusText: "Already on latest version",
       panel: panelOf({
-        title: "已是最新版本",
-        body: "当前版本已经是 GitHub Releases 上的最新版本。",
+        title: "Already on latest version",
+        body: "Current version is already the latest on GitHub Releases.",
         latestVersion: info?.latestVersion || APP_VERSION,
         currentVersion: info?.currentVersion || APP_VERSION,
         htmlUrl: info?.htmlUrl || "",
       }),
     }),
-    // 抄自 view.js:153-166(setUpdateError)
+    // Copied from view.js:153-166 (setUpdateError)
     setError: (error?: { message?: string } | null) => store.actions.apply({
       buttonState: APP_UPDATE_STATES.error,
       hasUpdate: false,
-      buttonTitle: "检查更新失败",
-      statusText: "检查失败",
+      buttonTitle: "Update check failed",
+      statusText: "Check failed",
       panel: panelOf({
-        title: "检查更新失败",
-        body: error?.message || "暂时无法连接 GitHub Releases。",
+        title: "Update check failed",
+        body: error?.message || "Unable to connect to GitHub Releases.",
       }),
     }),
   };

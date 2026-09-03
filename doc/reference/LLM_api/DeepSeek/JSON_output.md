@@ -1,14 +1,14 @@
-在很多场景下，用户需要让模型严格按照 JSON 格式来输出，以实现输出的结构化，便于后续逻辑进行解析。
+In many scenarios, users need the model to strictly follow JSON Format output for structure, enabling parsing by subsequent logic.
 
-DeepSeek 提供了 JSON Output 功能，来确保模型输出合法的 JSON 字符串。
+DeepSeek provides JSON Output Ensures valid model output. JSON String.
 
-注意事项
-设置 response_format 参数为 {'type': 'json_object'}。
-用户传入的 system 或 user prompt 中必须含有 json 字样，并给出希望模型输出的 JSON 格式的样例，以指导模型来输出合法 JSON。
-需要合理设置 max_tokens 参数，防止 JSON 字符串被中途截断。
-在使用 JSON Output 功能时，API 有概率会返回空的 content。我们正在积极优化该问题，您可以尝试修改 prompt 以缓解此类问题。
-样例代码
-这里展示了使用 JSON Output 功能的完整 Python 代码：
+Notes
+Set response_format parameter: {'type': 'json_object'}.
+User-provided system or user prompt must contain wording about json, and provide desired model output JSON format samples to guide model output validity. JSON.
+Configure appropriately. max_tokens Parameters, Prevent JSON String truncated partway.
+In use JSON Output When the feature,API May return empty with probability. contentWe are actively optimizing this issue. You can try modifying it. prompt To mitigate such issues.
+Sample code
+Shows usage JSON Output Functional completeness Python Code:
 
 import json
 from openai import OpenAI
@@ -47,7 +47,7 @@ response = client.chat.completions.create(
 print(json.loads(response.choices[0].message.content))
 
 
-模型将会输出：
+The model will output:
 
 {
     "question": "Which is the longest river in the world?",

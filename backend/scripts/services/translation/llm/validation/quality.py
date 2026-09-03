@@ -204,10 +204,13 @@ def _review_translated_text(
         issues.append(truncation)
     context_bleed = _context_bleed_leaked_math(item, source_text, translated_text)
     if context_bleed:
-        # 连续段片段按设计就是"无终止标点的不完整句",此检查对它们必然
-        # 高频触发;而 apply 层的 _sanitize_neighbor_continuation_leak 已经
-        # 能确定性修剪泄漏的后文公式。对连续段降级为警告,避免为机械层
-        # 可修复的问题反复重试;独立条目仍保持硬错误。
+        # Continuation fragments are by design incomplete sentences with
+        # no terminating punctuation, so this check would fire on them
+        # very frequently. The apply layer's
+        # `_sanitize_neighbor_continuation_leak` already deterministically
+        # trims leaked trailing math. We downgrade continuations to a
+        # warning so we don't loop retrying on a problem the mechanical
+        # layer can fix; standalone items still produce a hard error.
         issues.append(
             TranslationQualityIssue(
                 item_id=item_id,

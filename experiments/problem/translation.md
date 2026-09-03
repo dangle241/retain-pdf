@@ -1,10 +1,10 @@
 
 
-# 1. 推荐总体架构
+# 1. Recommended overall architecture
 
-不要按 page 翻译，也不要按裸 block 翻译。推荐用 **translation unit，TU** 作为最小翻译单元。
+Do not translate by page. Do not press bare. block Recommended translation unit, TU as minimum translation unit.
 
-但这里的 TU 不是简单句子，也不是 OCR block。它应该是一个带结构约束的对象：
+But the TU here does not take OCR block input directly. It must be a structured object with constraints.
 
 ```json
 {
@@ -31,7 +31,7 @@
 }
 ```
 
-推荐流水线改成这样：
+Recommended pipeline change to:
 
 ```
 OCR normalized JSON
@@ -51,28 +51,28 @@ OCR normalized JSON
 → diagnostics / manifest
 ```
 
-关键变化有三个：
+Three key changes:
 
-1. **先建 layout graph，再切 TU**
+1. **Create first. layout graphSkip TU**
 
-    不要直接按 reading_order 串起来。把 block 当图节点，边包括：
+    Don't translate directly. reading_order chain together. Treat block For graph nodes, edges include:
 
-    - 同页相邻
-    - 同栏相邻
-    - 跨栏候选
-    - 跨页候选
-    - 标题到正文
-    - 图表 caption 到图表
-    - footnote 到正文引用
-2. **翻译单元和渲染单元分离**
+    - Same-page adjacent
+    - Same-column adjacent
+    - Hurdle Candidate
+    - Cross-page candidates
+    - Title to Body
+- Chart caption Go to Chart
+    - footnote To body citation
+2. **Separate translation and rendering units**
 
-    一个 TU 可以跨多个 block，但回填时仍然要保留原始 block anchor。
+One TU can span multiple blocks but retain the original when backfilling. block anchor." – but "blockbut" should be "blocks but". Also "block anchor" is part of it. So: "    One TU can span multiple blocks but retain the original when backfilling. block anchor.
 
-    这样 continuation 判断错了，也不会立刻毁掉页面结构。
+This way, continuation wrong judgment won't immediately destroy page structure.
 
-3. **所有输出都带状态**
+3. **All outputs include status.**
 
-    每个 TU 最后应该有：
+Each TU should finally have:
 
 
 ```json
@@ -85,77 +85,77 @@ OCR normalized JSON
 }
 ```
 
-大文档系统最怕一句话：要么全成功，要么全失败。
+Large document systems dread one phrase: all or nothing.
 
-500 页任务必须允许**局部失败、局部降级、整体导出**。
+500 Page tasks must allow**Partial failure, partial degradation, full export**。
 
-# 2. block、paragraph、page、TU 怎么选
+# 2. block、paragraph、page、TU How to select
 
-推荐结论：
+Recommended conclusion:
 
-| 粒度 | 是否推荐 | 原因 |
+| Granularity | Recommended? | Reason |
 | --- | --- | --- |
 | --- | ---: | --- |
-| page | 不推荐做最小翻译单元 | prompt 太大，页面结构复杂，失败代价高，retry 成本高 |
-| block | 不推荐直接翻译 | OCR block 常常切碎句子，术语和上下文不稳 |
-| paragraph | 可作为中间层 | 对正文好用，但对表格、caption、脚注、公式附近文本不够稳 |
-| TU | 推荐 | 可以按语义和布局动态切分，适合并发、校验、repair、回填 |
+| page | not recommended as the minimum translation unit | prompt Too large, complex page structure, high failure cost.retry Costly |
+| block | No translation. | OCR block Frequently fragments sentences, terminology and context inconsistent. |
+| paragraph | Serves as intermediate layer. | Works well for the main text, but for tables,caption, footnotes, and text near formulas are unstable |
+| TU | Recommended | Dynamically splittable by semantics and layout. Suitable for concurrency, validation, ...repairFill |
 
-TU 的大小建议：
-
-```
-普通正文：80 到 300 tokens
-复杂科学段落：100 到 500 tokens
-表格 cell：一个 cell 或一组同类 cell
-caption：完整 caption
-标题：单独 TU
-公式说明：公式外文本单独 TU，公式本身保护
-脚注：单独 TU，但带引用上下文
-```
-
-不要追求 TU 越大越好。
-
-大 TU 提升上下文，但会增加空译文、解释泄漏、超时、格式破坏。你们现在的症状已经说明 batch 或 TU 过大、约束过多、retry 策略不够分层。
-
-# 3. continuation detection 放在哪里
-
-我的建议是三段式：
+TU Size suggestion:
 
 ```
-LLM 前：规则 + layout graph 生成 continuation candidates
-LLM 中：只允许判断低风险语义关系，不允许直接改结构
-翻译后：只做局部修复，不做大规模重排
+Body text: 80 to 300 tokens
+Complex scientific paragraphs: 100 to 500 tokens
+Table cell: one cell or a group of cells of the same kind
+caption: complete caption
+Title: Separate TU
+Formula description: text outside formulas separate. TUFormula itself protected.
+Footnote: separate TU.
 ```
 
-## 3.1 LLM 前必须做
+Don't pursue. TU Bigger is better.
 
-continuation 主要是结构问题，应该先用规则做候选判断。信号包括：
+Large TU increases context, but adds empty translations, explanation leakage, timeouts, format corruption. Your current symptoms already show it. batch or TU too large, too many constraints. Retry strategy lacks layering.
 
-1. 几何信号
-    - bbox 垂直距离
-    - 同栏 x overlap
-    - 栏宽
-    - 页边距
-    - 是否跨页
-    - 是否在 header/footer 区域
-2. 文本信号
-    - 上一个 block 是否以句号、问号、冒号、分号结束
-    - 下一个 block 是否小写开头
-    - 是否以连字符断词
-    - 是否像列表编号
-    - 是否像标题
-    - 是否包含公式编号
-3. 语义角色信号
-    - body 接 body 可以候选
-    - title 接 body 不应合并
-    - caption 接 body 通常不合并
-    - footnote 接 body 不合并，只建立引用关系
-4. reading_order 信号
-    - 同页 order 连续
-    - 跨栏 order 是否跳跃
-    - 跨页是否从上一页最后正文到下一页第一正文
+# 3. continuation detection Where to place it
 
-输出不要直接是 yes/no，而是：
+My suggestion: three-part structure.
+
+```
+LLM Before: Rules + layout graph generate continuation candidates
+LLM Only allow low-risk semantic relation judgments. Do not allow direct structural changes.
+Local fixes only, no major restructuring.
+```
+
+## 3.1 LLM Must do before
+
+continuation Signal candidates use rules first.
+
+1. Geometric Signal
+    - bbox Vertical distance
+    - Same column x overlap
+    - Column width
+    - Margins
+    - Span pages?
+- Whether in header/footer region
+2. Text signal
+- Previous block whether it ends with a period, question mark, colon, or semicolon
+    - Next block whether it starts with a lowercase letter
+    - Hyphenate words
+    - Is it like list numbering?
+    - Match title?
+    - Include equation numbers?
+3. Semantic role signals
+- body followed by body candidate
+- title followed by body: do not merge
+- caption followed by body: usually not merged
+- footnote followed by body: establish reference only. No merge.
+4. reading_order signal
+- Same-page order continuous
+- Cross-column order jump?
+    - whether cross-page continuity from last body text on previous page to first body text on next page
+
+Not a yes/no question, but rather:
 
 ```json
 {
@@ -166,11 +166,11 @@ continuation 主要是结构问题，应该先用规则做候选判断。信号�
 }
 ```
 
-## 3.2 LLM 只能处理低置信度候选
+## 3.2 LLM Handle low-confidence candidates only
 
-不要让 LLM 自由决定跨页合并。
+Do not let LLM cross-page merge at your discretion.
 
-它可以回答：
+It can answer:
 
 ```json
 {
@@ -180,13 +180,13 @@ continuation 主要是结构问题，应该先用规则做候选判断。信号�
 }
 ```
 
-但不能直接把两个 block 合并成新结构。结构写入必须由你们的规则层执行。
+but cannot directly combine the two block Merge into new structure. Structural writes must be executed by your rules layer.
 
-## 3.3 降低灾难性误判的方法
+## 3.3 Catastrophic misjudgment reduction methods.
 
-最关键的一条：**不做破坏性合并**。
+Most critical:**Non-destructive merge**。
 
-也就是说，即使判断两个 block 是 continuation，也不要把原始 block 消灭。用虚拟 paragraph group：
+That is, even if judging two blocks are continuation, do not delete the original block. Use virtual paragraph group:
 
 ```json
 {
@@ -197,9 +197,9 @@ continuation 主要是结构问题，应该先用规则做候选判断。信号�
 }
 ```
 
-翻译时可以把它们作为一个 TU 或相邻 TU，但回填仍然按 block anchor 切回去。
+Otherwise, backfill the missing TU or an adjacent TU, but keep the original block anchor intact when the translation is short.
 
-如果切回困难，就让一个 TU 对多个 block 产生 translated_segments：
+If switching back is difficult, let one. TU For multiple block Generate translated_segments：
 
 ```json
 {
@@ -211,93 +211,93 @@ continuation 主要是结构问题，应该先用规则做候选判断。信号�
 }
 ```
 
-高风险 continuation 的策略：
+High risk continuation Strategy:
 
 ```
-高置信度：允许虚拟合并翻译
-中置信度：分开翻译，但提供 read-only neighbor context
-低置信度：完全分开，只进入 diagnostics
+High confidence: allow virtual merge translation
+Medium confidence: translate separately, but provide. read-only neighbor context
+Low confidence: separate completely, enter only. diagnostics
 ```
 
-这样误判不会把上下文泄漏扩大成页面级事故。
+This misjudgment won't escalate context leakage to a page-level incident.
 
-# 4. quality gate 分级
+# 4. quality gate Leveling
 
-你们不应该只有 pass/fail。推荐四级。
+You shouldn't only have pass/fail。
 
-## 4.1 P0，必须阻断该 TU 导出
+## 4.1 P0 Block request. TU export
 
-这些问题不能放过：
+These issues cannot be overlooked:
 
-| 类型 | 例子 | 处理 |
+| Type | Example | Handling |
 | --- | --- | --- |
-| 空译文 | source 非空但 target 为空 | retry 或 repair，失败则 fallback_source 并标红 |
-| schema 错误 | JSON parse 失败、字段缺失、id 对不上 | retry |
-| item 数量错误 | 输入 10 个 TU，输出 9 个或 11 个 | retry |
-| placeholder 丢失 | `⟦PH_001⟧` 缺失、重复、改写 | repair，失败则失败 |
-| 公式破坏 | LaTeX token 丢失、公式编号错 | repair 或回滚 |
-| 解释泄漏 | 出现“这段可以翻译为”“Here is the translation” | repair |
-| 明显未翻译 | 整段英文残留，且目标是中文 | retry/repair |
-| 严重截断 | target 长度异常短，语义明显不完整 | retry |
-| 错页/错 id | target 写到另一个 tu_id | 阻断 |
-| 保护 span 顺序错误 | 引用、脚注、公式顺序错乱 | repair |
+| Empty translation | source non-empty but target empty | retry or repair; on failure fallback_source and highlight in red |
+| schema error | JSON parse failed, field missing, id mismatch. | retry |
+| item quantity error | input 10 TUs, output 9 or 11 | retry |
+| placeholder Missing | `⟦PH_001⟧` Data inconsistency. Clean duplicates. Validate inputs. | repairFailure tolerated. |
+| Formula Corruption | LaTeX token Lost formula numbering. | repair or Rollback |
+| Explain leakage | Meta-phrase like "Here is the translation" is omitted from the output. | repair |
+| Obviously not translated | Whole paragraph of English remains, and the target is Chinese | retry/repair |
+| Severe truncation. | target abnormally short length, semantically obviously incomplete | retry |
+| Error page/wrong id | target written to another tu_id | Block |
+| Protect span order error | References, footnotes, equations out of order. | repair |
 
-P0 是**局部阻断**，不是整个 PDF 阻断。
+P0 is a local block, not the entire PDF blocked.
 
-除非 P0 超过阈值，比如：
+Unless P0 Exceeds threshold, e.g.:
 
 ```
 P0 TU ratio > 0.5%
-或 P0 page ratio > 2%
-或连续 3 页存在 P0
+or P0 page ratio > 2%
+or continuous 3 Page exists. P0
 ```
 
-才阻断整本文档导出。
+Only then block entire document export.
 
-## 4.2 P1，必须尝试 repair，但可降级导出
+## 4.2 P1Must try repairBut degrade export
 
-| 类型 | 例子 | 处理 |
+| Type | Example | Handling |
 | --- | --- | --- |
-| 术语硬约束未命中 | 用户 glossary 指定 A 必须译为 B | repair |
-| 中等英文残留 | 有英文短语残留，但不是公式/缩写 | repair |
-| 格式轻微错 | 列表符号、换行、标点不一致 | repair |
-| 长度比例异常 | target/source 比例异常 | repair |
-| 重复输出 | 同一句重复两遍 | repair |
-| 风格明显跑偏 | 变成摘要、解释、改写 | repair |
+| Hard terminology constraint miss. | User glossary specifies A must be translated as B | repair |
+| Medium English residue detected. | English phrase remnants remain, but not formulas./abbreviations | repair |
+| Minor format errors | Inconsistent list markers, line breaks, and punctuation. | repair |
+| Abnormal length ratio | target/source ratio abnormal | repair |
+| duplicate output | Repeat same sentence twice. | repair |
+| style clearly deviated | Convert to summary, explanation, rewrite. | repair |
 
-P1 repair 失败后可以导出，但必须进入 manifest。
+P1 repair After failure, export possible but login required. manifest。
 
-## 4.3 P2，只进 diagnostics
+## 4.3 P2Only allow inbound diagnostics
 
-| 类型 | 例子 |
+| Type | Example |
 | --- | --- |
-| 软术语偏好未命中 | domain glossary 推荐词没用 |
-| 少量英文残留 | DNA、HOMO、Gaussian 这种可能本来不翻 |
-| continuation 低置信度 | 结构不确定但未造成格式错误 |
-| 译文略长 | 可能影响排版，但不破坏内容 |
-| 风格轻微不统一 | “计算结果表明” vs “计算结果显示” |
+| Soft terminology preference miss. | domain glossary Recommendations not working. |
+| Minor English residue. | DNA、HOMO、Gaussian This kind may not be translated originally |
+| continuation Low confidence | Structure uncertain but no format error |
+| translation is slightly long | May affect formatting, not content. |
+| Slight style inconsistency. | Calculation results indicate vs Calculation result displayed |
 
-## 4.4 P3，统计指标
+## 4.4 P3, statistical indicators
 
-例如：
+For example:
 
 ```
-平均长度膨胀率
-术语命中率
-repair 成功率
-tail retry 次数
-每页 warning 数
+Average length expansion ratio
+Term hit rate
+repair Success Rate
+tail retry Count
+warning count per page
 ```
 
-P3 不影响导出，只用于健康度和回归测试。
+P3 Health checks metrics only. Regression tests only.
 
-# 5. repair pipeline 怎么设计
+# 5. repair pipeline How to design
 
-repair 不能是再翻译一遍。
+repair Must not be a re-translation.
 
-repair 应该是**针对 validator error 的局部修复**。
+repair should be a local fix for validator errors.
 
-推荐状态机：
+Recommended state machine:
 
 ```
 translate
@@ -310,13 +310,13 @@ translate
 → manifest
 ```
 
-LLM repair 后必须再次 validator。
+LLM repair Must be repeated after. validator。
 
-这个边界不要模糊。只要 LLM 参与生成，结果就必须过 validator。Structured output 和 validator 是生产系统的核心防线，不是 prompt 的附属品。结构化输出能降低解析和格式漂移风险，但仍然需要 schema validation 和业务规则校验。[Cohere, Validating Outputs, https://cohere.com/llmu/validating-llm-outputs, 访问日期 2026-05-27][[1]](https://cohere.com/llmu/validating-llm-outputs)
+Do not blur this boundary. If an LLM participates in generation, the result must pass validator. Structured output and validator are the core defense lines of the production system, not prompt accessories. Structured output reduces parsing and format drift risk, but still requires schema validation and business rule validation. [Cohere, Validating Outputs, https://cohere.com/llmu/validating-llm-outputs, Access date 2026-05-27][[1]](https://cohere.com/llmu/validating-llm-outputs)
 
-## 5.1 repair 输入应该很小
+## 5.1 repair Input should be minimal
 
-不要把整页塞给 repair。给它：
+Do not feed the entire page to repair。
 
 ```json
 {
@@ -334,7 +334,7 @@ LLM repair 后必须再次 validator。
 }
 ```
 
-让它只输出：
+Make it output only:
 
 ```json
 {
@@ -343,140 +343,140 @@ LLM repair 后必须再次 validator。
 }
 ```
 
-## 5.2 repair 分类
+## 5.2 repair classification
 
-| 错误 | 推荐 repair 方式 |
+| Error | Recommended repair method |
 | --- | --- |
-| placeholder 丢失 | 先规则修，如果能确定位置；不能确定再 LLM |
-| 公式破坏 | 优先规则回填，不让 LLM 重写公式 |
-| 空译文 | 重新翻译，不叫 repair |
-| 英文残留 | LLM repair |
-| 解释泄漏 | 规则剥离 + validator，必要时 LLM repair |
-| 术语未命中 | LLM repair，但给 hard glossary |
-| 重复输出 | 规则去重优先，语义不确定再 LLM |
-| continuation 合并错 | 不建议 repair 硬修，应该回到 TU segmentation 重跑局部区域 |
+| placeholder missing | Fix rules first if location determinable; otherwise defer. LLM |
+| formula corruption | Priority rule backfill: disallow LLM rewriting formulas |" Actually "disallow. LLM rewrite formulas" might mean "disallow LLM rewriting formulas". So: "| formula corruption | Priority rule backfill: disallow LLM rewriting formulas |
+| empty translation | re-translate, not called repair |
+| residual English | LLM repair |
+| explanation leakage | Rule stripping + validator, when necessary LLM repair |
+| Term not found. | LLM repair, but give hard glossary |
+| duplicate output | Rule deduplication first; semantic uncertainty second. LLM |
+| continuation Merge error | Not recommended. repair Hard fix, revert to. TU segmentation Rerun partial area |
 
-## 5.3 repair 失败后怎么办
+## 5.3 repair What to do on failure
 
-不要静默保留坏译文。推荐策略：
+Bad translation removed. Recommended strategy: keep source verbatim.
 
 ```
-P0 repair 失败：
-  fallback_source，标记 failed_exportable=false 或 true 取决于业务
-  manifest 中记录
-  UI 中提示人工复核
+P0 repair failure:
+fallback_source, mark failed_exportable=false or true depending on business.
+  manifest Log to file
+  UI Human review required.
 
-P1 repair 失败：
-  保留 best candidate
+P1 repair failure:
+keep best candidate
   status=warning
-  diagnostics 记录
+log diagnostics
 
 P2：
-  不 repair，只记录
+do not repair; log only.
 ```
 
-是否允许 fallback 到原文？
+Allow? fallback to the original text?
 
-可以，但必须显式标记：
+Yes, but must be explicitly marked:
 
 ```json
 {
   "status": "fallback_source",
   "reason": "EMPTY_TRANSLATION_REPAIR_FAILED",
-  "display_text": "原文...",
+"display_text": "Original...",
   "needs_review": true
 }
 ```
 
-不要把 fallback_source 伪装成成功翻译。这个坑很大。
+Do not disguise fallback_source as successful translation. Major pitfall.
 
-# 6. tail latency 怎么处理
+# 6. tail latency Specify context.
 
-你们最后几个 batch 慢，通常来自四类原因：
+Your last few batch Slowness typically stems from four causes:
 
-1. batch 内有超长 item
-2. 某些请求触发模型慢路径
-3. 429 后退避导致排队
-4. 主队列快结束时，只剩 straggler
+1. batch contains oversized items item
+2. Some requests trigger model slow path.
+3. 429 Retreat causes queuing.
+4. Main queue nearing end. Only straggler
 
-推荐用三队列：
+Use three queues:
 
 ```
-main_queue：首次翻译
-retry_queue：429 / 5xx / timeout 后重试
-tail_queue：慢 item、疑难 item、repair item
+main_queue: first translation
+retry_queue：429 / 5xx / timeout Retry later.
+tail_queueSlow itemProblem unsolved. item、repair item
 ```
 
-不要在主队列里无限 retry。主队列应该只跑首次尝试和极少量快速 retry。
+Don't block main queue indefinitely. retryMain queue runs first attempts only. Retry queue handles rest. retry。
 
-## 6.1 timeout 策略
+## 6.1 timeout strategy
 
-按 token 长度设动态 timeout：
+Dynamic length timeout by token:
 
 ```
 timeout = base + α * input_tokens + β * expected_output_tokens
 ```
 
-不要所有 item 一个 timeout。长段落和短标题不该同等待遇。
+Don't remove all. Timeout per item: long paragraphs harsh, short headings lenient.
 
 ## 6.2 429
 
-429 必须尊重 `Retry-After`。没有这个 header 时，用 exponential backoff + jitter。429 的常见处理就是限速、排队、按服务端提示等待、指数退避。[Postman, HTTP Error 429 Too Many Requests, https://blog.postman.com/http-error-429/, 访问日期 2026-05-27][[2]](https://blog.postman.com/http-error-429/)
+429 Must respect `Retry-After`Not found. header When, use exponential backoff + jitter。429 Common handling: rate limiting, queuing, wait per server hint, exponential backoff.[Postman, HTTP Error 429 Too Many Requests, https://blog.postman.com/http-error-429/, Accessed date 2026-05-27][[2]](https://blog.postman.com/http-error-429/)
 
-策略：
+Strategy:
 
 ```
 429：
-  放入 throttle_retry_queue
-  按 provider/model 维度限流
-  不占 main_queue worker
+put into throttle_retry_queue
+rate limiting per provider/model dimension
+  No main_queue worker
 ```
 
 ## 6.3 5xx
 
 ```
 5xx：
-  retry 1 到 2 次
+retry 1 to 2 times
   exponential backoff + jitter
-  超过次数进入 tail_queue
+  Proceed after exceeding limit. tail_queue
 ```
 
-## 6.4 单个慢 item
+## 6.4 Single slow item
 
-推荐：
+Recommendation:
 
 ```
-超过当前模型 p95 latency：
-  标记 slow_candidate
+Exceeds current model. p95 latency：
+mark as slow_candidate
 
-超过 p99 或 hard deadline：
+Exceeds p99 or hard deadline:
   cancel or hedge
-  放入 tail_queue
+put into tail_queue
 ```
 
-hedged request 可以降低尾延迟，但要谨慎。请求对 LLM 来说成本高，不能乱复制。只对：
+hedged request Can reduce tail latency, but be cautious. Request pair. LLM is costly, cannot be copied indiscriminately. Only for:
 
 ```
-高价值任务
-已接近截止时间
-队列剩余少
-429 率低
-可用 token budget 足够
+High-value tasks
+Deadline near.
+Queue low
+429 Low rate
+Available token budget enough.
 ```
 
-才 hedge。
+only hedge。
 
-## 6.5 tail retry 什么时候开始
+## 6.5 tail retry When does it start
 
-两个触发条件：
+Two trigger conditions:
 
 ```
-main_queue remaining < 10% 到 20%
-或
-某 item age > p95_latency * 1.5
+main_queue remaining < 10% to 20%
+or
+certain item age > p95_latency * 1.5
 ```
 
-资源分配建议：
+Resource allocation recommendations:
 
 ```
 main_queue：80% worker
@@ -484,7 +484,7 @@ retry_queue：15% worker
 tail_queue：5% worker
 ```
 
-当 main_queue 低于 20% 时：
+When main_queue is below 20%:
 
 ```
 main_queue：50%
@@ -492,21 +492,21 @@ retry_queue：25%
 tail_queue：25%
 ```
 
-这样 tail 不会抢占正常任务。
+This way, tail normal tasks are not preempted.
 
-## 6.6 batch 策略
+## 6.6 batch strategy
 
-不要用固定 batch size。用 token bucket batching：
+Don't use fixed. batch sizeUse. token bucket batching：
 
 ```
-每个 batch 限制：
+Each batch limit:
   max_items
   max_input_tokens
   max_expected_output_tokens
   max_layout_complexity
 ```
 
-并且按复杂度分桶：
+And bucket by complexity:
 
 ```
 short_title
@@ -518,61 +518,61 @@ formula_heavy
 repair
 ```
 
-不要把 formula-heavy item 和普通正文混在一个 batch。一个坏 item 会拖慢整个 batch。
+Do not mix formula-heavy items with ordinary text. Bad batch input will slow down the entire batch.
 
-# 7. glossary / memory / context 怎么设计
+# 7. glossary / memory / context How to design
 
-术语一致性不要靠把所有 glossary 塞进 prompt。
+Terminology consistency should not rely on putting all glossary Insert prompt。
 
-应该做**分层 + 检索 + 硬软约束区分**。
+Should implement layering + retrieval + distinguish hard/soft constraints.
 
-Translation memory 和 glossary 是两种东西：TM 复用已翻译片段，glossary 管术语和指定译法，二者都能提升一致性，但作用不同。[Language Scientific, What’s The Difference Between Translation Memory and Glossary, https://www.languagescientific.com/whats-the-difference-between-translation-memory-tm-and-a-glossary/, 访问日期 2026-05-27][[3]](https://www.languagescientific.com/whats-the-difference-between-translation-memory-tm-and-a-glossary/)
+Translation memory and glossary are two distinct items: TM reuses translated segments, glossaries and specified translations both improve consistency, but serve different purposes. Should implement layering + retrieval + hard/soft constraint differentiation. [Language Scientific, What is The Difference Between Translation Memory and Glossary, https://www.languagescientific.com/whats-the-difference-between-translation-memory-tm-and-a-glossary/, Access date 2026-05-27][[3]](https://www.languagescientific.com/whats-the-difference-between-translation-memory-tm-and-a-glossary/)
 
-CAT/TMS 工具也通常把 glossary、translation memory、tag 或 placeholder QA 分开处理。[Smartcat, Translation memories glossaries, https://help.smartcat.com/6987550190610-leveraging-smartcat-linguistic-assets/, 访问日期 2026-05-27][[4]](https://help.smartcat.com/6987550190610-leveraging-smartcat-linguistic-assets/)
+CAT/TMS tools also typically handle glossary, translation memory, and tag or placeholder QA separately. [Smartcat, Leveraging Linguistic Assets, https://help.smartcat.com/6987550190610-leveraging-smartcat-linguistic-assets/, Access date 2026-05-27][[4]](https://help.smartcat.com/6987550190610-leveraging-smartcat-linguistic-assets/)
 
-## 7.1 推荐优先级
-
-```
-L0 用户强制 glossary
-L1 项目 glossary
-L2 文档内术语表
-L3 自动抽取 memory
-L4 领域词表
-L5 模型默认知识
-```
-
-冲突时：
+## 7.1 Recommended priority
 
 ```
-用户强制 glossary > 项目 glossary > 文档术语 > memory > 领域词表
+L0 User‑forced glossary
+L1 project glossary
+L2 Document glossary
+L3 Auto Extract memory
+L4 Domain Glossary
+L5 Model default knowledge
 ```
 
-每个术语要带属性：
+On conflict:
+
+```
+User-forced glossary > project glossary > documentation terminology > memory > domain glossary
+```
+
+Each term should have attributes:
 
 ```json
 {
   "source": "oscillator strength",
-  "target": "振子强度",
+  "target": "oscillator strength",
   "priority": "hard | preferred | hint",
   "domain": "computational_chemistry",
   "case_sensitive": false,
-  "allowed_variants": ["振子强度"],
+  "allowed_variants": ["Oscillator strength"],
   "do_not_translate": false
 }
 ```
 
-## 7.2 每个 item 按命中注入，不要全文档全局注入
+## 7.2 Each item Inject on hit, not globally.
 
-推荐 prompt 里放：
+Recommend prompt Put in:
 
 ```
-全局：翻译风格、目标语言、少量最高优先级术语
-局部：当前 TU 命中的 hard/preferred terms
-检索：top-K 相似 TM examples
-上下文：上一段摘要，不放大量原文
+Global: translation style, target language, minimal high-priority terminology
+Local: hard/preferred terms matched in current TU
+Search:top-K Similar TM examples
+Context: Summary of previous segment; avoid excessive original text.
 ```
 
-局部 glossary retrieval：
+Local glossary retrieval：
 
 ```
 source_text exact match
@@ -582,111 +582,111 @@ source_text exact match
 + section match
 ```
 
-每个 TU 注入术语数量建议：
+Suggested number of terms to inject per TU:
 
 ```
-hard terms：不限，但通常不会多
-preferred terms：top 10 到 30
-hint terms：top 5 到 10
-TM examples：top 1 到 3
+hard termsUnlimited, but typically not many.
+preferred terms: top 10 to 30
+hint terms: top 5 to 10
+TM examples: top 1 to 3
 ```
 
-不要超过这个量。prompt 越大，速度和稳定性越差，你们已经遇到了。
+Do not exceed this amount.prompt Larger = slower, less stable. Already encountered.
 
-## 7.3 术语 validator
+## 7.3 Terminology validator
 
-术语一致性不要只靠 prompt。要做 validator：
-
-```
-如果 source 出现 hard term：
-  target 必须出现指定译法
-否则 P1 repair
-
-如果 source 出现 preferred term：
-  target 未命中则 P2 diagnostics
-```
-
-术语 QA、placeholder QA 是翻译质量检查里的常见项。[Phrase, Quality Assurance Strings, https://support.phrase.com/hc/en-us/articles/5820046486684-Quality-Assurance-Strings, 访问日期 2026-05-27][[5]](https://support.phrase.com/hc/en-us/articles/5820046486684-Quality-Assurance-Strings)
-
-# 8. translation memory 并发更新
-
-不要边翻边让所有 worker 实时读写同一个 memory。
-
-这会造成不稳定：
+Terminology consistency should not rely solely on promptTo do. validator：
 
 ```
-worker A 先翻译 term X 为 甲
-worker B 同时翻译 term X 为 乙
-worker C 读到甲
-worker D 读到乙
-最后全书漂移
+If a hard term appears in source:
+  target the specified translation must appear
+otherwise P1 repair
+
+If a preferred term appears in source:
+  target On miss, P2 diagnostics
 ```
 
-推荐 **snapshot + epoch merge**。
+Terms QA and placeholder QA are common translation quality check items. [Phrase, Quality Assurance Strings, https://support.phrase.com/hc/en-us/articles/5820046486684-Quality-Assurance-Strings, Access date 2026-05-27][[5]](https://support.phrase.com/hc/en-us/articles/5820046486684-Quality-Assurance-Strings)
 
-## 8.1 文档级任务开始前
+# 8. translation memory Concurrent update
 
-```
-读取 user glossary
-读取 project glossary
-读取 domain glossary
-读取历史 TM
-构造 memory_snapshot_v1
-```
+Do not let all worker Real-time read and write to same. memory。
 
-所有 worker 在同一轮只读 snapshot。
-
-## 8.2 每章或每 N 页合并一次
-
-例如：
+This will cause instability:
 
 ```
-每 20 页一个 epoch
-或每一章一个 epoch
+worker A translates first term X as ç²
+worker B simultaneously translates term X as ä¹
+worker C Read to A
+worker D Read to B
+Final Book Drift
 ```
 
-epoch 结束后：
+Recommend snapshot + epoch merge.
+
+## 8.1 Before document-level tasks begin
 
 ```
-收集通过 validator 的高置信翻译
-抽取术语候选
-检测冲突
-更新 document_memory_v2
-下一 epoch 使用新 snapshot
+read user glossary
+read project glossary
+read domain glossary
+read history TM
+build memory_snapshot_v1
 ```
 
-这样长文档一致性更好，也不会完全牺牲前文对后文的帮助。
+All workers read-only snapshot in the same round.
 
-## 8.3 哪些内容可以进 TM
+## 8.2 Per chapter or per N Page merge once.
 
-只允许这些进：
+For example:
+
+```
+every 20 Page One epoch
+Or one per chapter epoch
+```
+
+epoch After completion:
+
+```
+Collection passed. validator High-confidence translation.
+Extract Term Candidates
+Detect Conflicts
+update document_memory_v2
+Next epoch Use new snapshot
+```
+
+Long documents improve consistency while retaining earlier context's benefit to later sections.
+
+## 8.3 Define scope. TM
+
+Only allow these in:
 
 ```
 status=ok
-或 status=repaired 且 second_validator_pass=true
-且无 P0/P1
-且 source/target 长度比例正常
-且无明显英文残留
+or status=repaired and second_validator_pass=true
+No translation needed. P0/P1
+and source/target length ratio normal
+and no obvious English remnants
 ```
 
-不要把 fallback_source、warning、未确认 repair 写进 TM。否则坏译文会扩散。
+Do not write fallback_source, warning, or unconfirmed repair into TM. No translation.
 
-# 9. 防模型解释泄漏，哪个最关键
+# 9. Which is most critical for preventing model explanation leakage?
 
-排序如下：
+Sort order:
 
 ```
 structured output / constrained decoding
 > validator
 > retry / repair
-> prompt 约束
+> prompt constraints
 ```
 
-prompt 只是一层软约束。
+prompt is just a soft constraint.
 
-生产系统不能指望一句“只输出译文”解决问题。
+Production systems cannot rely on a single "output translation only" instruction to solve problems.
 
-推荐输出 schema：
+For the schema:
 
 ```json
 {
@@ -700,115 +700,115 @@ prompt 只是一层软约束。
 }
 ```
 
-严格要求：
+Strict requirement:
 
 ```
 additionalProperties=false
-items 数量必须等于输入
-tu_id 必须完全匹配
-translation 不得为空
-translation 不得包含解释性模板
+items Quantity must equal input.
+tu_id Must exactly match.
+translation Not empty
+translation Must not contain explanatory templates
 ```
 
-解释泄漏检测可以用规则：
+Explain that leak detection can use rules:
 
 ```
 "Here is the translation"
 "Sure,"
-"这段话的意思是"
-"可以翻译为"
-"译文如下"
-"我会"
-"作为一个"
+"The meaning of this passage is"
+"Translates as."
+"The translation is as follows"
+"I will."
+"As a"
 ```
 
-但不要只靠关键词。再加两个检查：
+But don't rely on keywords alone. Add two more checks:
 
 ```
-target 是否包含 source 大段复制
-target 是否包含 instruction/prompt 片段
+target Include? source Copy Large Section
+target Include? instruction/prompt Fragment
 ```
 
-如果 structured output 仍然泄漏，直接 P0/P1：
+If structured output is still leaking, direct P0/P1:
 
 ```
-第一次：retry with stricter error message
-第二次：repair strip/extract
-第三次：failed or fallback_source
+First time:retry with stricter error message
+Second:repair strip/extract
+Third:failed or fallback_source
 ```
 
-# 10. 公式、placeholder、inline math 怎么保护
+# 10. Formula,placeholder、inline math How to protect
 
-科学论文/教材类 PDF，公式保护必须依赖规则占位符。
+Scientific Paper/Textbooks PDFFormula protection must rely on rule placeholders.
 
-不要相信模型按格式保留公式。
+Do not trust the model to preserve formulas in their original format.
 
-原因很简单：公式是精确对象，不是自然语言。数学公式翻译对符号精度要求极高，和普通文本翻译不一样。[Petersen et al., Neural Machine Translation for Mathematical Formulae, ACL 2023, https://aclanthology.org/2023.acl-long.645.pdf][[6]](https://aclanthology.org/2023.acl-long.645.pdf)
+Reason: formulas are precise objects, not natural language. Math translation demands extreme symbol precision, unlike standard text.[Petersen et al., Neural Machine Translation for Mathematical Formulae, ACL 2023, https://aclanthology.org/2023.acl-long.645.pdf][[6]](https://aclanthology.org/2023.acl-long.645.pdf)
 
-## 10.1 保护对象
+## 10.1 Protected object
 
-建议保护：
+Suggested protection:
 
 ```
 display math
 inline math
 LaTeX command
-公式编号
-引用编号 [1], (3.2), Eq. (5)
-变量名
-单位
-化学式
+Equation numbering
+citation numbers [1], (3.2), Eq. (5)
+variable name
+units
+Chemical formula
 DOI / URL / email
-占位符
-图表引用
-脚注 marker
+Placeholder
+figure/table references
+footnote markers
 ```
 
-比如：
+For example:
 
 ```
 The oscillator strength $f$ is defined by Eq. (3).
 ```
 
-先变成：
+First change to:
 
 ```
 The oscillator strength ⟦MATH_001⟧ is defined by ⟦REF_001⟧.
 ```
 
-翻译后：
+After translation:
 
 ```
-振子强度 ⟦MATH_001⟧ 由 ⟦REF_001⟧ 定义。
+Oscillator strength ⟦MATH_001⟧ defined by ⟦REF_001⟧.
 ```
 
-再 restore：
+Then restore:
 
 ```
-振子强度 $f$ 由 Eq. (3) 定义。
+Oscillator strength $f$ is defined by Eq. (3).
 ```
 
-如果你们希望 “Eq. (3)” 也汉化为“式 (3)”，那就不要整体保护 `Eq. (3)`，而是拆成：
+If you wish “Eq. (3)” also localized as "Eq. (3)Don't protect the entire thing. `Eq. (3)`, instead split into:
 
 ```
 Eq. ⟦REFNUM_001⟧
 ```
 
-让模型翻译 Eq.，保护编号。
+let the model translate Eq.Protection number.
 
-## 10.2 placeholder token 设计
+## 10.2 placeholder token Design unnecessary. Ship simplest solution.
 
-token 要满足：
+token Must satisfy:
 
 ```
-模型不容易改写
-正则容易识别
-不会和正文冲突
-能保留顺序
-能做 multiset check
+Model not easily rewritable.
+Regex easily recognized.
+No conflict with body.
+can preserve order
+Can do. multiset check
 ```
 
-推荐：
+Recommendation:
 
 ```
 ⟦MATH_000001⟧
@@ -817,80 +817,80 @@ token 要满足：
 ⟦CHEM_000004⟧
 ```
 
-validator 检查：
+validator check:
 
 ```
-输入 placeholder multiset == 输出 placeholder multiset
-顺序是否允许变化
-是否有未知 placeholder
-是否重复
-是否丢失
+aid, when prices appear to be entering a downtrend, this tool shows that buyers are more likely increasing buying pressure ( placeholder multiset == output placeholder multiset
+Can the order be changed?
+Any unknown? placeholder
+Duplicate?
+Missing?
 ```
 
-公式不建议让 LLM 修。
+Official does not recommend allowing LLM Fix.
 
-能规则修就规则修，不能规则修就重翻该 TU。
+If it can be fixed by rules, fix it by rules; if not, retranslate that TU。
 
-# 11. 哪些问题放主翻译前、翻译后、diagnostics
+# 11. Pre-translation: glossary, style guide, context. Post-translation: QA, LQA, feedback.diagnostics
 
-## 11.1 主翻译前必须解决
+## 11.1 Resolve before main translation.
 
-| 问题 | 原因 |
+| Problem | Reason |
 | --- | --- |
-| OCR block 清洗 | 脏输入会放大 LLM 错误 |
-| header/footer/page number 识别 | 否则污染上下文 |
-| formula / placeholder 保护 | 这是硬约束 |
-| TU segmentation | 决定并发粒度和失败边界 |
-| continuation candidate detection | 结构问题要先做 |
-| glossary 冲突消解 | 不然前后译法漂移 |
-| memory snapshot | 并发一致性依赖它 |
-| batch 分桶 | 避免长 item 拖慢短 item |
-| export policy | 先定义什么叫可导出 |
+| OCR block clean | Dirty input amplifies LLM errors |
+| header/footer/page number Identify | Otherwise pollutes context. |
+| formula / placeholder Protect | this is a hard constraint |
+| TU segmentation | Determine concurrency granularity and failure boundaries. |
+| continuation candidate detection | Structural issues first. |
+| glossary Conflict resolution | otherwise translation drifts |
+| memory snapshot | Concurrency consistency depends on it. |
+| batch Bucketing | avoid long item slow down short item |
+| export policy | First define what is meant by 'exportable'. |
 
-## 11.2 翻译后 repair
+## 11.2 Translated repair
 
-| 问题 | repair 方式 |
+| Problem | repair method |
 | --- | --- |
-| 空译文 | 重翻，不是修补 |
-| 英文残留 | LLM repair |
-| 解释泄漏 | 规则剥离 + LLM repair |
-| 术语未命中 | LLM repair |
-| placeholder 少量错位 | 规则优先 |
-| 重复输出 | 规则去重或 LLM repair |
-| 长度异常 | 重翻或 LLM repair |
-| 风格跑偏 | LLM repair |
+| empty translation | re-translate, not repair |
+| English residue | LLM repair |
+| explanation leakage | rule stripping + LLM repair |
+| term miss | LLM repair |
+| placeholder Slight misalignment | Rules prioritize. |
+| duplicate output | rule deduplication or LLM repair |
+| Length error | re-translate or LLM repair |
+| style deviation | LLM repair |
 
-## 11.3 只做 diagnostics
+## 11.3 Only do diagnostics
 
-| 问题 | 原因 |
+| Problem | Reason |
 | --- | --- |
-| soft glossary 未命中 | 不应阻断长文档 |
-| 轻微英文缩写残留 | 科学文本常见 |
-| 低置信 continuation | 记录给人工看 |
-| 轻微长度膨胀 | 交给渲染或人工复核 |
-| 风格小波动 | 大文档很难完全消除 |
-| 疑似术语冲突 | 可以在下一轮 glossary 更新解决 |
+| soft glossary Miss | Long document not block. |
+| Minor English abbreviation remnants. | Common in scientific texts |
+| Low confidence continuation | For manual review. |
+| Slight length expansion | Submit to rendering or manual review. |
+| minor style fluctuations | Large documents are difficult to eliminate completely. |
+| Possible term conflict | in the next round glossary Update resolved. |
 
-## 11.4 不应该用规则硬修的地方
+## 11.4 Areas where hard-coding rules is inappropriate
 
-| 场景 | 为什么 |
+| Scenario | Why |
 | --- | --- |
-| 复杂语义重译 | 规则不懂语义 |
-| continuation 大范围重排 | 容易破坏版面 |
-| 术语引起的语法调整 | 需要 LLM |
-| 长句中英文残留 | 规则替换容易造病句 |
-| 表格语义归一 | 需要上下文 |
-| 段落合并后的衔接 | 需要 LLM |
+| Complex semantic re-translation | rules do not understand semantics |
+| continuation Large-scale rearrangement | May break layout. |
+| Grammar adjustments due to terminology | requires LLM |
+| English remnants in long sentences. | rule replacement can easily create ungrammatical sentences |
+| Table Semantics Normalization | Need context. |
+| Post-merge paragraph cohesion | requires LLM |
 
-规则适合保护、检测、回滚、局部恢复。
+Rules suit protection, detection, rollback, partial recovery.
 
-LLM 适合语义翻译、术语融入、病句修复。
+LLM Suitable for semantic translation, terminology integration, and ungrammatical sentence repair.
 
-# 12. 500+ 页推荐 metrics
+# 12. 500+ Page recommendations metrics
 
-你们要看三类指标：吞吐、质量、结构风险。
+Monitor three metrics: throughput, quality, structural risk.
 
-## 12.1 性能指标
+## 12.1 Performance metrics
 
 ```
 per_item_latency_p50 / p90 / p95 / p99
@@ -910,9 +910,9 @@ hedged_request_count
 cancelled_request_count
 ```
 
-重点看 p95/p99，不要只看平均值。尾延迟本来就是分布问题，少量 straggler 就能拖垮整体完成时间。[Tail Latency Study, https://accelazh.github.io/storage/Tail-Latency-Study, 访问日期 2026-05-27][[7]](https://accelazh.github.io/storage/Tail-Latency-Study)
+Focus on p95/p99, do not just look at the average. Tail latency is inherently a distribution problem; a small number of stragglers can drag down overall completion time. [Tail Latency Study, https://accelazh.github.io/storage/Tail-Latency-Study, Access date 2026-05-27][[7]](https://accelazh.github.io/storage/Tail-Latency-Study)
 
-## 12.2 翻译质量指标
+## 12.2 Translation quality metrics
 
 ```
 empty_translation_count
@@ -929,7 +929,7 @@ second_validator_fail_rate
 fallback_source_count
 ```
 
-## 12.3 结构保护指标
+## 12.3 Structural protection metrics
 
 ```
 placeholder_mismatch_count
@@ -942,7 +942,7 @@ table_cell_count_mismatch
 list_marker_damage_count
 ```
 
-## 12.4 术语一致性指标
+## 12.4 Terminology consistency metric
 
 ```
 hard_glossary_hit_rate
@@ -955,7 +955,7 @@ TM_conflict_rate
 memory_update_rejected_count
 ```
 
-## 12.5 continuation 风险指标
+## 12.5 continuation Risk indicator
 
 ```
 continuation_candidate_count
@@ -968,7 +968,7 @@ context_bleed_suspected_count
 paragraph_split_error_count
 ```
 
-## 12.6 文档级导出指标
+## 12.6 Document-level export metrics
 
 ```
 P0_count
@@ -982,7 +982,7 @@ review_required_page_count
 export_blocked_reason
 ```
 
-建议定义健康阈值：
+Suggest defining health threshold:
 
 ```
 green:
@@ -1003,71 +1003,71 @@ red:
   formula restore fail > 0
 ```
 
-# 13. 推荐的最终策略
+# 13. Recommended final strategy
 
-如果让我给你们定一版工程方案，我会这样做：
+If I were to propose an engineering plan for you, I would do it like this:
 
-## 13.1 主翻译前
+## 13.1 Before main translation
 
 ```
-1. 建 layout graph
-2. 清理 header/footer/page number
-3. 保护公式、placeholder、引用、化学式、单位
-4. 切 TU，不直接按 block 或 page
-5. continuation 只生成候选和置信度
-6. glossary 先消冲突，再分层
-7. TM 使用 snapshot
-8. batch 按 token 和复杂度分桶
+1. build layout graph
+2. Clear header/footer/page number
+3. Protect formulas,placeholderCitation, Chemical Formula, Unit
+4. segment TU, do not press directly by block or page
+5. continuation Generate candidates and confidence scores only
+6. glossary Resolve conflicts first, then layer.
+7. TM uses snapshot
+8. batch by token and complexity bucketing
 ```
 
-## 13.2 翻译中
+## 13.2 Translating
 
 ```
 1. structured output
-2. 每个 output 必须带 tu_id
-3. 禁止自由文本输出
-4. 小 batch，多 worker
-5. 主队列不做重 retry
-6. 429 / 5xx / timeout 分队列处理
+2. each output must include tu_id
+3. Forbid free‑text output
+4. small batch, multiple worker
+5. Main queue no reorder retry
+6. 429 / 5xx / timeout Process in queues.
 ```
 
-## 13.3 翻译后
+## 13.3 After translation
 
 ```
-1. deterministic validator 先跑
-2. P0/P1 才 repair
-3. repair 后必须二次 validator
-4. repair 不通过就 fallback_source 或 failed
-5. 不让少量坏 TU 阻断整本书
+1. deterministic validator Run first
+2. repair only for P0/P1
+3. repair Must be done again afterwards. validator
+4. repair fails → skip: custom validation, add when spec changes. fallback_source or failed
+5. Don't allow small bad data. TU Block entire book
 ```
 
 ## 13.4 glossary / memory
 
 ```
-1. 用户 glossary 最高优先级
-2. 每个 TU 只注入命中的术语
-3. 文档级只放少量全局规则
-4. TM 并发只读 snapshot
-5. 每章或每 20 页合并一次 memory
-6. 只有 validator 通过的译文才能进 memory
+1. user glossary highest priority
+2. each TU inject only matched terms.
+3. Place only a few global rules at the document level.
+4. TM Concurrent read-only snapshot
+5. per chapter or per 20 Merge pages once. memory
+6. only validator-approved translations go into memory.
 ```
 
 ## 13.5 export
 
 ```
-1. P0 unresolved：该 TU 标 failed 或 fallback_source
-2. 文档是否导出看阈值，不看单点失败
-3. manifest 记录所有降级
-4. diagnostics 给人工 review
+1. P0 unresolved: mark this TU as failed or fallback_source
+2. Export decision based on threshold, not individual failures.
+3. manifest Log all downgrades.
+4. diagnostics Transfer to human. review
 ```
 
-一句话总结：
+In a nutshell:
 
-> 大 PDF 翻译系统的核心不是让每个 item 第一次都翻对，而是让每个 item 都能被隔离、校验、修复、降级和追踪。
+> The core of the large PDF translation system is not to make every item correct the first time, but to enable each item to be isolated, validated, repaired, degraded, and traced.
 >
 
-> page 是渲染单位，block 是版面单位，TU 才是翻译单位。
+> page Rendering unit.block It is a layout unit,TU The translation unit.
 >
 
-> continuation、公式、placeholder、glossary 冲突要在翻译前控住；英文残留、解释泄漏、术语未命中放到翻译后 repair；soft glossary 和低置信结构风险进入 diagnostics。
+> continuationFormulaplaceholder、glossary Control conflicts pre-translation; handle EN remnants, explanation leaks, term misses post-translation. repair；soft glossary Proceed with low-confidence structural risk diagnostics。
 >

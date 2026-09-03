@@ -1,22 +1,22 @@
-# Golden PDF 样本目录
+# Golden PDF Sample directory
 
-这里放 RetainPDF 的真实 PDF 回归样本。
+Place RetainPDF true PDF Regression samples here.
 
-这些 PDF 用来验证 OCR、翻译和渲染稳定性，尤其是：
+These PDFs are for verification of OCRTranslation stability, rendering stability, especially:
 
-- 可编辑论文 PDF
-- 多栏论文 PDF
-- 公式很多的 PDF
-- 图片型扫描 PDF
-- 黑底白字 PDF
-- 编程/技术手册 PDF
-- 有书签的 PDF
+- Editable paper PDF
+- Multi-column paper PDF
+- Many formulas. PDF
+- Image Scan PDF
+- White on black PDF
+- Programming/Technical Manual PDF
+- Bookmarked PDF
 
-## 放置规则
+## Placement rules
 
-PDF 文件直接放在当前目录。
+PDF Place file directly in current directory.
 
-建议文件名使用：
+Recommended file name:
 
 ```text
 editable-paper-formula.pdf
@@ -27,49 +27,49 @@ bookmarks.pdf
 multi-column-paper.pdf
 ```
 
-文件名尽量只用英文、数字、短横线和下划线，避免空格和中文。
+Filenames: only English, digits, hyphens, underscores. Avoid spaces, Chinese.
 
-## 清单
+## Manifest
 
-放入 PDF 后，在 `manifest.csv` 增加一行，说明这个样本主要覆盖什么风险。
+After adding PDF, add a line to `manifest.csv` stating the primary risks covered by this sample.
 
-字段说明：
+Field description:
 
-- `id`：稳定样本 ID。
-- `file`：PDF 文件名。
-- `category`：样本类型。
-- `pages`：大概页数。
-- `focus`：主要回归点。
-- `notes`：补充说明。
+- `id`Stable Sample ID。
+- `file`: PDF filename.
+- `category`Sample type.
+- `pages`Approx. page count.
+- `focus`Main regression points.
+- `notes`Supplementary notes.
 
-## Git 约定
+## Git Convention
 
-默认不建议把大 PDF 提交进 Git。这个目录主要作为本地/CI 私有样本入口。
+Default: not recommended to put large. PDF Submit GitLocal directory for local development./CI Private Sample Entry.
 
-如果后续要提交小型公开样本，单个文件建议控制在 1 MB 以内，并确认版权允许。
+If submitting small public samples later, keep each file under 1 MB within, and confirm copyright permission.
 
-## 本地回归脚本
+## Local regression script
 
-完整跑 OCR、翻译、渲染：
+Run completely. OCR, translation, rendering:
 
 ```bash
 RETAIN_TRANSLATION_API_KEY=... python3 backend/scripts/devtools/run_golden_flow.py \
   --sample-id editable-paper-formula
 ```
 
-查看当前可用样本：
+View available samples:
 
 ```bash
 python3 backend/scripts/devtools/run_golden_flow.py --list-samples
 ```
 
-只校验样本清单：
+Validate only sample list:
 
 ```bash
 python3 backend/scripts/devtools/run_golden_flow.py --check-manifest
 ```
 
-复用已有 job 做检查：
+Reuse existing job Perform check:
 
 ```bash
 python3 backend/scripts/devtools/run_golden_flow.py \
@@ -77,8 +77,8 @@ python3 backend/scripts/devtools/run_golden_flow.py \
   --skip-run
 ```
 
-脚本会检查：
+Script checks:
 
-- 翻译诊断中没有非白名单 unresolved 项。
-- 最终 PDF 存在且页数和源 PDF 一致。
-- 抽样 item 的 Typst 放置坐标和 OCR bbox 左上角一致，默认检查 `p001-b013`。
+- No non-whitelist items in translation diagnosis unresolved items.
+- Final PDF exists and page count matches source PDF.
+- Sampled item Typst Place coordinates and OCR bbox Top-left alignment, default checked. `p001-b013`.

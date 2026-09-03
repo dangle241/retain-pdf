@@ -1,4 +1,4 @@
-// 通用悬浮窗壳：拖标题、Esc 关闭、位置持久化
+// Generic floating panel shell: drag title, Esc to close, position persistence
 
 import {
   useCallback,
@@ -19,7 +19,7 @@ export type ReaderFloatShellProps = {
   storageKey: string;
   ariaLabel: string;
   className?: string;
-  /** 默认宽（px），会 min 到视口 */
+  /** Default width (px), clamped to viewport */
   width?: number;
   onClose: () => void;
   toolbar?: ReactNode;
@@ -75,7 +75,7 @@ export function ReaderFloatShell({
   id,
   open,
   title,
-  subtitle = "拖动标题可移动",
+  subtitle = "Drag title to move",
   titleIcon,
   storageKey,
   ariaLabel,
@@ -193,7 +193,7 @@ export function ReaderFloatShell({
           </strong>
           {subtitle ? <span>{subtitle}</span> : null}
         </div>
-        <button type="button" className="reader-notes-close" aria-label={`关闭${title}`} onClick={onClose}>
+        <button type="button" className="reader-notes-close" aria-label={`Close${title}`} onClick={onClose}>
           <X size={14} strokeWidth={2.5} aria-hidden />
         </button>
       </header>
@@ -202,3 +202,4 @@ export function ReaderFloatShell({
     </aside>
   );
 }
+

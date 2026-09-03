@@ -12,9 +12,9 @@ import {
   saveStoredConversationId,
 } from "./conversation-store.js";
 
-// 阅读器问答的 agentic 应答器:走 /api/v1/ai/ask(带 SSE 过程事件与可跳转引用)。
-// document_id 经后端 GET /documents?job_id= 直查(含历史 run),查不到时 fail closed。
-// conversation_id 本地粘性 + 服务端 auto-create / done 回传,实现多轮。
+// Reader QA agentic responder: uses /api/v1/ai/ask (with SSE progress events and jumpable citations).
+// document_id is fetched via backend GET /documents?job_id= (including history runs); fails closed if not found.
+// conversation_id has local stickiness + server-side auto-create/done callback for multi-turn support.
 
 const QUOTE_MAX_LENGTH = 240;
 
@@ -23,7 +23,7 @@ function clipQuoteText(text = "", maxLength = QUOTE_MAX_LENGTH) {
   if (normalized.length <= maxLength) {
     return normalized;
   }
-  return `${normalized.slice(0, maxLength).trim()}…`;
+  return `${normalized.slice(0, maxLength).trim()}...`;
 }
 
 export function buildScopedQuestion({ question = "", scope = "document", context = null, resolveQuote = null } = {}) {
@@ -35,14 +35,14 @@ export function buildScopedQuestion({ question = "", scope = "document", context
     const quote = typeof resolveQuote === "function" && context ? resolveQuote(context) : null;
     const quoteText = clipQuoteText(quote?.quoteText || "");
     if (quoteText) {
-      return `（针对选中的原文片段：「${quoteText}」）${trimmed}`;
+      return `(For the selected source snippet: "${quoteText}")${trimmed}`;
     }
     if (context?.page) {
-      return `（针对第 ${Number(context.page)} 页的选区内容）${trimmed}`;
+      return `(ForPage ${Number(context.page)} pagesselection content)${trimmed}`;
     }
   }
   if (scope === "page" && context?.page) {
-    return `（当前第 ${Number(context.page)} 页）${trimmed}`;
+    return `(CurrentPage ${Number(context.page)} pages)${trimmed}`;
   }
   return trimmed;
 }
@@ -53,11 +53,11 @@ export function createReaderAskAnswerer({
   ask = askLibraryAi,
   documentByJobId = fetchDocumentByJobId,
   resolveQuote = null,
-  // 前端凭据设置里的模型 API Key(与翻译流程同源),按请求随问答一起传给后端
+  // Frontend credentials model API key (same source as TranslationWorkflow), sent with each QA request to backend
   llmConfig = resolveReaderAiConfig,
 } = {}) {
   let documentIdPromise = null;
-  // 内存优先,localStorage 兜底(跨刷新)
+  // Memory first, localStorage fallback (across refreshes)
   let conversationId = loadStoredConversationId({ jobId });
 
   function resolveDocumentId() {
@@ -93,25 +93,25 @@ export function createReaderAskAnswerer({
     regenerate = false,
     userMessageId = "",
     assistantMessageId = "",
-    /** 取消信号：中止 SSE；aborted 后不回写会话粘性（防旧流污染新会话） */
+    /** Cancel signal: abort SSE; do not write back session stickiness after abort (prevent old stream polluting new session) */
     signal = null,
   } = {}) {
     const scopedQuestion = buildScopedQuestion({ context, question, resolveQuote, scope });
     if (!scopedQuestion) {
-      throw new Error("请输入问题。");
+      throw new Error("Enter a question.");
     }
-    // 凭据门禁必须在任何网络请求之前：否则用户会先看到「检索中」再报缺 Key
+    // Credentials gate must run before any network request; otherwise user sees "Searching..." then missing key error.
     const config = typeof llmConfig === "function" ? llmConfig() : (llmConfig || {});
     const apiKey = `${config.apiKey || ""}`.trim();
     if (!apiKey) {
       throw new Error(MISSING_MODEL_API_KEY_MESSAGE);
     }
     const documentId = await resolveDocumentId();
-    // 阅读器默认整本问答:反查不到文档时 fail closed,禁止静默变全库检索
+    // Reader defaults to whole-book QA: fail closed if document not found; do not silently fall back to full Library Search
     if (!documentId && `${jobId || ""}`.trim()) {
-      throw new Error("无法关联当前文档，暂不能做整本问答。请确认任务已绑定文档后重试。");
+      throw new Error("Cannot link current document, cannot do whole-book QA yet. Please confirm the job has a document bound and retry.");
     }
-    // document 解析后若 storage 里只有 job key,再补写一份 doc key
+    // After document parsing, if storage only has job key, supplement with doc key
     if (!conversationId) {
       conversationId = loadStoredConversationId({ jobId, documentId });
     }
@@ -132,8 +132,8 @@ export function createReaderAskAnswerer({
       signal,
     });
     const nextConversationId = `${(result as { conversationId?: string })?.conversationId || ""}`.trim();
-    // aborted 的旧流禁止回写粘性：否则"生成中切会话"会被 done 事件把
-    // conversation_id 拽回旧会话，下一问落错线程（审计 P0-4）
+    // Aborted old streams must not write back stickiness; otherwise "Generating session switch" would have its
+    // conversation_id pulled back to the old session by done events, causing the next question to land on the wrong thread (Audit P0-4)
     if (nextConversationId && !(signal as AbortSignal | null)?.aborted) {
       rememberConversationId(nextConversationId, documentId);
     }
@@ -160,9 +160,14 @@ export function createReaderAskAnswerer({
     },
     getDocumentId: () => resolveDocumentId(),
     ensureLoaded: async () => {
-      // 预热 document_id;失败在 answer 时再报错
+      // Prewarm document_id; report errors only when answering
       const documentId = await resolveDocumentId();
       return Boolean(documentId);
     },
   };
 }
+
+
+
+
+

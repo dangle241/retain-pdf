@@ -1,80 +1,80 @@
-# Translation 说明
+# Translation description
 
-这一层只做一件事：把 OCR payload 变成可落盘、可回填、可渲染的翻译结果。
+This layer only does one thing: take OCR payload Persistable, backfillable, renderable translation output.
 
-这里不负责 PDF 读取和写回，也不负责 MinerU 解包。
+Not responsible here. PDF Not responsible for reading and writing back either. MinerU Unpack.
 
-## 阶段边界
+## Stage boundaries
 
-Translation 阶段的正式输入和输出固定为：
+The formal inputs and outputs of the translation stage are fixed as:
 
-- 输入：
-  `document.v1.json`、翻译策略参数、翻译输出目录
-- 输出：
-  逐页 translation payload、翻译摘要、翻译诊断
+- Input:
+  `document.v1.json`Translation strategy parameters Translation output directory
+- Output:
+  Page by page translation payload, translation summary, translation diagnostics
 
-明确不负责的事情：
+Clearly not responsible for:
 
-- 不直接消费 provider raw JSON、zip 或 unpacked 目录
-- 不负责源 PDF 的页面写回、排版覆盖和最终 PDF 交付
-- 不负责 OCR provider 上传、轮询、下载和 normalize 产物生成
+- Do not directly consume provider raw JSON, zip, or unpacked directories
+- Not responsible for source PDF page write-back, layout override, and final PDF delivery
+- Not responsible for OCR provider upload, poll, download, normalize artifact generation
 
-## 默认翻译策略
+## Default translation strategy.
 
-默认策略按人工翻译流程设计，而不是把整页信息全部塞给模型：
+Default policy: human translation workflow, not whole-page model dump.
 
-1. 当前块优先
-   每次翻译以当前 item 的原文为唯一输出对象。上下文、术语和文档记忆只能辅助理解，不能被翻译进当前块。
-2. 术语按命中注入
-   用户词汇表和自动文档记忆不会全量进入 prompt。主翻译链会先用当前 item 或当前 batch 的 source text 匹配术语，只把命中的 `preferred` 术语作为翻译偏好注入；`preserve/canonical` 这类硬约束优先通过占位保护处理。
-3. 上下文按需注入
-   完整普通正文段默认不带前后文，减少 prompt 体积并避免邻近段落被误翻进当前块。只有跨栏/跨页续接、候选续接、图注、连接词开头片段、短的不完整片段等场景才会带 reading-order 前后文。需要调试旧行为时可用 `mode="all"` 保留全量邻居上下文。
-4. 质量兜底不可关闭
-   `should_translate=true` 的 item 不能以空译文结束。普通翻译、短文本 retry、乱码修复和 agent repair 都应把空译视为可修复问题；高级选项可以控制上下文/术语/质量预算，但不应关闭最终空译修复保证。
+1. Current block first
+   Each translation uses the current item the source text of the current item as the sole output object. Context, terms, and document memory can only assist understanding and must not be translated into the current block.
+2. Inject terms on match.
+User glossary and automatic document memory are not fully loaded into prompt; the main translation chain will first match terms against the current item or batch's source text, only matched preferred terms are injected as translation preferences. preserve/canonical hard constraints: placeholder protection first.
+3. Context injection on demand
+Complete ordinary body paragraphs default to no surrounding context to reduce prompt size and avoid neighboring paragraphs being mistakenly translated into the current block. Only scenarios like cross-column/page continuations, candidate continuations, captions, conjunction-starting fragments, short incomplete fragments will include reading-order surrounding context. For debugging old behavior, mode="all" can be used to retain full neighbor context.
+4. Quality fallback cannot be disabled.
+Items with should_translate=true cannot end with empty translation. Standard translation, short text retry, encoding corruption fix, and agent repair treat empty translations as fixable issues; advanced options control context/terminology/quality budget, but do not disable the final empty-translation fix guarantee.
 
-### 高级选项
+### Advanced Options
 
-后端翻译请求支持三个高级选项，Rust API 会写入 stage spec 并传给 Python 翻译执行层：
+Backend translation request supports three advanced options,Rust API Will be written stage spec and pass to Python Translation Execution Layer:
 
-| 字段 | 默认值 | 可选值 | 含义 |
+| Field | Default | Optional Values | Meaning |
 | --- | --- | --- | --- |
-| `context_mode` | `needed` | `needed` / `all` / `off` | 控制 reading-order 前后文。`needed` 只给不完整片段、续接段和图注等需要上下文的块；`all` 退回旧的邻居上下文行为；`off` 完全关闭前后文。 |
-| `glossary_mode` | `matched` | `matched` / `all` / `off` | 控制用户词汇表注入。`matched` 只注入当前 item/batch 命中的术语；`all` 把整张表交给 prompt；`off` 不注入词汇表。 |
-| `memory_mode` | `matched` | `matched` / `broad` / `off` | 控制自动文档记忆。`matched` 只注入当前 item/batch 命中的历史术语；`broad` 注入文档级摘要；`off` 关闭记忆注入。 |
+| context_mode | needed | needed / all / off | Controls reading-order surrounding context. needed only for incomplete snippets, continuations, captions, and context-dependent blocks; all reverts to old neighbor context behavior; off clears all context. |
+| `glossary_mode` | `matched` | `matched` / `all` / `off` | Control user vocabulary injection.`matched` Inject only current. item/batch Matched terms;`all` Submit entire table prompt；`off` do not inject glossary. |
+| `memory_mode` | `matched` | `matched` / `broad` / `off` | Control Automatic Document Memory.`matched` Inject only current. item/batch Matched historical terms;`broad` Inject document-level summary.`off` Disable memory injection. |
 
-这些选项只影响 prompt 上下文预算和术语/记忆注入范围，不影响最终质量兜底。空译、严重英文残留和占位符错误仍然必须进入后续修复链路。
+These options only affect prompt Context budget and terminology/Memory injection scope; does not affect final quality fallback. Empty translations, severe English residue, and placeholder errors must still enter the follow-up fix pipeline.
 
-默认执行时，自动文档记忆只在任务开始时读取一次 `JobMemorySnapshot`，worker 并发翻译期间不会实时写回
-`job-memory.json`。这样可以避免大 PDF 高并发时反复锁文件、刷新 prompt 记忆和拖慢尾批次。需要调试旧行为时，
-可以设置 `RETAIN_TRANSLATION_LIVE_MEMORY_UPDATES=1`，让结果回填阶段继续实时更新 job memory。
+Default: auto document memory read once at task start. `JobMemorySnapshot`，worker No real-time write-back during concurrent translation.
+`job-memory.json`This can avoid big. PDF Repeated file locking and flushing under high concurrency. prompt Memory and slow tail batch. When debugging old behavior,
+Configurable. `RETAIN_TRANSLATION_LIVE_MEMORY_UPDATES=1`Keep result backfill phase updating in real time. job memory。
 
-当前稳定交接点：
+Current stable handoff point:
 
-- 上游 OCR 阶段应先把 provider 结果收敛成 `document.v1.json`
-- 下游渲染阶段应只消费这里落盘的翻译产物，不应再回头理解 OCR provider 私有字段
+- Upstream OCR stage should first converge providers to document.v1.json
+- Downstream render stage consumes only disk translation output, no upstream interpretation of OCR provider private fields
 
-当前默认翻译产物协议：
+Default translation output protocol:
 
 - `translation-manifest.json`
-记录页索引到翻译 payload 文件的稳定映射，供渲染阶段优先读取
-  还会附带轻量元数据，例如 glossary 摘要、诊断摘要，以及 `invocation` 字段
-  当前正式路径统一标记为 `stage_spec`
-- 逐页 translation payload
-  当前仍按每页一个 JSON 落盘，manifest 负责声明这些文件该如何被渲染阶段发现
-- 阶段 spec
-  `translate-only` 入口已支持 `job_root/specs/translate.spec.json`（`translate.stage.v1`）
-- 调试产物
+Record page index to translation payload Stable file mapping, priority read during render phase.
+Also includes lightweight metadata, e.g., glossary summary, diagnostic summary, and invocation field
+  Current production path uniformly marked as `stage_spec`
+- Per-page translation payload
+  Currently still one per page. JSON Write to disk,manifest Declares how render phase discovers these files.
+- Stage spec
+translate-only entry already supports job_root/specs/translate.spec.json (translate.stage.v1)
+- Debug artifacts
   - `artifacts/translation_diagnostics.json`
   - `artifacts/translation_debug_index.json`
 
-## Translation Payload 口径
+## Translation Payload Scope
 
-逐页 translation payload 现在分成两层：
+Per-page translation payload now split into two layers:
 
-1. 顶层 contract 字段
-2. `metadata` 调试/桥接字段
+1. Top-level contract fields
+2. metadata debug/bridge fields
 
-顶层 contract 字段包括：
+Top-level contract fields include:
 
 - `block_kind`
 - `layout_role`
@@ -86,69 +86,69 @@ Translation 阶段的正式输入和输出固定为：
 - `raw_block_type`
 - `normalized_sub_type`
 
-当前约定：
+Current convention:
 
-- translation 的分类、style hint、policy、payload 回填和 diagnostics 主链优先只读这些顶层 contract 字段
-- `metadata` 可以继续保留，但职责只限于 debug、provider trace 和桥接 `continuation_hint/provider warning`
-- 新逻辑不要再把 `metadata.layout_role`、`metadata.semantic_role`、`metadata.structure_role` 当正式语义入口
-- 如果后续 block 语义变更，优先只改 `document.v1 -> TextItem -> payload` 这条 contract 投影，不要让下游模块各自再翻 `metadata`
+- Translation classification, style hint, policy, payload backfill, and diagnostics main chain priority reads only top-level contract fields
+- `metadata` May remain, but responsibilities limited to debug、provider trace and Bridging `continuation_hint/provider warning`
+- New logic: do not ... again `metadata.layout_role`、`metadata.semantic_role`、`metadata.structure_role` Formal Semantic Entry
+- Subsequent block Change semantics. Prioritize only modifications. `document.v1 -> TextItem -> payload` this contract Projection: do not let downstream modules re-translate separately. `metadata`
 
-兼容约定：
+Compatibility conventions:
 
-- 新任务目录应生成 `translation-manifest.json`
-- 翻译产物协议固定为 `translation-manifest.json` + 每页 payload，渲染阶段不再兼容旧的逐页 JSON 直扫模式
-- 默认加载口径已经是 strict contract；缺少上述顶层字段的 payload 会直接报错
-- Rust 主工作流调用的 `translate-only` worker 现在要求 `--spec`
-- `scripts/entrypoints/translate_book.py` 现在也是 spec-only 包装入口
-- API 凭证不再要求写入 stage spec；spec 中使用 `credential_ref`，由运行时环境注入真实 key
+- New task directory should be generated. `translation-manifest.json`
+- The translation output protocol is fixed as. `translation-manifest.json` + Per page payloadRendering phase no longer compatible with legacy page-by-page. JSON Direct Scan Mode
+- Default load metric already. strict contractMissing the above top-level fields. payload will error directly
+- The translate-only worker called by the Rust main workflow now requires --spec
+- `scripts/entrypoints/translate_book.py` is now also spec-only Packaging Entry
+- API credentials no longer need to be written to stage spec; use credential_ref in spec, injected by runtime environment with real key
 
-## 调试闭环
+## Debug Loop
 
-现在有一套最小可复现链路，专门用来定位“某个 item 为什么没翻 / 降级 / 保留原文”：
+Now there is a minimal reproducible chain, specifically for locating "why a certain item was not translated / downgraded / kept original text":
 
-1. 先看调试产物
-   - `translation_diagnostics.json` 看全局统计
-   - `translation_debug_index.json` 看 item 级索引
-2. 再看单 item
+1. Check debug artifacts first.
+   - `translation_diagnostics.json` View global statistics
+- translation_debug_index.json to see item-level index
+2. Review the order again. item
    - `backend/scripts/devtools/replay_translation_item.py`
-3. 需要批量回归时再接 promptfoo
+3. Connect when batch regression needed. promptfoo
    - `backend/scripts/devtools/promptfoo/`
-   - 先用 `scan_drift.py` 找 saved vs replay 漂移项，再用 `capture_case.py` 固化成 case artifact
+   - First use `scan_drift.py` find saved vs replay Drift term, reuse. `capture_case.py` Solidify into case artifact
 
-Rust API 对应暴露了：
+Rust API Correspondingly exposes:
 
 - `GET /api/v1/jobs/{job_id}/translation/diagnostics`
 - `GET /api/v1/jobs/{job_id}/translation/items`
 - `GET /api/v1/jobs/{job_id}/translation/items/{item_id}`
 - `POST /api/v1/jobs/{job_id}/translation/items/{item_id}/replay`
 
-## 子目录与边界
+## Subdirectories and boundaries
 
-一级目录按稳定职责划分。新代码优先放入这些目录，不要在根目录继续增加大文件。
+Stable responsibility directories first. New code go there. Root big files stop.
 
-根目录只保留 `README.md` 和包初始化。新代码不要再新增 `translation/*.py`
-大文件；外部模块需要 translation 能力时，优先走 `public/`。
+Root directory only `README.md` Initialize wallet. No new code. `translation/*.py`
+Large file; required by external module. translation When capable, prioritize. `public/`。
 
-| 目录 | 职责 | 不该做的事 |
+| Directory | Responsibilities | Unnecessary work |
 | --- | --- | --- |
-| `entrypoints/` | Python worker 入口脚本实现，例如 translate-only、book translation pipeline。根目录同名文件只是兼容 shim。 | 不放业务规则；不被 workflow 反向依赖。 |
-| `workflow/` | 翻译流程编排、阶段调度、batch/worker 分配和主流程落盘。 | 不直接拼 provider HTTP payload；不写具体 policy 规则。 |
-| `core/` | 稳定领域模型和数据协议：item contract、`document.v1` 读取、translation payload、manifest、orchestration。 | 不调用 LLM；不管理 job 生命周期。 |
-| `services/` | 翻译业务能力：policy、continuation、classification、context、terms、memory、quality、agents、postprocess、results。 | 不做外部入口解析；不直接依赖 runtime pipeline。 |
-| `llm/` | LLM provider、prompt 协议、缓存、响应解析、重试和校验入口。 | 不读取 OCR 文件；不决定页面级 workflow。 |
-| `artifacts/` | 结构化诊断、debug index、review artifact、运行统计输出。 | 不承担业务决策；不调用 provider。 |
-| `public/` | 给 runtime、rendering、ocr_provider 等 translation 外部生产代码使用的稳定门面。 | 不写业务逻辑；不把内部临时 helper 随手暴露出去。 |
+| `entrypoints/` | Python worker Entry script implementation, e.g. translate-only、book translation pipelineCompat root same-name file only for compatibility. shim。 | No business rules. No exceptions. workflow Reverse dependency. |
+| workflow/ | Translation workflow orchestration, phase scheduling, batch/worker allocation and main process flush to disk. | Not needed: remove provider HTTP payload; do not write specific policy rules. |
+| core/ | Stabilize domain model and data protocol: item contract, document.v1 reading, translation payload, manifest, orchestration. | Do not call LLM, do not manage job lifecycle. |
+| `services/` | Translation business capabilities:policy、continuation、classification、context、terms、memory、quality、agents、postprocess、results。 | No external entry parsing; no direct dependencies. runtime pipeline。 |
+| `llm/` | LLM provider、prompt Protocol, cache, response parsing, retry, and validation entry point. | Do not read. OCR File; does not determine page level. workflow。 |
+| `artifacts/` | Structured Diagnosisdebug index、review artifactRun stats output. | No liability for business decisions. No invocation. provider。 |
+| public/ | Provide stable facade for runtime, rendering, ocr_provider, and other external production code. | No business logic. Avoid accidentally exposing internal temp code helpers. |
 
-### 外部公开入口
+### Public entry point
 
-production 代码在 translation 外部引用本模块时，默认只允许：
+production Code in translation When externally referencing this module, default allows only:
 
 - `services.translation.public`
-  runtime、rendering、ocr_provider 共享的稳定 contract，例如 glossary entry、provider runtime 默认值、translation manifest 读取、item role helper、公式保护 helper、diagnostics writer。
+runtime, rendering, ocr_provider shared stability contracts, e.g., glossary entry, provider runtime defaults, translation manifest reading, item role helpers, formula protection helpers, diagnostics writer.
 - `services.translation.entrypoints.*`
-  CLI/worker 入口脚本使用。
+  CLI/worker Entry script usage.
 
-以下 production 目录不应直接 import translation 内部实现：
+The following production Directory should not be directly import translation Internal implementation:
 
 - `runtime/pipeline/**`
 - `services/rendering/**`
@@ -156,7 +156,7 @@ production 代码在 translation 外部引用本模块时，默认只允许：
 - `services/mineru/**`
 - `services/document_schema/**`
 
-这些目录禁止直接引用：
+Do not directly reference these directories:
 
 - `services.translation.core`
 - `services.translation.services`
@@ -164,27 +164,27 @@ production 代码在 translation 外部引用本模块时，默认只允许：
 - `services.translation.workflow`
 - `services.translation.artifacts`
 
-如果这些外部模块确实需要新的 translation 能力，先把它设计成稳定 contract 后加到 `public/`，再由外部调用。
+If these external modules indeed require new. translation Capability: design for stability first. contract Add later `public/`then called externally.
 
-`public/` 必须保持 lazy facade：不要在 `services/translation/public/__init__.py` 顶层写
-`from services.translation... import ...` 或 `from services.rendering... import ...`。新增导出时只登记到
-`_EXPORTS`，由 `__getattr__` 按需加载，避免 translation 和 rendering 之间重新形成 import cycle。
+`public/` must remain lazy facade: do not `services/translation/public/__init__.py` write at top level
+from services.translation... import ... or from services.rendering... import ... add export registration only
+_EXPORTS via __getattr__ loads on demand, avoiding translation and rendering creating import cycles.
 
-### Devtools 与测试例外
+### Devtools Test exception
 
-`backend/scripts/devtools/**` 和 `backend/scripts/devtools/tests/**` 可以直接 import translation 内部模块，用来做：
+backend/scripts/devtools/** and backend/scripts/devtools/tests/** can directly import translation internal modules for:
 
-- 单元测试内部规则、payload helper、LLM 协议和 policy 分支
-- replay / promptfoo / repair runner 这类调试工具
-- golden flow 或 schema 回归检查
+- Unit testing internal rules, payload helpers, LLM protocol, and policy branches
+- replay / promptfoo / repair runner These debugging tools
+- golden flow or schema regression checks
 
-这些是 debug/test-only 例外，不代表 production 代码可以照抄。新增普通运行链路、worker、OCR/normalize、rendering 或 runtime 代码时，
-默认仍必须走 `services.translation.public`。如果某个 devtools 脚本将来会被 production 调用，应先把它需要的 translation 能力收口到
-`public/`，再接入主链。
+These are debug/test-only exceptions, not representative of production code. When adding normal runtime paths, workers, OCR/normalize, rendering, or runtime code,
+Default must still be used. `services.translation.public`If any devtools Script will be production Call: provide dependencies first. translation Converge capabilities to
+`public/`Then connect to the main chain.
 
-### 依赖方向
+### Dependency direction
 
-目标依赖方向：
+Target dependency direction:
 
 ```text
 entrypoints
@@ -203,18 +203,18 @@ public
   -> core / workflow / llm provider runtime / artifacts
 ```
 
-当前仍有少量过渡例外：
+A few transitional exceptions remain:
 
-- `workflow/execution_runner.py` 会启动 render source prewarm，这是为了和翻译并行预热渲染输入，例外必须保持窄范围。
+- `workflow/execution_runner.py` Will start render source prewarmThis is to preheat render input in parallel with translation; exceptions must remain narrow.
 
-已经收口的边界：
+Closed boundaries:
 
-- `core` 只放纯 contract、数据读取、payload 数据操作和文本规则，不 import `services`、`workflow` 或 `llm`
-- `llm` 不再读取 `services/context`、`services/memory`、`services/quality`、`services/terms`
-- `artifacts` 不再读取 `services/agents` 或 LLM control context；review 摘要构造在 `services/agents/review_artifact.py`
-- `services` 可以组合 `core`、`llm` 和 `artifacts`，但不反向依赖 `workflow`
+- core: pure contracts, data read, payload data operations, and text rules; do not import services, workflow, or llm
+- `llm` Stop reading `services/context`、`services/memory`、`services/quality`、`services/terms`
+- artifacts no longer reads services/agents or LLM control context; review summary built in services/agents/review_artifact.py
+- services can combine core, llm, and artifacts, but must not reverse-depend on workflow
 
-已删除的兼容 shim：
+Removed Compatibility shim：
 
 - `translation/from_ocr_pipeline.py` -> `translation/entrypoints/from_ocr_pipeline.py`
 - `translation/translate_only_pipeline.py` -> `translation/entrypoints/translate_only_pipeline.py`
@@ -227,187 +227,187 @@ public
 - `translation/services/terms/injection.py` -> `translation/core/terms/injection.py`
 - `translation/services/quality/checks.py` -> `translation/llm/validation/quality.py`
 
-这些 shim 已经退出主线。架构门禁会拒绝继续引用这些旧路径；新代码应直接引用真实路径。
+These shims have already exited the mainline. Architecture gate rejects continued references to these old paths; new code should reference real paths directly.
 
-### payload/parts 边界
+### payload/parts boundaries
 
-`core/payload/` 只保留 payload contract 和数据操作：
+core/payload/ only retains payload contract and data operations.
 
-- `manifest.py` 负责 translation manifest 读写协议。
-- `ops.py` 负责通用 payload 字段读写。
-- `translations.py` 负责翻译结果回填和状态字段。
-- `formula_protection.py` 负责 payload 内公式保护标记。
-- `template_contract.py`、`template_records.py`、`template_sync.py` 负责模板 contract、记录和同步。
-- `parts/` 负责 payload 内部拆分后的纯数据处理，例如 apply、result entry、group split、result status、summary、translation units。
+- manifest.py is responsible for translation manifest read/write protocol.
+- `ops.py` General payload Field read/write.
+- `translations.py` Responsible for translation result backfill and status fields.
+- formula_protection.py is responsible for payload internal formula protection markers.
+- `template_contract.py`、`template_records.py`、`template_sync.py` Template Owner contractRecord and sync.
+- parts/ is responsible for payload pure data processing after internal split, e.g., apply, result entry, group split, result status, summary, translation units.
 
-policy 相关 mutation/check/default 已迁到 `services/policy/payload_rules/`，统一策略状态写入在
-`core/payload/parts/policy_state.py`，运行时策略判定在 `services/policy/verdict.py`：
+Policy-related mutation/check/default migrated to services/policy/payload_rules/, unified policy status writes to
+`core/payload/parts/policy_state.py`runtime policy determination at `services/policy/verdict.py`：
 
-- `policy_mutations.py`、`legacy_policy_mutations.py` 负责 policy 阶段写字段。
-- `policy_defaults.py` 负责 reset 阶段的 foundational/default translatable 判定。
-- `legacy_policy_checks.py` 负责 legacy policy 中 CJK、引用条目、mixed literal 的纯判定。
-- `core/payload/parts/policy_state.py` 负责统一写入 `classification_label`、`should_translate`、
+- policy_mutations.py, legacy_policy_mutations.py are responsible for policy stage write fields.
+- policy_defaults.py is responsible for reset-phase foundational/default translatable determination.
+- legacy_policy_checks.py is responsible for legacy policy CJK, referenced entries, mixed literal pure determination.
+- `core/payload/parts/policy_state.py` Responsible `classification_label`、`should_translate`、
   `skip_reason`、`final_status`。
-- `services/policy/verdict.py` 负责统一回答是否调用模型、是否允许保留原文、是否阻塞导出。
+- `services/policy/verdict.py` Unified responses for: model invocation, original text retention, export blocking.
 
-禁止方向：
+Forbidden directions:
 
-- `llm/providers/**` 不应 import `workflow`、`runtime.pipeline`、`rendering`。
-- `policy/**` 不应 import `llm/providers` 或 `runtime.pipeline`。
-- `payload/**` 不应 import `llm/providers`、`workflow`、`rendering`。
-- `memory/**` 不应 import `llm/providers`、`workflow`、`rendering`。
-- `translation/**` 整体不应 import `services.rendering`。
+- `llm/providers/**` Should not import `workflow`、`runtime.pipeline`、`rendering`。
+- policy/** should not import llm/providers or runtime.pipeline.
+- payload/** should not import llm/providers, workflow, rendering.
+- memory/** should not import llm/providers, workflow, rendering.
+- `translation/**` Overall should not import `services.rendering`。
 
-这些规则由 `backend/scripts/devtools/check_pipeline_architecture.py` 逐步收紧。当前先卡住新增越界依赖，历史兼容入口会分批迁移。
+These rules are `backend/scripts/devtools/check_pipeline_architecture.py` Tighten gradually. Block new out-of-bounds dependencies for now; legacy compatibility entry points will be migrated in batches.
 
-当前架构门禁已经覆盖：
+Architecture gate coverage:
 
-- translation 根目录只允许包初始化和 README，不允许新增根部大文件
-- production 外部目录只能通过 `services.translation.public` 使用 translation contract
-- `public/` 必须保持 lazy export，避免 eager import 拉起 workflow/rendering
-- 已删除 shim 路径不可再引用
-- translation 内部不得直接 import `runtime.pipeline`
-- translation 整体不得直接 import `services.rendering`，唯一窄例外是 `workflow/execution_runner.py` 的 render source prewarm
+- translation Root directory permits only package initialization and README, no new root-level large files allowed
+- Production external directories only use translation contracts via services.translation.public
+- public/ must remain lazy export, avoiding eager import that launches workflow/rendering
+- Deleted shim Path no longer referenceable.
+- translation Internal: do not use directly. import `runtime.pipeline`
+- Translation should not directly import services.rendering as a whole; the only narrow exception is workflow/execution_runner.py's render source prewarm
 
-## 主要流程
+## Main flow
 
-1. `core/ocr/` 读取统一中间层 `document.v1.json` 并抽取页面块
-2. 如果入口给的是 provider 原始 JSON，则先由 `document_schema/adapters.py` 转成 `document.v1`
-3. `workflow/translation_workflow.py` 生成每页翻译模板并加载 payload
-4. `core/orchestration` 补齐布局区和编排元数据
-5. `services/continuation` 先消费上游 `continuation_hint`，再用规则兜底，把连续段落合并成统一 translation unit
-6. `services/policy` 根据模式决定跳过哪些块
-7. `llm` 按 batch 调模型翻译、缓存和重试，并统一处理 placeholder/segment/fallback 控制
-8. `core/payload` 把翻译结果回填到 page payload，并保存最终 JSON
+1. `core/ocr/` Read unified middleware layer. `document.v1.json` and extract page blocks
+2. If the entry is provider raw JSON, first convert via document_schema/adapters.py to document.v1
+3. `workflow/translation_workflow.py` Generate and load per-page translation template. payload
+4. `core/orchestration` Complete layout area and orchestration metadata.
+5. `services/continuation` Consume upstream first. `continuation_hint`Use rules as fallback. Merge consecutive paragraphs into unified. translation unit
+6. `services/policy` Skip blocks based on mode.
+7. llm handles batch model translation, cache, retry, placeholder/segment/fallback control in a unified way → skipped: complex logic, add when needed.
+8. `core/payload` fill the translation results back into page payload, and save the final JSON
 
-补充约定：
+Supplementary conventions:
 
-- translation 主线不应该直接理解某个 OCR provider 的 raw JSON 结构
-- translation 主线当前的默认落盘结果是“逐页 translation payload + translation-manifest.json”；这层负责产物内容和映射协议，不负责最终 PDF 文件名和渲染模式
-- `document.v1` 里凡是已经带 `skip_translation` tag 的块，必须在 `core/ocr/json_extractor.py` 抽取阶段就被挡掉，不能再漏进翻译候选
-- `abstract` 这类正文扩展语义可以继续进入翻译；`reference_entry`、`formula_number` 这类 provider 已明确标记跳过的块不应进入 payload
-- 抽取阶段优先读取显式 `content.kind / layout_role / semantic_role / structure_role / policy.translate`；默认主链不再从 `derived.role / sub_type / raw_type / tags` 反推正文
-- 抽取阶段会把 block 上的 `continuation_hint` 展开成 payload 里的 `ocr_continuation_*` 字段
-- continuation 当前采用 provider-first 策略：优先消费同页 `intra_page` provider hint；跨页 `cross_page` hint 只在“相邻页 + 顺序明确 + layout_zone 命中页尾/页首阅读边界 + 文本长度足够”时受控消费，其余情况继续保留但不直接驱动拼接
-- 如果只想排查 OCR 规范化是否有问题，优先看 `document.v1.report.json`
-- Python 侧读取 report 摘要时，优先走 `document_schema/reporting.py`
+- Translation main thread must not directly interpret any OCR provider raw JSON structure
+- translation Default disk result for main branch is "page-by-page". translation payload + translation-manifest.json;"Layer handles artifact content mapping protocol. Final delivery handled elsewhere." PDF File Names & Rendering Modes
+- `document.v1` All already brought inside. `skip_translation` tag block must be at `core/ocr/json_extractor.py` Blocked at extraction stage; must not leak into translation candidates.
+- abstract and similar body extension semantics may proceed into translation; reference_entry, formula_number and other provider-explicitly skipped blocks must not enter payload.
+- Extraction phase: read explicit first. `content.kind / layout_role / semantic_role / structure_role / policy.translate`Default main chain no longer from `derived.role / sub_type / raw_type / tags` Infer the main text.
+- Extraction phase will expand continuation_hint on blocks into payload ocr_continuation_* fields
+- continuation Currently used provider-first Strategy: prioritize consuming same page. `intra_page` provider hintacross pages `cross_page` hint Only on adjacent pages + order is clear + layout_zone Page footer reached/Top reading boundary + Controlled consumption when sufficient length; otherwise retain but not drive concatenation directly.
+- If you only want to troubleshoot. OCR Standardization issues? Check first. `document.v1.report.json`
+- Python Side read report Prefer when summarizing. `document_schema/reporting.py`
 
-默认正文白名单现在固定为：
+Default body whitelist now fixed to:
 
 - `content.kind == "text"`
-- 且 `policy.translate == true`
+- And policy.translate == true
 
-这意味着：
+"This means:"
 
-- 正文是否进入翻译链，应该在 normalize / adapter 阶段决定
-- translation 默认主链不再重新猜 `footer/header/page_number/table/image/code/reference_content`
-- `ref_text`、`mixed_literal`、`metadata_fragment` 这类旧本地 skip / rewrite 规则已经退出默认主链
+- Whether the body enters the translation chain should be normalize / adapter Phase Decision
+- translation Default main chain: no re-guess. `footer/header/page_number/table/image/code/reference_content`
+- `ref_text`、`mixed_literal`、`metadata_fragment` such old local skip / rewrite The rules have already been removed from the default main chain
 
-## 术语表 v1
+## Glossary v1
 
-当前术语表链路分成两层输入：
+Current glossary pipeline consists of two input layers.
 
-- 命名术语表资源：由 Rust API 先落库，再通过 `glossary_id` 引用
-- 任务内 inline 术语：直接随任务一起传入 `glossary_entries`
+- Glossary resource: by Rust API Save to DB first, then pass. `glossary_id` Quote
+- In-task inline terminology: passed directly with the task via glossary_entries
 
-进入 Python 之前，Rust 侧会先完成：
+Before entering Python, Rust side completes first:
 
-- 术语条目归一化
-- 去重
-- 命名术语表与 inline 术语的合并
-- 相同 `source` 的覆盖统计
+- Term entry normalization
+- Deduplicate
+- Naming Terminology Glossary and inline Term merging
+- Same source coverage statistics
 
-Translation 阶段当前只做两件事：
+Translation Current stage: only two things.
 
-- 把合并后的术语表注入到 LLM 控制上下文，作为翻译偏好提示
-- 在翻译结束后统计术语命中情况，并写入 `translation-manifest.json`、诊断文件和 pipeline summary
+- Inject the merged glossary into LLM control context as translation preference hints
+- After translation, count term hits and write to translation-manifest.json, diagnostic files, and pipeline summary
 
-运行时注入规则：
+Runtime injection rules:
 
-- LLM 调用前会按当前 item 或 batch 的源文命中术语，只把命中的 glossary 条目写入提示词
-- 缩写表也按源文命中后再注入，避免无关缩写污染当前段落
-- `preserve` / `canonical` 这类硬术语仍只对命中的源文片段生效，不做全书无条件替换
-- 如果源文没有命中某个术语或缩写，该条目不会进入当前 prompt，也不会影响当前缓存 key
+- Before LLM call, based on current item or batch's source text match terms, only matched glossary entries are written into prompt
+- Match abbreviations against source before injection. Avoids irrelevant abbreviations polluting current paragraph.
+- `preserve` / `canonical` Hard terms apply only to matched source segments; do not perform unconditional full-book replacement.
+- If source does not match a term or abbreviation, entry not included in current. promptnor will it affect the current cache. key
 
-明确不做的事情：
+Clearly not doing:
 
-- 不做翻译后强制替换
-- 不保证每个术语一定命中
-- 不直接解析 Excel 文件
+- Force-replace after translation.
+- No guarantee that every term will be matched
+- Do not parse Excel files directly
 
 ## Agent v1
 
-当前 agent 不是独立进程，也不是新的 provider gateway，而是 translation 服务层里的角色化能力封装。它们复用现有
-`llm/shared/provider_runtime.py`，不绕过既有模型、base_url、api_key 和结构化输出协议。
+Current agent is not a standalone process, not a new provider gateway, but a translation role capability encapsulation in the service layer. They reuse existing
+`llm/shared/provider_runtime.py`do not bypass existing modelsbase_url、api_key and Structured Output Protocol.
 
-已落地的角色：
+Implemented roles:
 
 - `TerminologyAgent`
-  按当前源文命中术语和缩写，避免把整张术语表塞进每次 prompt。
+  The TerminologyAgent prompt: produces term candidates.
 - `ConsistencyReviewerAgent`
-  对翻译结果做规则型质量检查，例如英文残留、placeholder 不一致、术语缺失。
+  Perform rule-based quality checks on translation output, e.g., untranslated English remnants.placeholder inconsistency, missing terms.
 - `RepairAgent`
-  对可修复问题构造 LLM repair task，只修当前 item，不扩写上下文。
+  Construct for Repairable Issues LLM repair task, only repair current item, do not expand context.
 - `TranslationAgentRuntime`
-  统一执行 LLM agent task，默认走 active provider 的 `request_chat_content`。
+Unified execution of LLM agent tasks, defaulting to active provider's request_chat_content.
 - `TranslationAgentCoordinator`
-  作为服务层编排入口，把 terminology/review/repair 串成稳定接口。
+  As the service layer orchestration entry, take terminology/review/repair Stabilize interface.
 
-第一版边界：
+V1 boundary.
 
-- agent 可以构造 task、执行 task、解析结果、写入诊断或 review artifact
-- agent 不直接读取 OCR 文件、不决定页面级 workflow、不写最终 PDF
-- agent 不引入新的 SDK；新增 provider 时仍先接 `llm/shared/provider_registry.py`
-- 多 agent 编排先保持在 translation 内部，外部 API 只暴露稳定产物和诊断
+- agent Can be constructed. taskRun taskParse result write diagnostic review artifact
+- agent Do not read directly OCR File, does not determine page-level. workflowNo final write. PDF
+- Agent has no new SDK dependencies; when adding a new provider, still first connect via llm/shared/provider_registry.py
+- multi- agent Orchestration stays. translation Internal, External API Expose only stable artifacts and diagnostics.
 
-当前主链接入：
+Current main link access:
 
-- 翻译批次和乱码修复结束后，会进入 `agent_repair` 后处理阶段
-- 默认 `RETAIN_TRANSLATION_REPAIR_PROFILE=fast`，agent repair 只拿小预算做兜底修复，避免少量异常段落拖慢整本书
-- `fast` 默认最多修复 8 个候选项；候选很少时会按阻塞未译项数量收缩
-- `quality` 会放大 agent repair 预算，适合重质量的离线任务
-- 可通过 `RETAIN_TRANSLATION_AGENT_REPAIR_LIMIT=0` 彻底关闭
-- 可通过 `RETAIN_TRANSLATION_AGENT_REPAIR=0` 跳过 agent repair 阶段
-- 只修复英文残留、术语缺失、协议壳等可修复问题
-- placeholder 数量/顺序错误、数学分隔符不平衡、上下文串入等硬错误只写 skip 诊断，不让 repair agent 猜
+- Translation batch and mojibake fix done. Enter. `agent_repair` Post-processing
+- Default RETAIN_TRANSLATION_REPAIR_PROFILE=fast, agent repair has small budget for fallback fixes only; avoid a few abnormal paragraphs slowing the whole book.
+- `fast` Default max repairs 8 Few candidates shrink by untranslated count.
+- `quality` Enlarges agent repair Budget, suitable for quality-focused offline tasks.
+- Passable `RETAIN_TRANSLATION_AGENT_REPAIR_LIMIT=0` Force Close
+- Can set RETAIN_TRANSLATION_AGENT_REPAIR=0 to skip agent repair stage
+- Fix only repairable issues such as English remnants, missing terminology, and protocol shells.
+- placeholder Qty/Hard errors only. Syntax issues reported. Fix: skip diagnose, not let repair agent guess
 
 repair profile：
 
 - `RETAIN_TRANSLATION_REPAIR_PROFILE=fast`
-  默认模式。跳过重型乱码重构，保留小预算 agent repair 和最终空译收口。
+  default mode. Skip heavy garbled reconstruction, retain small budget agent repair Final empty translation closure.
 - `RETAIN_TRANSLATION_REPAIR_PROFILE=quality`
-  质量优先。启用更大的 agent repair 和最终恢复预算，适合对速度不敏感的任务。
-- 单项覆盖：
+  Quality first. Enable larger. agent repair and final recovery budget, suitable for tasks not sensitive to speed.
+- Single item coverage:
   `RETAIN_TRANSLATION_GARBLED_RECONSTRUCTION=1`
   `RETAIN_TRANSLATION_AGENT_REPAIR=0|1`
   `RETAIN_TRANSLATION_AGENT_REPAIR_LIMIT=N`
   `RETAIN_TRANSLATION_FINAL_RECOVERY_MAX_ITEMS=N`
 
-后续推进顺序：
+Next steps order:
 
-1. 先把更多现有“翻译后检查 / 修复 / 术语注入”收口到 coordinator。
-2. 再把失败重试、英文残留修复、术语一致性修复接成可配置 pipeline。
-3. 最后再考虑跨段落一致性 agent 或文档级术语记忆 agent，避免一开始就改主流程太大。
+1. First, consolidate more existing "post-translation check / Fix / Term injection funneled into coordinator。
+2. Make failure retry, English residue repair, and terminology consistency repair configurable. pipeline。
+3. Finally consider cross-paragraph consistency. agent Or document-level term memory. agentAvoid large changes to main flow initially.
 
-## 并发与失败调度
+## Concurrency and failure scheduling
 
-- DeepSeek 官方 API 的默认翻译 workers 由 Rust API 解析为 `1000`。请求体里的 `translation.workers` 仍然可以覆盖。
-- Python HTTP 连接池会按 `configured_workers` 放大，默认上限 `1000`；可用 `RETAIN_TRANSLATION_HTTP_POOL_MAX` 临时压低。
-- 主翻译通道默认只做 1 次 HTTP attempt。timeout、429、5xx、连接错误会尽快让出 worker，进入尾部 transport retry 队列，避免一个失败项卡住后续段落。
-- 尾部 transport retry 会在主队列之后执行，默认允许 2 次 HTTP attempt，并使用更长 timeout。
+- DeepSeek official API default translation workers parsed by Rust API as 1000; request body translation.workers can still override.
+- Python HTTP Connection pool will by `configured_workers` Zoom, default maximum `1000`Available `RETAIN_TRANSLATION_HTTP_POOL_MAX` Temporary compression active.
+- Main translation channel only performs 1 times HTTP attempt。timeout、429、5xxConnection errors release resources immediately. workerNavigate to footer. transport retry Queue prevents one failure from blocking subsequent items.
+- Tail transport retry executes after main queue; enabled by default, 2 HTTP attempts, and uses longer timeout.
 
-## 模式说明
+## Mode description
 
 - `fast`
-  不启用分类器。
+  Disable classifier.
 - `sci`
-  面向论文和技术文档，还会做领域推断。
+  For papers and technical documents, it also performs domain inference.
 - `precise`
-  启用 LLM 分类器，只对可疑 OCR 块做额外判断。
+  Enabled. Send source. LLM Classifier: suspicious only. OCR Block does extra checks.
 
-## Policy Config 兼容说明
+## Policy Config Compatibility notes
 
-`services/policy/config.py` 里的 `build_translation_policy_config()` 目前还保留了几个旧字段，但它们已经不属于默认主链语义：
+services/policy/config.py's build_translation_policy_config() retains several old fields, but they are no longer part of default main-chain semantics:
 
 - `enable_narrow_body_noise_skip`
 - `enable_metadata_fragment_skip`
@@ -415,23 +415,23 @@ repair profile：
 - `enable_reference_zone_skip`
 - `enable_reference_tail_skip`
 
-当前约定是：
+Current convention is:
 
-- 默认主链不会消费这些字段去重建旧 skip 逻辑
-- 它们当前只作为 deprecated compatibility surface 保留，主要避免老测试/老调用方立刻报错
-- 新代码不要再基于这些字段设计行为
+- Default main chain does not consume these fields to rebuild old skip logic
+- Currently only used as deprecated compatibility surface Keep, primarily to avoid old tests./Legacy callers error immediately.
+- New code must not base behavior on these fields.
 
-注意：
+Note:
 
-- 这属于内部 Python translation policy contract，不是外部 HTTP API 契约
-- 真实的“是否翻译”主决策仍应来自 `document.v1` 的显式 block policy
+- Internal Python translation policy contract, not external HTTP API contract
+- The actual primary decision of whether to translate should still come from `document.v1` Explicit block policy
 
-## 协作规矩
+## Collaboration rules
 
-如果翻译模块单独分人维护，这里只负责“把 `document.v1.json` 变成稳定翻译产物”。
+If the translation module is maintained separately, this part is only responsible for "turning `document.v1.json` become a stable translation output".
 
-- 允许在这里改策略、并发、术语表、LLM 调度、payload 落盘和翻译诊断
-- 不要在这里直接处理 provider raw OCR 结构，也不要把源 PDF 渲染逻辑塞回来
-- 当前正式输出协议是“逐页 translation payload + `translation-manifest.json`”；渲染层应只消费这套协议
-- 如果修改 payload 结构、manifest 字段语义或默认文件发现方式，必须同步更新 `runtime/pipeline`、`rendering`、README 和测试
-- 术语表当前是翻译提示约束，不是渲染层规则，也不是 OCR 层规则；不要把术语逻辑扩散到其他模块
+- Edit policies, concurrency, glossary, LLM scheduling, payload disk write, and translation diagnostics here
+- Do not process here directly. provider raw OCR structure, nor source PDF Reintegrate rendering logic.
+- The current active stage also appears in translation payload + `translation-manifest.json`Render layer consume only this protocol
+- If modifying payload structure, manifest field semantics, or default file discovery method, must synchronously update runtime/pipeline, rendering, README, and tests
+- The glossary is currently a translation prompt constraint, not a rendering-layer rule, nor... OCR Layer rules; do not leak term logic to other modules.

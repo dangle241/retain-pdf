@@ -6,15 +6,15 @@ import {
 } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-// 状态区(#status-section)可见性 feature。
+// Status area (#status-section) visibility feature.
 //
-// 3a 只落"可见性 + 事件契约"(镜像 ui/status-area-view.js 的 setStatusAreaVisible
-// 与 ui/presentation-view.js 的 setWorkflowSectionsView):StatusCard 本体是 3b
-// (recent-jobs + job-runtime 蓝图 features/status/)的范围,这里的 store 届时
-// 直接被 StatusCard.jsx 家族复用。
+// 3a only addresses "visibility + Events contract" (mirrors ui/status-area-view.js setStatusAreaVisible
+// and ui/presentation-view.js setWorkflowSectionsView): StatusCard book body is 3b's
+// (recent-jobs + job-runtime Blueprint features/status/) scope; the store here will be
+// directly reused by StatusCard.jsx family.
 //
-// 事件契约:每次 setVisible 都 dispatch statusAreaVisibilityChanged(旧世界
-// 同款,translation-workflow-dialog 靠它同步 upload/status 模式)。
+// Events contract: every setVisible dispatches statusAreaVisibilityChanged (same as old world;
+// translation-workflow-dialog uses it to sync upload/status mode).
 
 export type StatusAreaState = {
   visible: boolean;
@@ -75,15 +75,15 @@ export function createStatusAreaFeature({
     return Boolean(store.getSnapshot().visible);
   }
 
-  // 旧世界从状态卡元素冒泡 returnHome;新世界直接发到 document
-  // (消费方 jobRuntimeFeature.returnToHome 是 document 级监听,3b 接线)
+  // Old world bubbles returnHome from Status card element; new world dispatches directly to document
+  // (consumer jobRuntimeFeature.returnToHome listens on document level; 3b wires it)
   function returnHome() {
     if (documentRef?.dispatchEvent && typeof globalThis.CustomEvent === "function") {
       documentRef.dispatchEvent(new globalThis.CustomEvent(APP_EVENTS.returnHome));
     }
   }
 
-  // setWorkflowSections(job):idle 复位链与 3b runtime-reset 共用的回调
+  // setWorkflowSections(job): idle reset chain and 3b runtime-reset total callback
   function setWorkflowSections(job: unknown = null): WorkflowSectionsViewModel {
     const viewModel = buildWorkflowSectionsViewModel(job) as WorkflowSectionsViewModel;
     setVisible(viewModel.hasJob);
@@ -104,3 +104,7 @@ export function createStatusAreaFeature({
     store,
   };
 }
+
+
+
+

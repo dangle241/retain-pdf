@@ -1,16 +1,16 @@
 # 04 Continuation Hint
 
-## 目标
+## Goal
 
-如果 Paddle 本身已经知道哪些 block 属于同一段，adapter 应该把这类信息映射成统一契约：
+If Paddle already knows which blocks are in the same paragraph, the adapter should map such info to a unified contract:
 
 - `continuation_hint`
 
-不要让 translation 层直接读取 Paddle 的 `group_id`、`global_group_id`、`block_order`。
+Don't let the translation layer directly read Paddle's group_id, global_group_id, or block_order.
 
-## 当前字段
+## Current fields
 
-`continuation_hint` 当前结构：
+Current structure of continuation_hint:
 
 ```json
 {
@@ -23,51 +23,51 @@
 }
 ```
 
-字段说明：
+Field description:
 
 - `source`
-  当前 provider 写入时固定为 `provider`
+Current provider writes provider as a fixed value
 - `group_id`
-  连续组稳定 id
+  Continuous Group Stability id
 - `role`
   `single/head/middle/tail`
 - `scope`
-  `intra_page` 或 `cross_page`
+intra_page or cross_page
 - `reading_order`
-  组内顺序
+  Order within group
 - `confidence`
-  provider 对这个组的置信度
+  provider Confidence for this group
 
-## 当前 Paddle 映射规则
+## Current Paddle mapping rules
 
-当前代码在：
+Current code is at:
 
 - `backend/scripts/services/document_schema/provider_adapters/paddle/continuation.py`
 
-当前规则：
+Current rules:
 
-1. 优先用 `raw_global_group_id`
-2. 没有全局组时，退回 `page_index + raw_group_id`
-3. 多 block 组如果没有可靠 `raw_block_order`，则不生成 continuation hint
-4. 同页组标为 `intra_page`
-5. 跨页组标为 `cross_page`
+1. Prioritize `raw_global_group_id`
+2. Fall back if no global group. `page_index + raw_group_id`
+3. If a multi-block group is not reliable from raw_block_order, do not generate continuation hint
+4. Mark as same-page group `intra_page`
+5. Mark as cross-page group `cross_page`
 
-## 下游消费约定
+## Downstream consumption contract
 
-translation 当前采用 provider-first：
+Translation currently adopts provider-first:
 
-1. 同页 `intra_page` hint 优先直接消费
-2. 跨页 `cross_page` hint 只在安全条件满足时受控消费
-3. 不满足安全条件时，hint 会被保留，但不会直接触发拼接
+1. Same page `intra_page` hint Prioritize direct consumption
+2. Cross-page cross_page hint is consumed only under controlled conditions when security requirements are met.
+3. Security warning: action blocked.hint Will be retained, but will not directly trigger concatenation.
 
-也就是说：
+That is to say:
 
-- adapter 负责“准确表达 provider 知道的事”
-- translation 负责“决定什么时候安全地相信 provider”
+- adapter Responsible for "accurate expression" provider Known things
+- translation Responsible for deciding when to safely trust provider”
 
-## 适配人需要注意
+## Notes for adapters
 
-1. `group_id` 只要求组内稳定，不要求跨版本永远不变。
-2. `reading_order` 必须是组内唯一且单调的。
-3. 如果 Paddle 某个版本的组信息不稳定，宁可不写 `continuation_hint`，不要写错。
-4. 不要为了让某个样例过关，伪造跨页连续关系。
+1. `group_id` Only require stability within the group, not invariance across versions forever.
+2. `reading_order` Must be unique and monotonically increasing within the group.
+3. If Paddle's group info is unstable for a certain version, omit continuation_hint and don't write incorrect data.
+4. Don't fake cross-page continuity just to make an example pass.

@@ -45,7 +45,7 @@ export async function handleBrowserDeepSeekValidate({
   }
   viewPort.setTopUpVisible(false);
   if (!silent) {
-    viewPort.setValidationMessage("正在检测 DeepSeek 和余额…");
+    viewPort.setValidationMessage("Checking DeepSeek and balance...");
   }
   const result = await runDeepSeekConnectivityCheck({
     apiPrefix,
@@ -64,13 +64,13 @@ export async function handleBrowserDeepSeekValidate({
     });
     if (balance.status === "unsupported_provider") {
       if (!silent) {
-        viewPort.setValidationMessage("DeepSeek 可用", "valid");
+        viewPort.setValidationMessage("DeepSeek Ready", "valid");
       }
       return balance;
     }
     if (balance.status === "network_error") {
       if (!silent) {
-        viewPort.setValidationMessage("DeepSeek 可用，余额查询失败", "valid");
+        viewPort.setValidationMessage("DeepSeek is ready, but balance lookup failed", "valid");
       }
       return balance;
     }
@@ -81,7 +81,7 @@ export async function handleBrowserDeepSeekValidate({
     const shouldTopUp = balanceAmount < DEEPSEEK_LOW_BALANCE_THRESHOLD;
     viewPort.setTopUpVisible(shouldTopUp);
     viewPort.setValidationMessage(
-      `DeepSeek 可用，${balanceSummary}${shouldTopUp ? "，余额低于 2 元" : ""}`,
+      `DeepSeek Ready, ${balanceSummary}${shouldTopUp ? ", balance is below CNY 2" : ""}`,
       balance.is_available ? "valid" : "error",
     );
     return balance;
@@ -95,3 +95,6 @@ export async function handleBrowserDeepSeekValidate({
   }
   return result;
 }
+
+
+

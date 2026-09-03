@@ -1,16 +1,16 @@
-// 图书馆(文档)域的动作集合 —— 从 composition.js 抽出来的(重构①)。
+// Library (Documents) domain action set — extracted from composition.js (refactoring ①).
 //
-// composition.js 只负责 new 一次 + 把返回值接进 services.library.actions。
+// composition.js is only responsible for new once + wire the return value into services.library.actions.
 //
-// 依赖经参数注入(不直接 import composition 作用域的东西):
+// Dependencies are injected via parameters (do not directly import composition scope things):
 // - documentRef / libraryEventPort / reloadRecentJobs / deleteJob / buildTranslateConfig
-// - startPolling: job-runtime 开始盯某个 job（composition 传闭包,调用时再取 feature）
-// - hideStatusArea: 静默接进度时不要抬起主页工作流状态区
+// - startPolling: job-runtime starts watching a job (composition passes a closure, feature is fetched at call time)
+// - hideStatusArea: when silently receiving progress, do not raise the main page workflow status area
 //
-// 进度接入契约（与 selectJob 刻意分叉）:
-// - selectJob（recent-jobs/actions）→ 打开工作流弹窗 + startPolling
-// - attachJobProgress（本 controller）→ 只 startPolling，不弹窗、不亮主状态区
-//   供书籍详情「翻译」Tab 内嵌 StatusCard 使用。
+// Progress attachment contract (deliberately diverged from selectJob):
+// - selectJob (recent-jobs/actions) → open workflow dialog + startPolling
+// - attachJobProgress (books controller) → only startPolling, no dialog, no main status area highlight
+//   for Book Details "Translation" tab embedded StatusCard usage.
 
 import { createBookDetailDialogStore } from "../detail/book-detail-dialog-store.js";
 import type {
@@ -63,8 +63,8 @@ export function createLibraryController({
     await reloadRecentJobs?.(opts);
   }
 
-  // F4 馆藏文档"读原文":无 job,派发带 documentId 的 openReaderRequested,
-  // ReaderDialog 用 document_id 打开只读源文档阅读器(与卡片对照阅读同一事件契约)。
+  // F4 Library documents "Read Source": no job, dispatch openReaderRequested with documentId,
+  // ReaderDialog opens a read-only source document reader using document_id (same event contract as the card side-by-side reader).
   function openSourceReader(documentId?: string | null) {
     const normalizedId = `${documentId || ""}`.trim();
     if (!normalizedId) {
@@ -73,40 +73,40 @@ export function createLibraryController({
     dispatchAppEvent(APP_EVENTS.openReaderRequested, { documentId: normalizedId, pageIdx: null, blockId: "" });
   }
 
-  // F3 "只入库,不翻译":PDF 在**上传完成那一刻**后端就已经建好 document 了
-  // (POST /uploads → upsert_document_from_upload,document_id = 内容哈希),
-  // 所以"只入库"不需要任何新接口——就是**不提交翻译 job**:关掉工作流对话框
-  // (其 close() 顺带 resetUploadSession + bindings 里 scheduleRefresh soft)。
-  // 不再额外 force refresh，避免关对话框连闪两次。
+  // F3 "Added only, no translation": the backend already created the document at the moment upload completed
+  // (POST /uploads → upsert_document_from_upload, document_id = content hash),
+  // so "added only" does not require any new interface — just **do not submit a translation job**: close the workflow dialog
+  // (its close() also resets upload session + scheduleRefresh soft in bindings).
+  // No longer force extra refresh, to avoid flashing twice when closing the dialog.
   function storeUploadedDocumentOnly() {
     dispatchAppEvent(APP_EVENTS.closeTranslationWorkflow);
   }
 
-  // 翻译失败的友好文案:后端最常见的失败是"没配 OCR/翻译凭据"
-  // (如 paddle_token is required),原文对用户没意义,给一句可操作提示;其余
-  // 错误至少把后端消息透出来(不再静默)。
+  // Friendly copy for translation failure: the most common backend failure is "OCR/translation credentials not configured"
+  // (e.g., paddle_token is required), which is meaningless to users, so give an actionable hint;
+  // for other errors, at least surface the backend message (no longer silently swallow).
   function friendlyTranslateError(error: ErrorLike) {
     const message = typeof error === "string" ? error : `${error?.message || error || ""}`;
-    const credentialish = /(token|key|凭据|令牌|密钥|credential)/i.test(message);
-    const missing = /(required|需要|缺|未配置|not configured|missing)/i.test(message);
+    const credentialish = /(token|key|credentials|token|key|credential)/i.test(message);
+    const missing = /(required|required|not configured|not configured|missing)/i.test(message);
     if (credentialish && missing) {
-      return "翻译需要先在「设置」里配置 OCR / 翻译凭据后再试。";
+      return "Translation required. Configure OCR and translation credentials in Settings first.";
     }
-    return message || "发起翻译失败，请稍后重试。";
+    return message || "Failed to start translation. Please retry later.";
   }
 
-  // F5 馆藏文档"以后再翻":复用文档已存的 upload 起 book 翻译 job,后端回填
-  // active_job_id;随后整页重载一次——该文档会以真实 job_id 重新进网格,现有
-  // 轮询引擎(active-refresh 按 job_id 拉 job payload)自然接管进度。
+  // F5 Library documents "Translate later": reuse the document's existing upload to start a book translation job,
+  // backend backfills active_job_id; then reload the whole page once — the document will re-enter the grid with a real job_id,
+  // and the existing polling engine (active-refresh pulls job payload by job_id) naturally takes over progress.
   //
-  // 失败时**抛给调用方**(书籍详情弹窗在弹窗内 setError 展示 + 不关闭弹窗)。
-  // 早期这里往网格 renderError,但翻译入口已从卡片挪进弹窗,而网格错误条只在
-  // "网格为空"时才显示、满网格时用户根本看不到——表现成"点了没反应"(缺
-  // OCR 凭据时的真实 bug)。
-  // 组装真正发给后端的 job 配置:先从已配置凭据拼出完整的 ocr(PaddleOCR)+
-  // translation(DeepSeek)基座(buildTranslateConfig),再把弹窗传来的页码范围
-  // (payload.ocr.page_ranges / payload.translation.start_page-end_page)叠上去。
-  // 不带凭据的话后端收不到 provider,会默认到已废弃的 OCR provider 而失败。
+  // On failure **throw to the caller** (Book Details dialog shows setError inside the dialog + does not close the dialog).
+  // Earlier this rendered error into the grid, but the translation entry has moved from the card into the dialog,
+  // and grid error entries only display when the "grid is empty"; when the grid is full users see nothing at all —
+  // appearing as "clicked but nothing happened" (the real bug when OCR credentials are missing).
+  // Assemble the actual job config sent to the backend: first build the full ocr (PaddleOCR) +
+  // translation (DeepSeek) base from configured credentials (buildTranslateConfig), then overlay the page scope
+  // from the dialog (payload.ocr.page_ranges / payload.translation.start_page–end_page).
+  // Without credentials the backend receives no provider and falls back to a deprecated OCR provider, causing failure.
   function assembleTranslatePayload(overrides: TranslateDocumentPayload = {}): TranslateDocumentPayload {
     const pageRanges = `${overrides?.ocr?.page_ranges || ""}`.trim();
     const base = (buildTranslateConfig?.(pageRanges) || {}) as TranslateDocumentPayload;
@@ -117,10 +117,10 @@ export function createLibraryController({
   }
 
   /**
-   * 静默接入任务进度（书籍详情翻译 Tab → bd-job-status-inner）。
-   * - silent startPolling：只写 statusCardStore，不抬工作流区、不广播 create
-   * - 绝不 dispatch openTranslationWorkflow（进度主场在详情，不在弹窗）
-   * - 强制 hide 主状态区，避免 #status-section / 主 StatusCard 抢戏
+   * Silently attach job progress (Book Details Translation Tab → bd-job-status-inner).
+   * - silent startPolling: only writes statusCardStore, does not raise workflow area, does not broadcast create
+   * - never dispatch openTranslationWorkflow (progress main stage is in details, not in dialog)
+   * - force hide main status area, to avoid #status-section / main StatusCard stealing focus
    */
   function attachJobProgress(jobId?: string | null) {
     const id = `${jobId || ""}`.trim();
@@ -133,11 +133,11 @@ export function createLibraryController({
   }
 
   /**
-   * 翻译成功后的即时反馈（不等整页重载）:
-   * 1) 详情 payload 立刻挂上真实 job_id → 翻译 Tab 切到 StatusCard
-   * 2) attachJobProgress → 进度环/阶段流马上动
-   * 3) publishJobUpdated 按 document_id 就地更新原卡（禁止插第二张）
-   * 4) 后台 silent 刷新对齐服务端，不闪 loading
+   * Immediate feedback after translation success (does not wait for full page reload):
+   * 1) detail payload immediately gets real job_id → Translation tab switches to StatusCard
+   * 2) attachJobProgress → progress ring / stage flow starts immediately
+   * 3) publishJobUpdated updates the original card in place by document_id (prevent inserting a second card)
+   * 4) background silent refresh aligns with server, no loading flash
    */
   function promoteDocumentToJob(
     documentId: string,
@@ -164,7 +164,7 @@ export function createLibraryController({
       });
     }
 
-    // 用 JobUpdated：按 document_id 就地改原卡，禁止主页再插一张新书
+    // Use JobUpdated: update the original card in place by document_id, prevent main page from inserting another new book
     const previousJobId = `${base.job_id || ""}`.trim();
     libraryEventPort?.publishJobUpdated?.({
       job_id: jobId,
@@ -206,27 +206,27 @@ export function createLibraryController({
       translatingDocumentIds.delete(normalizedId);
     }
 
-    // 立刻接进度 + 更新详情/网格；不再整页 reload（运行中由单卡 patch 推进）
+    // Immediately attach progress + update details/grid; no longer full page reload (running state is advanced by per-card patch)
     promoteDocumentToJob(normalizedId, result);
     return result;
   }
 
-  // 文档级删除(后端补了 DELETE /documents/:id 之后):删掉 document + 名下所有
-  // job/upload/文件。馆藏文档和已翻译文档统一走这条(卡片都带 document_id)。
+  // Document-level delete (after backend added DELETE /documents/:id): delete document + all its
+  // jobs/uploads/files. Library documents and translated documents both go through this path (cards all carry document_id).
   function friendlyDocumentDeleteError(error: ErrorLike) {
     const message = typeof error === "string" ? error : `${error?.message || error || ""}`;
     const status = typeof error === "object" && error ? error.status : undefined;
     if (status === 409 || message.includes("(409)")) {
       const count = message.match(/\d+/)?.[0];
       return count
-        ? `该文档有 ${count} 条收藏，请先删除收藏后再删除文档。`
-        : "该文档存在收藏引用，请先删除相关收藏后再删除文档。";
+        ? `This document has ${count} entriesFavorite, delete its favorites before deleting the document.`
+        : "This document has favorite references. Delete related favorites before deleting the document.";
     }
-    return message || "删除文档失败";
+    return message || "DeleteDocumentsFailed";
   }
 
-  // 同翻译:失败抛给调用方(弹窗内展示)。成功后乐观删卡 + 静默 soft reload，
-  // 不再 await 非 silent 整页 loading（主页闪空根因之一）。
+  // Same as translation: throw to caller on failure (display inside dialog). On success optimistically delete card + silent soft reload,
+  // no longer await non-silent full page loading (one of the root causes of main page flashing empty).
   async function deleteLibraryDocument(documentId?: string | null) {
     const normalizedId = `${documentId || ""}`.trim();
     if (!normalizedId) {
@@ -241,7 +241,7 @@ export function createLibraryController({
     void reload({ reset: true, silent: true });
   }
 
-  // 批量删除:API 仍逐个 delete；网格乐观一次移除 + 单次 silent soft reload。
+  // Batch delete: API still deletes one by one; grid optimistically removes once + single silent soft reload.
   async function deleteLibraryDocuments(
     documentIds: Array<string | null | undefined> = [],
   ): Promise<DeleteDocumentsResult> {
@@ -259,13 +259,13 @@ export function createLibraryController({
     return { confirmed, failed: results.length - confirmed };
   }
 
-  // 卡片删除入口:有 document_id 走文档级删除(删整篇文档 + 名下所有 job);
-  // 没有(极少见的运行时插入 job 项)退回老的 job 删除,保留原行为。
+  // Card delete entry: if there is document_id, go document-level delete (delete whole document + all its jobs);
+  // if not (rare runtime inserted job items), fall back to old job delete, preserving original behavior.
   function deleteCard(target: DeleteCardTarget = {}) {
     const documentId = `${target?.documentId || ""}`.trim();
     if (documentId) {
-      // fire-and-forget:deleteLibraryDocument 现在会 throw,吞掉避免未处理拒绝
-      // (这条卡片级入口目前无消费方,卡片删除已并进详情弹窗)。
+      // fire-and-forget: deleteLibraryDocument now throws, swallow to avoid unhandled rejection
+      // (this card-level entry currently has no consumer; card delete has been merged into the detail dialog).
       void deleteLibraryDocument(documentId).catch(() => {});
       return;
     }
@@ -279,20 +279,20 @@ export function createLibraryController({
       return true;
     }
     const jobId = `${item?.job_id || item?.active_job_id || ""}`.trim();
-    // 有真实 job 且非馆藏合成 id → 默认看翻译 Tab 进度
+    // Has real job and not a library synthetic id → default to Translation tab progress
     if (jobId && !jobId.startsWith("doc:") && !item?.library_only) {
       return true;
     }
     return false;
   }
 
-  // 书籍详情弹窗：点卡片打开。运行中/失败默认落翻译 Tab + silent 进度，
-  // 绝不打开 #translation-workflow-dialog。
+  // Book Details dialog: open by clicking card. Running/failed defaults to Translation tab + silent progress,
+  // never open #translation-workflow-dialog.
   function openBookDetail(item?: LibraryCardItem | null) {
     if (!item) return;
     const documentId = `${item.document_id || ""}`.trim();
     const jobId = `${item.job_id || item.active_job_id || ""}`.trim();
-    // 至少要有 document_id 或真实 job_id
+    // Must have at least document_id or real job_id
     if (!documentId && (!jobId || jobId.startsWith("doc:"))) {
       return;
     }
@@ -307,14 +307,14 @@ export function createLibraryController({
   }
 
   /**
-   * 网格「选中任务」：一律进详情翻译 Tab + silent 进度。
-   * 不再 fallback 到 openTranslationWorkflow（旧弹窗只留给底部「添加」）。
+   * Grid "select job": always go to detail Translation tab + silent progress.
+   * No longer fallback to openTranslationWorkflow (old dialog is only reserved for bottom "add").
    */
   function selectJobForDetail(
     jobId?: string | null,
     options: {
       findItem?: (jobId: string) => LibraryCardItem | null | undefined;
-      /** @deprecated 图书馆网格不再弹工作流；保留参数兼容测试注入 */
+      /** @deprecated LibraryGrid no longer pops workflow dialog; kept for parameter compatibility / test injection */
       fallbackSelectJob?: (jobId: string) => void;
     } = {},
   ) {
@@ -330,7 +330,7 @@ export function createLibraryController({
       });
       return;
     }
-    // 网格里暂时找不到行：仍用 job_id 打开详情壳 + silent 轮询，不弹旧窗
+    // Temporarily can't find the row in grid: still open detail shell with job_id + silent polling, no old dialog
     openBookDetail({
       job_id: id,
       prefer_translate_tab: true,
@@ -338,7 +338,7 @@ export function createLibraryController({
     });
   }
 
-  // 详情弹窗里改标题/标签/阅读状态:PATCH 后乐观写网格/详情，再后台 silent soft 对齐。
+  // Detail dialog edit Title/Tags/Reading status: after PATCH, optimistically write grid/details, then background silent soft alignment.
   async function updateLibraryDocument(
     documentId?: string | null,
     payload: UpdateDocumentPayload = {},
@@ -376,8 +376,8 @@ export function createLibraryController({
 
   return {
     bookDetailStore,
-    // 键名对齐 services.library.actions 的既有契约(消费方 RecentJobsLibrary /
-    // BookDetailDialog / CategoriesView 不用改)。
+    // Key names align with the existing contract of services.library.actions (consumers RecentJobsLibrary /
+    // BookDetailDialog / CategoriesView do not need changes).
     openSourceReader,
     storeOnly: storeUploadedDocumentOnly,
     translateDocument: translateLibraryDocument,
@@ -387,7 +387,12 @@ export function createLibraryController({
     openBookDetail,
     selectJobForDetail,
     updateDocument: updateLibraryDocument,
-    /** 详情内嵌进度：静默轮询，不弹 #translation-workflow-dialog */
+    /** Detail embedded progress: silent polling, no #translation-workflow-dialog popup */
     attachJobProgress,
   };
 }
+
+
+
+
+

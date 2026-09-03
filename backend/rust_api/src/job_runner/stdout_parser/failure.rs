@@ -50,11 +50,11 @@ fn provider_failure_stage_detail(
         .unwrap_or_default();
     match error.category {
         OcrErrorCategory::CredentialExpired => Some(format!(
-            "MinerU Token 已过期，请更换新 Token{}",
+            "MinerU Token has expired, please replace with a new Token{}",
             trace_suffix
         )),
         OcrErrorCategory::Unauthorized => Some(format!(
-            "MinerU Token 无效或鉴权失败，请检查 Token 是否正确{}",
+            "MinerU Token is invalid or authentication failed, please verify the Token is correct{}",
             trace_suffix
         )),
         _ => None,

@@ -20,7 +20,7 @@ export interface HomeState {
   recentJobsError: string;
 }
 
-/** 兼容旧扁平字段名的初始态 */
+/** Initial state compatible with legacy flat field names */
 export type HomeInitialState = Partial<HomeState> & {
   homeViewMode?: HomeViewMode | string;
   homeRecentJobsLoadingState?: HomeLoadingState | string;

@@ -1,10 +1,10 @@
-/* 阅读器布局共享（默认 react-pdf + legacy 共用）：
- * 页面变量 / body / panel / empty / viewer-wrap。
- * 三栏骨架、legacy pdf.js、底栏 HUD → layout-legacy.css（仅 legacy 包）。
+/* Reader layout shared (default react-pdf + legacy shared):
+ * Page variables / body / panel / empty / viewer-wrap.
+ * Three-column shell, legacy pdf.js, bottom HUD → layout-legacy.css (legacy pack only).
  */
 
 :root {
-  /* 皮肤可覆盖 --reader-page（宣纸米白）；回退 bg */
+  /* Skin can override --reader-page (rice paper off-white); fallback bg */
   --reader-page-bg: var(--reader-page, var(--bg));
   --reader-toolbar-bg: var(--paper);
   --reader-panel-border: var(--line);

@@ -1,7 +1,7 @@
-// React 阅读会话：
-// 1) 解析 job/document → URL
-// 2) 整文件下载完原文/译文 PDF（遮罩不关）
-// 3) 再展示阅读器；可见页渲染等优化在显示之后进行
+// React reading session:
+// 1) parse job/document → URL
+// 2) download complete Source/Translation PDF (overlay does not close)
+// 3) then display Reader; visible-page rendering optimizations happen after display
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -25,13 +25,13 @@ import {
 
 export type ReaderMode = "source" | "translated" | "compare";
 
-/** 与 legacy ReaderDownloadMenu 相同的下载上下文 */
+/** Download context same as legacy ReaderDownloadMenu */
 export type ReaderDownloadContext = {
   fetchProtected: typeof defaultReaderDataPort.fetchProtected;
   jobId: string;
   jobPayload: Record<string, unknown> | null;
   manifestPayload: Record<string, unknown> | null;
-  /** 馆藏只读等无 job 时直接用已解析 URL */
+  /** Library read-only (no job) directly uses parsed URL */
   sourceUrl: string;
   translatedUrl: string;
   sourceOnly: boolean;
@@ -45,10 +45,10 @@ export type ReaderSessionState = {
   setMode: (mode: ReaderMode) => void;
   sourceUrl: string;
   translatedUrl: string;
-  /** 预下载完成的 PDF 字节；展示前已就绪 */
+  /** Pre-downloaded complete PDF bytes; ready before display */
   sourceFile: ProtectedPdfFile | null;
   translatedFile: ProtectedPdfFile | null;
-  /** 下载完成、可以挂载 Document */
+  /** Download complete; can mount Document */
   assetsReady: boolean;
   boot: {
     loading: boolean;
@@ -220,17 +220,17 @@ export function useReaderSession(): ReaderSessionState {
           setTitle("");
           setJobPayload(null);
           setManifestPayload(null);
-          const file = await downloadOne(url, "正在下载原文 PDF…", 30, 85);
+          const file = await downloadOne(url, "DownloadingSource PDF...", 30, 85);
           if (cancelled) return;
           if (!file) {
             setBoot({
               loading: false,
               percent: 100,
-              text: "源文件不可用：该文档没有可读取的源 PDF。",
+              text: "源Files不Ready: 该Documents没有可读取的Source PDF.",
               stage: "failed",
               failed: true,
             });
-            postProgress({ percent: 100, text: "源文件下载失败", stage: "failed" });
+            postProgress({ percent: 100, text: "sourceFilesDownload failed", stage: "failed" });
             return;
           }
           setSourceFile(file);
@@ -243,7 +243,7 @@ export function useReaderSession(): ReaderSessionState {
             failed: false,
           });
           postProgress({ percent: 100, text: READER_PROGRESS_COPY.ready, stage: "ready" });
-          // URL 锚点跳页见 useUrlAnchorJump（react-pdf 控制器）
+          // URL anchor jump to page: see useUrlAnchorJump (react-pdf controller)
           return;
         }
 
@@ -287,22 +287,22 @@ export function useReaderSession(): ReaderSessionState {
           return;
         }
 
-        // 先下完所有 PDF，再允许界面挂载 Document
-        setBootProgress(setBoot, 25, "正在下载 PDF…", "download");
+        // Download all PDFs first, then allow UI to mount Document
+        setBootProgress(setBoot, 25, "Downloading PDF...", "download");
         const tasks: Promise<void>[] = [];
         let sourceBytes: ProtectedPdfFile | null = null;
         let translatedBytes: ProtectedPdfFile | null = null;
 
         if (sourceFinal) {
           tasks.push(
-            downloadOne(sourceFinal, "正在下载原文 PDF…", 30, 55).then((f) => {
+            downloadOne(sourceFinal, "DownloadingSource PDF...", 30, 55).then((f) => {
               sourceBytes = f;
             }),
           );
         }
         if (translatedFinal) {
           tasks.push(
-            downloadOne(translatedFinal, "正在下载译文 PDF…", 55, 85).then((f) => {
+            downloadOne(translatedFinal, "DownloadingTranslation PDF...", 55, 85).then((f) => {
               translatedBytes = f;
             }),
           );
@@ -316,11 +316,11 @@ export function useReaderSession(): ReaderSessionState {
           setBoot({
             loading: false,
             percent: 100,
-            text: "PDF 下载失败，请重试",
+            text: "PDF Download failed, pleaseRetry",
             stage: "failed",
             failed: true,
           });
-          postProgress({ percent: 100, text: "PDF 下载失败", stage: "failed" });
+          postProgress({ percent: 100, text: "PDF Download failed", stage: "failed" });
           return;
         }
 
@@ -335,7 +335,7 @@ export function useReaderSession(): ReaderSessionState {
           failed: false,
         });
         postProgress({ percent: 100, text: READER_PROGRESS_COPY.ready, stage: "ready" });
-        // URL 锚点跳页见 useUrlAnchorJump（react-pdf 控制器）
+        // URL anchor jump to page: see useUrlAnchorJump (react-pdf controller)
       } catch (err) {
         if (cancelled) return;
         const text = err instanceof Error ? err.message : READER_PROGRESS_COPY.failed;
@@ -385,3 +385,8 @@ export function useReaderSession(): ReaderSessionState {
     download,
   };
 }
+
+
+
+
+

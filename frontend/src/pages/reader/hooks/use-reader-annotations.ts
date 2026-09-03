@@ -1,4 +1,4 @@
-// 新阅读器批注状态：本地列表 + CRUD，不依赖旧抽屉/favorites 链路。
+// New Reader annotations state: local list + CRUD, does not depend on the legacy drawer/favorites chain.
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -42,7 +42,7 @@ export function useReaderAnnotations(
   const [notes, setNotes] = useState<ReaderNote[]>(() => loadNotes(docKey));
   const onAfterAdd = options.onAfterAdd;
 
-  // 文档切换时重载
+  // Reload when document changes
   useEffect(() => {
     setNotes(loadNotes(docKey));
   }, [docKey.jobId, docKey.documentId]);
@@ -108,3 +108,6 @@ export function useReaderAnnotations(
     count: notes.length,
   };
 }
+
+
+

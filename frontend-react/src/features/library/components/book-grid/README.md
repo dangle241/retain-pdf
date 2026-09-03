@@ -1,17 +1,17 @@
-# Book Grid 组件族
+# Book Grid component family
 
-## 边界
+## Boundary
 
-`book-grid` 负责图书集合的网格布局。它只接收已经准备好的 `books`，不负责搜索、排序、筛选或请求数据。
+`book-grid` Responsible for grid layout of book collection. It only receives already prepared. `books`Does not handle search, sort, filter, or data requests.
 
-## 文件
+## Files
 
-- `book-grid.tsx`：渲染滚动容器和书卡片网格。
-- `index.ts`：组件族的公共出口。
+- `book-grid.tsx`Render scroll container and book card grid.
+- index.ts: public export for the component family.
 
-## 规则
+## Rules
 
-- 外部只导入 `BookGrid`。
-- 选择态通过 `selectedBookId` 传入。
-- 点击行为通过 `onSelectBook` 交给页面或容器处理。
-- 后续空状态、加载态、批量选择工具条可以放在这个目录里。
+- External only import BookGrid.
+- Selection is passed via selectedBookId.
+- Click behavior passed `onSelectBook` Leave handling to the page or container.
+- Empty states, loading states, and batch selection toolbar: place in this directory later.

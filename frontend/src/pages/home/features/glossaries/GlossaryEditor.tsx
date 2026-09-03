@@ -1,9 +1,10 @@
-// 术语表编辑器表格(对照 glossary-manager-dialog-template.js 的
-// .glossary-editor-panel 表格区块 + view.js:appendGlossaryEntryRow 逐列镜像)。
+// Glossary editor table (side-by-side mirror of glossary-manager-dialog-template.js's
+// .glossary-editor-panel table block + view.js:appendGlossaryEntryRow column by column).
 //
-// 命令式 DOM 行操作 → 结构化数组 + .map 渲染(蓝图 §3):entries 全部来自
-// glossaries-store.js 的 draft.entries,每格是受控 input/select,onChange 直接
-// 写 store(updateEntryField),不再手写行级 DOM 增删。
+// Imperative DOM row actions → structured array + .map rendering (blueprint §3):
+// entries all come from glossaries-store.js's draft.entries; every cell is a
+// controlled input/select, onChange writes directly to store (updateEntryField),
+// no hand-written row-level DOM add/remove.
 
 import { EmptyState } from "../../../../shared/icons/EmptyState.jsx";
 import { GLOSSARY_DOM_IDS, ENTRY_LEVEL_OPTIONS, MATCH_MODE_OPTIONS } from "./glossaries-dom-ids.js";
@@ -15,17 +16,17 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
       <table className="glossary-table">
         <thead>
           <tr>
-            <th className="glossary-col-source">原词</th>
-            <th className="glossary-col-target">译文</th>
-            <th className="glossary-col-note">备注</th>
-            <th className="glossary-col-level">类型</th>
-            <th className="glossary-col-match">匹配</th>
+            <th className="glossary-col-source">Source</th>
+            <th className="glossary-col-target">Translation</th>
+            <th className="glossary-col-note">Note</th>
+            <th className="glossary-col-level">Type</th>
+            <th className="glossary-col-match">Match</th>
             <th className="glossary-col-action"></th>
           </tr>
         </thead>
         <tbody id={GLOSSARY_DOM_IDS.entries}>
           {entries.map((row, index) => (
-            // eslint-disable-next-line react/no-array-index-key -- 行无稳定 id(旧世界也是纯位置化 DOM 行),索引键与旧行为等价
+            // eslint-disable-next-line react/no-array-index-key -- row has no stable id (old world also pure positional DOM rows), index key equivalent to old behavior
             <tr key={index} className="glossary-entry-row">
               <td>
                 <input
@@ -40,7 +41,7 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
                 <input
                   type="text"
                   className="glossary-entry-target"
-                  placeholder="可留空"
+                  placeholder="Optional"
                   value={row.target}
                   onChange={(event) => onFieldChange(index, "target", event.target.value)}
                 />
@@ -49,7 +50,7 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
                 <input
                   type="text"
                   className="glossary-entry-note"
-                  placeholder="可选"
+                  placeholder="Optional"
                   value={row.note}
                   onChange={(event) => onFieldChange(index, "note", event.target.value)}
                 />
@@ -80,7 +81,7 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
                 <button
                   type="button"
                   className="glossary-entry-remove secondary"
-                  aria-label="删除词条"
+                  aria-label="Delete entry"
                   onClick={() => onRemoveRow(index)}
                 >
                   ×
@@ -94,11 +95,14 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
         {!hasEntries ? (
           <EmptyState
             instrument="spectrum"
-            title="暂无词条"
-            hint="添加原词与译文，翻译时会优先用你的术语。"
+            title="No entries"
+            hint="Add source terms and translations; they will be prioritized during translation."
           />
         ) : null}
       </div>
     </div>
   );
 }
+
+
+

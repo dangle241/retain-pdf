@@ -34,7 +34,7 @@ export function useLibraryData({ onLoadError }: UseLibraryDataOptions = {}) {
         if (!canceled) {
           setBooks(mockLibraryEnabled() ? libraryBooks : [])
           setSelectedBookId(mockLibraryEnabled() ? libraryBooks[0]?.id : undefined)
-          onLoadError?.(error instanceof Error ? error.message : '加载图书馆失败')
+          onLoadError?.(error instanceof Error ? error.message : 'Failed to load library')
         }
       })
 
@@ -89,3 +89,5 @@ export function useLibraryData({ onLoadError }: UseLibraryDataOptions = {}) {
     removeBookFromLibrary,
   }
 }
+
+

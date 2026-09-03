@@ -1,15 +1,15 @@
-# ADR 说明
+# ADR description
 
-ADR 是 Architecture Decision Record，用来记录重要架构决策。
+ADR stands for Architecture Decision Record, used to record important architectural decisions.
 
-每篇 ADR 只回答四件事：
+Per article ADR Answer only four things:
 
-- 背景：当时遇到什么问题。
-- 决策：最终选择什么方案。
-- 后果：这个选择带来什么约束和代价。
-- 替代方案：考虑过但没有采用什么。
+- Background: issue encountered.
+- Decision: final solution chosen.
+- Consequences: constraints and costs.
+- Alternatives: considered but none adopted.
 
-命名规则：
+Naming conventions:
 
 ```text
 0001-use-document-v1-as-ir.md
@@ -17,4 +17,4 @@ ADR 是 Architecture Decision Record，用来记录重要架构决策。
 0003-guard-python-boundaries-with-architecture-checks.md
 ```
 
-ADR 不是流水账。只有会影响多人协作、模块边界、长期维护成本的决定才需要写。
+ADR Not a log. Only document decisions affecting multi-person collaboration, module boundaries, or long-term maintenance costs.

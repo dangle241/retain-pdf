@@ -16,7 +16,7 @@ export function resetStatusDetailRuntimeView({ setText, resetEventsList, activat
   setText("failure-suggestion", "-");
   setText("failure-last-log-line", "-");
   setText("failure-retryable", "-");
-  setText("events-status", "全部事件");
+  setText("events-status", "All events");
   resetEventsList();
   activateDetailTab("overview");
 }
@@ -55,3 +55,4 @@ export function initializeIdleAppView({
   applyWorkflowMode();
   updateJobWarning("idle");
 }
+

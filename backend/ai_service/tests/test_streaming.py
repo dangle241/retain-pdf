@@ -28,8 +28,8 @@ def test_assemble_streaming_pure_content_emits_each_delta():
     deltas: list[str] = []
     message = assemble_streaming_message(iter(lines), deltas.append)
 
-    # 审计 A3 后的新契约:前 64 字符先缓冲定性(防工具轮前言泄漏),
-    # 短纯回答在流结束时合并补发——总文本不变,分片方式不再逐 piece 锁死
+    # New contract after Audit A3: first 64 chars are buffered for qualification (prevents tool-round preamble leak),
+    # short pure answers are merged and flushed at stream end -- total text unchanged, chunking no longer locked piece-by-piece
     assert "".join(deltas) == "选择性来自共轭 [1]"
     assert message["content"] == "选择性来自共轭 [1]"
     assert "tool_calls" not in message
@@ -73,7 +73,7 @@ def test_assemble_streaming_tool_calls_do_not_emit_deltas():
     deltas: list[str] = []
     message = assemble_streaming_message(iter(lines), deltas.append)
 
-    assert deltas == []  # 工具调用轮绝不 emit answer_delta
+    assert deltas == []  # Tool-call rounds must never emit answer_delta
     assert message["content"] == ""
     call = message["tool_calls"][0]
     assert call["id"] == "call-1"
@@ -86,7 +86,7 @@ def test_ask_endpoint_streams_answer_deltas(monkeypatch):
     full = "".join(pieces)
 
     def fake_build(settings, client=None, *, on_delta=None):
-        def chat(messages, tools):  # 2 参契约:与非流式一致
+        def chat(messages, tools):  # 2-arg contract: consistent with non-streaming
             for piece in pieces:
                 if on_delta is not None:
                     on_delta(piece)

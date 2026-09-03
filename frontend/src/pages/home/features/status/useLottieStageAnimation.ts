@@ -1,26 +1,27 @@
-// lottie 阶段动画 hook——命令式孤岛(蓝图 §2 features/status/,风险 §8.2)。
+// lottie Stage animation hook——imperative island (Blueprint §2 features/status/, risk §8.2).
 //
-// 拷贝自 components/status/job-status-card-animation.js 的
-// createStatusStageAnimationController(该文件属"死,由 StatusCard.jsx 家族
-// 替代"清单,js/components/ 禁止 import;STAGE_ANIMATIONS 表拷贝自
-// job-status-card-presets.js;resolveVisualStageKeyForSnapshot 拷贝自
-// job-status-card-visuals.js;resolveLottieVendorUrl 是 runtime/ 纯工具,
-// 合法直接 import)。
+// Copied from components/status/job-status-card-animation.js
+// createStatusStageAnimationController (that file is "dead", on the "to be replaced by
+// StatusCard.jsx family" list; js/components/ prohibits import; STAGE_ANIMATIONS table copied
+// from job-status-card-presets.js; resolveVisualStageKeyForSnapshot copied from
+// job-status-card-visuals.js; resolveLottieVendorUrl is a runtime/ pure tool, legally imported directly).
 //
-// 铁律(风险 §8.2):desiredKey 三重检查原样保留——lottie-web 是通过动态
-// <script> 标签异步加载的,加载期间用户可能连续切换阶段(甚至连续切换 job),
-// 三次核对 stageAnimationDesiredKey 是为了保证"加载完成时仍是当前想要展示的
-// 阶段"才真正 loadAnimation,否则会出现"网络慢时旧阶段动画在新阶段渲染完成
-// 后才姗姗来迟地把新动画覆盖掉"的竞态闪烁。
+// Iron rule (risk §8.2): desiredKey triple-check preserved as-is——lottie-web is loaded
+// via dynamic <script> tags in separate steps; during loading the user may switch Stages
+// repeatedly (even switch jobs repeatedly). Triple verification of stageAnimationDesiredKey
+// ensures that only when "the loaded animation is still the one currently desired" does it
+// actually loadAnimation; otherwise the race condition flicker occurs: slow network causes
+// old Stage animation to belatedly overwrite new Stage's rendering completion.
 //
-// React 化的方式:lottie 实例本身是纯命令式(容器 DOM ref),但"是否显示动画
-// 容器 / 是否 translate 态"两个视觉标记原样上抛为 hook 返回值,由
-// StatusCard.jsx 以声明式 className/dataset 渲染(不必要的命令式 DOM 写)。
+// React-ified approach: the lottie instance itself is purely imperative (container DOM ref),
+// but the two visual flags "whether to display animation container / whether is translate state"
+// are surfaced unchanged as hook return values; StatusCard.jsx renders them declaratively
+// via className/dataset (no unnecessary imperative DOM writes).
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { resolveLottieVendorUrl } from "../../composition/external.js";
 
-// 用站点根路径，避免详情弹窗 / 子路径下相对 ./src 解析失败导致动画空盒
+// Use site root path to avoid detail dialog / sub-path relative ./src parse failure causing empty animation box
 const TRANSLATION_ANIMATION_PATH = "/src/assets/animations/deepseek_lottie.json";
 const OCR_ANIMATION_PATH = "/src/assets/animations/ocr_Lottie.json";
 const UPLOAD_ANIMATION_PATH = "/src/assets/animations/pdf_upload_Lottie.json";
@@ -159,8 +160,8 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
     }
     loadLottieWeb()
       .then((lottie) => {
-        // 三重 desiredKey 核对(风险 §8.2,原样保留):异步加载期间用户可能
-        // 连续切换阶段,任何一次检查失败都说明这次加载结果已经过期。
+        // Triple desiredKey check (risk §8.2, preserved as-is): during step-by-step loading
+        // the user may switch Stages repeatedly; any failed check means this loading result is stale.
         if (stageAnimationDesiredKeyRef.current !== stageKey) {
           return;
         }
@@ -207,8 +208,8 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
 
   useEffect(() => clearStageAnimation, []);
 
-  // syncProgressSpeed 是副作用(读写 ref + 调 lottie 实例的 setSpeed),必须
-  // 在 effect 里跑,不能在渲染期间直接调用(渲染函数体必须是纯函数)。
+  // syncProgressSpeed is a side effect (reads/writes ref + calls lottie instance setSpeed);
+  // must run in an effect, cannot be called directly during rendering (render function body must be pure).
   const { stageKey = "", current = NaN, total = NaN, progressUnit = "" } = progressSample || {} as ProgressSample;
   useEffect(() => {
     const normalizedStageKey = `${stageKey || ""}`.trim();
@@ -241,3 +242,6 @@ export function useLottieStageAnimation(visualStageKey = "", progressSample: Pro
     visualStageKey: normalized,
   };
 }
+
+
+

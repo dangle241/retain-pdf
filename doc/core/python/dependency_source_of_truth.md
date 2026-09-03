@@ -1,19 +1,19 @@
-# Python 依赖单一事实来源
+# Python Single source of truth
 
-当前仓库的 Python 依赖真相源已经收敛到根目录的 [`pyproject.toml`](../../pyproject.toml)。
+The current repository's Python Dependency truth source has converged to the root directory. [`pyproject.toml`](../../pyproject.toml)。
 
-## 现在怎么维护
+## How to maintain now
 
-- 运行时依赖：
+- Runtime dependencies:
   `project.dependencies`
-- 测试依赖：
+- Test dependencies:
   `project.optional-dependencies.test`
-- Python 版本：
+- Python version:
   `project.requires-python`
-- 非 Python 二进制依赖：
+- Non‑Python binary dependencies:
   `tool.retain_pdf.external-binaries`
 
-不要再直接手改这些生成产物：
+Do not manually edit generated artifacts directly.
 
 - [`docker/requirements-app.txt`](../../docker/requirements-app.txt)
 - [`docker/requirements-test.txt`](../../docker/requirements-test.txt)
@@ -21,23 +21,23 @@
 - [`desktop/requirements-desktop-windows.txt`](../../desktop/requirements-desktop-windows.txt)
 - [`desktop/requirements-desktop-macos.txt`](../../desktop/requirements-desktop-macos.txt)
 
-## 更新方式
+## Update method
 
-修改完 [`pyproject.toml`](../../pyproject.toml) 后，执行：
+After modifying pyproject.toml, run:
 
 ```bash
 python backend/scripts/devtools/sync_python_requirements.py --repo-root .
 ```
 
-如果只想检查是否漂移：
+To only check for drift:
 
 ```bash
 python backend/scripts/devtools/sync_python_requirements.py --repo-root . --check
 ```
 
-## 当前口径
+## Current definition
 
-运行时 Python 包：
+Runtime Python packages:
 
 - `Pillow`
 - `PyMuPDF`
@@ -45,25 +45,25 @@ python backend/scripts/devtools/sync_python_requirements.py --repo-root . --chec
 - `requests`
 - `urllib3`
 
-测试额外包：
+Test extra package:
 
 - `pytest`
 
-非 Python 二进制依赖：
+Non‑Python binary dependencies:
 
-- `typst`：必需
-- `gs`：可选压缩路径依赖
+- `typst`Required
+- `gs`Compress path dependencies (optional)
 
-## 为什么这样做
+## Missing context. Provide code or scenario to analyze rationale.
 
-之前 Docker、desktop、CI 各自维护 requirements，容易出现：
+Before Docker、desktop、CI Maintain separately requirementsEasily occurs:
 
-- 某个平台漏装包
-- 运行时和桌面打包版本漂移
-- CI 通过，但本地或发布构建失败
+- Platform missing package.
+- Runtime and desktop packaged version drift.
+- CI Passed, but local or release build fails.
 
-现在的目标是：
+The current goal is:
 
-- 只改一处
-- 多处生成
-- CI 用 `--check` 阻止漂移进入主线
+- Change in one place only
+- Generated in multiple places
+- CI uses --check to prevent drift into main.

@@ -208,23 +208,23 @@ pub(super) fn infer_failed_stage(job: &JobSnapshot, haystack: &str) -> String {
 
     if stage == "rendering"
         || stage == "render"
-        || stage_detail.contains("排版")
-        || stage_detail.contains("渲染")
+        || stage_detail.contains("rendering")
+        || stage_detail.contains("render")
         || contains_render_failure_signal(&combined)
     {
         return "render".to_string();
     }
-    if stage == "translation" || combined.contains("translation") || stage_detail.contains("翻译")
+    if stage == "translation" || combined.contains("translation") || stage_detail.contains("translation")
     {
         return "translation".to_string();
     }
-    if combined.contains("normaliz") || stage_detail.contains("标准化") {
+    if combined.contains("normaliz") || stage_detail.contains("normalization") {
         return "normalization".to_string();
     }
     if combined.contains("ocr")
         || combined.contains("mineru")
         || combined.contains("paddle")
-        || stage_detail.contains("解析")
+        || stage_detail.contains("parsing")
     {
         return "ocr".to_string();
     }

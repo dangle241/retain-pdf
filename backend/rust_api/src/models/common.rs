@@ -63,7 +63,8 @@ pub struct UploadRecord {
     pub page_count: u32,
     pub uploaded_at: String,
     pub developer_mode: bool,
-    /// sha256(文件字节),即 documents.document_id;空串表示旧记录未回填
+    /// sha256 of file bytes, which equals `documents.document_id`; an
+    /// empty string indicates a legacy record not yet backfilled.
     #[serde(default)]
     pub content_hash: String,
 }

@@ -275,7 +275,8 @@ def test_direct_typst_sanitizer_rewrites_bra_ket_rangle_for_mitex_compatibility(
 
 
 def test_direct_typst_sanitizer_rewrites_varphi_for_mitex_compatibility() -> None:
-    # sanitizer 同时会剥掉 mitex 不支持的 \left/\right 尺寸修饰
+    # The sanitizer also strips the `\left`/`\right` size modifiers
+    # because mitex does not support them.
     markdown = sanitize_direct_typst_inline_math(r"基态 $\left|\varPhi_{0}\right\rangle$ 保持。")
     assert markdown == r"基态 $|\Phi_{0}⟩$ 保持。"
 

@@ -1,29 +1,29 @@
-# 任务详情页（`pages/detail`）
+# Task details page (`pages/detail`）
 
-独立 SPA：`detail.html` → `entry.tsx` → `DetailApp`。
+Standalone SPA：`detail.html` → `entry.tsx` → `DetailApp`。
 
-## 布局
+## Layout
 
 ```text
 pages/detail/
   entry.tsx / DetailApp.tsx
-  external.ts              # 对 src/js/* 的唯一出口
+external.ts              # the only exit for src/js/*
   components/              # UI（Header / Artifacts / Events…）
 ```
 
-## 规则
+## Rules
 
-| 层 | 规则 |
+| Layer | Rule |
 |----|------|
-| `DetailApp` / `components/**` | **禁止**直接 `import … from "../../js/…"` |
-| `external.ts` | 唯一允许 import `src/js/*` 的文件；缺符号只改这里 |
-| `js/job-detail/*` | 命令式 overview / markdown / resume 逻辑（经 external 接入） |
+| `DetailApp` / `components/**` | **Prohibited** direct `import â¦ from "../../js/â¦"` |
+| `external.ts` | Only allowed import `src/js/*` file; missing symbol, fix here only |
+| `js/job-detail/*` | Imperative overview / markdown / resume logic (via external Integrate |
 
-门禁：`tests/architecture-boundaries.test.mjs`  
+Access Control:`tests/architecture-boundaries.test.mjs`  
 （`detail page must not import src/js/* directly`）
 
-## 状态策略（摘要）
+## Status Strategy (Summary)
 
-- 文案 / 链接：React state（`texts` / `links`），由 job-detail 回调写入  
-- 产物清单、失败调试、Markdown 图片网格：命令式 innerHTML 孤岛（见各组件注释）  
-- 模态 / 下载 toast：React（Radix Dialog + DownloadToastHost）
+- copy / link:React state（`texts` / `links`Syntax error. Fix: Remove extra parenthesis. job-detail Write Callback  
+- Artifact list, failure debugging,Markdown Image Grid: Imperative innerHTML Silo (see component annotations)  
+- Modal / download toast: React (Radix Dialog + DownloadToastHost)

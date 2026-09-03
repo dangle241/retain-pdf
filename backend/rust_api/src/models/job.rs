@@ -40,12 +40,12 @@ mod tests {
         job.started_at = Some("2026-04-04T00:00:00Z".to_string());
         job.updated_at = "2026-04-04T00:00:05Z".to_string();
         job.stage = Some("running".to_string());
-        job.stage_detail = Some("正在运行".to_string());
+        job.stage_detail = Some("running".to_string());
         job.sync_runtime_state();
 
         job.updated_at = "2026-04-04T00:00:12Z".to_string();
         job.stage = Some("rendering".to_string());
-        job.stage_detail = Some("正在渲染".to_string());
+        job.stage_detail = Some("Rendering".to_string());
         job.sync_runtime_state();
 
         job.updated_at = "2026-04-04T00:00:20Z".to_string();

@@ -1,14 +1,14 @@
-// 图书馆网格根组件(蓝图 §2 features/library/)。
+// LibraryGrid root component (Blueprint §2 features/library/).
 //
-// 订阅设计(蓝图 §3):Library 本体走无 selector 全快照订阅——重渲 grid 函数
-// 本体便宜,真正的性能隔离靠 BookCard 的 memo + cardSignatureOf(见
-// BookCard.jsx),不做 per-card store 订阅(收益零,蓝图已验证)。
+// Subscription design (Blueprint §3): Library book body uses no-selector full snapshot subscription——
+// re-rendering grid function is cheap; real performance isolation relies on BookCard's memo +
+// cardSignatureOf (see BookCard.jsx), not per-card store subscription (zero gain; Blueprint verified).
 //
-// 展示模式派生(经与引擎实测核实,非直觉设计——见 library-view-store.js 顶部
-// 注释):recentJobsStatePort 的 batch() 分页提交在 storeDrivenRendering:true
-// 下从不触发 viewPort.renderList/renderEmpty,所以"items.length > 0 优先"是
-// 唯一不会陈旧的信号源;libraryViewStore 的 mode 只在 items 为空时才可信
-// (loading/empty/error 三态由 renderLoading()/actions.js 的边缘路径驱动)。
+// Display mode derivation (verified with engine testing; non-intuitive design——see library-view-store.js
+// top comment): recentJobsStatePort batch() page submission under storeDrivenRendering:true
+// never triggers viewPort.renderList/renderEmpty, so "items.length > 0 first" is the
+// only signal source that never becomes stale; libraryViewStore mode is trustworthy only when
+// items is empty (loading/empty/error three states driven by renderLoading()/actions.js edge paths).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -29,7 +29,7 @@ import {
   isRecentJobActive,
 } from "../../../composition/external.js";
 
-// 客户端排序(只排已加载的这几页;/documents 无 sort 参数,和参考项目一样在前端排)。
+// Client-side sort (only sorts loaded pages; /documents has no sort param; sorted on frontend like reference items).
 function sortItems(items, sortMode) {
   const arr = [...items];
   const desc = (key) => (a, b) => `${b?.[key] || ""}`.localeCompare(`${a?.[key] || ""}`);
@@ -37,7 +37,7 @@ function sortItems(items, sortMode) {
     case "created": return arr.sort(desc("added_at"));
     case "opened": return arr.sort(desc("last_opened_at"));
     case "title":
-      return arr.sort((a, b) => `${a?.title || a?.display_name || ""}`.localeCompare(`${b?.title || b?.display_name || ""}`, "zh-CN"));
+      return arr.sort((a, b) => `${a?.title || a?.display_name || ""}`.localeCompare(`${b?.title || b?.display_name || ""}`, "en-US"));
     case "updated":
     default:
       return arr.sort(desc("updated_at"));
@@ -45,10 +45,10 @@ function sortItems(items, sortMode) {
 }
 
 const VIEW_TEXT = Object.freeze({
-  loadMore: "更多",
-  loadMoreLoading: "加载中…",
-  empty: "暂无最近任务",
-  emptySearch: "没有匹配的书籍",
+  loadMore: "More",
+  loadMoreLoading: "Loading...",
+  empty: "No recent jobs yet",
+  emptySearch: "No matching books",
 });
 
 export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
@@ -65,9 +65,9 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState("");
 
-  // 批量选择(#31):选中态用 document_id 做 key(和网格主键一致);批量模式
-  // 开关经 onBatchModeChange 上报给 HomeApp,由它把底部栏(AppBottomBar)用
-  // CSS 隐藏(batchMode 期间让位给这条批量工具栏——两者都固定在底部居中)。
+  // BatchSelect (#31): selected state uses document_id as key (consistent with Grid primary key);
+  // batch mode toggle reported to HomeApp via onBatchModeChange; HomeApp hides the bottom bar
+  // (AppBottomBar) with CSS (batchMode yields to this BatchTools bar——both fixed at bottom center).
   const [batchMode, setBatchModeState] = useState(false);
   const [selectedIds, setSelectedIds] = useState(() => new Set<string>());
   const [batchBusy, setBatchBusy] = useState(false);
@@ -78,9 +78,9 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
     if (!next) setSelectedIds(new Set());
     onBatchModeChange?.(next);
   }
-  // useCallback:稳定引用——传给每张卡片当 onToggleSelect,不然
-  // areCardPropsEqual 里的 onToggleSelect 每次 render 都判不相等,
-  // RecentJobsLibrary 一重渲就拖着所有卡片一起重渲(memo 白做)。
+  // useCallback: stable reference——passed to each card as onToggleSelect; otherwise
+  // areCardPropsEqual's onToggleSelect is judged unequal every render,
+  // RecentJobsLibrary re-rendering drags all cards to re-render together (memo wasted).
   const toggleSelect = useCallback((documentId) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -101,7 +101,7 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
 
   const items = Array.isArray(recentJobs.items) ? recentJobs.items : [];
 
-  // 标签列表 + 各状态计数(供筛选面板显示,基于已加载项)。
+  // TagsList + per-status counts (for Filter panel display, based on loaded items).
   const { tags, statusCounts } = useMemo(() => {
     const tagSet = new Set<string>();
     const counts = { done: 0, untranslated: 0, active: 0, failed: 0 };
@@ -113,7 +113,7 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
       else if (s === "succeeded") counts.done += 1;
       else if (s === "failed") counts.failed += 1;
     }
-    return { tags: [...tagSet].sort((a: string, b: string) => a.localeCompare(b, "zh-CN")), statusCounts: counts };
+    return { tags: [...tagSet].sort((a: string, b: string) => a.localeCompare(b, "en-US")), statusCounts: counts };
   }, [items]);
 
   const visibleItems = useMemo(() => {
@@ -123,8 +123,8 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
     return sortItems(filtered, sortMode);
   }, [items, statusFilter, tagFilter, sortMode]);
 
-  // 批量选择只作用"可选中"的项(有 document_id 的);极少见的运行时插入
-  // job-only 项(无 document_id)选不了,也不计入"全选已加载"的分母。
+  // BatchSelect only applies to "selectable" items (those with document_id); rare runtime-inserted
+  // job-only items (no document_id) cannot be selected and are not included in "Select all loaded" count.
   const selectableIds = useMemo(
     () => visibleItems.map((item) => `${item.document_id || ""}`.trim()).filter(Boolean),
     [visibleItems],
@@ -138,16 +138,16 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
   async function handleBatchDelete() {
     const ids = [...selectedIds];
     if (!ids.length || batchBusy) return;
-    if (!window.confirm(`确定删除选中的 ${ids.length} 篇文档？此操作不可恢复。`)) return;
+    if (!window.confirm(`Delete the selected ${ids.length} documents? This cannot be undone.`)) return;
     setBatchBusy(true);
     try {
       const { confirmed, failed } = await actions.deleteDocuments(ids);
-      if (failed === 0) toast.success(`已删除 ${confirmed} 篇`);
-      else if (confirmed > 0) toast.warning(`已删除 ${confirmed} 篇，${failed} 篇失败`);
-      else toast.error("删除失败，请稍后重试");
+      if (failed === 0) toast.success(`Deleted ${confirmed} documents`);
+      else if (confirmed > 0) toast.warning(`Deleted ${confirmed} documents, ${failed} documentsFailed`);
+      else toast.error("Delete failed. Please try again later.");
       setBatchMode(false);
     } catch (err) {
-      toast.error(err?.message || "删除失败，请稍后重试");
+      toast.error(err?.message || "Delete failed. Please try again later.");
     } finally {
       setBatchBusy(false);
     }
@@ -159,10 +159,10 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
     setBatchBusy(true);
     try {
       await services.collections.controller.addDocuments(collectionId, ids);
-      toast.success(`已加入合集，共 ${ids.length} 篇`);
+      toast.success(`Added to collection, total ${ids.length} documents`);
       setBatchMode(false);
     } catch (err) {
-      toast.error(err?.message || "加入合集失败，请稍后重试");
+      toast.error(err?.message || "Add to collection failed. Please try again later.");
     } finally {
       setBatchBusy(false);
     }
@@ -187,7 +187,7 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
     viewPort,
   });
 
-  // 从阅读器返回：列表有高度后再恢复 #recent-jobs-scroll-body 滚动
+  // Returning from Reader: resume #recent-jobs-scroll-body scroll only after List has height
   useHomeReturnRestore(hasItems || mode === "empty" || mode === "error");
 
   function handleLoadMoreClick() {
@@ -195,26 +195,26 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
   }
 
   return (
-    <section id="library-view" className="library-view" aria-label="图书馆">
+    <section id="library-view" className="library-view" aria-label="Library">
       <div id="recent-jobs-scroll-body" className="library-scroll-body" ref={scrollBodyRef}>
         <div id="recent-jobs-summary" className="status-panel-note library-summary">{summary.text}</div>
         <div id="recent-jobs-empty" className={mode === "list" ? "hidden" : undefined}>
           {mode === "loading" ? (
-            <div className="events-empty">正在加载最近任务…</div>
+            <div className="events-empty">Loading recent jobs...</div>
           ) : mode === "error" ? (
             <div className="events-empty">{errorMessage}</div>
           ) : (
             <EmptyState
               instrument="microscope"
-              title={emptyMessage || "暂无最近任务"}
-              hint="上传 PDF 后会出现在这里，处理完成即可阅读。"
+              title={emptyMessage || "No recent jobs yet"}
+              hint="Uploaded PDFs appear here and can be read after processing is done."
             >
               <button
                 type="button"
                 className="app-button empty-state-action"
                 onClick={() => services.workflowDialog.requestOpenUpload()}
               >
-                上传 PDF
+                Upload PDF
               </button>
             </EmptyState>
           )}
@@ -262,7 +262,7 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
                 <BookCard
                   key={item.job_id}
                   item={item}
-                  // 壳 + 按钮:默认只有「快速阅读」;要加翻译等在此 concat 即可
+                  // Shell + buttons: default only "Quick Read"; add Translation etc. by concatenating here
                   actions={buildDefaultBookCardActions(item, {
                     onReader: actions.openJobReader,
                     onReadSource: actions.openSourceReader,
@@ -306,10 +306,10 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
   );
 }
 
-// 使用 handleSearchChange 的搜索输入框自身留在 LibraryBottomBar(HomeApp.jsx)
-// 骨架里——图书馆网格与底部搜索栏是同级兄弟节点,不是父子关系(镜像
-// partials/main-content.html)。导出这个 hook 供 HomeApp.jsx 复用同一条
-// onSearch/query 通道,避免出现两条平行实现。
+// The search input using handleSearchChange stays in LibraryBottomBar (HomeApp.jsx)
+// skeleton——LibraryGrid and bottom search bar are siblings, not parent-child (mirrors
+// partials/main-content.html). Export this hook for HomeApp.jsx to reuse the same
+// onSearch/query channel; avoids two parallel implementations.
 export function useLibrarySearchBinding() {
   const services = useHomeServices();
   const { viewPort } = services.library;
@@ -323,3 +323,8 @@ export function useLibrarySearchBinding() {
 
   return { query: view.query, onSearchChange };
 }
+
+
+
+
+

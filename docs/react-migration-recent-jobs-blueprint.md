@@ -1,128 +1,128 @@
-# recent-jobs + job-runtime 子域 React 迁移施工蓝图(Phase 3 核心)
+# recent-jobs + job-runtime Subdomain React Migration Blueprint(Phase 3 Core)
 
-> Phase 3 实施 agent 的直接输入。源码级勘察产出,配合总计划
-> ~/.claude/plans/wondrous-baking-donut.md 使用。
+> Phase 3 Implementation agent Direct input. Source-level survey output., coordinate with general plan
+> ~/.claude/plans/wondrous-baking-donut.md Use.
 
-## 0. 现状数据流(施工前必读)
+## 0. Current data flow (Must read before construction)
 
-三条链路、两套定时器、三个 store:
+Three links two timers three store:
 
-- **链路 A(当前任务轮询 1s)**:jobRuntimeFeature.startPolling → setInterval 1000ms → fetchJob/fetchJobPayload → render-context 写 currentJobStore → ui/presentation.js renderJob → job-status-card.renderSnapshot;同时 notifyLibraryJobUpdated(document CustomEvent)+ requestLibraryRefresh(4s 节流)+ secondaryResourceScheduler(events/manifest/stageActions 三资源限频 → secondaryResourceStore → renderJobSecondaryPatch)。
-- **链路 B(图书馆列表)**:refreshScheduler.initialize → loader.load → pagination 聚合 → commit → recentJobsStatePort.batch → store-renderer → viewPort.renderList → view.js → <recent-job-card> 网格。
-- **链路 C(活跃卡补丁 2.5s)**:active-refresh 拉最多 6 个非当前活跃 job → runtimePatches.update → statePort.replaceItem(卡片级补丁)→ 随后全量静默重拉。
-- **事件桥(bindings.js)**:library* 三个 document CustomEvent → 命令总线 → command-handlers(缓存失效 + 补丁 + 300/600/1200ms 分级刷新);openTranslationWorkflow 挂起刷新 / close 恢复。
+- **link A(Current Task Polling 1s)**:jobRuntimeFeature.startPolling → setInterval 1000ms → fetchJob/fetchJobPayload → render-context write currentJobStore → ui/presentation.js renderJob → job-status-card.renderSnapshot;Also notifyLibraryJobUpdated(document CustomEvent)+ requestLibraryRefresh(4s Throttle function. Reduce event frequency. Implement: `lodash.throttle`. → skipped: custom debounce, add when performance issues arise.)+ secondaryResourceScheduler(events/manifest/stageActions Three-resource rate limit. → secondaryResourceStore → renderJobSecondaryPatch)。
+- **Link B(Library list)**:refreshScheduler.initialize → loader.load → pagination Aggregate → commit → recentJobsStatePort.batch → store-renderer → viewPort.renderList → view.js → <recent-job-card> Grid.
+- **Link C (Active card patch 2.5s)**: active-refresh Pull max 6 Not currently active job â runtimePatches.update â statePort.replaceItem (Card-level patch) â Then full silent re-pull.
+- **EventBridge(bindings.js)**: three library* document CustomEvents â Command bus â command-handlers (Cache invalidation + Patch + 300/600/1200ms Tiered refresh); openTranslationWorkflow Suspend refresh / close Restore.
 
-**关键事实**:
-- recentJobsStatePort / currentJobStore / secondaryResourceStore 已是唯一真值(storeDrivenRendering: true)——**轮询/补丁/节流引擎一行不动**,React 只换 viewPort 与自定义元素。
-- 状态卡 VM 全在 src/js/job-status/(纯逻辑,门禁允许)。
-- card-presenter.js / image-loader.js 是 features/recent-jobs/ 下的转口 facade(re-export 自 components/recent-jobs/),**从 facade import 合法**。
-- store getSnapshot() 每次深冻结新克隆 → notify 后所有 item 引用全变,**卡片订阅不能靠引用相等**(见 §3)。
-- smoke DOM 契约必须逐一镜像:.recent-job-item[data-job-id]、#job-status-card、#status-ring-label/-value、#status-progress-ring、#job-progress-text、.status-stage-step[data-stage-key][aria-selected]、#status-section.hidden、#recent-jobs-list、#recent-jobs-empty。
-- recoverActiveJob(actions.js:84)无生产调用方,保持不接线。
+**Key facts**:
+- recentJobsStatePort / currentJobStore / secondaryResourceStore Already the only truthy value. (storeDrivenRendering: true)ââ**Polling/Patch/Throttle engine unchanged.**, React Replace only. viewPort With custom elements.
+- status card VM All src/js/job-status/(Pure logic,Access granted.)。
+- card-presenter.js / image-loader.js are features/recent-jobs/ Transshipment below facade (re-export since components/recent-jobs/), **import from facade is legal**.
+- store getSnapshot() Deep-freeze new clone each time. â notify After all item Replace all references., **Card subscription cannot rely on reference equality** (see Â§3).
+- smoke DOM Mirror each contract.:.recent-job-item[data-job-id]、#job-status-card、#status-ring-label/-value、#status-progress-ring、#job-progress-text、.status-stage-step[data-stage-key][aria-selected]、#status-section.hidden、#recent-jobs-list、#recent-jobs-empty。
+- recoverActiveJob(actions.js:84)No production callers.,Keep disconnected.
 
-## 1. 逐文件判决
+## 1. File-by-file ruling.
 
-### features/recent-jobs/(45 文件)
-- **保留原样(引擎)**:state、pagination、runtime-item、runtime-patches、runtime-value-helpers、loader、commit、runtime、controller、actions、active-refresh、refresh-scheduler、refresh-environment、commands、command-handlers、bindings、library-books-resource、library-refresh-port、navigation-port、job-runtime-port、reader-port、active-job-recovery、created-job-hydration、summary-view-model、loading-state-contract、image-refresh、event-target——composition.js 直接 import 并 mount。
-- **保留(facade)**:card-presenter.js、image-loader.js。
-- **保留但停用**:store-renderer.js(React viewPort 下无害,Phase 4 删)。
-- **保留**:workflow-open-port.js(composition 注入 isWorkflowOpen 读 workflow store)。
-- **死(cutover 删)**:view.js、view-port.js、host.js、host-actions.js、render-target.js、view-state-target.js、view-state.js、list-rendering.js、list-events.js、image-hydration.js、card-markup.js、card-template.js、formatting.js、dom-contract.js。⚠️ controller/runtime/loader/commit/bindings 5 处默认参数 `viewPort = createRecentJobsViewPort()` 同 commit 改必传(测试均已注入,影响面零)。
+### features/recent-jobs/(45 files)
+- **Keep as is(Engine)**:state, pagination, runtime-item, runtime-patches, runtime-value-helpers, loader, commit, runtime, controller, actions, active-refresh, refresh-scheduler, refresh-environment, commands, command-handlers, bindings, library-books-resource, library-refresh-port, navigation-port, job-runtime-port, reader-port, active-job-recovery, created-job-hydration, summary-view-model, loading-state-contract, image-refresh, event-targetâcomposition.js Direct import and mount.
+- **Retain(facade)**:card-presenter.js、image-loader.js。
+- **Retain but disable**:store-renderer.js(React viewPort Harmless, delete in Phase 4).
+- **Retain**:workflow-open-port.js(composition inject isWorkflowOpen read workflow store).
+- **dead(delete at cutover)**:view.js, view-port.js, host.js, host-actions.js, render-target.js, view-state-target.js, view-state.js, list-rendering.js, list-events.js, image-hydration.js, card-markup.js, card-template.js, formatting.js, dom-contract.js. â ï¸ controller/runtime/loader/commit/bindings 5 Set default parameters. `viewPort = createRecentJobsViewPort()` same as commit Change to required.(Tests injected, Zero impact).
 
-### features/job-runtime/(17 文件)
-**全部保留**。变的只是 mountJobRuntimeFeature payload 的回调实现(renderJob/renderJobSecondaryPatch/setText/setWorkflowSections… 由 composition 提供 React 实现)。runtime-reset 消费 app-shell 子域先行迁移的注入回调。
+### features/job-runtime/(17 files)
+**All retained** Only change is mountJobRuntimeFeature payload callback implementation of(renderJob/renderJobSecondaryPatch/setText/setWorkflowSectionsâ¦ provided by composition React implementation). runtime-reset consumes app-shell Subdomain-first migration injection callback.
 
-### components/status/(17 文件)+ job-status/(VM)
-job-status/ 全目录纯 VM 保留,React 直接 import。components/status 判决:
-- job-status-card.js / -template.js / connected-.js / -rendering.js / -progress-renderer.js / -selection.js / -stage-flow.js / -substages.js / -retry.js / -snapshot.js / -presets.js / -visuals.js / -dom-contract.js / task-toolbar.js → **死**,由 StatusCard.jsx 家族替代;其中:
-  - rendering.js 的 buildProgressRenderModel(45-164 纯函数)**拷贝**至 src/pages/home/features/status/progress-model.js(禁区无法 import)。
-  - -progress-animation.js → hook useStagedProgressAnimation(内核从 job-status/status-card-progress-view-model.js import;timers/displayedProgressByStage 用 useRef)。
-  - -animation.js(lottie 194 行)→ 命令式孤岛 hook useLottieStageAnimation(desiredKey 竞态防护 + speedForProgressDelta 曲线整体拷贝;resolveLottieVendorUrl 合法 import)。
-  - -presets.js 的 STAGE_ANIMATIONS 表拷贝进 hook;-visuals.js 的 resolveVisualStageKeyForSnapshot(8 行)拷贝。
-  - 隐藏区 #job-id/#job-status/#job-stage-detail/#query-job-duration/#job-finished-at 及 legacy 链接**照样渲染**(job-summary 文本与 parallel smoke 依赖)。
+### components/status/(17 files)+ job-status/(VM)
+job-status/ All Directories Plain VM retained, React directly import. components/status ruling:
+- job-status-card.js / -template.js / connected-.js / -rendering.js / -progress-renderer.js / -selection.js / -stage-flow.js / -substages.js / -retry.js / -snapshot.js / -presets.js / -visuals.js / -dom-contract.js / task-toolbar.js â **dead**, substituted by StatusCard.jsx Family; among them:
+- rendering.js buildProgressRenderModel(45-164 Pure function) **Copy** to src/pages/home/features/status/progress-model.js(Forbidden area access denied. Check permissions. import).
+  - -progress-animation.js → hook useStagedProgressAnimation(Kernel from job-status/status-card-progress-view-model.js import;timers/displayedProgressByStage use useRef)。
+- -animation.js(lottie 194 lines) â Imperative Island hook useLottieStageAnimation(desiredKey Race Condition Protection + speedForProgressDelta Copy Entire Curve; resolveLottieVendorUrl Legal import).
+- -presets.js STAGE_ANIMATIONS Copy table into hook; -visuals.js resolveVisualStageKeyForSnapshot(8 lines) Copy.
+- Hidden area #job-id/#job-status/#job-stage-detail/#query-job-duration/#job-finished-at and legacy link **Render anyway.**(job-summary Text & parallel smoke dependency).
 
-### components/recent-jobs/(3 文件)
-recent-job-card.js 死 → RecentJobCard.jsx;presenter 与 image-loader **保留**(经 facade;模块级 objectURL 缓存必须共享,React 内不得另建)。
+### components/recent-jobs/(3 files)
+recent-job-card.js dead â RecentJobCard.jsx; presenter and image-loader **retained**(via facade; Module-level objectURL Cache must be shared, React No nested construction inside).
 
-### ui/ 状态呈现链
-presentation.js、status-surfaces-presenter.js、job-status-card-renderer.js、status-card-view-port.js、job-status-summary-presenter.js、elapsed-presenter.js、presentation-view.js、status-ring-fallback-presenter.js → 死于 cutover。纯逻辑本就在 job-status/ 与 job/。⚠️ 不要从 pages import ui/status-surfaces-presenter.js(拖进旧 DOM 写入链)。
+### ui/ State rendering chain
+presentation.js, status-surfaces-presenter.js, job-status-card-renderer.js, status-card-view-port.js, job-status-summary-presenter.js, elapsed-presenter.js, presentation-view.js, status-ring-fallback-presenter.js â Died cutover Pure logic already exists in job-status/ and job/. â ï¸ Do not import ui/status-surfaces-presenter.js from pages(Drag into old DOM Write to Chain).
 
-## 2. React 组件表(src/pages/home/)
+## 2. React Component table(src/pages/home/)
 
 ### features/library/
-- **RecentJobsLibrary.jsx**:useStoreSnapshot(recentJobsStore) 全快照 + useStoreSnapshot(libraryViewStore);loadMore → runtime.loadRecentJobs({reset:false});summary 用 buildRecentJobsSummaryViewModel。
-- **RecentJobCard.jsx**:memo(Card, areCardPropsEqual),props = item + onSelect/onDelete/onReader(稳定引用);删除确认 popover 提升为 Library 级 confirmingDeleteJobId useState。
-- **useRecentJobCover.js**:loadFirstRecentJobImage + recentJobRawImageUrls(facade);imageCacheVersionOf 拷贝(recent-job-card.js:12-29);token 防竞态;**卸载不 revoke**。
-- **useLibraryAutoLoad.js**:滚动 passive listener + rAF,260px/0.35 阈值几何重写(~10 行)。
-- **library-view-store.js**(新):{mode: loading|list|empty|error, message, hasMore, loadMoreLoading};文案拷贝 RECENT_JOBS_VIEW_TEXT 主视图变体。
-- **react-view-port.js**(新):实现旧 viewPort 10 方法 → 写 libraryViewStore;renderList 忽略 items(React 直读 recentJobsStore);replaceCard 恒 true;bindEvents 捕获 handlers 到 handlersRef;hasView 恒 true。
-- recent-jobs-dialog 元素形态在主视图不启用,死。
+- **RecentJobsLibrary.jsx**: useStoreSnapshot(recentJobsStore) Full snapshot + useStoreSnapshot(libraryViewStore); loadMore â runtime.loadRecentJobs({reset:false}); summary uses buildRecentJobsSummaryViewModel.
+- **RecentJobCard.jsx**:memo(Card, areCardPropsEqual),props = item + onSelect/onDelete/onReader(Stable reference);Delete confirmation popover Promote to Library level confirmingDeleteJobId useState。
+- **useRecentJobCover.js**: loadFirstRecentJobImage + recentJobRawImageUrls(facade); imageCacheVersionOf Copy(recent-job-card.js:12-29); token Race condition prevention; **do not revoke on unmount**.
+- **useLibraryAutoLoad.js**: Scroll passive listener + rAF, 260px/0.35 Threshold geometry rewrite.(~10 lines).
+- **library-view-store.js**(new):{mode: loading|list|empty|error, message, hasMore, loadMoreLoading};Copy Text RECENT_JOBS_VIEW_TEXT Main view variant.
+- **react-view-port.js**(new):Implement legacy. viewPort 10 Method â write libraryViewStore;renderList ignore items(React Direct read recentJobsStore);replaceCard always true;bindEvents Capture handlers to handlersRef;hasView always true.
+- recent-jobs-dialog Element form disabled in main view.,Die.
 
 ### features/status/
-- **StatusCard.jsx**(id="job-status-card",渲进 #status-section):useStoreSnapshot(statusCardStore) 整快照;取消 → services.jobRuntime.cancelCurrentJob()。
-- **StageFlow.jsx / SubstageFlow.jsx / ProgressBlock.jsx / ResultActions.jsx / StageRetry.jsx**:全部由 job-status/ 纯 VM 驱动;StageRetry dispatch APP_EVENTS.retryStage。
-- **useElapsedTicker.js**:1s tick + buildElapsedViewModel(job/elapsed-view-model.js),终态即停;elapsed 不进 store(避免快照恒变)。
-- **useStageSelection.js**:selectedStageKey/manual useState;换 job 复位、阶段推进清 manual(selection.js:45-64 语义)。
-- **status-card-store.js**(新)+ statusCardPresenter(~80 行):renderMain = buildRuntimeStatusCardViewModel + buildJobStatusSummaryViewModel → setSnapshot;renderPatch 三 source 统一"重算 VM 写 store"(语义收敛点,S9 对照验证);finishedAtFallback 用 currentJobStore。
+- **StatusCard.jsx**(id="job-status-card",Render engine. Update. Optimize. #status-section):useStoreSnapshot(statusCardStore) Take Snapshot;Cancel â services.jobRuntime.cancelCurrentJob().
+- **StageFlow.jsx / SubstageFlow.jsx / ProgressBlock.jsx / ResultActions.jsx / StageRetry.jsx**:All by job-status/ pure VM driven;StageRetry dispatch APP_EVENTS.retryStage.
+- **useElapsedTicker.js**:1s tick + buildElapsedViewModel(job/elapsed-view-model.js), stop at final state;elapsed not in store(avoid constant snapshot changes).
+- **useStageSelection.js**:selectedStageKey/manual useState;change job Reset, stage advance clear manual(selection.js:45-64 semantics).
+- **status-card-store.js**(new)+ statusCardPresenter(~80 lines):renderMain = buildRuntimeStatusCardViewModel + buildJobStatusSummaryViewModel â setSnapshot;renderPatch Three source Unify "Recalculate. VM write store"(Semantic convergence point,S9 Cross-check);finishedAtFallback use currentJobStore.
 
-## 3. 订阅设计(1s 轮询不重渲整格)
+## 3. Subscription Design(1s Polling without full-cell re-render)
 
-1. 网格单点订阅:Library 组件无 selector 全快照(重渲 grid 函数本体便宜)。
-2. **卡片 memo + 签名比较**:cardSignatureOf(item) 生成 primitive 串(imageCacheVersionOf 字段集 ∪ title/display_name/page_count/cover_url/thumbnail_url/stage_detail/runtime_status.detail);只有活跃卡签名变才重渲。**不做 per-card store 订阅**(收益零)。
-3. 回调稳定:onSelect 等直接引用 composition 单例 actions,不包内联箭头。
-4. selector 必须模块顶层定义(use-store 的 getSnapshot useCallback 依赖它)。
-5. StatusCard 整快照;elapsed 由 ticker 局部驱动。
+1. Grid Single Subscription:Library No component selector Full snapshot(Rerender grid Function body is cheap.)。
+2. **Card memo + Signature comparison**:cardSignatureOf(item) generate primitive string(imageCacheVersionOf Fieldset âª title/display_name/page_count/cover_url/thumbnail_url/stage_detail/runtime_status.detail);Re-render only when active card signature changes.**Do not do per-card store subscription**(Earnings: 0).
+3. Callback stable:onSelect Direct quote. composition Singleton actions,Inline arrows removed.
+4. selector Must be defined at module top level.(use-store getSnapshot useCallback Depend on it).
+5. StatusCard full snapshot;elapsed by ticker Local Drive.
 
-store 频率:recentJobsStore ~1-3 次/s、currentJobStore 1 次/s、secondaryResourceStore 3-5s 级、statusCardStore 1 次/s、libraryViewStore 稀疏。
+store frequency:recentJobsStore ~1-3 times/s, currentJobStore 1 time/s, secondaryResourceStore 3-5s Remove. Unnecessary. Simplify.statusCardStore 1 time/s, libraryViewStore Remove unnecessary elements. Optimize.
 
-## 4. 生命周期(bootstrap → composition)
+## 4. Lifecycle(bootstrap â composition)
 
-**所有定时器留在 React 之外**(已活在保留引擎里);composition 模块级单例,entry.jsx 先建后 render,与 StrictMode 解耦。
+**All timers remain outside React**(Live in retention engine);composition Module-level singleton,entry.jsx Create first, then render, with StrictMode Code duplication. Refactor. Extract common functionality.
 
-createHomeComposition() 要点:
+createHomeComposition() Key points:
 - statusCardStore + statusCardPresenter;
-- mountJobRuntimeFeature({state, api 端口原样, renderJob→presenter.renderMain, renderJobSecondaryPatch→presenter.renderPatch, setText/setWorkflowSections/…由先行迁移的 app-shell/upload/workflow/status-detail React 特性提供, shellViewPort, libraryEventPort, resetStatePort});
-- createRecentJobsReactViewPort + mountRecentJobsFeature(fetch* 原样, startPolling/currentJobId 接 jobRuntimeFeature, readerPort/stageAdapterPort 平移 bootstrap 对应文件实现, statePort);
-- document 监听:openReaderRequested(平移 payloads.js:55-68)、retryStage → jobRuntimeFeature.retryStage;
-- startup 路由:URL ?job_id= 启动轮询(平移 startup-route.js:49-59)。
+- mountJobRuntimeFeature({state, api Port unchanged., renderJob→presenter.renderMain, renderJobSecondaryPatch→presenter.renderPatch, setText/setWorkflowSections/…Pre-migration tasks incomplete. Verify completion. app-shell/upload/workflow/status-detail React feature provides, shellViewPort, libraryEventPort, resetStatePort});
+- createRecentJobsReactViewPort + mountRecentJobsFeature(fetch* As is, startPolling/currentJobId connect jobRuntimeFeature, readerPort/stageAdapterPort Pan bootstrap Implement corresponding file., statePort);
+- document listener:openReaderRequested(Pan payloads.js:55-68), retryStage â jobRuntimeFeature.retryStage;
+- startup route:URL ?job_id= Start polling.(migrate startup-route.js:49-59).
 
-溶解的 bootstrap 文件 ~20 个(startup-route*、job-*-port、mount-job-features 半边、main-shell-event-bindings 两行等),cutover 删。
+Dissolved bootstrap files ~20 (startup-route*, job-*-port, mount-job-features Halfmain-shell-event-bindings Two lines equal),cutover Deleted.
 
-顺序保证:composition 先 mount(首次 load 同步发)→ React render;useSyncExternalStore 首读拿现值。
+Order Guarantee:composition mount first(First load Sync Send)â React render;useSyncExternalStore First read gets present value.
 
-## 5. 事件契约
+## 5. Event contract
 
-- library* 三个 document CustomEvent、命令总线、open/close-translation-workflow、status-area-visibility-changed:**全部原样保留**,React 组件不直接消费(全走 store),composition 里的 bindings.js 继续跑。
-- **前置契约**:workflow React 特性必须继续 dispatch open/close 事件,否则库刷新永久挂起(风险 5)。
-- StageRetry 继续 dispatch retryStage;event-name-contracts 已扫 .jsx。
-- 本步落地 src/shared/react/use-app-event.js(供 status-detail/workflow 消费)+ 单测。
+- library* Three document CustomEventCommand Busopen/close-translation-workflow, status-area-visibility-changed:**All preserved as-is**,React Components do not directly consume(Run All store),bindings.js in composition Continue running.
+- **Precondition**:workflow React Feature must continue dispatch open/close events,Otherwise library refresh hangs indefinitely.(Risk 5).
+- StageRetry continue dispatch retryStage;event-name-contracts scanned .jsx。
+- Step implemented. src/shared/react/use-app-event.js(provide status-detail/workflow consumption)+ Unit Test.
 
-## 6. 测试映射
+## 6. Test mapping
 
-- **零改动保活**:recent-jobs.test.mjs 的 state/pagination/commit/loader/refresh-scheduler/active-refresh/actions/runtime-patches/commands/command-handlers 段;job-runtime.test.mjs 的 controller/polling/secondary/render-context 段;status-card.test.mjs 中 import 自 job-status/ 的 VM 段(约七成);library-* 与 use-store-hook。
-- **随视图死**:recent-jobs.test.mjs 的 view/list-rendering/list-events/host/render-target/view-state/store-renderer 段;status-card.test.mjs 的 components/status 壳段(buildProgressRenderModel、progress-animation 用例**迁移**指向新 pages 文件,断言不变);job-runtime.test.mjs 依赖 ui/ 的段。
-- **新增 Top10**:①库网格渲染+smoke 契约;②卡片交互(select/delete popover/reader/键盘);③**卡片渲染隔离**(replaceItem 单卡,其余 23 卡渲染计数不变——memo 回归锚);④viewPort×store 状态机;⑤StatusCard 契约(stage flow/substage/retry/result actions/data-status/ring ids);⑥阶段选择语义;⑦staged 动画(fake timer 120ms);⑧statusCardPresenter 三 source;⑨composition 集成(首屏 load、job-updated 补丁、workflow 挂起);⑩useRecentJobCover(缓存/竞态/不 revoke)。
+- **No change needed. System handles keep-alive.**:recent-jobs.test.mjs state/pagination/commit/loader/refresh-scheduler/active-refresh/actions/runtime-patches/commands/command-handlers sections;job-runtime.test.mjs controller/polling/secondary/render-context sections;status-card.test.mjs VM sections import since job-status/ (Approximately seventy percent.);library-* and use-store-hook.
+- **View destroy -> deferred: only add cleanup when really needed**: recent-jobs.test.mjs view, list-rendering, list-events, host, render-target, view-state, and store-renderer sections; status-card.test.mjs components/status shell section (buildProgressRenderModel and the progress-animation use case). **Boundary: do not point at the new pages files**; assert the existing behavior stays unchanged. The job-runtime.test.mjs sections that depend on ui/ are out of scope for this round.
+- **New Top10**:â Library Grid Rendering+smoke contract;â¡Card Interactions(select/delete popover/reader/keyboard);â¢**Card Render Isolation**(replaceItem Single Card, remaining 23 Card render count unchanged.ââmemo Regression Anchor);â£viewPortÃstore state machine;â¤StatusCard contract(stage flow/substage/retry/result actions/data-status/ring ids);â¥stage selection semantics;â¦staged Animation(fake timer 120ms);â§statusCardPresenter Three source;â¨composition integration(first screen load, job-updated Patch needed. Identify issue. Apply fix. Test.workflow Suspend);â©useRecentJobCover(Cache invalidation fail. Implement proper cache keys./Race condition/do not revoke).
 
-## 7. 施工顺序(每步 npm test 全绿;cutover 前 12 基线天然不动)
+## 7. Construction sequence(Each step npm test All green;12 Baseline immutable before cutover.)
 
-S1 store+viewPort+composition 雏形 → S2 RecentJobCard+cover hook → S3 Library+autoload+搜索 → S4 statusCardStore+presenter+接 jobRuntime → S5 StatusCard 静态结构 → S6 动画孤岛(lottie+staged) → S7 交互闭环(选择/elapsed/cancel/retry) → S8 事件桥全量 → S9 双轨手验(watch:js + 真实后端 + mock=parallel)→ cutover(换入口、删死文件+5 处默认参数、删测试段、4 基线+全套 smoke)。
+S1 store+viewPort+composition prototype â S2 RecentJobCard+cover hook â S3 Library+autoload+Search â S4 statusCardStore+presenter+connect jobRuntime â S5 StatusCard static structure â S6 Animation Island(lottie+staged) â S7 Interaction loop(select/elapsed/cancel/retry) â S8 EventBridge Full â S9 Dual-track manual verification(watch:js + real backend + mock=parallel)â cutover(Switch entry, delete dead files.+5 Handle default params, delete test section.4 Baseline+Full Set smoke).
 
-## 8. 风险与缓解
+## 8. Risk mitigation
 
-1. **staged 动画时序(最高)**:displayedProgressByStage 必须 useRef;新快照按 shouldAnimateRenderPageProgress 决定续跑/跳变;换 job reset。误用 useState 会每 tick 重渲+闭包旧值。
-2. **lottie 竞态**:desiredKey 三重检查原样保留;status-section 用 CSS hidden 而非卸载(动画实例存活语义)。
-3. **objectURL**:模块级缓存从不 revoke,React 卸载**不得** revoke;invalidate 只走 invalidateRecentJobImages。
-4. **刷新节流语义**:lastRefreshAt 写入时机是故意行为,禁止重排;测试段保活即锚。
-5. **workflow 挂起死锁**:isWorkflowOpen 由 composition 注入读 workflow store;集成测覆盖 开→关→300ms 刷新。
-6. **首帧 placeholder**:presenter 必须在 startPolling 同步链内写 store(否则闪空卡,status-dialog 基线抓)。
-7. **DOM 契约**:含 --status-ring-percent、--status-substage-count CSS 变量、aria-selected、data-stage-key;dom-ids 常量 + 契约测试逐 id 断言。
-8. **深克隆地板**:现状已担同等成本;不得 per-card selector 里 items.find。
-9. **默认参数断链**:cutover 同 commit 改 5 处必传。
-10. **renderPatch 收敛**:React 整卡 diff 理论等价;S9 以 mock=parallel + 失败任务双路径对照。
+1. **staged Animation timing(Highest)**:displayedProgressByStage Required useRef;New snapshot by shouldAnimateRenderPageProgress Decide to resume./Jump detected. Investigate cause.;change job resetMisuse. useState Incomplete. tick re-render+Closure stale value.
+2. **lottie race condition**:desiredKey Triple-check retain original;status-section use CSS hidden rather than unmount(Animation instance lifetime semantics).
+3. **objectURL**:Module-level cache never revoke,React unmount **must not** revoke;invalidate Walk only invalidateRecentJobImages.
+4. **Refresh throttle semantics**:lastRefreshAt Write timing is intentional.,Disable reflow;Test segment keepalive is anchor.
+5. **workflow Suspend deadlock**:isWorkflowOpen by composition Inject read workflow store;Integration test coverage. OpenâCloseâ300ms Refresh.
+6. **First frame placeholder**:presenter must write store within startPolling synchronous chain(Otherwise, flash empty card.,status-dialog Capture Baseline).
+7. **DOM contract**:contains --status-ring-percent, --status-substage-count CSS Variables, aria-selected, data-stage-key;dom-ids constants + Contract Testing Step id Assert.
+8. **Deep clone floor**:Current state bears equivalent cost.;do not use items.find in per-card selector.
+9. **Default parameter breaks chain.**:cutover same commit change 5 Required.
+10. **renderPatch convergence**:React Whole card diff Theoretically equivalent;S9 with mock=parallel + Failed task dual-path comparison.
 
-## 关键文件
-- features/recent-jobs/controller.js(viewPort 注入点)
-- features/job-runtime/controller.js(轮询引擎 payload 契约)
-- job-status/status-card-runtime-source.js(状态卡唯一 VM 源)
-- components/status/job-status-card.js(StatusCard.jsx 行为镜像基准)
-- src/shared/react/use-store.js(订阅基座)
+## Key Files
+- features/recent-jobs/controller.js(viewPort Injection point)
+- features/job-runtime/controller.js(Polling Engine payload contract)
+- job-status/status-card-runtime-source.js(status card unique VM source)
+- components/status/job-status-card.js(StatusCard.jsx Behavior mirroring baseline)
+- src/shared/react/use-store.js(Subscription Base)

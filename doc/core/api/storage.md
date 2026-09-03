@@ -1,17 +1,17 @@
-# 存储结构
+# Storage structure
 
-运行时根目录由 `RUST_API_DATA_ROOT` 决定；下文用 `DATA_ROOT` 代指这个解析后的目录。
+Runtime root directory determined by `RUST_API_DATA_ROOT` Decision; use below. `DATA_ROOT` Refers to this parsed directory.
 
-## 主要路径
+## Main path
 
-- `DATA_ROOT/uploads/`：上传文件。
-- `DATA_ROOT/jobs/{job_id}/`：任务工作目录。
-- `DATA_ROOT/downloads/`：下载缓存。
-- `DATA_ROOT/db/jobs.db`：SQLite 数据库。
+- `DATA_ROOT/uploads/`Upload file.
+- `DATA_ROOT/jobs/{job_id}/`Task working directory.
+- `DATA_ROOT/downloads/`Download cache.
+- `DATA_ROOT/db/jobs.db`：SQLite Database.
 
-## 任务目录
+## Task directory
 
-标准任务目录：
+Standard Task Directory
 
 ```text
 jobs/{job_id}/
@@ -23,35 +23,35 @@ jobs/{job_id}/
 └── logs/
 ```
 
-常见产物：
+Common artifacts:
 
-- `ocr/`：Provider 原始结果、解包结果、标准化输入。
-- `translated/`：翻译中间产物和 `translation-manifest.json`。
-- `rendered/`：渲染输出。
-- `artifacts/`：对外发布的稳定产物、诊断文件和索引。
-- `logs/pipeline_events.jsonl`：当前事件落盘主文件。
+- `ocr/`：Provider Original result, unpacked result, standardized input.
+- `translated/`Intermediate products and `translation-manifest.json`。
+- `rendered/`Render Output.
+- `artifacts/`Stable release artifacts, diagnostic files, and indices.
+- `logs/pipeline_events.jsonl`Main file for current event persistence.
 
-历史兼容：
+Backward compatibility:
 
-- 老任务可能只有 `logs/events.jsonl`。
-- 当前读取逻辑会优先读取 `pipeline_events.jsonl`，再回退到旧文件名。
+- Old tasks may only have `logs/events.jsonl`。
+- Current read logic reads first. `pipeline_events.jsonl`then revert to the old filename.
 
 ## SQLite
 
-SQLite 主要承担：
+SQLite Main responsibility:
 
-- `uploads`：源文件名、存储路径、PDF 大小、页数和上传时间。
-- `jobs`：任务状态、阶段、进度、请求/runtime 状态、失败信息和日志尾部。
-- `artifacts`：每个任务的 artifact index JSON。
-- `job_artifact_entries`：规范化 artifact manifest，用于下载和列表展示。
-- `events`：结构化事件流。
-- `glossaries`：命名术语表资源。
+- `uploads`Source file name, storage path,PDF Size, page count, upload time.
+- `jobs`Task Status, Phase, Progress, Request/runtime Status, failure info, and log tail.
+- `artifacts`of each task artifact index JSON。
+- `job_artifact_entries`Normalize artifact manifestfor download and list display.
+- `events`Structured event stream.
+- `glossaries`Name glossary resource.
 
-接口返回和数据库记录尽量使用相对路径，运行时再解析到真实文件，避免把机器路径暴露给前端。
+Use relative paths in API responses and database records. Resolve to actual files at runtime to avoid exposing machine paths to the frontend.
 
-## 边界约定
+## Boundary conventions
 
-- Rust 负责分配任务目录和登记 artifacts。
-- Python worker 只消费 Rust 传入的路径。
-- 前端和外部调用方不应该依赖任务目录内部布局。
-- 正式产物发现入口是 `GET /api/v1/jobs/{job_id}/artifacts-manifest`。
+- Rust Assigns task directories and registers. artifacts。
+- Python workers only consume paths passed by Rust.
+- Frontend and external callers should not depend on the internal layout of the task directory.
+- Formal artifact discovery entry is `GET /api/v1/jobs/{job_id}/artifacts-manifest`。

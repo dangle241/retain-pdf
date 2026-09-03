@@ -1,30 +1,30 @@
-# PaddleOCR 官方说明归档
+# PaddleOCR Archive official docs.
 
-这里放的是和当前仓库集成最相关的 PaddleOCR 官方资料入口，统一从 `doc/` 进入，不再散落在源码目录里找。
+Most relevant integration content for current repository. PaddleOCR Official documentation entry, unified from `doc/` Enter. No more searching in source directories.
 
-## 官方来源
+## Official source
 
-- PaddleOCR-VL 官方使用文档：
+- PaddleOCR-VL Official user documentation:
   <https://github.com/PaddlePaddle/PaddleOCR/blob/main/docs/version3.x/pipeline_usage/PaddleOCR-VL.md>
-- PaddleOCR-VL 官方在线文档：
+- PaddleOCR-VL Official online documentation:
   <https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html>
 
-## 当前仓库重点关注
+## Current repo focus
 
-对本项目最关键的不是整份部署教程，而是下面这几个官方事实：
+For this project, the key is not the full deployment guide, but these official facts:
 
-1. `layoutParsingResults[*].markdown.text` 是官方返回的 Markdown 正文。
-2. `layoutParsingResults[*].markdown.images` 是 Markdown 里引用图片的映射。
-3. 多页 PDF 可以通过 `restructurePages` 做跨页重构。
-4. `showFormulaNumber`、`prettifyMarkdown` 会直接影响 Markdown 输出形态。
+1. layoutParsingResults[*].markdown.text is the officially returned Markdown body text.
+2. layoutParsingResults[*].markdown.images is the Markdown image reference mapping.
+3. Multiple Pages PDF Pass. `restructurePages` Cross-page refactoring.
+4. `showFormulaNumber`、`prettifyMarkdown` Directly affects Markdown Output form.
 
-## 本仓库整理稿
+## Repo cleanup draft
 
-- 服务化接口与异步调用摘录：
+- Service Interface and Asynchronous Call Excerpts:
   [async_parse_official_excerpt.md](./async_parse_official_excerpt.md)
 
-## 使用约定
+## Usage conventions
 
-1. 这里保存官方说明的仓库内入口与整理摘录。
-2. 对接实现以官方字段语义为准，不以历史兼容逻辑为准。
-3. 如果官方文档更新，先改这里，再改 provider 代码和内部适配文档。
+1. Stored here: repository-internal entry and curated excerpts of official documentation.
+2. Integration implementation follows official field semantics, not historical compatibility logic.
+3. If official documentation updates, update here first, then update the rest. provider Code and internal adaptation documentation.

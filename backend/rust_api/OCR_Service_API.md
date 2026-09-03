@@ -1,21 +1,21 @@
-# OCR-only API 说明
+# OCR-only API Description
 
-这份文档只说明 OCR-only 微服务接口。
+This document only describes. OCR-only Microservice interface.
 
-说明：
+Explanation:
 
-- 这是一份 OCR-only 专项说明，正式 API 总入口先看 [RetainPDF 后端 API 总入口](/home/wxyhgk/tmp/Code/doc/core/api/index.md)，运行主链看 [CURRENT_API_MAP](/home/wxyhgk/tmp/Code/backend/rust_api/CURRENT_API_MAP.md)
-- 当前 provider 选择看请求里的 `provider` / `ocr.provider`，实际支持集以健康检查和 `OCR_PROVIDER_CONTRACT.md` 为准
+- This is an OCR-only specialized instruction. Check the official API main entry first. [RetainPDF Backend API main entry](/home/wxyhgk/tmp/Code/doc/core/api/index.md). Run the main chain and see [CURRENT_API_MAP](/home/wxyhgk/tmp/Code/backend/rust_api/CURRENT_API_MAP.md)
+- Current provider selection to view in request `provider` / `ocr.provider`; actual supported set subject to health checks and `OCR_PROVIDER_CONTRACT.md`
 
-它的目标很明确：
+Its goal is clear:
 
-- 只做 OCR 解析
-- 只做 raw OCR -> `document.v1.json` / `document.v1.report.json` 标准化
-- 不做翻译
-- 不做 Typst
-- 不做 PDF 渲染
+- Only perform OCR parsing
+- Only do raw OCR -> `document.v1.json` / `document.v1.report.json` standardization
+- No translation performed.
+- No Typst
+- No PDF rendering
 
-当前这套接口已经挂在现有 `rust_api` 服务里，但逻辑上是独立的 OCR 微服务接口族：
+Current interfaces already mounted on existing. `rust_api` In the service, but logically independent. OCR Microservice Interface Family:
 
 - `/api/v1/ocr/jobs`
 - `/api/v1/ocr/jobs/{job_id}`
@@ -24,15 +24,15 @@
 - `/api/v1/ocr/jobs/{job_id}/normalization-report`
 - `/api/v1/ocr/jobs/{job_id}/cancel`
 
-当前示例仍以 `mineru` 为主，但这只是 provider 示例，不代表 OCR-only 协议默认绑定 MinerU。
+The current example still uses `mineru` for main only. provider Example, not representative. OCR-only Protocol default binding MinerU。
 
-这条 OCR-only 流程在整套系统中的位置是：
+This OCR-only Position of the process in the overall system:
 
-1. OCR API 负责把 provider 原始结果收口成 `document.v1`
-2. 完整翻译链再由上层 `normalize -> translate -> render` 主流程继续消费
-3. OCR API 不是测试脚本，也不是翻译/渲染入口；它是正式生产链路里的 normalize 前半段
+1. OCR API Responsible for provider Finalize raw results. `document.v1`
+2. Complete translation chain then upper layer. `normalize -> translate -> render` Main process continues consuming
+3. OCR API neither a test script nor translation/Rendering entry point; it is part of the official production pipeline. normalize First half
 
-当前 `document.v1` 交给下游时的正式消费口径是：
+Current `document.v1` formal consumption specification for downstream:
 
 - `geometry`
 - `content`
@@ -42,38 +42,38 @@
 - `policy`
 - `provenance`
 
-兼容字段 `type/sub_type/bbox/text/lines/segments` 可以保留，但不应再被下游当成主要语义入口。
+Compatibility Fields `type/sub_type/bbox/text/lines/segments` Can be retained, but should no longer be treated by downstream as the primary semantic entry point.
 
-内部实现说明：
+Internal Implementation Notes:
 
-- `app/router.rs` 负责挂载 `/api/v1/ocr/jobs*` 路由
-- `routes/jobs/create.rs` 负责 OCR `multipart/form-data` 入口
-- `routes/jobs/query.rs` / `routes/jobs/control.rs` / `routes/jobs/download.rs` 负责查询、取消和产物下载
-- `routes/job_requests.rs` 负责 OCR 表单解析
-- `routes/common.rs` / `routes/download_response/**` / `routes/job_helpers.rs` 负责 OCR / 通用 job 的公共 response 与下载辅助逻辑
-- `services/jobs/facade.rs` 负责稳定服务入口
-- `services/jobs/creation.rs` 与 `services/jobs/creation/bundle.rs` 负责 OCR job 构建
-- `services/job_validation.rs` 负责 provider 参数校验
-- `services/job_snapshot_factory.rs` 负责 snapshot / command 组装
-- `services/job_launcher.rs` 负责执行启动
+- `app/router.rs` handles mounting `/api/v1/ocr/jobs*` Routes
+- `routes/jobs/create.rs` handles OCR `multipart/form-data` entry
+- `routes/jobs/query.rs` / `routes/jobs/control.rs` / `routes/jobs/download.rs` Handles query, cancellation, and artifact download.
+- `routes/job_requests.rs` handles OCR form parsing
+- `routes/common.rs` / `routes/download_response/**` / `routes/job_helpers.rs` Responsible. Ensure. Next step. OCR / General job public response Download helper logic
+- `services/jobs/facade.rs` Ensures stable service ingress.
+- `services/jobs/creation.rs` and `services/jobs/creation/bundle.rs` handle OCR job build
+- `services/job_validation.rs` handles provider parameter validation
+- `services/job_snapshot_factory.rs` is responsible for snapshot / command assembly
+- `services/job_launcher.rs` Executes startup.
 
-如果你在排查接口行为，请以这些拆分后的模块职责为准，而不是旧版集中式文件结构。
+If troubleshooting API behavior, refer to the responsibilities of these split modules, not the old centralized file structure.
 
-## 1. 基础信息
+## 1. Basic Info
 
-- 服务端口：`41000`
-- 基础前缀：`/api/v1`
-- 健康检查：`GET /health`
-- 鉴权方式：请求头 `X-API-Key`
-- 响应格式：除下载接口外，默认返回 JSON
+- Service port:`41000`
+- Base prefix:`/api/v1`
+- Health check:`GET /health`
+- Authentication method: request header. `X-API-Key`
+- Response format: except for download endpoints, default return JSON
 
-请求头示例：
+Request header example:
 
 ```http
 X-API-Key: your-rust-api-key
 ```
 
-统一返回包：
+Unified response format:
 
 ```json
 {
@@ -83,15 +83,15 @@ X-API-Key: your-rust-api-key
 }
 ```
 
-说明：
+Note:
 
-- `code=0` 表示成功
-- 非 `0` 表示失败
-- `message` 可以直接给前端展示
+- `code=0` Success
+- non- `0` Failed
+- `message` Directly display to frontend.
 
-## 2. OCR 任务状态
+## 2. OCR Task status
 
-任务总状态：
+Total task status:
 
 - `queued`
 - `running`
@@ -99,7 +99,7 @@ X-API-Key: your-rust-api-key
 - `failed`
 - `canceled`
 
-常见阶段：
+Common stages:
 
 - `queued`
 - `mineru_upload`
@@ -109,19 +109,19 @@ X-API-Key: your-rust-api-key
 - `failed`
 - `canceled`
 
-补充说明：
+Additional notes:
 
-- `queued`：已入队，等待执行槽位
-- `mineru_upload`：文件已上传给 MinerU，等待处理
-- `mineru_processing`：MinerU 正在解析
-- `normalizing`：正在生成 `document.v1`
-- `finished`：OCR + 标准化完成
+- `queued`Queued, waiting for execution slot.
+- `mineru_upload`File uploaded to MinerUpending processing
+- `mineru_processing`：MinerU Parsing
+- `normalizing`Generating... `document.v1`
+- `finished`：OCR + Standardization complete
 
-## 3. 健康检查
+## 3. Health check
 
 `GET /health`
 
-返回示例：
+Return example:
 
 ```json
 {
@@ -138,43 +138,43 @@ X-API-Key: your-rust-api-key
 }
 ```
 
-字段说明：
+Field descriptions:
 
-- `status`：`up` 或 `degraded`
-- `db`：SQLite 是否可用
-- `queue_depth`：当前排队任务数
-- `running_jobs`：当前运行中任务数
-- `provider_backends`：当前已接入的 OCR provider
+- `status`:`up` or `degraded`
+- `db`：SQLite whether available
+- `queue_depth`Queued tasks
+- `running_jobs`Currently running tasks:
+- `provider_backends`Currently connected: OCR provider
 
-## 4. 创建 OCR 任务
+## 4. Create OCR Task
 
 `POST /api/v1/ocr/jobs`
 
-这是一个 `multipart/form-data` 接口。
+This is a `multipart/form-data` Interface.
 
-实现补充：
+Implementation details:
 
-- 表单字段解析在 `routes/job_requests.rs`
-- 创建入口在 `routes/jobs/create.rs`
-- facade 收口在 `services/jobs/facade.rs`
-- 创建前的 provider / token / URL / timeout 校验在 `services/job_validation.rs`
-- OCR job 的 snapshot 构建与启动由 `services/jobs/creation.rs`、`services/job_snapshot_factory.rs` 和 `services/job_launcher.rs` 协作完成
+- Form field parsing in `routes/job_requests.rs`
+- Create entry at `routes/jobs/create.rs`
+- facade Close at `services/jobs/facade.rs`
+- Pre-creation provider / token / URL / timeout Validate `services/job_validation.rs`
+- OCR job snapshot build and startup are completed collaboratively by `services/jobs/creation.rs`, `services/job_snapshot_factory.rs` and `services/job_launcher.rs`
 
-支持两种提交方式，二选一：
+Two submission methods, choose one.
 
-- 上传本地 PDF：`file`
-- 提交远程 PDF：`source_url`
+- Upload local PDF：`file`
+- Push to remote PDF：`source_url`
 
-### 必填字段
+### Required field
 
 - `provider`
-  当前常用值：`mineru`；其他 provider 以当前部署启用项为准
+  Current common values:`mineru`；Other provider Current deployment enablements apply.
 - `mineru_token`
-  当 `provider=mineru` 时必填
+  when `provider=mineru` Required when
 - `timeout_seconds`
-  OCR 任务总超时秒数
+  OCR Total task timeout seconds
 
-### 常用可选字段
+### Common optional fields
 
 - `file`
 - `source_url`
@@ -192,7 +192,7 @@ X-API-Key: your-rust-api-key
 - `poll_timeout`
 - `job_id`
 
-### 本地文件示例
+### Local file example
 
 ```bash
 curl -X POST "http://127.0.0.1:41000/api/v1/ocr/jobs" \
@@ -204,7 +204,7 @@ curl -X POST "http://127.0.0.1:41000/api/v1/ocr/jobs" \
   -F "file=@/path/to/paper.pdf"
 ```
 
-### 远程 URL 示例
+### Remote URL Example
 
 ```bash
 curl -X POST "http://127.0.0.1:41000/api/v1/ocr/jobs" \
@@ -215,7 +215,7 @@ curl -X POST "http://127.0.0.1:41000/api/v1/ocr/jobs" \
   -F "source_url=https://example.com/paper.pdf"
 ```
 
-### 返回示例
+### Response Example
 
 ```json
 {
@@ -237,33 +237,33 @@ curl -X POST "http://127.0.0.1:41000/api/v1/ocr/jobs" \
 }
 ```
 
-### 校验规则
+### Validation rules
 
-- `provider` 必须是当前服务支持的 OCR provider
-- 当 `provider=mineru` 时，`mineru_token` 不能为空
-- 当传入 `mineru_token` 时，它不能是 URL
-- `source_url` 如果提供，必须以 `http://` 或 `https://` 开头
-- `timeout_seconds` 必须大于 `0`
+- `provider` Must be supported by the current service. OCR provider
+- When `provider=mineru`, `mineru_token` cannot be empty.
+- When passed `mineru_token` When, it cannot be URL
+- `source_url` If provided, must be `http://` or `https://` Start
+- `timeout_seconds` Must be greater than `0`
 
-## 5. OCR 任务列表
+## 5. OCR Task list
 
 `GET /api/v1/ocr/jobs`
 
-支持参数：
+Supported parameters:
 
 - `limit`
 - `offset`
 - `status`
 - `provider`
 
-示例：
+Example:
 
 ```bash
 curl -H "X-API-Key: your-rust-api-key" \
   "http://127.0.0.1:41000/api/v1/ocr/jobs?limit=20&offset=0&status=failed&provider=mineru"
 ```
 
-返回示例：
+Response example:
 
 ```json
 {
@@ -287,18 +287,18 @@ curl -H "X-API-Key: your-rust-api-key" \
 }
 ```
 
-## 6. OCR 任务详情
+## 6. OCR Task details
 
 `GET /api/v1/ocr/jobs/{job_id}`
 
-示例：
+Example:
 
 ```bash
 curl -H "X-API-Key: your-rust-api-key" \
   "http://127.0.0.1:41000/api/v1/ocr/jobs/20260331033736-c2bcda"
 ```
 
-详情里重点看这些字段：
+In the details, focus on these fields:
 
 - `status`
 - `stage`
@@ -308,28 +308,28 @@ curl -H "X-API-Key: your-rust-api-key" \
 - `ocr_provider_diagnostics`
 - `artifacts`
 
-说明：
+Note:
 
-- `trace_id` 是 OCR 微服务内部链路 ID
-- `provider_trace_id` 是 provider 返回的链路 ID
-- `ocr_provider_diagnostics` 用于排错
-- `ocr_provider_diagnostics.artifacts` 只放 provider transport/raw 产物和 normalize 产物路径摘要，不直接展开 `document.v1` 内部字段
+- `trace_id` is the OCR internal microservice link ID
+- `provider_trace_id` is the provider return path ID
+- `ocr_provider_diagnostics` For troubleshooting
+- `ocr_provider_diagnostics.artifacts` Place only provider transport/raw Artifacts and normalize Artifact path summary, not expanded directly. `document.v1` Internal Field
 
-边界约定：
+Boundary conventions:
 
-- provider 原始状态、错误、raw bundle 信息保留在 `ocr_provider_diagnostics`
-- `document.v1.json` / `document.v1.report.json` 仍然是下游主契约
-- 不把 provider 私有字段直接塞进 `document.v1`
+- provider Original state, errorraw bundle Information retained in `ocr_provider_diagnostics`
+- `document.v1.json` / `document.v1.report.json` Still the downstream main contract.
+- Don't skip provider Private fields directly stuffed into `document.v1`
 
-## 7. 获取产物索引
+## 7. Fetch artifact index
 
 `GET /api/v1/ocr/jobs/{job_id}/artifacts`
 
-这个接口是 OCR 微服务最重要的接口之一。
+This API is OCR One of the most important interfaces in microservices.
 
-它会返回下游真正关心的产物索引。
+Returns the artifact indices downstream actually cares about.
 
-返回重点：
+Return highlights:
 
 - `schema_version`
 - `provider_raw_dir`
@@ -338,7 +338,7 @@ curl -H "X-API-Key: your-rust-api-key" \
 - `normalized_document`
 - `normalization_report`
 
-真实示例字段形态：
+Actual example field structure:
 
 ```json
 {
@@ -357,45 +357,45 @@ curl -H "X-API-Key: your-rust-api-key" \
 }
 ```
 
-字段语义：
+Field semantics:
 
 - `provider_raw_dir`
-  provider 解包后的原始目录
+  provider Original unpacked directory
 - `provider_zip`
-  provider 原始 zip
+  provider Original zip
 - `provider_summary_json`
-  provider 原始返回结果
+  provider Raw return result
 - `normalized_document`
-  标准化后的 `document.v1.json`
+  Standardized `document.v1.json`
 - `normalization_report`
-  标准化报告 `document.v1.report.json`
+  Standardization Report `document.v1.report.json`
 
-补充说明：
+Supplementary note:
 
-- `provider_summary_json` / `provider_zip` / `provider_raw_dir` 属于 provider raw artifacts
-- `normalized_document` / `normalization_report` 属于 normalized artifacts
-- 这两层需要同时保留，前者用于排 OCR provider 问题，后者用于排 `document_schema` 适配问题
+- `provider_summary_json` / `provider_zip` / `provider_raw_dir` Belongs to provider raw artifacts
+- `normalized_document` / `normalization_report` belong to normalized artifacts
+- These two layers need to be retained simultaneously; the former is used for arrangement. OCR provider question, the latter used for troubleshooting `document_schema` Compatibility Issues
 
-## 8. 下载标准化 OCR 结果
+## 8. Standardize download OCR Result
 
-### 下载 `document.v1.json`
+### Download `document.v1.json`
 
 `GET /api/v1/ocr/jobs/{job_id}/normalized-document`
 
-### 下载 `document.v1.report.json`
+### Download `document.v1.report.json`
 
 `GET /api/v1/ocr/jobs/{job_id}/normalization-report`
 
-用途：
+Purpose:
 
-- `document.v1.json` 给翻译主线直接消费
-- `document.v1.report.json` 给排错、前端诊断、schema 检查使用
+- `document.v1.json` Directly consumed by translation mainline.
+- `document.v1.report.json` Troubleshooting, frontend diagnostics,schema Check usage
 
-## 9. 取消 OCR 任务
+## 9. Cancel OCR Task
 
 `POST /api/v1/ocr/jobs/{job_id}/cancel`
 
-示例：
+Example:
 
 ```bash
 curl -X POST \
@@ -403,15 +403,15 @@ curl -X POST \
   "http://127.0.0.1:41000/api/v1/ocr/jobs/20260331033736-c2bcda/cancel"
 ```
 
-当前取消规则：
+Current Cancellation Rules:
 
-- 如果任务还在排队，直接取消
-- 如果任务还在 provider 阶段，停止后续轮询/执行
-- 如果任务已经进入 `normalizing`，会先完成当前 normalize，再丢弃标准化产物，然后标记 `canceled`
+- Cancel if task still queued.
+- If the task is still in the provider phase, stop subsequent polling.
+- If the task has already entered `normalizing`Will complete current first. normalizeDiscard normalized outputs, then mark. `canceled`
 
-## 10. 当前目录落盘约定
+## 10. Current directory persistence convention
 
-以任务 `20260331033736-c2bcda` 为例：
+Using task `20260331033736-c2bcda` as an example:
 
 ```text
 output/20260331033736-c2bcda/
@@ -426,43 +426,43 @@ output/20260331033736-c2bcda/
         └── document.v1.report.json
 ```
 
-说明：
+Note:
 
-- `source/`：原始 PDF
-- `ocr/unpacked/`：provider 解包原始内容
-- `ocr/normalized/`：给主链路消费的标准化结果
+- `source/`Missing source. Paste text. PDF
+- `ocr/unpacked/`：provider Unpack raw content.
+- `ocr/normalized/`Standardized result for main pipeline consumption.
 
-## 11. 当前限制和边界
+## 11. Current limits and boundaries
 
-当前这套 OCR 微服务接口已经能跑通 `provider raw -> document.v1`。
+Current set OCR Microservice interface operational. `provider raw -> document.v1`。
 
-但要注意：
+But note:
 
-- 当前 provider 已不止 `mineru`，但不同部署启用的 provider 集合可能不同
-- Rust 侧已经负责 MinerU / Paddle provider transport 的提交、轮询、结果下载或 raw 产物落盘
-- Python 侧仍负责 raw OCR -> `document.v1.json` 的 normalize，以及后续 translate / render worker
-- Rust 侧还负责：
+- The current provider is more than `mineru`, but the provider sets enabled on different deployments may differ.
+- Rust Our side already responsible. MinerU / Paddle provider transport submission, polling, result download, or raw Write artifacts to disk.
+- The Python side remains responsible for normalizing raw OCR -> `document.v1.json`, and subsequent translate / render workers
+- Rust Also responsible:
   - HTTP API
-  - 任务状态
-  - 分页列表
+  - Task Status
+  - Paged List
   - trace_id
-  - 取消/超时
-  - artifacts 索引
+- Cancel/timeout
+  - artifacts Index
 
-## 12. 推荐对接方式
+## 12. Recommended integration method
 
-如果你后续要让主系统接这套 OCR 微服务，建议固定按这个顺序：
+If later you want the main system to integrate this. OCR Microservices: fixed order recommended:
 
 1. `POST /api/v1/ocr/jobs`
 2. `GET /api/v1/ocr/jobs/{job_id}`
 3. `GET /api/v1/ocr/jobs/{job_id}/artifacts`
-4. 下载：
+4. Download
    - `/normalized-document`
    - `/normalization-report`
 
-主系统不要直接读 provider raw JSON。
+Don't read main system directly. provider raw JSON。
 
-主系统应该优先消费：
+Primary system consume first.
 
 - `document.v1.json`
 - `document.v1.report.json`
@@ -470,4 +470,4 @@ output/20260331033736-c2bcda/
 - `trace_id`
 - `provider_trace_id`
 
-这样后续替换 OCR provider 时，翻译和渲染主线不需要一起改。
+This way, subsequent replacements OCR provider Translation and rendering mainline need not be changed together.

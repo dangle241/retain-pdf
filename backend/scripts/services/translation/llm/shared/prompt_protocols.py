@@ -53,17 +53,21 @@ MATH_DELIMITER_DAMAGE_HINT = (
 
 
 def _append_math_delimiter_damage_hint(lines: list[str], item: TranslationItemContext) -> None:
-    # 源文本 $ 不平衡时直接交给模型必然产出不平衡译文,触发整条验证/
-    # 修复链(实测一个条目烧 ~10 次 LLM 调用)。先明确提示模型按语义修复。
+    # When the source text has unbalanced `$` delimiters, handing it to the
+    # model directly will produce unbalanced translations and trip the
+    # entire validation/repair chain (observed ~10 LLM calls per item).
+    # Tell the model up front to fix the delimiters semantically.
     if not has_balanced_unescaped_dollars(item.source_for_prompt()):
         lines.append(MATH_DELIMITER_DAMAGE_HINT)
     _append_mitex_rewrite_hint(lines, item)
 
 
 def _append_mitex_rewrite_hint(lines: list[str], item: TranslationItemContext) -> None:
-    # 数据驱动的按需提示:只有源文本里真的出现了渲染器不支持的命令,
-    # 才把对应替换规则告诉模型,由模型在语义层完成替换(复杂公式里
-    # 正则改写不可靠);渲染期的正则改写保留作兜底。
+    # Data-driven, on-demand hint: only tell the model about replacement
+    # rules when the source text actually contains commands the renderer
+    # doesn't support. The model performs the replacement semantically
+    # (regex rewriting in complex formulas is unreliable); the render-time
+    # regex rewrite is kept as a backstop.
     rewrites = find_mitex_rewrites(item.source_for_prompt())
     if not rewrites:
         return
@@ -76,8 +80,9 @@ def _scoped_terms_guidance(item: TranslationItemContext) -> str:
 
 
 def _append_scoped_terms_guidance(lines: list[str], item: TranslationItemContext) -> None:
-    # 逐条匹配的术语指引放 user 消息:放 system 会让每条请求前缀不同,
-    # 打掉 provider 前缀缓存。
+    # Per-item scoped term guidance is appended to the user message:
+    # putting it in the system prompt would change every request's prefix
+    # and defeat the provider's prefix cache.
     guidance = _scoped_terms_guidance(item)
     if guidance:
         lines.append(f"术语要求：\n{guidance}")

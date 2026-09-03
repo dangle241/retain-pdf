@@ -1,192 +1,192 @@
-# 主页 ↔ 阅读器：关闭不刷新（Soft Reader）
+# Home ↔ Reader: close without refreshSoft Reader）
 
-**日期：** 2026-07-21  
-**范围：** `frontend` 主页打开 PDF 阅读、关闭后回书架  
-**状态：** 已落地
-
----
-
-## 1. 现象
-
-1. 主页点进阅读器后，右上角没有「关闭 / 回主页」。
-2. 加上关闭后：点 × 会**整页刷新**主页，书架**滚动位置丢失**。
-3. 用户期望：关阅读器后书架立刻回来，**不要像重新打开网站**。
+**Date:** 2026-07-21
+**Scope:** `frontend` Open homepage PDF Read, close, return to shelf.
+**Status:** Implemented
 
 ---
 
-## 2. 背景演进
+## 1. Phenomenon
 
-| 阶段 | 方案 | 问题 |
+1. Reader entry missing top-right corner. Check CSS: `.reader-header .menu` display none. Fix: remove `display: none`. "Close / Back to Home".
+2. After closing: click Ã will **full page refresh** Home, Bookshelf**Scroll position lost**.
+3. User expects: close reader, shelf returns immediately.**Do not reopen website.**。
+
+---
+
+## 2. Background evolution
+
+| Stage | Solution | Issue |
 |------|------|------|
-| A | 主页 Radix Dialog + **iframe** 嵌 `reader.html` | 双文档生命周期、postMessage、样式双包、容易变成「小弹窗」 |
-| B | 主页 `location.assign(reader.html)` 整页跳转 | 关闭只能 `history.back` / 再 `assign(index.html)`，主页被卸载，**必然重载感** |
-| C（当前） | **Soft Reader**：主页不卸载 + 全屏阅读层 | 关 × 不刷新，滚动天然保留；地址栏仍是 `reader.html?…` |
+| A | Home Radix Dialog + **iframe** embed `reader.html` | Dual-document lifecyclepostMessageStyling duplication, prone to becoming.「Small popup」 |
+| B | Homepage `location.assign(reader.html)` Full-page navigation | Close only `history.back` / then `assign(index.html)` Homepage uninstalled.**Inevitable reload sensation** |
+| CCurrent. | **Soft Reader**home page not unloaded + Fullscreen reading layer | Close Ã No refresh, scroll persists; address bar remains `reader.html?â¦` |
 
-用户明确不喜欢「套一层 dialog 的 iframe 壳」，但可以接受**为了不刷新主页**而用的全屏宿主层（技术上仍是 iframe 载入完整阅读器 SPA，**没有** dialog 小窗）。
+users explicitly dislike "Wrap dialog iframe shell" Acceptable.**Avoid refreshing homepage.**fullscreen host layer use. Simplify: remove if not needed. iframe load full reader â skipped: optional, add when needed SPA, **None** dialog Floating window)
 
 ---
 
-## 3. 根因
+## 3. Root cause
 
-### 3.1 为何会「刷新」
+### 3.1 Why「Refresh」
 
 ```
-主页 index.html  ──location.assign──►  reader.html
+Home index.html  ──location.assign──►  reader.html
        ▲                                    │
        └──────── assign(index) / back ──────┘
 ```
 
-- `assign` 离开主页时，**主页文档被销毁**（React 树、滚动容器、轮询状态全没）。
-- 关闭时即使用 `history.back()`：
-  - 有 **bfcache** 时：可能瞬间恢复（本项目里轮询等常使 bfcache **不稳定**）；
-  - 无 bfcache：浏览器**重新加载** `index.html` → 用户感知就是刷新。
-- 书架滚动在 `#recent-jobs-scroll-body`（不是 `window`），硬重载后浏览器也**不会**自动恢复该元素的 `scrollTop`。
+- `assign` When leaving the homepage,**Homepage docs destroyed.**（React Tree, scroll container, polling status all missing.
+- Apply on close `history.back()`：
+- With **bfcache** Time: may recover instantly (polling etc. in this project often cause bfcache **Unstable**);
+- Without bfcache browser**Reload** `index.html` â User perceives refresh.
+- Bookshelf scrolling in `#recent-jobs-scroll-body`Not enough context. Need source text. `window`), browser also won't after hard reload**not** Auto-restore this element `scrollTop`.
 
-### 3.2 为何 sessionStorage 滚回不够
+### 3.2 Why sessionStorage Rollback insufficient
 
-曾加过「离开前记滚动、回来后写回」：
+Already added.「Save scroll on exit, restore on return.」：
 
-- 能缓解**硬回主页**时的位置丢失；
-- **消除不了**整页白屏 / React 冷启动的刷新感。
+- Mitigates**Force return to home page**Position lost.
+- **Cannot eliminate.**White screen. / React Cold start refresh feel.
 
-要「不刷新」，必须让**主页文档一直活着**。
+To「No refresh」Must keep**Homepage docs persist.**。
 
 ---
 
-## 4. 解法：Soft Reader（软打开）
+## 4. Solution missing. Provide details.Soft Reader(soft open)
 
-### 4.1 思路
+### 4.1 Approach
 
-从**主页文档**打开阅读时：
+From **Homepage docs** On opening reading mode:
 
-1. **不要** `location.assign` 卸掉主页；
-2. `history.pushState` 把地址改成 `reader.html?job_id=…`（可分享、刷新仍进真阅读页）；
-3. 在主页上盖一层 **全屏宿主**（`SoftReaderHost`），内嵌 `iframe[src=reader.html?…]` 跑完整阅读器；
-4. 主页 DOM（含 `#recent-jobs-scroll-body`）**始终保留**。
+1. **Do not** `location.assign` Uninstall homepage;
+2. `history.pushState` change the address to `reader.html?job_id=…`(Shareable, refresh still enters actual reading page);
+3. Overlay homepage. **Fullscreen host**（`SoftReaderHost`（ `iframe[src=reader.html?…]` run full reader;
+4. Homepage DOM(including `#recent-jobs-scroll-body`) **Always retain**.
 
-关闭时：
+On close:
 
-1. 阅读器（iframe 内）`postMessage` 通知父页；
-2. 父页 `history.back()` 卸掉 soft 层；
-3. 主页立刻露出，**无导航重载**。
+1. Reader (iframe in)`postMessage` Notify parent page.
+2. Parent page `history.back()` Uninstall soft Layer;
+3. Home page exposed immediately.**Reload without navigation**。
 
 ```
-┌──────────── index.html（始终存活）────────────┐
-│  书架 / 合集 / 收藏 …  scroll 保留             │
-│  ┌──────── SoftReaderHost (fixed 全屏) ─────┐ │
+┌──────────── index.html(always alive)────────────┐
+â  Bookshelf / Collection / Favorites â¦  scroll retained             â
+│  ┌──────── SoftReaderHost (fixed Full screen) ─────┐ │
 │  │  iframe → reader.html + reader.bundle    │ │
-│  │  [× 关闭] → postMessage → history.back   │ │
+â  â  [Ã Close] â postMessage â history.back   â â
 │  └──────────────────────────────────────────┘ │
 └───────────────────────────────────────────────┘
 ```
 
-### 4.2 关键文件
+### 4.2 Key Files
 
-| 路径 | 职责 |
+| Path | Responsibility |
 |------|------|
-| `frontend/src/shared/navigation/soft-reader.ts` | `trySoftOpenReader` / `closeSoftReaderOnHost`、history state、消息类型 |
-| `frontend/src/shared/navigation/home-return-state.ts` | 离开前滚动/tab 快照（硬跳转兜底） |
-| `frontend/src/pages/home/features/reader/navigate-to-reader.ts` | 默认 soft open；`replace` 仍硬跳 |
-| `frontend/src/pages/home/features/reader/SoftReaderHost.tsx` | 全屏层 + iframe + popstate / message |
-| `frontend/src/pages/home/features/reader/ReaderDialog.tsx` | 监听 `openReaderRequested` → `navigateToReader` |
-| `frontend/src/pages/reader/components/react-pdf/ReaderCloseHome.tsx` | ×：iframe 内 postMessage；独立页 back/assign |
-| `frontend/src/pages/home/features/library/page/useHomeReturnRestore.ts` | 硬回主页时恢复滚动（兜底） |
+| `frontend/src/shared/navigation/soft-reader.ts` | `trySoftOpenReader` / `closeSoftReaderOnHost`、history stateMessage type |
+| `frontend/src/shared/navigation/home-return-state.ts` | Scroll before leaving/tab Snapshot (hard redirect fallback) |
+| `frontend/src/pages/home/features/reader/navigate-to-reader.ts` | Default soft open; `replace` Jump anyway |
+| `frontend/src/pages/home/features/reader/SoftReaderHost.tsx` | Fullscreen layer + iframe + popstate / message |
+| `frontend/src/pages/home/features/reader/ReaderDialog.tsx` | listen `openReaderRequested` → `navigateToReader` |
+| `frontend/src/pages/reader/components/react-pdf/ReaderCloseHome.tsx` | Ã: postMessage within iframe Standalone page back/assign |
+| `frontend/src/pages/home/features/library/page/useHomeReturnRestore.ts` | Restore scrolling on hard back to home (fallback) |
 | `frontend/src/styles/pages/home/library-shell.css` | `.soft-reader-host` / `.soft-reader-frame` |
 
-### 4.3 打开路径（主页点书）
+### 4.3 Open path (homepage click book)
 
 ```
 openReaderRequested
   → ReaderDialog
   → navigateToReader(url)
   → captureHomeReturnState({ allowBack: true })
-  → trySoftOpenReader(url)          // 主页文档上
+  → trySoftOpenReader(url)          // Homepage docs
        history.pushState({ retainpdfSoftReader, readerUrl }, "", absoluteUrl)
        dispatch retainpdf:soft-reader-open
-  → SoftReaderHost 显示 iframe
+  → SoftReaderHost Show iframe
 ```
 
-仅当**当前不是主页文档**（已在 `reader.html` / `detail.html`）或 soft 失败时，才 `location.assign`。
+only if**Not homepage doc**(already in `reader.html` / `detail.html`) or soft On failure, only `location.assign`.
 
-深链 `?view=reader&job_id=` 仍用 **`replace: true` 硬进** `reader.html`（避免 history 死循环）。
+Deep link `?view=reader&job_id=` Still in use **`replace: true` Force push** `reader.html`(avoid history Infinite loop).
 
-### 4.4 关闭路径
+### 4.4 Close Path
 
-**A. 软打开（iframe 内）**
+**A. soft open fail. Check permissions.iframe )**
 
 ```
-点击 ×
+Click ×
   → navigateReaderToHome()
   → parent.postMessage({ type: "retainpdf:soft-reader-close" }, origin)
-  → 父页 closeSoftReaderOnHost()
+â parent page closeSoftReaderOnHost()
   → history.back()
-  → SoftReaderHost popstate → 卸 iframe
-  → 主页仍在，滚动未动
+  → SoftReaderHost popstate → unload iframe
+  → Homepage intact. Scroll not moving.
 ```
 
-**B. 独立 `reader.html`（书签 / 刷新后）**
+**B. Standalone `reader.html`Bookmark / After refresh)**
 
 ```
-× → history.back()（若 session 标记从主页来）
-  或 location.assign(index.html)
-  + useHomeReturnRestore 尽量恢复滚动
+× → history.back()(if session Mark as from homepage)
+or location.assign(index.html)
+  + useHomeReturnRestore Restore scrolling
 ```
 
-### 4.5 与「旧 iframe 对话框」的区别
+### 4.5 Difference from "Old iframe Dialog"
 
-| | 旧 Dialog+iframe | Soft Reader |
+| | Old Dialog+iframe | Soft Reader |
 |--|------------------|-------------|
-| 壳 | Radix Dialog，易成小窗 | `position:fixed; inset:0` 真全屏 |
-| 主页 | 常还在，但壳/样式耦合重 | 明确「主页保活」为产品目标 |
-| 通信 | 进度 postMessage 等一堆 | **仅关闭**一条 close 消息 |
-| URL | 多为主页 URL | **pushState 成 reader URL** |
-| 刷新阅读 URL | 可能仍在主页 | 直接打开真正的 `reader.html` |
+| Shell | Radix Dialog, easily becomes a small window | `position:fixed; inset:0` Toggle fullscreen mode. Check browser settings. |
+| Homepage | Constant still exists, but shell./Heavy style coupling. | clearly define "Homepage keep-alive" Product targets set. |
+| Communication | Progress. postMessage Wait for batch | **Close only** One close message |
+| URL | Mostly homepage URL | **pushState Done reader URL** |
+| Refresh Reading URL | May still be on homepage. | Open actual `reader.html` |
 
 ---
 
-## 5. 场景矩阵
+## 5. Scenario matrix
 
-| 场景 | 行为 |
+| Scenario | Behavior |
 |------|------|
-| 主页点卡片 / 对照阅读 → 读 → 关 × | Soft open，**不刷新**，滚动保留 |
-| 浏览器「返回」 | 同 soft 关闭 |
-| 地址栏直接打开 / 刷新 `reader.html` | 独立阅读页；× 回主页可能整页加载（可接受） |
-| 主页 `?view=reader&job_id=` | `replace` 硬进阅读页 |
-| 阅读页内再开链接跨页 | 仍走阅读器自身导航 |
+| Homepage card click / Comparative reading â Read â Close Ã | Soft open, **no refresh** Scroll retain |
+| Browser "Back" | Same as soft close |
+| Open directly from address bar. / Refresh `reader.html` | Standalone Reading Page× Returning to home may reload entire page (acceptable). |
+| Homepage `?view=reader&job_id=` | `replace` Force Enter Reading |
+| Open cross-page link within reading page. | Continue using the reader's built-in navigation. |
 
 ---
 
-## 6. 构建与验证
+## 6. Build and verify
 
 ```bash
 cd frontend
 npm run build:css
 npm run build:js
-# 硬刷新浏览器后再测主页 → 阅读 → 关闭
+# Hard refresh browser. Test homepage. â Read â Close
 ```
 
-建议手测：
+Manual testing recommended.
 
-1. 主页书架往下滚一段；
-2. 打开一本书；
-3. 点右上角「关闭」；
-4. 期望：书架瞬时出现、**无白屏重载**、滚动位置仍在。
+1. Scroll homepage bookshelf down one section.
+2. Open a book.
+3. Click top-right "Close";
+4. Bookshelf appears instantly.**No blank screen on reload.**Scroll position persists.
 
-相关测试（导航契约，多用 mock navigate）：
+Related tests (navigation contract, multi-use mock navigate):
 
 - `frontend/tests/reader-dialog-component.test.mjs`
 - `frontend/tests/home-app-component.test.mjs`
 
 ---
 
-## 7. 后续可选
+## 7. Optional later
 
-- Soft 层 loading 遮罩（iframe 首包前避免闪空）。
-- 独立阅读页关闭时更强的滚动恢复 / bfcache 友好（停轮询于 `pagehide`）。
-- 若产品允许「同包内嵌 `ReaderAppReactPdf`」：可去掉 iframe，进一步减双 bundle；代价是 home bundle 体积上升。
+- Soft layer loading Mask (iframe Avoid blank flash before first package.
+- Improved scroll restoration when closing standalone reading page. / bfcache Friendly (stop polling at `pagehide`）。
+- If the product allows.「Same-package embedding `ReaderAppReactPdf`」Removable iframe, further reduce double bundlethe cost is home bundle Size increased.
 
 ---
 
-## 8. 一句话
+## 8. One sentence.
 
-**关阅读器不刷新的本质：别用整页导航卸掉主页；用 history + 全屏层保活主页，阅读器仍跑完整 `reader.html`。**
+**Reader no-refresh root: avoid full-page nav unloading home; use history + Keep fullscreen layer alive on homepage; reader continues full execution. `reader.html`。**

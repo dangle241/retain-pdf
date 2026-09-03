@@ -277,41 +277,41 @@ def _finish_ocr_only_provider_job(
         artifact_key="source_pdf",
         path=source_pdf_path,
         stage="saving",
-        message="源 PDF 已登记",
+        message="Source PDF registered",
     )
     emit_artifact_published(
         artifact_key="layout_json",
         path=layout_json_path,
         stage="saving",
-        message="layout json 已发布",
+        message="Layout json published",
     )
     emit_artifact_published(
         artifact_key="normalized_document_json",
         path=normalized_json_path,
         stage="saving",
-        message="标准化文档已发布",
+        message="Normalized document published",
     )
     emit_artifact_published(
         artifact_key="normalization_report_json",
         path=normalization_report_path,
         stage="saving",
-        message="标准化报告已发布",
+        message="Normalization report published",
     )
     emit_artifact_published(
         artifact_key="pipeline_summary_json",
         path=summary_path,
         stage="saving",
-        message="已写出 OCR provider summary",
+        message="OCR provider summary written",
     )
     emit_artifact_published(
         artifact_key="pipeline_events_jsonl",
         path=event_writer.path,
         stage="saving",
-        message="统一事件流已写出",
+        message="Unified event stream written",
     )
     emit_stage_transition(
         stage="finished",
-        message="OCR provider 流程完成",
+        message="OCR provider flow complete",
         provider=provider,
     )
     print(format_stdout_kv(STDOUT_LABEL_JOB_ROOT, job_dirs.root))
@@ -352,7 +352,7 @@ def main() -> None:
     with pipeline_event_writer_scope(event_writer):
         emit_stage_transition(
             stage="startup",
-            message="provider worker 已启动",
+            message="Provider worker started",
             provider=provider,
         )
         print(f"{STDOUT_LABEL_EVENTS_JSONL}: {event_writer.path}", flush=True)
@@ -387,7 +387,7 @@ def main() -> None:
         emit_stage_progress(
             stage="normalizing",
             substage="normalizing",
-            message="OCR provider 已完成，标准化文档已就绪",
+            message="OCR provider complete, normalized document ready",
             provider=provider,
         )
         render_visual_prewarm_handle = start_ocr_render_preprocess(
@@ -409,7 +409,7 @@ def main() -> None:
         emit_stage_transition(
             stage="translation_prepare",
             substage="translation_prepare",
-            message="开始准备翻译和渲染阶段",
+            message="Start preparing translation and rendering stages",
             provider=provider,
         )
         result = run_book_pipeline(
@@ -471,11 +471,11 @@ def main() -> None:
             artifact_key="pipeline_events_jsonl",
             path=event_writer.path,
             stage="saving",
-            message="统一事件流已写出",
+            message="Unified event stream written",
         )
         emit_stage_transition(
             stage="finished",
-            message="provider-backed 全流程完成",
+            message="Provider-backed full pipeline complete",
             provider=provider,
         )
         print_pipeline_summary(

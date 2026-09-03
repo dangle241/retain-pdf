@@ -1,17 +1,18 @@
-// staged 进度动画 hook(蓝图 §2 features/status/,风险 §8.1——全项目最容易
-// 翻车的时序点)。
+// Staged progress animation hook (Blueprint §2 features/status/, risk §8.1——easiest
+// timing point to break in the whole codebase).
 //
-// 拷贝自 components/status/job-status-card-progress-animation.js 的
-// createStatusCardProgressAnimation(该文件属"死,由 StatusCard.jsx 家族
-// 替代"清单,js/components/ 禁止 import;buildProgressOptions/
-// shouldAnimateRenderPageProgress 是 job-status/ 纯 VM,原样 import)。
+// Copied from components/status/job-status-card-progress-animation.js
+// createStatusCardProgressAnimation (that file is "dead", on the "to be replaced by
+// StatusCard.jsx family" list; js/components/ prohibits import; buildProgressOptions/
+// shouldAnimateRenderPageProgress are job-status/ pure VMs, imported as-is).
 //
-// 铁律(风险 §8.1):displayedProgressByStage 与 timer 必须是 useRef,不是
-// useState——每 120ms 跳一页的动画如果改用 useState,会导致每 tick 触发一次
-// 整组件重渲染,且闭包捕获的是旧的 state 值(setState 的函数式更新虽能绕开
-// 闭包旧值问题,但仍无法避免每 tick 重渲——ref 是唯一同时满足"跨 tick 持久化
-// 又不触发渲染"的方案)。真正需要触发渲染的只有 renderOptions(通过独立的
-// useState 输出,交给 ProgressBlock.jsx 渲染)。
+// Iron rule (risk §8.1): displayedProgressByStage and timer must be useRef, not useState——
+// animation jumping one page every 120ms using useState would trigger a full component
+// re-render every tick, and closures capture stale state values (functional setState updates
+// can bypass the stale-closure issue but still cannot avoid per-tick re-render——ref is the
+// only solution that simultaneously satisfies "persist across ticks without triggering render").
+// The only thing that truly needs to trigger rendering is renderOptions (output via
+// separate useState, delivered to ProgressBlock.jsx for rendering).
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -40,9 +41,10 @@ export function useStagedProgressAnimation({ selected, selectedIsCurrent, snapsh
     };
   }
 
-  // 换 job 复位(风险 §8.1 附带语义):displayedProgressByStage 是"跨阶段的
-  // 已显示进度记忆",job 切换后旧任务的记忆必须清空,否则新任务同名阶段会
-  // 复用旧任务的显示进度做动画起点。
+  // Job switch reset (risk §8.1 accompanying semantics): displayedProgressByStage is
+  // "cross-Stage displayed progress memory"; after job switch old task's memory must be
+  // cleared, otherwise new task's same-named Stage would reuse old task's displayed
+  // progress as animation starting point.
   useEffect(() => {
     clear();
     displayedProgressByStageRef.current = {};
@@ -79,9 +81,11 @@ export function useStagedProgressAnimation({ selected, selectedIsCurrent, snapsh
     };
     tick();
     return clear;
-    // selected/selectedIsCurrent/snapshot/selectedProgress 均来自 props 派生值,
-    // 每次上游快照变化时这些引用天然变化,依赖表随其变化重跑动画判定——
-    // 与旧世界 render({selected,...}) 每次快照回调都被调用一次的时序等价。
+    // selected/selectedIsCurrent/snapshot/selectedProgress all come from props-derived values;
+    // every time upstream snapshot changes these references naturally change; the dependency
+    // array reruns the animation judgment with those changes——
+    // equivalent timing to the old world's render({selected,...}) where every snapshot
+    // callback was called once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, selectedIsCurrent, snapshot, selectedProgress]);
 
@@ -89,3 +93,7 @@ export function useStagedProgressAnimation({ selected, selectedIsCurrent, snapsh
 
   return renderOptions;
 }
+
+
+
+

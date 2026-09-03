@@ -126,7 +126,7 @@ export async function runOcrTokenValidation({
     };
   }
   if (showResult) {
-    setOcrValidationMessage(`正在检测 ${definition.label} Token…`, "", definition.id);
+    setOcrValidationMessage(`Checking ${definition.label} Token...`, "", definition.id);
   }
   try {
     const result = asValidationResult(await validateOcrToken(apiPrefix, definition.id, normalizedToken));
@@ -137,19 +137,19 @@ export async function runOcrTokenValidation({
     });
     if (showResult) {
       const hint = result.operator_hint ? ` ${result.operator_hint}` : "";
-      const message = result.summary || `${definition.label} Token 检测结果：${result.status || "unknown"}`;
+      const message = result.summary || `${definition.label} Token check result: ${result.status || "unknown"}`;
       setOcrValidationMessage(`${message}${hint}`.trim(), result.ok ? "valid" : "error", definition.id);
     }
     return result;
   } catch (_err) {
     resetOcrValidationRuntime({ state, credentialsStatePort, legacyRuntimePort });
     if (showResult) {
-      setOcrValidationMessage(`${definition.label} Token 检测失败，请稍后重试。`, "error", definition.id);
+      setOcrValidationMessage(`${definition.label} Token check failed. Please retry later.`, "error", definition.id);
     }
     return {
       ok: false,
       status: "network_error",
-      summary: `${definition.label} Token 检测失败，请稍后重试。`,
+      summary: `${definition.label} Token check failed. Please retry later.`,
     };
   }
 }
@@ -171,7 +171,7 @@ export async function runDeepSeekConnectivityCheck({
     return { ok: false, status: 0 };
   }
   if (showResult) {
-    setDeepSeekValidationMessage("正在检测 DeepSeek 接口…");
+    setDeepSeekValidationMessage("Checking DeepSeek API...");
   }
   try {
     const result = asValidationResult(await validateDeepSeekToken(apiPrefix, {
@@ -201,12 +201,12 @@ export function summarizeDeepSeekBalance(result) {
     .filter((item) => item && item.currency && item.total_balance)
     .map((item) => `${item.currency} ${item.total_balance}`);
   if (parts.length > 0) {
-    return `余额 ${parts.join("，")}`;
+    return `Balance ${parts.join(", ")}`;
   }
   if (result?.is_available) {
-    return "余额可用";
+    return "balance ready";
   }
-  return "余额不足";
+  return "Insufficient balance";
 }
 
 export async function runDeepSeekBalanceCheck({
@@ -232,3 +232,7 @@ export async function runDeepSeekBalanceCheck({
     return { ok: false, status: "network_error" };
   }
 }
+
+
+
+

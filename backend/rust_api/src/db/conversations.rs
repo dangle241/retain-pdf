@@ -128,10 +128,13 @@ impl Db {
         self.get_conversation(conversation_id)
     }
 
-    /// 返回会话内全部消息(按 seq 升序),供前端重建分支树。
+    /// Return every message in the conversation (ascending by `seq`),
+    /// used by the frontend to rebuild the branch tree.
     pub fn list_messages(&self, conversation_id: &str, limit: u32) -> Result<Vec<MessageRecord>> {
         let conn = self.connect()?;
-        // 分支树需要全量(或大窗口);仍按 seq 正序,便于 fromBranchableArray 父先于子。
+        // The branch tree needs the full set (or a large window); rows
+        // are still returned in ascending `seq` so `fromBranchableArray`
+        // sees the parent before its child.
         let mut stmt = conn.prepare(&format!(
             r#"
             SELECT {MESSAGE_COLUMNS}
@@ -168,7 +171,9 @@ impl Db {
         Ok(record)
     }
 
-    /// 追加消息:seq 自增、刷新会话时间与 head;会话标题为空时取首条 user 消息前缀。
+    /// Append a message: `seq` auto-increments, the conversation's
+    /// timestamp and `head` are refreshed; if the conversation has no
+    /// title, the first user message is used as the title prefix.
     pub fn append_message(
         &self,
         conversation_id: &str,

@@ -1,4 +1,4 @@
-// assistant-ui ExternalStore：进度/正文分离 + 消息分支树 + 本地快照。
+// assistant-ui ExternalStore: separate Progress/body + message branch tree + local snapshot.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -45,9 +45,9 @@ type TreeItem = {
 };
 
 const SUGGESTIONS = [
-  { prompt: "这篇文献的主要结论是什么？" },
-  { prompt: "作者用了什么方法或模型？" },
-  { prompt: "有哪些关键结果或数据？" },
+  { prompt: "What are the main conclusions of this paper?" },
+  { prompt: "What methods or models did the authors use?" },
+  { prompt: "What are the key results or data?" },
 ];
 
 function textFromAppend(message: AppendMessage): string {
@@ -66,16 +66,16 @@ function textFromAppend(message: AppendMessage): string {
 }
 
 function toThreadMessageLike(message: ReaderAskStoreMessage): ThreadMessageLike {
-  // 注意：fromThreadMessageLike 会丢掉 trim 为空的 text part；
-  // 流式占位用可见点，避免 content=[] 时气泡不挂载 Parts。
+  // Note: fromThreadMessageLike drops text parts that are empty after trim;
+  // use visible dots as streaming placeholder to avoid bubbles not mounting Parts when content=[]
   const raw = message.content;
   const isAssistant = message.role === "assistant";
   const content = raw.trim()
     ? raw
     : isAssistant && message.status?.type === "running"
-      ? "…"
+      ? "..."
       : raw;
-  // assistant-ui fromBranchableArray：status 只能出现在 assistant，否则
+  // assistant-ui fromBranchableArray: status can only appear on assistant, otherwise
   // Uncaught Error: status is only supported for assistant messages
   return {
     id: message.id,
@@ -207,7 +207,7 @@ function findMessage(
   return items.find((i) => i.message.id === id)?.message ?? null;
 }
 
-/** 从任意消息沿 parent 回溯到根，得到路径上的 TreeItem 序列（根→叶）。 */
+/** Trace any message along parent chain back to root, getting the TreeItem sequence on that path (root→leaf). */
 function pathItemsToMessage(
   items: readonly TreeItem[],
   targetId: string,
@@ -226,8 +226,8 @@ function pathItemsToMessage(
 }
 
 /**
- * 分支用路径：优先 parent 链；链断/缺 parent 时退化为「可见路径截到目标答案」。
- * 避免只 fork 出半截（甚至只有一条 assistant）导致「分支不像新对话/无上文」。
+ * Path for branching: prefer parent chain; when chain is broken/missing parent, fall back to "visible path truncated to target Answer".
+ * Avoid forking only a half (or even just one assistant entry) causing "branch doesn't look like a new conversation/no prior context".
  */
 function pathForBranch(
   items: readonly TreeItem[],
@@ -237,7 +237,7 @@ function pathForBranch(
   const tid = `${targetId || ""}`.trim();
   if (!tid || !items.length) return [];
 
-  // aui 有时用自己的 id；优先精确匹配，再回退到当前 head / 最近 assistant
+  // aui sometimes uses its own id; prefer exact match, then fall back to current head / most recent assistant
   let resolvedId = tid;
   if (!items.some((i) => i.message.id === resolvedId)) {
     if (headId && items.some((i) => i.message.id === headId)) {
@@ -249,7 +249,7 @@ function pathForBranch(
   }
 
   let path = pathItemsToMessage(items, resolvedId);
-  // parent 链完整：至少含 user+assistant
+  // parent chain complete: contains at least user+assistant
   if (path.length >= 2 && path[path.length - 1].message.role === "assistant") {
     return path;
   }
@@ -257,11 +257,11 @@ function pathForBranch(
     path = [];
   }
 
-  // Fallback：按当前可见线性顺序，从根截到 target（含）
+  // Fallback: by current visible linear order, truncate from root to target (inclusive)
   const visible = visibleMessages(items, headId || resolvedId);
   let idx = visible.findIndex((m) => m.id === resolvedId);
   if (idx < 0) {
-    // 再退：整条可见路径（以 head 为叶）
+    // Fall back further: whole entries visible path (with head as leaf)
     idx = visible.length - 1;
   }
   if (idx < 0) return path;
@@ -271,7 +271,7 @@ function pathForBranch(
     const row = byId.get(visible[i].id);
     if (row) linear.push(row);
   }
-  // 确保以 assistant 结尾
+  // Ensure ends with assistant
   while (linear.length && linear[linear.length - 1].message.role !== "assistant") {
     linear.pop();
   }
@@ -312,9 +312,9 @@ export function useReaderAskRuntime(options: {
   const [sessionBusy, setSessionBusy] = useState(false);
   const [sessionError, setSessionError] = useState("");
   const runningRef = useRef(false);
-  // 贯穿单次 runAssistant 的取消把手：onCancel/切会话/新会话/连发前 abort。
-  // 审计 P0-2/3/4 的共同根因就是此前没有它——停止不断流、完成流复活已取消
-  // 消息、旧流回写会话粘性，全靠这一个 controller 消掉。
+  // Single-run cancel handle through runAssistant: abort on cancel/switch session/new session/rapid succession.
+  // Audit P0-2/3/4 root cause was precisely the lack of it — stop doesn't stop the stream, done stream revives Canceled
+  // messages, old stream writes back with session stickiness, all eliminated by this one controller.
   const runAbortRef = useRef<AbortController | null>(null);
   const itemsRef = useRef(items);
   const headIdRef = useRef(headId);
@@ -322,7 +322,7 @@ export function useReaderAskRuntime(options: {
   const streamRafRef = useRef<number | null>(null);
   const pendingContentRef = useRef("");
   const streamAssistantIdRef = useRef("");
-  /** 流式正文旁路（不依赖 aui Parts / status），保证 token 到即刷 */
+  /** Streaming body bypass (does not depend on aui Parts/status), ensures tokens are flushed immediately */
   const streamContentRef = useRef<Record<string, string>>({});
   const [streamEpoch, setStreamEpoch] = useState(0);
   const [streamingAssistantId, setStreamingAssistantId] = useState("");
@@ -351,7 +351,7 @@ export function useReaderAskRuntime(options: {
       const res = await listConversations({ document_id: doc, limit: 50 });
       setSessions(res.conversations || []);
     } catch {
-      // 列表失败不挡主流程
+      // List failure doesn't block main workflow
     }
   }, []);
 
@@ -368,9 +368,9 @@ export function useReaderAskRuntime(options: {
     );
   }, []);
 
-  // job 切换 / 面板打开：拉会话列表 + hydrate 消息树
-  // 注意：面板关闭时 enabled=false 也会跑 effect；不能用 lastJobRef 在 enabled 翻转时直接 return，
-  // 否则「打开面板」永远不会 refreshSessions（用户只能新对话后才看到列表）。
+  // Job switch / panel open: pull session list + hydrate message tree
+  // Note: effect also runs when panel closes and enabled=false; can't use lastJobRef to return directly on enabled flip,
+  // otherwise "open panel" would never refreshSessions (user only sees list after new conversation).
   useEffect(() => {
     if (!jobId) {
       setItems([]);
@@ -398,12 +398,12 @@ export function useReaderAskRuntime(options: {
       documentIdRef.current = "";
     }
 
-    // 面板未打开：只记 job，等 enabled 再拉网
+    // Panel not open: only remember job, wait for enabled before pulling from network
     if (!enabled || !remoteAnswerer) return;
 
     let cancelled = false;
     void (async () => {
-      // 1) 解析 document_id（列表按文档过滤）
+      // 1) parse document_id (list filtered by document)
       let docId = `${documentIdRef.current || ""}`.trim();
       if (!docId) {
         try {
@@ -414,12 +414,12 @@ export function useReaderAskRuntime(options: {
         if (docId) documentIdRef.current = docId;
       }
 
-      // 2) 始终刷新会话列表（打开面板 / 切 job 都要）
+      // 2) Always refresh session list (needed for panel open / job switch)
       if (!cancelled && docId) {
         await refreshSessions(docId);
       }
 
-      // 3) 消息树：job 刚切换，或当前还是空树时再 hydrate
+      // 3) Message tree: hydrate when job just switched, or current still has an empty tree
       const needHydrate = jobChanged || !itemsRef.current.length;
       if (!needHydrate || cancelled) {
         if (!cancelled) persistReadyRef.current = true;
@@ -446,11 +446,11 @@ export function useReaderAskRuntime(options: {
             return;
           }
         } catch {
-          // 网络/404 → 本地快照
+          // Network/404 → local snapshot
         }
       }
 
-      // 无粘性会话：若列表里已有对话，自动挂最近一条，便于直接切换
+      // Sticky session: if the list already has conversations, automatically attach the most recent entry for easy switching
       if (!cancelled && docId) {
         try {
           const listed = await listConversations({ document_id: docId, limit: 50 });
@@ -503,7 +503,7 @@ export function useReaderAskRuntime(options: {
     };
   }, [jobId, enabled, remoteAnswerer, refreshSessions, applyConversationTree]);
 
-  // 防抖持久化全量树（按会话隔离）
+  // Debounced persist full tree (isolated by session)
   useEffect(() => {
     if (!jobId || !persistReadyRef.current) return;
     const convId = activeConversationId;
@@ -551,14 +551,14 @@ export function useReaderAskRuntime(options: {
     return map;
   }, [items]);
 
-  /** 流式正文旁路：store + 进行中的 streamContent（streamEpoch 强制刷新） */
+  /** Streaming body bypass: store + in-progress streamContent (streamEpoch forces refresh) */
   const contentByMessageId = useMemo(() => {
     const map: Record<string, string> = {};
     for (const item of items) {
       const m = item.message;
       if (m.content) map[m.id] = m.content;
     }
-    // 覆盖为最新流式缓冲（可能比 items 里多半帧）
+    // Overwrite with latest streaming buffer (may be a few frames ahead of items)
     for (const [id, text] of Object.entries(streamContentRef.current)) {
       if (text) map[id] = text;
     }
@@ -591,9 +591,9 @@ export function useReaderAskRuntime(options: {
     );
   }, []);
 
-  // 流式清洗降频：sanitize 从"每 token 一次"移到"每帧一次"（rAF flush 内），
-  // 长答案不再对全文反复跑 5 条正则（审计 P1-7 O(n²)）。
-  // 语义不变：清洗后为空则回退原文，保证可见增量。
+  // Streaming sanitization throttle: moved sanitize from "once per token" to "once per frame" (inside rAF flush),
+  // so long answers no longer repeatedly run 5-entry regex on full text (audit P1-7 O(n²)).
+  // Semantics unchanged: if sanitization results in empty, fall back to source to ensure visible incremental progress.
   const sanitizeStreamText = useCallback((raw: string) => {
     const cleaned = sanitizeAssistantAnswer(raw || "", []);
     return cleaned.trim() ? cleaned : `${raw || ""}`;
@@ -605,7 +605,7 @@ export function useReaderAskRuntime(options: {
     answerStartedRef.current = true;
     streamAssistantIdRef.current = assistantId;
 
-    // 首包：同步上屏（旁路 + store），避免等 rAF / aui status
+    // First packet: sync to screen immediately (bypass + store), avoid waiting for rAF / aui status
     const cur = itemsRef.current.find((i) => i.message.id === assistantId);
     if (!cur?.message.content?.trim()) {
       if (streamRafRef.current != null) {
@@ -623,12 +623,12 @@ export function useReaderAskRuntime(options: {
       return;
     }
 
-    // 后续：每帧最多 flush 一次旁路；store 也更新以免切消息丢字
+    // Subsequent: flush bypass at most once per frame; also update store to avoid losing text on message switch
     if (streamRafRef.current != null) return;
     streamRafRef.current = requestAnimationFrame(() => {
       streamRafRef.current = null;
-      // 陈旧守卫：取消/连发后 pendingContentRef 已属于新流，
-      // 旧 rAF 不许把它写进旧气泡（审计 P0-3 串流）
+      // Stale guard: after cancel/rapid succession, pendingContentRef already belongs to new stream,
+      // old rAF must not write it into old bubbles (audit P0-3 stream chaining)
       if (streamAssistantIdRef.current !== assistantId) return;
       const latest = sanitizeStreamText(pendingContentRef.current);
       streamContentRef.current[assistantId] = latest;
@@ -641,7 +641,7 @@ export function useReaderAskRuntime(options: {
     });
   }, [patchAssistant, sanitizeStreamText]);
 
-  // 卸载（关浮窗/离开页面）时断掉在飞请求，不留幽灵 SSE
+  // On unmount (close floating window/leave pages), abort in-flight requests, no ghost SSE
   useEffect(() => () => {
     runAbortRef.current?.abort();
     runAbortRef.current = null;
@@ -658,14 +658,14 @@ export function useReaderAskRuntime(options: {
   ) => {
     if (!remoteAnswerer && !localAnswerer) {
       patchAssistant(assistantId, {
-        content: "问答暂不可用：请确认已打开任务阅读器。",
+        content: "Q&A is not ready yet. Make sure the job reader is open.",
         progress: "",
         status: { type: "incomplete", reason: "error" },
       });
       return;
     }
 
-    // 连发保护：终止上一在飞请求，再开新 controller
+    // Rapid-fire protection: abort previous in-flight request, then open new controller
     runAbortRef.current?.abort();
     const controller = new AbortController();
     runAbortRef.current = controller;
@@ -678,10 +678,10 @@ export function useReaderAskRuntime(options: {
     setStreamingAssistantId(assistantId);
     setStreamEpoch((n) => n + 1);
     setIsRunning(true);
-    // 占位 running，确保 UI 走流式路径
+    // Placeholder running, ensures UI goes through streaming path
     patchAssistant(assistantId, {
       content: "",
-      progress: "正在检索文档…",
+      progress: "Searching documents...",
       status: { type: "running" },
     });
 
@@ -707,20 +707,20 @@ export function useReaderAskRuntime(options: {
           },
           onAnswerDelta: (fullText: string) => {
             if (controller.signal.aborted) return;
-            // 原文直接入队，清洗在 scheduleAnswerText 的帧级 flush 里做
-            //（每 token 全文 sanitize 是 O(n²)，审计 P1-7）
+            // Source goes directly to queue, sanitization happens in scheduleAnswerText's frame-level flush
+            // (per-token full-text sanitization is O(n²), audit P1-7)
             if (fullText) scheduleAnswerText(assistantId, fullText);
           },
           signal: controller.signal,
         });
       } catch (error) {
-        // 主动取消：不降级、不报错，气泡状态已由 onCancel 定格
+        // Intentional cancel: no fallback, no error, bubble status already frozen by onCancel
         if (controller.signal.aborted) return;
         if (!localAnswerer || !shouldFallbackToLocal(error)) throw error;
         usedFallback = true;
         if (!answerStartedRef.current) {
           patchAssistant(assistantId, {
-            progress: "在线服务暂不可用，改用本地检索…",
+            progress: "Online service is not ready. Falling back to local search...",
             status: { type: "running" },
           });
         }
@@ -728,7 +728,7 @@ export function useReaderAskRuntime(options: {
         result = await localAnswerer.answer({ question, scope: "document" });
       }
 
-      // 完成前最后一道闸：已取消的运行禁止用完整答案覆盖"已取消"气泡
+      // Final gate before Done: canceled runs are forbidden from overwriting "Canceled" bubble with complete answer
       if (controller.signal.aborted) return;
       if (streamRafRef.current != null) {
         cancelAnimationFrame(streamRafRef.current);
@@ -736,15 +736,15 @@ export function useReaderAskRuntime(options: {
       }
       const citations = normalizeCitations(result?.citations);
       let answer = sanitizeAssistantAnswer(
-        `${result?.answer || pendingContentRef.current || ""}`.trim() || "没有找到可用回答。",
+        `${result?.answer || pendingContentRef.current || ""}`.trim() || "No ready answer was found.",
         citations,
       );
       if (usedFallback) {
-        answer = `${answer}\n\n_在线服务暂不可用，以上来自本地文档检索。_`;
+        answer = `${answer}\n\n_Online service not ready yet, above from local documents search._`;
       }
       if ((result as { persisted?: boolean })?.persisted === false) {
-        // 审计 C2:回写失败不再静默——用户至少知道该复制保存
-        answer = `${answer}\n\n_⚠️ 本轮回答未能写入历史记录（存储暂时不可用），刷新后可能丢失。_`;
+        // Audit C2: write-back failure no longer silent — user at least knows to copy/save
+        answer = `${answer}\n\n_⚠️ This round's answer could not be written to history record (storage not ready temporarily), may be lost after refresh._`;
       }
       delete streamContentRef.current[assistantId];
       streamAssistantIdRef.current = "";
@@ -757,7 +757,7 @@ export function useReaderAskRuntime(options: {
         status: { type: "complete", reason: "stop" },
       });
     } catch (error) {
-      // 主动取消抛出的 AbortError 不算失败，气泡已由 onCancel 定格
+      // AbortError thrown by intentional cancel is not a failure, bubble already frozen by onCancel
       if (controller.signal.aborted) return;
       if (streamRafRef.current != null) {
         cancelAnimationFrame(streamRafRef.current);
@@ -767,7 +767,7 @@ export function useReaderAskRuntime(options: {
       streamAssistantIdRef.current = "";
       setStreamingAssistantId("");
       setStreamEpoch((n) => n + 1);
-      const msg = error instanceof Error ? error.message : "生成回答失败，请重试。";
+      const msg = error instanceof Error ? error.message : "Failed to generate an answer. Please retry.";
       patchAssistant(assistantId, {
         content: msg,
         progress: "",
@@ -775,7 +775,7 @@ export function useReaderAskRuntime(options: {
         status: { type: "incomplete", reason: "error" },
       });
     } finally {
-      // 只有"仍是当前运行"才复位全局标志：旧 run 的 finally 不许踩新 run
+      // Only reset global flag if still running the current one: old run's finally must not step on new run
       if (runAbortRef.current === controller) {
         runAbortRef.current = null;
         runningRef.current = false;
@@ -789,7 +789,7 @@ export function useReaderAskRuntime(options: {
     const question = textFromAppend(message);
     if (!question) return;
 
-    // 优先 append 自带的 parentId：从某条答案「分支」时 parent = 该 assistant id
+    // Prefer append's built-in parentId: when "branching" from an entry's Answer, parent = that assistant id
     const parentId = message.parentId ?? headIdRef.current;
     const userId = makeId("u");
     const assistantId = makeId("a");
@@ -803,7 +803,7 @@ export function useReaderAskRuntime(options: {
           id: assistantId,
           role: "assistant",
           content: "",
-          progress: "正在检索文档…",
+          progress: "Searching documents...",
           status: { type: "running" },
           citations: [],
         },
@@ -817,7 +817,7 @@ export function useReaderAskRuntime(options: {
     });
   }, [runAssistant]);
 
-  /** 重新生成：parentId 为被替换助手消息的父节点（通常是 user）。 */
+  /** Regenerate: parentId is the parent node of the assistant message being replaced (usually user). */
   const onReload = useCallback(async (parentId: string | null) => {
     if (runningRef.current) return;
     const tree = itemsRef.current;
@@ -827,7 +827,7 @@ export function useReaderAskRuntime(options: {
     if (parent?.role === "user") {
       question = parent.content.trim();
     } else {
-      // 兜底：沿可见路径找最后一个 user
+      // Fallback: find the last user along the visible path
       const path = visibleMessages(tree, parentId ?? headIdRef.current);
       for (let i = path.length - 1; i >= 0; i -= 1) {
         if (path[i].role === "user") {
@@ -849,7 +849,7 @@ export function useReaderAskRuntime(options: {
           id: assistantId,
           role: "assistant",
           content: "",
-          progress: "正在重新生成…",
+          progress: "Regenerating...",
           status: { type: "running" },
           citations: [],
         },
@@ -862,7 +862,7 @@ export function useReaderAskRuntime(options: {
     });
   }, [runAssistant]);
 
-  /** 编辑用户消息：在 parentId 下长出新 user 兄弟分支并重跑。 */
+  /** Edit user message: grow a new user sibling branch under parentId and rerun. */
   const onEdit = useCallback(async (message: AppendMessage) => {
     if (runningRef.current) return;
     const question = textFromAppend(message);
@@ -881,7 +881,7 @@ export function useReaderAskRuntime(options: {
           id: assistantId,
           role: "assistant",
           content: "",
-          progress: "正在检索文档…",
+          progress: "Searching documents...",
           status: { type: "running" },
           citations: [],
         },
@@ -896,7 +896,7 @@ export function useReaderAskRuntime(options: {
   }, [runAssistant]);
 
   const onCancel = useCallback(async () => {
-    // 真取消：断 SSE（省网络/token），并掐灭 pending rAF 防止把状态打回 running
+    // Real cancel: disconnect SSE (saves network/tokens), and kill pending rAF to prevent status reverting to running
     runAbortRef.current?.abort();
     runAbortRef.current = null;
     if (streamRafRef.current != null) {
@@ -917,7 +917,7 @@ export function useReaderAskRuntime(options: {
               ...item.message,
               status: { type: "incomplete", reason: "cancelled" as const },
               progress: "",
-              content: item.message.content.trim() || "已取消",
+              content: item.message.content.trim() || "Canceled",
             },
           }
           : item,
@@ -925,7 +925,7 @@ export function useReaderAskRuntime(options: {
     );
   }, []);
 
-  /** 分支切换：runtime 传入当前可见 ThreadMessage 路径，只改 head。 */
+  /** Branch switch: runtime passes currently visible ThreadMessage path, only changes head. */
   const setMessages = useCallback((next: readonly ThreadMessage[]) => {
     const last = next[next.length - 1];
     setHeadId(last?.id ?? null);
@@ -935,14 +935,14 @@ export function useReaderAskRuntime(options: {
     event: { headId: string | null },
   ) => {
     setHeadId(event.headId);
-    // 同步服务端 head，跨端/刷新保持可见分支
+    // Sync server head, cross-endpoint/refresh keeps visible branch
     const convId =
       remoteAnswerer?.getConversationId?.()
       || loadStoredConversationId({ jobId });
     const head = `${event.headId || ""}`.trim();
     if (convId && head) {
       void patchConversation(convId, { head_id: head }).catch(() => {
-        // 离线/404 忽略，本地树仍可用
+        // Offline/404 ignored, local tree still ready
       });
     }
   }, [jobId, remoteAnswerer]);
@@ -952,10 +952,10 @@ export function useReaderAskRuntime(options: {
     if (last?.id) setHeadId(last.id);
   }, []);
 
-  /** 新对话窗口：清空气泡，下次 ask 会 auto-create 新 conversation。 */
+  /** New conversation window: clear bubbles; next ask will auto-create new conversation. */
   const newSession = useCallback(async () => {
     if (sessionBusy) return;
-    // 生成中也允许开新窗：真 abort 在飞请求，防旧流写进新窗口
+    // Generating also allows opening new window: truly abort in-flight request to prevent old stream writing to new window
     runAbortRef.current?.abort();
     runAbortRef.current = null;
     runningRef.current = false;
@@ -982,13 +982,13 @@ export function useReaderAskRuntime(options: {
       if (docId) await refreshSessions(docId);
     } catch (error) {
       console.warn("[reader-ai] new session failed", error);
-      setSessionError("无法创建新对话，请重试。");
+      setSessionError("Cannot create new conversation, please retry.");
     } finally {
       if (token === switchTokenRef.current) setSessionBusy(false);
     }
   }, [jobId, remoteAnswerer, refreshSessions, sessionBusy]);
 
-  /** 切换已有会话窗口。 */
+  /** Switch to an existing conversation window. */
   const switchSession = useCallback(async (conversationId: string) => {
     const id = `${conversationId || ""}`.trim();
     const current =
@@ -997,21 +997,21 @@ export function useReaderAskRuntime(options: {
       || "";
     if (!id || id === current || sessionBusy) return;
 
-    // 生成中也允许切走：真 abort 在飞请求——旧流的 done 若继续，会把
-    // conversation_id 粘回旧会话、下一问落错线程（审计 P0-4）
+    // Generating also allows switching away: truly abort in-flight request — if old stream's done continues, it would
+    // stick conversation_id back to old session, next question lands in wrong thread (audit P0-4)
     runAbortRef.current?.abort();
     runAbortRef.current = null;
     runningRef.current = false;
     setIsRunning(false);
 
-    // 短时隔离即可；过长会像「点了没反应 / 乱跳」
+    // Short isolation is enough; too long feels like "clicked with no reaction / jumping around"
     armReaderAiClickShield(1200);
     lockReaderAiNavigation(1200);
     setSessionBusy(true);
     setSessionError("");
     const token = ++switchTokenRef.current;
 
-    // 先切 UI 选中态 + 清空，避免仍显示上一会话内容
+    // First switch UI selection state + clear, avoid still displaying previous session content
     setActiveConversationId(id);
     activeConversationIdRef.current = id;
     setItems([]);
@@ -1048,7 +1048,7 @@ export function useReaderAskRuntime(options: {
       applyConversationTree(branchItems, detail.head_id);
       remoteAnswerer?.setConversationId?.(id, docId);
 
-      // 本地快照与服务端对齐（按会话隔离）
+      // Local snapshot aligned with server (isolated by session)
       if (branchItems.length) {
         saveThreadBranchSnapshot(
           jobId,
@@ -1067,7 +1067,7 @@ export function useReaderAskRuntime(options: {
 
       if (docId) await refreshSessions(docId);
 
-      // 只滚 AI 面板，不碰 PDF
+      // Only scroll AI panel, don't touch PDF
       requestAnimationFrame(() => {
         const vp = globalThis.document?.querySelector?.(
           "[data-reader-ai-viewport]",
@@ -1084,8 +1084,8 @@ export function useReaderAskRuntime(options: {
     } catch (error) {
       console.warn("[reader-ai] switch session failed", error);
       if (token === switchTokenRef.current) {
-        setSessionError("加载该对话失败，请检查网络后重试。");
-        // 失败时不要假装已切换：恢复为空，避免展示错会话
+        setSessionError("Failed to load this conversation, please check network and retry.");
+        // On failure don't pretend to have switched: resume shows empty to avoid displaying wrong session
         setItems([]);
         setHeadId(null);
       }
@@ -1101,20 +1101,20 @@ export function useReaderAskRuntime(options: {
   ]);
 
   /**
-   * 从某条助手答案「开新对话」：
-   * 复制 root→该答案 的历史到新 conversation，原会话原样保留。
-   * 之后提问只带新会话上下文，避免原线程被续写污染（ChatGPT Branch in new chat）。
-   * @returns 是否成功
+   * Open new conversation from an entry's assistant Answer:
+   * Copy history from root to that Answer into a new conversation, original session remains unchanged.
+   * Subsequent questions carry only the new session context, avoiding original thread pollution (ChatGPT Branch in new chat).
+   * @returns whether successful
    */
   const branchFromAnswer = useCallback(async (assistantMessageId: string): Promise<boolean> => {
     const forkId = `${assistantMessageId || ""}`.trim();
-    // 允许在 busy 时排队失败要有提示；生成中也可 fork（先停本地 running）
+    // Allow forking when busy — queued failures need feedback; generating can also fork (first stop local running)
     if (!forkId) {
-      setSessionError("无法分支：消息 id 无效。");
+      setSessionError("Cannot branch: message id is invalid.");
       return false;
     }
     if (sessionBusy) {
-      setSessionError("请稍候，当前有会话操作进行中。");
+      setSessionError("Please wait. A conversation operation is already in progress.");
       return false;
     }
     if (runningRef.current) {
@@ -1124,12 +1124,12 @@ export function useReaderAskRuntime(options: {
 
     const path = pathForBranch(itemsRef.current, forkId, headIdRef.current);
     if (!path.length) {
-      setSessionError("无法分支：找不到到此答案的对话路径。");
+      setSessionError("Cannot branch: could not find conversation path to this answer.");
       return false;
     }
     const last = path[path.length - 1];
     if (last.message.role !== "assistant") {
-      setSessionError("只能从助手答案处开新对话。");
+      setSessionError("Can only start new conversation from assistant answer.");
       return false;
     }
 
@@ -1144,7 +1144,7 @@ export function useReaderAskRuntime(options: {
         || `${(await remoteAnswerer?.getDocumentId?.()) || ""}`.trim();
       documentIdRef.current = docId;
       if (!docId) {
-        // 再试一次解析
+        // Try parsing once more
         try {
           docId = `${(await remoteAnswerer?.getDocumentId?.()) || ""}`.trim();
           documentIdRef.current = docId;
@@ -1153,11 +1153,11 @@ export function useReaderAskRuntime(options: {
         }
       }
       if (!docId) {
-        setSessionError("无法分支：文档未就绪，请稍后重试。");
+        setSessionError("Cannot branch: documents not ready, please retry later.");
         return false;
       }
 
-      // 线性化 parent，保证 fork 写入时父子链完整（不依赖可能断裂的旧 parentId）
+      // Linearize parent chain, ensure completeness during fork write (don't rely on potentially broken old parentId)
       const pathPayload = path.map((item, i) => ({
         id: item.message.id,
         role: item.message.role as "user" | "assistant",
@@ -1166,7 +1166,7 @@ export function useReaderAskRuntime(options: {
         parentId: i === 0 ? null : path[i - 1].message.id,
       }));
 
-      // 标题：fork-n-xxx（xxx = 当前/原始对话名）
+      // Title: fork-n-xxx (xxx = current/original conversation name)
       const currentId =
         activeConversationIdRef.current
         || remoteAnswerer?.getConversationId?.()
@@ -1176,11 +1176,11 @@ export function useReaderAskRuntime(options: {
       const sourceTitle =
         `${currentRow?.title || ""}`.trim()
         || `${firstUser?.content || ""}`.replace(/\s+/g, " ").trim()
-        || "未命名对话";
+        || "Untitled conversation";
       const existingTitles = (sessions || []).map((s) => s.title || "");
       const branchTitle = nextForkConversationTitle(sourceTitle, existingTitles);
 
-      // 必须完整 fork 到服务端（含消息），禁止只建空会话
+      // Must fully fork to server (including messages); creating empty session is not allowed
       const forked = await forkConversationFromPath({
         documentId: docId,
         title: branchTitle,
@@ -1196,14 +1196,14 @@ export function useReaderAskRuntime(options: {
       armReaderAiClickShield(600);
       lockReaderAiNavigation(600);
 
-      // 切到新会话：原会话仍在列表里可切回
+      // Switch to new session: original session remains in the list and can be switched back to
       setItems(nextItems);
       setHeadId(nextHead);
       setActiveConversationId(nextConvId);
       activeConversationIdRef.current = nextConvId;
       remoteAnswerer?.setConversationId?.(nextConvId, docId);
 
-      // 乐观插入列表（带正确标题与消息数），再 refresh 对齐服务端
+      // Optimistically insert into list (with correct title and message count), then refresh to align with server
       setSessions((prev) => {
         const row: ConversationRecord = {
           conversation_id: nextConvId,
@@ -1225,7 +1225,7 @@ export function useReaderAskRuntime(options: {
       );
       await refreshSessions(docId);
 
-      // 新对话：滚到末尾，方便接着问
+      // New conversation: scroll to bottom for ease of follow-up questions
       requestAnimationFrame(() => {
         const vp = globalThis.document?.querySelector?.(
           "[data-reader-ai-viewport]",
@@ -1238,14 +1238,14 @@ export function useReaderAskRuntime(options: {
       return true;
     } catch (error) {
       console.warn("[reader-ai] branch from answer failed", error);
-      setSessionError("分支失败：未能复制上文到新对话。请检查网络后重试。");
+      setSessionError("Branch failed: could not copy prior context to new conversation. Please check network and retry.");
       return false;
     } finally {
       setSessionBusy(false);
     }
   }, [jobId, remoteAnswerer, refreshSessions, sessionBusy, sessions]);
 
-  /** 删除会话（服务端 + 本地快照）；删当前则切到最近一条或空窗。 */
+  /** Delete session (server + local snapshot); if deleting current, switch to most recent entry or empty window. */
   const removeSession = useCallback(async (conversationId: string) => {
     const id = `${conversationId || ""}`.trim();
     if (!id || sessionBusy) return;
@@ -1314,13 +1314,13 @@ export function useReaderAskRuntime(options: {
       }
     } catch (error) {
       console.warn("[reader-ai] delete session failed", error);
-      setSessionError("删除对话失败，请重试。");
+      setSessionError("Delete conversation failed, please retry.");
     } finally {
       if (token === switchTokenRef.current) setSessionBusy(false);
     }
   }, [applyConversationTree, jobId, remoteAnswerer, refreshSessions, sessionBusy]);
 
-  /** 重命名会话标题。 */
+  /** Rename conversation title. */
   const renameSession = useCallback(async (conversationId: string, title: string) => {
     const id = `${conversationId || ""}`.trim();
     const nextTitle = `${title || ""}`.replace(/\s+/g, " ").trim();
@@ -1339,13 +1339,13 @@ export function useReaderAskRuntime(options: {
       if (docId) await refreshSessions(docId);
     } catch (error) {
       console.warn("[reader-ai] rename session failed", error);
-      setSessionError("重命名失败，请重试。");
+      setSessionError("Rename failed, please retry.");
     } finally {
       setSessionBusy(false);
     }
   }, [refreshSessions, sessionBusy]);
 
-  // 问答完成后刷新会话列表标题/排序
+  // After Q&A done, refresh session list title/sort
   const prevRunning = useRef(false);
   useEffect(() => {
     if (prevRunning.current && !isRunning) {
@@ -1359,7 +1359,7 @@ export function useReaderAskRuntime(options: {
 
   const runtime = useExternalStoreRuntime({
     isRunning,
-    // 切会话/分支时不要整线程 isDisabled（会闪禁用态像刷新）；按钮侧用 branchBusy 锁
+    // Don't disable entire thread during session/branch switch (would flash disabled state like a refresh); button side uses branchBusy lock
     isDisabled: !enabled,
     messageRepository,
     setMessages,
@@ -1378,7 +1378,7 @@ export function useReaderAskRuntime(options: {
       || "";
     return (sessions || []).map((s) => ({
       id: s.conversation_id,
-      title: `${s.title || ""}`.trim() || "未命名对话",
+      title: `${s.title || ""}`.trim() || "Untitled conversation",
       updatedAt: s.updated_at || "",
       messageCount: Number(s.message_count) || 0,
       active: s.conversation_id === active,
@@ -1406,3 +1406,8 @@ export function useReaderAskRuntime(options: {
     branchFromAnswer,
   };
 }
+
+
+
+
+

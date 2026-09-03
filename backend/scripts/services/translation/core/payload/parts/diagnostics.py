@@ -1,16 +1,21 @@
 from __future__ import annotations
 
 
-# translation_diagnostics 的统一写入口(修复链专用,逐步推广)。
+# Single write entry point for `translation_diagnostics` (currently used by
+# the repair chain; rollout to other stages is incremental).
 #
-# 契约:
-# - 顶层保持 dict、覆盖式 merge,与现有读方(前端调试面板、Rust 视图、
-#   debug index、replay 工具)完全兼容;
-# - 每次写入同时把本次 updates 追加进 diagnostics["history"],
-#   保留各阶段处理轨迹——此前 route_path/degradation_reason/fallback_to
-#   等单值字段被后续阶段覆盖后,历史即丢失;
-# - 写入前重读 item 上的当前 diagnostics,避免"先构造快照、中间别人
-#   写入、再整段回写"造成的静默覆盖。
+# Contract:
+# - The top level remains a dict and is merged with overwrite semantics, so
+#   every existing reader (frontend debug panel, Rust view, debug index,
+#   replay tool) stays fully compatible.
+# - Every write also appends the current `updates` into
+#   `diagnostics["history"]`, preserving each stage's processing trail.
+#   Previously single-value fields like `route_path`, `degradation_reason`,
+#   and `fallback_to` were overwritten by later stages and the prior
+#   history was lost.
+# - Before writing we re-read the current diagnostics on the item to avoid
+#   silent overwrites caused by the "snapshot first, then someone else
+#   writes, then we rewrite the whole thing" pattern.
 
 
 def record_translation_diagnostics(item: dict, stage: str, updates: dict) -> dict:

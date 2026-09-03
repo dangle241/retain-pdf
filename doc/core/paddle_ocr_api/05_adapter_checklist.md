@@ -1,25 +1,25 @@
 # 05 Adapter Checklist
 
-## 任务定义
+## Task definition
 
-安排一个人去适配 Paddle OCR 时，建议直接按下面交付：
+Assign one person to adapt. Paddle OCR If applicable, it is recommended to deliver directly as follows:
 
-### 输入
+### Input
 
-- Paddle OCR 原始 JSON
-- 至少一个最小 fixture
-- 至少一个较完整 fixture
+- Paddle OCR raw JSON
+- Minimum 1 fixture
+- At least one relatively complete. fixture
 
-### 输出
+### Output
 
-- 可注册的 Paddle adapter
-- `document.v1` 输出
-- 对应文档
-- 对应测试
+- Registerable Paddle adapter
+- document.v1 output
+- Corresponding documentation.
+- Corresponding Test
 
-## 文件范围
+## File scope
 
-允许修改：
+Allow modification:
 
 - `doc/core/paddle_ocr_api/*`
 - `backend/scripts/services/document_schema/provider_adapters/paddle/*`
@@ -28,29 +28,29 @@
 - `backend/scripts/devtools/tests/document_schema/fixtures/*`
 - `backend/scripts/devtools/tests/document_schema/regression_check.py`
 
-不要修改：
+Do not modify:
 
 - `backend/scripts/services/translation/*`
 - `backend/scripts/services/rendering/*`
 - `backend/scripts/runtime/pipeline/*`
 
-例外：
+Exceptions:
 
-- 只有当主契约确实需要新增稳定字段时，才允许先提案，再改 `document_schema`
+- Only when the main contract genuinely needs new stable fields is proposal first, then modification permitted. `document_schema`
 
-## 接入顺序
+## Integration order
 
-1. 确认 Paddle 原始返回格式
-2. 梳理顶层/页级/block 级字段
-3. 明确字段落位
-4. 实现 detector
-5. 实现 adapter
-6. 实现 `continuation_hint` 映射
-7. 补 fixture
-8. 跑回归
-9. 更新文档
+1. Confirm Paddle Raw Response Format
+2. Sort out the top‑level/page‑level/block‑level fields
+3. Specify field placement.
+4. Implement the detector
+5. Implement the adapter
+6. Implement continuation_hint mapping
+7. Add fixtures
+8. Run regression tests.
+9. Update documentation.
 
-## 验收命令
+## Acceptance command
 
 ```bash
 PYTHONPATH=backend/scripts python backend/scripts/devtools/tests/document_schema/regression_check.py
@@ -58,23 +58,23 @@ PYTHONPATH=backend/scripts python -m pytest backend/scripts/devtools/tests/docum
 PYTHONPATH=backend/scripts python -m pytest backend/scripts/devtools/tests/translation -q
 ```
 
-## 必查项
+## Required fields
 
-- provider 检测是否稳定
-- `document.v1` 是否通过 schema 校验
-- `source.provider` 是否正确写成 `paddle`
-- `type/sub_type/tags/derived` 是否符合当前契约
-- `metadata/source` 是否保留了必要 trace
-- `continuation_hint` 是否只在可靠时写入
-- `skip_translation` 标记是否只给该跳过的块
+- provider Check stability
+- Whether document.v1 passes schema validation
+- `source.provider` Thiếu ngữ cảnh. Cần đoạn văn gốc cần kiểm tra. Gửi lại. `paddle`
+- `type/sub_type/tags/derived` Compliant with current contract?
+- `metadata/source` whether necessary trace is retained trace
+- `continuation_hint` Write only when reliable.
+- `skip_translation` Skip only that block?
 
-## 交付说明模板
+## Delivery Instructions Template
 
-适配人提交时，至少应说明：
+Adapter submitter must at least state:
 
-1. 支持了哪个 Paddle API 返回格式
-2. 用了哪些 fixture
-3. 新增或修改了哪些字段映射
-4. 哪些 Paddle 字段被故意不接
-5. 是否写入了 `continuation_hint`
-6. 测试命令和结果
+1. which Paddle API format is supported Paddle API return format
+2. which fixtures used fixture
+3. which field mappings have been added or modified
+4. Which Paddle Field intentionally left unconnected.
+5. whether duplicate bboxlogs have been reintroduced `continuation_hint`
+6. Test Commands and Results

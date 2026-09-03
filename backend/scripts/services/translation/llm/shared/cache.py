@@ -133,10 +133,13 @@ def _unit_cache_ttl_seconds() -> float:
 
 
 def _prune_expired_cache_entries_once() -> None:
-    # 缓存 key 含提示词指纹和协议版本,提示词一改旧代条目全部成为
-    # 永不命中的孤儿,此前无任何回收机制、无限增长。按 mtime TTL
-    # (默认 90 天,RETAIN_TRANSLATION_UNIT_CACHE_TTL_DAYS=0 关闭)
-    # 每进程最多清扫一次,失败静默——这是缓存卫生,不是正确性。
+    # Cache keys embed the prompt fingerprint and protocol version. When the
+    # prompt changes, every entry from the previous generation becomes an
+    # orphan that will never be hit again — previously there was no reclaim
+    # mechanism, so the cache grew without bound. We sweep by mtime TTL
+    # (default 90 days; set RETAIN_TRANSLATION_UNIT_CACHE_TTL_DAYS=0 to
+    # disable) at most once per process. Sweep failures are swallowed —
+    # this is cache hygiene, not correctness.
     global _PRUNE_DONE
     with _PRUNE_LOCK:
         if _PRUNE_DONE:

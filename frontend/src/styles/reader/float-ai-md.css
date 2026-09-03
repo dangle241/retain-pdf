@@ -1,6 +1,6 @@
-/* AI 悬浮窗 · 答案 Markdown 排版 / 公式 / 图片 */
+/* AI float window · Answer Markdown layout / formulas / images */
 
-/* AI 正文：Notion 文档流气质（流式 / 最终共用） */
+/* AI body: Notion document-flow feel (streaming / final shared) */
 .reader-float-ai .aui-md {
   font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif);
   font-size: 14px;
@@ -12,7 +12,7 @@
   overflow-wrap: anywhere;
   -webkit-font-smoothing: antialiased;
 }
-/* 外链已降级为 span（无 href），避免桌面端 openExternal；仅保留视觉 */
+/* Outbound links downgraded to span (no href) to avoid desktop openExternal; keep visuals only */
 .reader-float-ai .aui-md .aui-md-extlink {
   color: color-mix(in srgb, var(--accent) 85%, var(--ink));
   text-decoration: underline;
@@ -22,7 +22,7 @@
   word-break: break-all;
 }
 .reader-float-ai .aui-md a[href] {
-  /* 残留真实锚点也禁止点穿（JS 会再拆掉） */
+  /* Any leftover real anchor is also unclickable (JS strips it) */
   pointer-events: none;
   color: inherit;
   text-decoration: underline;
@@ -107,7 +107,7 @@
   border: 0;
   border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
 }
-/* 公式（MathJax SVG） */
+/* Formulas (MathJax SVG) */
 .reader-float-ai .aui-md .reader-md-math-inline {
   display: inline-block;
   max-width: 100%;

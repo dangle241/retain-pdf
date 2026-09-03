@@ -1,11 +1,12 @@
-// URL 锚点 → react-pdf 跳页。
+// URL anchor → react-pdf jump to page.
 //
-// 收藏 / 搜索 / 引用回跳会在 URL 上带 ?page_idx=&block_id=（page_idx 0 基）。
-// Legacy 引擎在 boot 里 scheduleAnchorJump；默认 react-pdf 路径此前只
-// void resolveReaderAnchor()，等于没跳。本 hook 在 PDF 就绪且总页数可知后
-// 跳到 page_idx+1，并用短延迟重试以等页槽布局。
+// Favorite / search / citation jump-back adds ?page_idx=&block_id= to the URL (page_idx is 0-based).
+// The legacy engine uses scheduleAnchorJump in boot; the default react-pdf path previously only
+// void resolveReaderAnchor(), which is a no-op. This hook, once the PDF is ready and the total
+// page count is known, jumps to page_idx+1, and uses short delays to retry while waiting for
+// the page slot layout.
 //
-// block_id：react-pdf 尚无 region 层，仅做页级跳转。
+// block_id: react-pdf has no region layer yet, only page-level jumps.
 
 import { useEffect, useRef } from "react";
 import { resolveReaderAnchor } from "../external.js";
@@ -15,12 +16,12 @@ export type UrlReaderAnchor = {
   blockId: string;
 };
 
-/** page_idx (0-based) → 阅读器页码 (1-based)；无效返回 null */
+/** page_idx (0-based) → Reader page number (1-based); invalid returns null */
 export function pageNumberFromUrlAnchor(
   anchor: UrlReaderAnchor | null | undefined,
 ): number | null {
   if (!anchor) return null;
-  // 勿 Number(null)===0，否则「仅有 block_id」会被误当成第 1 页
+  // Do not Number(null)===0, otherwise "block_id only" would be misread as Page 1
   if (anchor.pageIdx === null || anchor.pageIdx === undefined) return null;
   const raw = Number(anchor.pageIdx);
   if (!Number.isFinite(raw)) return null;
@@ -31,10 +32,10 @@ export function pageNumberFromUrlAnchor(
 const JUMP_DELAYS_MS = [0, 80, 200, 400, 800];
 
 /**
- * 在 enabled 且 numPages 可用时，按 URL 锚点跳一次（每会话一次）。
+ * When enabled and numPages is ready, jump once by the URL anchor (once per session).
  */
 export function useUrlAnchorJump(options: {
-  /** boot 完成、可滚动 */
+  /** boot done, scrollable */
   enabled: boolean;
   numPages: number;
   goToPage: (page: number) => void;
@@ -51,7 +52,7 @@ export function useUrlAnchorJump(options: {
 
     const anchor = resolveReaderAnchor() as UrlReaderAnchor | null;
     const page = pageNumberFromUrlAnchor(anchor);
-    // 无有效页码：视为已处理，避免后续反复读 URL
+    // Invalid page number: treat as handled, avoid re-reading URL repeatedly
     const key = page == null
       ? `none:${anchor?.blockId || ""}`
       : `p:${page}`;
@@ -77,3 +78,7 @@ export function useUrlAnchorJump(options: {
     };
   }, [enabled, numPages]);
 }
+
+
+
+

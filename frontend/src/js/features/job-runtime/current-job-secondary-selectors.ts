@@ -4,8 +4,8 @@ import {
   cachedStageActionsFor,
 } from "./secondary-resource-cache.js";
 
-// 经全局 Symbol 读 current-job store(直接 import current-job-state.js 会循环依赖);
-// 无 store 的纯快照对象按字段名直读
+// Read current-job store via global Symbol (direct import of current-job-state.js causes circular dependency);
+// plain snapshot objects without a store read fields by name directly
 const CURRENT_JOB_STORE_KEY = Symbol.for("retainpdf.currentJobStore");
 
 function currentJobId(state) {
@@ -27,3 +27,4 @@ export function currentJobStageActions(state) {
 export function currentJobEventsFor(state, jobId) {
   return cachedEventsFor(state, jobId);
 }
+

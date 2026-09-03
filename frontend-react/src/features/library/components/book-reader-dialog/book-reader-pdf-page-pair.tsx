@@ -80,7 +80,7 @@ export function BookReaderPdfPagePair({
           <BookReaderPdfPage document={sourceDocument} pageNumber={pageNumber} availableWidth={sourceWidth} />
         ) : (
           <div className="grid min-h-[720px] place-items-center text-xs text-neutral-500">
-            {sourceError || (sourceLoading ? '正在下载原文 PDF...' : '')}
+            {sourceError || (sourceLoading ? 'DownloadingSource PDF...' : '')}
           </div>
         )}
       </div>
@@ -89,10 +89,11 @@ export function BookReaderPdfPagePair({
           <BookReaderPdfPage document={translatedDocument} pageNumber={pageNumber} availableWidth={translatedWidth} />
         ) : (
           <div className="grid min-h-[720px] place-items-center text-xs text-neutral-500">
-            {translatedError || (translatedLoading ? '正在下载译文 PDF...' : '')}
+            {translatedError || (translatedLoading ? 'DownloadingTranslation PDF...' : '')}
           </div>
         )}
       </div>
     </div>
   )
 }
+

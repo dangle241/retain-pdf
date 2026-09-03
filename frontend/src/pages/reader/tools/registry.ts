@@ -1,45 +1,48 @@
-// 阅读器工具定义（对齐 legacy 顶栏四件套 + 下载在 FAB 另区）
+// Reader tools definitions (aligned with the legacy top-bar quartet + downloads live in a separate FAB zone)
 
 export type ReaderToolId = "notes" | "favorites" | "markdown" | "ai";
 
 export type ReaderToolDef = {
   id: ReaderToolId;
   label: string;
-  /** 副文案（关 / 开） */
+  /** Secondary copy (closed / open) */
   subIdle: string;
   subOpen: string;
-  /** 源文档只读时是否禁用 */
+  /** Whether to disable when the source document is read-only */
   needsJob: boolean;
 };
 
-/** 与 legacy ReaderTopbarActions.TOOL_BUTTONS 同一套能力 */
+/** Same capabilities as legacy ReaderTopbarActions.TOOL_BUTTONS */
 export const READER_TOOLS: readonly ReaderToolDef[] = Object.freeze([
   {
     id: "notes",
-    label: "批注",
-    subIdle: "选中文字后添加",
-    subOpen: "关闭悬浮窗",
+    label: "annotations",
+    subIdle: "Add after selecting text",
+    subOpen: "Close popover",
     needsJob: false,
   },
   {
     id: "favorites",
-    label: "摘录",
-    subIdle: "本书云端收藏",
-    subOpen: "关闭悬浮窗",
+    label: "Excerpt",
+    subIdle: "Cloud favorites",
+    subOpen: "Close popover",
     needsJob: false,
   },
   {
     id: "markdown",
     label: "Markdown",
-    subIdle: "识别 / 译文文本",
-    subOpen: "关闭悬浮窗",
+    subIdle: "Recognize / Translate text",
+    subOpen: "Close popover",
     needsJob: true,
   },
   {
     id: "ai",
-    label: "AI 问答",
-    subIdle: "基于文档提问",
-    subOpen: "关闭悬浮窗",
+    label: "AI Q&A",
+    subIdle: "Ask questions based on document",
+    subOpen: "Close popover",
     needsJob: true,
   },
 ]);
+
+
+

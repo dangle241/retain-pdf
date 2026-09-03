@@ -1,6 +1,6 @@
-// 库检索岛的纯逻辑层:不碰 DOM/React,便于 node 单测
+// Pure logic for the Library Search island: no DOM/React, easy to unit test in node.
 
-// 后端 snippet 用 [ ] 包裹命中词,拆成分段供展示层渲染 <mark>
+// Backend snippet wraps hits in [ ]; split into segments so the UI can render <mark>
 export function highlightSegments(snippet = "") {
   const text = `${snippet || ""}`;
   const segments = [];
@@ -22,9 +22,9 @@ export function highlightSegments(snippet = "") {
 }
 
 export const READING_STATUS_META = Object.freeze({
-  unread: { label: "未读", order: 0 },
-  reading: { label: "在读", order: 1 },
-  done: { label: "读完", order: 2 },
+  unread: { label: "Unread", order: 0 },
+  reading: { label: "Reading", order: 1 },
+  done: { label: "Finished", order: 2 },
 });
 
 const READING_STATUS_CYCLE = ["unread", "reading", "done"];
@@ -52,3 +52,5 @@ export function filterDocuments(documents = [], { query = "", readingStatus = ""
     return haystack.includes(normalizedQuery);
   });
 }
+
+

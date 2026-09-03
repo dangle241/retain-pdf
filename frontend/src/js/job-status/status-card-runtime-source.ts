@@ -5,14 +5,14 @@ import {
 import type { JobLike, JobPayload, ManifestPayload } from "../job/types.js";
 import type { EventsPayload, PublicStagePresentation } from "./types.js";
 
-/** secondaryResourceStore 单条缓存（events / manifest / stageActions） */
+/** secondaryResourceStore single entry cache (events / manifest / stageActions) */
 export interface SecondaryResourceRecordLike {
   jobId?: string;
   payload?: unknown;
   [key: string]: unknown;
 }
 
-/** secondaryResourceStore.getSnapshot() 形状；允许 host 以 Record 宽类型传入 */
+/** secondaryResourceStore.getSnapshot() shape; allows host to pass wide Record type */
 export type SecondaryResourceSnapshot =
   | Record<string, SecondaryResourceRecordLike | null | undefined>
   | Record<string, unknown>
@@ -154,3 +154,5 @@ export function buildRuntimeStatusCardSnapshot({
     stagePresentation: presentationOverride?.stagePresentation || null,
   });
 }
+
+

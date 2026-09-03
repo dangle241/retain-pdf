@@ -13,12 +13,12 @@ function formatDurationMs(ms) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   if (hours > 0) {
-    return `${hours}小时 ${minutes}分 ${seconds}秒`;
+    return `${hours}h ${minutes}m ${seconds}s`;
   }
   if (minutes > 0) {
-    return `${minutes}分 ${seconds}秒`;
+    return `${minutes}m ${seconds}s`;
   }
-  return `${seconds}秒`;
+  return `${seconds}s`;
 }
 
 export function summarizeRuntimeField(value) {
@@ -95,12 +95,12 @@ export function formatJobDuration(payload) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   if (hours > 0) {
-    return `${hours}小时 ${minutes}分 ${seconds}秒`;
+    return `${hours}h ${minutes}m ${seconds}s`;
   }
   if (minutes > 0) {
-    return `${minutes}分 ${seconds}秒`;
+    return `${minutes}m ${seconds}s`;
   }
-  return `${seconds}秒`;
+  return `${seconds}s`;
 }
 
 export function summarizeInvocationProtocol(payload) {
@@ -116,3 +116,4 @@ export function summarizeInvocationSchemaVersion(payload) {
   const invocation = payload?.invocation || {};
   return firstNonEmpty(invocation.stage_spec_schema_version) || "-";
 }
+

@@ -1,81 +1,81 @@
 # Render Options Contract
 
-这份文档规定 Rust API 对外接收的 `render` 参数。原则是：
+This document specifies. Rust API External inbound `render` Parameters. Principles:
 
-- Rust API 是参数契约入口，负责默认值、允许值和基础校验。
-- Python worker 只消费 Rust 写出的 stage spec，不再自己猜默认语义。
-- 新增渲染选项必须先更新这里、`API_SPEC.md`、Rust validation 和 stage spec 写入逻辑。
+- Rust API Parameter contract entry point. Handles defaults, allowed values, and basic validation.
+- Python worker Consume only Rust written stage spec, no longer guessing default semantics on its own.
+- New rendering options: update here first.`API_SPEC.md`, Rust validation and stage spec Write logic.
 
-## 当前字段
+## Current field
 
-| 字段 | 类型 | 默认值 | 允许值 / 范围 | 说明 |
+| Field | Type | Default | Allowed values / Scope | Description |
 | --- | --- | --- | --- | --- |
-| `render.render_mode` | string | `auto` | `auto`, `overlay`, `typst`, `typst_visual`, `dual` | 渲染主路径。`auto` 会由 Python 根据 PDF 可编辑性和页面特征选择实际模式。 |
-| `render.compile_workers` | integer | `0` | `>= 0` | Typst 编译并发。`0` 表示使用 worker 默认策略。 |
-| `render.typst_font_family` | string | `Source Han Serif SC` | 非结构化字符串 | Typst 默认中文字体族。 |
-| `render.pdf_compress_dpi` | integer | `0` | `>= 0` | PDF 图片压缩 DPI。`0` 表示不做额外图片压缩。 |
-| `render.translated_pdf_name` | string | `""` | 任意文件名字符串 | 输出 PDF 文件名。空值使用后端默认命名。 |
-| `render.body_font_size_factor` | number | `0.95` | `> 0` 且 finite | 正文字号全局倍率。 |
-| `render.body_leading_factor` | number | `1.08` | `> 0` 且 finite | 正文行间距全局倍率。 |
-| `render.font_unify_mode` | string | `role_min` | `role_min`, `off` | 字体统一策略。`role_min` 按角色统一到稳定下界，`off` 关闭统一但不关闭 fit/碰撞/背景规则。 |
-| `render.source_cleanup_strategy` | string | `pikepdf_text_strip` | `typst_fill`, `pikepdf_text_strip`, `bbox_text_strip`, `legacy`, `redact_restore_formulas` | 原文处理策略。默认先做路径级 text-op 删除，再由 Typst 背景块做视觉覆盖；`typst_fill` 可显式关闭删除。 |
-| `render.inner_bbox_shrink_x` | number | `0.0` | `>= 0` 且 finite | 普通 bbox 横向内缩。 |
-| `render.inner_bbox_shrink_y` | number | `0.0` | `>= 0` 且 finite | 普通 bbox 纵向内缩。 |
-| `render.inner_bbox_dense_shrink_x` | number | `0.0` | `>= 0` 且 finite | 密集 bbox 横向内缩。 |
-| `render.inner_bbox_dense_shrink_y` | number | `0.0` | `>= 0` 且 finite | 密集 bbox 纵向内缩。 |
+| `render.render_mode` | string | `auto` | `auto`, `overlay`, `typst`, `typst_visual`, `dual` | Render main path.`auto` Handled by Python based on PDF Editability and page feature selection actual mode. |
+| `render.compile_workers` | integer | `0` | `>= 0` | Typst Concurrent compilation.`0` Indicates use. worker default strategy. |
+| `render.typst_font_family` | string | `Source Han Serif SC` | Unstructured string | Typst Default Chinese font family. |
+| `render.pdf_compress_dpi` | integer | `0` | `>= 0` | PDF image compression DPI. `0` Indicates no additional image compression. |
+| `render.translated_pdf_name` | string | `""` | Any filename string | Output PDF filename. An empty value uses the backend default naming. |
+| `render.body_font_size_factor` | number | `0.95` | `> 0` and finite | Global body font size scaling. |
+| `render.body_leading_factor` | number | `1.08` | `> 0` and finite | Global body line spacing multiplier. |
+| `render.font_unify_mode` | string | `role_min` | `role_min`, `off` | Font consistency strategy.`role_min` Normalize roles to stable baseline.`off` Turn off unified but do not turn off fit/Collision/Background rules. |
+| `render.source_cleanup_strategy` | string | `pikepdf_text_strip` | `typst_fill`, `pikepdf_text_strip`, `bbox_text_strip`, `legacy`, `redact_restore_formulas` | Default: path-level first. text-op deletion, then visual overlay by Typst background blocks; `typst_fill` Explicitly close deletion. |
+| `render.inner_bbox_shrink_x` | number | `0.0` | `>= 0` and finite | Normal bbox Horizontal indent. |
+| `render.inner_bbox_shrink_y` | number | `0.0` | `>= 0` and finite | Normal bbox Vertical indent. |
+| `render.inner_bbox_dense_shrink_x` | number | `0.0` | `>= 0` and finite | Dense bbox horizontal indent. |
+| `render.inner_bbox_dense_shrink_y` | number | `0.0` | `>= 0` and finite | Dense bbox vertical indent. |
 
 ## `source_cleanup_strategy`
 
-这是当前最重要的渲染行为开关。
+This is the most important rendering behavior switch.
 
 - `typst_fill`
-  保留原始 PDF 文本层，不跑 bbox text strip。每个可翻译文本块由 Typst 生成带背景色的翻译块覆盖原文。
+  Keep original PDF Text layer, do not run. bbox text strip. Each translatable text block is Typst Generate translation blocks with background color to cover the original text.
 - `pikepdf_text_strip`
-  默认策略。渲染前用 pikepdf 按 bbox 删除原 PDF content stream 中的文本显示操作；遇到 `formula` / `display_formula` bbox 时只作为保护区，不删除公式内部文本，不因一页存在行间公式而整页跳过。overlay 阶段根据 `source_text_precleaned_page_indices` 跳过旧的页内 PyMuPDF redaction/visual cover，视觉遮盖仍由 Typst 文本块背景承担。
+Set default policy. Render pre. pikepdf deletes original PDF content stream Text display operations by bbox; encountered `formula` / `display_formula` bbox Protected areas only. Preserve formula text. No page skip for display formulas.overlay stage based on `source_text_precleaned_page_indices` Skip old in-page. PyMuPDF redaction/visual cover, with visual coverage still handled by Typst Text block background.
 - `bbox_text_strip`
-  兼容别名，当前行为等同 `pikepdf_text_strip`。保留给旧配置和历史任务。
+  Compatibility alias; current behavior unchanged. `pikepdf_text_strip`Reserved for old configurations and historical tasks.
 - `redact_restore_formulas`
-  兼容旧名称，当前行为等同 `pikepdf_text_strip`。名称保留是为了历史任务和旧 spec 可回放；不要再按“删后贴回公式”的语义扩展它。
+  Legacy name compatibility. Behavior unchanged. `pikepdf_text_strip`Name retained for historical tasks and legacy. spec Playback supported; do not extend it per "delete then paste back formula" semantics.
 - `legacy`
-  旧策略别名，当前行为等同 `pikepdf_text_strip`。
+  Legacy policy alias; current behavior identical. `pikepdf_text_strip`。
 
-默认使用 `pikepdf_text_strip` 的原因：
+used by default `pikepdf_text_strip` reason:
 
-- 尽量减少原文从 Typst 背景块边缘漏出的概率。
-- pikepdf 路径级 text-op 删除比旧的 PyMuPDF redaction 更适合正式 PDF 写入。
-- `formula` / `display_formula` bbox 会作为保护区保留，视觉遮盖仍由 Typst 背景块兜底。
-- 如果某类 PDF 删除风险更高，可以显式设置 `typst_fill` 只做覆盖。
+- Minimize original text leaking from Typst Probability of background block edge bleed.
+- The pikepdf path is changing. Removing `text-op` is more suitable for the formal PDF redaction step than relying on PyMuPDF.
+- `formula` / `display_formula` bbox Reserved as protected area. Visual masking still by... Typst Background block fallback.
+- If a certain category PDF Deletion is riskier; set explicitly. `typst_fill` Overwrite only.
 
-## Stage Spec 映射
+## Stage Spec Mapping
 
-Rust 写出的 stage spec 必须包含这些字段：
+Rust-written stage spec Must include these fields:
 
 - `provider.spec.json.render.source_cleanup_strategy`
 - `book.spec.json.render.source_cleanup_strategy`
 - `render.spec.json.params.source_cleanup_strategy`
 - `translate.spec.json.params.render_prewarm_source_cleanup_strategy`
 
-翻译阶段预热渲染 source 时必须使用和最终渲染一致的 `source_cleanup_strategy`，否则预热 manifest 会因为 fingerprint 不一致而失效。
+Translation phase warm-up rendering source Must match the final rendered output. `source_cleanup_strategy`otherwise preheat manifest will be due to fingerprint Inconsistency causes failure.
 
-## Job 快照
+## Job Snapshot
 
-每个 job 创建时，Rust API 会把 resolved render 参数写入：
+Each job On creation,Rust API Will. resolved render Write Parameters:
 
 ```text
 DATA_ROOT/jobs/<job_id>/artifacts/render_config.json
 ```
 
-该文件是调试某个历史任务时的权威渲染配置快照，artifact key 为 `render_config_json`。
-Python 的 `pipeline_summary.json` 可以补充运行结果和诊断，但不应取代这个 Rust 侧配置快照。
+Authoritative rendering configuration snapshot for debugging a historical task.artifact key as `render_config_json`。
+Python's `pipeline_summary.json` May supplement run results and diagnostics, but not replace this. Rust Side config snapshot.
 
-## 修改规则
+## Modify rules
 
-新增或修改 render 参数时，必须同时完成：
+Add or edit render When parameters, must complete simultaneously:
 
-1. 更新 Rust `RenderInput` 默认值。
-2. 更新 Rust validation。
-3. 更新 stage spec 写入和 Python loader。
-4. 更新 `API_SPEC.md` 和本文档。
-5. 至少增加一个 Rust validation 测试或 stage spec 测试。
+1. Update Rust `RenderInput` Default.
+2. Update Rust validation.
+3. Update stage spec Write and Python loader.
+4. Update `API_SPEC.md` and this document.
+5. Add at least one. Rust validation Test or stage spec test.
 
-不要让 Python 默默接受未知值并回退默认值。未知值应在 Rust API 层直接返回 `400`，这样前端问题能尽早暴露。
+Don't allow Python Silently accept unknown values and fall back to defaults. Unknown values should Rust API Layer returns directly `400`so frontend issues are exposed as early as possible.

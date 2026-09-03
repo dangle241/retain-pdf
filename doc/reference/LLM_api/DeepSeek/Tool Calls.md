@@ -1,10 +1,10 @@
-Tool Calls 让模型能够调用外部工具，来增强自身能力。
+Tool Calls Enable models to call external tools to enhance their capabilities.
 
-非思考模式
-样例代码
-这里以获取用户当前位置的天气信息为例，展示了使用 Tool Calls 的完整 Python 代码。
+Non-thinking mode
+Sample code
+This uses obtaining the user's current location weather information as an example, demonstrating the complete Python code using Tool Calls.
 
-Tool Calls 的具体 API 格式请参考对话补全文档。
+Tool Calls Specific API Refer to the Chat Completion documentation for formatting.
 
 from openai import OpenAI
 
@@ -52,26 +52,26 @@ messages.append({"role": "tool", "tool_call_id": tool.id, "content": "24℃"})
 message = send_messages(messages)
 print(f"Model>\t {message.content}")
 
-这个例子的执行流程如下：
+Execution flow for this example:
 
-用户：询问现在的天气
-模型：返回 function get_weather({location: 'Hangzhou'})
-用户：调用 function get_weather({location: 'Hangzhou'})，并传给模型。
-模型：返回自然语言，"The current temperature in Hangzhou is 24°C."
-注：上述代码中 get_weather 函数功能需由用户提供，模型本身不执行具体函数。
+User: asks about the current weather
+Model: Return function get_weather({location: 'Hangzhou'})
+User: Call function get_weather({location: 'Hangzhou'})and pass to the model.
+Model: returns natural language,"The current temperature in Hangzhou is 24°C."
+Note: in the above code get_weather User provides function implementation; model does not execute.
 
-思考模式
-从 DeepSeek-V3.2 开始，API 支持了思考模式下的工具调用能力，详见思考模式。
+Thinking mode
+Starting from DeepSeek-V3.2, API added support for tool calling in thinking mode. See Thinking Mode for details.
 
-strict 模式（Beta）
-在 strict 模式下，模型在输出 Function 调用时会严格遵循 Function 的 JSON Schema 的格式要求，以确保模型输出的 Function 符合用户的定义。在思考与非思考模式下的工具调用，均可使用 strict 模式。
+strict Mode (Beta）
+In strict mode, the model outputting Function strictly follows Function's JSON Schema format requirements to ensure the model outputs Function that meets user definition. Tool calls allowed in both thinking and non-thinking modes. strict mode.
 
-要使用 strict 模式，需要：
+Use strict Mode, required:
 
-用户需要设置 base_url="https://api.deepseek.com/beta" 来开启 Beta 功能
-在传入的 tools 列表中，所有 function 均需设置 strict 属性为 true
-服务端会对用户传入的 Function 的 JSON Schema 进行校验，如不符合规范，或遇到服务端不支持的 JSON Schema 类型，将返回错误信息
-以下是 strict 模式下 tool 的定义样例：
+User configuration required. base_url="https://api.deepseek.com/beta" Enable Beta Feature
+In the passed tools All in the list function All required. strict Attribute: true
+The server validates the user-provided Function's JSON Schema; if not compliant, or if the server does not support the JSON Schema type, returns error message.
+Below is strict Mode tool Definition examples:
 
 {
     "type": "function",
@@ -93,7 +93,7 @@ strict 模式（Beta）
     }
 }
 
-strict 模式支持的 JSON Schema 类型
+strict supported JSON Schema types
 object
 string
 number
@@ -102,10 +102,10 @@ boolean
 array
 enum
 anyOf
-object 类型
-object 定义一个包含键值对的深层结构，其中 properties 定义了对象中每个键（属性）的 schema。每个 object 的所有属性均需设置为 required，且 object 中 additionalProperties 属性必须为 false。
+object type
+object defines a deep structure containing key-value pairs, where properties defines each key (property) in the object's schema. Each object property must be set to required, and additionalProperties attribute must be false.
 
-示例：
+Example:
 
 {
     "type": "object",
@@ -117,19 +117,19 @@ object 定义一个包含键值对的深层结构，其中 properties 定义了�
     "additionalProperties": false
 }
 
-string 类型
-支持的参数：
-pattern：使用正则表达式来约束字符串的格式
-format：使用预定义的常见格式进行校验，目前支持：
-email：电子邮件地址
-hostname：主机名
-ipv4：IPv4 地址
-ipv6：IPv6 地址
+string type
+Parameters:
+patternUse regular expressions to constrain string format.
+formatValidate using predefined common formats. Currently supported:
+emailEmail address
+hostnameHostname
+ipv4：IPv4 Address
+ipv6: IPv6 address
 uuid：uuid
-不支持的参数
+Unsupported parameter
 minLength
 maxLength
-示例：
+Example:
 
 {
     "type": "object",
@@ -147,16 +147,16 @@ maxLength
     }
 }
 
-number/integer 类型
-支持的参数
-const：固定数字为常数
-default：数字的默认值
-minimum：最小值
-maximum：最大值
-exclusiveMinimum：不小于
-exclusiveMaximum：不大于
-multipleOf：数字输出为这个值的倍数
-示例：
+number/integer type
+Supported parameters
+constFixed numbers as constants.
+defaultDefault value
+minimumMinimum
+maximumMaximum
+exclusiveMinimumNot less than
+exclusiveMaximumnot greater than
+multipleOfNumber output is a multiple of this value.
+Example:
 
 {
     "type": "object",
@@ -172,11 +172,11 @@ multipleOf：数字输出为这个值的倍数
     "additionalProperties": false
 }
 
-array 类型
-不支持的参数
+array type
+Unsupported parameters
 minItems
 maxItems
-示例：
+Example:
 
 {
     "type": "object",
@@ -195,9 +195,9 @@ maxItems
 }
 
 enum
-enum 可以确保输出是预期的几个选项之一，例如在订单状态的场景下，只能是有限几个状态之一。
+enum Ensures output is one of the expected options, e.g., order status restricted to a finite set.
 
-样例：
+Example:
 
 {
     "type": "object",
@@ -211,22 +211,22 @@ enum 可以确保输出是预期的几个选项之一，例如在订单状态的
 }
 
 anyOf
-匹配所提供的多个 schema 中的任意一个，可以处理可能具有多种有效格式的字段，例如用户的账户可能是邮箱或者手机号中的一个：
+Match the provided multiple. schema Handle multiple valid formats per field. Use union type or pattern match. Example: `Account = Email | Phone`.
 
 {
     "type": "object",
     "properties": {
     "account": {
         "anyOf": [
-            { "type": "string", "format": "email", "description": "可以是电子邮件地址" },
-            { "type": "string", "pattern": "^\\d{11}$", "description": "或11位手机号码" }
+            { "type": "string", "format": "email", "description": "Can be an email address." },
+{ "type": "string", "pattern": "^\\d{11}
         ]
     }
   }
 }
 
 $ref 和 $def
-可以使用 $def 定义模块，再用 $ref 引用以减少模式的重复和模块化，此外还可以单独使用 $ref 定义递归结构。
+can use $def Define module, then use. $ref Reference to reduce pattern repetition and modularize; also usable standalone. $ref Define recursive structure.
 
 {
     "type": "object",
@@ -269,4 +269,4 @@ $ref 和 $def
     }
 }
 
-上一页
+Previous page

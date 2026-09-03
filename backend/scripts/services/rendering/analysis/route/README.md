@@ -1,24 +1,24 @@
 # rendering/analysis/route
 
-## 负责什么
+## Responsibilities
 
-单页路线决策层。这里消费 `RenderPageProfile`，输出 `RenderPageRoute`。
+Single-page route decision layer. Consumes RenderPageProfile, outputs RenderPageRoute.
 
-上层执行代码只能消费这里的路线或 profile 中的事实字段。比如伪 PDF
-是否走 `typst_visual`、hidden text 是否剥离、source cleanup 是否物理删字，
-都应该由同一份 page profile 派生，不能在 overlay/source cleanup 中各自再扫
-`page_has_large_background_image()` 后做局部判断。
+Only expose routes here. profile fact fields. For example, pseudo PDF
+Go? `typst_visual`、hidden text Strip?source cleanup Physically delete characters?
+All should be from the same source. page profile Derived, cannot be. overlay/source cleanup Each scans separately
+`page_has_large_background_image()` Local checks later.
 
-## 对外入口
+## Public entry point
 
 - `builder.py`
 - `models.py`
 
-## 不该做什么
+## What not to do
 
-- 不重新扫描 PDF。
-- 不执行 redaction。
-- 不生成 Typst。
-- 不改变实际渲染行为，除非上层显式接入 route。
+- No rescan PDF。
+- Do not execute redaction.
+- Do not generate Typst.
+- Does not alter actual rendering behavior unless explicitly integrated by upper layer. route。
 
-新增路线判断时，保持一个判断一个文件，例如 `redaction_route.py`、`background_route.py`。
+When adding route judgments, keep one judgment per file, e.g. `redaction_route.py`、`background_route.py`。

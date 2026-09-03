@@ -47,7 +47,7 @@ export function bindRecentJobsFeatureEvents({
     refreshScheduler.setSuspended(true);
   });
   doc.addEventListener(APP_EVENTS.closeTranslationWorkflow, () => {
-    // 打开期间 refresh 被 suspend 吞掉；关闭后必须 bypass 5s 节流做一次 soft 对齐
+    // refresh swallowed by suspend while open; must bypass 5s throttle for soft alignment upon close
     refreshScheduler.setSuspended(false);
     refreshScheduler.scheduleRefresh({ delay: 300, bypassThrottle: true });
   });
@@ -57,3 +57,4 @@ export function bindRecentJobsFeatureEvents({
     librarySubscription,
   };
 }
+

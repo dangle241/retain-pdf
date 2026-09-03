@@ -275,8 +275,8 @@ export function resolveMarkdownAssetUrl(imagesBaseUrl: unknown, relativePath: un
   if (!base) {
     return target;
   }
-  // images_base 已是 .../markdown/images/，path 常为 images/page-1/...
-  // 若直接 new URL 会变成 .../images/images/...（双前缀 404）
+  // images_base is already .../markdown/images/; path is often images/page-1/...
+  // new URL would become .../images/images/... (double-prefix 404)
   let rel = target.replace(/\\/g, "/").replace(/^\.\//, "");
   while (rel.startsWith("images/")) {
     rel = rel.slice("images/".length);
@@ -333,3 +333,5 @@ export function collectMarkdownImageRefs(content: unknown): string[] {
 
   return refs;
 }
+
+

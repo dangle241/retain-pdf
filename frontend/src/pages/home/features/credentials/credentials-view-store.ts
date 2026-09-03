@@ -1,13 +1,14 @@
-// CredentialsDialog 的纯视图态(蓝图 §2:setupMode/tab/校验反馈/DeepSeek 充值
-// 提示/保存态)+ 与 features/credentials/browser.js(kept 控制器)对接的
-// store 驱动 viewPort/elementsPort。
+// CredentialsDialog's pure view state (blueprint §2: setupMode/tab/validation
+// feedback/DeepSeek top-up prompt/save state) + store-driven viewPort/elementsPort
+// interfacing with features/credentials/browser.js (kept controller).
 //
-// 旧世界 browser-view-port.js/dialog-elements-port.js/view.js/dialog-sync.js/
-// validation-view.js 全部是 DOM 直写(死,不 import);这里用同名方法签名
-// 重新实现,只是"写"的目的地从 DOM 换成 store,让 CredentialsDialog.jsx 系的
-// 组件订阅渲染。browser.js(state.js/validation.js/deepseek-flow.js/
-// ocr-readiness-flow.js/persistence.js/dialog-values.js 等 kept 逻辑层的编排者)
-// 一行不改地复用。
+// Old world browser-view-port.js/dialog-elements-port.js/view.js/dialog-sync.js/
+// validation-view.js all wrote directly to DOM (dead, not imported); here reimplemented
+// with same method signatures, only the "write" destination changed from DOM to store,
+// letting CredentialsDialog.jsx family components subscribe for rendering while browser.js
+// (state.js/validation.js/deepseek-flow.js/ocr-readiness-flow.js/persistence.js/
+// dialog-values.js etc., the kept logic layer's orchestrator) is reused without a single
+// line changed.
 
 import type { DialogStore } from "../../state/dialog-store.js";
 import type {
@@ -32,12 +33,12 @@ export type CredentialGateState = {
 export type CredentialsViewState = {
   setupMode: boolean;
   activeTab: string;
-  /** { [providerId]: { message, tone } } —— OCR token 校验反馈(paddle 等) */
+  /** { [providerId]: { message, tone } } — OCR token validation feedback (paddle etc.) */
   validations: Record<string, CredentialsMessage>;
   deepSeek: CredentialsMessage;
   deepSeekTopUpVisible: boolean;
   dialogStatus: CredentialsMessage;
-  /** 只读态,供 HeroUpload 订阅决定上传瓦片锁定/credential-gate 可见性 */
+  /** Read-only state; subscribed to by HeroUpload to decide upload tile lock / credential-gate visibility */
   credentialGate: CredentialGateState;
 };
 
@@ -79,9 +80,9 @@ export function createCredentialsViewFeature({
       deepSeek: { message: "", tone: "" },
       deepSeekTopUpVisible: false,
       dialogStatus: { message: "", tone: "" },
-      // 只读态,供 3a HeroUpload 订阅决定上传瓦片锁定/credential-gate 可见性
-      // (蓝图 §2.2「upload 按钮锁定态移交 3a」——本域只写这份快照,不直接
-      // 触碰 upload-view-store.js/HeroUpload.jsx)。
+      // Read-only state; subscribed to by 3a HeroUpload to decide upload tile lock / credential-gate visibility
+      // (blueprint §2.2 "upload button lock state transferred to 3a" — this domain only writes this snapshot, does not
+      // directly touch upload-view-store.js/HeroUpload.jsx).
       credentialGate: {
         desktopMode: false,
         show: false,
@@ -124,10 +125,11 @@ export function createCredentialsViewFeature({
     },
   });
 
-  // 对话框内可见字段的非受控 DOM ref 收集点(镜像 upload-view-store.js 的
-  // domRefs 模式)。dialog-values.js/dialog-sync.js(kept)直接读写这些节点的
-  // .value,不走 React 受控 value/onChange——避免两套写入源打架(蓝图风险 1
-  // 的姊妹问题:可见字段虽不是"隐藏 input 桥接"那 4 个,但同样不该双写)。
+  // Uncontrolled DOM ref collection point for in-dialog visible fields (mirrors
+  // upload-view-store.js's domRefs pattern). dialog-values.js/dialog-sync.js (kept)
+  // directly read/write these nodes' .value, bypassing React controlled value/onChange —
+// to avoid two write sources clashing (blueprint risk 1's sibling question: visible fields
+  // are not the 4 "hidden input bridge" ones, but also should not be double-written).
   const elementsRef: CredentialsElementsRef = {
     apiKeyInput: null,
     modelBaseUrlInput: null,
@@ -154,18 +156,18 @@ export function createCredentialsViewFeature({
 
   const elementsPort = {
     elements,
-    // OCR provider 面板可见性由 OcrProviderPanels.jsx 直接订阅
-    // credentialsStatePort(credentials.ocrProvider)渲染;不需要
-    // dialog-sync.js 原本那种命令式二次同步,no-op。
+    // OCR provider panel visibility subscribed to directly by OcrProviderPanels.jsx
+    // via credentialsStatePort (credentials.ocrProvider) rendering; no required
+    // dialog-sync.js-style imperative second sync, no-op.
     syncOcrProviderControls: () => {},
   };
 
-  // browser.js 在 mountBrowserCredentialsFeature() 内同步调用一次
-  // viewPort.bindEvents(handlers),把 save/validateOcr/validateDeepSeek/
-  // changeProvider/activateCredentialTab/open 等处理函数交给视图层——旧世界
-  // 在这里挂原生 DOM 监听(view.js,死);React 世界没有等价步骤,改成把
-  // handlers 存进 ref,JSX 按钮的 onClick 直接调用
-  // (见 useCredentialsController.js)。
+  // browser.js calls viewPort.bindEvents(handlers) once synchronously inside
+  // mountBrowserCredentialsFeature(), handing save/validateOcr/validateDeepSeek/
+  // changeProvider/activateCredentialTab/open handlers to the view layer — old world
+  // attached native DOM listeners here (view.js, dead); React world has no equivalent
+  // step, changed to storing handlers in a ref, JSX buttons' onClick call directly
+  // (see useCredentialsController.js).
   const handlersRef: { current: HandlersBag | null } = { current: null };
 
   const viewPort = {
@@ -192,9 +194,9 @@ export function createCredentialsViewFeature({
     },
     setDialogStatus: (message = "", tone = "") => store.actions.setDialogStatus({ message, tone }),
     setHiddenOcrProvider: () => {
-      // no-op:credentialsStatePort.patchCredentials(default-state-port.js 单例)
-      // 的 mirrorToDom 副作用已经同步写过隐藏 input(见 browser.js 的
-      // changeProvider handler),这里重复写只是同一帧内两次相同赋值。
+      // no-op: credentialsStatePort.patchCredentials (default-state-port.js singleton)
+      // mirrorToDom side effect has already synchronously written the hidden input (see browser.js's
+      // changeProvider handler); writing again here would be two identical assignments in the same frame.
     },
     setOcrValidationMessage: (message = "", tone = "", providerId = "") => store.actions.setValidation({
       providerId,
@@ -202,11 +204,11 @@ export function createCredentialsViewFeature({
       tone,
     }),
     syncOcrProviderControls: () => {
-      // no-op(理由同 elementsPort.syncOcrProviderControls)。
+      // no-op (same reason as elementsPort.syncOcrProviderControls).
     },
     updateCredentialGate: (payload: Partial<CredentialGateState> = {}) => {
       store.actions.setCredentialGate(payload);
-      return true; // browser.js 依赖真值判断继续 refreshSubmitControls()
+      return true; // browser.js depends on truthy return to continue refreshSubmitControls()
     },
   };
 
@@ -219,3 +221,7 @@ export function createCredentialsViewFeature({
     viewPort,
   };
 }
+
+
+
+

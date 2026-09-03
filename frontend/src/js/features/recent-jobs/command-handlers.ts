@@ -38,19 +38,19 @@ export function bindRecentJobsCommandHandlers({
       refreshScheduler.scheduleRefresh({ delay: Number(delay ?? 600), force });
     },
     onJobUpdated: ({ job }: RecentJobsJobCommandPayload = {}) => {
-      // 运行中只做单卡补丁，不 invalidate / 不整页 refresh。
-      // 每拍 invalidate 会让后续任意 soft reload 都打满网、整格重渲。
+      // While running, only patch individual cards; do not invalidate or refresh full page.
+      // Every invalidate causes any subsequent soft reload to hit the network and rerender the full grid.
       runtimePatches.update(job);
       const status = `${(job as LibraryJobItem | null | undefined)?.status || ""}`.trim();
       if (isTerminalStatus(status)) {
         invalidateLibraryBooksResource(libraryBooksResource);
-        // soft silent：终态一次对齐文档投影/封面
+        // soft silent: align document projection / cover once at terminal state
         refreshScheduler.scheduleRefresh({ delay: 400, bypassThrottle: true });
       }
     },
     onJobCreated: ({ job }: RecentJobsJobCommandPayload = {}) => {
       invalidateLibraryBooksResource(libraryBooksResource);
-      // insert 内部已按 document_id upsert：已有书就地更新，不会再 prepend 第二张
+      // insert internally upserts by document_id: updates existing book in-place, never prepends a duplicate
       runtimePatches.insert(job);
       void hydrateCreatedRecentJob({
         job,
@@ -61,3 +61,5 @@ export function bindRecentJobsCommandHandlers({
     },
   });
 }
+
+

@@ -1,19 +1,19 @@
-# Policy 说明
+# Policy description
 
-`scripts/services/translation/policy/` 是翻译策略层的正式实现目录。
+`scripts/services/translation/policy/` Official implementation directory for the translation strategy layer.
 
-主要包括：
+Includes:
 
 - `config.py`
-  模式配置、跳过策略、领域推断入口。
+  Mode configuration, skip strategy, domain inference entry.
 - `flow.py`
-  把策略真正应用到 payload 的流程入口。
+  Actually apply the strategy. payload Process entry point.
 - `body_text_filter.py`
-  正文噪声和窄块过滤逻辑。
+  Body noise and narrow block filtering logic.
 - `metadata_filter.py`
-  作者行、版权行、编辑信息等元数据片段过滤逻辑。
+  Metadata fragment filter logic: author lines, copyright lines, edit info, etc.
 
-## 设计原则
+## Design principles
 
-- 新代码统一从 `services.translation.services.policy.*` 导入。
-- 策略层只处理 payload 级别判断，不直接碰 PDF 或渲染。
+- New code starts from `services.translation.services.policy.*` Import.
+- Strategy layer only processes payload Level determination, do not touch directly. PDF Or render.

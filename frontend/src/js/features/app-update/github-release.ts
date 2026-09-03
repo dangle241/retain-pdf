@@ -83,7 +83,7 @@ export async function fetchLatestGithubRelease() {
     },
   });
   if (!resp.ok) {
-    throw new Error(`检查更新失败: GitHub ${resp.status}`);
+    throw new Error(`Update check failed: GitHub ${resp.status}`);
   }
   return await resp.json();
 }
@@ -94,9 +94,11 @@ export function normalizeReleaseInfo(release: any = {}) {
     currentVersion: APP_VERSION,
     latestVersion,
     hasUpdate: isNewerVersion(latestVersion, APP_VERSION),
-    title: release.name || latestVersion || "RetainPDF 更新",
+    title: release.name || latestVersion || "RetainPDF Updates",
     body: release.body || "",
     htmlUrl: release.html_url || `https://github.com/${GITHUB_REPO}/releases`,
     publishedAt: release.published_at || "",
   };
 }
+
+

@@ -1,18 +1,18 @@
-# 翻译阶段
+# Translation phase
 
-这个目录用于承接全书级翻译阶段实现。
+This directory is for implementing the full-book translation phase.
 
-计划拆分：
+Plan split:
 
 - `continuation.py`
-  初始连续段整理，以及 provider 辅助的跨栏/跨页连续段复核。
+  Initial contiguous segment consolidation, and provider Auxiliary Hurdle/Cross-page continuous paragraph review.
 - `policy.py`
-  页面策略和块分类阶段。
+  Page strategy and block classification stage.
 - `batch_translation.py`
-  批量翻译阶段适配层。它应该调用 scheduling 代码，而不是自己管理队列细节。
+  Batch translation phase adapter layer. It should call scheduling Write code, do not manage queue details yourself.
 - `repair.py`
-  乱码重建、agent 修复和最终未翻译收口。
+  Garbled rebuild.agent Fix and finalize untranslated items.
 - `events.py`
-  如果事件格式继续增长，稳定的阶段事件 helper 放这里。
+  If event format continues to grow, stable stage events. helper Place here.
 
-不要把 provider HTTP client、render prewarm 或页面文件发现逻辑放到这里。
+Do not place provider HTTP client, render prewarm, or page file discovery logic here.

@@ -55,7 +55,7 @@ pub(super) fn prepare_in_place_render_job(mut job: JobSnapshot) -> Result<JobSna
     job.command.clear();
     job.error = None;
     job.stage = Some("queued".to_string());
-    job.stage_detail = Some("重渲染任务排队中，等待可用执行槽位".to_string());
+    job.stage_detail = Some("Rerender job queued, waiting for an available execution slot".to_string());
     job.progress_current = Some(0);
     job.progress_total = None;
     job.log_tail.clear();

@@ -1,7 +1,7 @@
-// 任务选项 tab(对照旧 components/dialogs/browser-credentials-dialog.js 的
-// "task" 面板——公式模式下拉;模型地址/模型名不在旧模板里渲染但
-// dialog-values.js/dialog-sync.js(kept)仍会读写对应字段,这里补上对应的
-// 非受控 ref 容器,保持字段契约完整,不改变可见布局)。
+// Task options tab (Side-by-side with old components/dialogs/browser-credentials-dialog.js's
+// "task" panel — Formula Mode dropdown; model address/name not rendered in old template but
+// dialog-values.js/dialog-sync.js (kept) still read/write these fields, here we add
+// corresponding uncontrolled ref containers, keeping field contract complete without changing visible layout).
 
 import { useCredentialsController } from "./useCredentialsController.js";
 import { CREDENTIAL_DOM_IDS } from "./credentials-dom-ids.js";
@@ -21,24 +21,24 @@ export function TaskOptionsPanel({ hidden = false } = {}) {
       <div className="credential-card-grid credential-card-grid-compact">
         <section className="credential-card">
           <div className="credential-card-head">
-            <h3>任务选项</h3>
+            <h3>Task Options</h3>
           </div>
           <label>
             <span className="developer-label">
-              <span>公式模式</span>
+              <span>Formula Mode</span>
             </span>
             <select
               id={BROWSER_IDS.mathMode}
-              aria-label="公式模式"
+              aria-label="Formula Mode"
               defaultValue="direct_typst"
               ref={(node) => { elementsRef.mathModeSelect = node || null; }}
             >
-              <option value="placeholder">占位保护</option>
-              <option value="direct_typst">直出公式</option>
+              <option value="placeholder">Placeholder</option>
+              <option value="direct_typst">Direct Typst</option>
             </select>
           </label>
-          {/* 模型地址/模型名不在旧模板可见布局里,但 dialog-values.js/
-              dialog-sync.js 仍读写这两个字段——保留隐藏字段契约,不新增可见 UI。 */}
+          {/* Model address/name not in old template's visible layout, but dialog-values.js/
+              dialog-sync.js still read/write these fields — keep hidden field contract, no new visible UI. */}
           <input
             id={BROWSER_IDS.modelBaseUrl}
             name="model_base_url"
@@ -58,3 +58,6 @@ export function TaskOptionsPanel({ hidden = false } = {}) {
     </section>
   );
 }
+
+
+

@@ -67,13 +67,13 @@ pub async fn store_pdf_upload(
 
     if upload_max_bytes > 0 && byte_count > upload_max_bytes {
         return Err(AppError::bad_request(format!(
-            "当前服务限制：PDF 文件大小必须不超过 {:.2}MB",
+            "Current service limit: PDF file size must not exceed {:.2}MB",
             upload_max_bytes as f64 / 1024.0 / 1024.0
         )));
     }
     if upload_max_pages > 0 && page_count > upload_max_pages {
         return Err(AppError::bad_request(format!(
-            "当前服务限制：PDF 页数必须不超过 {} 页",
+            "Current service limit: PDF page count must not exceed {} pages",
             upload_max_pages
         )));
     }
@@ -90,7 +90,8 @@ pub async fn store_pdf_upload(
         content_hash,
     };
     db.save_upload(&record)?;
-    // 内容哈希即文档身份:同一 PDF 重复上传归并到同一 document
+    // Content hash equals the document identity: multiple uploads of the
+    // same PDF are merged into a single document.
     db.upsert_document_from_upload(&record)?;
     Ok(record)
 }

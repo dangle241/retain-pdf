@@ -1,9 +1,10 @@
-// GlossariesDialog 的 id/选择器契约(蓝图 §3 + §0.1)。
+// GlossariesDialog id/selector contract (blueprint §3 + §0.1).
 //
-// 拷贝自 src/js/components/dialogs/glossary-manager-dialog-dom-contract.js
-// (旧自定义元素视图层,architecture-boundaries 门禁禁止 src/pages/** 直接
-// import js/components/**)——同一手法已在 credentials-dom-ids.js 用过一次。
-// 字面量必须与旧契约逐一对齐:视觉基线与门禁按这些 id 精确定位,不得改名。
+// Copied from src/js/components/dialogs/glossary-manager-dialog-dom-contract.js
+// (old custom-element view layer, architecture-boundaries gate forbids src/pages/**
+// from directly importing js/components/**) — same technique already used once in
+// credentials-dom-ids.js. Literals must match old contract one-to-one: visual baseline
+// and gate assertions locate by these ids precisely, no renaming allowed.
 
 export const GLOSSARY_DOM_IDS = Object.freeze({
   triggerButton: "glossary-btn",
@@ -28,13 +29,17 @@ export const GLOSSARY_DOM_IDS = Object.freeze({
 });
 
 export const ENTRY_LEVEL_OPTIONS = [
-  ["preserve", "保留"],
-  ["canonical", "固定译法"],
-  ["preferred", "偏好译法"],
+  ["preserve", "Preserve"],
+  ["canonical", "Fixed translation"],
+  ["preferred", "Preferred"],
 ];
 
 export const MATCH_MODE_OPTIONS = [
-  ["case_insensitive", "忽略大小写"],
-  ["exact", "精确"],
-  ["regex", "正则"],
+  ["case_insensitive", "Ignore case"],
+  ["exact", "Exact"],
+  ["regex", "Regex"],
 ];
+
+
+
+

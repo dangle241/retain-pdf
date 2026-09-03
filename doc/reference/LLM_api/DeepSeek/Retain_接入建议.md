@@ -1,37 +1,37 @@
-# Retain 对接建议
+# Retain Integration recommendations
 
-基于当前 `doc/reference/LLM_api/DeepSeek` 目录文档，以及官方最新模型口径，当前项目最值得直接利用的能力如下。
+Based on current `doc/reference/LLM_api/DeepSeek` directory documentation, and official latest model specification; most directly valuable capabilities for current project are as follows.
 
-## 1. 默认模型
+## 1. Default model
 
-- 默认模型应切到 `deepseek-v4-flash`
-- `deepseek-chat` / `deepseek-reasoner` 目前仍兼容，但官方文档已标注后续弃用，不应再作为新默认值
+- Default model should be switched to `deepseek-v4-flash`
+- `deepseek-chat` / `deepseek-reasoner` Still compatible, but marked for deprecation; not for new defaults.
 
-## 2. 当前项目最直接有用的能力
+## 2. Project's most direct, useful capability.
 
 - `JSON Output`
-  适合我们当前翻译分类、失败诊断、结构化返回场景
+  Applicable to our current translation classification, failure diagnosis, and structured response scenarios.
 - `1M context`
-  有利于长文档、长上下文规则和术语表场景
+  Useful for long documents, long-context rules, and glossary scenarios.
 - `Context Cache / KV Cache`
-  对重复 system prompt、长规则、长术语表的批量翻译成本优化价值很高
+  Duplicate system promptBatch translation cost optimization for long rules and long term glossaries: high value.
 - `Tool Calls`
-  目前主流程不是必须，但对失败诊断、规则选择、外部术语查询有潜在价值
-- `错误码`
-  401 / 402 / 422 / 429 / 500 / 503 值得映射进我们现有失败分类与重试策略
+  Currently not required for main flow, but potentially valuable for failure diagnosis, rule selection, external term lookup.
+- Error codes
+  401 / 402 / 422 / 429 / 500 / 503 Worth mapping into our existing failure classification and retry policy.
 
-## 3. 对后端最建议优先做的事情
+## 3. Prioritize backend tasks.
 
-- 统一默认模型为 `deepseek-v4-flash`
-- 保留 `response_format={\"type\":\"json_object\"}` 的结构化返回能力
-- 在 DeepSeek 429 / 503 上继续强化重试与退避
-- 评估把长 system prompt、规则文本、术语表接入 context cache
-- 不要再把 `deepseek-chat` 写进新的示例、默认值和调试工具
+- Set default model to `deepseek-v4-flash`
+- Keep `response_format={\"type\":\"json_object\"}` structured return capability.
+- Strengthen retry backoff for DeepSeek 429 / 503
+- Evaluate length system promptRule text, glossary integration. context cache
+- Do not add `deepseek-chat` to new examples, defaults, and debugging tools.
 
-## 4. 相关文档
+## 4. Related docs
 
-- [模型 & 价格](./模型%20%26%20价格.md)
+- [Models & Pricing](./Models%20%26%20Pricing.md)
 - [JSON_output](./JSON_output.md)
 - [Tool Calls](./Tool%20Calls.md)
-- [错误码](./错误码.md)
-- [Token 用量计算](./Token%20用量计算.md)
+- [Error Codes](./éè¯¯ç .md)
+- [Token usage calculation](./Token%20Usage%20Calculation.md)

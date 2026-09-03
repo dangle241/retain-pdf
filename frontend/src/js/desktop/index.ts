@@ -98,7 +98,7 @@ export async function saveDesktopConfig(browserConfig: any = {}, afterSave) {
     } catch (error) {
       if (isDesktopConfigured(state)) {
         const message = error?.message || String(error);
-        throw new Error(`首次配置已保存，但当前无法连接本地后端。${message}`);
+        throw new Error(`First-run setup was saved, but the current app cannot connect to the local backend.${message}`);
       }
       throw error;
     }
@@ -107,3 +107,6 @@ export async function saveDesktopConfig(browserConfig: any = {}, afterSave) {
   applyDefaultCredentialInputs(persisted.browserConfig || {});
   return persisted;
 }
+
+
+

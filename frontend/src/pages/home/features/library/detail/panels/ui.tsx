@@ -1,4 +1,5 @@
-// 详情弹窗 panel 共用小工具（样式 / 图标），无业务。
+// Small UI helpers (styles / icons) shared by the detail-dialog panels.
+// No business logic lives here.
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button.jsx";
@@ -64,3 +65,6 @@ export function IconLayers(props) {
     </svg>
   );
 }
+
+
+

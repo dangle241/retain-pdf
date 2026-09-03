@@ -1,5 +1,5 @@
-// pages/detail 对 src/js/* 的唯一出口。
-// DetailApp / components 禁止直接 import ../../js/**；缺符号只改本文件。
+// pages/detail is the only exit point for src/js/*.
+// DetailApp / components are forbidden from directly importing ../../js/**; if a symbol is missing, only change this file.
 
 // —— job ——
 export { normalizeJobPayload } from "../../js/job/normalize.js";
@@ -36,3 +36,5 @@ export {
   showDownloadPreparing,
   updateDownloadProgress,
 } from "../../js/utils/download-feedback.js";
+
+

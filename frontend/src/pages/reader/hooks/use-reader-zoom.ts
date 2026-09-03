@@ -1,4 +1,4 @@
-// 阅读器缩放：100% = 适应当前栏宽；变更时保持视口中心不偏右/上跳。
+// Reader zoom: 100% = fit to current column width; on change, keep the viewport center stable (no rightward/upward jump).
 
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
@@ -43,7 +43,7 @@ export function useReaderZoom(
     onZoomChange(defaultZoomForMode(mode));
   }, [onZoomChange]);
 
-  // 页宽变更提交后，按比例把滚动钉回视口中心
+  // After page-width change is committed, pin the scroll back to viewport center by ratio
   useLayoutEffect(() => {
     const ratio = pendingRatioRef.current;
     if (Math.abs(ratio - 1) < 0.001) {
@@ -55,3 +55,6 @@ export function useReaderZoom(
 
   return { userZoom, onZoomChange, stepZoom, resetZoom };
 }
+
+
+

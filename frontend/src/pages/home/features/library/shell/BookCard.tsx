@@ -1,17 +1,17 @@
-// BookCard —— 图书馆一等 UI 组件：纯「壳」。
+// BookCard —— Library first-class UI component: pure "shell".
 //
-// 壳负责:
-//   - 封面 / 占位 / 状态徽标 / 进度条
-//   - 标题 + 副标题
-//   - 点卡片本体 → 打开详情(或批量选中)
-//   - hover 遮罩上渲染 actions 按钮列表
+// Shell is responsible for:
+//   - Cover / placeholder / Status badge / Progress entries
+//   - Title + subtitle
+//   - Clicking card body → open detail (or batch select)
+//   - Hover overlay: render action button list
 //
-// 壳不负责:
-//   - 决定有哪些按钮、按钮干什么(由 props.actions 注入)
-//   - 翻译 / 删除 / 合集等业务(放在 action.onClick 或 BookDetail)
+// Shell is NOT responsible for:
+//   - Deciding which buttons exist and what they do (injected via props.actions)
+//   - Translation / Delete / Collection business logic (put in action.onClick or BookDetail)
 //
-// 默认按钮见 ../actions/ → buildDefaultBookCardActions。
-// 加按钮 = 调用方拼更大的 actions 数组,不必改本文件。
+// Default buttons: see ../actions/ → buildDefaultBookCardActions.
+// Adding buttons = caller builds a larger actions array, no need to change BookCard.
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
@@ -43,7 +43,7 @@ function formatCardDate(value: string | null | undefined) {
   }).format(parsed);
 }
 
-/** memo / 列表行共用：item 展示签名（进度与标题变了才重渲）。 */
+/** memo / List row signature: item display signature (re-render only when Progress or Title changes). */
 export function cardSignatureOf(item: LibraryCardItem = {}) {
   const progress = item.progress && typeof item.progress === "object" ? item.progress : {};
   const runtimeProgress =
@@ -134,13 +134,13 @@ function resolveActionIcon(icon) {
   if (icon == null || icon === "eye") return <IconEye aria-hidden="true" />;
   if (icon === "languages") return <IconLanguages aria-hidden="true" />;
   if (icon === "info") return <IconInfo aria-hidden="true" />;
-  // 自定义 React 节点
+  // Custom React node
   return icon;
 }
 
 /**
- * 壳上的单个圆形操作钮(封面 hover 区)。
- * 也可被外部单独 import 复用。
+ * Single circular action button on the shell (cover hover zone).
+ * Can also be imported and reused externally.
  */
 export function BookCardActionButton({
   action,
@@ -151,7 +151,7 @@ export function BookCardActionButton({
   item?: LibraryCardItem;
   className?: string;
 }) {
-  const label = `${action?.label || action?.id || "操作"}`.trim();
+  const label = `${action?.label || action?.id || "Action"}`.trim();
   return (
     <button
       type="button"
@@ -183,7 +183,7 @@ function areBookCardPropsEqual(prev: BookCardProps, next: BookCardProps) {
     prev.batchMode === next.batchMode &&
     prev.selected === next.selected &&
     prev.onToggleSelect === next.onToggleSelect &&
-    // 兼容旧 props:未显式传 actions 时仍比 onReader/onReadSource
+    // Backward-compatible props: still compare onReader/onReadSource when actions not explicitly passed
     prev.onReader === next.onReader &&
     prev.onReadSource === next.onReadSource &&
     bookCardActionsSignature(prev.actions) === bookCardActionsSignature(next.actions) &&
@@ -238,7 +238,7 @@ function BookCardImpl({
       if (documentId) onToggleSelect?.(documentId);
       return;
     }
-    // 优先书籍详情（含运行中进度 Tab）；不再用 selectJob 弹旧工作流窗
+    // Prefer Book Details (includes running Progress Tab); no longer use selectJob for old workflow popup
     if (onOpenDetail && (documentId || jobId)) {
       onOpenDetail(item);
       return;
@@ -292,10 +292,10 @@ function BookCardImpl({
           </div>
         )}
 
-        {/* 进行中：封面中央 loading，不在右上角写 OCR/翻译/渲染（易截断） */}
+        {/* In progress: center loading on cover, don't write OCR/Translation/Rendering in top-right (easily truncated) */}
         {processing ? <BookCardProcessingOverlay /> : null}
 
-        {/* 右上角终态/馆藏：禁止 truncate/flex 收缩，否则「已翻译」会被裁成省略号 */}
+        {/* Top-right terminal state / Library: prevent truncate/flex shrink, otherwise "Translated" gets cut off */}
         {badge && !processing ? (
           <div className="pointer-events-none absolute right-2 top-2 z-10 max-w-[none]">
             <span
@@ -363,7 +363,7 @@ function BookCardImpl({
           {title}
         </h3>
         <p className="book-card-meta recent-job-real-id line-clamp-1 text-[10px] text-muted-foreground">
-          {pageCount} 页 · {updatedAt}
+          {pageCount} pages · {updatedAt}
         </p>
       </div>
     </div>
@@ -372,7 +372,7 @@ function BookCardImpl({
 
 export const BookCard = memo(BookCardImpl, areBookCardPropsEqual);
 
-// 工厂 re-export：阅读 / 翻译各自独立模块，见 book-card-actions/
+// Factory re-export: Read / Translation each as independent module, see book-card-actions/
 export {
   BOOK_CARD_ACTION_READ,
   BOOK_CARD_ACTION_TRANSLATE,
@@ -382,3 +382,8 @@ export {
   buildShelfBookCardActions,
   bookCardActionsSignature,
 } from "../actions/index.js";
+
+
+
+
+

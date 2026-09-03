@@ -1,6 +1,7 @@
-// 失败 tab 的"从断点恢复/重新运行"按钮绑定(蓝图 §1.2)。resume-actions.js
-// (kept)已经把 enabled/status 算好写进 overview.rerun,这里只做
-// disabled = !enabled || rerunPending 的组合与点击派发,不重复计算。
+// Failed tab "Resume from checkpoint / rerun" button binding (blueprint §1.2). resume-actions.js
+// (kept) already computed enabled/status into overview.rerun; this only handles
+// the disabled = !enabled || rerunPending combination and click dispatch, without
+// recomputing anything.
 
 export function useRerunAction({ overview, rerunPending, controller }) {
   const rerun = overview.rerun || { enabled: false, status: "" };
@@ -11,3 +12,5 @@ export function useRerunAction({ overview, rerunPending, controller }) {
     run: () => controller.rerunCurrentJob(),
   };
 }
+
+

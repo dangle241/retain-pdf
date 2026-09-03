@@ -1,7 +1,7 @@
-# 后端 API 主文档
+# Backend API main document
 
-本文档已收敛到统一入口：
+Doc consolidated to unified entry:
 
-- [RetainPDF 后端 API 总入口](./index.md)
+- RetainPDF backend API entry
 
-保留这个文件是为了兼容旧链接。后续不要在这里新增接口细节，统一改 `index.md`。
+Retain file for old link compatibility. No new API details; update elsewhere. `index.md`。

@@ -23,7 +23,7 @@ export function buildReaderPageUrl(jobId, anchor = null) {
   if (`${anchor?.blockId || ""}`.trim()) {
     url.searchParams.set("block_id", `${anchor.blockId}`.trim());
   }
-  // iframe 是独立文档,mock 场景需要显式透传,否则嵌入式阅读器会请求真实后端
+  // iframe is a separate document; mock must be forwarded or the embedded reader hits the real backend
   const mock = `${new URL(currentWindowHref()).searchParams.get("mock") || ""}`.trim();
   if (mock) {
     url.searchParams.set("mock", mock);
@@ -43,3 +43,5 @@ export function isReaderActionEnabled(job, manifestPayload = null) {
       || actions.pdfEnabled),
   );
 }
+
+

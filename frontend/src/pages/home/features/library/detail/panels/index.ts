@@ -1,4 +1,4 @@
-// 细粒度区块（被 tabs/* 组装，一般不直接给 Dialog 用）
+// Fine-grained sections (composed by tabs/*; not used directly by the dialog)
 export { CoverActionsPanel } from "./CoverActionsPanel.jsx";
 export { TitleMetaPanel } from "./TitleMetaPanel.jsx";
 export { TranslateWorkspacePanel } from "./TranslateWorkspacePanel.jsx";
@@ -8,3 +8,4 @@ export { BookTranslateProgressPanel } from "./BookTranslateProgressPanel.jsx";
 export { ReadingStatusPanel, READING_STATUSES } from "./ReadingStatusPanel.jsx";
 export { CollectionsPanel } from "./CollectionsPanel.jsx";
 export { DeleteFooterPanel } from "./DeleteFooterPanel.jsx";
+

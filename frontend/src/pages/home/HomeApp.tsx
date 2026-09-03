@@ -1,12 +1,12 @@
-// home 页 React 编排根。
+// Home page React orchestration root.
 //
-// 结构对照 partials/main-content.html + dialogs.html 逐区块镜像;顶部只留
-// 品牌 + 图书馆/分类分栏(AppTopBar.jsx,去掉白卡背景);添加/搜索/设置 三样
-// 收进底部一条居中浮动栏(AppBottomBar.jsx,取代早期分离的 AppBottomActions +
-// LibrarySearchDock 两个浮岛)。
-// 其余区块(library-view 网格、status 卡、credentials/glossaries/status-detail 等)
-// 已陆续接上;ReaderDialog 仅导航到 reader.html(无 UI)。
-// 占位自定义元素标签(<recent-jobs-dialog> 等)在新世界不注册定义,惰性无副作用。
+// Structure mirrors partials/main-content.html + dialogs.html block by block; the top only
+// keeps brand + Library/Category tabs (AppTopBar.jsx, white-card background removed); Add/Search/Settings
+// sit in one centered floating bottom bar (AppBottomBar.jsx, replacing the earlier split
+// AppBottomActions + LibrarySearchDock islands).
+// Remaining blocks (library-view Grid, status card, credentials/glossaries/status-detail, etc.)
+// are wired up; ReaderDialog only navigates to reader.html (no UI).
+// Placeholder custom-element tags (<recent-jobs-dialog>, etc.) are not defined in the new world and have no side effects.
 
 import { useState } from "react";
 import { HomeServicesProvider } from "./home-services-context.js";
@@ -35,25 +35,26 @@ import {
   readInitialLibraryTabFromReturn,
   useHomeReturnRestore,
 } from "./features/library/page/useHomeReturnRestore.js";
-// library-search-island 自定义元素的唯一注册点。旧世界由 src/js/components/index.js
-// 兜底 side-effect import 注册;该文件随 cutover 删除后,注册链路断了会导致下方
-// JSX 里的 <library-search-island> 标签渲染成惰性空标签(数据契约上仍在,但搜索
-// 功能静默失效——只有真实浏览器渲染能看出来,jsdom 不会报错)。这里显式接管注册。
+// Sole registration point for the library-search-island custom element. The old world registered
+// it via a fallback side-effect import in src/js/components/index.js; after that file is deleted
+// at cutover, the chain breaks and the <library-search-island> tag below renders as an inert
+// empty tag (the data contract is still there, but search silently dies——only a real browser
+// render shows it; jsdom will not error). Explicitly take over registration here.
 import "../../js/islands/library-search/index.js";
 
 function HomeShell() {
-  // 从阅读器返回时尽量恢复离开前的 tab；否则默认图书馆。
+  // When returning from Reader, restore the tab left on; otherwise default to Library.
   const [activeLibraryTab, setActiveLibraryTab] = useState(readInitialLibraryTabFromReturn);
   const isLibraryTab = activeLibraryTab === "library";
   const isCategoriesTab = activeLibraryTab === "categories";
   const isFavoritesTab = activeLibraryTab === "favorites";
   const isAskTab = activeLibraryTab === "ask";
-  // #31 批量选择工具栏和底部栏都固定在底部居中,批量模式期间底部栏用 CSS
-  // 隐藏(不卸载——搜索 input 卸载会让 library-search-island 的引用失效)让位
-  // 给批量工具栏,两者不同时可见。
+  // #31 Batch-select tools bar and bottom bar are both fixed bottom-center. In batch mode the
+  // bottom bar is CSS-hidden (not unmounted——unmounting the search input would drop
+  // library-search-island's refs) so the batch tools bar can take the slot; they are never both visible.
   const [batchModeActive, setBatchModeActive] = useState(false);
 
-  // 合集/收藏/AI tab：视图挂载即可尝试恢复 panel 滚动（图书馆由 RecentJobsLibrary 在有列表后恢复）
+  // Collection/Favorite/AI tab: try restoring panel scroll as soon as the view mounts (Library is restored by RecentJobsLibrary after it has a list)
   useHomeReturnRestore(isCategoriesTab || isFavoritesTab || isAskTab);
 
   return (
@@ -61,7 +62,7 @@ function HomeShell() {
       <main id="app-shell" className="page app-shell" data-home-spa="">
         <AppTopBar activeTab={activeLibraryTab} onTabChange={setActiveLibraryTab} />
         <MockModeBanner />
-        {/* 纸心舞台：材质/比例层级（非传统符号拼贴）；侧栏筛选暂不做 */}
+        {/* Paper-heart stage: material/scale layers (not a traditional symbol collage); sidebar filter not yet */}
         <div className="home-paper-stage">
           {isLibraryTab ? (
             <>
@@ -80,17 +81,17 @@ function HomeShell() {
               <AppBottomBar showSearch={false} />
             </>
           ) : isAskTab ? (
-            // AI 对话不挂底部「上传 / 设置」浮栏，避免压住输入区
+            // AI chat does not mount the bottom "Upload / Settings" float, so it does not cover the input area
             <HomeAskView />
           ) : null}
         </div>
-        <button id="open-query-btn" type="button" className="secondary hidden" aria-hidden="true">最近任务</button>
-        {/* 3b 占位:最近任务对话框 */}
+        <button id="open-query-btn" type="button" className="secondary hidden" aria-hidden="true">Recent Jobs</button>
+        {/* 3b placeholder: Recent Jobs dialog */}
         <recent-jobs-dialog></recent-jobs-dialog>
         <SettingsHubDialog />
         <TranslationWorkflowDialog />
       </main>
-      {/* dialogs.html 区块:upload 域的专业翻译对话框 + credentials 域已 React 化,其余占位(3b) */}
+      {/* dialogs.html block: upload-domain professional translation dialog + credentials already React; rest are 3b placeholders */}
       <CredentialsDialog />
       <GlossariesDialog />
       <developer-auth-dialog></developer-auth-dialog>
@@ -98,7 +99,7 @@ function HomeShell() {
       <PageRangeDialog />
       <StatusDetailDialog />
       <ReaderDialog />
-      {/* 软打开阅读器：全屏层，主页不卸载（关 × 不刷新） */}
+      {/* Soft-open Reader: fullscreen layer; home page stays mounted (close × does not refresh) */}
       <SoftReaderHost />
       <CollectionManageDialog />
       <BookDetailDialog />
@@ -114,3 +115,7 @@ export function HomeApp({ services }: { services: HomeServices }) {
     </HomeServicesProvider>
   );
 }
+
+
+
+

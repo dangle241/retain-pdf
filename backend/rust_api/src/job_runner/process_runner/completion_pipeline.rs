@@ -67,7 +67,7 @@ fn ensure_successful_worker_contract(
 ) {
     if let Err(err) = validate_successful_worker_outputs(latest_job, data_root) {
         latest_job.append_log(&format!("ERROR: worker output contract failed: {err}"));
-        latest_job.stage_detail = Some(format!("Python worker 成功退出，但必需产物缺失：{err}"));
+        latest_job.stage_detail = Some(format!("Python worker exited successfully, but required artifacts are missing: {err}"));
         *completion = ProcessCompletionKind::Failed;
     }
 }

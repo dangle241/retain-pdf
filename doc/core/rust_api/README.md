@@ -1,31 +1,31 @@
-# Rust API 说明
+# Rust API documentation
 
-这组文档是 RetainPDF 后端实现和协作边界入口。
+These documents are RetainPDF Backend implementation and collaboration boundary entry.
 
-如果要接入 HTTP API，先看：
+If you are integrating the HTTP API, start here.
 
-- [RetainPDF 后端 API 总入口](../api/index.md)
+- RetainPDF backend API main entry
 
-如果你只想快速找答案，先按这个顺序看：
+If you just need quick answers, start with this order:
 
-1. [01-基础契约.md](./01-基础契约.md)
-2. [02-任务详情与事件.md](./02-任务详情与事件.md)
-3. [03-产物与下载.md](./03-产物与下载.md)
-4. [04-协作与边界.md](./04-协作与边界.md)
+1. [01-åºç¡å¥çº¦.md](./01-åºç¡å¥çº¦.md)
+2. 02-Task Details and Events.md
+3. [03-Artifacts and Downloads.md](./03-äº§ç©ä¸ä¸è½½.md)
+4. [04-Collaboration and Boundaries.md](./04-åä½ä¸è¾¹ç.md)
 
-## 4 个主文档
+## 4 Main document
 
-- [01-基础契约.md](./01-基础契约.md)
-  - 响应包装、列表、Provider 校验、基础读法
-- [02-任务详情与事件.md](./02-任务详情与事件.md)
-  - 任务详情、时间线、事件流、生命周期、失败协议
-- [03-产物与下载.md](./03-产物与下载.md)
-  - 产物清单、下载入口、artifact 边界、排错
-- [04-协作与边界.md](./04-协作与边界.md)
-  - 协同开发约定、分层边界、落点规则、大模型权限边界
-- [12-job_runner 边界.md](./12-job_runner%20%E8%BE%B9%E7%95%8C.md)
-  - 后端运行态执行层的模块职责、落点规则、拆分边界
+- [01-Basic Contract.md](./01-åºç¡å¥çº¦.md)
+  - Response wrapper, list,Provider Validation and Basic Reading
+- 02-Task Details and Events.md
+  - Task Details, Timeline, Event Stream, Lifecycle, Failure Protocol
+- [03-Artifacts and Downloads.md](./03-äº§ç©ä¸ä¸è½½.md)
+  - Artifacts list, download entryartifact Edge Cases and Troubleshooting
+- [04-Collaboration and Boundaries.md](./04-åä½ä¸è¾¹ç.md)
+  - Collaboration conventions, layer boundaries, placement rules, LLM permission boundaries.
+- [12-job_runner Boundaries.md](./12-job_runner%20%E8%BE%B9%E7%95%8C.md)
+  - Backend runtime execution layer module responsibilities, placement rules, and decomposition boundaries.
 
-## 旧文档
+## Legacy docs
 
-`01-11` 这些旧单篇文档先保留兼容入口，但不再作为主入口。以后优先读上面 4 篇。
+`01-11` Keep old single-doc entries for compatibility, but no longer as main entry. Prefer reading above from now on. 4 Chapter.

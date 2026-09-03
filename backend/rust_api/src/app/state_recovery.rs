@@ -59,19 +59,17 @@ pub(super) fn reconcile_stale_running_jobs(config: &AppConfig, db: &Db) -> Resul
 
         let (detail, failure_category, failure_code) = match reason {
             StaleReason::Orphaned(pid) => (
-                format!(
-                    "后端启动时发现遗留 running 任务，worker 进程 {pid} 仍在运行（孤儿进程），已终止该进程"
-                ),
+                format!("Stale running job found at startup; worker process {pid} still alive (orphaned), terminated"),
                 "worker_orphaned_after_restart",
                 "worker_orphaned_after_restart",
             ),
             StaleReason::Dead(pid) => (
-                format!("后端启动时发现遗留 running 任务，但 worker 进程 {pid} 已不存在"),
+                format!("Found stale running job at startup; worker process {pid} no longer exists"),
                 "worker_process_missing",
                 "worker_process_missing",
             ),
             StaleReason::NoPid => (
-                "后端启动时发现遗留 running 任务，但未记录 worker pid".to_string(),
+                "Found stale running job at startup; no worker pid recorded".to_string(),
                 "worker_process_missing",
                 "worker_process_missing",
             ),
@@ -97,13 +95,13 @@ pub(super) fn reconcile_stale_running_jobs(config: &AppConfig, db: &Db) -> Resul
                     failure_category: Some("internal".to_string()),
                     provider_stage: None,
                     provider_code: None,
-                    summary: "后端启动时回收了遗留 running 任务".to_string(),
+                    summary: "Recovered stale running job during startup".to_string(),
                     root_cause: Some(detail.clone()),
                     retryable: true,
                     upstream_host: None,
                     provider: None,
                     suggestion: Some(
-                        "该任务对应的 worker 已不在运行；请重新提交或手动重试".to_string(),
+                        "Worker for this job is no longer running; resubmit or retry manually".to_string(),
                     ),
                     last_log_line: Some(detail.clone()),
                     raw_excerpt: Some(detail.clone()),

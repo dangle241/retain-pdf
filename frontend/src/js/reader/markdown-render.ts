@@ -1,8 +1,8 @@
 import { resolveMarkedVendorUrl } from "../runtime/vendor-url.js";
 
-// AI 回答专用的 Markdown 安全渲染:marked 惰性加载,且**转义原始 HTML**——
-// 模型输出的 `**加粗**`/`## 标题`/列表会渲染,但 `<img>`/`<script>` 一律显示为
-// 字面文本,绝不进入 DOM(防注入)。引用按钮注入与本模块解耦(见 chat.js)。
+// Safe Markdown rendering for AI answers: lazy-load marked and **escape raw HTML** —
+// model output like `**bold**`/`## Title`/lists renders, but `<img>`/`<script>` always displays as
+// literal text, never enters DOM (injection prevention). Citation button injection is decoupled from this module (see chat.js).
 
 let markedPromise = null;
 
@@ -15,7 +15,7 @@ function escapeHtml(value = "") {
     .replaceAll("'", "&#39;");
 }
 
-// marked 各版本 renderer.html 的入参不一(字符串或 token),统一取原文再转义
+// marked renderer.html input varies by version (string or token); normalize to source then escape
 function rawHtmlText(input) {
   if (typeof input === "string") {
     return input;
@@ -27,7 +27,7 @@ function loadMarked() {
   if (!markedPromise) {
     markedPromise = import(resolveMarkedVendorUrl())
       .then(({ marked, Marked }) => {
-        // 用独立实例,避免污染 markdown-preview 的全局 marked 配置
+        // Use standalone instance to avoid polluting markdown-preview global marked config
         const instance = typeof Marked === "function" ? new Marked() : marked;
         instance.use({
           renderer: {
@@ -44,13 +44,13 @@ function loadMarked() {
   return markedPromise;
 }
 
-// Markdown 文本 → 清洗后的 DocumentFragment。marked 不可用(如 node 测试)时抛错,
-// 调用方负责回退为纯文本节点。
+// Markdown text → sanitized DocumentFragment. Throws if marked is unavailable (e.g. node tests);
+// caller is responsible for falling back to plain text nodes.
 export async function renderAiMarkdownFragment(text, { documentRef = globalThis.document } = {}) {
   const marked = await loadMarked();
   const template = documentRef.createElement("template");
   template.innerHTML = marked.parse(`${text || ""}`, { async: false });
-  // 双保险:即便 renderer.html 漏网,也移除脚本类节点与内联事件/危险链接
+  // Double insurance: remove script-like nodes, inline events, and dangerous links even if renderer.html missed them
   const content = template.content;
   content.querySelectorAll("script, iframe, object, embed, img, svg").forEach((node) => node.remove());
   content.querySelectorAll("*").forEach((node) => {
@@ -69,3 +69,6 @@ export async function renderAiMarkdownFragment(text, { documentRef = globalThis.
   });
   return content;
 }
+
+
+

@@ -1,75 +1,75 @@
 # 00 Overview
 
-## 目标
+## Goal
 
-Paddle OCR 对接层的目标是：
+Paddle OCR The goal of the integration layer is:
 
-- 输入：Paddle OCR 原始 JSON
-- 输出：符合当前主契约的 `normalized_document_v1`
+- Input: Paddle OCR raw JSON
+- Output: conforming to the current main contract `normalized_document_v1`
 
-也就是：
+That is:
 
 `Paddle raw payload -> provider adapter -> document.v1 -> translation/rendering`
 
-## 当前识别口径
+## Current recognition criteria
 
-当前代码把下面这种 payload 识别为 Paddle：
+Current code identifies the following as payload Identified as Paddle：
 
-- 顶层是 `dict`
-- 存在 `layoutParsingResults`
-- 存在 `dataInfo`
+- Top level is `dict`
+- Exists `layoutParsingResults`
+- Exists dataInfo
 
-代码位置：
+Code location:
 
 - `backend/scripts/services/document_schema/provider_adapters/paddle/adapter.py`
 - `backend/scripts/services/document_schema/adapters.py`
 
-## 当前目录职责
+## Current directory responsibilities
 
-`provider_adapters/paddle/` 当前按职责拆成这些部分：
+`provider_adapters/paddle/` Currently split by responsibility into these parts:
 
 - `adapter.py`
-  Paddle provider 总入口
+Paddle provider total entry
 - `payload_reader.py`
-  读取顶层 payload，并按页构造 page spec
+  Read top-level payloadand construct by page. page spec
 - `page_reader.py`
-  构造 page context/page spec
+  Construct page context/page spec
 - `block_reader.py`
-  构造 block context/block spec
+Construct block context/block spec
 - `block_labels.py`
-  `block_label -> type/sub_type/tags` 映射
+  `block_label -> type/sub_type/tags` Mapping
 - `trace.py`
-  构造 `metadata/source/derived`
+Construct metadata/source/derived
 - `continuation.py`
-  把 Paddle 的组信息映射成 `continuation_hint`
+Map Paddle group information to continuation_hint
 - `page_trace.py`
-  页级 trace 和 layout_det 匹配
-- `rich_content.py` 及相关文件
-  富内容 trace 聚合
+Match page-level trace with layout_det
+- `rich_content.py` and related files
+  Rich content trace Aggregation
 
-## 适配人的任务边界
+## Task boundaries for adapters
 
-适配 Paddle 的人只需要负责这几层：
+When adapting Paddle, only needs to handle these layers:
 
-1. Paddle 原始字段解释
-2. 字段落位规则
-3. `block_label` 语义映射
-4. `continuation_hint` 映射
-5. fixture 和回归
+1. Paddle Original Field Descriptions
+2. Field placement rules
+3. `block_label` Semantic mapping
+4. `continuation_hint` Mapping
+5. fixture and regression
 
-不要把这些事情混进任务里：
+Don't mix these into the task.
 
-1. 翻译提示词
-2. 排版覆盖
-3. PDF 写回
-4. 前端展示逻辑
+1. Prompt
+2. Layout Override
+3. PDF write back
+4. Frontend display logic
 
-## 交付标准
+## Delivery criteria
 
-至少满足：
+At least:
 
-1. `adapt_path_to_document_v1()` 可以把 Paddle raw JSON 转成 `document.v1`
-2. `validate_document_payload()` 通过
-3. `extract_text_items()` smoke 通过
-4. fixture 已登记进回归
-5. 文档已经更新
+1. adapt_path_to_document_v1() can convert Paddle raw JSON to document.v1
+2. validate_document_payload() passes
+3. `extract_text_items()` smoke through
+4. fixture Registered into regression.
+5. Document updated.

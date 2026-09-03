@@ -52,17 +52,17 @@ function enrichJobWithDocument(job: JobLike | LibraryCardItem, jobId: string) {
 
 export function getMockJobPayload(jobId = ""): JobLike {
   const id = `${jobId || ""}`.trim();
-  // 提交翻译产生的 live job：按墙钟推进（详情 Tab 进度动画）
+  // Live job from a translation submit: advances on wall-clock time (detail-tab progress animation).
   const live = buildLiveMockJobPayload(id);
   if (live) {
     return enrichJobWithDocument(live, id) as JobLike;
   }
-  // 主 mock job：跟 URL ?mock= 场景
+  // Primary mock job: follows the URL ?mock= scenario.
   if (!id || id === MOCK_JOB_ID) {
     return enrichJobWithDocument(buildMockJobPayload(), id || MOCK_JOB_ID) as JobLike;
   }
-  // 文档中心合成的 active_job_id（如 20260520-att-001）：返回终态完整 payload，
-  // 让书籍详情嵌入的 StatusCard 能拉到与真实成功 job 同形的数据（阶段流/产物就绪）。
+  // Synthesized active_job_id from documents center (e.g. 20260520-att-001): return a complete terminal payload
+  // so the StatusCard embedded in Book Details can fetch data shaped like a real successful job (stage flow / artifacts ready).
   const book = synthesizeMockBook(id);
   return {
     ...buildMockJobPayload("done"),
@@ -70,7 +70,7 @@ export function getMockJobPayload(jobId = ""): JobLike {
     job_id: id,
     status: "succeeded",
     stage: "finished",
-    stage_detail: book.stage_detail || "任务完成",
+    stage_detail: book.stage_detail || "任务Done",
   } as JobLike;
 }
 
@@ -86,11 +86,11 @@ export function getMockJobArtifactsManifest() {
   return buildMockManifest();
 }
 
-// 文档中心网格(F2)会用 library/books?job_ids= 批量取"已翻译 mock 文档"的活态。
-// 优先从 mock 文档表取真书名/封面，禁止再用 job_id.pdf 当标题（空封面根因之一）。
+// Documents-center grid (F2) batch-fetches live state of "translated mock documents" via library/books?job_ids=.
+// Prefer real title/cover from the mock documents table; never use job_id.pdf as title (one root cause of empty covers).
 function synthesizeMockBook(jobId: string): LibraryCardItem {
   const doc = getMockDocumentByJobId(jobId);
-  const title = doc?.title || doc?.source_filename || "已翻译文档";
+  const title = doc?.title || doc?.source_filename || "TranslatedDocuments";
   return {
     id: jobId,
     job_id: jobId,
@@ -103,7 +103,7 @@ function synthesizeMockBook(jobId: string): LibraryCardItem {
     thumbnail_url: doc?.thumbnail_url,
     status: "succeeded",
     stage: "finished",
-    stage_detail: "任务完成",
+    stage_detail: "任务Done",
     progress: { current: 12, total: 12, percent: 100, unit: "none" },
     output_pdf_ready: true,
     markdown_ready: true,
@@ -148,9 +148,9 @@ export function getMockJobList({ jobIds = [] }: MockJobListQuery = {}): MockJobL
 }
 
 export function submitMockJob(): JobLike {
-  // 上传流「开始翻译」也走 live 任务，才能在状态区看到推进动画
+  // Upload-flow "start translation" also uses a live job so the status area shows the advance animation.
   const live = registerLiveMockJob({
-    title: "Mock 上传翻译",
+    title: "Mock UploadTranslation",
     pageCount: 12,
   });
   return buildLiveMockJobPayload(live.jobId) || buildMockJobPayload();
@@ -164,3 +164,7 @@ export function submitMockUpload() {
     bytes: 2_621_440,
   };
 }
+
+
+
+

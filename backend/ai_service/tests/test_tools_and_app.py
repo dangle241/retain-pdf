@@ -190,7 +190,7 @@ def test_default_registry_tools_return_anchored_results(tmp_path):
     assert len(hits) == 2
     assert hits[0]["block_id"] == "p003-b0001"
 
-    # 整本：document_id 过滤掉其它文档
+    # Whole-book: document_id filters out other documents
     scoped = registry.invoke(
         "search_fulltext",
         {"query": "光谱", "document_id": "doc-a"},
@@ -208,7 +208,7 @@ def test_default_registry_tools_return_anchored_results(tmp_path):
 
     documents = registry.invoke("list_documents", {})["documents"]
     assert documents[0]["document_id"] == "doc-a"
-    # 注入 document_id 时 list_documents 只返回该文档
+    # When document_id is injected, list_documents returns only that document
     only = registry.invoke("list_documents", {"document_id": "doc-a"})["documents"]
     assert len(only) == 1
 
@@ -296,7 +296,7 @@ def test_ask_endpoint_streams_sse_events():
 
 
 def test_ask_endpoint_requires_llm_key_from_env_or_request():
-    # env 与请求都无 LLM key:提前 400,不打到上游
+    # Neither env nor request has LLM key: early 400, do not hit upstream
     settings = Settings(api_keys=frozenset({"test-key"}))
     client = TestClient(build_app(settings, agent=FakeAgent()))
     missing = client.post(
@@ -307,7 +307,7 @@ def test_ask_endpoint_requires_llm_key_from_env_or_request():
     assert missing.status_code == 400
     assert "LLM API Key" in missing.json()["detail"]
 
-    # 请求携带 LLM key:即使 env 为空也放行(FakeAgent 忽略 chat_fn)
+    # Request carries LLM key: allow even if env is empty (FakeAgent ignores chat_fn)
     ok = client.post(
         "/v1/ask",
         json={"question": "q", "llm_api_key": "sk-from-frontend"},
@@ -318,7 +318,7 @@ def test_ask_endpoint_requires_llm_key_from_env_or_request():
 
 
 def test_ask_auto_creates_conversation_and_persists_history():
-    """B1: 无 conversation_id 时 auto-create;第二轮注入 history 并回传同一 id。"""
+    """B1: auto-create when no conversation_id; second round injects history and returns the same id."""
     settings = Settings(api_keys=frozenset({"test-key"}), llm_api_key="env-llm-key")
     rust = FakeRust()
     agent = FakeAgent()
@@ -334,7 +334,7 @@ def test_ask_auto_creates_conversation_and_persists_history():
     conversation_id = data1["conversation_id"]
     assert conversation_id.startswith("conv-")
     assert conversation_id in rust.conversations
-    # 已回写 user+assistant
+    # user+assistant have been written back
     assert len(rust.conversations[conversation_id]["messages"]) == 2
     assert agent.last_history == []
 
@@ -378,11 +378,11 @@ def test_ask_stream_done_includes_conversation_id():
 
 
 def test_summary_lands_on_head_path_and_feeds_next_turn():
-    """审计 A2 回归锁:摘要必须接进 head 路径——第二问的 history 要能读回
-    【对话摘要】,而不是每轮重压缩 + 累积孤儿摘要。
+    """Audit A2 regression lock: summary must land on the head path -- second ask's history must read back
+    【对话摘要】, rather than re-compressing every round + accumulating orphan summaries.
 
-    关键:seed 与两次 ask 都显式传 parent 链(模拟真实前端),否则 FakeRust 的
-    空 parent 线性合成会掩盖死分支。"""
+    Key: seed and both asks explicitly pass parent chain (simulating real frontend), otherwise FakeRust's
+    empty-parent linear synthesis would mask dead branches."""
     settings = Settings(
         api_keys=frozenset({"test-key"}),
         llm_api_key="env-llm-key",
@@ -411,7 +411,7 @@ def test_summary_lands_on_head_path_and_feeds_next_turn():
     assert first.status_code == 200
 
     conv = rust.conversations[cid]
-    # 摘要在 head 路径上:从 head 沿显式 parent 回溯必经过【对话摘要】节点
+    # Summary is on the head path: backtracking from head along explicit parent must pass the 【对话摘要】 node
     by_id = {m["message_id"]: m for m in conv["messages"]}
     cur = by_id.get(conv["head_id"])
     on_path = []
@@ -429,14 +429,14 @@ def test_summary_lands_on_head_path_and_feeds_next_turn():
     )
     assert second.status_code == 200
     assert agent.last_history, "第二问应携带 history"
-    # assemble_history 把摘要包装成"已知背景"伪轮(assemble.py),不保留原前缀
+    # assemble_history wraps the summary as a "known background" pseudo-turn (assemble.py), original prefix not kept
     assert any(
         "更早对话的摘要" in str(t.get("content") or "") for t in agent.last_history
     ), "第二问的 history 读不回摘要(孤儿摘要回归)"
 
 
 def test_persist_failure_surfaces_in_done_payload():
-    """审计 C2 回归锁:回写失败必须经 persisted=false 告知前端,不再静默丢轮。"""
+    """Audit C2 regression lock: write-back failure must inform frontend via persisted=false, no longer silently dropping turns."""
     settings = Settings(api_keys=frozenset({"test-key"}), llm_api_key="env-llm-key")
 
     class BrokenPersistRust(FakeRust):
@@ -458,7 +458,7 @@ def test_persist_failure_surfaces_in_done_payload():
     assert response.status_code == 200
     assert response.json()["data"]["persisted"] is False
 
-    # 正常路径 persisted=True
+    # Normal path persisted=True
     ok_rust = FakeRust()
     ok_client = TestClient(build_app(settings, agent=FakeAgent(), rust=ok_rust))
     ok = ok_client.post(
@@ -470,7 +470,7 @@ def test_persist_failure_surfaces_in_done_payload():
 
 
 def test_ask_force_compress_emits_compress_event_and_summary():
-    """B2: force_compress 时 SSE 先 compress，再 tool/done；摘要落库。"""
+    """B2: when force_compress, SSE emits compress first, then tool/done; summary is persisted."""
     settings = Settings(
         api_keys=frozenset({"test-key"}),
         llm_api_key="env-llm-key",
@@ -478,7 +478,7 @@ def test_ask_force_compress_emits_compress_event_and_summary():
         memory_compress_after_turns=100,
     )
     rust = FakeRust()
-    # 预置长对话
+    # Pre-seed long conversation
     created = rust.create_conversation(title="t", document_id="doc-a")
     cid = created["conversation_id"]
     for i in range(6):
@@ -516,19 +516,19 @@ def test_ask_force_compress_emits_compress_event_and_summary():
     assert compress["dropped_turns"] >= 1
     assert events[-1]["type"] == "done"
     assert events[-1]["memory"]["had_summary"] is True
-    # 摘要已写入
+    # Summary has been written
     assert any(
         str(m.get("content") or "").startswith("【对话摘要】")
         for m in rust.conversations[cid]["messages"]
     )
-    # agent 收到带摘要的 history
+    # Agent receives history with summary
     assert agent.last_history
     assert any("摘要" in m["content"] for m in agent.last_history if m["role"] == "user")
 
 
 def test_ask_resolves_document_id_from_job_id():
-    # 历史 job 也能定位文档:job_id → 服务端解析 document_id,
-    # 不再依赖前端的 active_job_id 反查
+    # Historical jobs can also locate documents: job_id -> server resolves document_id,
+    # no longer relying on frontend active_job_id lookup
     captured = {}
 
     class RecordingAgent(FakeAgent):
@@ -626,12 +626,12 @@ def test_ask_injects_conversation_history_and_persists_turn():
         headers={"X-API-Key": "test-key"},
     )
     assert response.status_code == 200
-    # 历史注入
+    # History injection
     assert calls["history"] == [
         {"role": "user", "content": "之前的问题"},
         {"role": "assistant", "content": "之前的回答 [1]"},
     ]
-    # 回写 user + assistant 两条,assistant 带引用快照
+    # Write back user + assistant pair, assistant carries citation snapshot
     assert [(c[1], c[0]) for c in calls["appended"]] == [("user", "conv-1"), ("assistant", "conv-1")]
     assert "block_id" in calls["appended"][1][3]
 

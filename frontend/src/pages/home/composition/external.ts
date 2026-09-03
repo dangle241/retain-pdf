@@ -1,5 +1,6 @@
-// composition 层对 src/js/* 的统一出口。
-// pages/home/features 与 create-*.ts 禁止再直接 import ../../../js/**；缺符号只改本文件。
+// composition layer's unified export surface to src/js/*.
+// pages/home/features and create-*.ts must not directly import ../../../js/** anymore;
+// missing symbols should only be fixed in this file.
 
 // —— config / constants ——
 export { API_PREFIX } from "../../../js/config/api-constants.js";
@@ -197,7 +198,7 @@ export {
 } from "../../../js/api/translation-debug.js";
 
 // —— feature controllers / ports ——
-// pages/home/features 不得直接 import ../../../js/features/*；统一从本文件拿。
+// pages/home/features must not directly import ../../../js/features/*; all from this file instead.
 
 // home / upload / workflow
 export { createHomeStatePort, HOME_LOADING_STATES } from "../../../js/features/home/state.js";
@@ -324,3 +325,5 @@ export {
 export { createStatusDetailTranslationDataPort } from "../../../js/features/status-detail/translation-data-port.js";
 export { createStatusDetailTranslationTabCoordinator } from "../../../js/features/status-detail/translation-tab-coordinator.js";
 export { createTranslationState } from "../../../js/features/status-detail/translation-state.js";
+
+

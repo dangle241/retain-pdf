@@ -164,7 +164,7 @@ if (ensureElement("browser-credentials-dialog").open !== false) {
   throw new Error("expected setup dialog to close after first-run save");
 }
 
-if (!caughtMessage.includes("首次配置已保存")) {
+if (!caughtMessage.includes("First-run setup was saved")) {
   throw new Error(`expected saved-first-run connectivity error, got: ${caughtMessage || "<empty>"}`);
 }
 

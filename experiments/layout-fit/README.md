@@ -1,354 +1,354 @@
 # Layout Fit Lab
 
-当前绝对路径：
+Current absolute path unknown. Provide the path or context.
 
 `/home/wxyhgk/tmp/Code/experiments/layout-fit`
 
-现有任务数据目录：
+Existing task data directory:
 
 `/home/wxyhgk/tmp/Code/data`
 
-现有任务目录：
+Current task directory:
 
 `/home/wxyhgk/tmp/Code/data/jobs`
 
-这个目录是排版实验区，目标是探索两类能力：
+This directory is a layout experiment zone. Goal: explore two capabilities:
 
-1. 用 `HTML/CSS` 做文本块排版拟合
-2. 用实验结果反向辅助 `Typst` 选择更合适的字号、行高、字距和段落参数
+1. Use `HTML/CSS` for text block layout fitting
+2. Use experimental results to assist in reverse. `Typst` Choose appropriate font size, line height, tracking, and paragraph settings.
 
-这里不是生产代码区。短期目标是把方法论和实验结果做出来，而不是直接接入主流程。
+This is not production code. Short-term: methodology and experimental results, not direct mainline integration.
 
-## 当前最小工作方式
+## Current minimum working mode
 
-目前不要从上传、OCR、翻译重新跑全流程。  
-当前阶段只需要基于已有 `data/jobs/{job_id}` 里面的产物做重新渲染和排版拟合实验。
+Currently, do not from upload,OCRRerun full pipeline.  
+Current phase: base on existing only. `data/jobs/{job_id}` Perform re-rendering and layout fitting experiments on the internal artifacts.
 
-也就是说，实验人员优先从这里取数据：
+Thus, experimenters prioritize data from here:
 
 `/home/wxyhgk/tmp/Code/data/jobs/{job_id}`
 
-一个典型任务目录通常包含：
+A typical task directory usually contains:  README.md src/ tests/ Makefile .gitignore ponytail: skip if single-file script; add when project grows
 
 - `source/`
-  原始 PDF。
+Original PDF.
 - `ocr/`
-  OCR 和 MinerU 相关产物。
+OCR and MinerU related artifacts.
 - `translated/`
-  翻译后的中间产物。
+  Intermediate artifacts after translation.
 - `rendered/`
-  已渲染结果和 Typst 相关产物。
+Rendered results and Typst related artifacts.
 - `artifacts/`
-  对外登记的下载产物。
+  Externally registered download artifacts.
 - `logs/`
-  运行日志。
+  Operation Log
 
-当前实验的原则：
+Current experiment principles:
 
-- 优先复用 `data/jobs` 里的现有结果
-- 不要重新调用 MinerU
-- 不要重新调用大模型翻译
-- 不要修改原始 job 目录里的文件
-- 如果需要生成实验结果，写到 `experiments/layout-fit/output/`
-- 如果需要复制小样本，复制到 `experiments/layout-fit/fixtures/`
+- Prioritize reusing existing results from `data/jobs`
+- Do not re-invoke MinerU
+- Do not re-invoke LLM translation
+- Don't modify original. job Files in the directory
+- If experimental results need to be generated, write to `experiments/layout-fit/output/`
+- If you need to copy the small sample, copy to `experiments/layout-fit/fixtures/`
 
-这样做的目的很明确：先把“同一份 OCR/翻译结果，换不同排版算法能否更好渲染”这个问题验证清楚。
+The purpose is clear: first put the “same copy... OCR/Verify whether different layout algorithms improve rendering of translated results.
 
-## 重点 JSON 在哪里看
+## Key JSONs JSON Where to view
 
-如果只是做排版、字体、行高、块拟合实验，优先看下面这些文件：
+Layout, font, line height, block fitting experiments: start with these files:
 
-- 主 OCR 统一结构：
+- Main OCR unified structure:
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/ocr/normalized/document.v1.json`
-- OCR 统一结构说明文档：
+- OCR Unified Structure Documentation:
   `/home/wxyhgk/tmp/Code/backend/scripts/services/document_schema/README.md`
-- OCR 统一结构机器 schema：
+- OCR Unified Structure Machine schema：
   `/home/wxyhgk/tmp/Code/backend/scripts/services/document_schema/document.v1.schema.json`
-- OCR 原始 provider 结果摘要：
+- Original OCR provider summary:
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/ocr/mineru_result.json`
-- OCR 原始 unpacked 内容：
+- Original OCR unpacked content:
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/ocr/unpacked/layout.json`
-- OCR 原始 content list：
+- Original OCR content list:
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/ocr/unpacked/content_list_v2.json`
-- 翻译页级结果：
+- Translate page-level results:
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/translated/page-XXX-deepseek.json`
-- 领域上下文：
+- Domain context:
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/translated/domain-context.json`
-- Typst 排版输入与输出：
+- Typst Layout Input and Output:
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/rendered/typst/book-overlays/book-overlay.typ`
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/rendered/typst/book-overlays/book-overlay.pdf`
-- 事件流：
+- Event stream:
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/logs/events.jsonl`
-- 任务汇总：
+- Task summary:
   `/home/wxyhgk/tmp/Code/data/jobs/{job_id}/artifacts/pipeline_summary.json`
 
-## 实验时优先把哪个 JSON 当真源
+## Prioritize which during experiment? JSON True source
 
-排版实验时，优先级要明确：
+Layout experiments: clear priorities:
 
 1. `document.v1.json`
-   这是当前主链路已经标准化后的 OCR 真源，最适合做块级排版拟合。
+   Current main link after standardization. OCR Zhenyuan, best for block-level typesetting fitting.
 2. `translated/page-XXX-deepseek.json`
-   用来看每页翻译后的块内容、保护占位符和翻译结果。
+   View per-page translated block content; preserve placeholders and translation results.
 3. `book-overlay.typ`
-   用来看当前 Typst 实际是怎么落参数和排版的。
+   View current Typst How are parameters passed and formatted in practice?
 4. `layout.json` / `content_list_v2.json`
-   只在需要回溯原始 OCR provider 输出时再看，不要把它们当主实验输入。
+   Only when needing to revert to original. OCR provider Review on output; do not treat as primary experiment input.
 
-简单说：
+Simply put:
 
-- 想研究“块怎么排”，先看 `document.v1.json`
-- 想研究“翻译后文本是什么”，再看 `translated/*.json`
-- 想研究“当前 Typst 到底怎么排出来的”，再看 `book-overlay.typ`
+- To study 'how blocks are arranged', first see `document.v1.json`
+- Investigate post-translation text. Review. `translated/*.json`
+- slow, or Typst "How exactly is it sorted out?", then look again. `book-overlay.typ`
 
-## 让别人先看哪里
+## Where to start
 
-如果是新接手的人，先按下面顺序看：
+Newcomers: follow order below.
 
-1. 本文件：
+1. This file:
    `/home/wxyhgk/tmp/Code/experiments/layout-fit/README.md`
-2. OCR 统一结构说明：
+2. OCR Unified structure description:
    `/home/wxyhgk/tmp/Code/backend/scripts/services/document_schema/README.md`
-3. 选一个真实任务目录：
+3. Select a real task directory:
    `/home/wxyhgk/tmp/Code/data/jobs/{job_id}`
-4. 先打开：
+4. First open:
    - `ocr/normalized/document.v1.json`
    - `translated/page-001-deepseek.json`
    - `rendered/typst/book-overlays/book-overlay.typ`
 
-这样基本就能知道：
+This basically tells you:
 
-- OCR 标准化后长什么样
-- 翻译结果长什么样
-- Typst 当前吃什么输入并产出什么版面
+- OCR What does it look like after standardization?
+- What does the translated result look like?
+- Typst Input consumed and layout produced.
 
-## 为什么单独建这个目录
+## Why create this directory separately
 
-当前主工程已经有稳定的前端、Rust API、Python 管线和 Typst 渲染链路。  
-但“字体大小怎么选、行间距怎么定、一个文本块怎样在目标框里尽量贴合”这类问题，本质上仍然是实验问题，不适合直接塞进生产代码。
+The current main project already has a stable frontend,Rust API、Python Pipeline and Typst Rendering pipeline.  
+But questions like "how to choose font size, how to determine line spacing, how to fit a text block as closely as possible within a target box" are essentially still experimental issues, not suitable to be directly crammed into production code.
 
-因此这里单独做一个实验场：
+Thus, set up a separate testbed here:
 
-- 不污染 `backend/` 和 `frontend/`
-- 可以快速试错
-- 可以保留多个思路并行存在
-- 实验成熟后，再把稳定部分迁回正式链路
+- Do not pollute `backend/` and `frontend/`
+- Fast trial-and-error.
+- Multiple approaches can be kept in parallel.
+- After experiment matures, migrate stable parts back to production pipeline.
 
-## 目录约定
+## Directory Conventions
 
 - `fixtures/`
-  放实验输入数据。建议是小而精的样本，不要直接塞整本书。
+  Provide experimental input data. Prefer small, refined samples; do not directly input the entire book.
 - `html/`
-  放 HTML/CSS/JS 排版实验页面。
+Place HTML/CSS/JS layout experiment pages.
 - `typst/`
-  放 Typst 对照样例，用于比较 HTML 拟合结果和 Typst 当前策略。
+Place Typst samples for comparison, HTML fitting results, and current Typst strategy.
 - `scripts/`
-  放自动化脚本，例如参数扫描、误差评分、结果汇总。
+  Place automation scripts: parameter scanning, error scoring, result aggregation.
 - `notes/`
-  放阶段结论、参数记录、失败案例、后续想法。
+  Include stage conclusions, parameter records, failure cases, and follow-up ideas.
 - `output/`
-  放本地产物，例如截图、评分结果、调试 JSON。该目录默认不进 Git。
+  Place local artifacts, e.g., screenshots, scoring results, debugging. JSONDirectory not entered by default. Git。
 
-## 推荐研究边界
+## Recommend researching boundaries
 
-不要一开始就做“整页恢复”。先从最小、最可控的问题入手。
+Start with page fragment recovery.
 
-推荐分三层：
+Three-layer recommendation.
 
 1. `text metrics`
-   只研究单个文本块的字号、行高、字距、段宽。
+   Study only font size, line height, letter spacing, and paragraph width for a single text block.
 2. `block layout`
-   让一个文本块在给定目标框内尽量贴合。
+   Fit text block tightly within given target box.
 3. `page composition`
-   把多个已经拟合好的块重新放回页面，再看是否发生碰撞、溢出、顺序错乱。
+   Place fitted blocks back on page. Check collisions, overflow, order errors.
 
-短期最重要的是第 1 和第 2 层。
+In the short term, layers 1 and 2 are most important.
 
-## 适合探索的具体问题
+## Specific questions worth exploring
 
-### 1. 字号拟合
+### 1. Font size fitting
 
-输入：
+Input:
 
-- 文本内容
-- 目标框宽高
-- 字体族
-- 初始字号范围
+- Text content
+- Target box width and height
+- Font Family
+- Default font size range
 
-输出：
+Output:
 
-- 最优字号
-- 在该字号下的行数、总高度、溢出情况
+- Optimal Font Size
+- Line count, total height, overflow at this font size.
 
-### 2. 行高拟合
+### 2. Fit line height
 
-输入：
+Input:
 
-- 固定字号
-- 不同行高候选值
+- Fixed Font Size
+- Different line-height candidate values
 
-输出：
+Output:
 
-- 哪个行高最接近目标框高度
-- 是否导致孤行、溢出、压缩过度
+- Which line height is closest to the target box height?
+- whether it causes orphans, overflow, or over‑compression
 
-### 3. 字距与段落压缩
+### 3. Letter-spacing and paragraph compression
 
-输入：
+Input:
 
-- 固定字号和行高
-- 不同字距、词距、段前段后设置
+- Fixed font size and line height
+- Custom character spacing, word spacing, and paragraph spacing settings
 
-输出：
+Output:
 
-- 在不明显伤害阅读体验的前提下，是否能让文本更贴近目标框
+- whether the text can be made closer to the target box without significantly harming the reading experience
 
-### 4. Typst 参数反推
+### 4. Typst Reverse parameter inference
 
-目标不是用 HTML 替代 Typst，而是利用 HTML 实验得出的结果去回答：
+The goal is not to use. HTML Replace Typstbut rather use HTML Answer with experimental results:
 
-- 这个块更适合多大字号
-- 行高应该更松还是更紧
-- 某些版面密度下，Typst 当前默认参数是不是偏保守
+- What font size fits this block better?
+- Should line height be looser or tighter?
+- Under certain layout densities,Typst Are the current default parameters too conservative?
 
-## 明确不做的事情
+## Explicit exclusions.
 
-以下内容先不要碰，避免把问题做散：
+Avoid the following for now to prevent scope creep:
 
-- 不要先做整本 PDF 的完整 HTML 重排
-- 不要先做复杂的图文混排恢复
-- 不要先做表格、公式、浮动图注的终极方案
-- 不要直接改生产渲染链路
-- 不要在这里做和布局无关的翻译策略实验
+- Do not start with a full HTML rearrange of the entire book PDF
+- Do not prioritize complex image-text layout recovery.
+- Do not prioritize final solutions for tables, formulas, or floating captions.
+- Don't modify production rendering pipeline directly.
+- Don't experiment with translation strategies unrelated to layout here.
 
-## 推荐输入样本
+## Recommended input samples
 
-建议从现有任务里抽取 5 到 10 个块级样本，覆盖以下类型：
+Extract 5 to 10 sample blocks from existing tasks.
 
-- 单段正文
-- 两到三段连续正文
-- 标题
-- 带行内公式的段落
-- 中英文混排段落
-- 稠密小字号段落
-- 稀疏大字号段落
+- Single paragraph body
+- Two to three continuous paragraphs.
+- Heading
+- Paragraph with inline formula
+- Mixed Chinese-English paragraph
+- Dense small-font paragraph.
+- Widely-spaced large paragraphs.
 
-每个样本建议最少包含：
+Minimum recommended per sample:
 
-- 原始文本
-- 翻译后文本
-- 目标框坐标与尺寸
-- 页宽页高
-- 当前 Typst 使用的参数
-- 渲染结果截图或参考图
+- Original text
+- Translated text
+- Bounding box coordinates and dimensions.
+- Page width and height
+- Current Typst parameters
+- Render result screenshot or reference image.
 
-## 推荐技术路线
+## Recommended tech stack
 
-### 路线 A：HTML 作为测量器
+### Route A：HTML As a meter
 
-思路：
+Approach:
 
-- 用浏览器排版引擎计算文本在目标宽度下的真实布局
-- 扫描字号、行高、字距
-- 选择误差最小的一组参数
+- Compute text's actual layout at target width using browser layout engine.
+- Scan font size, line height, tracking.
+- Select the parameter set with the minimum error.
 
-优点：
+Advantages:
 
-- 迭代快
-- 可视化方便
-- 适合先做块级实验
+- Rapid iteration
+- Convenient visualization
+- Block-level experiments first.
 
-缺点：
+Disadvantages:
 
-- 和 Typst 的排版模型并不完全一致
-- 只能作为“拟合参考”，不是最终真值
+- Not entirely consistent with Typst layout models.
+- Only as fitting reference, not final ground truth.
 
-### 路线 B：HTML 辅助 Typst
+### Route B: HTML-assisted Typst
 
-思路：
+Approach:
 
-- 先用 HTML 搜一个较好的参数区间
-- 再把参数喂给 Typst 样例做二次验证
+- First use HTML to search for a better parameter range.
+- Then feed the parameters to Typst Re-verify sample
 
-优点：
+Pros:
 
-- 更接近真实生产链路
-- 能把实验结果迁移回主系统
+- Closer to actual production pipeline
+- Experimental results can be migrated back to the main system.
 
-缺点：
+Cons:
 
-- 实现复杂度更高
-- 调试速度比纯 HTML 慢
+- Higher implementation complexity.
+- Debug speed is slower compared to pure HTML
 
-当前建议优先做 `路线 A`，然后再补 `路线 B`。
+Current suggestion: prioritize `Route A`, then fill in `Route B` later.
 
-## 建议先做的最小闭环
+## Suggest minimal closed loop first.
 
-1. 在 `fixtures/` 放入 5 到 10 个文本块样本
-2. 在 `html/` 写一个最小实验页，支持：
-   - 输入文本
-   - 输入目标宽高
-   - 切换字体
-   - 扫描字号、行高、字距
-3. 在 `scripts/` 写一个评分器，输出：
-   - 高度误差
-   - 宽度越界情况
-   - 行数
-   - 是否溢出
-4. 在 `notes/` 记录每类样本的最佳参数分布
-5. 在 `typst/` 做对应对照样例，看这些参数能否迁回 Typst
+1. Insert 5 to 10 text block samples in `fixtures/`
+2. Write a minimal experiment page in `html/` supporting:
+   - Input text
+   - Enter target width and height
+   - Switch Font
+- Scanning font size, line height, and letter spacing
+3. Write a scorer in `scripts/` that outputs:
+   - Height error
+   - Width out of bounds
+   - Lines
+   - Overflow?
+4. Record optimal parameter distribution per sample class in `notes/`.
+5. Match against the sample in `typst/` to see if these parameters can be migrated back to Typst.
 
-## 建议评分方式
+## Suggested rating method
 
-先不要追求过于复杂的损失函数，先做一个简单可解释的版本：
+Do not pursue overly complex loss functions. Start with a simple interpretable version.
 
-- 高度误差越小越好
-- 宽度溢出直接重罚
-- 行数偏差可以适度惩罚
-- 过小字号要惩罚
-- 过大行高要惩罚
+- Minimize height error.
+- Width overflow: immediate penalty.
+- Line count deviation may be moderately penalized.
+- Penalty for font size too small.
+- Excessive row height will be penalized.
 
-可以先用类似下面的思路：
+You can start with an approach similar to the following:
 
 `score = height_error * a + overflow_penalty * b + line_count_penalty * c + readability_penalty * d`
 
-重点不是公式多漂亮，而是评分结果稳定、可解释、能迭代。
+Focus: scoring stability, interpretability, iterability — not formula elegance.
 
-## 交付要求
+## Delivery Requirements
 
-接手这个目录的人，至少需要交付下面这些东西：
+The person taking over this directory must deliver at least the following:
 
-1. 一个可以本地打开的最小 HTML 实验页
-2. 一组小规模但有代表性的样本
-3. 一个最基础的参数扫描或评分脚本
-4. 一篇阶段总结，说明：
-   - 哪些块容易拟合
-   - 哪些块难拟合
-   - 哪些参数最敏感
-   - HTML 结果和 Typst 结果差多少
-5. 对主工程的建议：
-   - 是否值得接入
-   - 适合接在哪一层
-   - 风险是什么
+1. Minimal local HTML file opens in browser. HTML Experimental Page
+2. A representative small-scale sample
+3. ```python import sys import json from pathlib import Path  def scan_params(config_path: str) -> dict:     cfg = json.loads(Path(config_path).read_text())     return {k: v for k, v in cfg.items() if isinstance(v, (int, float))}  if __name__ == "__main__":     print(json.dumps(scan_params(sys.argv[1]))) ``` → skipped: type validation, add when input from untrusted source.
+4. A phase summary, explaining:
+   - Which blocks are prone to overfitting?
+   - Which blocks are difficult to fit?
+   - Which parameters are most sensitive?
+   - HTML Results and Typst How much difference?
+5. Suggestions for main project:
+   - whether it is worth integrating
+   - Which layer to connect to?
+   - What are the risks
 
-## 交接要求
+## Handover requirements
 
-如果你是来接这个实验的人，请先做这几件事：
+If you're taking over this experiment, do these first:
 
-1. 先读完本文件
-2. 先在 `notes/` 写一页你的实验计划
-3. 不要直接改主工程
-4. 每次只验证一个假设，不要一口气混入多个变量
-5. 结论必须配样本、截图或评分结果，不能只写主观判断
+1. Read this file first
+2. First, in `notes/` Write a one-page experimental plan
+3. Don't modify main project directly.
+4. Verify one assumption at a time; do not mix multiple variables.
+5. Conclusions must be accompanied by samples, screenshots, or scoring results; do not write only subjective judgments
 
-## 当前建议
+## Current Suggestion
 
-当前最合理的切入点不是“整页 HTML 排版”，而是“块级拟合器”。
+The most reasonable entry point currently is not "whole page HTML "typesetting", but rather "block-level fitter".
 
-因为一旦块级拟合器做稳，后面可以有三种用途：
+Once block-level fitter stabilizes, three uses follow:
 
-- 直接服务 HTML 渲染
-- 给 Typst 提供更好的初始参数
-- 为后续 Word/DOCX 导出提供字号和段落样式参考
+- Direct service HTML rendering
+- Provide better initial parameters for Typst.
+- For future use. Word/DOCX Export provides font size and paragraph style reference.
 
-这一步如果做不稳，直接上整页恢复只会把问题放大。
+Unstable step. Full-page recovery amplifies issues.

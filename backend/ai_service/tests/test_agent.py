@@ -69,7 +69,7 @@ def test_agent_runs_tools_then_answers_with_cited_anchors():
 
     assert result.rounds == 2
     assert result.answer == "选择性来自共轭效应 [2]。"
-    # 只返回被引用的锚点,且编号写进了给模型看的工具结果
+    # Only return cited anchors, and numbering is written into the tool result shown to the model
     assert [citation.ref for citation in result.citations] == [2]
     assert result.citations[0].block_id == "p008-b0001"
     payload = json.loads(seen_tool_messages[0]["content"])
@@ -80,7 +80,7 @@ def test_agent_runs_tools_then_answers_with_cited_anchors():
 
 
 def test_agent_forces_document_id_into_search_tools():
-    """整本问答:即便模型没传 document_id,agent 也要强制注入。"""
+    """Whole-book Q&A: agent must force-inject document_id even if the model does not pass it."""
     seen_args = []
 
     def capture(arguments):
@@ -134,7 +134,7 @@ def test_agent_forces_final_answer_when_rounds_exhausted():
                 "content": "",
                 "tool_calls": [_tool_call("search_fulltext", {"query": f"q{calls['n']}"})],
             }
-        # 收尾调用不给工具
+        # Final call: no tools given
         assert messages[-1]["role"] == "user"
         return {"content": "基于已有证据的最终回答 [1]。", "tool_calls": []}
 
@@ -146,7 +146,7 @@ def test_agent_forces_final_answer_when_rounds_exhausted():
 
 
 def test_friendly_llm_error_maps_status_codes():
-    """审计 C1:402/429/401 必须译成用户可行动的中文,且截断上游详情。"""
+    """Audit C1: 402/429/401 must be translated into actionable Chinese for users, and upstream details truncated."""
     from retainpdf_ai.agent import _friendly_llm_error
 
     assert "余额不足" in str(_friendly_llm_error(402))
@@ -160,8 +160,9 @@ def test_friendly_llm_error_maps_status_codes():
 
 
 def test_rounds_exhausted_final_call_uses_request_level_chat_fn():
-    """审计 A1 回归锁:env 不配 key(启动期 chat=_missing_key 形态)、按请求传
-    chat_fn 时,轮数耗尽的收尾轮必须继续用请求级 chat_fn,而不是 self._chat。"""
+    """Audit A1 regression lock: when env has no key (startup chat=_missing_key shape) and
+    chat_fn is passed per-request, the final round after exhausting tool rounds must continue
+    using the request-level chat_fn, not self._chat."""
     registry = ToolRegistry([_search_tool(HITS)])
 
     def startup_chat_missing_key(_messages, _tools):
@@ -243,7 +244,7 @@ def _tool_chunk():
 
 
 def test_streaming_tool_turn_preamble_not_emitted_as_answer_delta():
-    """审计 A3 回归锁:工具轮的 content 前言不得泄漏为 answer_delta。"""
+    """Audit A3 regression lock: tool-round content preamble must not leak as answer_delta."""
     from retainpdf_ai.agent import assemble_streaming_message
 
     deltas = []
@@ -253,14 +254,14 @@ def test_streaming_tool_turn_preamble_not_emitted_as_answer_delta():
     )
     assert deltas == [], f"工具轮前言泄漏: {deltas}"
     assert message["tool_calls"][0]["function"]["name"] == "search_fulltext"
-    # content 仍保留在 message 里(回给模型的上下文完整)
+    # content is still preserved in message (context returned to the model remains complete)
     assert "搜索一下" in message["content"]
 
 
 def test_streaming_pure_answer_still_streams_and_short_answer_flushes():
     from retainpdf_ai.agent import assemble_streaming_message
 
-    # 长答案:攒满 64 字符定性后转直通
+    # Long answer: after accumulating 64 chars for qualification, switch to direct pass-through
     long_piece = "答" * 64
     deltas = []
     assemble_streaming_message(
@@ -270,7 +271,7 @@ def test_streaming_pure_answer_still_streams_and_short_answer_flushes():
     assert "".join(deltas) == long_piece + "尾巴"
     assert len(deltas) == 2, "定性后应逐 piece 直通"
 
-    # 短答案:不足阈值,流结束一次性补发
+    # Short answer: below threshold, flush once at stream end
     deltas2 = []
     assemble_streaming_message(_sse([_content_chunk("短答案")]), on_delta=deltas2.append)
     assert "".join(deltas2) == "短答案"

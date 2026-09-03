@@ -1,15 +1,15 @@
-# RetainPDF 文档目录
+# RetainPDF Documentation directory
 
-用户安装、下载和 Docker 部署入口见仓库根目录 [README](../README.md)。  
-这里只保留 3 个入口。
+User installation, download, and Docker Deploy entry: repo root. [README](../README.md)。  
+Keep only this 3 Single entry point.
 
-## 入口
+## Entry
 
 - [API Wiki](./api/README.md)
-- [主线文档](./core/README.md)
-- [参考资料](./reference/README.md)
-- [运维与过程记录](./ops/README.md)
+- [Mainline docs](./core/README.md)
+- [References](./reference/README.md)
+- [Ops & Process Logs](./ops/README.md)
 
-## 读法
+## How to Read
 
-先按目录找大类，再进具体文档。不要再从顶层直接暴露一长串平铺入口。
+First locate broad categories via the directory, then navigate to specific documents. Do not expose a long flat list of entries directly from the top level.

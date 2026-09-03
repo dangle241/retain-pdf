@@ -1,17 +1,17 @@
-// 图书馆网格滚动自动加载(蓝图 §2 features/library/)。
+// LibraryGrid scroll auto-load (Blueprint §2 features/library/).
 //
-// 几何判定重写自 host-actions.js 的 shouldAutoLoadRecentJobs(260px / 0.35
-// 阈值,不 import——旧文件属"死(cutover 删)"清单,按蓝图口径原地重写这
-// ~10 行而不是复用)。触发口有两个,都汇到同一个 check():
-// 1. 滚动容器的 passive scroll 监听(用户手动划到底);
-// 2. refresh-scheduler.js 在每次分页提交后调用的 scheduleAutoLoadIfNeeded →
-//    viewPort.scheduleAutoLoadCheck({isSuspended})——通过
-//    react-view-port.js 的 registerAutoLoadChecker 接进来(内容变化后如果
-//    还没填满一屏,需要接着自动加载下一页)。
+// Geometry check rewritten from host-actions.js shouldAutoLoadRecentJobs (260px / 0.35
+// threshold; not imported——old file is on the "dead (cutover deleted)" list; per Blueprint
+// rewritten in-place ~10 lines instead of reusing). Two trigger points, both funnel to the same check():
+// 1. Passive scroll listener on scroll container (user manually scrolls to bottom);
+// 2. refresh-scheduler.js calls scheduleAutoLoadIfNeeded after each page submission →
+//    viewPort.scheduleAutoLoadCheck({isSuspended})——connected via
+//    react-view-port.js registerAutoLoadChecker (after content changes, if screen is still not
+//    filled, required to auto-load the next page).
 //
-// loadMore 调用统一走 viewPort.handlersRef.current.onLoadMore(bindings.js
-// 绑定的是 () => runtime.loadRecentJobs({reset:false})),不直接调
-// runtime——保持与"更多"按钮同一条口径,避免出现两条平行的加载入口。
+// loadMore calls uniformly go through viewPort.handlersRef.current.onLoadMore (bindings.js
+// binds it to () => runtime.loadRecentJobs({reset:false})), not directly calling
+// runtime——keeps same entry point as the "More" button, avoids two parallel loading entries.
 
 import { useCallback, useEffect } from "react";
 
@@ -37,10 +37,10 @@ export function useLibraryAutoLoad({ scrollBodyRef, hasMore, loadMoreLoading, vi
     }
   }, [hasMore, loadMoreLoading, scrollBodyRef, viewPort]);
 
-  // 接入 refresh-scheduler.js → viewPort.scheduleAutoLoadCheck 的调用链
+  // Connect to refresh-scheduler.js → viewPort.scheduleAutoLoadCheck call chain
   useEffect(() => viewPort.registerAutoLoadChecker(check), [viewPort, check]);
 
-  // 滚动容器自身的被动监听
+  // Passive listener on scroll container itself
   useEffect(() => {
     const scrollBody = scrollBodyRef.current;
     if (!scrollBody) {
@@ -56,3 +56,7 @@ export function useLibraryAutoLoad({ scrollBodyRef, hasMore, loadMoreLoading, vi
     return () => scrollBody.removeEventListener("scroll", onScroll);
   }, [scrollBodyRef, viewPort, check]);
 }
+
+
+
+

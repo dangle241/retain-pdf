@@ -108,7 +108,7 @@ export function useReaderReactController(): ReaderReactController {
   );
 
   const goToPage = useCallback((page: number) => {
-    // 取已加载栏的最大页数；未知时传 0，由 clampPageNumber 放行目标页
+    // Get max pages of loaded pane; pass 0 when unknown, clampPageNumber lets target page through
     const total = Math.max(
       Number(panes.hudNumPages) || 0,
       Number(panes.primaryNumPages) || 0,
@@ -118,7 +118,7 @@ export function useReaderReactController(): ReaderReactController {
     goToPageWithTotal(page, total);
   }, [goToPageWithTotal, panes.hudNumPages, panes.primaryNumPages, panes.numPagesByPane]);
 
-  // 收藏 / 搜索回跳：URL ?page_idx= → 页码（0 基 → 1 基）
+  // Favorite / search jump back: URL ?page_idx= → page number (0-based → 1-based)
   useUrlAnchorJump({
     enabled: !session.boot.loading && !session.boot.failed && session.assetsReady,
     numPages: panes.hudNumPages || 0,
@@ -158,7 +158,7 @@ export function useReaderReactController(): ReaderReactController {
   }, [notes, clearSelection]);
 
   const jumpToNote = useCallback((note: ReaderNote) => {
-    // 若批注在译文/原文栏，尽量切到对应单栏或对照
+    // If annotations are in Translation/Source pane, try to switch to corresponding single column or side-by-side
     if (note.pane === "translated" && session.mode === "source") {
       beginModeSwitch();
       session.setMode("compare");
@@ -183,7 +183,7 @@ export function useReaderReactController(): ReaderReactController {
     enabled: showHud,
   });
 
-  // tools 对象引用稳定到 active 变化时
+  // tools object reference stable until active changes
   const toolsApi = useMemo(() => tools, [tools.active, tools.open, tools.close, tools.toggle, tools.isOpen]);
 
   return {
@@ -216,3 +216,7 @@ export function useReaderReactController(): ReaderReactController {
     documentTitle: session.title || "",
   };
 }
+
+
+
+

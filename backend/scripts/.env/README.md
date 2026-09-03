@@ -1,14 +1,14 @@
-# 本地密钥
+# Local key
 
-这个目录只放本机开发时使用的密钥文件。
+Local development key files only.
 
-当前约定：
+Current conventions:
 
 - `mineru.env`
-  文件中写入 `MINERU_API_TOKEN=...`
+  Write to file `MINERU_API_TOKEN=...`
 
-说明：
+Note:
 
-- 目录里的真实 `*.env` 文件已经被 Git 忽略
-- 这里只用于本地开发，不用于对外交付
-- 如果命令行传了 `--token`，仍然以命令行参数为准
+- Real `*.env` files in directory already Git-ignored
+- This is only for local development, not for external delivery
+- If passed via CLI `--token`Use CLI args.

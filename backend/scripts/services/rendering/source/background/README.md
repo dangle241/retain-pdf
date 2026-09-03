@@ -1,10 +1,10 @@
 # rendering/source/background
 
-## 负责什么
+## Responsibilities
 
-背景处理层。这里负责大背景图检测、图像提取、局部背景重建和背景页面叠加。
+Background processing layer: large background detection, image extraction, local reconstruction, page overlay.
 
-## 对外入口
+## Public entry point
 
 - `detect.py`
 - `extract.py`
@@ -15,11 +15,11 @@
 - `stage.py`
 - `redaction_items.py`
 
-## 不该做什么
+## What not to do
 
-- 不决定翻译文字怎么排版。
-- 不执行文本层删除策略。
-- 不调用 Typst 编译。
-- 不替代 `page_profile/` 做全局页面分类。
-- 不从 `source.cleanup` 借背景重建参数或采样 helper；背景图路径的参数放在
-  本目录内。
+- Do not determine the layout of translated text.
+- Text layer deletion strategy not executed.
+- Do not call Typst compile.
+- Do not replace `page_profile/` Add global page categorization.
+- Not from `source.cleanup` Use background reconstruction parameters or sampling. helper; parameters for background image paths are placed in
+  Within this directory.

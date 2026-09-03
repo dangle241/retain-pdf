@@ -188,19 +188,19 @@ fn validate_upload_limit(
     };
     if too_large {
         let relation = if bytes_inclusive {
-            "不超过"
+            "no greater than"
         } else {
-            "小于"
+            "less than"
         };
         return Err(AppError::bad_request(format!(
-            "{provider_name} API 限制：PDF 文件大小必须{relation} {:.0}MB；当前文件为 {:.2}MB",
+            "{provider_name} API limit: PDF file size must be {relation} {:.0}MB; current file is {:.2}MB",
             max_bytes as f64 / 1024.0 / 1024.0,
             upload.bytes as f64 / 1024.0 / 1024.0
         )));
     }
     if upload.page_count > max_pages {
         return Err(AppError::bad_request(format!(
-            "{provider_name} API 限制：PDF 页数必须不超过 {max_pages} 页；当前文件为 {} 页",
+            "{provider_name} API limit: PDF page count must not exceed {max_pages} pages; current file has {} pages",
             upload.page_count
         )));
     }

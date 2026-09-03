@@ -25,15 +25,16 @@ def test_normal_transitions_leave_no_breadcrumb() -> None:
     item: dict = {}
 
     set_final_status(item, FAILED_STATUS)  # pending -> failed
-    set_final_status(item, TRANSLATED_STATUS)  # failed -> translated(修复链拉回)
-    set_final_status(item, KEPT_ORIGIN_STATUS)  # translated -> kept_origin(策略收口)
+    set_final_status(item, TRANSLATED_STATUS)  # failed -> translated (repair chain pullback)
+    set_final_status(item, KEPT_ORIGIN_STATUS)  # translated -> kept_origin (policy funnel)
 
     assert item["final_status"] == KEPT_ORIGIN_STATUS
     assert "translation_diagnostics" not in item
 
 
 def test_demoting_translated_to_failed_records_breadcrumb_but_still_writes() -> None:
-    # v1 契约:只观测不拦截。违规照常写入,但必须留下可观测的面包屑。
+    # v1 contract: observe only, do not block. The violation still writes
+    # through, but must leave an observable breadcrumb.
     item = {"final_status": TRANSLATED_STATUS}
 
     set_final_status(item, FAILED_STATUS)
@@ -80,8 +81,10 @@ def test_final_status_violation_is_pure_check() -> None:
 
 
 def test_policy_helpers_route_through_funnel() -> None:
-    # mark_translation_failed_policy_state 打在已译 item 上 = 真实的降级场景,
-    # 走漏斗后必须留面包屑;mark_policy_skip 的正常收口不留。
+    # `mark_translation_failed_policy_state` applied to an already
+    # translated item is a real downgrade scenario and must leave a
+    # breadcrumb after going through the funnel. The normal finalization
+    # via `mark_policy_skip` does not.
     translated_item = {
         "final_status": TRANSLATED_STATUS,
         "translated_text": "已有译文",

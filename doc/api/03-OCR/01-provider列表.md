@@ -1,14 +1,14 @@
-# OCR Provider 列表
+# OCR Provider list
 
-## 接口
+## Endpoint
 
 ```http
 GET /api/v1/providers/ocr
 ```
 
-用于发现后端当前支持的 OCR provider、凭据字段、可配置 options、能力和产物布局。
+Used to discover what the backend currently supports. OCR providerCredential field configurable optionsLayout capabilities products.
 
-## 响应示例
+## Response example
 
 ```json
 {
@@ -55,13 +55,13 @@ GET /api/v1/providers/ocr
 
 ## provider_kind
 
-- `remote`: 后端内置远程 provider，例如 MinerU、Paddle。
-- `local_command`: 配置型本地命令 provider。
-- `remote_command`: 配置型远程命令 provider。
+- remote: built-in remote provider, e.g., MinerU, Paddle.
+- `local_command`: Local configuration commands provider。
+- `remote_command`: Configuration Remote Command provider。
 
-## 前端规则
+## Frontend rules
 
-- 不要硬编码 provider 参数表。
-- 表单字段从 `credential` 和 `options` 生成。
-- `credential` 为 `null` 时不展示凭据输入。
-- provider-specific 非密钥参数写入 `ocr.options`。
+- Don't hardcode. Use config files. provider Parameter table.
+- Form fields generated from credential and options.
+- If credential is null, do not display credential input.
+- provider-specific Write non-key parameters. `ocr.options`。

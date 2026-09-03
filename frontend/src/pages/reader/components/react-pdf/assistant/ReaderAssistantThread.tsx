@@ -1,4 +1,4 @@
-// assistant-ui 阅读器问答：进度与正文分离；完成后一次性 Markdown+公式+引用。
+// assistant-ui Reader Q&A: separate Progress from body; on Done, render Markdown+formulas+citations all at once.
 
 import {
   createContext,
@@ -57,30 +57,30 @@ import {
   MISSING_MODEL_API_KEY_MESSAGE,
 } from "../../../../../js/reader/ai/config.js";
 
-/** Notion 侧栏式建议：图标 + 短标题 */
+/** Notion sidebar-style suggestions: icon + short title */
 const SUGGESTIONS: Array<{
   prompt: string;
   label: string;
   icon: typeof BookOpen;
 }> = [
   {
-    prompt: "用几句话总结这篇文献的核心内容。",
-    label: "总结本页文档",
+    prompt: "Summarize the core content of this paper in a few sentences.",
+    label: "Summarize this page",
     icon: BookOpen,
   },
   {
-    prompt: "这篇文献的主要结论是什么？",
-    label: "提炼主要结论",
+    prompt: "What are the main conclusions of this paper?",
+    label: "Extract main conclusions",
     icon: ListTree,
   },
   {
-    prompt: "作者用了什么方法或模型？",
-    label: "梳理方法与模型",
+    prompt: "What methods or models did the authors use?",
+    label: "Outline methods and models",
     icon: FlaskConical,
   },
   {
-    prompt: "有哪些关键结果或数据？",
-    label: "标出关键结果",
+    prompt: "What are the key results or data?",
+    label: "Highlight key results",
     icon: Sparkles,
   },
 ];
@@ -89,13 +89,13 @@ export type ReaderAssistantThreadProps = {
   jobId?: string;
   citationsByMessageId?: Record<string, AiCitationLike[]>;
   progressByMessageId?: Record<string, string>;
-  /** store 正文旁路，保证流式 token 能立刻渲染 */
+  /** Store body bypass: ensures streaming tokens render immediately */
   contentByMessageId?: Record<string, string>;
-  /** 当前正在生成的 assistant id（旁路 status，避免 aui 不刷 running） */
+  /** Current assistant id being generated (bypasses status to prevent aui from not refreshing running state) */
   streamingAssistantId?: string;
   isRunning?: boolean;
   onJumpCitation?: (citation: AiCitationLike) => void;
-  /** 从助手答案开新会话窗口（复制到该点的历史） */
+  /** Open a new conversation window from the assistant's Answer (copy history up to that point) */
   onBranchFromAnswer?: (assistantMessageId: string) => void | Promise<boolean | void>;
   branchBusy?: boolean;
 };
@@ -129,7 +129,7 @@ function messageIsStreaming(
   const status = (message as { status?: { type?: string } } | null)?.status;
   if (status?.type === "running") return true;
   if (status?.type === "complete" || status?.type === "incomplete") return false;
-  // aui 有时不把 ExternalStore 的 status 映到 useMessage；用旁路 id 兜底
+  // aui sometimes doesn't map ExternalStore's status to useMessage; fall back to bypass id
   if (!isRunning || !streamingAssistantId) return false;
   const id = `${(message as { id?: string } | null)?.id || ""}`;
   const storeId = `${(message as { metadata?: { custom?: { storeId?: string } } } | null)
@@ -154,7 +154,7 @@ function useViewportStickBottom(
       stick.current = distance < 120;
     };
     const scrollBottom = () => {
-      // 分支/切会话 remount 时禁止强行滚底，否则体感像「刷新并跳转」
+      // Don't force-scroll to bottom on branch/session remount, otherwise it feels like a refresh and jump
       if (suppressRef.current) return;
       if (el.dataset.suppressAutoscroll === "1") return;
       if (!stick.current) return;
@@ -172,7 +172,7 @@ function useViewportStickBottom(
       if (structural) schedule();
     });
     mo.observe(el, { childList: true, subtree: true });
-    // 仅首挂且未 suppress 时贴底
+    // Only stick to bottom on first mount and when not suppressed
     if (!suppressAutoScroll) schedule();
     return () => {
       el.removeEventListener("scroll", onScroll);
@@ -186,7 +186,7 @@ function ThinkingRow({ label }: { label: string }) {
   return (
     <div className="aui-thinking" role="status" aria-live="polite">
       <Loader2 className="aui-spin" size={14} strokeWidth={2.4} aria-hidden />
-      <span>{label || "思考中…"}</span>
+      <span>{label || "Thinking..."}</span>
     </div>
   );
 }
@@ -225,21 +225,21 @@ function MarkdownText() {
   } = useContext(AskUiContext);
   const meta = readMessageCustom(message);
   const streaming = messageIsStreaming(message, streamingAssistantId, isRunning);
-  // 优先 metadata.custom（稳定）；回退 store map
+  // Prefer metadata.custom (stable); fall back to store map
   const citations = meta.citations.length
     ? meta.citations
     : (citationsByMessageId[meta.storeId] || citationsByMessageId[meta.messageId] || []);
   const rootRef = useRef<HTMLDivElement | null>(null);
-  // 流式：优先 contentByMessageId（store/旁路直通），避免 aui Parts 缓存导致「答完才渲染」
+  // Streaming: prefer contentByMessageId (store/bypass direct), avoid aui Parts cache causing "render only after answer completes"
   const storeText =
     contentByMessageId[meta.storeId]
     || contentByMessageId[meta.messageId]
     || "";
-  // 流式过程不要 trim 尾部，避免半句被吃掉；完成后再 trim
+  // Don't trim trailing content during streaming, to avoid half-sentences being dropped; trim after Done
   const bodyText = streaming
     ? `${storeText || text || ""}`
     : `${storeText || text || ""}`.trim();
-  // 分支 remount 时 id 变了但正文相同：用缓存避免闪 pending
+  // On branch remount, id changes but body is the same: use cache to avoid pending flash
   const [finalHtml, setFinalHtml] = useState<string | null>(() =>
     (streaming || !bodyText ? null : peekFinalAnswerHtmlCache(bodyText)),
   );
@@ -260,7 +260,7 @@ function MarkdownText() {
     [citations],
   );
 
-  // 流式：同步轻量 HTML，绝不走 MathJax 异步（否则会「写完才显示」）
+  // Streaming: sync lightweight HTML, never go through MathJax async step (otherwise it "displays only after writing finishes")
   const streamingHtml = useMemo(
     () => (streaming && bodyText ? renderStreamingPreviewHtml(bodyText) : ""),
     [streaming, bodyText],
@@ -303,8 +303,8 @@ function MarkdownText() {
     const root = rootRef.current;
     if (!root || streaming || finalHtml == null || !finalHtml) return;
 
-    // 覆盖前回收上一轮 hydrate 的 blob URL（重渲染反复生成新 blob，
-    // 旧的会泄漏到页面关闭——审计 P1-5）
+    // Revoke blob URLs from previous round's hydrate before overwriting (re-rendering repeatedly generates new blobs;
+    // old ones would leak until page close — audit P1-5)
     revokeHydratedImageUrls(root);
     root.innerHTML = finalHtml;
     neutralizeMarkdownAnchors(root, {
@@ -327,7 +327,7 @@ function MarkdownText() {
     }
   }, [streaming, finalHtml, citationByRef, citations, onJumpCitation, bodyText]);
 
-  // 卸载（切消息/关浮窗）回收本气泡的 blob
+  // On unmount (switch message/close floating window), revoke blobs for file bubbles
   useEffect(() => () => {
     revokeHydratedImageUrls(rootRef.current);
   }, []);
@@ -377,17 +377,17 @@ function messagePlainText(message: unknown): string {
 }
 
 /**
- * 兄弟节点切换器。
- * - path：同一答案下的多条续问路径
- * - answer：同一问题下的多版重试答案
+ * Sibling node switcher.
+ * - path: follow-up path under the same Answer with multiple entries
+ * - answer: multiple retry versions of the same Question
  */
 function MessageBranchPicker({ kind }: { kind: "path" | "answer" }) {
-  const label = kind === "path" ? "分支" : "答案";
+  const label = kind === "path" ? "branch" : "Answer";
   return (
     <BranchPickerPrimitive.Root
       className={`aui-branch-picker aui-branch-picker-${kind}`}
       hideWhenSingleBranch
-      title={kind === "path" ? "切换从此答案分出的路径" : "切换不同答案版本"}
+      title={kind === "path" ? "Switch to another path branched from this Answer" : "Switch to a different version of this Answer"}
     >
       <span className="aui-branch-kind" aria-hidden>
         {label}
@@ -396,7 +396,7 @@ function MessageBranchPicker({ kind }: { kind: "path" | "answer" }) {
         <button
           type="button"
           className="aui-branch-btn"
-          aria-label={kind === "path" ? "上一个分支" : "上一个答案"}
+          aria-label={kind === "path" ? "Previous branch" : "Previous Answer"}
         >
           <ChevronLeft size={14} strokeWidth={2.4} aria-hidden />
         </button>
@@ -410,7 +410,7 @@ function MessageBranchPicker({ kind }: { kind: "path" | "answer" }) {
         <button
           type="button"
           className="aui-branch-btn"
-          aria-label={kind === "path" ? "下一个分支" : "下一个答案"}
+          aria-label={kind === "path" ? "Next branch" : "Next Answer"}
         >
           <ChevronRight size={14} strokeWidth={2.4} aria-hidden />
         </button>
@@ -420,8 +420,8 @@ function MessageBranchPicker({ kind }: { kind: "path" | "answer" }) {
 }
 
 /**
- * 从助手答案开「新会话窗口」：
- * 复制 root→本答案 的历史到新 conversation，原会话不动（类似 ChatGPT Branch in new chat）。
+ * Open a "new conversation window" from the assistant's Answer:
+ * Copy the history from root to this Answer into a new conversation, original session unchanged (similar to ChatGPT Branch in new chat).
  */
 function AssistantMessage() {
   const message = useMessage();
@@ -453,7 +453,7 @@ function AssistantMessage() {
     if (!onBranchFromAnswer || !assistantId || branchBusy || forking) return;
     setForking(true);
     try {
-      // 等 click 完全结束后再上全屏遮罩，绝不能在 pointerdown 就盖住按钮
+      // Wait for the click to fully end before applying full-screen shield, must never cover the button on pointerdown
       await new Promise<void>((r) => {
         window.setTimeout(r, 0);
       });
@@ -461,7 +461,7 @@ function AssistantMessage() {
       lockReaderAiNavigation(1200);
       const ok = await onBranchFromAnswer(assistantId);
       if (!ok) {
-        // 失败时也给一点反馈时间（sessionError 在会话条）
+        // Give some feedback on failure too (sessionError is in the conversation entries)
         armReaderAiClickShield(200, { overlayDelayMs: 0 });
       }
     } finally {
@@ -476,7 +476,7 @@ function AssistantMessage() {
       </div>
       <div className="aui-msg-stack">
       {streaming && progress ? <ThinkingRow label={progress} /> : null}
-      {streaming && !progress && !hasBody ? <ThinkingRow label="思考中…" /> : null}
+      {streaming && !progress && !hasBody ? <ThinkingRow label="Thinking..." /> : null}
       {hasBody ? (
         <div className="aui-msg-bubble">
           <MessagePrimitive.Parts components={{ Text: StableMarkdownText }} />
@@ -489,41 +489,41 @@ function AssistantMessage() {
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* 同问题多版答案切换（仍在当前窗口；真正开新窗用下面「开新对话」） */}
+          {/* Switch between multiple versions of the same Question's Answer (still in the current window; for a truly new window use "Open new conversation" below) */}
           <MessageBranchPicker kind="answer" />
           <button
             type="button"
             className="aui-action-btn aui-action-btn-branch"
             onPointerDown={(e) => {
-              // 只 stopPropagation，不要 preventDefault，否则可能丢 click
+              // Only stopPropagation, don't preventDefault — otherwise clicks may be lost
               e.stopPropagation();
             }}
             onClick={(e) => {
               void handleBranch(e);
             }}
             disabled={Boolean(branchBusy || forking || !onBranchFromAnswer)}
-            aria-label="从此答案开新对话"
-            title="复制到此答案为止的上文，开一个新对话继续问（原对话不变，避免上下文污染）"
+            aria-label="Open new conversation from this Answer"
+            title="Copy conversation up to this Answer, open a new conversation to continue asking (original conversation unchanged, avoids context pollution)"
           >
             {forking ? (
               <Loader2 className="aui-spin" size={13} strokeWidth={2.4} aria-hidden />
             ) : (
               <GitBranch size={13} strokeWidth={2.4} aria-hidden />
             )}
-            {forking ? "分支中…" : "开新对话"}
+            {forking ? "branch中..." : "开New conversation"}
           </button>
           <ActionBarPrimitive.Root className="aui-action-bar" hideWhenRunning>
             <ActionBarPrimitive.Reload asChild>
               <button
                 type="button"
                 className="aui-action-btn"
-                aria-label="重新生成答案"
-                title="同一问题再生成一版答案（仍在当前窗口）"
+                aria-label="Regenerate answer"
+                title="Regenerate another version of the answer to the same question (still in the current window)"
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
               >
                 <RefreshCw size={13} strokeWidth={2.4} aria-hidden />
-                重试
+                Retry
               </button>
             </ActionBarPrimitive.Reload>
           </ActionBarPrimitive.Root>
@@ -560,9 +560,9 @@ function EmptyState() {
           <Sparkles size={22} strokeWidth={1.9} />
         </span>
       </div>
-      <h2 className="aui-empty-title">随时待命，有什么可以帮你？</h2>
-      <p className="aui-empty-sub">基于当前整份文档检索回答 · 点引用可跳页</p>
-      <div className="aui-suggestions" role="group" aria-label="推荐问题">
+      <h2 className="aui-empty-title">Ready when you are. What can I help with?</h2>
+      <p className="aui-empty-sub">Answers use the current document search. Click citations to jump pages.</p>
+      <div className="aui-suggestions" role="group" aria-label="Suggested questions">
         {SUGGESTIONS.map((item) => {
           const Icon = item.icon;
           return (
@@ -641,7 +641,7 @@ export function ReaderAssistantThread({
     [],
   );
 
-  // 无模型 Key 时禁止输入/发送（与主页一致：只认设置 → 凭据）
+  // No model key: disable input/Send (consistent with main page: only accepts Settings → credentials)
   const [credTick, setCredTick] = useState(0);
   useEffect(() => {
     const bump = () => setCredTick((n) => n + 1);
@@ -665,7 +665,7 @@ export function ReaderAssistantThread({
           className="aui-viewport"
           data-reader-ai-viewport="true"
           turnAnchor="top"
-          // 分支/切会话时关闭库内 autoScroll，避免整列跳到底像「刷新」
+          // Disable autoScroll in the library during branch/session switch, to avoid the whole column jumping to bottom like a "refresh"
           autoScroll={!branchBusy}
           scrollToBottomOnRunStart={!branchBusy}
         >
@@ -676,7 +676,7 @@ export function ReaderAssistantThread({
           <ThreadPrimitive.Messages components={messageComponents} />
 
           <ThreadPrimitive.ScrollToBottom className="aui-scroll-bottom" asChild>
-            <button type="button" className="aui-scroll-bottom-btn" aria-label="滚到最新">
+            <button type="button" className="aui-scroll-bottom-btn" aria-label="Scroll to latest">
               <ArrowDown size={16} strokeWidth={2.25} />
             </button>
           </ThreadPrimitive.ScrollToBottom>
@@ -685,35 +685,35 @@ export function ReaderAssistantThread({
         {missingLlmKey ? (
           <div className="aui-composer aui-composer-locked" role="alert">
             <p className="aui-llm-lock-msg">{MISSING_MODEL_API_KEY_MESSAGE}</p>
-            <p className="aui-hint">请到首页「设置 → API 设置」填写模型 Key 后即可提问</p>
+            <p className="aui-hint">Open Settings → API Settings on the home page and enter a model key to ask questions.</p>
           </div>
         ) : (
           <ComposerPrimitive.Root className="aui-composer" compact>
-            {/* Notion 式一体圆角输入卡：正文 + 底栏工具 */}
+            {/* Notion-style unified rounded input card: body + bottom toolbar Tools */}
             <div className="aui-composer-shell">
               <ComposerPrimitive.Input
                 className="aui-input"
                 rows={2}
-                placeholder="用 AI 做任何事…"
+                placeholder="Ask AI anything..."
                 submitOnEnter
               />
               <div className="aui-composer-toolbar">
-                <span className="aui-composer-chip" title="检索范围">
+                <span className="aui-composer-chip" title="Search scope">
                   <BookOpen size={12} strokeWidth={2.2} aria-hidden />
-                  当前文档
+                  CurrentDocuments
                 </span>
-                {/* 停止/发送互斥占同一位：双钮常驻会让「停止」在 95% 时间是死按钮 */}
+                {/* Stop/Send are mutually exclusive and share the same position: having both buttons permanently visible would make "Stop" a dead button 95% of the time */}
                 <div className="aui-composer-actions">
                   <ThreadPrimitive.If running>
                     <ComposerPrimitive.Cancel asChild>
-                      <button type="button" className="aui-send aui-send-stop" aria-label="停止生成">
+                      <button type="button" className="aui-send aui-send-stop" aria-label="Stop generation">
                         <Square size={12} strokeWidth={2.6} aria-hidden />
                       </button>
                     </ComposerPrimitive.Cancel>
                   </ThreadPrimitive.If>
                   <ThreadPrimitive.If running={false}>
                     <ComposerPrimitive.Send asChild>
-                      <button type="button" className="aui-send" aria-label="发送">
+                      <button type="button" className="aui-send" aria-label="Send">
                         <ArrowUp size={16} strokeWidth={2.5} aria-hidden />
                       </button>
                     </ComposerPrimitive.Send>
@@ -721,10 +721,15 @@ export function ReaderAssistantThread({
                 </div>
               </div>
             </div>
-            <p className="aui-hint">Enter 发送 · Shift+Enter 换行 · 点答案 [n] 跳页</p>
+            <p className="aui-hint">Enter to send · Shift+Enter new line · Click Answer [n] to jump to page</p>
           </ComposerPrimitive.Root>
         )}
       </ThreadPrimitive.Root>
     </AskUiContext.Provider>
   );
 }
+
+
+
+
+

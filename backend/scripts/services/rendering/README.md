@@ -1,202 +1,202 @@
-# Rendering 说明
+# Rendering description
 
-`scripts/services/rendering` 负责把已经翻译好的页面数据变成最终 PDF。
+`scripts/services/rendering` Turn translated page data into final version. PDF。
 
-这里不负责翻译，也不负责 OCR 解析，只负责“怎么渲染、怎么排版、怎么输出”。
+Not responsible for translation, nor for anything else. OCR Parsing: only responsible for 'how to render, how to lay out, how to output'.
 
-## 阶段边界
+## Stage boundaries
 
-Rendering 阶段的正式输入和输出固定为：
+Rendering The formal inputs and outputs of the stage are fixed as:
 
-- 输入：
-  源 PDF、翻译产物、渲染参数
-- 输出：
-  最终 PDF，以及必要的 overlay / typst / 压缩中间产物
+- Input:
+Source PDF, translation product, render parameters
+- Output:
+Final PDF, and necessary overlay / typst / compressed intermediate artifacts
 
-明确不负责的事情：
+Clearly not responsible for:
 
-- 不直接消费 provider raw OCR JSON
-- 不负责把 raw OCR 规范化成 `document.v1.json`
-- 不负责向翻译模型发请求，也不负责生成翻译文本
+- Do not consume directly provider raw OCR JSON
+- Not responsible for. raw OCR Normalize to `document.v1.json`
+- Understood.
 
-当前稳定交接点：
+Current stable handoff point:
 
-- rendering 主线只接受“源 PDF + 翻译产物”这一组输入
-- 渲染阶段固定读取 `translation-manifest.json`；没有 manifest 的旧翻译目录不再支持直接渲染
-- Render-only 调用协议固定为：`source_pdf_path + translations_dir` 或 `source_pdf_path + translation_manifest_path`
-- Render-only 入口已支持 `job_root/specs/render.spec.json`（`render.stage.v1`）
-- 如果输入不满足协议，入口统一抛出 `Render-only input error`，而不是在后续 Typst/PDF 阶段才报模糊错误
-- 如果怀疑 OCR 结构有问题，应该先回到 `document.v1.json` / `document.v1.report.json` 排查
-- 如果怀疑翻译内容或术语策略有问题，应该先回到 translation payload，而不是在 rendering 层补翻译逻辑
-- API 凭证不写入 render stage spec；spec 中使用 `credential_ref`，由运行时环境注入真实 key
+- rendering mainline only accepts "source PDF + The set of inputs labeled "Translation artifacts".
+- Fixed read at render stage. `translation-manifest.json`No. manifest Old translation directory no longer supports direct rendering.
+- Render-only call protocol fixed to: source_pdf_path + translations_dir or source_pdf_path + translation_manifest_path
+- Render-only Entry supported. `job_root/specs/render.spec.json`（`render.stage.v1`）
+- If input does not conform to the protocol, throw uniformly at the entry point. `Render-only input error`, rather than later Typst/PDF Vague error reported only at stage.
+- If in doubt about OCR structure issues, should first return to document.v1.json / document.v1.report.json for troubleshooting
+- If you suspect issues with the translation content or terminology strategy, first return to translation payloadnot at rendering Layer supplement translation logic.
+- Do not write credentials in render stage spec; use credential_ref in spec, injected with real values by the runtime environment key.
 
-## 当前目录结构
+## Current directory structure
 
 ```text
 scripts/services/rendering/
   __init__.py
   README.md
-  legacy/          旧调用方兼容入口；新逻辑不要放这里
-  workflow/        渲染阶段编排，只调度，不做具体 PDF/Typst 细节
-  analysis/        页面画像、页面分类和页面路线决策
-  document/        源 PDF、页码映射、书签/目录等文档级辅助
-  source/          原 PDF 准备、清理、背景重建和压缩
-  layout/          翻译块到渲染块的排版计算
-  output/          Typst 源码生成、编译、overlay 合成和 PDF 写出
+  legacy/          Legacy caller compatibility entry; do not place new logic here.
+workflow/        Rendering stage orchestration. Dispatch only; no concrete execution of PDF/Typst details
+  analysis/        Page profiling, page classification, and page routing decision.
+document/        Source PDF page number mapping, bookmarks/table of contents and other document-level aids.
+  source/          original PDF Preparation, cleanup, background reconstruction, and compression.
+  layout/          Typesetting calculation from translation block to rendering block.
+output/          Typst source code generation, compilation, overlay composition, and PDF writing
 ```
 
-推荐理解顺序：
+Recommended understanding order:
 
 `workflow -> document/analysis -> source/layout -> output`
 
-`legacy/` 是旧调用方兼容门面，不应该继续堆业务逻辑。
+`legacy/` Compatibility facade for legacy callers. Do not add further business logic.
 
-## 渲染主路径
+## Render main path
 
-当前主路径可以概括为：
+Current main path summary:
 
 `translation JSON -> layout/payload -> output/typst -> PDF`
 
-上层通常通过 [render_stage.py](/home/wxyhgk/tmp/Code/backend/scripts/runtime/pipeline/render_stage.py) 调用这里的能力。
+Upper layer typically via API calls. Use standard HTTP client. [render_stage.py](/home/wxyhgk/tmp/Code/backend/scripts/runtime/pipeline/render_stage.py) Invoke the capabilities here.
 
-输入边界：
+Input boundary:
 
-- rendering 主线消费的是翻译后的 page payload 和源 PDF
-- 当前逐页 translation payload 与 `translation-manifest.json` 是上游默认交付物；渲染层只负责读取，不负责定义 OCR/翻译阶段协议
-- 如果上游只想重跑渲染，可以显式传 `translation_manifest_path`，不必依赖固定目录扫描
-- OCR provider 的 raw JSON 不应该直接流入这里
-- 如果上游 OCR 结构有问题，应先回到 `document.v1.json` / `document.v1.report.json` 这一层排查，而不是在渲染层补 provider 特判
+- rendering The main line consumes the translated page payload Heyuan PDF
+- Current page translation payload and translation-manifest.json are upstream default deliverables. Rendering layer reads only; does not define OCR/translation phase protocols.
+- If upstream only wants to re-run rendering, pass explicitly. `translation_manifest_path`No fixed directory scan.
+- OCR provider raw JSON should not flow directly here
+- If upstream OCR structure is flawed, revert to document.v1.json / document.v1.report.json investigation at this layer, not patch rendering layer with provider special cases.
 
-## 模块分工
+## Module division
 
 - `legacy/`
-  旧调用方兼容门面。新业务逻辑不要写在这里，只转发到具体模块。
+  Legacy caller compatibility facade. Do not write new business logic here; only forward to specific modules.
 - `workflow/`
-  编排渲染流程，负责选择模式、串联 Typst/背景/redaction，不直接写复杂算法。
+  Orchestrates rendering flow: selects mode, chains steps. Typst/Background/redactionDo not directly write complex algorithms.
 - `workflow/render_only.py`
-  render-only worker 包装入口。
+render-only worker wrapper entry point.
 - `analysis/profile/`
-  单页事实采集层。只回答“这一页是什么样”，不决定怎么渲染。
+  Single-page fact collection layer. Answers only "what this page looks like"; does not decide rendering.
 - `analysis/route/`
-  单页路线决策层。只根据 profile 决定路线，不直接操作 PDF。
+  Single-page route decision layer. Based only on. profile Determine route, do not operate directly. PDF。
 - `layout/payload/`
-  把翻译后的 OCR payload 转成可渲染块。
+  convert the translated OCR payload convert to renderable blocks.
 - `layout/typography/`
-  排版测量和几何工具层。
+  Layout measurement and geometry tool layer.
 - `layout/inline_content/`
-  公式、Markdown、Typst inline 文本归一化。
+  Formula,Markdown、Typst inline Text Normalization.
 - `source/render_source.py`
-  源 PDF 渲染前准备，包括隐藏文本剥离和压缩副本选择。
+Source PDF pre-render: strip hidden text, select compressed copy.
 - `source/cleanup/`
-  直接操作 PDF 页面对象，负责删字、盖底和写回。
+  Directly operate PDF Page object for text deletion, background overlay, and write-back.
 - `source/background/`
-  大背景图页面的局部背景重建。
+  Local background rebuild for large-background image pages.
 - `source/compression/`
-  PDF 图片型压缩。
+  PDF Image compression.
 - `output/typst/`
-  负责把渲染块变成 Typst 源码并编译成 PDF。
+  Responsible for turning render blocks into Typst Source code and compile into PDF。
 - `output/pdf_writer.py`
-  兼容旧 import 的 re-export；新代码优先使用 `document/pdf_ops.py`。
+Backward compatible import re-export. New code should prefer document/pdf_ops.py.
 - `document/pdf_ops.py`
-  通用 PDF 保存和页面链接处理辅助。它属于文档级基础能力，不属于 Typst 输出层。
+Generic PDF save and page link handling helpers. Document-level foundational capability, not part of Typst output layer.
 - `document/pikepdf_overlay.py` / `document/pikepdf_pages.py`
-  正式 PDF 结构写入优先入口。用于内容流级 overlay 合并、整本/选页复制和路径级优化。
+  Official PDF Structure write priority entry. For content streaming level. overlay Merge, Entire Book/Page-selection copy and path-level optimization.
 - `layout/model/`
-  渲染层公共数据结构和排版文本 helper。
+  Rendering layer public data structures and layout text helper。
 - `layout/page_specs.py`
-  页面级渲染规格组装，连接翻译 payload、页面几何和输出层。
+  Page-level render spec assembly; link translations. payloadPage geometry output layer.
 
-## 背景遮盖策略
+## Background masking strategy
 
-Typst overlay 路径优先使用“文本容器自带背景”：
+Typst overlay Path priority: use the text container's own background.
 
 ```typst
 place(...,
   block(width: ..., height: ..., fill: ...)[
-    译文内容
+    translated content
   ]
 )
 ```
 
-不要再为普通译文块单独输出一层 `rect(...)` 白块再输出文字。文本容器自带背景可以让白底和文字天然绑定，减少层级、错位和覆盖顺序问题。
+Stop outputting a separate layer for ordinary translation blocks. `rect(...)` White block then output text. Text container with built-in background naturally binds white background and text, reducing layers, misalignment, and z-order issues.
 
-需要区分两件事：
+Two things to distinguish:
 
-- 视觉遮盖：由 Typst block 的 `fill` 或 Word 白底文本框完成。
-- 文本层清理：仍由 `source/cleanup` 和 redaction 策略处理，不能只靠视觉遮盖替代。
+- Visual masking: done by Typst block fill or white text box.
+- Text layer cleanup: still handled by source/cleanup and redaction policy; cannot be replaced by visual masking alone.
 
-## PDF 写入原则
+## PDF Write principles
 
-正式产物的 PDF 结构修改优先走 `pikepdf`：
+Production PDF Prioritize structural modifications. `pikepdf`：
 
-- content stream text-op 删除
+- content stream text-op Delete
 - hidden text strip
-- 整本 Typst overlay 合并
-- 无源页清理需求的逐页 Typst fallback overlay 合并
-- 无源页修改需求的 single-PDF overlay 合并
-- 路径级 bbox rect text-op 删除
-- PDF 复制、选页抽取和结构重写
-- 图片对象压缩 / 替换
+- Entire book Typst overlay merge
+- Page-by-page cleanup for source-less pages, Typst fallback overlay merge
+- No source page modification required, single-PDF overlay merge
+- Path-level bbox rect text-op deletion
+- PDF Copy, extract selected pages, and restructure.
+- Image Object Compression / Replace
 
-PyMuPDF 主要保留在读和分析场景：
+PyMuPDF Maintain read analyze scenarios
 
-- 页面尺寸、文字、bbox、drawing 分析
-- 截图和调试预览
-- 颜色采样、首行缩进检测等视觉辅助
+- Page size, text,bbox、drawing Analysis
+- Screenshots and debug preview
+- Color sampling, first-line indent detection, and other visual aids.
 
-不要在新主链中继续新增 PyMuPDF destructive write：
+Do not add new features to the new main chain. PyMuPDF destructive write：
 
-- 不新增 `apply_redactions`
-- 不新增 `show_pdf_page` 作为正式 overlay 合并
-- 不新增 `insert_pdf + doc.save` 作为结构复制路径
+- No new code. `apply_redactions`
+- Do not add show_pdf_page as official overlay merge
+- Do not add insert_pdf + doc.save copy path as structure
 
-现有 PyMuPDF 写入只作为 legacy/fallback 保留，迁移时优先用 `document/pikepdf_*` 或
-`source_cleanup` 中的路径级工具替代。
-页内 `remove_text_under_rects_with_pymupdf_redaction` 属于 legacy redaction 边界；新增文本层清理优先使用 `source_cleanup` 包的路径级 pikepdf rect-strip 能力。pikepdf text strip 只删除可翻译文本块，`formula` / `display_formula` bbox 作为保护区保留原 PDF 公式；公式页中的其他正文/图注仍可删除，不再因为一页存在公式而整页跳过。
-渲染前处理会向 workflow 传递 `source_text_precleaned_page_indices`，其中包括实际删除过 text-op 的页面和检测到无原文重叠的页面；overlay 阶段用它判断是否可以跳过旧的页内 visual cover/redaction。
-`source_cleanup_strategy=pikepdf_text_strip` 是正式策略名，后续新配置应使用这个名字。
-渲染 diagnostics 会记录 `legacy_pymupdf_redaction_pages`、`legacy_pymupdf_overlay_pages` 和 `legacy_pdf_write_reasons`；真实样本回归时优先观察这些值是否仍非零。
+Existing PyMuPDF write-only legacy/fallback retained. Prioritize during migration: document/pikepdf_* or
+`source_cleanup` Chinese path-level tool replacement.
+in-page `remove_text_under_rects_with_pymupdf_redaction` Belongs legacy redaction Boundary; add text layer cleanup priority use. Delete redundant text layers first. Add when necessary. `source_cleanup` Package Path Level pikepdf rect-strip capabilities.pikepdf text strip only delete translatable text blocks,`formula` / `display_formula` bbox Keep original as protected area PDF Formula; other body text on formula page./Figure captions deletable. Pages with formulas no longer skipped entirely.
+Pre-rendering processing will workflow Transfer `source_text_precleaned_page_indices`, which includes pages where text-ops were actually deleted and pages with no detected overlapping source text; the overlay stage uses this to determine whether it can skip the old in-page visual cover/redaction. text-op pages, and pages detected without original text overlap;overlay stage uses it to determine whether to skip old in-page visual cover/redaction。
+`source_cleanup_strategy=pikepdf_text_strip` Official policy name. Use for future configurations.
+Rendering diagnostics will record legacy_pymupdf_redaction_pages, legacy_pymupdf_overlay_pages, and legacy_pdf_write_reasons. When regressing on real samples, first observe whether these values remain non-zero.
 
-## 纯 Typst 编译速度
+## Pure Typst Compilation speed
 
-大文档 overlay 路径不要退化成逐页 Typst 编译。逐页 PDF 会重复嵌入字体和资源，最终文件体积容易膨胀。
+Large Document overlay Path must not degenerate into page-by-page. Typst Compile. Page by page. PDF Re-embedding fonts and resources bloats final file size.
 
-当前分片是显式 opt-in 策略，不作为默认路径。默认仍优先整本 Typst 编译，因为这通常体积最小，并且很多大文档整本编译并不慢。
+Current shard is explicit. opt-in Strategy not default. Default whole-book priority. Typst Compile, because this typically yields the smallest size, and compiling entire large documents is not slow.
 
-显式开启后，策略是体积受控的大块分片：
+Explicit enable: controlled-size large chunks:
 
-- 只有设置 `RETAIN_TYPST_OVERLAY_CHUNKED=1` 且可以用 `pikepdf` 合并 overlay 的大文档才启用。
-- 默认 `256` 页以上启用分片，默认每片 `128` 页。
-- 每片生成一个多页 overlay PDF，再由 `pikepdf` 一次性合并回源 PDF。
-- 小文档继续走整本 Typst 编译，保持体积最优。
+- Settings: Only RETAIN_TYPST_OVERLAY_CHUNKED=1 can use pikepdf to merge overlays; only enabled for large documents.
+- Default: 256 pages above which sharding is enabled; default per shard: 128 pages.
+- Generate one multi-page overlay PDF per shard, then merge into the original PDF once using pikepdf.
+- Small documents continue using full-book compilation Typst Compile, keep size optimal.
 
-可调环境变量：
+Configurable environment variables:
 
-- `RETAIN_TYPST_OVERLAY_CHUNKED=1` 开启分片编译。
-- `RETAIN_TYPST_OVERLAY_CHUNK_MIN_PAGES` 调整启用阈值。
-- `RETAIN_TYPST_OVERLAY_CHUNK_PAGES` 调整每片页数。不要轻易设得太小，除非已经确认文件体积可接受。
+- `RETAIN_TYPST_OVERLAY_CHUNKED=1` Enable sharded compilation.
+- `RETAIN_TYPST_OVERLAY_CHUNK_MIN_PAGES` Adjust enable threshold.
+- `RETAIN_TYPST_OVERLAY_CHUNK_PAGES` Adjust pages per chunk. Do not set too small unless file size confirmed acceptable.
 
-## Render Prewarm 复用
+## Render Prewarm Reuse
 
-`render_prewarm` 同时承载两类产物：
+`render_prewarm` Supports two types of artifacts:
 
-- source 产物：预处理后的源 PDF、bbox text-strip candidates。
-- payload 产物：首行缩进、effective inner bbox、颜色 profile、背景模式 page specs。
+- source Output: preprocessed source PDF、bbox text-strip candidates。
+- payload Artifacts: first-line indent,effective inner bboxColor profileDark mode page specs。
 
-render-only 阶段必须同时复用这两类产物。特别注意：同步刷新 source manifest 时不能清空既有
-`payload_prewarm`，否则 overlay 渲染会重新跑 payload prepare 和颜色采样。
+render-only Phase must reuse both artifact types simultaneously. Note: sync refresh. source manifest Cannot clear existing
+`payload_prewarm`otherwise overlay Rendering reruns. payload prepare and color sampling.
 
-真实 635 页样本中，payload prewarm 命中后：
+Real 635-page sample, payload prewarm hit:
 
-- `color_adapt_elapsed_seconds` 从约 `14.1s` 降到约 `0.1s`。
-- `payload_prepare_elapsed_seconds` 从约 `22.3s` 降到约 `9.9s`。
-- 总 render-only 从约 `49s` 降到约 `23s`。
+- `color_adapt_elapsed_seconds` Abide by Agreement `14.1s` Reduce to approx. `0.1s`。
+- payload_prepare_elapsed_seconds from about 22.3s down to about 9.9s.
+- total render-only from about 49s down to about 23s.
 
-## 真实 PDF 回归
+## Real PDF regression
 
-真实样本放在 [resources/samples/golden-pdfs](/home/wxyhgk/tmp/Code/resources/samples/golden-pdfs)。
+Place real samples [resources/samples/golden-pdfs](/home/wxyhgk/tmp/Code/resources/samples/golden-pdfs)。
 
-常用命令：
+Common commands:
 
 ```bash
 python3 backend/scripts/devtools/run_golden_flow.py --check-manifest
@@ -211,44 +211,44 @@ python3 backend/scripts/devtools/run_golden_flow.py \
   --bbox-item p001-b013
 ```
 
-当前最小回归集：
+Current minimal regression set:
 
-- `editable-paper-formula`：可编辑论文 PDF，覆盖文本层、公式和常规 Typst 背景渲染。
-- `pseudo-editable`：伪可编辑 PDF，覆盖扫描/背景图风险和文本层保留风险。
+- `editable-paper-formula`Editable Paper PDFcovering text layer, formulas, and general. Typst Background rendering.
+- `pseudo-editable`Pseudo-editable PDFCoverage Scan/Background image risk. Text layer retention risk.
 
-回归脚本会检查：
+Regression script checks:
 
-- 样本清单合法。
-- 最终 PDF 页数与源 PDF 一致。
-- 翻译诊断没有 unresolved 项。
-- 抽样 block 的 Typst 放置坐标与 OCR bbox 左上角一致。
+- Sample list valid.
+- Final PDF page numbers consistent with source PDF.
+- No translation diagnosis. unresolved Item.
+- Typst placement coordinates of sampled blocks consistent with OCR bbox top-left.
 
-## Import 边界
+## Import Boundary
 
-- runtime/pipeline 只应调用 `workflow/` 的稳定入口。
-- `analysis/route/` 可以依赖 `analysis/profile/`，但 `analysis/profile/` 不应反向依赖 `analysis/route/`。
-- `layout/` 不应直接调用 source cleanup；它只生成排版/渲染块。
-- `output/typst/` 不应重新做 OCR/翻译判断；需要页面事实时从 profile/route 传入。
-- `source/cleanup/` 可以操作 PDF 页面对象，但不应生成 Typst 源码。
-- 新代码优先 import 具体模块，不要依赖包根 `__init__.py` 的 re-export。
+- runtime/pipeline Call only `workflow/` Stable entry point.
+- `analysis/route/` can depend on `analysis/profile/`, but `analysis/profile/` Do not reverse-depend. `analysis/route/`。
+- `layout/` Do not call directly source cleanup； it only generates layout/Render block.
+- `output/typst/` Should not redo OCR/Translation judgment; when page facts are needed, from profile/route Incoming.
+- `source/cleanup/` Operable PDF Page object, do not generate. Typst Source code.
+- New code should prefer importing specific module, do not depend on package root __init__.py re-exports.
 
-## 推荐入口
+## Recommended entry points
 
 - [render_stage.py](/home/wxyhgk/tmp/Code/backend/scripts/runtime/pipeline/render_stage.py)
 - [services/rendering/workflow](/home/wxyhgk/tmp/Code/backend/scripts/services/rendering/workflow)
 
-## 公式回归
+## Formula regression
 
-如果新增了一条公式归一化规则，直接把坏例子补到
+If adding a new formula normalization rule, directly append bad examples to
 [`devtools/tests/translation/test_formula_math_markers.py`](/home/wxyhgk/tmp/Code/backend/scripts/devtools/tests/translation/test_formula_math_markers.py)
-里的参数化回归测试。
+Parameterized regression testing within.
 
-## 协作规矩
+## Collaboration rules
 
-如果渲染模块单独分人维护，这里只负责“读取翻译产物并生成最终 PDF”。
+If rendering module maintained separately, this layer only reads translation artifacts and generates final. PDF”。
 
-- 允许在这里改 overlay、Typst、背景处理、压缩、红框擦除和版面回填
-- 不要在这里补 OCR provider 特判，也不要在这里追加翻译请求或术语替换逻辑
-- 正式输入边界是 `source_pdf_path + translations_dir/translation_manifest_path`
-- 如果修改渲染输入协议、manifest 读取方式或最终产物命名，必须同步更新 `runtime/pipeline`、调用入口、README 和测试
-- 遇到上游 OCR 或翻译问题，优先把问题退回对应模块修，不要在 rendering 层堆跨层补丁
+- Allowed here: modify overlay, Typst background processing, compression, red-box erasure, layout refill
+- Do not add OCR provider Special case; do not append translation requests or term replacement logic here either.
+- Formal input boundary is `source_pdf_path + translations_dir/translation_manifest_path`
+- If modifying the rendering input protocol,manifest Reading method or final artifact naming: sync update required. `runtime/pipeline`Entry pointREADME and Test
+- Encountered upstream OCR Or translation issue, prefer returning the problem to the corresponding module for fix, do not rendering Layer Stack Cross-Layer Patch

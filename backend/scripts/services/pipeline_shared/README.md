@@ -1,44 +1,44 @@
-# Pipeline Shared 说明
+# Pipeline Shared description
 
-`services/pipeline_shared/` 放的是跨阶段共享、但不属于任何单一 provider 的通用协议层。
+`services/pipeline_shared/` Cross-stage shared, not belonging to any single provider Common protocol layer.
 
-当前主要承载三类东西：
+Currently hosts three main types:
 
 - `events.py`
-  Python worker 统一阶段事件 writer。所有 OCR / translation / render 细粒度事件都应通过这里写入 `logs/pipeline_events.jsonl`。
+  Python worker Unified stage events writerAll remove. OCR / translation / render All fine-grained events write through here. `logs/pipeline_events.jsonl`。
 - `contracts.py`
-  provider / translate / render worker 共用的 stdout label 与 summary 文件名。
+provider/translate/render workers share stdout label and summary file name.
 - `io.py`
-  中性的 JSON 落盘 helper。
+  neutral JSON flush to disk helper。
 - `source_json.py`
-  主线如何在 raw provider layout 与 normalized document 之间选择正式输入的中性规则。
+Main branch checkout: raw provider layout and normalized document formal neutral input rule select.
 - `summary.py`
-  主线 worker 共用的 pipeline summary 生成与打印逻辑。
+Mainline worker shared pipeline summary generate and print logic
 
-设计边界：
+Design boundaries:
 
-- 这里只放阶段级共享协议，不放 MinerU、Paddle 之类 provider 私有语义。
-- 这里只放主线都需要的通用能力，不放翻译策略、渲染实现或 OCR 适配细节。
-- `services/mineru/` 可以继续保留兼容壳，但新的主线依赖应优先指向这里。
-- 事件主语义必须写成顶层字段，不要只塞进 `payload`。
-- `message` 只给人看，前端和 Rust API canonicalize 都不应该靠它猜阶段。
+- Stage-level shared protocols only. No others. MinerU、Paddle Like this. provider Private semantics.
+- Only general capabilities required by the mainline go here. Not translation strategies, rendering implementations, or. OCR Adaptation details.
+- `services/mineru/` Keep compatibility shim, but new mainline dependencies should point here first.
+- Event primary semantics must be written as top-level fields, not just stuffed into `payload`。
+- `message` for human viewing only; frontend and Rust API canonicalize Never rely on it to guess the stage.
 
-## 事件字段约定
+## Event field conventions
 
-Python 原始事件必须稳定带：
+Python Original events must be stably carried:
 
 - `user_stage`：`ocr | translation | render | done`
-- `stage`：Python 内部机器阶段
-- `substage`：机器可读子阶段
-- `stage_detail`：用户可读短文案
-- `event_type`：原始事件类型，例如 `stage_progress`
-- `semantic_event_type`：语义事件类型，例如 `progress`
+- `stage`：Python Internal Machine Phase
+- `substage`Machine-readable subphase.
+- `stage_detail`User-readable short copy
+- `event_type`Original event type, e.g. `stage_progress`
+- `semantic_event_type`Semantic event type, e.g. `progress`
 - `progress_current`
 - `progress_total`
 - `progress_unit`
 - `payload`
 
-当前稳定子阶段包括：
+Current stable sub-stages include:
 
 - `ocr_processing`
 - `normalizing`
@@ -56,13 +56,13 @@ Python 原始事件必须稳定带：
 - `render_pages`
 - `render_compile`
 
-新增子阶段时，需要同步更新 Rust 映射：
+Sync updates when adding a substage. Rust Mapping:
 
 - `backend/rust_api/src/models/job/stage.rs`
 - `backend/rust_api/src/services/jobs/presentation/live_stage/canonical_events.rs`
 
-更完整的协议见：
+For full protocol, see:
 
-- `doc/core/rust_api/11-阶段事件与失败协议.md`
+- `doc/core/rust_api/11-stage-events-and-failure-protocol.md`
 
-这层的目标不是增加一层抽象，而是把原来挂在 `services/mineru/*` 名字下、实际已经被全流程共用的能力收口到中性模块，方便后续把后端继续演进成“模块化单体”。
+Layer goal: not add abstraction. Remove original attachment from `services/mineru/*` Consolidate shared capabilities under neutral module to facilitate backend evolution into modular monolith.

@@ -1,193 +1,193 @@
-# RetainPDF 主题皮肤系统（设计稿）
+# RetainPDF Theme skin system (design spec)
 
-**状态：** 设计 + 基础设施已落地；「江南院落」皮肤可切换试用  
-**日期：** 2026-07-21  
-**目标：** 先有一套**可扩展的皮肤架构**，再逐步把硬编码色替换为语义 token。
-
----
-
-## 1. 为什么要「系统」而不是直接改色
-
-当前问题：
-
-1. 颜色真值在 `tokens.css`，但大量页面仍写死 `#1d1d1f` / `#f5f5f7` 等。
-2. 只有单一 `:root`，无法并存「黑白克制」与「江南院落」两套气质。
-3. shadcn 变量（`--primary` 等）已映射到项目 token——**换肤只需换底层 token**，组件层可不动。
-
-原则：
-
-> **组件只认语义名（`--bg` / `--accent` / `--danger`…），皮肤只负责给语义名赋值。**
+**Status:** Design + Infrastructure deployed. "Jiangnan courtyard" skin switchable trial.
+**Date:** 2026-07-21
+**Goal:** One set first. **Extensible skin architecture**, then gradually replace hard-coded colors with semantic tokens.
 
 ---
 
-## 2. 语义色板（皮肤无关，名字稳定）
+## 1. Why「System」Instead of directly changing the color
 
-| Token | 角色 | 产品语义 |
+Current problem:
+
+1. Color truth value in `tokens.css`. Pages hardcode strings. Refactor: extract to i18n JSON. Use next-i18next. ponytail: ceiling: 100+ pages. Upgrade: custom loader if bundle size critical. `#1d1d1f` / `#f5f5f7` etc.
+2. Single only. `:root` cannot coexist. "Monochrome restraint" and "Jiangnan Courtyard" are two styles.
+3. shadcn Variable (`--primary` etc.) mapped to project token——**Skinning only requires changing the underlying layer. token**, component layer remains unchanged.
+
+Principle:
+
+> **Component accepts semantic names only (`--bg` / `--accent` / `--danger`…Skin only assigns semantic names.**
+
+---
+
+## 2. Semantic color palette stable. Use CSS variables. Define once. Apply globally.
+
+| Token | Role | Product semantics |
 |-------|------|----------|
-| `--bg` | 应用背景 | 院落 / 灰砖地面 |
-| `--paper` | 卡片 / 纸面 | 宣纸、浮起表面 |
-| `--surface` | 半透明玻璃面 | 顶栏、底栏毛玻璃 |
-| `--ink` | 主文字 / 强对比 | 墨色 |
-| `--muted` | 次要文字 | 淡墨 |
-| `--line` | 描边 / 分割 | 砖缝、淡线 |
-| `--accent` | 主按钮 / 链接 / 焦点 | **铜绿 / 梁枋青绿** |
-| `--accent-weak` | 选中弱底 | 浅青绿晕 |
-| `--selection` | 当前页、选中文档 | 青绿彩画浅底（新增） |
-| `--danger` | 错误 / 破坏操作 / 批注强调 | 朱砂 |
-| `--danger-weak` | 错误弱底 | 朱砂薄晕 |
-| `--ok` | 成功 | 可保留功能绿或偏青苔 |
-| `--warn` | 警告 | 琥珀 |
-| `--gold` | 高级模型 / 重要状态 | 鎏金（新增） |
-| `--chrome` | 顶栏深色 / 深色模式底 | 黛瓦墨黑（新增） |
-| `--reader-page` | PDF 页背景 | 宣纸米白（新增，阅读器） |
+| `--bg` | Background | Courtyard. / Gray brick floor |
+| `--paper` | Card / On paper | Rice paper, floating surface |
+| `--surface` | Translucent glass surface | Top/bottom bar frosted glass. |
+| `--ink` | Primary text / High contrast | Ink |
+| `--muted` | Secondary text | Light ink |
+| `--line` | Stroke / Split | Grout lines, faint lines |
+| `--accent` | Primary button / Link / Focus | **Verdigris. / Azure-green beams and purlins** |
+| `--accent-weak` | Select weak bottom | Pale teal halo |
+| `--selection` | Current page, selected document | Teal-green decorative painting, light base (new) |
+| `--danger` | Error / Destructive operation / Emphasize annotation | Cinnabar |
+| `--danger-weak` | Weak error base. | Cinnabar blush |
+| `--ok` | Success | Retain green or moss-green. |
+| `--warn` | Warning | Amber |
+| `--gold` | Advanced Model / Important status | Gilding (new) |
+| `--chrome` | Top bar dark. / Dark mode background | Black roof tiles (new) |
+| `--reader-page` | PDF Page background. | Rice White (new, reader) |
 
-shadcn 层继续：
+shadcn Continue layer
 
 - `--background` ← `--bg`
 - `--foreground` ← `--ink`
 - `--primary` ← `--accent`
 - `--destructive` ← `--danger`
-- …（见 `shadcn-theme.css`）
+- ... (see `shadcn-theme.css`)
 
-**禁止**皮肤直接改 shadcn 名；只改项目语义 token。
+**Forbidden**: Direct skin edits. Use shadcn names; project semantics use tokens only.
 
 ---
 
-## 3. 皮肤清单
+## 3. Skin list
 
-内置皮肤（注册表 `THEME_REGISTRY`，设置 → 外观 按组展示）：
+Built-in skin (registry) `THEME_REGISTRY`Settings → Appearance Group view):
 
-| id | 分组 | 说明 |
+| id | Group | Description |
 |----|------|------|
-| `classic` | light | 默认黑白灰 |
-| `jiangnan` | accent | 青砖 · 宣纸 · 铜绿 · 朱砂 |
-| `seacliff` | accent | 海岬雾蓝 · 海石青 |
-| `night` | dark | 黛瓦夜色（`html.theme-dark`） |
+| `classic` | light | Default black, white, gray |
+| `jiangnan` | accent | grey brick · Xuan paper · Verdigris · Cinnabar |
+| `seacliff` | accent | Cape Mist Blue · Sea Stone Cyan |
+| `night` | dark | Night on Dark Tiles (`html.theme-dark`） |
 
-新增皮肤只需 3 步，见 **[ADDING_A_THEME.md](./ADDING_A_THEME.md)**。
+Add skin: 3 Step, see **[ADDING_A_THEME.md](./ADDING_A_THEME.md)**。
 
-江南色板细节：`skins/jiangnan.md`。
+Jiangnan Color Palette Details:`skins/jiangnan.md`。
 
 ---
 
-## 4. 运行机制
+## 4. Runtime Mechanism
 
-### 4.1 挂载点
+### 4.1 Mount Point
 
 ```html
-<html data-theme="jiangnan">  <!-- 或 classic -->
+<html data-theme="jiangnan">  <!-- or classic -->
 ```
 
 CSS：
 
 ```css
 :root,
-[data-theme="classic"] { /* classic 值 */ }
+[data-theme="classic"] { /* classic values */ }
 
-[data-theme="jiangnan"] { /* 覆盖语义 token */ }
+[data-theme="jiangnan"] { /* Override semantic tokens token */ }
 ```
 
-### 4.2 持久化
+### 4.2 Persist
 
 - Key：`localStorage["retainpdf.theme"]` = `"classic" | "jiangnan" | ...`
-- 启动：尽早读 storage 写到 `<html data-theme>`，避免 FOUC  
-  - 脚本：`frontend/src/shared/theme/boot-theme.js`（各 HTML 可内联或入口首行 import）
+- Start: Read early storage and write to `<html data-theme>` to avoid FOUC
+  - Script:`frontend/src/shared/theme/boot-theme.js`(each HTML Inline or at entry's first line. import）
 
-### 4.3 切换 API（代码）
+### 4.3 Switch API Code
 
 ```ts
 import { getTheme, setTheme, listThemes } from "./shared/theme/theme";
 
-setTheme("jiangnan"); // 写 storage + document.documentElement.dataset.theme
+setTheme("jiangnan"); // write storage + document.documentElement.dataset.theme
 ```
 
-设置页后续加「外观」一行即可接上，不必改业务组件。
+Settings page to be added later. "Appearance": Just add one line to connect; no need to modify business components.
 
 ---
 
-## 5. 文件布局
+## 5. File layout
 
 ```
 docs/theme-system/
-  THEME_SYSTEM.md          ← 本文
+  THEME_SYSTEM.md          ← This document
   skins/
-    jiangnan.md            ← 江南色板说明（设计向）
+    jiangnan.md            ← Jiangnan Color Palette Guide (Design)
 
 frontend/src/styles/
-  tokens.css               ← 语义契约 + 默认引入 classic
+  tokens.css               ← Semantic Contract + Default Import classic
   themes/
-    classic.css            ← 当前默认肤色
-    jiangnan.css           ← 江南院落
-  shadcn-theme.css         ← 仍映射语义 token（皮肤无关）
+    classic.css            ← Current default skin tone
+jiangnan.css           â Jiangnan Courtyard
+  shadcn-theme.css         ← Keep mapping semantics. token(skin unrelated)
 
 frontend/src/shared/theme/
   theme.ts                 ← get/set/list + storage
-  boot-theme.ts            ← 同步写 data-theme（防闪）
+  boot-theme.ts            ← Sync write data-themeAnti-flicker
 ```
 
 ---
 
-## 6. 落地阶段（建议）
+## 6. Implementation phase (recommended)
 
-| 阶段 | 内容 | 风险 |
+| Phase | Content | Risk |
 |------|------|------|
-| **S0** ✅ | 语义 token 分层 + classic / jiangnan 两套 CSS + setTheme API | 低 |
-| **S1** ✅ | 设置「外观」tab + 主题卡片；三页 entry `bootTheme()` | 低 |
-| **S2** ✅ | 批量清中性硬编码 → token；选中态走 `--accent` | 中 |
-| **S3** ✅ | 注册表多皮肤架构；`night`/`seacliff`；外观分组 UI | 中 |
-| **S4** | 继续清剩余 hex；业务选中态统一 `--selection` | 中 |
-| **S5** | 图标/动效随主题；社区/导入自定义皮肤（可选） | 高 |
+| S0 ✅ | Semantic token layering + classic / jiangnan Two sets CSS + setTheme API | Low |
+| **S1** ✅ | Set "Appearance" tab + Theme card; three pages entry `bootTheme()` | Low |
+| S2 ✅ | Batch remove neutral hardcoding → tokenSelected state path --accent | Medium |
+| S3 ✅ | Registry multi-skin architecture;night/seacliffAppearance group UI | Medium |
+| **S4** | Clear remaining. hexBusiness selected state unified `--selection` | Medium |
+| **S5** | Icons/Animations follow theme; community/Import custom skin (optional) | high |
 
-**不要**在 S0 大改组件视觉；默认仍 classic，江南皮肤靠 `data-theme` 试用。
+**Do not** perform Major visual overhaul in S0; default remains classicJiangnan skin relies on `data-theme` trial.
 
 ---
 
-## 7. 试用江南皮肤（开发）
+## 7. Try Jiangnan Skin (Dev)
 
-浏览器控制台：
+Browser console:
 
 ```js
 localStorage.setItem("retainpdf.theme", "jiangnan");
 document.documentElement.dataset.theme = "jiangnan";
 ```
 
-或：
+Or:
 
 ```js
-// 若已接入 shared/theme
-import { setTheme } from "/…"; // 打包后用设置页
+// If integrated shared/theme
+import { setTheme } from "/…"; // Settings page post-build.
 ```
 
-恢复默认：
+Restore defaults:
 
 ```js
 localStorage.setItem("retainpdf.theme", "classic");
 document.documentElement.dataset.theme = "classic";
-// 或 removeItem + removeAttribute
+// Or removeItem + removeAttribute
 ```
 
 ---
 
-## 8. 与图标系统的关系
+## 8. Relationship with icon system
 
-- 图标保持 **单色 currentColor**，换肤只改 token，图标自动跟 `--ink` / `--accent`。
-- 朱砂批注、鎏金状态：用 `--danger` / `--gold` 给 badge 上色，不要把色画死在 SVG 里。
+- Keep icon **monochrome currentColor**. Change skin only modify CSS variables. tokenIcon auto-follow parent color. `--ink` / `--accent`.
+- Cinnabar annotations, gilded status: use `--danger` / `--gold` to apply color to badge. Do not hardcode values in SVG.
 
 ---
 
-## 9. 决策记录
+## 9. Decision log
 
-| 决策 | 选择 | 原因 |
+| Decision | Choice | Reason |
 |------|------|------|
-| 切换方式 | `data-theme` 属性 | 不依赖 React 也能首屏生效；CSS 纯选择器 |
-| 默认皮肤 | classic | 不破坏现有观感与测试截图 |
-| 品牌主色 | `--accent` 可随皮肤变绿 | 主按钮/焦点统一走 accent |
-| 危险色 | 各皮肤可微调，语义仍是 danger | 删除/失败保持可识别 |
-| 硬编码清理 | 分期 | 一次全换 diff 过大 |
+| Switching method | `data-theme` Properties | Independent of React. Takes effect on first screen. Pure CSS selectors |
+| Default Skin | classic | Do not break existing visuals or test screenshots. |
+| Brand primary color | `--accent` Turns green with skin | Main button/Unify focus handling. accent |
+| Danger | Each skin fine-tunable; semantics unchanged. danger | Delete/Keep failures identifiable. |
+| Hardcoded cleanup | Installments | Replace all instances. diff too large |
 
 ---
 
-## 10. 一句话
+## 10. Summary
 
-**皮肤 = 给同一套语义 CSS 变量换色；应用 = 只写语义变量。**  
-江南院落是第一套「有故事」的皮肤；classic 保底。
+**Skin = Use same semantics. CSS Variable color change; apply = Semantic variables only.**
+Jiangnan Courtyard is the first set.「There is a story.」Skin;classic Fallback

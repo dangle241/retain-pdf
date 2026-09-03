@@ -1,5 +1,5 @@
-// 单页：对齐旧 createManualPageElement + setManualPageSize（固定宽高）
-// 对照时 syncedMinHeight 来自 syncReaderPageRows 的 max 高度
+// Single pages: align with old createManualPageElement + setManualPageSize (fixed width/height)
+// When side-by-side, syncedMinHeight comes from the max height of syncReaderPageRows
 
 import { memo, useEffect, useRef, useState } from "react";
 import { Page } from "react-pdf";
@@ -17,7 +17,7 @@ export type PdfPageSlotProps = {
   devicePixelRatio: number;
   scrollRoot: HTMLElement | null;
   pane?: ReaderPaneId;
-  /** 对照左右同页 max 高度 */
+  /** Left/right pages share the same max height in side-by-side mode */
   syncedMinHeight?: number;
   onMetrics?: () => void;
 };
@@ -54,7 +54,7 @@ function PdfPageSlotInner({
     return () => observer.disconnect();
   }, [scrollRoot, pageNumber]);
 
-  // 旧引擎 page 固定 height = viewport * scale
+  // Old engine: fixed page height = viewport * scale
   const naturalHeight = Math.max(120, Math.floor(width * aspect));
   const boxHeight = Math.max(naturalHeight, Math.ceil(syncedMinHeight || 0));
 
@@ -113,3 +113,6 @@ function PdfPageSlotInner({
 }
 
 export const PdfPageSlot = memo(PdfPageSlotInner);
+
+
+

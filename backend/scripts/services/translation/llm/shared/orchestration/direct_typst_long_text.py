@@ -99,7 +99,8 @@ def translate_direct_typst_long_text_chunks(
         translated_parts.append(translated)
 
     if degraded_chunks >= len(chunks):
-        # 全部块失败才整体判失败;个别块失败走下方的部分接受。
+        # Only mark the whole translation as failed when EVERY chunk failed.
+        # Individual chunk failures take the partial-accept path below.
         result = terminal_payloads.translation_failed_payload_for_validation(
             item,
             context=context,
@@ -117,8 +118,9 @@ def translate_direct_typst_long_text_chunks(
         return result
 
     if degraded_chunks:
-        # 部分接受:失败块降级为原文保留(与公式窗口路径一致),
-        # 不再因一个块的瞬时失败作废整条 4000+ 字符的大块。
+        # Partial accept: failed chunks degrade to "keep original" (matches
+        # the formula-window path) instead of voiding the whole 4000+-char
+        # block because of a single chunk's transient failure.
         translated_parts = [
             part if part else chunks[index]
             for index, part in enumerate(translated_parts)

@@ -1,32 +1,32 @@
-// 快捷键说明：底栏键盘图标 + 浮层列表；h / ? 也可打开。
+// Keyboard shortcuts help: bottom-bar keyboard icon + floating list; h / ? also opens it.
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Keyboard } from "lucide-react";
 
 const SHORTCUT_GROUPS: { title: string; items: { keys: string; desc: string }[] }[] = [
   {
-    title: "翻页",
+    title: "Page navigation",
     items: [
-      { keys: "J · ↓ · PgDn", desc: "下一页" },
-      { keys: "K · ↑ · PgUp", desc: "上一页" },
-      { keys: "Home / End", desc: "首页 / 末页" },
-      { keys: "点底栏页码", desc: "输入页码跳转" },
+      { keys: "J · ↓ · PgDn", desc: "Next page" },
+      { keys: "K · ↑ · PgUp", desc: "Previous page" },
+      { keys: "Home / End", desc: "First page / Last page" },
+      { keys: "Click bottom page number", desc: "Enter page number to jump" },
     ],
   },
   {
-    title: "缩放",
+    title: "Zoom",
     items: [
-      { keys: "+ / −", desc: "放大 / 缩小" },
-      { keys: "0", desc: "重置为模式默认" },
-      { keys: "点百分比", desc: "重置为模式默认" },
+      { keys: "+ / −", desc: "Zoom in / Zoom out" },
+      { keys: "0", desc: "Reset to mode default" },
+      { keys: "Click percentage", desc: "Reset to mode default" },
     ],
   },
   {
-    title: "模式",
+    title: "Mode",
     items: [
-      { keys: "1", desc: "原文" },
-      { keys: "2", desc: "译文" },
-      { keys: "3", desc: "对照阅读" },
+      { keys: "1", desc: "Source" },
+      { keys: "2", desc: "Translation" },
+      { keys: "3", desc: "Side-by-side Reader" },
     ],
   },
 ];
@@ -73,9 +73,9 @@ export function ReaderShortcutsHelp() {
       if (isEditableTarget(event.target)) return;
       const key = event.key;
       if (key === "?" || key === "h" || key === "H" || key === "/") {
-        // / 在部分键盘上是 ? 未 shift；也接受 h
+        // On some keyboards / is ? without shift; also accept h
         if (key === "/" && !event.shiftKey) {
-          // 单独 / 不当帮助，避免误触
+          // Don't treat lone / as help to avoid accidental triggers
           return;
         }
         event.preventDefault();
@@ -91,10 +91,10 @@ export function ReaderShortcutsHelp() {
       <button
         type="button"
         className={`reader-react-hud-btn reader-react-shortcuts-btn${open ? " is-active" : ""}`}
-        aria-label="快捷键说明"
+        aria-label="Keyboard shortcuts"
         aria-expanded={open}
         aria-controls={panelId}
-        title="快捷键（H 或 ?）"
+        title="Shortcuts (H or ?)"
         onClick={() => setOpen((v) => !v)}
       >
         <Keyboard className="reader-react-shortcuts-icon" size={16} strokeWidth={2.25} aria-hidden />
@@ -104,14 +104,14 @@ export function ReaderShortcutsHelp() {
           id={panelId}
           className="reader-react-shortcuts-panel"
           role="dialog"
-          aria-label="阅读器快捷键"
+          aria-label="Reader shortcuts"
         >
           <div className="reader-react-shortcuts-head">
-            <strong>快捷键</strong>
+            <strong>Shortcuts</strong>
             <button
               type="button"
               className="reader-react-shortcuts-close"
-              aria-label="关闭"
+              aria-label="Close"
               onClick={() => setOpen(false)}
             >
               ×
@@ -132,9 +132,12 @@ export function ReaderShortcutsHelp() {
               </section>
             ))}
           </div>
-          <p className="reader-react-shortcuts-foot">在输入框内不会触发快捷键</p>
+          <p className="reader-react-shortcuts-foot">Shortcuts are disabled while typing in inputs</p>
         </div>
       ) : null}
     </div>
   );
 }
+
+
+

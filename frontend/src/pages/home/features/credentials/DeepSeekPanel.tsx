@@ -1,5 +1,6 @@
-// DeepSeek(翻译模型)卡片(对照旧 components/dialogs/browser-credentials-dialog.js
-// 的 DeepSeek 区块 + validation-view.js 的校验徽标/充值链接语义)。
+// DeepSeek (translation model) card (Side-by-side with old
+// components/dialogs/browser-credentials-dialog.js's DeepSeek section + validation-view.js's
+// validation badge / top-up link semantics).
 
 import { CREDENTIAL_DOM_IDS } from "./credentials-dom-ids.js";
 import { useCredentialsController } from "./useCredentialsController.js";
@@ -17,7 +18,7 @@ function validationIcon(tone = "", content = "") {
   if (tone === "error") {
     return "!";
   }
-  return "…";
+  return "...";
 }
 
 export function DeepSeekPanel() {
@@ -74,9 +75,11 @@ export function DeepSeekPanel() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          充值
+          Top Up
         </a>
       </div>
     </section>
   );
 }
+
+

@@ -4,7 +4,8 @@ fn default_documents_limit() -> u32 {
     50
 }
 
-/// 文档:图书馆一等公民,document_id = sha256(文件字节)。
+/// Document: a first-class citizen of the library; `document_id` is
+/// `sha256(file_bytes)`.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DocumentRecord {
     pub document_id: String,
@@ -21,19 +22,22 @@ pub struct DocumentRecord {
     pub last_opened_at: Option<String>,
     pub updated_at: String,
     pub tags: Vec<String>,
-    /// 源 PDF 下载 URL（列表/详情由 API 层填充，不入库）
+    /// Source PDF download URL (filled by API layer for list/detail,
+    /// not stored in DB).
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub source_pdf_url: String,
-    /// 封面图 URL（列表/详情由 API 层填充，不入库）
+    /// Cover image URL (filled by API layer for list/detail,
+    /// not stored in DB).
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub cover_url: String,
-    /// 缩略图 URL（列表/详情由 API 层填充，不入库）
+    /// Thumbnail image URL (filled by API layer for list/detail,
+    /// not stored in DB).
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub thumbnail_url: String,
 }
 
-/// 收藏:锚点 = (document_id, job_id, page_idx, block_id[, 选区]) + 引文快照。
-/// job_id 标记锚点所在的块空间版本;被引用的 job 不允许单独删除。
+/// Favorite: anchor = (document_id, job_id, page_idx, block_id[, selection]) + citation snapshot.
+/// job_id marks the blockspace version containing the anchor; referenced jobs cannot be deleted alone.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FavoriteRecord {
     pub favorite_id: String,
@@ -47,17 +51,17 @@ pub struct FavoriteRecord {
     pub quote_text: String,
     pub translated_quote_text: String,
     pub note: String,
-    /// 图片附件(assets.asset_id,内容寻址);空串 = 纯文字收藏
+    /// Image attachment (assets.asset_id, content-addressed); empty = plain-text favorite.
     #[serde(default)]
     pub asset_id: String,
-    /// 截图剪裁矩形几何(前端坐标系,整存整取)
+    /// Screenshot crop rectangle geometry (frontend coordinate system, stored as-is).
     #[serde(default)]
     pub rect_json: String,
     pub created_at: String,
     pub updated_at: String,
 }
 
-/// 内容寻址的二进制资产(收藏截图等);文件本体在 data/assets/<2>/<hash>。
+/// Content-addressed binary asset (e.g. favorite screenshot); file body at data/assets/<2>/<hash>.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AssetRecord {
     pub asset_id: String,
@@ -68,8 +72,8 @@ pub struct AssetRecord {
     pub created_at: String,
 }
 
-/// AI 问答会话。document_id 为空 = 全库问答。
-/// head_id: 当前可见分支的叶消息 id(空 = 用 max(seq) 推断)。
+/// AI Q&A conversation. document_id = None means a whole-library Q&A.
+/// head_id: leaf message id of currently visible branch (empty = use max(seq)).
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConversationRecord {
     pub conversation_id: String,
@@ -79,13 +83,15 @@ pub struct ConversationRecord {
     pub updated_at: String,
     #[serde(default)]
     pub message_count: i64,
-    /// 当前可见叶;空字符串表示未显式设置。
+    /// Currently visible leaf; empty string means not explicitly set.
     #[serde(default)]
     pub head_id: String,
 }
 
-/// 会话消息。citations_json 是软锚点快照:job 删除后跳转失效但内容不丢。
-/// parent_id: 树边;空 = 根。同 parent 的多条为分支兄弟(重试/编辑)。
+/// Conversation message. `citations_json` is a soft-anchor snapshot:
+/// after job deletion, jumping to the anchor fails but content is preserved.
+/// `parent_id`: tree edge; empty = root. Multiple messages with the same
+/// parent are branch siblings (retries / edits).
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MessageRecord {
     pub message_id: String,
@@ -97,13 +103,14 @@ pub struct MessageRecord {
     pub tool_trace_json: String,
     pub model: String,
     pub created_at: String,
-    /// 父消息 id;空字符串 = 根节点。
+    /// Parent message id; empty string = root node.
     #[serde(default)]
     pub parent_id: String,
 }
 
-/// 分类文件夹(合集)。v1 只用扁平结构展示,parent_id 为未来嵌套子分类预留
-/// (建表时就规划好,当前恒为 None,不是本次要拆的技术债)。
+/// Classification folder (collection). v1 uses a flat structure for display;
+/// `parent_id` is reserved for future nested sub-collections (planned at
+/// table creation, currently always None, not a technical debt for this PR).
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CollectionRecord {
     pub collection_id: String,
@@ -111,12 +118,13 @@ pub struct CollectionRecord {
     pub parent_id: Option<String>,
     pub sort_order: i64,
     pub created_at: String,
-    /// 该文件夹当前文档数;只有列表接口才会填,单条查询恒为 0。
+    /// Current number of documents in this folder; filled only by list
+    /// endpoints, always 0 for single-record queries.
     #[serde(default)]
     pub document_count: i64,
 }
 
-/// blocks_fts 的一行(派生索引,可随时由任务产物重建)。
+/// A row from `blocks_fts` (derived index, can be rebuilt from job artifacts).
 #[derive(Debug, Clone)]
 pub struct FtsBlockRow {
     pub page_idx: i64,
@@ -125,7 +133,8 @@ pub struct FtsBlockRow {
     pub translated_text: String,
 }
 
-/// 全文检索命中:带完整锚点,前端可跳转阅读器原位。
+/// Full-text search hit: contains full anchors so the frontend can jump
+/// to the exact position in the reader.
 #[derive(Debug, Serialize, Clone)]
 pub struct BlockSearchHit {
     pub document_id: String,
@@ -136,7 +145,7 @@ pub struct BlockSearchHit {
     pub translated_snippet: String,
 }
 
-/// GET /api/v1/documents 查询参数。
+/// Query parameters for `GET /api/v1/documents`.
 #[derive(Debug, Deserialize)]
 pub struct ListDocumentsQuery {
     #[serde(default = "default_documents_limit")]
@@ -146,7 +155,8 @@ pub struct ListDocumentsQuery {
     pub reading_status: Option<String>,
     pub tag: Option<String>,
     pub collection_id: Option<String>,
-    /// 按任意 job_id(含历史 run)直查其所属文档,前端无需再扫列表反查
+    /// Look up the document owned by any `job_id` (including historical
+    /// runs); allows the frontend to avoid scanning the list to reverse-lookup.
     pub job_id: Option<String>,
 }
 
@@ -163,13 +173,15 @@ pub struct PatchDocumentInput {
     pub tags: Option<Vec<String>>,
 }
 
-/// POST /api/v1/favorites
+/// `POST /api/v1/favorites`
 #[derive(Debug, Deserialize)]
 pub struct CreateFavoriteInput {
-    /// 可缺省:给了 job_id 时后端自动解析所属文档(历史 run 也能收藏)
+    /// Optional: if `job_id` is provided, the backend automatically
+    /// resolves the document (historical runs can also be favorited).
     #[serde(default)]
     pub document_id: String,
-    /// 锚点所在块空间;缺省用文档当前 active_job_id
+    /// The block space for the anchor; defaults to the document's
+    /// current `active_job_id`.
     pub job_id: Option<String>,
     pub page_idx: i64,
     pub block_id: String,
@@ -182,10 +194,12 @@ pub struct CreateFavoriteInput {
     pub translated_quote_text: Option<String>,
     #[serde(default)]
     pub note: Option<String>,
-    /// 图片附件:先 POST /api/v1/assets 拿 asset_id 再挂上(kind 建议 figure)
+    /// Image attachment: first `POST /api/v1/assets` to get an
+    /// `asset_id` then attach it (suggested `kind` = "figure").
     #[serde(default)]
     pub asset_id: Option<String>,
-    /// 截图剪裁矩形几何(前端坐标系原样存)
+    /// Screenshot crop rectangle geometry (stored as-is from the
+    /// frontend coordinate system).
     #[serde(default)]
     pub rect_json: Option<String>,
 }
@@ -217,13 +231,14 @@ fn default_search_limit() -> u32 {
     20
 }
 
-/// GET /api/v1/search
+/// `GET /api/v1/search`
 #[derive(Debug, Deserialize)]
 pub struct SearchQuery {
     pub q: String,
     #[serde(default = "default_search_limit")]
     pub limit: u32,
-    /// 限定单文档（阅读器 / AI 整本问答）；空 = 全库
+    /// Restrict to a single document (Reader / AI whole-book Q&A);
+    /// empty = whole library.
     #[serde(default)]
     pub document_id: String,
 }
@@ -254,7 +269,7 @@ pub struct ListConversationsQuery {
     pub limit: u32,
     #[serde(default)]
     pub offset: u32,
-    /// 按文档过滤;空 = 全部。
+    /// Filter by document; empty = all.
     #[serde(default)]
     pub document_id: String,
 }
@@ -281,13 +296,13 @@ pub struct AppendMessageInput {
     pub tool_trace_json: String,
     #[serde(default)]
     pub model: String,
-    /// 父消息 id;省略/空 = 挂到当前 head(线性续写)。
+    /// Parent message id; omitted/empty = attach to current head (linear continuation).
     #[serde(default)]
     pub parent_id: String,
-    /// 客户端稳定 id(与 assistant-ui store id 对齐);空则服务端生成。
+    /// Client-side stable id (aligned with assistant-ui store id); if empty, the server generates one.
     #[serde(default)]
     pub message_id: String,
-    /// 追加后是否把 head 指到本条;默认 true。
+    /// Whether to point the head to this message after appending; defaults to true.
     #[serde(default = "default_true")]
     pub set_head: bool,
 }
@@ -298,7 +313,7 @@ fn default_true() -> bool {
 
 #[derive(Debug, Deserialize)]
 pub struct PatchConversationInput {
-    /// 切换可见分支叶节点。
+    /// Switch the visible branch leaf node.
     #[serde(default)]
     pub head_id: String,
     #[serde(default)]

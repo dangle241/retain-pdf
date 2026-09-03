@@ -1,61 +1,61 @@
-# 测试贡献指南
+# Test contribution guidelines
 
-测试贡献和代码贡献同等重要。专业测试人员不需要先理解全部内部实现，也可以直接贡献高价值工作。
+Test contribution and code contribution are equally important. Professional testers do not need to fully understand internal implementation to contribute high-value work directly.
 
-## 可以贡献什么
+## Contribute code, docs, or bug reports.
 
-- 可公开或已脱敏的 PDF 样本，以及对应的期望现象、页码、bbox、截图和 job_id。
-- OCR 归一化、翻译、公式保护、渲染、下载、reader、library、resume 的回归用例。
-- 大样本性能基准，例如 100 页、500 页、1000 页 PDF 的阶段耗时、内存占用和输出体积。
-- 端到端验收清单，例如桌面端首次启动、Docker 升级、断网重试、token 错误、任务取消、重新渲染、批量删除。
-- 手工测试报告，包含环境、版本、复现步骤、期望结果、实际结果和附件。
-- 自动化测试脚本或 fixture，但必须保证不包含私有 token、真实用户文件或不可公开内容。
+- Public or anonymized PDF Sample, corresponding expected result, page number,bboxScreenshot capture job_id。
+- OCR Normalization, translation, formula protection, rendering, download,reader、library、resume Regression test cases.
+- Large-sample performance benchmarks, e.g., 100-page, 500-page, 1000-page PDF stage durations, memory usage, output sizes.
+- End-to-end acceptance checklist, e.g., desktop first launch,Docker Upgrade, Retry on disconnect,token Error, Task Cancel, Re-render, Batch Delete.
+- Manual test report: environment, version, reproduction steps, expected results, actual results, attachments.
+- Automated test script or fixturebut must ensure no private content is included. token, real user files, or non-public content.
 
-## 测试 Issue 建议格式
+## Test issue suggested format
 
 ```md
-## 环境
+## Environment
 
-- RetainPDF 版本：
-- 运行方式：桌面端 / Docker / 本地开发
-- 系统和浏览器：
+- RetainPDF version:
+- Run mode: Desktop / Docker / Local Development
+- System and browser:
 - OCR provider：
-- 模型 provider：
+- Model provider:
 
-## 样本
+## Sample
 
-- 是否可公开：
-- 页数：
-- 相关页码 / bbox：
+- Public:
+- Pages:
+- Related pages / bbox：
 - job_id：
 
-## 步骤
+## Steps
 
 1. ...
 2. ...
 
-## 期望结果
+## Expected result
 
 ...
 
-## 实际结果
+## Actual result
 
 ...
 
-## 附件
+## Attachment
 
-- 截图 / 脱敏 PDF / 日志 / 事件流片段
+- Screenshot / Desensitize PDF / Logs / Event Stream Fragment
 ```
 
-## 测试 PR 建议
+## Test PR suggestions
 
-- fixture 尽量小，能用 1 到 3 页复现就不要提交整本书。
-- 大文件、批量 PDF、benchmark 输出默认放 `experiments/` 或外部链接；只有明确需要进入自动化测试的小样本才提交仓库。
-- 新增测试时说明它保护的 bug、模块或用户流程。
-- 对性能测试，写清楚机器环境、样本页数、命令、旧耗时、新耗时和允许波动范围。
-- 对视觉/渲染问题，尽量附页码、bbox、截图和期望行为；只说“看起来不对”很难形成回归测试。
+- Keep fixture minimal but usable: 1-3 pages; do not submit entire book for reproduction.
+- Large Files, Batch PDF、benchmark Default output location `experiments/` or external links; only small samples explicitly requiring automated testing are committed to the repository.
+- When adding tests, state what they protect. bugModule user flow.
+- For performance testing, clearly specify the machine environment, sample page count, command, old duration, new duration, and allowable fluctuation range.
+- Visual/Rendering issues. Include page numbers if possible.bboxScreenshot and expected behavior missing. "Looks wrong" fails regression.
 
-## 常用测试入口
+## Common test entry points
 
 Rust API：
 
@@ -72,7 +72,7 @@ PYTHONPATH=backend/scripts python3 -m pytest backend/scripts/devtools/tests/rend
 python3 backend/scripts/devtools/check_pipeline_architecture.py
 ```
 
-前端与桌面端：
+Frontend & desktop:
 
 ```bash
 npm --prefix frontend test
@@ -80,9 +80,9 @@ npm --prefix frontend run build
 npm --prefix desktop run verify-frontend-sync
 ```
 
-`npm --prefix frontend test` 使用 Node 原生 test runner，优先覆盖任务进度、状态整形等不依赖浏览器和后端服务的纯函数回归。
+npm --prefix frontend test uses Node native test runner, covers task progress status reshaping pure functions first. No browser backend dependency.
 
-前端端到端状态 smoke 会真实提交任务，通常需要本地 Rust API、OCR token、模型 key 和样本 PDF；具备这些条件时再跑：
+Frontend end-to-end state smoke will actually submit tasks; typically requires local Rust API, OCR token, model key, and sample PDF; run when conditions met:
 
 ```bash
 cd frontend

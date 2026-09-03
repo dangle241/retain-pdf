@@ -10,7 +10,7 @@ function cleanStack(value) {
 
 function inferErrorMessage(error) {
   if (!error) {
-    return "未知错误";
+    return "Unknown error";
   }
   if (typeof error === "string") {
     return error;
@@ -35,7 +35,7 @@ function normalizeDetails(details: any = {}) {
 
 export function buildErrorDiagnostic(error, context: any = {}) {
   const message = inferErrorMessage(error);
-  const operation = cleanText(context.operation) || "前端操作";
+  const operation = cleanText(context.operation) || "Frontend operation";
   const status = inferHttpStatus(error, context);
   const url = inferUrl(error, context);
   const jobId = cleanText(context.jobId) || cleanText(error?.jobId);
@@ -44,29 +44,31 @@ export function buildErrorDiagnostic(error, context: any = {}) {
   const stack = context.includeStack === false ? "" : cleanStack(error?.stack);
 
   const diagnosticLines = [
-    "RetainPDF 前端错误诊断",
-    `时间: ${now}`,
-    `前端版本: ${APP_VERSION}`,
-    `操作: ${operation}`,
+    "RetainPDF frontend error diagnostics",
+    `Time: ${now}`,
+    `Frontend version: ${APP_VERSION}`,
+    `Action: ${operation}`,
     jobId ? `job_id: ${jobId}` : "",
-    status ? `HTTP 状态码: ${status}` : "",
+    status ? `HTTP status code: ${status}` : "",
     url ? `URL: ${url}` : "",
-    `错误信息: ${message}`,
+    `Error message: ${message}`,
     ...details.map(([key, value]) => `${key}: ${value}`),
-    stack ? `堆栈:\n${stack}` : "",
+    stack ? `Stack:\n${stack}` : "",
     cleanText(globalThis.navigator?.userAgent) ? `User-Agent: ${cleanText(globalThis.navigator?.userAgent)}` : "",
   ].filter(Boolean);
 
   return {
     kind: "error-diagnostic",
-    summary: `${operation}失败：${message}`,
+    summary: `${operation}Failed: ${message}`,
     diagnostic: diagnosticLines.join("\n"),
   };
 }
 
 export function messageForErrorBox(value) {
   if (value && typeof value === "object" && value.kind === "error-diagnostic") {
-    return value.summary || value.diagnostic || "操作失败";
+    return value.summary || value.diagnostic || "Operation failed";
   }
   return value;
 }
+
+

@@ -1,16 +1,18 @@
-// home 页文本注册表(id → 文案)store。
+// Home page text registry (id → text) store.
 //
-// 旧世界 ui/text.js 的 setText(id, value) 是全局 DOM 写入口;React 世界改为
-// 写入本 store,由订阅了对应 id 的组件自行渲染。3a 阶段只有 error-box
-// (inline-error-box)消费;status-detail/job-runtime 等 3b 域的 id 先落在
-// store 里等占位组件接管——setText 回调接口因此对 3b 保持稳定。
+// In the legacy world, ui/text.js's setText(id, value) is a global DOM write entry; in the React world
+// it writes to this store, and components subscribed to the corresponding id render themselves.
+// In stage 3a only error-box (inline-error-box) consumes it; ids from 3b domains like status-detail/job-runtime
+// are parked in the store waiting for placeholder components to take over — so the setText callback
+// interface stays stable for 3b.
 //
-// 特例口径(镜像 ui/text.js):"error-box" 的 value 允许是 error-diagnostic
-// 对象,展示层用 messageForErrorBox 提取摘要;这里原样存储,由组件解读。
+// Special-case contract (mirrors ui/text.js): the value of "error-box" may be an error-diagnostic
+// object; the display layer uses messageForErrorBox to extract the summary. Stored as-is here,
+// interpreted by the component.
 
 import { createStore, type Store } from "../../../js/app-framework/store.js";
 
-/** error-diagnostics.buildErrorDiagnostic 的返回形状 */
+/** Return shape of error-diagnostics.buildErrorDiagnostic */
 export type ErrorDiagnosticText = {
   kind: "error-diagnostic";
   summary?: string;
@@ -19,8 +21,8 @@ export type ErrorDiagnosticText = {
 };
 
 /**
- * 文本槽位值：普通字符串、error-box 诊断对象，或其它展示载荷。
- * 用 unknown 收口，避免 any；ErrorDiagnosticText 供展示层窄化。
+ * Text slot value: plain string, error-box diagnostic object, or other display payloads.
+ * Uses unknown to avoid any; ErrorDiagnosticText narrows for the display layer.
  */
 export type HomeTextValue = unknown;
 
@@ -64,7 +66,7 @@ export function createHomeTextStore() {
     store.actions.set({ id, value });
   }
 
-  // selector 帮助函数:配合 useStoreSnapshot(store, selector) 使用
+  // Selector helper: used together with useStoreSnapshot(store, selector)
   function textOf(
     snapshot: HomeTextState | null | undefined,
     id: string,
@@ -80,3 +82,6 @@ export function createHomeTextStore() {
     textOf,
   };
 }
+
+
+

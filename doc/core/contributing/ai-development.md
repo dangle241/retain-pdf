@@ -1,44 +1,44 @@
-# AI 辅助开发指南
+# AI AI-Assisted Development Guide
 
-RetainPDF 鼓励使用 AI 辅助开发。推荐优先使用 Codex 或 Claude Code 这类能读写本地仓库、运行命令、执行测试的 coding agent，而不是只在聊天窗口里让模型凭空给方案。
+RetainPDF encourages using AI-assisted development. Recommended priority use of coding agents like Codex or Claude Code that can read/write local repositories, run commands, and execute tests, rather than just letting the model propose solutions out of thin air in the chat window.
 
-AI 可以提高效率，但不能替代边界判断、测试验证和最终责任。提交 PR 的人需要确认改动符合项目架构、通过必要检查，并能解释风险。
+AI Improves efficiency, but does not replace boundary checks, test validation, and ultimate responsibility. PR Responsible person must confirm changes conform to project architecture, pass required checks, and explain risks.
 
-## 推荐工具
+## Recommended tools
 
-- Codex：适合在本地仓库中做代码修改、重构、测试、文档整理和发布前检查。
-- Claude Code：适合长上下文代码阅读、跨文件重构、生成测试和总结复杂改动。
+- CodexFor local repo: code changes, refactoring, testing, doc cleanup, pre-release checks.
+- Claude CodeSuitable for long-context code reading, cross-file refactoring, test generation, and summarizing complex changes.
 
-不要求贡献者必须使用某一个工具，但如果使用 AI 参与开发，建议在 PR 描述中简单说明 AI 参与了哪些环节，例如“辅助生成测试”“辅助整理文档”“辅助重构 import 边界”。
+Use standard linters. Run `make lint` before commit. AI Participate in development, suggest at PR Briefly explain in description. AI What parts were involved, e.g., "assisted test generation", "assisted documentation collation", "assisted refactoring". import Boundary
 
-## 建议的 AI Skills
+## Suggested AI Skills
 
-可以把下面这些能力写成 Codex skill、Claude Code command，或项目内的 agent checklist。
+You can write the following capabilities below as Codex skill、Claude Code commandor within the project agent checklist。
 
-### RetainPDF 项目上下文
+### RetainPDF Project context
 
-用途：让 AI 先理解仓库边界再动手。
+Purpose: to let AI Understand repository boundaries before taking action.
 
-应包含：
+Should include:
 
-- 项目根目录：`/home/wxyhgk/tmp/Code`
-- 主要模块：`backend/rust_api/`、`backend/scripts/`、`frontend/`、`frontend-react/`、`desktop/`、`docker/`、`doc/`
-- 核心规则：不要回滚无关脏改；手动编辑用 patch；改前先读相邻代码；按模块跑测试。
-- 文档入口：根目录 `CONTRIBUTING.md` 和 `doc/core/contributing/README.md`
+- Project root directory:`/home/wxyhgk/tmp/Code`
+- Main modules`backend/rust_api/`、`backend/scripts/`、`frontend/`、`frontend-react/`、`desktop/`、`docker/`、`doc/`
+- Core rule: Do not roll back unrelated dirty changes; use manual editing. patchBefore modifying, read surrounding code; run tests per module.
+- Documentation entry: root directory CONTRIBUTING.md and doc/core/contributing/README.md
 
-### Rust API 边界检查
+### Rust API Boundary Check
 
-用途：防止 AI 把 route、service、runner、db 混在一起。
+### Rust API boundary check
 
-应提醒 AI：
+Remind AI：
 
-- `routes/*` 只做 HTTP adapter。
-- service 层做业务聚合和 view/projection。
-- `job_runner/*` 做运行态执行。
-- 数据库访问通过 `Db` facade，不在 route 里直接写 SQL。
-- 新 API 字段要同步文档和测试。
+- routes/* only do HTTP adapter.
+- service Layer performs business aggregation and view/projection。
+- `job_runner/*` Execute at runtime.
+- Database access passed. `Db` facade, not in route Write directly inside. SQL。
+- New APIs keep fields in sync with documentation and tests.
 
-常用检查：
+Common Checks:
 
 ```bash
 cargo fmt --manifest-path backend/rust_api/Cargo.toml --check
@@ -46,18 +46,18 @@ cargo test --manifest-path backend/rust_api/Cargo.toml
 cd backend/rust_api && python3 scripts/check_architecture.py
 ```
 
-### Python 流水线边界检查
+### Python Pipeline boundary check
 
-用途：防止 AI 引入跨层 import 或绕过稳定 manifest。
+### Python pipeline boundary check
 
-应提醒 AI：
+Remind AI:
 
-- OCR raw payload 先进入 `document_schema`，产出 `document.v1`。
-- translation 不 import rendering。
-- rendering 只消费源 PDF、translation manifest、逐页 payload 和 render spec。
-- 新增公式、术语、bbox、渲染策略时补最小回归测试。
+- OCR raw payload enters document_schema first, produces document.v1.
+- translation does not import rendering.
+- rendering only consumes source PDF, translation manifest, page payload, and render spec.
+- Add formulas, terminology,bboxMinimal regression test add for render strategy.
 
-常用检查：
+Common checks:
 
 ```bash
 python3 backend/scripts/devtools/check_pipeline_architecture.py
@@ -65,94 +65,94 @@ PYTHONPATH=backend/scripts python3 -m pytest backend/scripts/devtools/tests/tran
 PYTHONPATH=backend/scripts python3 -m pytest backend/scripts/devtools/tests/rendering -q
 ```
 
-### 前端与桌面端同步
+### Sync frontend with desktop.
 
-用途：防止 AI 只改网页源码，忘记桌面端 bundle。
+### Sync frontend with desktop
 
-应提醒 AI：
+Remind AI:
 
-- 改 `frontend/**` 后需要跑 `npm --prefix desktop run verify-frontend-sync`。
-- 不要只改 `desktop/app/frontend/**`。
-- `frontend-react/` 是迁移区，不默认替代 `frontend/`。
-- 本地静态前端默认端口是 `40001`。
+- Modify `frontend/**` Run later. `npm --prefix desktop run verify-frontend-sync`。
+- Don't just change it. `desktop/app/frontend/**`。
+- `frontend-react/` Migration zone, not default replacement. `frontend/`。
+- The default port for the local static frontend is `40001`。
 
-常用检查：
+Common checks:
 
 ```bash
 npm --prefix frontend run build
 npm --prefix desktop run verify-frontend-sync
 ```
 
-### 测试与回归生成
+### Test and regression generation
 
-用途：让 AI 帮专业测试人员把问题转成可复现用例。
+### Test and regression generation
 
-应提醒 AI 输出：
+Remind AI to output:
 
-- 环境、版本、provider、workflow。
-- 样本是否可公开。
-- 页码、bbox、截图、job_id。
-- 复现步骤、期望结果、实际结果。
-- 最小 fixture 或自动化测试建议。
+- Environment, version,provider、workflow。
+- Is the sample publicly available?
+- Page numbers,bboxScreenshot take.job_id。
+- Reproduction steps, expected result, actual result.
+- Minimal fixture or automated testing suggestions.
 
-### 文档一致性检查
+### Documentation consistency check
 
-用途：避免改代码后文档落后。
+Purpose: keep documentation in sync with code changes.
 
-应提醒 AI 检查：
+Remind AI to check:
 
-- API 字段是否同步 `doc/core/api/`。
-- Rust 边界是否同步 `doc/core/rust_api/`。
-- Python 边界是否同步 `doc/core/python/`。
-- 前端、Docker、桌面端端口和命令是否一致。
-- 根目录 `CONTRIBUTING.md` 是否仍然只是短入口。
+- API Sync field? `doc/core/api/`。
+- Rust Boundaries synchronized? `doc/core/rust_api/`。
+- Python boundaries synchronized with doc/core/python/.
+- Frontend,DockerWhether desktop ports and commands are consistent.
+- root directory `CONTRIBUTING.md` Is it still just a short entry?
 
-## 推荐工作流
+## Recommended workflow
 
-1. 让 AI 先读相关子文档，不要直接改代码。
-2. 要求 AI 给出影响范围和验证计划。
-3. 让 AI 小步提交 patch，不做无关格式化。
-4. 跑对应测试或检查。
-5. 让 AI 做一次 review：重点查跨层依赖、旧兼容、测试缺口、文档缺口。
-6. 人工确认输出、风险和 PR 描述。
+## Recommended workflow
+2. Requirements AI Provide the impact scope and verification plan.
+3. Have AI commit small patches without unrelated formatting.
+4. Run corresponding tests or checks.
+5. Have AI perform a review focusing on cross-layer dependencies, legacy compatibility, test gaps, and documentation gaps.
+6. Manual confirmation of output, risks, and PR description.
 
-## 提示词建议
+## Prompt suggestions
 
-可以直接对 Codex 或 Claude Code 这样说：
-
-```text
-你在 RetainPDF 仓库中工作。先阅读 CONTRIBUTING.md 和相关 doc/core/contributing 子文档。
-只修改本任务相关文件，不要回滚无关脏改。
-改动前说明影响范围，改动后运行对应测试。
-如果不能运行测试，说明原因和剩余风险。
-```
-
-针对后端：
+Can directly say to Codex or Claude Code:
 
 ```text
-检查这次 Rust API 改动是否违反 routes -> services -> job_runner/db 的边界。
-重点看 route 是否拼业务 JSON、service 是否直接依赖 HTTP Response、job_runner 是否反向依赖 service。
-给出文件和行号，必要时直接修复。
+You are in RetainPDF working in the repository. Read first CONTRIBUTING.md and related doc/core/contributing Subdocument.
+Only modify files relevant to this task; do not revert unrelated dirty changes.
+Before changes, state impact scope. After changes, run corresponding tests.
+If tests cannot run, state cause and remaining risks.
 ```
 
-针对 Python：
+Backend:
 
 ```text
-检查 translation、rendering、ocr_provider 是否存在跨层 import。
-不要让 translation import services.rendering。
-如果需要共享数据，通过 manifest/spec/document.v1 传递。
+Check whether this Rust API Cần biết thay đổi cụ thể và vi phạm điều gì. Cung cấp thêm thông tin. routes -> services -> job_runner/db Boundary.
+Key points route Enable business spelling? JSON、service Direct dependency? HTTP Response、job_runner Reverse dependency? service。
+No context. Specify error/log/target. Provide reproduction or description.
 ```
 
-针对测试：
+Targeting Python：
 
 ```text
-把这个 bug 报告整理成可复现测试用例。
-需要包含环境、样本、页码、bbox、复现步骤、期望结果、实际结果，以及建议自动化测试落点。
+Check translation, rendering, ocr_provider for cross-layer imports.
+Do not let translation import services.rendering.
+If data sharing is needed, via manifest/spec/document.v1 Pass.
 ```
 
-## 注意事项
+For testing:
 
-- AI 生成的代码必须经过人工 review。
-- AI 不应提交真实用户文件、私有 token、本地数据库或大体积运行产物。
-- AI 做重构时必须说明替代了哪些重复或耦合，不能为了“看起来更通用”新增抽象。
-- AI 修改发布、Docker、桌面端打包流程时，要额外说明回滚方式和验证方式。
+```text
+Take this bug Organize report into reproducible test cases.
+Include environment, sample, page number,bboxReproduction steps. Expected result. Actual result. Suggested automation test points.
+```
+
+## Notes
+
+- AI Generated code must be manually reviewed. review。
+- AI Do not commit real user files private tokenLocal database or large-volume artifacts.
+- AI When refactoring, specify which redundancies or couplings are replaced; do not add abstractions solely for the sake of "generality."
+- AI Modify ReleaseDockerDesktop packaging process. Add rollback method rollback steps. Add validation method validation steps.

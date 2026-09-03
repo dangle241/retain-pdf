@@ -19,7 +19,7 @@ export async function fetchJobArtifactsManifest(jobId, apiPrefix) {
     if (resp.status === 404) {
       return { items: [] };
     }
-    throw new Error(`读取产物清单失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Failed to load the artifact manifest. Please retry later.(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -37,7 +37,7 @@ export async function fetchJobMarkdown(jobId, apiPrefix) {
     if (resp.status === 404) {
       return null;
     }
-    throw new Error(`读取 Markdown 失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Failed to load Markdown. Please retry later.(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
@@ -55,7 +55,10 @@ export async function fetchJobMarkdownDocument(jobId, apiPrefix) {
     if (resp.status === 404) {
       return null;
     }
-    throw new Error(`读取结构化 Markdown 失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Failed to load structured Markdown. Please retry later.(${resp.status})`);
   }
   return unwrapEnvelope(await resp.json());
 }
+
+
+

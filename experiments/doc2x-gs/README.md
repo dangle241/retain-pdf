@@ -1,91 +1,91 @@
-# doc2x-gs PDF 内容流删正文实验
+# doc2x-gs PDF Content stream body removal experiment
 
-这个目录用于复现“删除原文正文，但保留行间公式”的 PDF content stream 实验。
+This directory reproduces "delete main text but keep display formulas". PDF content stream Experiment.
 
-## 目标
+## Goal
 
-验证一种比 bbox 覆盖更精细的方案：
+Verify a ratio. bbox More granular coverage plan:
 
-- 不整页栅格化；
-- 不按大 bbox 一刀切删除；
-- 直接改写 PDF content stream；
-- 删除普通正文的 `TJ/Tj` text-show 操作；
-- 保留行间公式里的细碎 `Tj/Tm` 操作和矢量元素；
-- 后续再叠加我们的 Typst 中文译文。
+- Unpaginated grid layout.
+- Not press big bbox One-size-fits-all deletion.
+- directly rewrite PDF content stream；
+- Delete Normal Body Text `TJ/Tj` text-show Action;
+- Preserve fine details in display equations. `Tj/Tm` Operations and vector elements
+- Add ours on top later. Typst Chinese translation.
 
-闭源参考文件 `电子结构方法-第四章-高斯基组-onlyTrans.pdf` 基本就是类似路线：原始英文正文不可抽取，但行间公式仍保留为 PDF 原始文本/矢量。
+Closed-source reference file `Electronic structure methods-Chapter 4-Gao Siji Group-onlyTrans.pdf` Basically similar approach: original English body not extractable, but display formulas remain as PDF Source text missing. Provide content to translate./Vector.
 
-## 文件
+## Files
 
-- `电子结构方法-第四章-高斯基组.pdf`：原始样本 PDF。
-- `电子结构方法-第四章-高斯基组-onlyTrans.pdf`：闭源项目输出，用于对比。
-- `content_stream_text_strip.py`：当前 POC 脚本。
-- `work/`：实验输出目录。
+- `Electronic-Structure-Methods-Chapter-4-Gaussian-Basis-Sets.pdf` Original Sample: PDF.
+- `Electronic-Structure-Methods-Chapter-4-Gaussian-Basis-Sets-onlyTrans.pdf` Closed-source project output for comparison.
+- `content_stream_text_strip.py`: Current POC Script.
+- `work/`Experiment output directory.
 
-## 运行
+## Execution
 
-在本目录运行：
+Run in this directory:
 
 ```bash
 python3 content_stream_text_strip.py \
-  --input 电子结构方法-第四章-高斯基组.pdf \
+  --input Electronic structure methods-Chapter 4-Gaussian basis.pdf \
   --output work/content-op-strip.pdf \
   --diagnostics work/content-op-strip-diagnostics.json \
   --preview work/content-op-strip-page1.png \
   --pages 1
 ```
 
-也可以运行专家建议的“先 redact 再贴回公式区域”方案：
+Also run the expert's suggested "first redact "Paste back to formula area" option:
 
 ```bash
 python3 redact_restore_formula.py \
-  --input 电子结构方法-第四章-高斯基组.pdf \
+--input Electronic-Structure-Methods-Chapter-4-Gaussian-Basis-Sets.pdf \
   --output work/redact-restore-formula.pdf \
   --diagnostics work/redact-restore-formula-diagnostics.json \
   --preview work/redact-restore-formula-page1.png \
   --pages 1
 ```
 
-输出：
+Output:
 
 - `work/content-op-strip.pdf`
 - `work/content-op-strip-diagnostics.json`
 - `work/content-op-strip-page1.png`
 
-## 当前效果
+## Current Results
 
-对第 1 页：
+For page 1 Page:
 
-- 英文正文、英文标题、页脚被删除；
-- 三个行间公式被保留；
-- PDF 没有图片化，公式仍是原始 PDF 对象；
-- 抽取文本基本只剩公式块。
+- English body, English title, footer deleted;
+- Three inline formulas preserved.
+- PDF No image conversion; formulas remain raw. PDF Object
+- Extraction leaves essentially only formula blocks.
 
-## 当前限制
+## Current limit
 
-这还是样本 POC，不是后端通用实现。
+This is still a sample. POC, not a general backend implementation.
 
-当前规则利用了这个 PDF 的结构特征：
+The current rule uses this. PDF Structural features:
 
-- 正文主要编码为长 `TJ` 数组；
-- 行间公式主要编码为大量细碎 `Tj/Tm`；
-- 正文中的孤立变量需要额外规则清掉。
+- Main body encoding: long. `TJ` Array;
+- Inline formulas primarily encoded as numerous fine fragments. `Tj/Tm`；
+- Orphaned variables in body need extra rules to clear.
 
-后端通用版本还需要补：
+Backend generic version still needs:
 
-- 稳定的 `Tj/TJ -> bbox` 映射；
-- 接入 PaddleOCR `display_formula` bbox 作为保护区；
-- 保护区内保留原文操作，保护区外删除正文操作；
-- 与现有 Typst overlay / source cleanup 策略做成可选渲染模式。
+- Stable `Tj/TJ -> bbox` Mapping;
+- Integrate PaddleOCR `display_formula` bbox as a protected area;
+- Within protected zones, preserve original text; outside, delete body text.
+- And existing Typst overlay / source cleanup Make strategy an optional rendering mode.
 
-## 推荐集成方向
+## Recommended integration direction
 
-专家建议优先集成 `apply_redactions + show_pdf_page`，原因是工程复杂度远低于完整 text-op interpreter。
+Experts: prioritize integration. `apply_redactions + show_pdf_page`, because the engineering complexity is much lower than a full text-op interpreter。
 
-后端流程可以是：
+Backend flow could be:
 
-1. OCR 阶段保留 `display_formula` bbox。
-2. cleanup 阶段对正文翻译 bbox 做 redaction。
-3. redaction 后从原 PDF 按 `display_formula` bbox clip 回贴公式区域。
-4. 再叠加 Typst 中文译文。
-5. 如果回贴失败，降级到现有 bbox cover/strip。
+1. Retain `display_formula` bbox during OCR stage.
+2. Perform redaction on body translation bbox during cleanup stage.
+3. Revert redaction to Original PDF by clipping and restoring formula area via `display_formula` bbox.
+4. Overlay Typst Chinese translation again.
+5. If reply fails, fall back to existing. bbox cover/strip。

@@ -56,8 +56,8 @@ export function normalizeJobPayload(payload: JobPayloadInput | unknown = null): 
   }
 
   const requestPayload = (unwrapped.request_payload || null) as JobRequestPayload | null;
-  // 书目 / 重试身份字段必须透传：silent 轮询与阶段重试靠 document_id / source_job_id
-  // 把进度合并回主页原卡；丢了会「状态卡在跑、书架仍显示已翻译」。
+  // Bibliographic / retry identity fields must pass through: silent poll and stage retry merge progress
+  // back onto the original library card via document_id / source_job_id. Drop them and the status card runs while the shelf still shows Translated.
   const documentId = firstNonEmpty(
     unwrapped.document_id,
     (unwrapped as JobLike & { book_summary?: { document_id?: string } }).book_summary?.document_id,
@@ -70,7 +70,7 @@ export function normalizeJobPayload(payload: JobPayloadInput | unknown = null): 
     request_payload_page_ranges: firstNonEmpty(requestPayload?.ocr?.page_ranges),
     request_payload_math_mode: firstNonEmpty(requestPayload?.translation?.math_mode),
     job_id: jobId || "",
-    // 图书馆卡片身份（重试换 job_id 时靠这些找原卡）
+    // Library card identity (used to find the original card when retry swaps job_id)
     document_id: documentId,
     source_job_id: firstNonEmpty(unwrapped.source_job_id),
     active_job_id: firstNonEmpty(unwrapped.active_job_id, jobId),
@@ -149,3 +149,6 @@ export function normalizeJobPayload(payload: JobPayloadInput | unknown = null): 
     stage_snapshot: buildStageSnapshot(normalized),
   } as JobPayload;
 }
+
+
+

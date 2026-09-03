@@ -121,7 +121,7 @@ function buildListSnapshot(item: JobListItemView, activeStage: StageKey): Status
   return {
     activeStage,
     selectedStage: activeStage,
-    elapsedText: item.status === 'succeeded' ? '完成' : item.status === 'queued' ? '排队中' : '处理中',
+    elapsedText: item.status === 'succeeded' ? 'Done' : item.status === 'queued' ? 'Queued' : 'Processing',
     pdfReady: item.output_pdf_ready,
     readerReady: item.markdown_ready,
     stageProgress: {
@@ -142,14 +142,14 @@ function progressLabel(item: JobListItemView) {
   if (item.progress?.current != null && item.progress?.total != null) {
     return `${item.progress.current}/${item.progress.total}`
   }
-  return item.status === 'queued' ? '等待开始' : item.status === 'succeeded' ? '已完成' : '处理中'
+  return item.status === 'queued' ? 'Waiting to start' : item.status === 'succeeded' ? 'Complete' : 'Processing'
 }
 
 function buildListArtifacts(item: JobListItemView): LibraryBookArtifact[] {
   return [
-    { key: 'pdf', label: '译文 PDF', state: item.output_pdf_ready ? 'ready' : 'processing', detail: item.output_pdf_ready ? '可下载' : '等待生成' },
-    { key: 'markdown', label: 'Markdown', state: item.markdown_ready ? 'ready' : 'processing', detail: item.markdown_ready ? '可查看' : '等待生成' },
-    { key: 'bundle', label: '任务包', state: item.bundle_ready ? 'ready' : 'processing', detail: item.bundle_ready ? '可下载' : '等待生成' },
+    { key: 'pdf', label: 'Translation PDF', state: item.output_pdf_ready ? 'ready' : 'processing', detail: item.output_pdf_ready ? 'Ready to download' : 'Waiting to generate' },
+    { key: 'markdown', label: 'Markdown', state: item.markdown_ready ? 'ready' : 'processing', detail: item.markdown_ready ? 'Ready to view' : 'Waiting to generate' },
+    { key: 'bundle', label: 'Job Bundle', state: item.bundle_ready ? 'ready' : 'processing', detail: item.bundle_ready ? 'Ready to download' : 'Waiting to generate' },
   ]
 }
 
@@ -213,3 +213,5 @@ function formatUpdatedAt(value: string) {
   }
   return date.toLocaleString()
 }
+
+

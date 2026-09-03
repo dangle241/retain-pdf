@@ -1,8 +1,8 @@
-# 本地启动与配置
+# Local startup and configuration
 
-## 后端
+## Backend
 
-从仓库根目录启动：
+Start from repository root:
 
 ```bash
 cd /path/to/retain-pdf/backend/rust_api
@@ -12,62 +12,62 @@ RUST_API_SCRIPTS_DIR=../scripts \
 cargo run
 ```
 
-默认监听：
+Default listening:
 
-- 完整 API：`http://127.0.0.1:41000`
-- multipart 异步提交 API：`http://127.0.0.1:42000`
+- Complete API：`http://127.0.0.1:41000`
+- multipart Async submit API：`http://127.0.0.1:42000`
 
-## 前端
+## Frontend
 
 ```bash
 cd /path/to/retain-pdf/frontend
 python3 -m http.server 40001 --bind 0.0.0.0
 ```
 
-前端 API base 规则：
+Frontend API base rules:
 
-- 优先读取 `window.__FRONT_RUNTIME_CONFIG__.apiBase`。
-- 如果没有配置，回落到当前 host 的 `41000`。
-- Docker 交付默认 `FRONT_API_BASE=` 为空，由 Nginx 同源 `/api/` 代理到后端。
+- Prefer reading window.__FRONT_RUNTIME_CONFIG__.apiBase.
+- If not configured, fallback to current host's 41000.
+- Docker Deliver Default `FRONT_API_BASE=` Empty. Nginx Same origin `/api/` Proxy to backend.
 
-## 鉴权
+## Auth.
 
-除 `GET /health` 外，其余 API 默认需要：
+Except GET /health, other APIs require authentication by default.
 
 ```http
 X-API-Key: your-rust-api-key
 ```
 
-`X-API-Key` 是访问 Rust API 的后端白名单 key，不是 DeepSeek / MinerU / Paddle 的模型或 OCR key。
+X-API-Key is the backend whitelist key for accessing Rust API, not DeepSeek/MinerU/Paddle model or OCR key.
 
-本地 key 来源：
+Local key sources:
 
 - `backend/rust_api/auth.local.json`
-- 环境变量 `RUST_API_KEYS`
+- Environment variable RUST_API_KEYS
 
-Docker 中 `docker/delivery/docker/auth.local.json` 的 `api_keys` 必须和 `docker/delivery/docker/web.env` 里的 `FRONT_X_API_KEY` 对上。
+In Docker, docker/delivery/docker/auth.local.json's api_keys must match FRONT_X_API_KEY in docker/delivery/docker/web.env.
 
-## 常用环境变量
+## Common environment variables
 
-- `RUST_API_ROOT`：Rust API 根目录。
-- `RUST_API_PROJECT_ROOT`：项目根目录。
-- `RUST_API_BIND_HOST`：监听地址，默认 `0.0.0.0`。
-- `RUST_API_PORT`：完整 API 端口，默认 `41000`。
-- `RUST_API_SIMPLE_PORT`：multipart 异步提交端口，默认 `42000`。
-- `RUST_API_DATA_ROOT`：运行时数据根目录。
-- `RUST_API_DATA_DIR`：旧别名，仅在 `RUST_API_DATA_ROOT` 未设置时使用。
-- `RUST_API_SCRIPTS_DIR`：Python 脚本目录。
-- `PYTHON_BIN`：Python 可执行文件。
-- `RUST_API_UPLOAD_MAX_BYTES`：普通上传大小限制，`0` 表示不限制。
-- `RUST_API_UPLOAD_MAX_PAGES`：普通上传页数限制，`0` 表示不限制。
-- `RUST_API_MAX_RUNNING_JOBS`：最大并发任务数。
+- RUST_API_ROOT: Rust API root directory.
+- `RUST_API_PROJECT_ROOT`Project root directory.
+- `RUST_API_BIND_HOST`Listen address, default `0.0.0.0`。
+- `RUST_API_PORT`Complete API Default port `41000`。
+- `RUST_API_SIMPLE_PORT`：multipart Async submission port (default) `42000`。
+- `RUST_API_DATA_ROOT`Runtime data root directory.
+- `RUST_API_DATA_DIR`Old alias, only `RUST_API_DATA_ROOT` Use when not set.
+- `RUST_API_SCRIPTS_DIR`：Python Scripts
+- `PYTHON_BIN`：Python Executable file.
+- `RUST_API_UPLOAD_MAX_BYTES`Normal upload size limit,`0` No limit.
+- RUST_API_UPLOAD_MAX_PAGES: normal upload page limit; 0 means no limit.
+- `RUST_API_MAX_RUNNING_JOBS`Max concurrent tasks.
 
-## Docker 配置位置
+## Docker Config location
 
-Compose 实际读取的是：
+Compose Actual read:
 
 - `docker/delivery/docker/app.env`
 - `docker/delivery/docker/web.env`
 - `docker/delivery/docker/auth.local.json`
 
-不是仓库根目录下的 `docker/*.env`。
+Not in repo root. `docker/*.env`。

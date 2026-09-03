@@ -1,10 +1,10 @@
-// home 页组合根：只做「顺序接线」，不写业务、不堆 import。
+// Home page composition root: only "wire in order"; no business, no import pile.
 //
-// 规则：
-//   1. 所有 ../../../js/* 只在 composition/external.ts
-//   2. 各 create* 工厂返回自己的 bag，这里显式赋值，禁止 Object.assign(ctx)
-//   3. features 是唯一可变注册表；晚绑定通过它完成
-//   4. job-runtime / recent-jobs / artifacts 在 composition 阶段一次挂齐
+// Rules:
+//   1. All ../../../js/* only in composition/external.ts
+//   2. Each create* factory returns its own bag; assign explicitly here; no Object.assign(ctx)
+//   3. features is the only mutable registry; late binding goes through it
+//   4. job-runtime / recent-jobs / artifacts are mounted once at the composition stage
 
 import {
   loadBrowserStoredConfig,
@@ -81,7 +81,7 @@ export function createHomeComposition({
 }: CreateHomeCompositionOptions = {}): HomeServices {
   const features: HomeFeatures = {};
 
-  // —— 基础 state / view ——
+  // —— Basic state / view ——
   const legacyState = { ...createDeveloperState(), ...createDesktopState() };
   setDeveloperConfig(legacyState, loadPersistedDeveloperConfig());
   setDesktopMode(legacyState, initialDesktopMode);
@@ -93,7 +93,7 @@ export function createHomeComposition({
 
   const textStore = createHomeTextStore();
   const uploadView = createUploadViewFeature();
-  // 下层 view/runtime 工厂的默认参 `= {}` 会让 TS 丢掉无默认字段；运行时入参正确，此处放宽。
+  // Lower view/runtime factories' default `= {}` makes TS drop fields that have no defaults; runtime args are correct, so loosen here.
   const workflowView = createWorkflowViewFeature({
     uploadTilePort: uploadView.uploadTilePort,
   } as any);
@@ -108,7 +108,7 @@ export function createHomeComposition({
     documentRef,
   } as any);
 
-  // bridge 需要 statusDetail holder（后续 createStatusDomain 写入）
+  // bridge requires a statusDetail holder (written later by createStatusDomain)
   const statusDetailHolder: StatusDetailHolder = { store: null, dialogStore: null };
   const bridge = createBridge({
     textStore,
@@ -120,7 +120,7 @@ export function createHomeComposition({
     statusDetail: statusDetailHolder,
   });
 
-  // —— 各域（返回 bag，显式挂到 features） ——
+  // —— Domains (return a bag, hang it on features explicitly) ——
   Object.assign(features, createWorkflowAndUpload({
     features,
     credentialsStatePort,
@@ -188,12 +188,12 @@ export function createHomeComposition({
   });
   features.appActionsFeature = appActionsFeature;
 
-  // 必须先于 recent-jobs 注册 closeTranslationWorkflow 监听：
-  // recent-jobs 的 scheduleRefresh 会同步读 isWorkflowOpen(DOM data-open)；
-  // 若 workflow 的 close() 还没把 data-open 写成 0，刷新会被 isSuspended 吞掉（蓝图风险 5）。
+  // Must register the closeTranslationWorkflow listener before recent-jobs:
+  // recent-jobs scheduleRefresh sync-reads isWorkflowOpen (DOM data-open);
+  // if workflow close() has not yet written data-open to 0, the refresh is swallowed by isSuspended (blueprint risk 5).
   const disposeWorkflowDialogEvents = workflowDialog.bindEvents();
 
-  // job-runtime / recent-jobs / artifacts：一次挂齐
+  // job-runtime / recent-jobs / artifacts: mount all at once
   Object.assign(features, createRuntimeFeatures({
     features,
     bridge,
@@ -247,3 +247,7 @@ export function createHomeComposition({
     },
   });
 }
+
+
+
+

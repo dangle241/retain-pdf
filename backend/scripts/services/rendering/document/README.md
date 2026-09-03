@@ -1,17 +1,17 @@
 # rendering/document
 
-## 负责什么
+## Responsibilities
 
-渲染阶段的 PDF 文档级辅助能力，包括源 PDF 准备、页码映射和目录/书签复制。
+Rendering phase PDF Document-level assistance capabilities, including source PDF Preparation, Page Number Mapping, and Table of Contents/Copy Bookmark
 
-## 对外入口
+## Public entry point
 
 - `source_pdf.py`
 - `page_map.py`
 - `metadata.py`
 
-## 不该做什么
+## What not to do
 
-- 不做页面 redaction。
-- 不生成 Typst。
-- 不做 OCR/翻译判断。
+- Skip page generation. Use CLI/API only. redaction。
+- Do not generate Typst.
+- Do not make OCR/translation judgments.

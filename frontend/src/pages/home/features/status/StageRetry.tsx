@@ -1,6 +1,6 @@
-// 阶段重试按钮(蓝图 §2 features/status/;镜像 job-status-card-retry.js 的
-// renderStageRetryAction/bindStageRetryEvents——点击 dispatch
-// APP_EVENTS.retryStage,job-runtime 引擎消费,事件契约原样保留,蓝图 §5)。
+// StageRetry button (Blueprint §2 features/status/; mirrors job-status-card-retry.js
+// renderStageRetryAction/bindStageRetryEvents——on click dispatches
+// APP_EVENTS.retryStage, consumed by job-runtime engine; Events contract preserved as-is, Blueprint §5).
 
 import { useStatusCardIds } from "./status-card-ids-context.js";
 import { APP_EVENTS } from "../../composition/external.js";
@@ -36,8 +36,11 @@ export function StageRetry({ selectedStageKey = "", action = null }) {
           }
         }}
       >
-        {action.label || "重新执行"}
+        {action.label || "Run Again"}
       </button>
     </div>
   );
 }
+
+
+

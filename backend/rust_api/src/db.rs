@@ -203,7 +203,8 @@ impl Db {
             CREATE INDEX IF NOT EXISTS idx_glossaries_updated_at ON glossaries(updated_at DESC);
             "#,
         )?;
-        // 图书馆表走版本化迁移,随 schema 保证存在(不依赖 init 被调用)
+        // Library tables follow the versioned-migration path; the schema
+        // ensures they exist (without depending on `init` being called).
         run_versioned_migrations(&conn)?;
         *ready = true;
         Ok(())
@@ -428,12 +429,12 @@ mod tests {
             failure_category: Some("timeout".to_string()),
             provider_stage: None,
             provider_code: None,
-            summary: "外部服务请求超时".to_string(),
-            root_cause: Some("测试失败归因".to_string()),
+            summary: "external service request timed out".to_string(),
+            root_cause: Some("test failure attribution".to_string()),
             retryable: true,
             upstream_host: Some("api.deepseek.com".to_string()),
             provider: Some("mineru".to_string()),
-            suggestion: Some("重试".to_string()),
+            suggestion: Some("retry".to_string()),
             last_log_line: Some("ReadTimeout".to_string()),
             raw_excerpt: Some("ReadTimeout".to_string()),
             raw_error_excerpt: Some("ReadTimeout".to_string()),

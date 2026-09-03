@@ -14,10 +14,10 @@ import { firstNonEmptyText } from "./routing.js";
 export function summarizeMathMode(job) {
   const mathMode = `${job?.request_payload_math_mode || ""}`.trim();
   if (mathMode === "placeholder") {
-    return "placeholder - 公式占位保护";
+    return "placeholder - formula placeholder protection";
   }
   if (mathMode === "direct_typst") {
-    return "direct_typst - 模型直出公式";
+    return "direct_typst - model outputs formulas directly";
   }
   return mathMode || "-";
 }
@@ -70,9 +70,11 @@ export function renderJobDetailFailureSummary({ job, setText }) {
   setText("detail-failure-root-cause", summarizeRuntimeField(failure.root_cause || failureDiagnostic.root_cause || failure.upstream_host));
   setText("detail-failure-suggestion", summarizeRuntimeField(failure.suggestion || failureDiagnostic.suggestion || failure.failure_code));
   setText("detail-failure-last-log-line", summarizeRuntimeField(failureLastLogLine));
-  setText("detail-failure-retryable", typeof retryable === "boolean" ? (retryable ? "是" : "否") : "-");
+  setText("detail-failure-retryable", typeof retryable === "boolean" ? (retryable ? "yes" : "no") : "-");
 }
 
 export function renderJobDetailPublicError({ job, setText }) {
   setText("detail-error-box", summarizePublicError(job));
 }
+
+

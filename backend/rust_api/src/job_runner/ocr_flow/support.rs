@@ -59,8 +59,8 @@ async fn mirror_parent_ocr_status(
         parent_job.stage_detail = ocr_job
             .stage_detail
             .as_ref()
-            .map(|detail| format!("OCR 子任务：{detail}"))
-            .or_else(|| Some("OCR 子任务运行中".to_string()));
+            .map(|detail| format!("OCR child job: {detail}"))
+            .or_else(|| Some("OCR child job running".to_string()));
         parent_job.progress_current = ocr_job.progress_current;
         parent_job.progress_total = ocr_job.progress_total;
         parent_job.updated_at = now_iso();
@@ -124,7 +124,7 @@ pub(super) fn fail_missing_source_pdf(
     let message = format!("source pdf not found: {}", source_pdf_path.display());
     job.status = JobStatusKind::Failed;
     job.stage = Some(job_stage_str(JobStage::Failed).to_string());
-    job.stage_detail = Some("OCR 已完成，但任务源 PDF 缺失".to_string());
+    job.stage_detail = Some("OCR finished, but job source PDF is missing".to_string());
     job.error = Some(message.clone());
     job.updated_at = now_iso();
     job.finished_at = Some(now_iso());
@@ -193,7 +193,7 @@ pub(super) fn fail_ocr_transport(job: &mut JobRuntimeState, err: &anyhow::Error)
         .filter(|value| !value.is_empty())
         .is_none()
     {
-        job.stage_detail = Some("OCR provider transport 失败".to_string());
+        job.stage_detail = Some("OCR provider transport failed".to_string());
     }
     job.error = Some(message);
     job.updated_at = now_iso();

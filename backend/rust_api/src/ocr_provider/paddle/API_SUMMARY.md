@@ -1,73 +1,73 @@
 # Paddle OCR API Summary
 
-这份文档只回答一个问题：
+This document answers one question:
 
-**我们当前接入的 Paddle OCR 异步 API，实际协议是什么。**
+**Currently integrated Paddle OCR Asynchronous API — actual protocol details.**
 
-不是讲 `document.v1`，也不是讲渲染/翻译，只讲 provider transport 层。
+Does not cover `document.v1`, rendering, or translation — only the provider transport layer.
 
-相关资料：
+Related materials:
 
-- Paddle 官方异步接口示例：
+- Paddle Official async API example:
   [`AsyncParse.md`](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/AsyncParse.md)
 - Rust client：
   [`client.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/client.rs)
 - Python client：
   [`backend/scripts/services/ocr_provider/paddle_api.py`](/home/wxyhgk/tmp/Code/backend/scripts/services/ocr_provider/paddle_api.py)
-- provider 边界：
+- provider boundary:
   [`PROVIDER_BOUNDARY.md`](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/PROVIDER_BOUNDARY.md)
 
-## 1. 我们当前用的是哪套接口
+## 1. Which API set is currently in use?
 
-当前主链接的是 Paddle OCR 的异步任务接口：
+The current main connection is Paddle OCR Async task interface:
 
 - `POST /api/v2/ocr/jobs`
 - `GET /api/v2/ocr/jobs/{jobId}`
-- 下载 `resultUrl.jsonUrl`
+- download `resultUrl.jsonUrl`
 
-默认基地址：
+Default base address:
 
 - `https://paddleocr.aistudio-app.com`
 
-当前代码入口：
+Current code entry:
 
 - Rust：
   [`client.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/client.rs)
 - Python：
   [`paddle_api.py`](/home/wxyhgk/tmp/Code/backend/scripts/services/ocr_provider/paddle_api.py)
 
-## 2. 鉴权方式
+## 2. Auth method.
 
-请求头：
+Request headers:
 
 ```http
 Authorization: bearer <token>
 Accept: application/json
 ```
 
-当前代码口径：
+Current code practice:
 
-- 环境变量：`RETAIN_PADDLE_API_TOKEN`
-- 本地 env 文件：`backend/scripts/.env/paddle.env`
+- Environment variables:`RETAIN_PADDLE_API_TOKEN`
+- Local env file: `backend/scripts/.env/paddle.env`
 
-Python 读取口：
+Python Read port:
 
 - [`get_paddle_token(...)`](/home/wxyhgk/tmp/Code/backend/scripts/services/ocr_provider/paddle_api.py)
 
-## 3. 三段式协议
+## 3. Three-part protocol
 
 ### 3.1 submit
 
-接口：
+Endpoint:
 
 - `POST /api/v2/ocr/jobs`
 
-两种提交方式：
+Two submission methods:
 
-1. 本地文件上传
-2. 远程 URL 提交
+1. Local file upload
+2. Remote URL submit
 
-我们当前实际支持的两种调用：
+Currently supported two invocation types:
 
 - Python：
   - `submit_local_file(...)`
@@ -76,24 +76,24 @@ Python 读取口：
   - `submit_local_file(...)`
   - `submit_remote_url(...)`
 
-关键入参：
+Key input parameters:
 
 - `model`
 - `optionalPayload`
-- 本地文件时用 multipart `file`
-- 远程文件时用 JSON `fileUrl`
+- For local files multipart `file`
+- For remote files JSON `fileUrl`
 
-成功后最关键的返回字段：
+Most critical response fields on success:
 
 - `data.jobId`
 
 ## 3.2 poll
 
-接口：
+Endpoint:
 
 - `GET /api/v2/ocr/jobs/{jobId}`
 
-我们当前关心的返回字段：
+Relevant return fields:
 
 - `data.state`
 - `data.extractProgress.totalPages`
@@ -101,52 +101,52 @@ Python 读取口：
 - `data.resultUrl.jsonUrl`
 - `data.errorMsg`
 
-当前系统中的统一状态映射：
+Unified state mapping in current system:
 
 - `pending` -> queued
 - `running` -> processing
 - `done` -> succeeded
 - `failed` -> failed
 
-对应实现：
+Corresponding implementation:
 
 - [`status.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/status.rs)
 
 ## 3.3 download result
 
-完成后不是直接拿结构化 JSON，而是去下载：
+After completion, do not directly retrieve structured. JSONbut instead to download:
 
 - `resultUrl.jsonUrl`
 
-这个 URL 返回的是 `jsonl`，不是单个 JSON。
+This URL returns `jsonl`, not a single JSON.
 
-当前解包逻辑会把每一行里的：
+Current unpack logic: per line:
 
 - `result.layoutParsingResults`
 - `result.dataInfo`
 
-聚合成后续 adapter 能消费的 provider raw payload。
+Merge into subsequent. adapter Consumable provider raw payload。
 
-对应实现：
+Corresponding implementation:
 
 - Rust：
   [`client.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/client.rs)
 - Python：
   [`paddle_api.py`](/home/wxyhgk/tmp/Code/backend/scripts/services/ocr_provider/paddle_api.py)
 
-## 4. 当前我们实际传的关键参数
+## 4. Actual key params passed.
 
 ### `model`
 
-当前默认模型名：
+Current default model name:
 
 - `PaddleOCR-VL-1.6`
 
-默认值来自共享配置：
+Defaults from shared configuration:
 
 - [`backend/config/ocr_providers.json`](/home/wxyhgk/tmp/Code/backend/config/ocr_providers.json)
 
-兼容归一化：
+Compatibility normalization:
 
 - `paddleocr-vl`
 - `paddle-ocr-vl`
@@ -157,34 +157,34 @@ Python 读取口：
 
 ### `optionalPayload`
 
-当前代码会按模型名构造不同 payload：
+Current code constructs differently based on model name. payload：
 
-- `PaddleOCR-VL(-1.6/-1.5)` 走一套默认 rich-content 参数
-- `PP-StructureV3` 走另一套结构化参数
+- `PaddleOCR-VL(-1.6/-1.5)` Use defaults. rich-content Parameters
+- `PP-StructureV3` Use another set of structured parameters.
 
-对应实现：
+Corresponding implementation:
 
 - [`build_optional_payload(...)`](/home/wxyhgk/tmp/Code/backend/scripts/services/ocr_provider/paddle_api.py)
 
-## 5. 错误口径
+## 5. Error caliber.
 
-当前 transport 层主要处理这几类错误：
+The transport layer currently handles these error types:
 
-- HTTP 状态错误
-- provider 返回 `errorCode != 0`
-- 返回结构不完整
-- `jobId` 缺失
-- `resultUrl.jsonUrl` 缺失
-- 轮询超时
-- JSONL 解包失败
+- HTTP status error
+- provider returns `errorCode != 0`
+- Return structure incomplete.
+- `jobId` missing
+- `resultUrl.jsonUrl` missing
+- polling timeout
+- JSONL Extraction failed.
 
-Rust 统一错误映射：
+Rust Unify error mapping:
 
 - [`errors.rs`](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/errors.rs)
 
-## 6. 与 `document.v1` 的边界
+## 6. Boundary with `document.v1`
 
-下面这些字段仍然只属于 provider transport 层：
+Fields still belonging to provider transport layer:
 
 - `jobId`
 - `state`
@@ -193,29 +193,29 @@ Rust 统一错误映射：
 - `errorCode`
 - `errorMsg`
 
-只有下载并解包完 `jsonl` 后得到的：
+After download and unpack. `jsonl` After:
 
 - `layoutParsingResults`
 - `dataInfo`
 
-才会继续进入 adapter，最终变成：
+Only then proceed. adapterultimately becomes:
 
 - `document.v1.json`
 
-不要把 provider 任务态字段直接混进统一文档层。
+Do not mix provider task-state fields directly into the unified document layer.
 
-## 7. 我们当前真实跑通的口径
+## 7. Currently validated metric definition
 
-当前本机真实链路已经验证：
+Real local chain verified:
 
 - `workflow = book`
 - `ocr.provider = paddle`
 - `translation.base_url = https://api.deepseek.com/v1`
 - `translation.model = deepseek-v4-flash`
 
-能跑通：
+Can run successfully:
 
-- 上传
+- upload
 - Paddle OCR submit
 - poll
 - result download
@@ -223,4 +223,4 @@ Rust 统一错误映射：
 - translate
 - render
 
-这说明当前仓库里的 Paddle API 接入不是纸面协议，而是和主链联通的。
+This indicates that in the current repository Paddle API Integration is not a paper agreement, but connectivity with the main chain.

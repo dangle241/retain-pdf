@@ -1,17 +1,19 @@
-/* L3 组件形态 token：可选，皮肤只覆盖想改的。
+/* L3 component-shape tokens: optional; skins override only what they want.
  *
- * 与颜色契约（_contract.css 必选 20 项）不同，这里全部有默认值——
- * 不覆盖 = 现状观感。皮肤在自己的 [data-theme] 块里覆盖（本文件在
- * index.css 里先于各皮肤 import，同特异性下皮肤后来居上）。
+ * Unlike the color contract (_contract.css required 20), everything here has
+ * a default — no override = current look. Skins override in their own
+ * [data-theme] block (this file is imported in index.css before each skin;
+ * later skin wins at equal specificity).
  *
- * v1 清单只收"已有真实消费者"的 token（由 DecorStage 实践反哺）：
- * - --btn-radius        主按钮圆角（app-button；classic 是纯 pill）
- * - --btn-primary-bg/fg 主按钮底/字（默认走 accent/paper）
- * - --panel-radius      对话框壳圆角（dialog-shell）
- * - --stage-veil        主页纸台不透明度（ambient-surface 的 color-mix 百分比）
- * - --ornament-line     装饰件描边（DecorStage 题字横幅金边）
+ * v1 list only takes tokens that already have a real consumer (fed back from
+ * DecorStage practice):
+ * - --btn-radius        Primary-button radius (app-button; classic is a pure pill)
+ * - --btn-primary-bg/fg Primary-button fill/text (defaults to accent/paper)
+ * - --panel-radius      Dialog-shell radius (dialog-shell)
+ * - --stage-veil        Home paper-stage opacity (ambient-surface color-mix %)
+ * - --ornament-line     Ornament stroke (DecorStage inscription-banner gold edge)
  *
- * 新增 token 前先找到消费者，别囤"以后可能用"的。
+ * Find a consumer before adding a token; do not stockpile "might use later".
  */
 
 :root {
@@ -19,15 +21,16 @@
   --btn-primary-bg: var(--accent);
   --btn-primary-fg: var(--paper);
   --panel-radius: 24px;
-  /* 弹窗背板：浅色纸感（night 下随 --bg 自动变深色毛玻璃），全站唯一真值 */
+  /* Dialog scrim: light paper feel (night follows --bg into dark frosted glass); site-wide single source of truth */
   --dialog-scrim: color-mix(in srgb, var(--bg) 62%, transparent);
   --stage-veil: 88%;
   --ornament-line: color-mix(in srgb, var(--gold) 45%, var(--line));
 
-  /* —— 布局密度（原 ambient-surface 的 html[data-theme=…] 特例块收编于此，
-   *    皮肤想要"素纸式"更宽廊道/更窄纸台，只在自己文件里覆盖，不碰 core）—— */
+  /* —— Layout density (former ambient-surface html[data-theme=…] special
+   *    cases folded here. Skins that want "plain-paper" wider corridors /
+   *    narrower stage override only in their own file; do not touch core) —— */
   --shell-pad-inline: clamp(18px, 4vw, 56px);
-  /* ≤900px 窄屏值；默认跟随常规值（= 无窄屏特例） */
+  /* ≤900px narrow value; default follows the regular value (= no narrow special case) */
   --shell-pad-inline-narrow: var(--shell-pad-inline);
   --header-width: min(1120px, 100%);
   --header-gap-bottom: 16px;

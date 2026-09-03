@@ -1,16 +1,16 @@
 # translate.stage.v1
 
-`translate.stage.v1` 是 Rust API 启动 Python 翻译 worker 的稳定内部契约。外部调用者通常不需要直接写这个文件，但理解它有助于排查任务。
+translate.stage.v1 is the stable internal contract for Rust API to start Python translation worker. External callers need not edit directly; understanding aids troubleshooting.
 
-## 执行入口
+## Entry point
 
-Rust 会启动：
+Rust Will start:
 
 ```bash
 run_translate_only.py --spec <job_root>/specs/translate.spec.json
 ```
 
-## Spec 结构
+## Spec structure
 
 ```json
 {
@@ -50,18 +50,18 @@ run_translate_only.py --spec <job_root>/specs/translate.spec.json
 }
 ```
 
-## 安全约定
+## Security conventions
 
-- API key 不写入 spec 明文。
-- `credential_ref` 指向运行时环境变量。
-- Rust worker 启动时注入 `RETAIN_TRANSLATION_API_KEY`。
+- API key Do not write. spec Plaintext.
+- `credential_ref` Points to runtime environment variables.
+- Rust worker Startup Injection `RETAIN_TRANSLATION_API_KEY`。
 
-## 产物
+## Outputs
 
-翻译 worker 成功后会写：
+Translation worker on success will write:
 
 - `translated/translation-manifest.json`
-- 逐页 translation payload
+- Per-page translation payloads
 - `artifacts/translation_diagnostics.json`
 - `artifacts/translation_debug_index.json`
 - `artifacts/translation_review.json`

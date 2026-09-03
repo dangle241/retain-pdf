@@ -1,11 +1,11 @@
-# 工程规划与台账
+# Project Planning & Ledger
 
-这里存放工程判断、后续执行计划和历史任务台账。  
-如果你在找“当前功能怎么用”，不要从这里开始。
+Stores engineering decisions, future execution plans, and historical task logs.  
+If you're looking for "how to use current features", don't start here.
 
-- [工程评价与后续执行计划](./工程评价与后续执行计划.md)
-- [架构与 API 契约任务台账](./architecture_tasks.csv)
-- [2026-04-15 Rust API 去耦任务清单](./250415_task.csv)
-- [2026-04-16 Normalize/翻译持续试错台账](./260416.csv)
+- Engineering evaluation and follow‑up execution plan
+- [Architecture and API Contract Task Register](./architecture_tasks.csv)
+- [2026-04-15 Rust API Decoupling Task List](./250415_task.csv)
+- [2026-04-16 Normalize/Continuous Translation Trial-and-Error Log](./260416.csv)
 
-CSV 台账用于保留历史决策和试错记录，不建议随意覆盖旧行；新增结论应追加记录。
+CSV Ledger preserves historical decisions and trial-and-error records. Do not overwrite old rows; append new conclusions.

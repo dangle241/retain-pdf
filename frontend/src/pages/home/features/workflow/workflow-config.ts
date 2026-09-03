@@ -20,12 +20,15 @@ import {
   DEFAULT_MODEL_VERSION,
 } from "../../composition/external.js";
 
-// 工作流常量与归一化。
+// Workflow constants and normalization.
 //
-// 拷贝自 bootstrap/workflow-constants.js 与 bootstrap/workflow-normalizers.js:
-// bootstrap/ 属旧 DI 装配层,architecture-boundaries 门禁禁止 pages import;
-// 常量本体仍从 src/js/config/(纯逻辑)取,拷贝的只是组装样板。
-// home cutover 删除旧世界时,bootstrap 版随之退役,此处成为唯一出处。
+// Copied from bootstrap/workflow-constants.js and bootstrap/workflow-normalizers.js:
+// bootstrap/ belongs to the old DI assembly layer, architecture-boundaries gate
+// forbids pages from importing it;
+// the constants body still comes from src/js/config/ (pure logic), the copy is only
+// the assembly boilerplate.
+// When home cutover deletes the old world, the bootstrap version retires with it,
+// and this file becomes the single source of truth.
 
 export const WORKFLOW_BOOK = "book";
 export const WORKFLOW_TRANSLATE = "translate";
@@ -73,3 +76,4 @@ export function normalizeWorkflow(value, {
 export function normalizeMathMode(value) {
   return `${value || ""}`.trim() === "placeholder" ? "placeholder" : "direct_typst";
 }
+

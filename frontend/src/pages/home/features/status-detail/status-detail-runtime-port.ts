@@ -9,18 +9,19 @@ import type {
   EventsPayload,
 } from "../../composition/external.js";
 
-// StatusDetailDialog 的 runtimePort(蓝图 §1 数据源铁律:读 job-runtime 保留
-// 引擎的 state,不是 statusCardStore)。
+// StatusDetailDialog runtime port (blueprint §1 data source iron law: reads
+// job-runtime state, NOT statusCardStore).
 //
-// 逻辑拷贝自 src/js/bootstrap/status-detail-runtime-port.js——该文件路径命中
-// architecture-boundaries.test.mjs 的 `/bootstrap/` 防回弹正则,pages/** 禁止
-// import;但它本身只是 job-runtime 三个 kept 端口
-// (current-job-state.js/secondary-resource-cache.js/render-context.js)的字面量
-// 组合,零 DOM 逻辑,直接照抄零风险。composition.js 用同一个 jobRuntimeState
-// 对象构造,拿到与 job-runtime 引擎完全同一份 currentJobStore/
-// secondaryResourceStore 引用,不新建平行状态。
+// Literal copy from src/js/bootstrap/status-detail-runtime-port.js — that file
+// is in a directory that architecture-boundaries.test.mjs's `/bootstrap/`
+// anti-bounce regex blocks pages/** from importing; but this file itself only
+// aggregates three kept job-runtime ports
+// (current-job-state.js/secondary-resource-cache.js/render-context.js) with zero
+// DOM logic, so a direct copy carries zero risk. composition.js uses the same
+// jobRuntimeState object, obtaining identical currentJobStore/secondaryResourceStore
+// references as the job-runtime engine — no new parallel state is created.
 
-/** applyOverviewPayload 入参：概览刷新后写回 runtime 的一批载荷 */
+/** applyOverviewPayload input: batch of payloads written back to runtime after Overview refresh */
 export interface StatusDetailOverviewPayloadOptions {
   payload?: JobLike | JobPayload | Record<string, unknown> | null;
   eventsPayload?: EventsPayload | null;
@@ -101,3 +102,5 @@ export function createStatusDetailRuntimePort(state: object) {
 }
 
 export type StatusDetailRuntimePort = ReturnType<typeof createStatusDetailRuntimePort>;
+
+

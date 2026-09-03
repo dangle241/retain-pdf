@@ -507,7 +507,7 @@ def test_long_text_split_partially_accepts_when_one_chunk_fails() -> None:
     )
 
     sentence = "This is a long body sentence describing the experimental protocol in detail. "
-    source = sentence * 70  # ~5500 字符,切成多块
+    source = sentence * 70  # ~5500 chars, split into multiple chunks
     item = {
         "item_id": "p001-b001",
         "protected_source_text": source,
@@ -537,7 +537,9 @@ def test_long_text_split_partially_accepts_when_one_chunk_fails() -> None:
     assert result is not None
     payload = result["p001-b001"]
     diag = payload["translation_diagnostics"]
-    # 单块失败不再作废整条:失败块保留原文,其余块保留译文
+    # A single chunk failure no longer voids the whole block: failed
+    # chunks keep the source text while the other chunks keep the
+    # translation.
     assert diag["final_status"] == "partially_translated"
     assert diag["degradation_reason"] == "direct_typst_long_text_split_partial"
     assert diag["degraded_chunk_count"] == 1

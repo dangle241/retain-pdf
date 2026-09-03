@@ -13,9 +13,11 @@ export const DEFAULT_INNER_BBOX_DENSE_SHRINK_X = 0;
 export const DEFAULT_INNER_BBOX_DENSE_SHRINK_Y = 0;
 export const DEFAULT_FONT_UNIFY_MODE = "role_min";
 export const DEFAULT_WORKERS = 100;
-// 批翻译默认口径与 Python 引擎(TranslationExecutionRequest.batch_size=8)对齐:
-// batch=1 会把每块拆成独立请求,批处理队列与批内上下文完全失效。
+// Default batch translation size aligned with Python engine (TranslationExecutionRequest.batch_size=8):
+// batch=1 splits each block into its own request, so batch queue and in-batch context are useless.
 export const DEFAULT_BATCH_SIZE = 8;
 export const DEFAULT_CLASSIFY_BATCH_SIZE = 12;
 export const DEFAULT_COMPILE_WORKERS = 8;
 export const DEFAULT_TIMEOUT_SECONDS = 1800;
+
+

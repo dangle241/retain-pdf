@@ -1,62 +1,62 @@
-# pretext 第一层评估
+# pretext First-level evaluation
 
-评估对象：
+Evaluation target:
 
 - <https://github.com/chenglou/pretext>
 - <https://github.com/chenglou/pretext/blob/main/STATUS.md>
 
-评估结论：
+Evaluation conclusion:
 
-`pretext` 值得进入 `layout-fit` 的候选方案清单，但第一阶段不要直接把它定为唯一测量内核。更稳妥的定位是：和原生 HTML/DOM 测量器并行，作为更可控、可缓存、低 reflow 的块级文本布局测量方案做小样本对照。
+`pretext` Worth entering `layout-fit` candidate solution list, but in the first stage, do not directly designate it as the sole measurement core. A more prudent positioning is: alongside the native HTML/DOM parallel measurement engines, as a more controllable, cacheable, low reflow Measure block-level text layout. Compare samples.
 
-## 和 layout-fit 的匹配点
+## Alignment with layout-fit
 
-`layout-fit` 当前最重要的问题是块级拟合：给定文本、字体、目标宽高和候选排版参数，稳定计算行数、高度、宽度溢出，再选择最接近目标框的一组参数。
+`layout-fit` The most critical issue is block-level fitting: given text, font, target width and height, and candidate layout parameters, stably compute line count, height, and width overflow, then select the set of parameters closest to the target box.
 
-`pretext` 的核心方向正好贴近这部分问题：
+`pretext` core direction aligns closely with this problem:
 
-- 它把文本布局拆成可编程的准备和布局步骤，而不是完全依赖 DOM reflow。
-- 它暴露了 `prepare()` 和 `layout()` 这类基础入口，适合做“同一段文本，多组参数反复测量”的扫描。
-- 它支持 `layoutWithLines()`、`prepareWithSegments()`、`measureLineStats()` 等更细粒度接口，适合拿到逐行结果和行统计信息。
-- 它强调低分配、低延迟的文本布局路径，适合后续做批量样本扫描或实时调参。
+- It breaks text layout into programmable preparation and layout steps, rather than relying entirely. DOM reflow。
+- It is exposed. `prepare()` and `layout()` Base entry: repeated scans of same text across parameter sets.
+- Supports `layoutWithLines()`、`prepareWithSegments()`、`measureLineStats()` Await finer-grained interface; retrieves per-line results and line statistics.
+- It emphasizes a low-allocation, low-latency text layout path, suitable for subsequent batch sample scanning or real-time parameter tuning.
 
-## 可以直接服务的能力
+## Directly servable capabilities
 
-第一层可复用能力主要是测量和布局，不是完整 PDF 恢复：
+First-layer reusable capabilities: primarily measurement and layout, not complete. PDF Recovery:
 
-- 给定宽度约束后，计算文本如何换行。
-- 拿到行数、行宽和整体高度一类布局指标。
-- 支持在不同参数下重复运行布局，用于字号、行高和段宽扫描。
-- 支持更细的文本片段输入，为后续处理中英文混排、强调样式或占位符保留提供空间。
+- Given a width constraint, calculate how text wraps.
+- Get layout metrics: line count, line width, overall height.
+- Supports repeated layout runs with different parameters for font size, line height, and paragraph width scanning.
+- Support finer text segment input, providing space for subsequent processing of Chinese-English mixed layout, emphasis styles, or placeholder preservation.
 
-## 不能直接解决的问题
+## Issues not directly resolvable
 
-这些能力仍然需要 `layout-fit` 自己做上层封装：
+These capabilities still require `layout-fit` Roll your own upper-layer wrapper.
 
-- 从 `document.v1.json`、`translated/page-XXX-deepseek.json` 抽取块级样本。
-- 定义 `fixtures` 的样本格式和实验输出格式。
-- 把测量结果映射到 Typst 的字号、行高、段落参数。
-- 做页面级多块回放、碰撞检测和图文混排恢复。
-- 验证 CJK、中英文混排、行内公式和 OCR 框坐标下的实际误差。
-- 对比 DOM、`pretext`、Typst 三者在同一批样本上的行数和高度差异。
+- Extract block-level samples from `document.v1.json` and `translated/page-XXX-deepseek.json`.
+- Define `fixtures` Sample format and experimental output format.
+- Map measurement results to Typst Font size, line height, paragraph parameters.
+- Implement page-level multi-block playback, collision detection, and mixed text-image layout restoration.
+- Verify CJKmixed CJK and English, inline formulas, and OCR Actual error in box coordinates.
+- Compare DOM, `pretext`, Typst Three: row count & height differences on same samples.
 
-## 当前风险
+## Current risk
 
-主要风险不在于 `pretext` 是否有价值，而在于它和我们的最终排版目标是否足够接近：
+The main risk does not lie in `pretext` Not whether valuable, but whether close enough to final layout target:
 
-- 它的排版模型不等同于 Typst，不能直接把输出当成 Typst 真值。
-- 字体测量一致性仍然可能受浏览器、Canvas 字体加载和平台字体差异影响。
-- 如果我们需要强控制 `letter-spacing`、段间距、中文标点压缩或公式占位符宽度，可能需要额外 adapter。
-- 如果样本主要来自 OCR 框，目标是贴合原 PDF 块尺寸，普通文本布局指标可能还不够，需要另加 OCR/Typst 对照评分。
+- Its layout model is not equivalent to. Typst, cannot directly treat the output as Typst Truth value.
+- Font measurement consistency may still be affected by browser,Canvas Font loading and platform font differences impact.
+- If we need strong control. `letter-spacing`paragraph spacing, Chinese punctuation compression, or formula placeholder width, additional adapters may be required adapter。
+- If samples mainly come from OCR-derived PDF block sizes, normal text layout metrics are insufficient; add separate OCR/Typst compare scores.
 
-## 建议定位
+## Recommended location
 
-下一步不要只做单轨 HTML/DOM 测量器，而是改成双轨：
+Next step not single track. HTML/DOM Measuring device, but rather change to dual-track:
 
-- 轨道 A：HTML/DOM 基线测量器。
-- 轨道 B：`pretext` 候选测量器。
+- Track A：HTML/DOM Baseline Measurer.
+- Skip mount B：`pretext` Candidate Meter.
 
-两条轨道使用同一批 `fixtures`，输出同一组指标：
+Two tracks use same batch. `fixtures`Output the same set of metrics.
 
 - `lineCount`
 - `height`
@@ -65,23 +65,23 @@
 - `overflowY`
 - `score`
 
-第一轮 PoC 只需要回答一个问题：在 5 到 10 个真实文本块样本上，`pretext` 的行数、高度和溢出判断是否比 DOM 基线更稳定、更容易做参数扫描。
+First round PoC only needs to answer one question: on 5 to 10 real text block samples, are `pretext` line count, height, and overflow judgments more stable and easier to parameter-scan than the DOM baseline?
 
-如果 PoC 结果稳定，再考虑把 `pretext` 包成 `scripts/` 或 `html/` 下的正式测量 adapter；如果结果和 DOM/Typst 差异过大，就只保留为参考方案。
+If PoC results are stable, consider `pretext` as a formal measurement adapter in `scripts/` or `html/`; otherwise, keep DOM/Typst only as reference if discrepancy is too large.
 
-## 当前实现状态
+## Current implementation status
 
-`layout-fit` 里已经补了浏览器侧 PoC 入口：
+`layout-fit` already added to browser side. PoC entry:
 
 - `html/pretext.html`
 - `package.json`
 
-依赖通过国内镜像可以正常安装：
+Dependencies can be installed normally via domestic mirror:
 
 - `npm install --registry=https://registry.npmmirror.com`
 
-另外已经确认一件重要事实：
+Additionally, one important fact has been confirmed:
 
-- `@chenglou/pretext` 在当前 Node 环境里可以被导入。
-- 但真正执行 `prepare()` / `prepareWithSegments()` 时需要 `OffscreenCanvas` 或 DOM canvas context。
-- 因此当前最合理的 PoC 位置是浏览器侧，不是纯 Node CLI 脚本。
+- `@chenglou/pretext` Current Node Environment supports imports. Use existing modules.
+- but actual execution of `prepare()` / `prepareWithSegments()` requires `OffscreenCanvas` or DOM canvas context.
+- Therefore the most reasonable currently. PoC Location is browser-side, not pure. Node CLI Script.

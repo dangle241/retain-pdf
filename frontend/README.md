@@ -1,23 +1,23 @@
-# RetainPDF 前端（主站）
+# RetainPDF Frontend (main site)
 
-**生产入口：本目录 `frontend/`**（三页静态 SPA：`index` / `detail` / `reader`）。
+**Production entry: this directory `frontend/`**Static 3 pages. SPA：`index` / `detail` / `reader`）。
 
-| 目录 | 说明 |
+| Directory | Description |
 |------|------|
-| `src/pages/home` | 主页（书架、上传、任务） |
-| `src/pages/reader` | 阅读器（默认 react-pdf；见该目录 README） |
-| `src/pages/detail` | 任务详情 |
-| `src/js` | 共享 API / 命令式领域 / 旧阅读引擎 / mock |
-| `src/styles` | 全局与按页 CSS |
+| `src/pages/home` | Home Bookshelf Upload Tasks |
+| `src/pages/reader` | Reader (Default react-pdf; see that directory README） |
+| `src/pages/detail` | Task Details |
+| src/js | Shared API / Imperative domain / Legacy reading engine / mock |
+| `src/styles` | Global and Per-Page CSS |
 
-**文件夹逻辑与双 features 树**：见 [`src/FEATURES.md`](src/FEATURES.md)  
-（`js/features` = 领域；`pages/home/features` = React UI；阅读器另见 `pages/reader` + `js/reader`。）
+Folder logic and dual features tree see src/FEATURES.md
+（`js/features` = Domain;`pages/home/features` = React UISee also Reader. `pages/reader` + `js/reader`.)
 
-## 与 `frontend-react/`
+## With frontend-react/
 
-仓库根还有 `frontend-react/`：**独立 Vite 实验/迁移区**，端口 40002，**不替代**本目录。日常开发与发版以 `frontend/` 为准。
+Repo root also has frontend-react/: independent Vite experiment/migration area on port 40002, do not replace this directory. Daily dev and release are based on frontend/.
 
-## 常用命令
+## Common commands
 
 ```bash
 npm run build        # css + js + stamp
@@ -27,12 +27,12 @@ npm test
 python3 scripts/serve_static.py --host 127.0.0.1 --port 40001 --root .
 ```
 
-| 文档 | 内容 |
+| Document | Content |
 |------|------|
-| `src/FEATURES.md` | 全站目录 / 双 features / 阅读器三层 / detail external |
-| `src/pages/reader/README.md` | 阅读器 react-pdf vs shared ports vs legacy |
-| `src/js/reader/README.md` | 旧 pdf.js 引擎边界 |
-| `src/pages/detail/README.md` | 详情页 external 规则 |
-| `src/pages/home/composition/README.md` | 主页装配规则 |
-| `src/pages/home/features/README.md` | 主页 React 域索引 |
-| `src/styles/README.md` | CSS 按页拆包（home/detail/reader） |
+| `src/FEATURES.md` | Site Directory / dual features / Three Layers of Reader / detail external |
+| `src/pages/reader/README.md` | Reader react-pdf vs shared ports vs legacy |
+| src/js/reader/README.md | Old pdf.js engine boundaries |
+| src/pages/detail/README.md | Details external rules |
+| `src/pages/home/composition/README.md` | Homepage assembly rules |
+| src/pages/home/features/README.md | Home React domain index |
+| `src/styles/README.md` | CSS Unpack by page (home/detail/reader） |

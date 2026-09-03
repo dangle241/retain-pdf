@@ -1,33 +1,33 @@
-# 0002 使用 Typst 作为翻译文字叠加渲染引擎
+# 0002 Use Typst as translation text overlay rendering engine
 
-## 背景
+## Background
 
-RetainPDF 需要在原 PDF 上叠加翻译文本，同时尽量保留公式、图片、表格和页面视觉结构。纯 PyMuPDF 写字能力有限，复杂 markdown、公式和自动 fit 的表达力不足。
+RetainPDF needs to be on the original PDF overlay translated text while preserving formulas, images, tables, and page visual structure. Pure PyMuPDF Limited writing ability, complex. markdownFormula and automation fit insufficient expressive power.
 
-## 决策
+## Decision
 
-渲染主路径使用 Typst 生成 overlay，再与清理后的 PDF 背景合成。
+Use primary rendering path: Typst generates overlay, then compose with cleaned PDF background.
 
-PyMuPDF 继续负责：
+PyMuPDF Continues to be responsible for:
 
-- 读取和保存 PDF。
-- 复制书签。
-- 页面 redaction / 背景清理。
-- 最终 PDF 合并和压缩。
+- Read and Save PDF。
+- Copy bookmarks.
+- Page redaction / Background cleanup.
+- Final PDF merge and compression.
 
-Typst 负责：
+Typst is responsible for:
 
-- 翻译文本排版。
-- markdown / 公式渲染。
-- overlay 页面编译。
+- Translation text layout.
+- markdown / Formula rendering.
+- overlay Page Compilation.
 
-## 后果
+## Consequences
 
-- 渲染层必须维护 `layout -> RenderBlock -> Typst source -> overlay PDF` 的清晰链路。
-- Typst 层不应该直接理解 OCR provider 或翻译策略。
-- redaction 和 layout 的错误会反映到 Typst overlay 视觉结果，但职责不能混在一起。
+- Rendering layer must be maintained. `layout -> RenderBlock -> Typst source -> overlay PDF` Clear link.
+- Typst Layers should not interpret directly. OCR provider or translation strategies.
+- Redaction and layout errors reflect to Typst overlay visual results, but responsibilities must not be mixed.
 
-## 替代方案
+## Alternatives
 
-- 只用 PyMuPDF 直接写文字。实现简单，但复杂公式、markdown 和 fit 能力不足。
-- 把原 PDF 全页转图片再叠字。视觉稳定，但输出文件会明显变大，并且会损失可复制文本和书签等 PDF 结构。
+- Use only PyMuPDF to write text directly. Simple implementation, but complex formulas and markdown fit insufficiently.
+- convert the original PDF Convert full page to image then overlay text. Visually stable, but output size increases significantly, and loses selectable text, bookmarks, etc. PDF Structure.

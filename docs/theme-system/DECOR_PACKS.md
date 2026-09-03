@@ -1,40 +1,40 @@
-# 装饰包（Decor Packs）契约
+# Decoration pack (Decor PacksContract
 
-> 状态：契约 + 图片版舞台已落地（three 引擎未实现，model 层暂走 fallback 图）。
-> 代码真值：`frontend/src/shared/decor/{slots,contract,stage-plan}.ts` · `DecorStage.tsx`
-> slot 定位：`frontend/src/styles/core/decor-stage.css` · 示范包：`frontend/decor/jiangnan/`
-> 测试：`frontend/tests/decor-contract.test.mjs` · `tests/decor-stage.test.mjs`
+> Status: Contract + Image version stage deployed (three Engine not implemented.model Layer temporary exit fallback Figure).
+> Code truth value:`frontend/src/shared/decor/{slots,contract,stage-plan}.ts` · `DecorStage.tsx`
+> slot Location:`frontend/src/styles/core/decor-stage.css` · Demo package:`frontend/decor/jiangnan/`
+> Tests: `frontend/tests/decor-contract.test.mjs` Â· `tests/decor-stage.test.mjs`
 
-## 是什么
+## What is it?
 
-现有主题体系（`data-theme` + 语义 CSS 变量）只管**配色**。装饰包在其上叠加一层
-**可选的视觉世界**：全幅背景插画、分层道具、可点击播动画的 3D 模型、题字横幅——
-即概念稿里的"国风/园林/草原"主题。
-
-```
-装饰主题 = 配色皮肤 (themes/<id>.css)  ← 既有体系，不动
-         + 装饰包   (decor/<pack>/manifest.json + 资产)
-```
-
-`registry.ts` 的 `ThemeDefinition.decorPack` 指向包名。**没有 decorPack 的皮肤
-（classic / night）零装饰、零额外下载**——three.js chunk 只在装饰包含 model 层时
-动态 import。
-
-## 第一原则：功能 UI 永远是 DOM
-
-书库网格、顶栏、搜索、按钮全部保持 React/DOM。装饰层只能挂在**具名锚点（slot）**
-上，分三个层级带：
+Existing theme system (`data-theme` + semantic CSS Variable) manages only **Color scheme**. Decorator package overlays layer on top.
+**Optional visual world**full-screen background illustrations, layered props, clickable animations 3D Models, inscription banners——
+i.e., in the concept draft"Chinese Style/Gardens/Grassland"Theme.
 
 ```
-z-index 低 → 高
-  bg   全幅背景插画          （永远被 UI 面板盖住）
-  ---- 功能 UI 背板（半透明 --surface）----
-  mid  中景道具：人物/铜鼎/马 （可被 UI 面板局部遮挡）
-  ---- 功能 UI 内容 ----
-  fg   前景压边：花枝/流苏    （压在 UI 边缘上，pointer-events: none）
+Decoration Theme = Color theme (themes/<id>.css)  ← Existing system, leave unchanged.
++ Decoration Pack   (decor/<pack>/manifest.json + assets)
 ```
 
-## 锚点地图（slots.ts 真值）
+`registry.ts`'s `ThemeDefinition.decorPack` points to package name. **No decorPack means no skin
+（classic / nightZero decoration, zero extra downloads.**——three.js chunk Decorate only if included. model layer time
+Dynamic import.
+
+## Principle 1: Functionality UI Forever DOM
+
+Keep library grid, top bar, search, buttons. React/DOMDecoration layer attaches only to**Named anchor (slot）**
+on, divided into three hierarchical bands:
+
+```
+z-index low → high
+  bg   Full-width background illustration          Always be UI Panel covered)
+---- Functional UI Backplane (semi-transparent --surface) ----
+  mid  Props: character/Bronze tripod/horse (can be UI Panel partially obstructed)
+---- Functional UI Content ----
+  fg   Foreground edge crop: flower branch/tassel    (pressed under UI On the edge,pointer-events: none）
+```
+
+## Anchor map (slots.ts truth value)
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -42,22 +42,22 @@ z-index 低 → 高
 │                  hero              quote    │
 │ e┌─────────────────────────────────────┐e   │
 │ d│                                     │d   │
-│ g│         功能 UI（书库面板）          │g   │
+â gâ         Functional UI (Library Panel)          âg   â
 │ e│                                     │e   │
 │ -│                                     │-   │
 │ l└─────────────────────────────────────┘r   │
 │ left-bottom                   right-bottom  │
-│              （right-bottom-fg：右下前景位）  │
-│              backdrop（全幅）                │
+│              （right-bottom-fgLower right foreground position)  │
+│              backdropFull Width                │
 └─────────────────────────────────────────────┘
 ```
 
-- slot 在哪、多大、什么 z-index：**舞台 CSS 统一实现**（待建 DecorStage），
-  manifest 只声明"资产挂哪个 slot"。资产侧与布局侧解耦。
-- 一个 slot 只挂一层。要堆叠 → slots.ts 开新锚点，不在 manifest 里叠罗汉。
-- 新增锚点 = slots.ts 登记一条 + 舞台 CSS 补一条定位，校验自动放行。
+- slot Where, size, what z-index：**Stage CSS Unified implementation**(TBD DecorStage），
+  manifest Declare only."Which asset to attach? slot"Asset-side decoupled from layout-side.
+- One slot only attaches one layer. Stacking required. â slots.ts New anchor not found. manifest Human pyramid inside.
+- Add anchor = slots.ts Add one. + Stage CSS Add a locate entry; validation auto-passes.
 
-## manifest 示例
+## manifest Example
 
 ```jsonc
 // decor/guofeng/manifest.json
@@ -70,58 +70,58 @@ z-index 低 → 高
     { "type": "model", "slot": "left-top",    "src": "girl.glb",
       "fallback": "girl.webp", "idleClip": "Breathe", "clickClip": "TurnPage" }
   ],
-  "quote": { "slot": "quote", "text": "知其所来\n明其所往" }
+  "quote": { "slot": "quote", "text": "Understand origin.\nKnow where to go." }
 }
 ```
 
-## 硬规则（validateDecorManifest 强制）
+## Hard rules (validateDecorManifest Force
 
-| 规则 | 理由 |
+| Rule | Reason |
 |---|---|
-| model 层 `fallback` 必填 | 降级链是契约：reduced-motion / 无 WebGL / 低端机 → 静态图 |
-| backdrop 禁挂 3D | 性能红线；背景用 image + parallax 以假乱真 |
-| 3D 图层 ≤ 3 | 单画布单 renderer，多了必卡 |
-| 图层总数 ≤ 12 | 防"贴满屏"失控 |
-| src 仅包内相对路径 | 禁止 `..` / 绝对路径 / http: / data: |
-| parallax ∈ [0, 0.2] | 视差是点缀不是特技 |
-| quote 只能挂 textCapable 锚点 | 文字排版由舞台统一处理 |
+| model layer `fallback` required | Degradation chain is a contract: reduced-motion / no WebGL / Low-end device â static image |
+| backdrop No Mount 3D | Performance critical; background use. image + parallax Fake as real |
+| 3D Layers ≤ 3 | Single Canvas rendererToo many will cause lag. |
+| Total layers ≤ 12 | prevent"Fill screen"out of control |
+| src Package-relative paths only. | Prohibit `..` / absolute path / http: / data: |
+| parallax ∈ [0, 0.2] | Parallax is an accent, not a gimmick. |
+| quote Mount only textCapable Anchor missing. Add anchor tags. | Text layout handled by stage. |
 
-## 资产预算（contract.ts 常量，管线门禁用）
+## Budget allocation incorrect. Check formula. Fix:contract.ts Constant, pipeline gate disabled
 
-| 项 | 上限 |
+| Item | Limit |
 |---|---|
-| 单个 glb（Draco+KTX2 压缩后） | 2048 KB |
-| 单模型三角面 | 50,000 |
-| 单张装饰图（webp） | 512 KB |
+| Single glb (Draco+KTX2 After compression) | 2048 KB |
+| Single model triangle | 50,000 |
+| Single decorative image (webp） | 512 KB |
 
-AI 产模型管线：AI 生成 → `gltf-transform optimize`（Draco 几何 + KTX2 纹理）→
-预算门禁（npm script，超限拒绝入库）→ 动画 clip 命名（`idleClip`/`clickClip`
-引用的名字必须存在于 glb）→ 入库。
+AI Production model pipeline: AI Generation â `gltf-transform optimize` (Draco Geometry + KTX2 Texture) â
+Budget Access Control (npm scriptexceeds limit, reject storage)→ Animation clip Naming (`idleClip`/`clickClip`
+Referenced name must exist in glb）→ Store.
 
-## 交互模型（舞台引擎实现时遵守）
+## Interaction model (enforced by stage engine implementation)
 
-- 单个全屏透明 WebGL canvas 承载所有 model 层，`pointer-events: none`。
-- window 级监听 click，raycast 命中注册了 `clickClip` 的对象才播动画——
-  UI 事件与装饰互不干扰。
-- `idleClip` 循环播放；`prefers-reduced-motion` 时不加载 three，直接用 fallback 图。
-- image 层可声明 `clickQuote`：舞台在该图层上叠一个透明热点按钮
-  （只盖人物实体部、恢复 `pointer-events`），点击轮播语录气泡、5s 自动收起；
-  装饰 `<img>` 本体依旧 `pointer-events: none` + `alt=""`，交互走真按钮。
+- Single full-screen transparent WebGL canvas Carries all model Layer,`pointer-events: none`。
+- window Level Monitor click，raycast Hit registered. `clickClip` Animation played only for the object.——
+  UI Events and decorations do not interfere with each other.
+- `idleClip` Loop;`prefers-reduced-motion` Not loaded at times three, directly use fallback Figure.
+- image Layers can be declared. `clickQuote`Overlay a transparent hotspot button on the stage in this layer.
+  Only stamp Character Entity Department, restore. `pointer-events`), click the carousel quote bubble,5s Auto-collapse;
+  Decoration `<img>` Main body unchanged. `pointer-events: none` + `alt=""`Interactive walkthrough button.
 
-## 新增一个装饰包
+## YAGNI. Why?
 
-1. `decor/<pack>/` 放 manifest.json + 资产（过预算门禁）
-2. **同目录写 `ASSETS.md` 资产规格书**（给 AI 生成工具的逐资产提示词 +
-   尺寸/构图/配色硬约束，模板见 `decor/jiangnan/ASSETS.md`）
-3. `registry.ts` 对应主题加 `decorPack: "<pack>"`
-4. 跑 `tests/decor-contract.test.mjs`（schema 变更时）+ 舞台引擎的 manifest 校验会在加载时兜底
+1. Place manifest.json + Assets in `decor/<pack>/` (Budget Gate Passed)
+2. **Write `ASSETS.md` Asset Specification Document in same directory** (Provide AI per-asset prompts for the tool +
+   Size/Composition/Hard color scheme constraints, see template. `decor/jiangnan/ASSETS.md`）
+3. `registry.ts` Add corresponding theme `decorPack: "<pack>"`
+4. Run `tests/decor-contract.test.mjs` (schema On change + Stage Engine manifest Validation falls back on load.
 
-## 路线图位置
+## Roadmap Position
 
-1. ✅ manifest 契约 + slot 注册表（本文档）
-2. ✅ CSS 硬编码收敛（461→0，棘轮基线 `{}`）
-3. ✅ 门禁（tests/css-color-literals.test.mjs，测试即门禁）
-4. ⬜ L3 组件 token（按钮/卡片形态可换肤）——由舞台实践反哺 token 清单
-5. ✅ DecorStage 图片版（jiangnan 示范包：雾山/竹枝/朱砂印/竖排题字；
-   视差 rAF 节流；<1100px 安全区只留背景；classic 等无包主题零开销）
-6. ⬜ three 引擎 + 第一个 3D 道具 + 资产管线门禁脚本
+1. ✅ manifest contract + slot Registry (this document)
+2. ✅ CSS Hardcoding Convergence (461→0ratchet baseline `{}`）
+3. ✅ Access Control (tests/css-color-literals.test.mjsTesting is the gate.
+4. ⬜ L3 Component token(Button/Card style skinnable)——Feedback from stage practice token Checklist
+5. ✅ DecorStage Image version (jiangnan Demo pack: Fog Mountain/Bamboo Branch/Cinnabar Seal/Vertical inscription;
+   parallax rAF Throttle;<1100px Safe area: background only.classic Zero-overhead package-free theme)
+6. ⬜ three Engine + first 3D Item + Asset pipeline gate script

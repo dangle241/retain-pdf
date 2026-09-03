@@ -1,14 +1,14 @@
-异步API使用文档
-更新时间：2026-02-04
-异步 API 使用说明
-单次请求最大支持 1000 页 pdf
-支持传入文件链接。文件大小不能超过 200 MB
-支持上传本地文件。文件大小不能超过 50 MB
-异步 API 完整调用示例
-针对不同的模型，返回结果的字段略有差异。以下分别提供 PaddleOCR-VL 系列 / PP-StructureV3 和 PP-OCRv5 的调用示例。
+Async API User Guide
+Last updated:2026-02-04
+Async API User Guide
+Max 1000 page PDF per request
+Supports file link input. File size cannot exceed 200 MB
+Supports uploading local files. File size cannot exceed 50 MB
+Async API Complete call example
+Response fields vary by model. Provided separately below. PaddleOCR-VL series / PP-StructureV3 and PP-OCRv5 Call example.
 
-1. PaddleOCR-VL-1.5、PaddleOCR-VL、PP-StructureV3 调用示例
-适用于 PaddleOCR-VL-1.5、PaddleOCR-VL 和 PP-StructureV3 模型。
+1. PaddleOCR-VL-1.5、PaddleOCR-VL、PP-StructureV3 Example
+Applies to PaddleOCR-VL-1.5, PaddleOCR-VL and PP-StructureV3 models.
 
 # Please make sure the requests library is installed
 # pip install requests
@@ -20,7 +20,7 @@ import time
 
 JOB_URL = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs"
 TOKEN = ""
-# 可选模型: "PaddleOCR-VL-1.5", "PaddleOCR-VL", "PP-StructureV3"
+# Optional models: "PaddleOCR-VL-1.5", "PaddleOCR-VL", "PP-StructureV3"
 MODEL = "PaddleOCR-VL-1.5"
 
 file_path = "<local file path or file url>"
@@ -110,7 +110,7 @@ if jsonl_url:
         if not line:
             continue
         result = json.loads(line)["result"]
-        # 注意：此处使用的是 layoutParsingResults 字段
+# Note: Uses layoutParsingResults field
         for i, res in enumerate(result["layoutParsingResults"]):
             md_filename = os.path.join(output_dir, f"doc_{page_num}.md")
             with open(md_filename, "w", encoding="utf-8") as md_file:
@@ -134,8 +134,8 @@ if jsonl_url:
                 else:
                     print(f"Failed to download image, status code: {img_response.status_code}")
             page_num += 1
-2. PP-OCRv5 调用示例
-适用于 PP-OCRv5 模型。
+2. PP-OCRv5 Call Example
+Applicable to PP-OCRv5 model.
 
 # Please make sure the requests library is installed
 # pip install requests
@@ -237,7 +237,7 @@ if jsonl_url:
         if not line:
             continue
         result = json.loads(line)["result"]
-        # 注意：PP-OCRv5 使用 ocrResults 字段
+# Note: PP-OCRv5 uses ocrResults field
         for i, res in enumerate(result["ocrResults"]):
             image_url = res["ocrImage"]
             img_response = requests.get(image_url)
@@ -250,10 +250,10 @@ if jsonl_url:
             else:
                 print(f"Failed to download image, status code: {img_response.status_code}")
             page_num += 1
-接口文档
+API Documentation
 Base URL：https://paddleocr.aistudio-app.com/
 
-提交解析任务
+Submit parsing task
 Path: /api/v2/ocr/jobs
 
 Method: POST
@@ -261,33 +261,33 @@ Method: POST
 Header:
 
 Authorization: Bearer {access_token}
-Content-Type: application/json（传入文件链接时设置，示例代码中已自动适配）
-Content-Type: multipart/form-data（上传文件时设置，示例代码中已自动适配）
+Content-Type: application/jsonSet when file link passed; sample code auto-adapts.
+Content-Type: multipart/form-data(Set when uploading files; automatically adapted in sample code.)
 Accept-Encoding: gzip, deflate, br
-请求参数说明
-参数	类型	是否必填	示例	描述
-file	bytes	是（与 fileUrl 二选一）		二进制文件数据
-fileUrl	string	是（与 file 二选一）		文件链接
-model	string	是	PP-OCRv5
+Request Parameters
+Parameter	Type	Required	Example	Description
+file	bytes	Yes (with fileUrl Select one of two)		Binary file data
+fileUrl	string	Yes (choose one of file or fileUrl)		File link
+model	string	Yes	PP-OCRv5
 PP-StructureV3
 PaddleOCR-VL
-PaddleOCR-VL-1.5	OCR 模型名
-optionalPayload	object	否	{"useDocOrientationClassify": false}	解析参数，不同模型类型不同，参考：
-PP-OCRV5：文档
-PP-StructureV3：文档
-PaddleOCR-VL：文档
-PaddleOCR-VL-1.5：文档
-pageRanges	string	否	"2,4-6"：第2页，第4到第6页
-"2--2"：第2页到倒数第2页	指定解析的页码范围
-batchId	string	否	可唯一标识的字符串	批量ID，用于批量查询任务
-响应参数说明
-参数	类型	示例	说明
-traceId	string	0b1eb3150f5bec03dab9e74b4264c615	请求 ID
-code	int	10002	接口状态码，成功为 0，失败详情参考“错误码说明”
-msg	string	文件 URL 无法识别	接口响应信息，失败详情参考“错误码说明”
+PaddleOCR-VL-1.5	OCR DeepSeek
+optionalPayload	object	No	{"useDocOrientationClassify": false}	Parse parameters. Vary by model type. Reference:
+PP-OCRV5Source text missing. Provide content to translate.
+PP-StructureV3: Documentation
+PaddleOCR-VL: Documentation
+PaddleOCR-VL-1.5: Documentation
+pageRanges	string	No	"2,4-6" Page 2, Pages 4-6
+"2--2": Page 2 to second to last page	Specify page range to parse
+batchId	string	No	Unique identifier string	Batch ID used for batch query tasks
+Response Parameter Description
+Parameter	Type	Example	Description
+traceId	string	0b1eb3150f5bec03dab9e74b4264c615	Request ID
+code	int	10002	API status code: success is 0For failure details, refer to "Error Code Description".
+msg	string	File URL Unrecognized	API response information. For failure details, refer to the "Error Code Description".
 data	object		
-data.jobId	string	ocrjob-f4377241b695	任务 ID
-获取解析结果
+data.jobId	string	ocrjob-f4377241b695	Job ID
+Get parse result
 Path: /api/v2/ocr/jobs/{jobId}
 
 Method: GET
@@ -296,27 +296,27 @@ Header:
 
 Authorization: Bearer {access_token}
 Content-Type: application/json
-响应参数说明
-参数	类型	示例	说明
-traceId	string	0b1eb3150f5bec03dab9e74b4264c615	请求 ID
-code	int	0	接口状态码，成功：0
-msg	string	Success	接口处理信息，成功："Success"
+Response Parameter Description
+Parameter	Type	Example	Description
+traceId	string	0b1eb3150f5bec03dab9e74b4264c615	Request ID
+code	int	0	Interface status code, success: 0
+msg	string	Success	Interface processing info, success: "Success"
 data	object		
-data.jobId	string	ocrjob-f4377241b695	任务 ID
-data.state	string	done	任务处理状态
-* done：完成
-* pending：排队中
-* running：正在解析中
-* failed：解析失败（不存在部分页成功的情况）
-data.errorMsg	string	文件格式不支持，请上传符合要求的文件类型	解析失败原因 state=failed 时该值有效
-data.resultUrl	object	提供 BOS 短链
-{ "jsonUrl": "https://***.com", "markdownUrl": "https://***.com"}	文档解析结果 state=done 时该值有效
-data.extractProgress	object		文档解析进度 state=running 时该值有效
-data.extractProgress.startTime	string	2026-01-01T12:00:00+08:00	文档解析开始时间
-data.extractProgress.endTime	string	2026-01-01T12:00:00+08:00	文档解析结束时间
-data.extractProgress.totalPages	string	10	文档总页数
-data.extractProgress.extractedPages	string	1	文档已解析页数
-批量获取任务结果
+data.jobId	string	ocrjob-f4377241b695	Job ID
+data.state	string	done	Task Processing Status
+* donedone
+* pendingpending
+* runningParsing
+* failedParsing failed (no partial success)
+data.errorMsg	string	Unsupported file format, please upload a required file type	Parse failure reason state=failed The value is valid at that time.
+data.resultUrl	object	Provides BOS Short link
+{ "jsonUrl": "https://***.com", "markdownUrl": "https://***.com"}	Document parsing result state=done Value valid at this time.
+data.extractProgress	object		Parsing progress valid when state=running
+data.extractProgress.startTime	string	2026-01-01T12:00:00+08:00	Document parsing start time
+data.extractProgress.endTime	string	2026-01-01T12:00:00+08:00	Document parsing end time
+data.extractProgress.totalPages	string	10	Total Pages
+data.extractProgress.extractedPages	string	1	Pages parsed
+Batch get job results
 Path: /api/v2/ocr/jobs/batch/{batchId}
 
 Method: GET
@@ -326,26 +326,26 @@ Header:
 Authorization: Bearer {access_token}
 Content-Type: application/json
 Accept-Encoding: gzip, deflate, br
-响应参数说明
+Response parameter description
 
-参数	类型	示例	说明
-traceId	string	0b1eb3150f5bec03dab9e74b4264c615	请求 ID
-code	int	0	接口状态码，成功：0
-msg	string	Success	接口处理信息，成功："Success"
+Parameter	Type	Example	Description
+traceId	string	0b1eb3150f5bec03dab9e74b4264c615	Request ID
+code	int	0	Interface status code, success: 0
+msg	string	Success	Interface processing info, success: "Success"
 data	object		
-data.batchId	string	batchid-202601210000	批量任务 ID，用户自定义传入，形式自订。
-data.extractResult	array		推理结果列表
-data.extractResult.jobId	string	ocrjob-f4377241b695	任务 ID
-data.extractResult.state	string	done	任务处理状态
-* done：完成
-* pending：排队中
-* running：正在解析中
-* failed：解析失败（不存在部分页成功的情况）
-data.extractResult.errorMsg	string	文件格式不支持，请上传符合要求的文件类型	解析失败原因 state=failed 时该值有效
-data.extractResult.resultUrl	object	提供 BOS 短链
-{ "jsonUrl": "https://***.com", "markdownUrl": "https://***.com"}	文档解析结果 state=done 时该值有效
-data.extractResult.extractProgress	object		文档解析进度 state=running 时该值有效
-data.extractResult.extractProgress.startTime	string	2026-01-01T12:00:00+08:00	文档解析开始时间
-data.extractResult.extractProgress.endTime	string	2026-01-01T12:00:00+08:00	文档解析结束时间
-data.extractResult.extractProgress.totalPages	int	10	文档总页数
-data.extractResult.extractProgress.extractedPages	int	1	文档已解析页数
+data.batchId	string	batchid-202601210000	Batch Tasks IDUser-defined input, form customizable.
+data.extractResult	array		Inference Results List
+data.extractResult.jobId	string	ocrjob-f4377241b695	Job ID
+data.extractResult.state	string	done	Job processing status
+* done: completed
+* pending: queuing
+* running: parsing
+* failed: parsing failed (no partial page success)
+data.extractResult.errorMsg	string	Unsupported file format, please upload a required file type	Parse failure reason valid when state=failed
+data.extractResult.resultUrl	object	Provides BOS short link
+{ "jsonUrl": "https://***.com", "markdownUrl": "https://***.com"}	Document parsing result valid when state=done
+data.extractResult.extractProgress	object		Document parsing progress valid when state=running
+data.extractResult.extractProgress.startTime	string	2026-01-01T12:00:00+08:00	Document parsing start time
+data.extractResult.extractProgress.endTime	string	2026-01-01T12:00:00+08:00	Document parsing end time
+data.extractResult.extractProgress.totalPages	int	10	Total document pages
+data.extractResult.extractProgress.extractedPages	int	1	Parsed document pages

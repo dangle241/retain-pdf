@@ -1,5 +1,5 @@
-// 三栏骨架的左右栏折叠:把手切换 body 上的折叠类,收起该栏(宽度归零),状态持久化。
-// 折叠是纯视觉(不改右栏的 active 抽屉),展开后原内容仍在。
+// Three-column layout left/right panel collapse: handle toggles body collapse classes, hiding panel (width→0), persisting state.
+// Collapse is purely visual (does not change right panel's active drawer); expanded content is preserved.
 
 const STORAGE_KEY = "retainpdf-reader-collapse-v1";
 
@@ -26,7 +26,7 @@ export function saveCollapseState(state, storage = globalThis.localStorage || nu
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify({ left: Boolean(state.left), right: Boolean(state.right) }));
   } catch (_err) {
-    // 配额满/隐私模式:静默失败
+    // Quota full / private mode: silent failure
   }
 }
 
@@ -43,7 +43,7 @@ export function createReaderPanelCollapse({
   function apply() {
     body?.classList?.toggle?.("reader-left-collapsed", state.left);
     body?.classList?.toggle?.("reader-right-collapsed", state.right);
-    // aria-expanded 反映"栏是否展开";把手图标随 is-collapsed 翻转(CSS)
+    // aria-expanded reflects whether panel is open; handle icon flips with is-collapsed (CSS)
     leftBtn?.setAttribute?.("aria-expanded", state.left ? "false" : "true");
     rightBtn?.setAttribute?.("aria-expanded", state.right ? "false" : "true");
     leftBtn?.classList?.toggle?.("is-collapsed", state.left);
@@ -63,7 +63,7 @@ export function createReaderPanelCollapse({
     apply();
   }
 
-  // 顶栏点开某工具时,右栏若处于折叠态则自动展开亮出内容
+  // When top bar opens a tool, auto-expand right panel if collapsed to reveal content
   function expandRight() {
     if (state.right) {
       state.right = false;
@@ -80,3 +80,5 @@ export function createReaderPanelCollapse({
 
   return { bindEvents, toggleLeft, toggleRight, expandRight, state: () => ({ ...state }) };
 }
+
+

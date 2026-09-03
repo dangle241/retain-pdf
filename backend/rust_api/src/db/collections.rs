@@ -19,7 +19,8 @@ impl Db {
     ) -> Result<CollectionRecord> {
         let conn = self.connect()?;
         let now = now_iso();
-        // 新文件夹排到末尾:取当前最大 sort_order + 1(空表则从 0 开始)。
+        // New folders are appended at the end: take the current max
+        // `sort_order + 1` (or 0 when the table is empty).
         let next_sort_order: i64 = conn.query_row(
             "SELECT COALESCE(MAX(sort_order), -1) + 1 FROM collections",
             [],
@@ -61,8 +62,9 @@ impl Db {
         Ok(collections)
     }
 
-    /// 改名和/或调整排序位置,两个字段都可选、按需更新;更新后返回最新记录
-    /// (记录不存在时报错,路由层转 404)。
+    /// Rename and/or adjust the sort position. Both fields are optional
+    /// and update only what was provided; the latest record is returned
+    /// (missing records are an error, which the route layer turns into 404).
     pub fn update_collection(
         &self,
         collection_id: &str,
@@ -86,8 +88,9 @@ impl Db {
             .with_context(|| format!("collection not found: {collection_id}"))
     }
 
-    /// 删除文件夹本身;collection_documents 的归属行随 ON DELETE CASCADE 自动清掉,
-    /// 文档记录本身不受影响。
+    /// Delete the folder itself. Membership rows in
+    /// `collection_documents` are cleaned up by `ON DELETE CASCADE`; the
+    /// underlying document records are untouched.
     pub fn delete_collection(&self, collection_id: &str) -> Result<bool> {
         let conn = self.connect()?;
         let changed = conn.execute(
@@ -97,7 +100,8 @@ impl Db {
         Ok(changed > 0)
     }
 
-    /// 批量加入文档;同一 (collection_id, document_id) 已存在则跳过(幂等)。
+    /// Bulk-add documents. Existing `(collection_id, document_id)` pairs
+    /// are skipped (idempotent).
     pub fn add_documents_to_collection(
         &self,
         collection_id: &str,
@@ -207,13 +211,13 @@ mod tests {
         db.init().expect("init");
 
         let a = db
-            .create_collection("col-a", "化学", None)
+            .create_collection("col-a", "chemistry", None)
             .expect("create a");
         assert_eq!(a.sort_order, 0);
         assert_eq!(a.document_count, 0);
 
         let b = db
-            .create_collection("col-b", "机器学习", None)
+            .create_collection("col-b", "machine learning", None)
             .expect("create b");
         assert_eq!(b.sort_order, 1);
 
@@ -223,9 +227,9 @@ mod tests {
         assert_eq!(listed[1].collection_id, "col-b");
 
         let renamed = db
-            .update_collection("col-a", Some("有机化学"), None)
+            .update_collection("col-a", Some("organic chemistry"), None)
             .expect("rename");
-        assert_eq!(renamed.name, "有机化学");
+        assert_eq!(renamed.name, "organic chemistry");
 
         let reordered = db
             .update_collection("col-a", None, Some(5))
@@ -252,17 +256,19 @@ mod tests {
         let fs = TestDbFs::new("collections-membership");
         let db = fs.db();
         db.init().expect("init");
-        db.create_collection("col-a", "化学", None)
+        db.create_collection("col-a", "chemistry", None)
             .expect("create");
 
-        // collection_documents 的 document_id 外键要求文档真实存在,先造一条。
+        // The `collection_documents.document_id` foreign key requires a
+        // real document to exist, so seed one first.
         let hash = sha256_hex(b"membership doc");
         db.upsert_document_from_upload(&upload_with_hash("up-membership", &hash))
             .expect("seed document");
 
         db.add_documents_to_collection("col-a", &[hash.clone()])
             .expect("add");
-        // 幂等:重复加入不报错、不重复计数。
+        // Idempotent: adding the same document again does not error and
+        // does not double-count.
         db.add_documents_to_collection("col-a", &[hash.clone()])
             .expect("add again");
         let after_add = db.get_collection("col-a").expect("get").expect("found");

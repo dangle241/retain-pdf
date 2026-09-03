@@ -1,14 +1,14 @@
-// 批注编辑器的纯逻辑层:不碰 DOM/React,便于 node 单测
-// 批注即服务端收藏(favorites)归一化后的记录,形状见 tests/reader-annotations-vm.test.mjs
+// Pure logic layer for annotation editor: no DOM/React, easy to unit test in node.
+// Annotations are normalized server favorites (favorites), shape defined in tests/reader-annotations-vm.test.mjs
 
-// kind 到展示文案的映射:冻结防止展示层意外改写
+// Mapping of kind to display label: frozen to prevent accidental modification by UI layer.
 export const ANNOTATION_KIND_META = Object.freeze({
-  sentence: { label: "句子" },
-  data: { label: "数据" },
-  figure: { label: "图表" },
+  sentence: { label: "Sentence" },
+  data: { label: "Data" },
+  figure: { label: "Figure" },
 });
 
-// 先按页码再按创建时间排序:导出与列表展示都依赖这个稳定顺序
+// Sort by page number first, then createdAt: both export and list display rely on this stable order
 export function sortAnnotations(list) {
   if (!Array.isArray(list)) {
     return [];
@@ -18,14 +18,14 @@ export function sortAnnotations(list) {
     if (pageDelta !== 0) {
       return pageDelta;
     }
-    // createdAt 是 ISO 字符串,字典序即时间序
+    // createdAt is ISO string; lexicographic order equals time order
     const left = `${a?.createdAt || ""}`;
     const right = `${b?.createdAt || ""}`;
     return left < right ? -1 : left > right ? 1 : 0;
   });
 }
 
-// 按页分组:展示层按页折叠、导出按页出小节,都复用这一份分组结果
+// Group by page: UI collapses by page, export outputs page sections; both reuse this grouping.
 export function groupAnnotationsByPage(list) {
   const groups = [];
   for (const annotation of sortAnnotations(list)) {
@@ -40,42 +40,46 @@ export function groupAnnotationsByPage(list) {
   return groups;
 }
 
-// 多行文本转 Markdown 引用块:每一行都要加 "> ",否则换行会跳出引用
+// Multi-line text to Markdown quote block: every line needs "> ", otherwise newline breaks out of blockquote
 function toQuoteBlockLines(text) {
   return `${text || ""}`.split("\n").map((line) => `> ${line}`);
 }
 
-// 生成导出用 Markdown:纯字符串拼装,方便精确单测与复制/下载复用
+// Generate export Markdown: pure string assembly for precise unit tests and Copy/download reuse
 export function buildAnnotationsMarkdown({ title = "", annotations = [] } = {}) {
-  const heading = title ? `# ${title} 批注` : "# 批注";
+  const heading = title ? `# ${title} annotations` : "# annotations";
   const groups = groupAnnotationsByPage(annotations);
   if (groups.length === 0) {
-    return `${heading}\n\n(暂无批注)\n`;
+    return `${heading}\n\n(No annotations)\n`;
   }
   const lines = [heading, ""];
   for (const group of groups) {
-    // pageIdx 是 0 基,展示给人看要转成 1 基页码
-    lines.push(`## 第 ${group.pageIdx + 1} 页`, "");
+    // pageIdx is 0-based; convert to 1-based page number for display
+    lines.push(`## Page ${group.pageIdx + 1} pages`, "");
     for (const annotation of group.items) {
       lines.push(...toQuoteBlockLines(annotation?.quoteText));
       if (annotation?.translatedQuoteText) {
-        // 译文紧贴原文引用块,用 —— 标记这是译文而非原文续行
+        // Translation immediately follows source quote block; use "——" to mark this as translation not source continuation
         lines.push(...toQuoteBlockLines(`—— ${annotation.translatedQuoteText}`));
       }
       if (annotation?.note) {
-        lines.push("", `笔记:${annotation.note}`);
+        lines.push("", `Note:${annotation.note}`);
       }
-      // 每条批注后留空行,末尾的 "" 也保证整篇以换行结尾
+      // Blank line after each annotation; trailing "" ensures final newline in document
       lines.push("");
     }
   }
   return lines.join("\n");
 }
 
-// 提取跳转锚点:阅读器只需要页码 + 块 id 就能定位回原文
+// Extract jump anchor: Reader only needs page number + block id to locate source
 export function annotationAnchor(annotation) {
   return {
     pageIdx: annotation?.pageIdx,
     blockId: annotation?.blockId,
   };
 }
+
+
+
+

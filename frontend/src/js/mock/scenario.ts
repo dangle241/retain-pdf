@@ -6,7 +6,7 @@ export function currentMockScenario() {
     succeeded: "done",
     complete: "done",
     completed: "done",
-    // demo：本地演示推荐入口；静态列表用 parallel，提交翻译走 live 推进
+    // demo: recommended local-demo entry; static list uses parallel, translation submit walks a live job.
     demo: "parallel",
     live: "parallel",
   };
@@ -17,3 +17,5 @@ export function currentMockScenario() {
 export function isoOffsetMinutes(minutes) {
   return new Date(Date.now() + minutes * 60_000).toISOString();
 }
+
+

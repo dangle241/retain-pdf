@@ -1,9 +1,9 @@
-// 状态徽标前置小图标(库存/翻译/处理中/失败/排队)。徽标本身很小,图标走
-// 11px 细线 lucide 路径,和徽标文字同色(currentColor)。name 来自
-// library-card-badge.js 返回的 icon key。
+// Status badge prefix icon (Library/Translation/Processing/Failed/queued). Badge itself is very small, icon uses
+// 11px thin-line lucide path, same color as badge text (currentColor). name comes from
+// library-card-badge.js returned icon key.
 
 const PATHS = {
-  // 馆藏:archive(带盖的收纳盒)——"入库存放但未翻译"
+  // Library: archive (box with lid) — "Added to storage but Not translated"
   archive: (
     <>
       <rect width="20" height="5" x="2" y="3" rx="1" />
@@ -11,7 +11,7 @@ const PATHS = {
       <path d="M10 12h4" />
     </>
   ),
-  // 已翻译:languages(文/A 翻译标)
+  // Translated: languages (language/translation icon)
   languages: (
     <>
       <path d="m5 8 6 6" />
@@ -22,9 +22,9 @@ const PATHS = {
       <path d="M14 18h6" />
     </>
   ),
-  // 处理中:loader-circle(转圈,配 animate-spin)
+  // Processing: loader-circle (spinning, paired with animate-spin)
   loader: <path d="M21 12a9 9 0 1 1-6.219-8.56" />,
-  // 失败:circle-alert
+  // Failed:circle-alert
   alert: (
     <>
       <circle cx="12" cy="12" r="10" />
@@ -32,7 +32,7 @@ const PATHS = {
       <line x1="12" x2="12.01" y1="16" y2="16" />
     </>
   ),
-  // 排队中:clock
+  // Queued:clock
   clock: (
     <>
       <circle cx="12" cy="12" r="10" />
@@ -61,3 +61,6 @@ export function BadgeIcon({ name }) {
     </svg>
   );
 }
+
+
+

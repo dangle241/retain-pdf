@@ -255,9 +255,10 @@ class TranslationRunDiagnostics:
         limit = max(1, min(max(1, self.configured_workers), int(initial_limit or 1)))
         floor = max(1, min(limit, int(floor_limit if floor_limit is not None else min(8, limit))))
         with self._adaptive_condition:
-            # warmup:先只放行 1 条请求,让 provider 的前缀缓存写入公共
-            # 系统提示词,首条请求结束后恢复全并发——后续请求命中缓存,
-            # 同时避免全并发冷启动惊群。
+            # warmup: let only the first request through so the provider's
+            # prefix cache is populated with the shared system prompt. Once it
+            # completes, restore full concurrency — later requests hit cache
+            # and we avoid a cold-start thundering herd.
             self._warmup_pending = bool(warmup) and limit > 1
             self._warmup_restore_limit = limit
             self._adaptive_limit = 1 if self._warmup_pending else limit
@@ -343,8 +344,10 @@ class TranslationRunDiagnostics:
         with self._adaptive_condition:
             self._adaptive_inflight = max(0, self._adaptive_inflight - 1)
             if self._warmup_pending:
-                # 无论首条请求成败都恢复全并发:预热是尽力而为,失败时
-                # 不能把整个运行钉死在串行。
+                # Always restore full concurrency regardless of whether the
+                # first request succeeded or failed: warmup is best-effort and
+                # must not strand the whole run in serial mode on a warmup
+                # failure.
                 self._warmup_pending = False
                 self._adaptive_limit = max(self._adaptive_limit, self._warmup_restore_limit)
             self._rebalance_adaptive_limit(
@@ -381,9 +384,12 @@ class TranslationRunDiagnostics:
             self._adaptive_success_streak = 0
             self._adaptive_slow_success_streak = 0
             if high_capacity_provider:
-                # 孤立超时容忍不降速;但失败连续堆积说明网络/provider 边缘
-                # 正在劣化(实测连接超时风暴中 limit 钉死 100 只会加剧惊群),
-                # 每堆积 5 次温和降速一档。成功会清零计数。
+                # A single isolated timeout does NOT trigger a slowdown, but
+                # consecutive failures piling up indicate a degrading network
+                # or provider edge (in observed connect-timeout storms pinning
+                # the limit at 100 only worsens the thundering herd). Every 5
+                # accumulated failures we step the limit down one notch. A
+                # success zeroes the counter.
                 if self._adaptive_recent_failure_count % 5 == 0:
                     self._adaptive_limit = max(min_limit, int(math.floor(self._adaptive_limit * 0.85)))
                 return

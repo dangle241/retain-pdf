@@ -1,114 +1,114 @@
 # Paddle Provider Boundary
 
-这份文档只说明一件事：
+This document describes only one thing:
 
-Paddle OCR 的 provider API 边界，和 `document.v1` 的统一文档边界，必须分开。
+Paddle OCR provider API boundary and `document.v1` unified document boundary must be separated.
 
-相关文档：
+Related documents:
 
-- API 摘要：
+- API summary:
   [`API_SUMMARY.md`](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/API_SUMMARY.md)
-- 官方异步接口示例：
+- Official async interface example:
   [`AsyncParse.md`](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/AsyncParse.md)
 
-## 1. Paddle Provider API 的三段式边界
+## 1. Paddle Provider API Three-part boundary
 
-根据 [AsyncParse.md](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/AsyncParse.md)，Paddle 的异步接口天然分成三段：
+According to [AsyncParse.md](/home/wxyhgk/tmp/Code/backend/rust_api/src/ocr_provider/paddle/AsyncParse.md), Paddle async interface naturally divides into three parts:
 
 ### `submit`
 
 - `POST /api/v2/ocr/jobs`
-- 输入：
-  - `fileUrl` 或 multipart `file`
+- Input:
+- `fileUrl` or multipart `file`
   - `model`
   - `optionalPayload`
-- 输出：
+- Output:
   - `jobId`
 
 ### `poll`
 
 - `GET /api/v2/ocr/jobs/{jobId}`
-- 状态：
+- Status:
   - `pending`
   - `running`
   - `done`
   - `failed`
-- 运行中可拿到：
+- Available during runtime:
   - `extractProgress.totalPages`
   - `extractProgress.extractedPages`
-- 完成后可拿到：
+- After completion, available:
   - `resultUrl.jsonUrl`
 
 ### `download_result`
 
-- 下载 `jsonUrl`
-- 返回的是 `jsonl`
-- 逐行解包后，才拿到真正的：
+- Download `jsonUrl`
+- Returns `jsonl`
+- Line-by-line unpacking yields the actual:
   - `result.layoutParsingResults`
   - `result.dataInfo`
 
-## 2. 哪些属于 Provider API 层
+## 2. Provider API layer
 
-以下内容属于 Paddle provider client / OCR service 层：
+The following belong to Paddle provider client / OCR service layer:
 
 - `jobId`
 - `state`
 - `extractProgress`
 - `resultUrl.jsonUrl`
-- 提交参数：
+- Submit parameters:
   - `model`
   - `optionalPayload`
   - `fileUrl`
   - multipart `file`
 
-这些信息用于：
+Purpose:
 
-- 提交任务
-- 轮询任务
-- 下载结果
-- 失败排错
+- Submit Task
+- Polling Task
+- Download result
+- Failure Troubleshooting
 
-它们不属于 `document.v1`。
+They do not belong. `document.v1`。
 
-## 3. 哪些才进入 `document.v1`
+## 3. Which ones enter `document.v1`
 
-只有在 `download_result` 之后，从 `jsonl` 里解出的实际 OCR 页面内容，才进入统一文档层：
+Only if `download_result` After `jsonl` actual extracted OCR Only page content enters the unified document layer:
 
 - `layoutParsingResults`
 - `dataInfo`
 
-后续才由 adapter 做：
+Subsequently by adapter handled by:
 
 1. provider raw JSON
-2. adapter 归一化
-3. 生成 `document.v1.json`
+2. adapter Normalize
+3. Generate `document.v1.json`
 
-也就是说：
+In other words:
 
-- Paddle provider API 层解决“任务怎么跑”
-- `document.v1` 层解决“文档最终长什么样”
+- Paddle provider API Layer solves 'how tasks run'.
+- `document.v1` Layer determines final document appearance.
 
-这两层不要混。
+Keep these two layers separate.
 
-## 4. 当前实现建议
+## 4. Current implementation recommendations
 
-如果后续在 Rust 或 Python 里继续接 Paddle：
+If later connecting Paddle in Rust or Python:
 
-- provider client 只负责：
+- provider client only responsible for:
   - submit
   - poll
   - download
-  - 解包 jsonl
-- adapter 只负责：
+  - Unpack jsonl
+- adapter only responsible for:
   - `layoutParsingResults/dataInfo -> document.v1`
-- 翻译/渲染主链路只接受：
+- Translation/main rendering pipeline accepts only:
   - `document.v1.json`
 
-不要把：
+Don't include:
 
 - `jobId`
 - `state`
 - `resultUrl`
 - `extractProgress`
 
-这类 provider API 运行态字段塞进 `document.v1`。
+This category provider API Inject runtime fields. `document.v1`。

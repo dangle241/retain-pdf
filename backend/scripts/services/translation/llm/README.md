@@ -1,82 +1,82 @@
-# LLM 目录约定
+# LLM Directory conventions
 
-当前目录按“provider 专属实现”和“跨 provider 公共逻辑”拆分。
+The current directory is split byprovider provider-specific implementations" and "cross- provider Split common logic.
 
-## 新人先读
+## Newcomers read first
 
-- 想看 provider API 请求和默认模型：
+- Want to see provider API Request & Default Model:
   `providers/deepseek/client.py`
-- 想看“当前激活 provider”的统一运行时入口：
+- View 'Currently Active' providerUnified runtime entry point
   `shared/provider_runtime.py`
-- 想看 provider registry/capability 装配：
+- To see provider registry/capability assembly:
   `shared/provider_registry.py`
-- 想看 provider 侧翻译实现：
+- To see provider-side translation implementation:
   `providers/deepseek/translation_client.py`
-- 想看翻译控制上下文、术语和提示拼装入口：
+- Translation control context, terminology, and prompt assembly entry point:
   `shared/control_context.py`
-- 想看翻译 prompt/message 构造：
+- Want to see translation prompt/message Construct:
   `shared/prompt_building.py`
-- 想看主翻译编排和 batch 重试：
+- Want to see the main translation orchestration and batch retry:
   `shared/orchestration/retrying_translator.py`
-- 想看 plain-text 降级、placeholder 稳定策略：
+- Want to see plain-text Version downgrade required. Check compatibility.placeholder Stability strategy:
   `shared/orchestration/single_item_flow.py`
-- 想看单条 direct-typst/heavy-formula/tagged-placeholder 路由包装：
+- View single direct-typst/heavy-formula/tagged-placeholder path runtime does not use
   `shared/orchestration/single_item_routes.py`
-- 想看 fallback facade：
+- To see fallback facade:
   `shared/orchestration/fallbacks.py`
-- 想看编排目录的完整职责地图：
+- Want to see the complete responsibility map of the orchestration directory:
   `shared/orchestration/README.md`
-- 想看公式切窗、segment 路由：
+- To see formula clipping window, segment routing:
   `shared/orchestration/segment_routing.py`
-- 想看占位符校验与降级原因：
+- Want to see placeholder validation and degradation reasons:
   `placeholder_guard.py`
 
-## 目录地图
+## Directory map
 
 - `providers/`
-  只放 provider 专属 API 适配、请求/响应处理、provider 默认值。
-  不应该承载跨 provider 的重试编排、公共结构化解析规则、页面级 workflow、policy 决策、memory 状态和渲染/落盘。
+Only place provider-specific API adapters, request/response handling, provider defaults.
+  Should not carry cross. provider retry orchestration, common structured parsing rules, page-level workflow、policy Decision.memory State and Rendering/Write to disk.
 - `shared/`
-  只放跨 provider 共用能力，例如控制上下文、缓存、结构化 schema 与解析器。
+  Cross only provider Shared capabilities, e.g., context control, caching, structuring. schema Parser.
 - `shared/prompt_building.py`
-  放跨 provider 的 prompt/message 构造逻辑，不再堆在 provider transport 文件里。
+Unspan provider prompt/message building logic; stop piling up provider transport in the file.
 - `shared/provider_runtime.py`
-  是 shared 层访问当前激活 provider 的稳定适配口。
+Is the shared layer access to the active provider stable adapter port.
 - `shared/provider_registry.py`
-  放 provider runtime 定义、provider family/default model/base url 和 transport/translation 能力装配。
+Holds provider runtime definition, provider family/default model/base url, and transport/translation capability assembly.
 - `shared/provider_protocol.py`
-  放 provider runtime 的协议类型和 capability 描述。Provider 新增能力时先扩这里，再让 registry 装配。
+Holds provider runtime protocol types and capability descriptions. When adding new capabilities to a provider, expand here first, then assemble in registry.
 - `shared/orchestration/`
-  只放跨 provider 的翻译编排、fallback、segment routing。
-  这里应优先依赖 `shared/provider_runtime.py`，不要直接 import `providers/deepseek/*`。
-  目录内更细的模块边界说明见 `shared/orchestration/README.md`。
-- 顶层 `llm/`
-  现在只保留稳定聚合入口和少量顶层公共模块。
-  新代码应优先直接依赖 `providers/` 或 `shared/` 下的真实实现。
+Only place cross-provider translation orchestration, fallback, segment routing.
+  Priority: rely on existing. `shared/provider_runtime.py`, do not directly import `providers/deepseek/*`。
+  Detailed module boundary descriptions within directory: see `shared/orchestration/README.md`。
+- Top-level `llm/`
+  Now only keep the stable aggregation entry and a small number of top-level common modules.
+New code should prefer direct dependencies on `providers/` or `shared/` implementations below.
 
-## 目录
+## Directories
 
 - `providers/deepseek/`
-  放 DeepSeek 专属 API 适配、默认值、请求/响应处理
+Place DeepSeek-specific API adaptation, defaults, request/response handling
 - `shared/`
-  放跨 provider 的缓存、控制上下文、结构化 schema 与解析器
+  Allow Cross-Origin provider caching, context control, structuring schema and parsers
 - `shared/prompt_building.py`
-  放 prompt 与 message builder
+Place prompt and message builder
 - `shared/provider_runtime.py`
-  放 shared 到当前 active provider 的运行时适配层
+Place shared runtime adaptation layer to current active provider
 - `shared/provider_registry.py`
-  放 active provider registry 与 capability runtime
+Place active provider registry and capability runtime
 - `shared/orchestration/`
-  放跨 provider 的翻译编排、fallback、公式分段路由
-- 顶层 `llm/`
-  保留稳定聚合入口与少量顶层公共逻辑
+Place cross-provider translation orchestration, fallback, segmented formula routing
+- Top-level `llm/`
+  Keep stable aggregation entry and minimal top-level common logic.
 
-## 当前分层
+## Current layering
 
-- provider 专属
+- Provider-specific
   - `providers/deepseek/client.py`
   - `providers/deepseek/translation_client.py`
-- shared 公共层
+- shared Common Layer
   - `shared/control_context.py`
   - `shared/cache.py`
   - `shared/prompt_building.py`
@@ -85,7 +85,7 @@
   - `shared/structured_models.py`
   - `shared/structured_output.py`
   - `shared/structured_parsers.py`
-- shared 编排层
+- shared Orchestration Layer
   - `shared/orchestration/README.md`
   - `shared/orchestration/retrying_translator.py`
   - `shared/orchestration/single_item_flow.py`
@@ -108,68 +108,68 @@
   - `shared/orchestration/metadata.py`
   - `shared/orchestration/common.py`
   - `shared/orchestration/segment_routing.py`
-- 公共逻辑
+- Common logic
   - `placeholder_guard.py`
   - `domain_context.py`
 
-## 稳定入口与兼容入口
+## Stable and compatibility entry points
 
-- 稳定聚合入口
+- Stable Aggregation Entry
   - `llm/__init__.py`
   - `providers/deepseek/__init__.py`
   - `shared/__init__.py`
   - `shared/orchestration/__init__.py`
 
-## Provider 运行时分层
+## Provider Runtime Layering
 
 - `providers/<provider>/`
-  只关心 provider 专属 transport、默认值和 provider 自己的翻译细节
+Only concerned with provider-specific transport, defaults, provider personal translation details.
 - `shared/provider_registry.py`
-  把 provider 专属能力装配成 `TranslationProviderRuntimeProtocol`
+Assembles provider-specific capabilities into `TranslationProviderRuntimeProtocol`
 - `shared/provider_runtime.py`
-  暴露“当前 active provider”的稳定别名给业务层和 orchestration 层
-- 业务层
-  默认只依赖 `shared/provider_runtime.py`，不直接 import `providers/deepseek/*`
+Exposes "current" active provider stable alias for business layer orchestration layer
+- Business layer
+Default dependency only on `shared/provider_runtime.py`, not directly importing `providers/deepseek/*`
 
-## 关键调用链
+## Critical call chain
 
-- 主翻译链：
+- Main translation chain
   `workflow/translation_workflow.py`
   -> `services.translation.llm.translate_batch`
   -> `shared/orchestration/retrying_translator.py`
   -> `shared/orchestration/single_item_flow.py`
   -> `providers/deepseek/translation_client.py`
   -> `providers/deepseek/client.py`
-- 领域提示链：
+- Domain prompt chain:
   `domain_context.py`
   -> `shared/control_context.py`
   -> `providers/deepseek/client.py`
-- 公式降级链：
+- Formula fallback chain:
   `shared/orchestration/retrying_translator.py`
   -> `shared/orchestration/segment_routing.py`
   -> `shared/orchestration/single_item_flow.py`
   -> `placeholder_guard.py`
 
-## 排错入口
+## Troubleshooting entry
 
-- placeholder 异常、keep-origin 降级：
+- placeholder Errorkeep-origin Downgrade version. Check compatibility. Test thoroughly.
   `placeholder_guard.py`
-- 批次重试、单 item 降级：
+- Batch retry, single item Downgrade:
   `shared/orchestration/retrying_translator.py`
   `shared/orchestration/single_item_flow.py`
   `shared/orchestration/fallbacks.py`
   `shared/orchestration/README.md`
-- 结构化输出解析失败：
+- Structured output parsing failed:
   `shared/structured_output.py`
   `shared/structured_parsers.py`
-- 调试与 replay：
+- Debugging and replay：
   `backend/scripts/devtools/replay_translation_item.py`
   `backend/scripts/devtools/tests/translation/`
 
-## 后续约定
+## Subsequent conventions
 
-- 新增 provider 时，优先在 `providers/<provider>/` 下新增实现
-- 新增 provider 时，同时在 `shared/provider_protocol.py` 声明能力，在 `shared/provider_registry.py` 注册 runtime
-- 公共能力优先放 `shared/`
-- 顶层 `llm/` 只保留稳定聚合入口与少量顶层公共模块，不继续堆 provider 特例
-- 业务代码默认经由 `shared/provider_runtime.py` 访问默认模型、base_url、api_key 解析和通用 chat transport
+- When adding a new provider, prioritize adding new implementation in `providers/<provider>/`
+- When adding a new provider, simultaneously declare capabilities in `shared/provider_protocol.py` and register runtime in `shared/provider_registry.py`
+- Common capabilities first. `shared/`
+- Top-level `llm/` keep only stable aggregation entry and few top-level common modules. Stop stacking provider exceptions.
+- Business code routed via `shared/provider_runtime.py` Access default modelbase_url、api_key Parsing and General chat transport

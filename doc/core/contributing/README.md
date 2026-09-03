@@ -1,17 +1,17 @@
-# 贡献文档
+# Contribution Documentation
 
-这里放 RetainPDF 贡献者需要的分角色指南。根目录 [CONTRIBUTING.md](../../../CONTRIBUTING.md) 是短入口，这里放细则。
+This holds RetainPDF role-specific guides for contributors. Root CONTRIBUTING.md is a short entry; details are here.
 
-## 入口
+## Entry points
 
-- [前端与桌面端](./frontend.md)
+- [Frontend and Desktop](./frontend.md)
 - [Rust API](./backend.md)
-- [数据库与持久化](./database.md)
-- [Python 流水线](./python-pipeline.md)
-- [测试贡献](./testing.md)
-- [AI 辅助开发](./ai-development.md)
-- [Issue、PR、代码风格与发布说明](./process-and-style.md)
+- [Database & Persistence](./database.md)
+- [Python Pipeline](./python-pipeline.md)
+- [Test contribution](./testing.md)
+- [AI Development Assistance](./ai-development.md)
+- Issues, PRs, code style, and release notes
 
-## 读法
+## How to read
 
-先读根目录贡献指南，再按自己要改的模块进入对应子文档。跨模块改动需要同时阅读相关模块文档。
+Read root CONTRIBUTING guide first, then the sub-doc for your module. Cross-module changes require reading all relevant module docs.

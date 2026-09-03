@@ -25,8 +25,10 @@ export const TRANSLATION_WORKFLOW_DIALOG = {
     uploadMode: "is-upload-mode",
   },
   copy: {
-    statusTitle: "任务进度",
-    uploadTitle: "添加 PDF",
-    uploadDescription: "上传后可直接翻译，或只收藏到书架。",
+    statusTitle: "Job Progress",
+    uploadTitle: "Add PDF",
+    uploadDescription: "After upload, start translation or keep it in the library.",
   },
 };
+
+

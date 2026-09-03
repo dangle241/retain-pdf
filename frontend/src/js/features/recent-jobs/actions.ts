@@ -34,22 +34,22 @@ export function createRecentJobActions({
   function selectJob(jobId) {
     const normalizedJobId = `${jobId || ""}`.trim();
     if (!normalizedJobId) {
-      renderRecentJobsError("该任务缺少 job_id，无法打开。", { reset: false });
+      renderRecentJobsError("This job is missing job_id and cannot be opened.", { reset: false });
       return;
     }
     navigationPort.openJob(normalizedJobId);
   }
 
-  // 409 = 删除保护:该 job 被收藏引用,不能自动 force,必须让用户先处理收藏
+  // 409 = Delete protection: document is referenced by favorites, cannot force automatically, user must handle favorites first
   function friendlyDeleteError(error) {
     const message = `${error?.message || error || ""}`;
     if (error?.status === 409 || message.includes("(409)")) {
       const count = message.match(/\d+/)?.[0];
       return count
-        ? `该文档有 ${count} 条收藏，请先删除收藏后再删除文档。`
-        : "该文档存在收藏引用，请先删除相关收藏后再删除文档。";
+        ? `This document has ${count} entriesFavorite, delete its favorites before deleting the document.`
+        : "This document has favorite references. Delete related favorites before deleting the document.";
     }
-    return message || "删除失败";
+    return message || "DeleteFailed";
   }
 
   async function deleteJob(jobId) {
@@ -66,7 +66,7 @@ export function createRecentJobActions({
     statePort.removeJobFamily(normalizedJobId);
     const nextItems = statePort.getSnapshot().items;
     if (nextItems.length === 0) {
-      renderRecentJobsEmpty("暂无最近任务");
+      renderRecentJobsEmpty("No recent jobs yet");
       return;
     }
     renderCurrentRecentJobs({ reset: true });
@@ -75,7 +75,7 @@ export function createRecentJobActions({
   function openJobReader(jobId) {
     const normalizedJobId = `${jobId || ""}`.trim();
     if (!normalizedJobId) {
-      renderRecentJobsError("该任务缺少 job_id，无法打开对照阅读。", { reset: false });
+      renderRecentJobsError("This job is missing job_id and cannot open the side-by-side reader.", { reset: false });
       return;
     }
     navigationPort.openReader(normalizedJobId);
@@ -104,3 +104,7 @@ export function createRecentJobActions({
     selectJob,
   };
 }
+
+
+
+

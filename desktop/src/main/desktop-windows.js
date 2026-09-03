@@ -90,8 +90,8 @@ function createDesktopWindows(app, options = {}) {
     if (process.platform === "win32" && typeof tray.displayBalloon === "function") {
       tray.displayBalloon({
         iconType: "info",
-        title: "RetainPDF 正在后台运行",
-        content: "窗口已隐藏到系统托盘，本地 API 仍可继续使用。右键托盘图标可退出。",
+        title: "RetainPDF running in background",
+        content: "Window hidden to system tray; local APIs remain available. Right-click the tray icon to quit.",
       });
     }
     persistCloseToTrayHintShown();
@@ -115,13 +115,13 @@ function createDesktopWindows(app, options = {}) {
     tray.setContextMenu(
       Menu.buildFromTemplate([
         {
-          label: "显示主窗口",
+          label: "Show main window",
           click: () => {
             showMainWindow();
           },
         },
         {
-          label: "退出",
+          label: "Quit",
           click: () => {
             markQuitting();
             app.quit();
@@ -181,18 +181,18 @@ function createDesktopWindows(app, options = {}) {
     mainWindow.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
       const detail = `code=${errorCode} url=${validatedURL || "unknown"} error=${errorDescription || "unknown"}`;
       logDesktopError(`[desktop] renderer load failed: ${detail}`);
-      dialog.showErrorBox("RetainPDF 页面加载失败", detail);
+      dialog.showErrorBox("RetainPDF page load failed", detail);
     });
 
     mainWindow.webContents.on("render-process-gone", (_event, details) => {
       const detail = `reason=${details?.reason || "unknown"} exitCode=${details?.exitCode ?? "unknown"}`;
       logDesktopError(`[desktop] renderer process gone: ${detail}`);
-      dialog.showErrorBox("RetainPDF 渲染进程异常退出", detail);
+      dialog.showErrorBox("RetainPDF renderer process exited unexpectedly", detail);
     });
 
     mainWindow.webContents.once("did-finish-load", () => {
       logDesktop("[desktop] frontend loaded; showing main window");
-      updateSplashProgress(100, "准备完成", "正在进入主界面");
+      updateSplashProgress(100, "Ready", "Entering main interface");
       mainWindow.show();
       if (typeof options.closeSplashWindow === "function") {
         options.closeSplashWindow();
@@ -204,8 +204,10 @@ function createDesktopWindows(app, options = {}) {
       if (!target || target === "about:blank") {
         return { action: "deny" };
       }
-      // 应用内页面：在主窗口打开，禁止 shell.openExternal（否则像「乱跳浏览器」）。
-      // 也不要 silent deny，否则对照阅读入口会「点了没反应」。
+      // In-app page: open in the main window; disallow shell.openExternal
+      // (otherwise it feels like "links randomly jumping to a browser").
+      // Also do not silent-deny, otherwise entry points like "side-by-side
+      // reading" will appear unresponsive when clicked.
       try {
         const next = new URL(target);
         let current = null;
@@ -219,7 +221,8 @@ function createDesktopWindows(app, options = {}) {
         const isLocalDev = /^(localhost|127\.0\.0\.1)$/i.test(next.hostname || "");
         if (next.protocol === "file:" || sameOrigin || (isLocalDev && isAppHtml)) {
           logDesktop(`[desktop] in-app navigate (no openExternal): ${target}`);
-          // 主窗口内导航，保证「对照阅读」等入口可用
+          // Navigate inside the main window so entry points like "side-by-side
+          // reading" keep working.
           if (mainWindow && !mainWindow.isDestroyed()) {
             mainWindow.loadURL(target).catch((err) => {
               logDesktopError(`[desktop] loadURL failed: ${err?.message || err}`);

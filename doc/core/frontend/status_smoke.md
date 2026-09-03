@@ -1,61 +1,61 @@
-# 前端状态 Smoke 检查
+# Frontend status smoke check
 
-这套检查的目标不是“把前端页面截图出来”，而是自动验证：
+The goal of this check is not to "take screenshots of the frontend pages", but to automatically verify:
 
-- 上传是否成功
-- `/api/v1/jobs` 是否成功提交
-- 任务详情轮询里，前端会显示的状态标签是否按预期推进
+- Upload successful.
+- `/api/v1/jobs` Submitted successfully?
+- During task detail polling, does the frontend status label advance as expected?
 
-当前脚本位置：
+Current script location:
 
 - `frontend/scripts/frontend-status-smoke.mjs`
 
-当前 npm 入口：
+Current npm entry:
 
 ```bash
 cd frontend
 npm run smoke:status -- --file ../data/temPDF/test1.pdf
 ```
 
-仓库级固定入口：
+Repository-level fixed entry:
 
 ```bash
 ./.github/scripts/smoke_frontend_status.sh
 ```
 
-默认会把最新结果写到：
+By default, writes latest results to:
 
 ```text
 doc/ops/reports/frontend-status-smoke-latest.json
 ```
 
-## 默认行为
+## Default behavior
 
-脚本会按下面的顺序自动取配置：
+Script automatically fetches configuration in the following order:
 
-1. 命令行参数
-2. 环境变量
+1. Command-line arguments
+2. Environment variables
 3. `frontend/runtime-config.local.js`
 4. `backend/scripts/.env/*.env`
 
-默认读取：
+Default read:
 
 - API Base: `frontend/runtime-config.local.js` / `frontend/runtime-config.js`
 - `X-API-Key`: `frontend/runtime-config.local.js`
 - Paddle token: `backend/scripts/.env/paddle.env`
 - MinerU token: `backend/scripts/.env/mineru.env`
-- 翻译 API key: `backend/scripts/.env/deepseek.env`
+- Translation API key: backend/scripts/.env/deepseek.env
 
-## 常用示例
+## Common examples
 
-跑完整 `book` 流程：
+Run all `book` Process:
 
 ```bash
 cd frontend
 npm run smoke:status -- --file ../data/temPDF/test1.pdf
 ```
 
-指定 Paddle：
+Specify Paddle:
 
 ```bash
 cd frontend
@@ -64,23 +64,23 @@ npm run smoke:status -- \
   --ocr-provider paddle
 ```
 
-仓库根目录直接跑：
+Run from repo root directly:
 
 ```bash
 ./.github/scripts/smoke_frontend_status.sh data/temPDF/test1.pdf --ocr-provider paddle
 ```
 
-只跑翻译不渲染：
+Run translation only, skip rendering:
 
 ```bash
 cd frontend
 npm run smoke:status -- \
   --file ../data/temPDF/test1.pdf \
   --workflow translate \
-  --expect-labels "OCR 中,翻译中,处理完成"
+--expect-labels "OCR in progress, translating, processing complete"
 ```
 
-指定接口地址与超时时间：
+Specify endpoint and timeout:
 
 ```bash
 cd frontend
@@ -90,7 +90,7 @@ npm run smoke:status -- \
   --max-wait-ms 3600000
 ```
 
-输出 JSON：
+Output JSON:
 
 ```bash
 cd frontend
@@ -99,18 +99,18 @@ npm run smoke:status -- \
   --json
 ```
 
-## 输出重点
+## Highlight key points.
 
-脚本会打印每次状态变化，例如：
+Script prints each state change, e.g.:
 
 ```text
-2026-04-25T14:00:00.000Z | running | OCR 中 | 已完成第 3/12 页 OCR
-2026-04-25T14:00:20.000Z | running | 翻译中 | 已完成第 5/18 批翻译
-2026-04-25T14:01:10.000Z | running | 渲染中 | 已完成第 9/12 页渲染
-2026-04-25T14:01:30.000Z | succeeded | 处理完成 | 处理完成
+2026-04-25T14:00:00.000Z | running | OCR in progress | Completed page 3/12 OCR
+2026-04-25T14:00:20.000Z | running | Translating | Completed batch 5/18 translation
+2026-04-25T14:01:10.000Z | running | Rendering | Completed page 9/12 page rendering
+2026-04-25T14:01:30.000Z | succeeded | Processing complete | Processing complete
 ```
 
-结尾会汇总：
+Summary at end.
 
 - `job_id`
 - `final_status`
@@ -118,15 +118,15 @@ npm run smoke:status -- \
 - `missing_labels`
 - `event_count`
 
-如果缺少预期标签，或任务最终不是 `succeeded`，脚本会返回非 0 退出码。
+If expected labels are missing, or the task ultimately is not `succeeded`, the script will return non- 0 Exit code.
 
-## 固定报告
+## Pin report
 
-仓库级脚本会固定写出：
+Repository-level scripts will write:
 
 - `doc/ops/reports/frontend-status-smoke-latest.json`
 
-报告里包含：
+Report contains:
 
 - `jobId`
 - `finalStatus`
@@ -135,12 +135,12 @@ npm run smoke:status -- \
 - `observations`
 - `eventSamples`
 
-## 适用边界
+## Applicable boundaries
 
-这套 smoke 主要验证“前端状态映射链路”：
+This set smoke Frontend state mapping chain verify
 
-- 后端是否产出 job detail
-- 前端状态归一化逻辑会得到什么标签
-- 实际流程里这些标签是否真的出现
+- Backend output? job detail
+- What label does frontend state normalization logic produce?
+- Do these tags actually appear in the real workflow?
 
-它不验证浏览器布局、组件动画、按钮显隐这类纯 UI 细节。那部分如果后面要补，再单独上 Playwright。
+It does not validate browser layout, component animations, button visibility, or other such pure UI Details. If that part needs supplementing later, add separately. Playwright。

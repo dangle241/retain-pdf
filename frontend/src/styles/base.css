@@ -3,9 +3,10 @@
     box-sizing: border-box;
   }
 
-  /* apple-design skill:减弱动效不等于零动效——用户开了"减弱动态效果"时,
-     整站过渡/动画统一收到几乎瞬时,不做逐组件适配(此前项目里完全没有这条,
-     是真实缺口)。 */
+  /* apple-design skill: reduced motion is not zero motion — when the user
+     enables "reduce motion", site-wide transitions/animations collapse to
+     near-instant; no per-component adaptation (this rule did not exist
+     before; a real gap). */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -20,7 +21,7 @@
     overflow-x: hidden;
   }
 
-  /* 深色皮肤：系统控件（滚动条、表单）跟深色方案 */
+  /* Dark skins: native controls (scrollbars, forms) follow the dark scheme */
   html.theme-dark,
   html[data-theme-group="dark"] {
     color-scheme: dark;
@@ -32,7 +33,8 @@
     overflow-x: hidden;
     font-family: var(--font-sans);
     color: var(--ink);
-    /* 实底交给 html + ambient-surface；body 透明以免盖住纹理 */
+    /* Solid fill lives on html + ambient-surface; body is transparent so it
+       does not cover the texture */
     background: transparent;
   }
 
@@ -57,7 +59,7 @@
 }
 
 
-/* 跨页无障碍：屏幕阅读器专用（home/reader/dialog 共用 className="sr-only"） */
+/* Cross-page a11y: screen-reader only (home/reader/dialog share className="sr-only") */
 .sr-only {
   position: absolute;
   width: 1px;

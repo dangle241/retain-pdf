@@ -117,13 +117,13 @@ export interface MockSearchHit {
 
 type HttpStatusError = Error & { status?: number };
 
-// 与后端 documents 数据层形状一致(见后端对接说明):
-// document = 按内容哈希去重的稳定身份,job 是文档名下的处理记录
+// Matches the backend documents data-layer shape (see backend integration notes):
+// document = stable identity deduped by content hash; job is a processing record under the document.
 function buildMockDocuments(): MockDocument[] {
   return [
     {
       document_id: MOCK_DOCUMENT_ID,
-      title: "共轭在卤素-锂交换选择性中的作用",
+      title: "total轭在halogen-lithium exchangeSelect性中的作用",
       source_filename: "halogen-lithium-exchange.pdf",
       page_count: 10,
       bytes: 2_621_440,
@@ -157,23 +157,23 @@ function buildMockDocuments(): MockDocument[] {
       added_at: "2026-06-08T14:00:00Z",
       updated_at: "2026-06-08T14:00:00Z",
     },
-    // 馆藏态(只入库、未翻译):active_job_id 为空。文档中心网格要能显示它们,
-    // 阅读器要能只读原文,卡片要能"以后再翻"。
+    // Library-only state (added, not translated): active_job_id is empty. Documents-center grid must display them;
+    // Reader must support source-only reading; cards must support "read later".
     {
       document_id: "doc-ref-6a1f2c",
-      title: "Reaxys Retrosynthesis 手册(仅馆藏)",
+      title: "Reaxys Retrosynthesis 手册(仅Library)",
       source_filename: "reaxys-handbook.pdf",
       page_count: 42,
       bytes: 3_200_000,
       active_job_id: null,
       reading_status: "unread",
-      tags: ["工具书"],
+      tags: ["Tools书"],
       added_at: "2026-06-10T09:00:00Z",
       updated_at: "2026-06-10T09:00:00Z",
     },
     {
       document_id: "doc-ref-9b7e04",
-      title: "Group Theory Lecture Notes(仅馆藏)",
+      title: "Group Theory Lecture Notes(仅Library)",
       source_filename: "group-theory-notes.pdf",
       page_count: 88,
       bytes: 5_600_000,
@@ -186,8 +186,8 @@ function buildMockDocuments(): MockDocument[] {
   ];
 }
 
-// 镜像后端 with_document_media_urls。封面/缩略图走 mock://，
-// 避免 /api/v1/documents/.../cover 在纯前端 mock 下 404 导致空封面。
+// Mirrors backend with_document_media_urls. Cover/thumbnail use mock://
+// so /api/v1/documents/.../cover does not 404 (empty cover) in pure frontend mock.
 export const MOCK_DOCUMENT_SOURCE_PDF_URL = "mock://document-source.pdf";
 export const MOCK_DOCUMENT_COVER_URL = "mock://document-cover.png";
 export const MOCK_DOCUMENT_THUMB_URL = "mock://document-thumb.png";
@@ -239,13 +239,13 @@ export function getMockDocumentList({
 export function getMockDocument(documentId: string): MockDocumentWithMedia {
   const found = documents().find((item) => item.document_id === documentId);
   if (!found) {
-    throw new Error("未找到该文档。(404)");
+    throw new Error("未找到该Documents.(404)");
   }
   return withMockDocumentMediaUrls(found);
 }
 
-// 后端按 job_id 直查所属文档:active_job_id 命中当然算,
-// 历史 run(同一文档的旧翻译记录)也应解析到同一文档——用一张历史映射证明这条路可用。
+// Backend looks up the owning document by job_id: an active_job_id hit counts,
+// and a historical run (older translation record on the same document) must resolve to the same document — one history map proves this path is ready.
 const MOCK_HISTORICAL_JOB_TO_DOCUMENT: Record<string, string> = {
   "mock-job-20260101-old": MOCK_DOCUMENT_ID,
 };
@@ -268,8 +268,8 @@ export function getMockDocumentByJobId(jobId: string): MockDocumentWithMedia | n
 }
 
 /**
- * 重试/新 job 绑定到文档：更新 active_job_id，并登记历史映射，
- * 使 getMockDocumentByJobId(新 id) 仍能取到书名/封面。
+ * Bind a retry / new job to a document: updates active_job_id and registers a history mapping
+ * so getMockDocumentByJobId(new id) still returns the title/cover.
  */
 export function bindMockDocumentActiveJob(
   documentId?: string | null,
@@ -295,8 +295,8 @@ export function bindMockDocumentActiveJob(
   return withMockDocumentMediaUrls(found);
 }
 
-// mock 版 DELETE /documents/:id:从 mock 文档表移除该文档(连同其合集成员关系)。
-// 被收藏引用时抛 409(镜像后端收藏保护)。
+// Mock DELETE /documents/:id: remove the document from the mock documents table (and its collection membership).
+// Throws 409 if referenced by a favorite (mirrors backend favorite protection).
 export function deleteMockDocument(documentId: string): {
   deleted: boolean;
   document_id: string;
@@ -305,12 +305,12 @@ export function deleteMockDocument(documentId: string): {
   const list = documents();
   const index = list.findIndex((item) => item.document_id === documentId);
   if (index < 0) {
-    throw new Error("未找到该文档。(404)");
+    throw new Error("未找到该Documents.(404)");
   }
   const favoriteCount = favorites().filter((item) => item.document_id === documentId).length;
   if (favoriteCount > 0) {
     const error: HttpStatusError = new Error(
-      `该文档有 ${favoriteCount} 条收藏，请先删除收藏后再删除文档。(409)`,
+      `This document has ${favoriteCount} entriesFavorite, delete its favorites before deleting the document.(409)`,
     );
     error.status = 409;
     throw error;
@@ -332,10 +332,10 @@ export function patchMockDocument(
 ): MockDocumentWithMedia {
   const found = documents().find((item) => item.document_id === documentId);
   if (!found) {
-    throw new Error("未找到该文档。(404)");
+    throw new Error("未找到该Documents.(404)");
   }
   if (readingStatus !== undefined && !READING_STATUSES.includes(readingStatus as MockReadingStatus)) {
-    throw new Error("reading_status 仅支持 unread | reading | done。(400)");
+    throw new Error("reading_status 仅支持 unread | reading | done.(400)");
   }
   if (title !== undefined) {
     found.title = `${title}`;
@@ -344,24 +344,24 @@ export function patchMockDocument(
     found.reading_status = readingStatus;
   }
   if (tags !== undefined) {
-    // 整体替换语义
+    // Replace-all semantics
     found.tags = Array.isArray(tags) ? tags.map((item) => `${item}`) : [];
   }
   found.updated_at = new Date().toISOString();
   return withMockDocumentMediaUrls(found);
 }
 
-// mock 版 POST /documents/:id/translate：登记 live 可推进任务，
-// 轮询 getMockJobPayload 会随时间走 OCR→翻译→渲染→完成（见 mock/live-jobs）。
-// 运行中再次提交 → 409；已终态可重新提交（方便反复演示）。
+// Mock POST /documents/:id/translate: register a live advanceable job.
+// Polling getMockJobPayload walks OCR→Translation→Rendering→Done over wall-clock time (see mock/live-jobs).
+// Re-submit while running → 409; terminal jobs may be re-submitted (for repeated demos).
 export function translateMockDocument(documentId: string): JobSubmissionView {
   const found = documents().find((item) => item.document_id === documentId);
   if (!found) {
-    throw new Error("未找到该文档。(404)");
+    throw new Error("未找到该Documents.(404)");
   }
   const existingId = `${found.active_job_id || ""}`.trim();
   if (existingId && isLiveMockJobActive(existingId)) {
-    throw new Error("该文档已在翻译流程中。(409)");
+    throw new Error("该Documents已在TranslationWorkflow中.(409)");
   }
   const live = registerLiveMockJob({
     documentId: found.document_id,
@@ -377,14 +377,14 @@ export function translateMockDocument(documentId: string): JobSubmissionView {
     status: `${snapshot.status || "queued"}`,
     stage: `${snapshot.stage || "queued"}`,
     display_stage: `${snapshot.display_stage || "ocr"}`,
-    stage_detail: `${snapshot.stage_detail || "正在读取任务状态..."}`,
+    stage_detail: `${snapshot.stage_detail || "Loading job status..."}`,
   };
 }
 
-// ===== 分类(合集):建文件夹给 PDF 分组 =====
-// 与 js/api/collections.js 同构(collection_id/name/parent_id/sort_order/
-// created_at/document_count);membership 单独存一张 collection_id → Set<document_id>
-// 表,和真实后端 collection_documents 表同样的建模方式。
+// ===== Category (Collection): folders for grouping PDFs =====
+// Same shape as js/api/collections.js (collection_id/name/parent_id/sort_order/
+// created_at/document_count); membership lives in a separate collection_id → Set<document_id>
+// table, matching the real backend collection_documents table.
 
 let mockCollections: MockCollection[] | null = null;
 let mockCollectionMembership: Map<string, Set<string>> | null = null;
@@ -396,9 +396,9 @@ function seedMockCollections(): void {
     { collection_id: "col-001", name: "化学", parent_id: null, sort_order: 0, created_at: "2026-06-01T10:30:00Z" },
     { collection_id: "col-002", name: "机器学习", parent_id: null, sort_order: 1, created_at: "2026-06-08T15:00:00Z" },
   ];
-  // mock 的"最近任务"列表(js/mock/index.js#getMockJobList)目前只有 MOCK_JOB_ID
-  // 这一条真实数据,doc-1b8c52d9a304/doc-77e0fa3c1d55 的 active_job_id 在
-  // job 列表里查不到——"机器学习"文件夹留空,顺便覆盖"空文件夹"这个真实 UI 态。
+  // Mock "Recent Jobs" list (js/mock/index.js#getMockJobList) currently has real data only for MOCK_JOB_ID;
+  // active_job_id of doc-1b8c52d9a304 / doc-77e0fa3c1d55 is not in the job list —
+  // leave the "机器学习" folder empty, also covering the empty-folder UI state.
   mockCollectionMembership = new Map([
     ["col-001", new Set([MOCK_DOCUMENT_ID])],
     ["col-002", new Set()],
@@ -439,7 +439,7 @@ export function createMockCollection({
   if (!trimmed) {
     throw new Error("name must not be empty. (400)");
   }
-  collectionsList(); // 确保种子数据与 collectionSeq 初始化
+  collectionsList(); // Ensure seed data and collectionSeq are initialized
   collectionSeq += 1;
   const record: MockCollection = {
     collection_id: `col-${String(collectionSeq).padStart(3, "0")}`,
@@ -458,7 +458,7 @@ export function patchMockCollection(
 ): MockCollectionWithCount {
   const found = collectionsList().find((item) => item.collection_id === collectionId);
   if (!found) {
-    throw new Error("未找到该分类。(404)");
+    throw new Error("未找到该Category.(404)");
   }
   if (name !== undefined) {
     const trimmed = `${name}`.trim();
@@ -477,7 +477,7 @@ export function deleteMockCollection(collectionId: string): { deleted: boolean }
   const list = collectionsList();
   const index = list.findIndex((item) => item.collection_id === collectionId);
   if (index < 0) {
-    throw new Error("未找到该分类。(404)");
+    throw new Error("未找到该Category.(404)");
   }
   list.splice(index, 1);
   if (mockCollectionMembership) {
@@ -492,7 +492,7 @@ export function addMockCollectionDocuments(
 ): MockCollectionWithCount {
   const found = collectionsList().find((item) => item.collection_id === collectionId);
   if (!found) {
-    throw new Error("未找到该分类。(404)");
+    throw new Error("未找到该Category.(404)");
   }
   const members = collectionMembership(collectionId);
   for (const documentId of documentIds) {
@@ -501,7 +501,7 @@ export function addMockCollectionDocuments(
       continue;
     }
     if (!documents().some((item) => item.document_id === normalized)) {
-      throw new Error(`未找到该文档: ${normalized}(404)`);
+      throw new Error(`未找到该Documents: ${normalized}(404)`);
     }
     members.add(normalized);
   }
@@ -515,13 +515,13 @@ export function removeMockCollectionDocument(
   const members = collectionMembership(collectionId);
   const normalized = `${documentId || ""}`.trim();
   if (!members.has(normalized)) {
-    throw new Error("该文档不在此分类中。(404)");
+    throw new Error("该Documents不在此Category中.(404)");
   }
   members.delete(normalized);
   return { removed: true };
 }
 
-// ===== 收藏 =====
+// ===== Favorite =====
 
 let mockFavorites: MockFavorite[] | null = null;
 let favoriteSeq = 0;
@@ -537,7 +537,7 @@ function favorites(): MockFavorite[] {
         page_idx: 0,
         block_id: "b-intro-3",
         kind: "sentence",
-        quote_text: "现代有机合成已达到极高的精密水平。",
+        quote_text: "Modern organic synthesis has reached a very high level of precision.",
         translated_quote_text: "",
         note: "",
         created_at: "2026-06-01T11:00:00Z",
@@ -562,19 +562,19 @@ function favorites(): MockFavorite[] {
 export function createMockFavorite(payload: MockFavoriteCreatePayload = {}): MockFavorite {
   const quoteText = `${payload.quote_text || ""}`.trim();
   const jobId = `${payload.job_id || ""}`.trim();
-  // document_id 可缺省:给了 job_id 时后端解析所属文档(含历史 run)。二者至少有一。
+  // document_id is optional: with job_id the backend resolves the owning document (including historical runs). At least one is required.
   const doc = `${payload.document_id || ""}`.trim()
     ? documents().find((item) => item.document_id === `${payload.document_id}`.trim())
     : (jobId ? getMockDocumentByJobId(jobId) : null);
   if (!doc || payload.page_idx === undefined || !payload.block_id || !quoteText) {
-    throw new Error("document_id 或 job_id、page_idx、block_id、quote_text 为必填。(400)");
+    throw new Error("document_id 或 job_id, page_idx, block_id, quote_text 为必填.(400)");
   }
-  favorites(); // 先确保种子数据与 favoriteSeq 初始化,再分配新 id
+  favorites(); // Ensure seed data and favoriteSeq are initialized, then allocate a new id
   favoriteSeq += 1;
   const favorite: MockFavorite = {
     favorite_id: `fav-${String(favoriteSeq).padStart(3, "0")}`,
     document_id: doc.document_id,
-    // job_id 不传时锚定文档的 active_job_id
+    // When job_id is omitted, pin to the document's active_job_id
     job_id: jobId || doc.active_job_id || "",
     page_idx: Number(payload.page_idx) || 0,
     block_id: `${payload.block_id}`,
@@ -605,7 +605,7 @@ export function deleteMockFavorite(favoriteId: string): { favorite_id: string } 
   const list = favorites();
   const index = list.findIndex((item) => item.favorite_id === favoriteId);
   if (index < 0) {
-    throw new Error("未找到该收藏。(404)");
+    throw new Error("未找到该Favorite.(404)");
   }
   list.splice(index, 1);
   return { favorite_id: favoriteId };
@@ -615,7 +615,7 @@ export function countMockFavoritesByJob(jobId: string): number {
   return favorites().filter((item) => item.job_id === `${jobId || ""}`.trim()).length;
 }
 
-// ===== 全文检索 =====
+// ===== Full-text search =====
 
 export function getMockSearchHits(
   q = "",
@@ -631,22 +631,22 @@ export function getMockSearchHits(
       job_id: MOCK_JOB_ID,
       page_idx: 0,
       block_id: "b-intro-3",
-      source_snippet: `…the halogen–lithium exchange in [${query}] series was investigated…`,
-      translated_snippet: `…考察了[${query}]系列中的卤素-锂交换…`,
+      source_snippet: `...the halogen–lithium exchange in [${query}] series was investigated...`,
+      translated_snippet: `...考察了[${query}]系列中的halogen-lithium exchange...`,
     },
     {
       document_id: "doc-1b8c52d9a304",
       job_id: "20260520-att-001",
       page_idx: 3,
       block_id: "b-sec3-2",
-      source_snippet: `…scaled dot-product attention relates to [${query}] in the encoder…`,
-      translated_snippet: `…缩放点积注意力与编码器中的[${query}]相关…`,
+      source_snippet: `...scaled dot-product attention relates to [${query}] in the encoder...`,
+      translated_snippet: `...缩放点积注意力与编码器中的[${query}]相关...`,
     },
   ];
   return { hits: hits.slice(0, limit) };
 }
 
-// ===== 阅读区域(锚点/选区取文 e2e 用) =====
+// ===== Reader regions (anchors / selection-to-text, for e2e) =====
 
 export function getMockReaderRegions() {
   return {
@@ -663,7 +663,7 @@ export function getMockReaderRegions() {
         translated: {
           page: 1,
           bbox: [57, 52, 540, 96],
-          text: "原始 PDF",
+          text: "Source PDF",
         },
       },
       {
@@ -684,3 +684,8 @@ export function getMockReaderRegions() {
     ],
   };
 }
+
+
+
+
+

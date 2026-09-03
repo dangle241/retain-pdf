@@ -100,9 +100,12 @@ class FrontendRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(encoded)
             return
         if self.path == "/runtime-config.local.js":
-            # 策略：磁盘文件只放非密钥项；密钥不进仓库/本地配置文件。
-            # - model/OCR key：仅当显式设置了对应环境变量时才注入（默认空 → UI 门禁生效）
-            # - 后端 X-API-Key：可从 env 或 auth.local.json 注入，方便本地连 Rust API
+            # Policy: only non-secret items live in on-disk files; secrets must
+            # not be committed to the repo or stored in local config.
+            # - model/OCR key: injected only when the matching env var is explicitly set
+            #   (empty by default -> UI gate stays in effect)
+            # - backend X-API-Key: may be injected from env or auth.local.json so the
+            #   local Rust API can be reached from the dev frontend
             root = Path(self.directory).resolve()
             disk_local = root / "runtime-config.local.js"
             chunks: list[str] = []

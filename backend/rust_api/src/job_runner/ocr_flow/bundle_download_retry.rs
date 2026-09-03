@@ -51,10 +51,10 @@ pub(super) async fn download_mineru_bundle_with_retry(
                     deps,
                     job,
                     format!(
-                        "OCR provider bundle 下载异常，{delay_secs}s 后重试（第 {attempt}/{} 次）",
+                        "OCR provider bundle download error, retrying in {delay_secs}s (attempt {attempt}/{})",
                         runtime.bundle_download_retry_limit
                     ),
-                    "OCR provider bundle 下载进入重试",
+                    "OCR provider bundle download entered retry",
                     BundleRetryEvent {
                         scope: "mineru_bundle_download",
                         attempt,

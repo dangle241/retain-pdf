@@ -1,135 +1,135 @@
-# 前端功能树地图（`frontend/src`）
+# Frontend feature tree map (`frontend/src`）
 
-日常开发以 **`frontend/`** 为准（不是 `frontend-react/`）。  
-本文说明**两套「features」**、阅读器双引擎、以及共享 `js/*` 该往哪放。
+Daily dev **`frontend/`** prevail (not `frontend-react/`）。  
+This document explains the two sets of 「features」, the reader dual-engine, and where to put shared js/*.
 
-## 总览
+## Overview
 
 ```text
 frontend/src/
 ├── pages/
-│   ├── home/          # 主页 SPA（React 壳 + 装配）
-│   │   ├── composition/   # 只接线：external → js/features + home features
-│   │   └── features/      # React UI / store / 主页专属编排
-│   ├── reader/        # 阅读器 SPA（默认 react-pdf；legacy 回退）
-│   └── detail/        # 任务详情 SPA
+│   ├── home/          # Home SPA (React shell + assembly)
+│   │   ├── composition/   # Wire only:external → js/features + home features
+│   │   └── features/      # React UI / store / Homepage-exclusive orchestration
+│   ├── reader/        # Reader SPA(default react-pdf；legacy Revert
+│   └── detail/        # Task detail SPA
 ├── js/
-│   ├── api/           # HTTP / 后端契约
-│   ├── features/      # 命令式领域逻辑（mount*、ports、state）
-│   ├── reader/        # 旧 pdf.js 引擎 + 少量被新引擎复用的 ports
-│   ├── job-status/ job/ job-detail/ status-detail/  # 任务展示纯逻辑
+│   ├── api/           # HTTP / Backend contract
+│   ├── features/      # Imperative domain logic (mount*、ports、state）
+│   ├── reader/        # Old pdf.js engine + minor reused by new engine ports
+│   ├── job-status/ job/ job-detail/ status-detail/  # Task Display Logic
 │   ├── state/ config/ mock/ islands/ …
 └── styles/ components/ shared/ partials/
 ```
 
-| 层 | 路径 | 职责 | 新代码放哪 |
+| Layer | Path | Responsibility | Where to put new code |
 |----|------|------|------------|
-| **页面 React** | `pages/*/features` 或 `pages/reader/*` | UI、hooks、page store | 新 UI / 新交互 |
-| **命令式领域** | `js/features/*` | 挂载、轮询、表单、ports | 跨页可复用的非 UI 逻辑 |
-| **共享 API** | `js/api/*` | fetch 封装 | 新后端端点客户端 |
-| **装配** | `pages/home/composition/*` | 接线，不写业务 | 只改 wiring |
+| Page React | pages/*/features or pages/reader/* | UI, hooks, page store | new UI / new interaction |
+| Imperative domain | js/features/* | Mount, poll, form ports | reusable UI logic not needed across pages; simplify |
+| **Share API** | `js/api/*` | fetch Encapsulation | New backend endpoint client |
+| **Assembly** | `pages/home/composition/*` | Wiring only. No business logic. | Composition entry points for the home page. |
 
 ---
 
-## 主页：双 features 树
+## Homepage: dual features tree
 
-主页同时存在：
+Homepage contains both
 
-1. **`src/js/features/*`** — 旧主路径抽出来的**命令式领域**（`mountXxxFeature`、ports、DOM contract、state）
-2. **`src/pages/home/features/*`** — **React 侧**视图、store、对话框、书架 UI
+1. src/js/features/* — extracted from old main path, imperative domain (mountXxxFeature, ports, DOM contract, state)
+2. src/pages/home/features/* — React side views, store, dialog, bookshelf UI
 
-它们**不是重复目录**，而是 **UI 层 vs 领域层**。接线规则见 `pages/home/composition/README.md`：
+They are not a duplicate directory, but UI layer vs domain layer; see wiring rules in pages/home/composition/README.md:
 
-- 领域工厂应经 **`composition/external.ts`** 引用 `js/*`（避免在 features 里满天飞 `../../../js`）
-- 例外：少量类型 / 纯函数已直接从 `pages/home/features` import `js/features`（历史债务，新增优先走 external）
+- Domain factories should be referenced from composition/external.ts to js/*, avoiding scattered ../../../js imports from features.
+- Exception: a few types / Pure functions already directly from `pages/home/features` import `js/features`（Historical debt, prioritize new additions. external）
 
-### 对照表（名字相近 ≠ 同一模块）
+### Lookup table (similar names) ≠ Same module)
 
-| `js/features/` | `pages/home/features/` | 关系 |
+| `js/features/` | `pages/home/features/` | Relations |
 |----------------|------------------------|------|
-| `upload/` | `upload/` | 领域 mount + form ↔ React upload view store |
-| `workflow/` + `translation-workflow-dialog/` | `workflow/` | 命令式 workflow + 对话框契约 ↔ React 工作流对话框 |
-| `credentials/` | `credentials/` | 凭据 mount/DOM ↔ React 设置 UI |
-| `glossaries/` | `glossaries/` | 术语表 controller ↔ React 术语表 |
-| `app-update/` | `app-update/` | GitHub release / cache ↔ React 更新条 |
-| `app-shell/` | `app-shell/` | idle reset / config ↔ 底栏等壳 UI |
-| `app-actions/` | （无同名） | 提交任务；由 composition 挂到 status/upload |
-| `job-runtime/` | （无同名） | 当前任务轮询；status / library 消费 |
-| `recent-jobs/` + `documents-library/` | `library/` + `collections/` | 最近任务 + 文档资源 ↔ 书架卡片 / 合集 |
-| `status-detail/` | `status/` + `status-detail/` | 详情逻辑 ↔ 状态卡 / 详情弹窗 React |
-| `reader-dialog/` | `reader/` | 阅读入口路由/契约 ↔ 主页「打开阅读」对话框 store |
-| `home/` | （散落） | home state port |
-| `artifact-downloads/` | （经 library/status） | 产物下载 |
-| （无） | `settings/` | 主页设置入口（多靠 credentials/update） |
+| `upload/` | `upload/` | domain mount + form ↔ React upload view store |
+| `workflow/` + `translation-workflow-dialog/` | `workflow/` | Imperative workflow + Dialog Contract ↔ React Workflow Dialog |
+| credentials/ | credentials/ | credentials mount/DOM ↔ React settings UI |
+| glossaries/ | glossaries/ | glossary controller ↔ React glossary |
+| `app-update/` | `app-update/` | GitHub release / cache ↔ React Update Entry |
+| `app-shell/` | `app-shell/` | idle reset / config ↔ Bottom bar shell UI |
+| `app-actions/` | No duplicate names. Ensure uniqueness. | Submit task; by composition Attach status/upload |
+| job-runtime/ | (no counterpart) | current task polling status / library consumer |
+| recent-jobs/ + documents-library/ | library/ + collections/ | recent tasks + document resources ↔ bookshelf card / collection |
+| status-detail/ | status/ + status-detail/ | detail logic ↔ status card / detail popup React |
+| reader-dialog/ | reader/ | reading entry routing/contract ↔ home 「Read」 dialog store |
+| `home/` | Scattered | home state port |
+| `artifact-downloads/` | Syntax error. Missing closing parenthesis. Fix: Add `)`. library/status） | Download Artifacts |
+| (none) | settings/ | homepage settings entry (near credentials/update) |
 
-### 主页改代码口诀
+### Homepage code modification mnemonic
 
-| 你要改… | 优先路径 |
+| To modify… | Priority path |
 |---------|----------|
-| 书架卡片 / 详情弹窗 UI | `pages/home/features/library/**` |
-| 上传表单 UI | `pages/home/features/upload/**` |
-| 任务轮询、active job | `js/features/job-runtime/**` |
-| 提交翻译任务 | `js/features/app-actions/**` + composition |
-| 把新 `js` 依赖接进主页 | **只改** `composition/external.ts` + 对应 `create-*.ts` |
+| Bookshelf card / Details popup UI | `pages/home/features/library/**` |
+| Upload form UI | `pages/home/features/upload/**` |
+| Task pollingactive job | `js/features/job-runtime/**` |
+| Submit translation task | `js/features/app-actions/**` + composition |
+| Incomplete input. js import dependencies on homepage. | only modify composition/external.ts + corresponding create-*.ts |
 
-`library` 子目录约定见 `pages/home/features/library/README.md`。
+`library` See subdirectory conventions. `pages/home/features/library/README.md`。
 
 ---
 
-## 阅读器：三层边界（与主页 features 无关）
+## Reader: three-layer boundary (with homepage features Irrelevant)
 
-| 层 | 入口 / 路径 | js 依赖方式 |
+| Layer | Entry / Path | js dependencies |
 |----|-------------|-------------|
-| **A 新引擎（默认）** | `ReaderAppReactPdf` + `hooks/` `pdf/` `annotations/` `components/react-pdf/` | 只经 **`pages/reader/external.ts`** |
-| **B 共享 ports** | `js/reader` 子集：data/config/resource/pdf-document/page-state… | 经 external 出口；勿塞进 pdf-controller |
-| **C legacy** | `?engine=legacy` → `legacy/**` + **`js/reader` 命令式主力** | 允许直接 import `js/reader/**` |
+| **A New engine (default)** | `ReaderAppReactPdf` + `hooks/` `pdf/` `annotations/` `components/react-pdf/` | Only via **`pages/reader/external.ts`** |
+| B shared ports | js/reader subset: data/config/resource/pdf-document/page-state… | via external exit; do not block pdf-controller |
+| **C legacy** | `?engine=legacy` → `legacy/**` + **`js/reader` Imperative core** | Allow direct import `js/reader/**` |
 
-详情：`pages/reader/README.md`、`js/reader/README.md`。
+Details: pages/reader/README.md, js/reader/README.md.
 
-**新功能不要写进 `legacy/` 或 `js/reader/favorites*`。**
+Do not write new features into legacy/ or js/reader/favorites*.
 
-## 详情页
+## Details Page
 
-| 路径 | 规则 |
+| Path | Rule |
 |------|------|
-| `pages/detail/**` | js 只经 **`pages/detail/external.ts`** |
-| `js/job-detail/*` | overview / markdown / resume 命令式逻辑 |
+| pages/detail/** | js only via pages/detail/external.ts |
+| `js/job-detail/*` | overview / markdown / resume Imperative logic |
 
 ---
 
-## `js/` 其它目录（速查）
+## `js/` Other directories (quick reference)
 
-| 目录 | 用途 |
+| Directory | Purpose |
 |------|------|
-| `api/` | 后端 API 客户端 |
-| `job-status/`、`job/`、`job-detail/` | 任务阶段 / 产物 / 详情页逻辑（detail + home status 共用） |
-| `status-detail/` | 状态详情 presenter（偏旧路径；与 `js/features/status-detail` 并存时以实际 import 为准） |
-| `state/`、`config/` | 全局 store 切片、runtime 配置 |
-| `islands/` | 可挂到旧 HTML 的小岛（如 library-search、reader-annotations） |
-| `mock/` | 测试与本地 mock |
-| `app-framework/` | 轻量 connector/store 原语 |
-| `styles/` | **按页拆包** `dist/css/{home,detail,reader}.css`；见 **`styles/README.md`** |
+| api/ | backend API client |
+| job-status/, job/, job-detail/ | task phase / artifacts / detail page logic (shared between detail and home status) |
+| `status-detail/` | status details presenter(older path; with `js/features/status-detail` Actual prevails when coexisting. import shall prevail) |
+| state/, config/ | global store slice, runtime config |
+| `islands/` | Mountable to old HTML of the small island (such as library-search、reader-annotations） |
+| `mock/` | Testing & Local mock |
+| app-framework/ | lightweight connector/store primitive |
+| `styles/` | **Split packages by page** `dist/css/{home,detail,reader}.css`; see **`styles/README.md`** |
 
 ---
 
-## 死代码策略
+## Dead code strategy
 
-- **先文档、再删**：`rg` 无 importer 仍可能是动态路径或测试专用。
-- `js/reader` 几乎全部被 legacy 链路引用（含内部引用）。已删除无生产引用的 `ai/remote-answerer.ts`。
-- **`pages/home/features` → `src/js/*`**：经 `pages/home/composition/external.ts`。
-- **`pages/detail` → `src/js/*`**：经 `pages/detail/external.ts`。
-- **`pages/reader` 非 legacy → `src/js/*`**：经 `pages/reader/external.ts`；`legacy/**` 除外。
-- **不要**批量删除 `js/reader/favorites/*` 或 `pdf-renderer` 等——它们经 `selection-favorites` / `pdf-controller` 服务 `?engine=legacy`。
+- Document first, then delete: if rg finds no importer, it's likely dynamic path or test-only.
+- `js/reader` Almost all are legacy Link references (including internal). Removed those without production references. `ai/remote-answerer.ts`。
+- **`pages/home/features` → `src/js/*`**experienced `pages/home/composition/external.ts`。
+- pages/detail → src/js/*: via pages/detail/external.ts.
+- pages/reader non-legacy → src/js/*: via pages/reader/external.ts; legacy/** excluded.
+- Do not batch delete js/reader/favorites/* or pdf-renderer etc. — they serve selection-favorites / pdf-controller for ?engine=legacy.
 
 ---
 
-## 相关 README
+## Related README
 
-| 文件 | 内容 |
+| File | Content |
 |------|------|
-| `frontend/README.md` | 入口、命令、与 frontend-react 关系 |
-| `pages/home/composition/README.md` | 主页装配规则 |
-| `pages/home/features/README.md` | home React features 索引 |
-| `pages/home/features/library/README.md` | 书架子目录 |
-| `pages/reader/README.md` | 阅读器新/旧布局 |
-| `js/reader/README.md` | 旧引擎边界与共享 ports |
+| frontend/README.md | Entry, commands, and frontend-react relationship |
+| pages/home/composition/README.md | home page assembly rules |
+| pages/home/features/README.md | home React features index |
+| `pages/home/features/library/README.md` | Bookshelf directory |
+| `pages/reader/README.md` | New Reader/Old layout |
+| `js/reader/README.md` | Legacy Engine Boundaries and Sharing ports |

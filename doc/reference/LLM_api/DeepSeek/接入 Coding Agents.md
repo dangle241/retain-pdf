@@ -1,8 +1,8 @@
-接入 Claude Code
-安装 Claude Code
+Access Claude Code
+Install Claude Code
 npm install -g @anthropic-ai/claude-code
 
-配置环境变量
+Configure environment variables.
 export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
 export ANTHROPIC_AUTH_TOKEN=${DEEPSEEK_API_KEY}
 export ANTHROPIC_MODEL=deepseek-v4-pro[1m]
@@ -14,17 +14,17 @@ export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 export CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK=1
 export CLAUDE_CODE_EFFORT_LEVEL=max
 
-进入项目目录，执行 claude 命令，即可开始使用了。
+Navigate to the project directory and run. claude Run the command to start.
 cd my-project
 claude
 
 
-接入 OpenCode
-安装 OpenCode
-安装方法请参阅OpenCode 官方文档
+Access OpenCode
+Install OpenCode
+See installation instructions.OpenCode Official Documentation
 
-修改配置文件
-在您的配置文件中，增加以下 provider 配置。配置文件路径：~/.config/opencode/opencode.jsonc
+Modify configuration file.
+Add the following to your configuration file. provider Configuration. Configuration file path:~/.config/opencode/opencode.jsonc
 
   "provider": {
     "deepseek": {

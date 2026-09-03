@@ -1,23 +1,23 @@
 # 01 Response Shape
 
-## 顶层结构
+## Top-level structure
 
-当前 Paddle adapter 依赖的顶层字段主要有：
+Current Paddle adapter top-level dependency fields mainly include:
 
 - `layoutParsingResults`
-  按页的解析结果列表
+  Parsed results list by page
 - `dataInfo`
-  页尺寸等元信息
+  Page size and other metadata
 - `preprocessedImages`
-  预处理图像列表，可选
+  Preprocess image list (optional)
 
-当前最小识别条件见：
+See current minimum recognition criteria:
 
 - `backend/scripts/services/document_schema/provider_adapters/paddle/adapter.py`
 
-## 页级结构
+## Page-level structure.
 
-对每一页，当前 adapter 主要读取：
+For each page, current adapter Main read
 
 - `prunedResult`
 - `prunedResult.parsing_res_list`
@@ -25,15 +25,15 @@
 - `markdown.text`
 - `markdown.images`
 
-页面尺寸优先顺序：
+Page size priority order:
 
 1. `dataInfo.pages[i].width / height`
 2. `prunedResult.width / height`
-3. 缺省为 `0`
+3. Defaults to `0`
 
-## block 级结构
+## block Hierarchy
 
-当前 block reader 主要读取这些字段：
+Current block reader reads these fields:
 
 - `block_label`
 - `block_bbox`
@@ -45,32 +45,32 @@
 - `global_group_id`
 - `block_order`
 
-说明：
+Note:
 
-- `block_label` 决定主结构映射
-- `block_content` 是文本主来源
-- `group_id / global_group_id / block_order` 当前主要服务于 `continuation_hint`
+- `block_label` Define main structure mapping
+- `block_content` Main text source.
+- `group_id / global_group_id / block_order` Primarily serves `continuation_hint`
 
-## 当前页构造流程
+## Current page construction flow
 
-当前 page adapter 流程是：
+Current page adapter process:
 
-1. 从 `layoutParsingResults[page_index]` 读一页 payload
-2. 构造 `PaddlePageContext`
-3. 从 `prunedResult.parsing_res_list` 逐块构造 block spec
-4. 补页级 `metadata`
-5. 交给 common builder 生成 `document.v1`
+1. Read one page payload from layoutParsingResults[page_index]
+2. Construct PaddlePageContext
+3. Construct blockwise block spec from prunedResult.parsing_res_list
+4. Supplement Level `metadata`
+5. Hand off to common builder to generate document.v1
 
-代码入口：
+Entry point:
 
 - `backend/scripts/services/document_schema/provider_adapters/paddle/payload_reader.py`
 - `backend/scripts/services/document_schema/provider_adapters/paddle/page_reader.py`
 
-## 文档维护建议
+## Documentation maintenance suggestions
 
-如果后续 Paddle API 结构变了，这个文件要优先更新：
+If later Paddle API Structure changed. Prioritize updating this file:
 
-1. 顶层字段是否变了
-2. 页级字段路径是否变了
-3. block 级字段路径是否变了
-4. 哪些字段已经不再可靠
+1. Top-level field changed?
+2. Whether page-level field paths have changed
+3. block Level field path changed?
+4. Which fields are no longer reliable?

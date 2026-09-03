@@ -1,13 +1,13 @@
-# 字体与排版密度文档
+# Font and typography density documentation
 
-这组文档记录 RetainPDF 在翻译回填时的字体缩放、文本密度和版面容量估算逻辑。
+This set of documents records RetainPDF Font scaling, text density, and layout capacity estimation logic during translation backfill.
 
-建议阅读顺序：
+Recommended reading order:
 
-1. [字体随页面变化的算法](./字体随页面变化的算法.md)
-2. [密度算法说明](./密度.md)
+1. [Font scaling algorithm](./å­ä½éé¡µé¢ååçç®æ³.md)
+2. [Density Algorithm Description](./å¯åº¦.md)
 
-相关代码主要在：
+Related code mainly in:
 
 - `backend/scripts/services/rendering/layout/payload/`
 - `backend/scripts/services/rendering/layout/typography/`

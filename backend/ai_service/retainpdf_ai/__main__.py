@@ -1,4 +1,4 @@
-"""启动入口:python -m retainpdf_ai"""
+"""Entry point: python -m retainpdf_ai"""
 
 from __future__ import annotations
 

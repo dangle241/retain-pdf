@@ -8,7 +8,7 @@ export function createRecentJobsNavigationPort({
   doc = document,
   jobRuntimePort = createRecentJobsRuntimePort({ currentJobId }),
   readerPort = createRecentJobsReaderPort(),
-  /** 图书馆网格默认 false：进度在书籍详情 Tab，不弹旧工作流窗 */
+  /** Library grid defaults to false: progress is in Book Detail tab, does not open legacy workflow dialog */
   openWorkflowOnSelect = false,
 }: any = {}) {
   function openWorkflow() {
@@ -46,7 +46,7 @@ export function createRecentJobsNavigationPort({
       if (!normalizedJobId) {
         return false;
       }
-      // 优先 recoverJob（silent poll）；兼容旧 port 仅有 openJob
+      // Prioritize recoverJob (silent poll); compat with legacy port providing openJob only
       if (typeof jobRuntimePort.recoverJob === "function") {
         return jobRuntimePort.recoverJob(normalizedJobId) !== false;
       }
@@ -54,3 +54,5 @@ export function createRecentJobsNavigationPort({
     },
   };
 }
+
+

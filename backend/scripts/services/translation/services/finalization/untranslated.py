@@ -244,8 +244,9 @@ def _source_text(item: dict) -> str:
 
 
 def _mark_final_dead_letter(item: dict, exc: Exception | None) -> None:
-    # 先 mark 再 record:record 写入时重读 item 上的最新诊断,
-    # 避免旧快照回写盖掉 mark_keep_origin 链路刚写入的内容。
+    # Mark first, record second: `record_*` re-reads the current diagnostics
+    # on the item before writing, so a stale snapshot from a prior call
+    # cannot overwrite what `mark_keep_origin` just wrote.
     mark_keep_origin(item)
     record_translation_diagnostics(
         item,

@@ -1,27 +1,27 @@
-# 科学仪器线标（RetainPDF）
+# Scientific instrument line label (RetainPDF）
 
-学术/实验气质 UI 图标，**不是**中国风山水符号。
+Academic/Experimental UI Icon **is not** Chinese-style landscape symbols.
 
-| 文件 | 语义 | 可用场景（建议） |
+| file | semantics | available scenarios (recommended) |
 |------|------|------------------|
-| `instrument-microscope.svg` | 显微镜 | 空状态、OCR/阅读相关 |
-| `instrument-flask.svg` | 锥形瓶 | 化学/实验类标签 |
-| `instrument-atom.svg` | 原子轨道 | 科学主题、AI 分析 |
-| `instrument-spectrum.svg` | 光谱/信号 | 数据、图表、分析 |
-| `instrument-telescope.svg` | 望远镜 | 探索、发现 |
-| `instrument-balance.svg` | 天平 | 对照阅读、对比 |
+| `instrument-microscope.svg` | Microscope | Empty state,OCR/Related Reading |
+| `instrument-flask.svg` | Erlenmeyer flask | Chemistry/Experimental Tags |
+| `instrument-atom.svg` | atomic orbital | ScienceAI analysis |
+| `instrument-spectrum.svg` | spectrum/signal | data, charts, analysis |
+| `instrument-telescope.svg` | Telescope | Explore, Discover |
+| `instrument-balance.svg` | Balance | Compare |
 
-## 规范
+## Specifications
 
 - `viewBox="0 0 24 24"`
-- `stroke="currentColor"` `fill="none"`（atom 中心点除外）
+- `stroke="currentColor"` `fill="none"`（atom Exclude center point
 - `stroke-width="1.6"` round
 
-接入时用 CSS `color: var(--ink)` 或 `var(--accent)`，不要写死色。
+Use during integration. CSS `color: var(--ink)` or `var(--accent)`; color not hardcoded.
 
-## 来源
+## Source
 
-- **Kimi CLI** 生成线标（2026-07-21），已写入本目录  
-- 规范：`currentColor` / 24×24 / stroke 1.6  
+- **Kimi CLI** Generate line markers (2026-07-21File written to current directory.  
+- Specification:`currentColor` / 24×24 / stroke 1.6  
 
-预览：用浏览器打开任意 `.svg`，或 `color: #1d1d1f` 套在 UI 里看。
+Open in browser: any `.svg`or `color: #1d1d1f` Wrap in UI view.

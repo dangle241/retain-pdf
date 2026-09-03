@@ -1,14 +1,16 @@
-// 文档中心网格的卡片 item 形状(计划 wondrous-baking-donut.md 的 F2)。
+// Document grid card item shape (as planned in wondrous-baking-donut.md F2).
 //
-// 设计要点(见 memory f2-document-centric-grid-design):图书馆网格改成"每篇文档
-// 一张卡",但底层复用 features/recent-jobs 那套按 job_id 键控的 store/去重/轮询
-// 引擎(一行不改)。于是:
-// - 已翻译文档(active_job_id 非空):卡片带真实 job_id,并把 library/books 的实时
-//   status/stage/progress/cover 合并进来 → 现有轮询/进度/封面机制原样接管。
-// - 馆藏文档(active_job_id 为 null/空):给一个**合成命名空间 job_id**
-//   `doc:<document_id>`,让它能原样穿过按 job_id 去重的 dedupeRecentJobs / store,
-//   不被"空 job_id 直接丢弃"的逻辑滤掉;卡片靠 library_only 布尔分支馆藏态
-//   (禁用对照阅读、显示"未翻译"、走翻译/读原文),不去解析这个合成 id。
+// Design rationale (see memory f2-document-centric-grid-design): library grid becomes "one card
+// per document", but reuses the existing features/recent-jobs store/dedupe/polling engine
+// keyed by job_id (unchanged). Thus:
+// - Translated documents (active_job_id non-empty): card carries the real job_id, and merges
+//   live status/stage/progress/cover from library/books → existing polling/progress/cover
+//   mechanisms take over unchanged.
+// - Library documents (active_job_id null/empty): given a **synthetic job_id namespace**
+//   `doc:<document_id>`, so they pass through dedupeRecentJobs / store filtering (which
+//   discards empty job_id) intact; the card uses library_only boolean to mark library state
+//   (disables side-by-side reader, shows "untranslated", offers translate/read original),
+//   and does not parse the synthetic id.
 
 import { flattenStageSnapshot } from "../../job/stage-snapshot-flatten.js";
 
@@ -33,14 +35,14 @@ function firstUrl(...candidates) {
   return "";
 }
 
-/** book 标题若是 job_id / job_id.pdf / Mock…，改用文档真名 */
+/** If book title is job_id / job_id.pdf / Mock…, use the document's real name instead */
 function pickCardTitle(bookTitle, document, jobId) {
   const book = `${bookTitle || ""}`.trim();
   const docTitle = `${document?.title || document?.source_filename || ""}`.trim();
   const id = `${jobId || ""}`.trim();
   const bookIsPlaceholder = !book
     || (id && (book === id || book === `${id}.pdf`))
-    || /^Mock(\s|重试|-|_)/i.test(book)
+    || /^Mock(\s|重试|-|_)/i.test(book) // "重试" (retry) is intentionally kept as part of the regex pattern
     || /^mock-/i.test(book);
   if (bookIsPlaceholder && docTitle) {
     return docTitle;
@@ -48,9 +50,10 @@ function pickCardTitle(bookTitle, document, jobId) {
   return book || docTitle || id || "";
 }
 
-// document + 可选的 library/books 投影 → 一张网格卡片 item。
-// book 命中(已翻译)时以 book 的活态字段为主,叠加文档身份(document_id、
-// reading_status、tags、source_pdf_url);book 缺失时按文档字段构造馆藏卡。
+// document + optional library/books projection → one grid card item.
+// When book is found (translated), use book's live fields as primary, overlay document identity
+// (document_id, reading_status, tags, source_pdf_url); when book is missing, construct a
+// collection card from document fields.
 export function shapeDocumentCardItem(document: any = {}, book = null) {
   const documentId = `${document.document_id || ""}`.trim();
   const activeJobId = `${document.active_job_id || ""}`.trim();
@@ -65,8 +68,9 @@ export function shapeDocumentCardItem(document: any = {}, book = null) {
   };
 
   if (activeJobId && book && typeof book === "object") {
-    // 已翻译:以 library/books 活态为主(与现网格视觉一致),补齐文档身份与
-    // 封面兜底(合成 book 可能不带 cover_url,回退到文档级 cover)。
+    // Translated: use library/books live state as primary (consistent with current grid visual),
+    // fill in document identity and cover fallback (synthetic book may lack cover_url, fallback
+    // to document-level cover).
     const flattened = flattenStageSnapshot(book);
     const jobId = `${flattened.job_id || book.job_id || activeJobId}`.trim();
     return {
@@ -75,8 +79,8 @@ export function shapeDocumentCardItem(document: any = {}, book = null) {
       job_id: jobId,
       active_job_id: activeJobId,
       library_only: false,
-      // 封面/页数：book 活态优先、文档级兜底（与现网格视觉一致）；
-      // 标题：禁止 book 用 job_id.pdf 盖掉真书名
+      // cover/page count: book live first, document fallback (consistent with current grid);
+      // title: prevent book from using job_id.pdf to override real title
       cover_url: firstUrl(flattened.cover_url, book.cover_url, document.cover_url),
       thumbnail_url: firstUrl(flattened.thumbnail_url, book.thumbnail_url, document.thumbnail_url),
       page_count: document.page_count || flattened.page_count || 0,
@@ -91,8 +95,9 @@ export function shapeDocumentCardItem(document: any = {}, book = null) {
   }
 
   if (activeJobId) {
-    // 有 active_job_id 但 library/books 没投影(少见边角:job 刚建/被清)。保留真实
-    // job_id 让轮询/对照阅读仍可用,但没有成品活态,按未完成处理(reader 禁用)。
+    // Has active_job_id but no library/books projection (rare corner: job just created or cleared).
+    // Keep real job_id so polling/side-by-side reader still works, but without finished live state,
+    // treat as incomplete (reader disabled).
     return {
       ...sharedDocFields,
       job_id: activeJobId,
@@ -109,7 +114,7 @@ export function shapeDocumentCardItem(document: any = {}, book = null) {
     };
   }
 
-  // 馆藏态(未翻译):合成 job_id 让它穿过按 job_id 键控的引擎;library_only 打标。
+  // Collection state (not translated): synthetic job_id to pass through job_id-keyed engine; mark library_only.
   return {
     ...sharedDocFields,
     job_id: syntheticLibraryJobId(documentId),

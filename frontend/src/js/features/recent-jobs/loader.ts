@@ -129,7 +129,7 @@ export function createRecentJobsLoader({
       cache: false,
     });
     if (snapshot.status === "error") {
-      throw snapshot.error || new Error("读取最近任务失败");
+      throw snapshot.error || new Error("Failed to load recent jobs");
     }
     return (snapshot.data || {
       collected: [],
@@ -255,3 +255,5 @@ export function createRecentJobsLoader({
     load,
   };
 }
+
+

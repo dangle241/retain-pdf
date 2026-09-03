@@ -1,24 +1,24 @@
-# 前端对接说明:图书馆数据层 API
+# Frontend Integration Notes:Library data layer API
 
-> 后端提交:`9b22e26`(图书馆数据层:documents 一等公民 + 锚点收藏 + FTS5 全文检索)
+> Backend Submit:`9b22e26`(Library Data Layer:documents First-class citizen + Anchor Bookmarks + FTS5 Full-text search)
 >
-> 现有 `/api/v1/library/books` 接口**原样保留**,图书馆页面可以按节奏迁移,不迁移也不会坏。
-> 所有新接口和现有接口一样走 `X-API-Key` 认证,响应统一 `{code, message, data}` 包装。
+> Existing `/api/v1/library/books` interface **Keep as-is**,Migrate library page incrementally.,No migration needed; system remains stable.
+> All new APIs follow same flow as existing. `X-API-Key` authentication,Unified Response `{code, message, data}` Packaging.
 
-## 核心概念(前端需要理解的唯一模型变化)
+## Core Concepts(Only model change frontend needs to understand)
 
-- **document = 一篇 PDF 的稳定身份**(按文件内容 sha256 去重):同一篇 PDF 不管上传几次、
-  翻译几次,都是同一个 `document_id`。job 变成了文档名下的"处理记录"。
-- **锚点**:收藏和搜索命中都带 `(document_id, job_id, page_idx, block_id)` 四元组,
-  `job_id + page + block` 就是阅读器现有的定位坐标,可以直接跳转到原位。
+- **document = a PDF stable identity**(By file content sha256 deduplication):Same article. PDF Regardless of upload attempts,
+  translated multiple times,All the same. `document_id`。job Now under the document name."Processing Records"。
+- **Anchor**:Include in favorites and search hits. `(document_id, job_id, page_idx, block_id)` quadruple,
+  `job_id + page + block` Current reader positioning coordinates.,Jump directly to the original position.
 
-## 接口清单
+## API list
 
-### 1. 文档列表 / 详情 / 编辑
+### 1. Document list / Details / Edit
 
 ```
-GET  /api/v1/documents?limit=50&offset=0&reading_status=reading&tag=化学&collection_id=xxx
-GET  /api/v1/documents?job_id=xxx          ← 任意 job_id(含历史 run)直查所属文档,勿再扫列表反查 active_job_id
+GET  /api/v1/documents?limit=50&offset=0&reading_status=reading&tag=Chemistry&collection_id=xxx
+GET  /api/v1/documents?job_id=xxx          â Any job_id(including history run)Directly check the owning document.,Stop scanning list for reverse lookup. active_job_id
      → data.documents[]: { document_id, title, source_filename, page_count, bytes,
                            active_job_id, reading_status, tags[], added_at,
                            last_opened_at, updated_at, authors_json, year, doi }
@@ -29,71 +29,71 @@ PATCH /api/v1/documents/:document_id
      body: { title?, reading_status?, tags? }
 ```
 
-- `reading_status` 只接受 `unread | reading | done`,其他值返回 400;
-- `tags` 是**整体替换**语义(传 `[]` 即清空);
-- `active_job_id` 是该文档当前生效的处理 run——**打开阅读器就用它**;
-- 列表按 `added_at` 倒序,`limit` 上限 500。
+- `reading_status` Accept only `unread | reading | done`,Return other values. 400;
+- `tags` is **Replace all** semantic(passing `[]` Clears immediately.);
+- `active_job_id` This document's current effective processing. run——**Open reader, use it.**;
+- Sort by `added_at` Reverse order,`limit` Upper bound 500。
 
-### 2. 收藏
+### 2. Favorites
 
 ```
 POST /api/v1/favorites
      body: {
-       page_idx, block_id, quote_text,                      ← 必填
-       document_id?, job_id?,                               ← 二选一至少给一个
+       page_idx, block_id, quote_text,                      ← Required
+       document_id?, job_id?,                               ← Select at least one of the two.
        char_start?, char_end?, kind?,
        translated_quote_text?, note?
      }
-     → data: FavoriteRecord(含生成的 favorite_id、解析出的 document_id 和实际锚定的 job_id)
+     → data: FavoriteRecord(Includes generated favorite_idParsed out document_id and anchored to the actual job_id)
 
 GET  /api/v1/favorites?document_id=xxx
-     → data.favorites[](按页码排序;不传参数 = 全部收藏,按时间倒序)
+     → data.favorites[](Sort by page number;No parameters provided. = Favorite All,Reverse chronological order.)
 
 PATCH /api/v1/favorites/:favorite_id
-     body: { note }                          ← 原子更新笔记,favorite_id 不变
+     body: { note }                          ← Atomic update notes,favorite_id Unchanged.
 DELETE /api/v1/favorites/:favorite_id
 ```
 
-- **只给 `job_id`(含历史 run)时后端自动解析所属文档并锚定该 run 的块空间**——
-  阅读器里收藏直接传当前 job_id 即可,打开历史 job 也能正确入库;
-- 只给 `document_id` 时锚定其 `active_job_id`;
-- `quote_text` 是引文快照,必填(选中的原文文本);`translated_quote_text` 建议一起传——
-  锚点将来失效时快照保证内容不丢;
-- `kind`: `sentence | data | figure`,默认 `sentence`;
-- `char_start / char_end` 是块内选区(可选,不传表示整块)。
+- **Only provide `job_id`(including history run)Backend auto-parses parent doc and anchors to it. run's block space**â
+  In reader, favorite passes current directly. job_id Done.,Open History job Also imports correctly.;
+- Only provide `document_id` Time anchor `active_job_id`;
+- `quote_text` Citation snapshot.,Required(Selected original text);`translated_quote_text` Upload together recommended.â
+  Snapshot preserves content if anchor later fails.;
+- `kind`: `sentence | data | figure`, default `sentence`;
+- `char_start / char_end` In-block selection(Optional, No argument means entire block).
 
-### 3. 全文检索(中英文都可)
+### 3. Full-text search
 
 ```
-GET /api/v1/search?q=光学光谱&limit=20
+GET /api/v1/search?q=optical spectroscopy&limit=20
     → data.hits[]: { document_id, job_id, page_idx, block_id,
                      source_snippet, translated_snippet }
 ```
 
-- snippet 里命中词用 `[` `]` 包裹,前端可替换成高亮标签;
-- 任意长度的 `q` 都能查(≥3 字符走 FTS5 全文索引,更短自动回退模糊匹配);
-- `limit` 上限 100。
+- snippet Match term usage wrapped in `[` `]`, Frontend replaceable with highlight tags.;
+- Any length. `q` All queryable.(â¥3 Characters Move to FTS5 full-text index, Shorter auto-fallback to fuzzy matching.);
+- `limit` upper bound 100.
 
-### 4. AI 问答(agentic 检索,带可跳转引用)
+### 4. AI Q&A(agentic Search, With clickable references)
 
-> 前端只访问 Rust API 这一个入口:`/api/v1/ai/ask` 是到 retainpdf-ai 服务的
-> 反向代理,认证仍是同一个 X-API-Key,无需任何新配置。
+> Frontend only. Rust API This entry:`/api/v1/ai/ask` Is to retainpdf-ai Service
+> Reverse proxy,Authentication unchanged. X-API-Key,No new configuration needed.
 
 ```
 POST /api/v1/ai/ask
      body: { question: string, document_id?: string, job_id?: string, stream?: boolean,
-             conversation_id?: string,             ← 多轮对话,见第 6 节
+conversation_id?: string,             â Multi-turn conversation, See 6 section
              llm_api_key?: string, llm_base_url?: string, llm_model?: string }
 ```
 
-- `job_id`(含历史 run)可替代 `document_id`:服务端解析所属文档后限定检索范围;
-- `llm_*` 三个字段来自前端凭据设置,按请求覆盖服务端 env 配置;缺 key 返回
-  400「请在前端凭据设置中填写模型 API Key」。
+- `job_id` (includes history runs) Replaceable `document_id`: Server parses associated document to restrict search scope.;
+- `llm_*` Three fields from frontend credential settings, overwrite server by request. env config; return if key missing
+400 "Please fill in the model API Key in the frontend credential settings".
 
-**非流式**(`stream` 缺省 false):等待完整回答(agent 多轮检索,通常 10-30 秒)
+**Non-streaming.**(`stream` Default false):Awaiting full response(agent Multi-turn retrieval,Usually 10-30 seconds)
 ```json
 { "code": 0, "data": {
-    "answer": "…回答文本,事实句带 [n] 引用标注…",
+    "answer": "…Answer text,Factual sentence [n] Citations…",
     "citations": [ { "ref": 1, "document_id": "…", "job_id": "…",
                      "page_idx": 3, "block_id": "p004-b0002", "snippet": "…" } ],
     "tool_trace": [ { "round": 1, "tool": "search_fulltext", "arguments": {…} } ],
@@ -101,114 +101,114 @@ POST /api/v1/ai/ask
 } }
 ```
 
-**流式**(`stream: true`):SSE(`text/event-stream`),每行 `data: {json}`,事件类型:
+**Streaming**(`stream: true`):SSE(`text/event-stream`),Per row `data: {json}`,Event Type:
 
-| type | 字段 | 说明 |
+| type | field | description |
 |---|---|---|
-| `tool` | round, tool, arguments | agent 每次调用工具时实时推送——渲染成"正在检索:xxx"的过程提示 |
-| `answer_delta` | text | 最终回答的逐 token 增量,边到边渲染 |
-| `done` | answer, citations, tool_trace, rounds | 最终结果(结构同非流式 data) |
-| `error` | message | 失败 |
+| `tool` | round, tool, arguments | agent Push in real time on every tool call.——Render as"Searching:xxx"Process prompt |
+| `answer_delta` | text | Final answer, item by item. token Incremental,Full-width rendering needed. Consider CSS flexbox or grid. → skipped: JavaScript solution, add when dynamic resizing required. |
+| `done` | answer, citations, tool_trace, rounds | Final result(Same structure as non-streaming. data) |
+| `error` | message | failure |
 
-前端渲染要点:
-- 回答文本里的 `[n]` 对应 `citations[].ref`,渲染成可点击引用;点击用
-  `job_id + page_idx + block_id` 跳阅读器——**与收藏跳转是同一套锚点逻辑**;
-- `document_id` 传入时限定单文档问答(阅读器内的"问这篇文档"),不传则全库检索;
-- 过程事件建议展示 `tool` 的语义化文案:`search_fulltext`→"全文检索"、
-  `read_blocks`→"阅读原文上下文"、`list_documents`→"浏览图书馆"、
-  `search_favorites`→"查找收藏";
-- AI 服务未启动时反代返回 502,提示"AI 服务未运行"。
+Frontend rendering essentials:
+- in the answer text `[n]` corresponds to `citations[].ref`, render as clickable reference.; click to use
+  `job_id + page_idx + block_id` jump to reader——**Shares anchor logic with favorites navigation.**;
+- `document_id` Restrict to single-document Q&A on input.(In Reader"Ask about this document"),Full database search if none provided.;
+- migration retired `tool` Semantic text content:`search_fulltext`→"Full-text search"、
+`read_blocks`â"Read original context", `list_documents`â"Browse Library",
+  `search_favorites`→"Search Favorites";
+- AI Reverse proxy response when service is not started 502, prompt "AI Service not running".
 
 
-### 5. 资产(收藏截图等图片附件)
+### 5. Assets (Collect screenshot image attachments.)
 
 ```
-POST /api/v1/assets                    ← multipart,字段名 file(png/jpeg/webp,≤20MB)
+POST /api/v1/assets                    â multipart, field name file(png/jpeg/webp, â¤20MB)
      → data: { asset_id, mime, bytes, created_at }
-GET  /api/v1/assets/:asset_id          ← 文件本体;内容寻址,响应带 immutable 缓存头,可放心 <img src>
+GET  /api/v1/assets/:asset_id          ← Content-addressed lookup; response carries immutable cache headers; safe to use directly as <img src>
 ```
 
-- `asset_id` = 文件 sha256:同一张图重复上传自动归并,拿到相同 id;
-- **图片收藏流程**:canvas 导出 PNG → POST assets 拿 asset_id → POST favorites 时带
-  `asset_id`(建议 `kind: "figure"`)和 `rect_json`(剪裁矩形几何原样存,换设备可还原);
-- favorites 记录现在返回 `asset_id` / `rect_json` 字段,空串 = 纯文字收藏。
+- `asset_id` = file sha256: Duplicate image uploads auto-merge, get same id;
+- **Image bookmarking flow**: canvas Export PNG â POST assets get asset_id â POST favorites Time zone
+`asset_id` (suggest `kind: "figure"`) and `rect_json` (Preserve cropped rectangle geometry, restorable on device change.);
+- favorites Record the return now. `asset_id` / `rect_json` fields, empty string = text-only favorite.
 
-### 6. AI 问答会话(历史存储 + 多轮对话)
+### 6. AI Q&A Session (Historical storage + multi-turn dialog)
 
 ```
 POST   /api/v1/ai/conversations                      body: { title?, document_id? }
-GET    /api/v1/ai/conversations?limit=50&offset=0    → data.conversations[](含 message_count,按更新倒序)
-GET    /api/v1/ai/conversations/:id                  → 会话字段 + messages[](seq 正序)
-DELETE /api/v1/ai/conversations/:id                  级联删消息
+GET    /api/v1/ai/conversations?limit=50&offset=0    → data.conversations[](contains message_count,Newest first)
+GET    /api/v1/ai/conversations/:id                  → Session Fields + messages[](seq Ascending)
+DELETE /api/v1/ai/conversations/:id                  Cascade Delete Messages
 POST   /api/v1/ai/conversations/:id/messages         body: { role, content, citations_json?, tool_trace_json?, model? }
 ```
 
-- **前端接多轮对话只需一步**:先建会话拿 `conversation_id`,之后每次 `/api/v1/ai/ask`
-  带上它——服务端自动注入既往轮次做上下文、回答完成后自动把 user/assistant 两条
-  写进历史(**前端不需要调 messages 接口**,那是 AI 服务回写用的);
-- 消息里的 `citations_json` 是锚点快照数组(结构同 ask 返回的 citations),渲染历史
-  时同样可点击跳转;
-- **软锚点语义**:问答引用不阻止 job 删除(与收藏的 409 保护不同),job 删除后跳转
-  失效但 snippet 文字仍在——渲染时跳转失败请优雅降级为仅展示文字;
-- 会话标题自动取首问前 40 字,可通过创建时的 `title` 覆盖。
+- **Frontend multi-turn dialog integration: one step.**:Create session first. `conversation_id`,Every time thereafter `/api/v1/ai/ask`
+  Take it.——Server automatically injects previous rounds as context, and after answering automatically user/assistant two lines
+Add to history (**Frontend doesn't need to call messages API**, that is AI Service writeback.);
+- In the message `citations_json` Array of anchor snapshots. (Same structure as citations returned by ask), render history
+  Also clickable to navigate.;
+- **Soft anchor semantics**: Q&A citations do not prevent job deletion (differs from favorites 409 protection), job redirect after deletion.
+  Invalid but snippet Text remains.——Render navigation fails. Gracefully degrade to text-only display.;
+- Auto title from first question 40 character,Configurable on creation. `title` override.
 
-### 7. 分类(合集):建文件夹给 PDF 分组
+### 7. Category (Collection): Create folder for PDF grouping
 
-> `collections`/`collection_documents` 表随图书馆数据层一起建好,一直没接
-> 路由;现在补上。v1 只做扁平文件夹(不支持嵌套,`parent_id` 传了也接受,
-> 但前端目前不需要用)。
+> `collections`/`collection_documents` Table created with library data layer.,No action.
+> Routing;Now add it.v1 Only flat folders.(Unsupported nested.,`parent_id` Submit and Accept,
+> but frontend doesn't need it yet)。
 
 ```
 POST   /api/v1/collections                body: { name, parent_id? }
-GET    /api/v1/collections                → data.collections[](按 sort_order 排序,含 document_count)
+GET    /api/v1/collections                â data.collections[] (sort by sort_order, includes document_count)
 PATCH  /api/v1/collections/:id             body: { name?, sort_order? }
-DELETE /api/v1/collections/:id             ← 只删文件夹本身,文档不受影响
+DELETE /api/v1/collections/:id             ← Delete only the folder itself.,Documents unaffected.
 
 POST   /api/v1/collections/:id/documents              body: { document_ids: [...] }
 DELETE /api/v1/collections/:id/documents/:document_id
 ```
 
-- 加入不存在的 `document_id` 返回 404;重复加入同一文档幂等(不报错、不重复计数);
-- 查看某个文件夹里有哪些文档:`GET /api/v1/documents?collection_id=xxx`(见第 1 节),
-  拿到的每条记录里的 `active_job_id` 就是该文档当前可打开的处理记录;
-- 如果前端仍在用旧世界的 `/api/v1/library/books` 渲染卡片(而不是 `/api/v1/documents`
-  投影),把上一步拿到的 `active_job_id` 集合拼进新加的 `job_ids` 参数
-  (逗号分隔,见下方对 `/api/v1/library/books` 的说明),就能拿到与首页图书馆
-  卡片同构的数据,不用另外做一套"文件夹详情卡片"渲染。
+- Add non-existent `document_id` returns 404; idempotent re-add of same document. (Does not error. Does not double-count.);
+- List documents in folder.: `GET /api/v1/documents?collection_id=xxx` (see section 1),
+  In each retrieved record. `active_job_id` Available processing records for current document.;
+- If the frontend still uses the old `/api/v1/library/books` to render cards (instead of `/api/v1/documents`
+projection), use previous step output. `active_job_id` merge into newly added. `job_ids` parameter
+(comma-separated, see the pair below. `/api/v1/library/books` description), then you can get with the homepage library.
+Card-isomorphic data, no extra copy needed. "Folder Details Card" rendering.
 
-### `/api/v1/library/books` 新增可选参数:`job_ids`
+### `/api/v1/library/books` Add optional parameter.:`job_ids`
 
 ```
 GET /api/v1/library/books?job_ids=job-a,job-b,job-c
 ```
 
-- 逗号分隔的 job_id 白名单,只返回命中的记录,形状与不传该参数时完全一致;
-- 不传就是现状(分页 `limit`/`offset`),这是纯增量参数,不影响任何现有调用方;
-- 传了 `job_ids` 时不做分页截断——语义是"精确给我这几个 job",不是"翻到第几页"。
+- comma-separated job_id allowlist,Return only matched records.,Shape identical to when parameter omitted.;
+- Keep current if omitted. (pagination `limit`/`offset`), delta-only parameter, does not affect any existing callers.;
+- Passed `job_ids` no pagination truncation. ââ Semantics: "give me exactly these jobs", not "which page?".
 
-## 两个必须处理的边界
+## Two mandatory edge cases
 
-1. **删除保护**:删除书籍(`DELETE /api/v1/library/books/:job_id`)时,如果该 job 被收藏
-   引用,后端返回 **409**,message 里有引用数量——前端要把这个错误呈现为
-   "该文档有 N 条收藏,请先删除收藏",而不是通用报错。
-2. **重复上传**:同一 PDF 再次上传不会产生新文档(documents 列表数量不变),
-   前端不要假设"上传成功 = 列表多一条"。
+1. **Delete protection**: When deleting book (`DELETE /api/v1/library/books/:job_id`), if this job is bookmarked
+reference, backend response **409**, message contains reference count ââ frontend must display this error as
+"This document has N Favorites, delete favorites first.", instead of a generic error.
+2. **Duplicate upload**: Re-uploading the same PDF does not create a new document (documents list count unchanged),
+   Frontend should not assume"Upload successful = List has one extra item."。
 
-## 建议的迁移路径(不强制)
+## Suggested migration path(Optional)
 
-1. **第一步只做增量**:阅读器里加"选中 → 收藏"和收藏侧栏(纯新增,不动现有页面)。
-   收藏跳转:用锚点里的 `job_id + page_idx + block_id` 复用现有阅读器定位。
-2. **第二步**再把图书馆主页从 `/api/v1/library/books` 投影切到 `/api/v1/documents`,
-   拿到标签 / 阅读状态 / 合集能力。
+1. **Step 1: incremental only**: Reader add "Select â Favorite" and favorites sidebar (new only, leave existing pages untouched).
+   Favorite Redirect:Use the one in the anchor. `job_id + page_idx + block_id` Reuse existing reader positioning.
+2. **Step 2** (deferred): switch the projection from `/api/v1/library/books` to `/api/v1/documents`,
+   Get Tag / Read status / Collections
 
-## 附:字段速查
+## appendix:Field quick reference
 
-| 字段 | 说明 |
+| field | description |
 |---|---|
-| `document_id` | 文件内容 sha256(hex),稳定不变 |
-| `active_job_id` | 当前生效的处理 run,阅读器入口 |
-| `job_id`(收藏/命中里) | 锚点所在的块空间版本 |
-| `block_id` | `document.v1.json` 的块 ID,如 `p001-b0002` |
-| `page_idx` | 0 起始页码 |
+| `document_id` | file content sha256(hex),Stable |
+| `active_job_id` | Currently active processing run,Reader Entry |
+| `job_id` (Favorite/Hit Rate) | Version of the block space containing the anchor. |
+| `block_id` | `document.v1.json` Block ID,such as `p001-b0002` |
+| `page_idx` | 0 Starting page |
 | `reading_status` | `unread` / `reading` / `done` |
-| `kind`(收藏) | `sentence` / `data` / `figure` |
+| `kind` (Favorite) | `sentence` / `data` / `figure` |

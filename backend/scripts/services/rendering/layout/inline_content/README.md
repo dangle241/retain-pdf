@@ -1,30 +1,30 @@
-# Inline Content Rendering 说明
+# Inline Content Rendering description
 
-`services/rendering/layout/inline_content/` 负责一件事：
+`services/rendering/layout/inline_content/` Own one thing.
 
-把“带公式、Markdown、Typst inline 内容的翻译文本”整理成排版阶段可用的文本形态。
+With formula,Markdown、Typst inline Arrange the translated content text into a layout-stage usable format.
 
-这里不负责：
+Not responsible here:
 
-- OCR 公式检测
-- 翻译模型调用
-- PDF 页面排版
-- Typst 整页编译
+- OCR Formula Detection
+- Translation model call
+- PDF Page Layout
+- Typst Compile Entire Page
 
-它只是渲染链里的一个小模块，负责“公式文本怎么进入渲染主链”。
+It's just a small module in the rendering chain, responsible for how formula text enters the main rendering pipeline.
 
-## 当前设计原则
+## Current design principles
 
-当前这块已经按两条线拆开：
+This section now split along two tracks:
 
 - `core/`
-  主链。放现在正常渲染一定会经过的逻辑。
+  Main chain. Only include logic executed during normal rendering.
 - `fallback/`
-  兜底链。放历史兼容、placeholder 路径、LaTeX-ish 修补、公式 PNG 渲染。
+  Fallback chain. Legacy compatibility.placeholder Cross-page continuationLaTeX-ish Patch, Formula PNG Render.
 
-不要再使用 `shared/`、`modes/` 这种语义模糊的目录名。
+Don't use it anymore. `shared/`、`modes/` Semantically vague directory names.
 
-## 当前目录
+## Current directory
 
 ```text
 layout/inline_content/
@@ -42,128 +42,128 @@ layout/inline_content/
     png_renderer.py
 ```
 
-## 主链怎么走
+## Context missing. Define "main chain" (blockchain, Git, supply chain). Specify platform/goal.
 
-当前默认思路是：
+Current default approach:
 
-1. 上游给出 `protected_text`、`formula_map`、`math_mode`
-2. `mode_router.py` 决定走哪条路径
-3. 如果是 `direct_typst`
-   直接走 `core/inline_math.py` + `core/markdown.py`
-4. 如果是 `placeholder`
-   走 `fallback/placeholder_markdown.py`
-5. 最终输出 markdown/plain-text，交给 layout / typst / redaction
+1. From upstream `protected_text`、`formula_map`、`math_mode`
+2. `mode_router.py` Choose which path to take.
+3. If it is `direct_typst`
+   Proceed `core/inline_math.py` + `core/markdown.py`
+4. If `placeholder`
+   go `fallback/placeholder_markdown.py`
+5. final output markdown/plain-text, handing over to layout / typst / redaction
 
-也就是说：
+That is:
 
-- `mode_router.py` 只负责分发
-- `core/` 负责主链文本整理
-- `fallback/` 负责旧路径和兜底能力
+- `mode_router.py` Distribution only
+- `core/` Responsible for main chain text organization.
+- `fallback/` Responsible for legacy path and fallback capability.
 
-## 文件职责
+## File responsibility
 
 ### `mode_router.py`
 
-唯一职责：根据 `math_mode` 选择路径。
+Sole responsibility: based on `math_mode` Select path.
 
-现在只应该做：
+Now only do:
 
 - `item_render_math_mode`
 - `is_direct_typst_math_mode`
 - `build_render_markdown`
 - `build_item_render_markdown`
 
-不应该在这里堆公式清洗细节。
+Should not clutter here with formula cleanup details.
 
 ### `core/inline_math.py`
 
-负责 inline math 级别的轻量处理。
+Responsible for inline math lightweight level processing.
 
-主要是：
+Mainly:
 
-- 识别已有的 `$...$`
-- 只对非数学片段做文本替换
-- `direct_typst` 模式下做最小兼容清洗
-- 给行内公式补必要空格
+- Identify existing `$...$`
+- Perform text replacement on non-mathematical fragments only.
+- `direct_typst` Minimal compatibility sanitization in mode.
+- Add necessary spaces to inline formulas.
 
-这里应该保持轻量，不要塞 placeholder 逻辑。
+here should remain lightweight, do not stuff placeholder logic.
 
 ### `core/markdown.py`
 
-负责主链 markdown 文本构建。
+Responsible for main chain markdown Text Construction.
 
-主要是：
+Mainly:
 
-- 从普通文本构建可渲染 markdown
-- 做 inline math 提升
-- 处理 citation-like 文本
-- 提供 plain-text 构建辅助
+- Build renderable from plain text markdown
+- do inline math Promote
+- Handle citation-like text
+- Provide plain-text build assistant
 
-这里代表“当前主路径真正想保留的公式文本规则”。
+Here represents "the formula text rule that the current main path truly intends to preserve".
 
 ### `fallback/placeholder_markdown.py`
 
-负责 placeholder 公式路径。
+Mock failure for debugging. placeholder Formula path.
 
-输入通常是：
+Input is usually:
 
 - `protected_text`
 - `formula_map`
 
-职责是：
+Responsibilities:
 
-- 按 token 切分文本
-- 用 `formula_map` 回填公式
-- 必要时把 citation 还原成普通文本
-- 最后再调用主链的 markdown 文本整理
+- Split text by token
+- Backfill formula using formula_map
+- If necessary, place citation restore to plain text
+- Finally call the main chain's markdown Text cleanup
 
-如果未来彻底去掉 placeholder，这个文件会继续缩小。
+If completely removed in the future placeholder, this file will continue to shrink.
 
 ### `fallback/latex_normalizer.py`
 
-负责旧 LaTeX-ish 公式修补。
+Responsible for legacy LaTeX-ish Formula patch.
 
-它不是主链核心能力，而是兼容层：
+Not a main chain core capability; a compatibility layer:
 
-- 修正常见 OCR 噪声
-- 处理历史遗留格式
-- 给 placeholder / PNG fallback 提供更稳定的输入
+- Fix common OCR Noise.
+- Handle legacy formats
+- to placeholder / PNG fallback More stable input
 
-如果某条规则只服务老数据，不要放进 `core/`，放这里。
+If a rule only serves legacy data, do not include it in `core/`.
 
 ### `fallback/png_renderer.py`
 
-负责把单条公式转成 PNG。
+Converts a single formula to PNG。
 
-这个能力主要给：
+This capability is mainly for:
 
-- redaction 路径
-- 某些公式无法直接按文本渲染时的兜底路径
+- Redaction path
+- Fallback path for formulas that cannot be rendered directly as text.
 
-它不代表主链。
+It does not represent the main chain.
 
-当前主链还是优先走文本 / direct typst，而不是把公式都转成图片。
+Main flow still prioritizes text. / direct typstinstead of converting all formulas into images.
 
-## 依赖方向
+## Dependency direction
 
-这一层必须遵守下面的依赖方向：
+This layer must follow dependency direction below:
 
 - `mode_router -> core`
 - `mode_router -> fallback`
 - `fallback -> core`
-- `core` 不反向依赖 `fallback`
+- `core` Do not reverse-depend. `fallback`
 
-也就是说：
+That is:
 
-- `core` 只能放真正底层、稳定、主链的东西
-- `fallback` 可以调用 `core`
-- 不能让 `core` 再 import 回 `fallback`
+- `core` Only for truly low-level, stable, main-chain components.
+- `fallback` Callable `core`
+- Cannot allow `core` again import back `fallback`
 
-否则目录虽然拆了，实际还是耦合的。
+Otherwise, directories split but still coupled in practice.
 
-## 对外暴露什么
+## Public API surface.
 
-外部模块通常只应该依赖这些稳定口：
+External modules should generally only depend on these stable interfaces:
 
 - `services.rendering.layout.inline_content.mode_router`
 - `services.rendering.layout.inline_content.core.markdown`
@@ -172,32 +172,32 @@ layout/inline_content/
 - `services.rendering.layout.inline_content.fallback.latex_normalizer`
 - `services.rendering.layout.inline_content.fallback.png_renderer`
 
-不要再引用已经删除的历史路径，比如：
+Stop referencing deleted legacy paths, such as:
 
-- `services.rendering.formula.*` 旧路径已删除，不要再使用。
+- `services.rendering.formula.*` Old path deleted. Do not use.
 - `services.rendering.layout.inline_content.math_utils`
 - `services.rendering.layout.inline_content.normalizer`
 - `services.rendering.layout.inline_content.typst_formula_renderer`
 - `services.rendering.layout.inline_content.shared.*`
 - `services.rendering.layout.inline_content.modes.*`
 
-## 修改建议
+## Suggested changes
 
-如果以后再改这块，按这个顺序判断：
+If modifying this later, evaluate in this order:
 
-1. 这是主链必经逻辑吗？
-   如果是，优先放 `core/`
-2. 这是 placeholder / 旧 LaTeX / PNG fallback / 历史兼容吗？
-   如果是，放 `fallback/`
-3. 这是路径选择吗？
-   放 `mode_router.py`
-4. 这是测试坏例吗？
-   放到
+1. Is this mandatory logic on the main path?
+   If yes, prioritize. `core/`
+2. Is this a placeholder / old LaTeX / PNG fallback / for historical compatibility?
+   If yes, place. `fallback/`
+3. Is this a path selection?
+Place in mode_router.py
+4. Is this a test failure case?
+Place in
    [`devtools/tests/translation/test_formula_math_markers.py`](/home/wxyhgk/tmp/Code/backend/scripts/devtools/tests/translation/test_formula_math_markers.py)
 
-## 当前你最该看的文件
+## The file you should read right now
 
-如果你想快速理解这里，阅读顺序建议是：
+For quick understanding, suggested reading order:
 
 1. [`mode_router.py`](/home/wxyhgk/tmp/Code/backend/scripts/services/rendering/layout/inline_content/mode_router.py)
 2. [`core/markdown.py`](/home/wxyhgk/tmp/Code/backend/scripts/services/rendering/layout/inline_content/core/markdown.py)
@@ -206,17 +206,17 @@ layout/inline_content/
 5. [`fallback/latex_normalizer.py`](/home/wxyhgk/tmp/Code/backend/scripts/services/rendering/layout/inline_content/fallback/latex_normalizer.py)
 6. [`fallback/png_renderer.py`](/home/wxyhgk/tmp/Code/backend/scripts/services/rendering/layout/inline_content/fallback/png_renderer.py)
 
-## 当前状态
+## Current status
 
-当前这块已经完成的整理是：
+The current completed work is:
 
-- `direct_typst` 主链和 placeholder 兜底链分开
-- `shared/`、`modes/` 这种假边界已经移除
-- `core` 与 `fallback` 的循环导入已经拆掉
+- `direct_typst` Main chain and placeholder Separate fallback chains
+- `shared/`、`modes/` Fake boundary removed.
+- core and fallback circular import removed.
 
-还剩下的非逻辑问题是：
+The remaining non-logical issues are:
 
-- 目录里还有 `.ipynb_checkpoints`
-- 目录里还有 `__pycache__`
+- Also in directory. `.ipynb_checkpoints`
+- Directory still has __pycache__
 
-这些不影响运行，但会影响阅读体验，后续可以直接清掉。
+These do not affect runtime but impact readability; can be removed later.

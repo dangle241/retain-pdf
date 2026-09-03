@@ -147,7 +147,7 @@ async function startBundledBackend() {
   const apiPort = 41000;
   const simplePort = 42000;
   const aiServicePort = AI_SERVICE_PORT;
-  // packaged: backend/ai_service；开发未 prepare 时可回退仓库 backend/ai_service
+  // packaged: backend/ai_service; in dev, fall back to repo backend/ai_service when not prepared
   let aiServiceRoot = path.join(backendRoot, "ai_service");
   if (!fs.existsSync(path.join(aiServiceRoot, "retainpdf_ai", "__main__.py"))) {
     const repoAi = path.join(appRoot, "..", "backend", "ai_service");
@@ -217,7 +217,7 @@ async function startBundledBackend() {
       logDesktop(`[desktop] reusing existing backend on port ${apiPort}`);
       updateSplashProgress(52, "检测到已有本地服务", "桌面端将直接复用当前后端");
       await waitForPort("127.0.0.1", apiPort, 5000);
-      // 仍尝试拉起 AI（若 41100 空闲）；复用的 Rust 会反代到本机 AI
+      // Still try to spawn AI (if 41100 is free); the reused Rust instance will reverse-proxy to local AI
       const reuseEnv = buildBackendEnv({
         apiPort,
         aiServicePort,
@@ -316,7 +316,7 @@ async function startBundledBackend() {
     dialog.showErrorBox("Rust API worker crashed", detail);
   });
 
-  // retainpdf-ai：与 Rust 同生命周期；LLM key 由前端按请求传入
+  // retainpdf-ai: same lifecycle as Rust; the LLM key is passed in per request by the frontend
   await startRetainpdfAiService({
     aiServicePort,
     aiServiceRoot,
@@ -329,7 +329,7 @@ async function startBundledBackend() {
     waitingProgress = Math.min(waitingProgress + 3, 88);
     updateSplashProgress(
       waitingProgress,
-      "正在连接本地服务",
+      "connecting to the local service",
       "首次启动可能稍慢，请稍候",
     );
   }, 500);
@@ -391,7 +391,7 @@ async function startRetainpdfAiService({
     await waitForPort("127.0.0.1", aiServicePort, aiReadyTimeoutMs);
     logDesktop(`[desktop] retainpdf-ai ready on port ${aiServicePort}`);
   } catch (error) {
-    // 不阻断主程序：翻译流水线仍可用，仅 AI 问答会 502
+    // Do not block the main program: the translation pipeline still works; only AI Q&A will 502
     logDesktopError(
       `[desktop] retainpdf-ai failed to become ready: ${error && error.message ? error.message : error}`,
     );
@@ -423,7 +423,7 @@ if (gotSingleInstanceLock) {
         const desktopLogPath = getDesktopLogPath();
         const dialogDetail = [
           String(error && error.message ? error.message : error),
-          desktopLogPath ? `\n完整日志: ${desktopLogPath}` : "",
+          desktopLogPath ? `\nfull log: ${desktopLogPath}` : "",
         ].filter(Boolean).join("\n");
         dialog.showErrorBox("RetainPDF startup failed", dialogDetail);
         app.quit();

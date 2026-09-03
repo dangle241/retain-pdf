@@ -1,5 +1,5 @@
-# 把做好的图标放这里
+# Place finished icons here.
 
-- svg/  → 静态 SVG
-- lottie/ → 动态 Lottie JSON
-- preview/ → 可选总览图
+- svg/  → Static SVG
+- lottie/ → Activity Lottie JSON
+- preview/ → Optional overview diagram

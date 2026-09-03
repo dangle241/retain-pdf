@@ -1,10 +1,10 @@
 # rendering/legacy
 
-## 负责什么
+## Responsibilities
 
-这里是渲染层旧调用方兼容入口。它保留历史 API 形状，但新功能不应该继续写到这里。
+Legacy caller compatibility entry for the rendering layer. Preserves history. API Shape, but new features should not continue to be written here.
 
-## 对外入口
+## Public entry point
 
 - `pdf_overlay.py`
 - `typst_page_renderer.py`
@@ -12,19 +12,19 @@
 - `pdf_compress.py`
 - `render_payloads.py`
 
-## 不该做什么
+## What not to do
 
-- 不新增复杂业务逻辑。
-- 不直接实现 redaction、layout、Typst 编译细节。
-- 不绕过 `workflow/` 去拼一条新的渲染主流程。
+- No new business logic.
+- Not implement directly. redaction、layout、Typst Compilation details.
+- Bypass not allowed. `workflow/` Assemble a new main rendering pipeline.
 
-## 命名约定
+## Naming conventions
 
-新代码优先 import 具体实现目录，例如：
+New code should prefer importing implementation directory, e.g.:
 
 - `services.rendering.output.typst.*`
 - `services.rendering.source.cleanup.*`
 - `services.rendering.source.background.*`
 - `services.rendering.source.compression.*`
 
-只有需要兼容旧调用方时才新增这里的 wrapper。
+Add here only when compatibility with legacy callers is required. wrapper。

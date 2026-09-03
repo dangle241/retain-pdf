@@ -1,4 +1,4 @@
-// 多会话 CRUD：列表切换 / 新建 / 重命名 / 删除
+// Multi-session CRUD: list switching / create / rename / delete
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
@@ -43,23 +43,23 @@ export function ReaderConversationBar({
   const [editTitle, setEditTitle] = useState("");
   const rootRef = useRef<HTMLDivElement | null>(null);
   const listId = useId();
-  // fork 标题存储格式是机器友好的 "fork-N-原标题"（序号解析依赖，不动存储），
-  // 显示层翻译成 "原标题 · 分支N"；重命名编辑框仍展示原始值
+  // Fork title storage format is machine-friendly "fork-N-originalTitle" (sequence number parsing depends on it, don't change storage),
+  // display layer translates to "originalTitle · branchN"; rename edit field still shows the raw value
   function displaySessionTitle(raw: string): string {
     const m = `${raw || ""}`.match(/^fork-(\d+)-(.*)$/i);
     if (!m) return raw;
     const rest = m[2].trim();
-    return rest ? `${rest} · 分支${m[1]}` : `分支${m[1]}`;
+    return rest ? `${rest} · branch${m[1]}` : `branch${m[1]}`;
   }
   const pickingRef = useRef(false);
   const editInputRef = useRef<HTMLInputElement | null>(null);
 
   const active = sessions.find((s) => s.id === activeId) || null;
   const label = active
-    ? (active.messageCount ? displaySessionTitle(active.title) : `${displaySessionTitle(active.title)}（空）`)
+    ? (active.messageCount ? displaySessionTitle(active.title) : `${displaySessionTitle(active.title)}(null)`)
     : hasSessions
-      ? "选择以往对话"
-      : "新对话";
+      ? "Select previous conversation"
+      : "New conversation";
 
   useEffect(() => {
     if (!open) {
@@ -140,8 +140,8 @@ export function ReaderConversationBar({
 
   const handleDelete = (s: ReaderAskSessionSummary) => {
     if (locked || pickingRef.current) return;
-    const name = s.title || "未命名对话";
-    const ok = globalThis.confirm?.(`确定删除对话「${name}」？此操作不可恢复。`);
+    const name = s.title || "Untitled conversation";
+    const ok = globalThis.confirm?.(`Delete conversation "${name}"? This cannot be resumed.`);
     if (!ok) return;
     pickingRef.current = true;
     beginSessionSwitchIsolation(800, 0);
@@ -170,7 +170,7 @@ export function ReaderConversationBar({
         <button
           type="button"
           className={`aui-session-trigger${open ? " is-open" : ""}`}
-          aria-label="切换对话窗口"
+          aria-label="Switch conversation"
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={listId}
@@ -188,8 +188,8 @@ export function ReaderConversationBar({
           type="button"
           className="aui-session-btn"
           disabled={locked}
-          title="新对话窗口"
-          aria-label="新对话"
+          title="New conversation window"
+          aria-label="New conversation"
           onClick={() => {
             if (locked || pickingRef.current) return;
             pickingRef.current = true;
@@ -212,7 +212,7 @@ export function ReaderConversationBar({
           ) : (
             <Plus size={14} strokeWidth={2.4} aria-hidden />
           )}
-          <span>新对话</span>
+          <span>New conversation</span>
         </button>
       </div>
 
@@ -221,12 +221,12 @@ export function ReaderConversationBar({
           id={listId}
           className="aui-session-list"
           role="listbox"
-          aria-label="以往对话"
+          aria-label="Previous conversations"
         >
           {sessions.map((s) => {
             const text = s.messageCount
               ? displaySessionTitle(s.title)
-              : `${displaySessionTitle(s.title)}（空）`;
+              : `${displaySessionTitle(s.title)}(null)`;
             const selected = s.id === activeId;
             const editing = editingId === s.id;
             return (
@@ -238,7 +238,7 @@ export function ReaderConversationBar({
                       className="aui-session-edit-input"
                       value={editTitle}
                       maxLength={80}
-                      aria-label="对话标题"
+                      aria-label="Conversation title"
                       disabled={locked}
                       onChange={(e) => setEditTitle(e.target.value)}
                       onKeyDown={(e) => {
@@ -255,8 +255,8 @@ export function ReaderConversationBar({
                     <button
                       type="button"
                       className="aui-session-icon-btn"
-                      aria-label="保存标题"
-                      title="保存"
+                      aria-label="Save title"
+                      title="Save"
                       disabled={locked || !editTitle.trim()}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -268,8 +268,8 @@ export function ReaderConversationBar({
                     <button
                       type="button"
                       className="aui-session-icon-btn"
-                      aria-label="取消重命名"
-                      title="取消"
+                      aria-label="Cancel rename"
+                      title="Cancel"
                       disabled={locked}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -306,14 +306,14 @@ export function ReaderConversationBar({
                     >
                       <span className="aui-session-item-title">{text}</span>
                       {selected ? (
-                        <span className="aui-session-item-badge">当前</span>
+                        <span className="aui-session-item-badge">Current</span>
                       ) : null}
                     </button>
                     <button
                       type="button"
                       className="aui-session-icon-btn"
-                      aria-label={`重命名 ${text}`}
-                      title="重命名"
+                      aria-label={`Rename ${text}`}
+                      title="Rename"
                       disabled={locked}
                       onClick={(e) => {
                         e.preventDefault();
@@ -326,8 +326,8 @@ export function ReaderConversationBar({
                     <button
                       type="button"
                       className="aui-session-icon-btn is-danger"
-                      aria-label={`删除 ${text}`}
-                      title="删除"
+                      aria-label={`Delete ${text}`}
+                      title="Delete"
                       disabled={locked}
                       onClick={(e) => {
                         e.preventDefault();
@@ -353,3 +353,7 @@ export function ReaderConversationBar({
     </div>
   );
 }
+
+
+
+

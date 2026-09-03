@@ -115,15 +115,15 @@ export function errorTypesOf(value) {
 export function finalStatusLabel(value) {
   switch (`${value || ""}`.trim()) {
     case "translated":
-      return "已翻译";
+      return "Translated";
     case "partially_translated":
-      return "部分翻译";
+      return "Partially translated";
     case "kept_origin":
-      return "保留原文";
+      return "Source retained";
     case "failed":
-      return "失败";
+      return "Failed";
     case "skipped":
-      return "已跳过";
+      return "Skipped";
     default:
       return `${value || "-"}`;
   }
@@ -148,9 +148,9 @@ export function finalStatusClass(value) {
 
 export function summarizeTranslationFilter(query: any = {}) {
   const finalStatus = `${query.finalStatus || ""}`.trim();
-  const statusText = finalStatus ? finalStatusLabel(finalStatus) : "全部";
+  const statusText = finalStatus ? finalStatusLabel(finalStatus) : "All";
   const search = `${query.q || ""}`.trim();
-  return `状态 ${statusText}，检索 ${search || "无"}`;
+  return `Status ${statusText}, Search ${search || "None"}`;
 }
 
 export function renderField(label, value) {
@@ -172,3 +172,5 @@ export function renderTextBlock(label, value) {
     </section>
   `;
 }
+
+

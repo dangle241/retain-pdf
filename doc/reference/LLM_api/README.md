@@ -1,33 +1,33 @@
-# LLM Provider 资料
+# LLM Provider Resources
 
-这里归档翻译 Provider 和 LLM 接入相关资料。  
-它不是 RetainPDF 主流程协议文档，而是“如果要接模型服务，先看什么”的参考目录。
+Archive translations here for Provider and LLM access related materials.
+It is not RetainPDF Mainstream protocol docs not needed. Reference directory: "If integrating model service, see first:"
 
-## 适用范围
+## Scope of application
 
-- 想看模型服务接入参考时看这里
-- 想看 RetainPDF 自己的翻译链路，请优先看 [Python 文档](../../core/python/README.md) 和 [Rust API 文档](../../core/rust_api/README.md)
+- Model service integration reference: see here.
+- If you want to check RetainPDF's own translation pipeline first, see Python docs and Rust API docs
 
 ## DeepSeek
 
-建议优先阅读：
+Priority reading
 
-1. [RetainPDF 接入建议](./DeepSeek/Retain_接入建议.md)
-2. [首次调用 API](./DeepSeek/首次调用%20API.md)
-3. [模型与价格](./DeepSeek/模型%20&%20价格.md)
-4. [Token 用量计算](./DeepSeek/Token%20用量计算.md)
-5. [JSON 输出](./DeepSeek/JSON_output.md)
-6. [错误码](./DeepSeek/错误码.md)
+1. RetainPDF integration recommendations
+2. [First API call](./DeepSeek/First%20API%20Call.md)
+3. [Models & Pricing](./DeepSeek/Models%20%26%20Pricing.md)
+4. [Token usage calculation](./DeepSeek/Token%20Usage%20Calculation.md)
+5. JSON output
+6. Error codes
 
-补充资料：
+Supplementary materials:
 
-- [多轮对话](./DeepSeek/多轮对话.md)
-- [思考模式](./DeepSeek/思考模式.md)
+- Multi-turn dialogue
+- Thinking mode
 - [Tool Calls](./DeepSeek/Tool%20Calls.md)
-- [接入 Coding Agents](./DeepSeek/接入%20Coding%20Agents.md)
-- [查询余额](./DeepSeek/查询余额.md)
+- [Integrate with Coding Agents](./DeepSeek/Integrate%20with%20Coding%20Agents.md)
+- Query balance
 
-## 项目内实现入口
+## Internal Implementation Entry Points
 
-- [Translation 模块说明](../../backend/scripts/services/translation/README.md)
-- [Python 依赖单一事实来源](../python/dependency_source_of_truth.md)
+- [Translation Module Description](../../backend/scripts/services/translation/README.md)
+- Python dependency single source of truth

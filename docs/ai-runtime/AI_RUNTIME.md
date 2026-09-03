@@ -1,103 +1,103 @@
-# RetainPDF AI Runtime 设计
+# RetainPDF AI Runtime Design
 
-**状态：** 设计草案 v0.1  
-**日期：** 2026-07-21  
-**范围：** `backend/ai_service`（retainpdf-ai）及与 Rust / 前端的契约  
-**非范围：** OCR/翻译流水线；具体 LLM 供应商锁定
+**Status:** Design Draft v0.1  
+**Date:** 2026-07-21  
+**Scope:** `backend/ai_service`（retainpdf-ai) and Rust / Frontend contract  
+**Out of scope:** OCR/Translation pipeline; specifics LLM Vendor lock-in
 
-配套：
+Included:
 
-- [SESSION_AND_MEMORY.md](./SESSION_AND_MEMORY.md) — 多轮与压缩  
-- [SKILLS.md](./SKILLS.md) — Skill 包  
+- [SESSION_AND_MEMORY.md](./SESSION_AND_MEMORY.md) — Multi-turn and Compression  
+- [SKILLS.md](./SKILLS.md) — Skill package  
 
 ---
 
-## 1. 动机
+## 1. Motivation
 
-当前 `RetrievalAgent` 足够支撑「整本检索 + 引用跳转」，但产品路线还需要：
+Current `RetrievalAgent` Sufficient ãFull-text search + Jump to Referenceã However, the product roadmap still requires:
 
-| 能力 | 为什么现在就设计 |
+| Capabilities | Design now waste time. Ship feature first. Refactor later if needed. YAGNI. |
 |------|------------------|
-| **Skills** | 文献问答 / 批注助手 / 多文对比… 不能全塞进一个 system prompt |
-| **工具调用** | 已有 function calling；要版本化、权限域、预算、可观测 |
-| **上下文压缩** | 多轮后 `history[-12:]` 会爆 token 且丢证据结构 |
-| **多 Agent** | 检索与写作拆分、可选 critic；避免单循环无限膨胀 |
+| **Skills** | Document Q&A / Annotation Assistant / Compare Texts… Can't fit all in one. system prompt |
+| **Tool invocation** | Already exists function calling; needs versioning, permission scopes, budgets, observability |
+| **Context compression** | After multiple rounds `history[-12:]` Will crash. token Discard evidence structure |
+| **Multi Agent** | Split retrieval and writing; optional criticAvoid single-loop bloat ponytail: ceiling O(n²) → switch to divide-and-conquer when n > 1e4 |
 
-约束（不可破）：
+Constraints (unbreakable):
 
-1. **Rust 是数据面单写入者**（documents / FTS / conversations / favorites）。  
-2. **AI 服务无状态优先**：可重启；会话持久化落 Rust。  
-3. **本地单用户**优先：延迟与可控性 > 云端 agent 平台完整度。  
-4. **工具 schema 与 OpenAI-compatible tools 同构**，便于换循环外壳。
+1. **Rust Data plane manifest writer**（documents / FTS / conversations / favorites）。  
+2. **AI Prefer stateless services.**restartable; session persistence handled by Rust。  
+3. **Local single-user**Priority: latency and controllability > Cloud agent Platform completeness.  
+4. Tool schemas are isomorphic with OpenAI-compatible tools, making it easy to swap the loop shell.
 
 ---
 
-## 2. 分层架构
+## 2. Layered architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Frontend (reader AI panel)                                 │
 │  SSE: tool / answer_delta / compress / handoff / done       │
 └───────────────────────────┬─────────────────────────────────┘
-                            │ POST /api/v1/ai/ask  (Rust 代理)
+                            │ POST /api/v1/ai/ask  (Rust Proxy)
 ┌───────────────────────────▼─────────────────────────────────┐
 │  Transport  app.py                                          │
-│  鉴权 · SSE · 请求校验 · conversation_id 透传               │
+│  Auth · SSE · Request validation · conversation_id pass-through               │
 └───────────────────────────┬─────────────────────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────────┐
-│  Orchestrator  (后期；v0 可退化为「直接跑默认 skill」)        │
-│  选 skill / 是否多 agent / 何时收尾                         │
+│  Orchestrator  (Postv0 Degenerates to「Run with defaults. skill」)        │
+│  Select skill / Too many? agent / When to wrap up                         │
 └───────┬─────────────────────┬───────────────────────────────┘
         │                     │
 ┌───────▼───────┐   ┌─────────▼─────────┐
 │ Session/Memory│   │ RunBudget         │
-│ 窗口·摘要·证据 │   │ 轮数·token·墙钟   │
+│ Window·Summary·Evidence │   │ Rounds·Token·Wall clock   │
 └───────┬───────┘   └─────────┬─────────┘
         │                     │
 ┌───────▼─────────────────────▼─────────┐
 │  Agent Runtime(s)                     │
-│  通用 tool loop · 事件发射 · 中止条件  │
+│  General tool loop · Event emission · Abort condition  │
 └───────┬───────────────────────────────┘
         │
 ┌───────▼───────────────────────────────┐
 │  Skills  →  Tools                     │
-│  声明式能力包    原子动作               │
+│  Declarative Capability Pack    Atomic action.               │
 └───────┬───────────────────────────────┘
         │
 ┌───────▼───────────────────────────────┐
-│  Data plane (只读自 AI 视角)            │
-│  Rust HTTP · job 目录 md/ocr/translated│
+│  Data plane (Read-only AI View)            │
+│  Rust HTTP · job directory md/ocr/translated│
 └───────────────────────────────────────┘
 ```
 
-| 层 | 职责 | 现状 | 目标 |
+| Layer | Responsibility | Current status | Objective |
 |----|------|------|------|
-| Transport | HTTP/SSE、Key | `app.py` | 保持薄；事件类型可扩展 |
-| Session/Memory | 多轮、压缩 | `history[-12:]` 原文 | 窗口 + 摘要 + evidence 包 |
-| Orchestrator | 路由/协作 | 无（单 agent） | skill 选择 → 可选 multi-agent |
-| Runtime | 工具循环 | `agent.py` | 抽成可复用 loop |
-| Skills | 策略+提示+工具子集 | 硬编码 SYSTEM_PROMPT | 目录化 skill 包 |
-| Tools | 原子 I/O | `tools.py` | 加 scope/timeout/版本 |
-| Evidence | 引用/图 | Citation dataclass | 统一协议，前端可跳可渲 |
+| Transport | HTTP/SSE、Key | `app.py` | Keep thin; event types extensible. |
+| Session/Memory | Multi-round, compressed. | history[-12:] original text | window + summary + evidence package |
+| Orchestrator | Routing/Collaboration | None (single agent) | skill selection → optional multi-agent |
+| Runtime | Tool Loop | `agent.py` | Extract reusable. loop |
+| Skills | Strategy+Prompt+Tool Subset | hardcoded SYSTEM_PROMPT | Catalog skill package |
+| Tools | atomic I/O | tools.py | add scope/timeout/version |
+| Evidence | References/Figures | Citation dataclass | Unified protocol: frontend can route and render. |
 
 ---
 
-## 3. 核心对象（逻辑模型）
+## 3. Core Objects (Logical Model)
 
 ### 3.1 Run
 
-一次用户提问触发的执行单元（可多轮工具、可跨 agent）。
+An execution unit triggered by a single user query (can involve multiple tool rounds or span across agents). agent）。
 
 ```text
 Run
-  run_id            运行时生成（日志/SSE 关联）
-  conversation_id   可选，持久会话
-  skill_id          默认 literature-qa
+  run_id            Runtime generation (log/SSE Link)
+  conversation_id   Persistent Session (Optional)
+skill_id          default literature-qa
   scope             { document_id?, job_id? }
   budget            RunBudget
   status            running | done | error | cancelled
-  events[]          可观测轨迹
+  events[]          Observable Trace
   result            answer + evidence + usage
 ```
 
@@ -105,82 +105,82 @@ Run
 
 ```text
 RunBudget
-  max_tool_rounds      默认 6（现有 RETAIN_AI_MAX_TOOL_ROUNDS）
-  max_wall_time_s      建议 120
-  max_input_tokens     建议按模型窗口 60%
-  max_tool_calls       建议 24
-  max_evidence_items   建议 32（压缩时保留上限）
+max_tool_rounds      default 6 (existing RETAIN_AI_MAX_TOOL_ROUNDS)
+max_wall_time_s      recommend 120
+  max_input_tokens     Recommend using the model window. 60%
+max_tool_calls       recommend 24
+max_evidence_items   recommend 32 to retain upper bound when compressing.
 ```
 
-耗尽时：强制收尾轮（现有「请基于已有证据回答」行为保留）。
+When exhausted: force final round (existing「Please answer based on existing evidence.」Behavior retained.
 
-### 3.3 EvidenceItem（统一证据）
+### 3.3 EvidenceItemUnified Evidence
 
-前端跳转、插图、引用脚注都吃这一种形状：
+Frontend redirects, illustrations, and footnote references all use this form:
 
 ```text
 EvidenceItem
-  ref               int          # 对用户可见的 [n]
+  ref               int          # User-visible [n]
   kind              text | image | page_preview | favorite
   document_id
   job_id
   page_idx          0-based
   block_id? 
-  snippet?          短摘录
+  snippet?          Short excerpt
   image_url?        /api/v1/jobs/.../markdown/images/...
   preview_url?      /api/v1/jobs/.../preview/pages/{1-based}
   source_tool       search_fulltext | read_blocks | ...
   created_round     int
 ```
 
-`citations[]` 是 `EvidenceItem` 中 `kind=text`（及被回答引用到的）子集的视图。
+citations[] is a subset view of EvidenceItem where kind=text.
 
-### 3.4 Transcript 消息（会话存储）
+### 3.4 Transcript Message (session storage)
 
-见 [SESSION_AND_MEMORY.md](./SESSION_AND_MEMORY.md)。关键点：除 `user`/`assistant` 外，允许 **`system_summary`** 与 **`evidence_snapshot`** 元数据字段（可落在 assistant 消息的 JSON 扩展里，或独立 message kind）。
+See SESSION_AND_MEMORY.md. Key point: besides user/assistant, allowed system_summary and evidence_snapshot metadata fields (may reside in assistant message JSON extension, or as standalone message kind).
 
 ---
 
-## 4. 事件流（SSE 契约）
+## 4. Event stream (SSE Contract)
 
-向后兼容现有类型；新增可选类型前端可忽略。
+Backward compatible with existing types; new optional types can be ignored by frontend.
 
-| type | 何时 | payload 要点 |
+| type | When | payload key points |
 |------|------|----------------|
-| `tool` | 工具调用前后 | `tool`, `round`, `arguments?`, `status?` |
-| `answer_delta` | 最终回答流式 | `text` 增量或累积（**实现须固定一种**；现状为累积全文） |
-| `compress` | 压缩发生 | `dropped_turns`, `summary_chars`, `kept_evidence` |
-| `skill` | skill 切换/加载 | `skill_id`, `phase: start\|end` |
-| `handoff` | agent 交接 | `from`, `to`, `reason` |
-| `done` | 成功结束 | `answer`, `citations`, `tool_trace`, `rounds`, `usage?`, `memory?` |
-| `error` | 失败 | `message`, `code?` |
+| `tool` | Before/After Tool Call | `tool`, `round`, `arguments?`, `status?` |
+| `answer_delta` | final answer streaming | `text` Incremental or Cumulative (**Implementation must fix one type.**Current status accumulation full text. Optimize. |
+| `compress` | Compression occurs. | `dropped_turns`, `summary_chars`, `kept_evidence` |
+| skill | skill switch/load | skill_id, phase: start\|end |
+| `handoff` | agent Handover | `from`, `to`, `reason` |
+| `done` | Success | `answer`, `citations`, `tool_trace`, `rounds`, `usage?`, `memory?` |
+| error | Failure | message, code? |
 
-**兼容规则：** 旧前端只认 `tool` / `answer_delta` / `done` / `error` 即可。
+**Compatibility rules:** Legacy frontend recognizes only `tool` / `answer_delta` / `done` / `error` Done.
 
 ---
 
-## 5. Skills 与 Tools（边界）
+## 5. Skills and Tools boundary.
 
 ```text
-Tool  = 原子动作（有 schema、可单测、可审计）
-Skill = 工具子集 + system/developer 提示 + 策略（scope 锁、输出格式、是否允许 list_documents）
+Tool  = Atomic Action (has schemaUnit tests. Audit trail.
+Skill = Tool subset + system/developer prompt + strategy (scope lock, output format, allow list_documents)
 ```
 
-详见 [SKILLS.md](./SKILLS.md)。
+See [SKILLS.md](./SKILLS.md)。
 
-首发 skill：
+Initial Release skill：
 
-| skill_id | 用途 | 工具 |
+| skill_id | Purpose | Tools |
 |----------|------|------|
-| `literature-qa` | 阅读器整本问答（当前行为） | search_fulltext, read_blocks, search_favorites（scoped） |
+| `literature-qa` | reader full-book Q&A (current behavior) | search_fulltext, read_blocks, search_favorites（scoped） |
 
-后续候选：`annotation-assist`、`paper-compare`、`glossary-extract`。
+Future candidates:`annotation-assist`、`paper-compare`、`glossary-extract`。
 
 ---
 
-## 6. 多 Agent（Phase D，接口先占位）
+## 6. Multi-agent (Phase D interface placeholder)
 
-**v0 / v1 不强制 multi-agent。** 接口预留：
+v0 / v1 do not force multi-agent.** API reserved:
 
 ```text
 AgentRole
@@ -193,25 +193,25 @@ Handoff
   payload: { evidence_refs[], question, notes }
 ```
 
-推荐演进：
+Recommended Evolution:
 
-1. **单 Runtime + literature-qa**（现在）  
-2. **流水线** Retriever → Analyst（同 evidence，不同 prompt）  
-3. **可选 Critic** 检查「无 [n] 的断言」  
-4. 再考虑并行 fan-out（多文档）
+1. Single runtime + literature-qa now
+2. **Pipeline** Retriever → Analyst(Same evidencedifferent prompt）  
+3. **Optional Critic** check for "no [n] assertion"
+4. Also consider parallelism. fan-out(Multi-document)
 
-编排器用简单状态机即可，不必先上图执行引擎。
+Orchestrator can use simple state machine; no need for graph execution engine upfront.
 
 ---
 
-## 7. 包结构目标
+## 7. Package structure goals
 
 ```text
 backend/ai_service/retainpdf_ai/
   app.py                 # Transport
   config.py
   rust_client.py
-  tools/                 # 或保留 tools.py 再拆
+  tools/                 # Or retain tools.py Split further.
     registry.py
     literature.py        # search/read/favorites
   skills/
@@ -220,113 +220,113 @@ backend/ai_service/retainpdf_ai/
       skill.yaml
       prompt.md
   runtime/
-    loop.py              # 自 agent.py 抽出
+loop.py              # extracted from agent.py
     budget.py
     events.py
   memory/
-    assemble.py          # 拼 messages
-    compress.py          # 摘要 + 裁剪
+    assemble.py          # assemble messages messages
+    compress.py          # Summary + Crop
   orchestrator/
-    default.py           # v0: 直接 run skill
+default.py           # v0: directly run skill
   evidence/
     model.py
     assign_refs.py
-  agent.py               # 过渡期 facade → 调 runtime
+agent.py               # transition period facade → call runtime
 ```
 
-迁移时 **`POST /v1/ask` 路径与字段保持兼容**；内部改调用链。
+During migration **`POST /v1/ask` Maintain path and field compatibility**Internal refactor call chain.
 
 ---
 
-## 8. 与 Rust / 前端边界
+## 8. Boundary with Rust / Frontend
 
 ### Rust
 
-- 继续：`/api/v1/ai/ask` 代理、conversations CRUD、messages 追加  
-- 扩展（B 需要）：消息可带 `metadata_json`（summary / evidence_snapshot / skill_id）  
-- AI **不**直接写 SQLite  
+- Continue:`/api/v1/ai/ask` proxy,conversations CRUD、messages Add  
+- Extensions (B Required): message may carry `metadata_json`（summary / evidence_snapshot / skill_id）  
+- AI does not write to SQLite
 
-### 前端
+### Frontend
 
-- 传：`question`, `document_id`/`job_id`, `conversation_id`, `stream`, LLM 凭据  
-- 消费：SSE + `citations` + 图片 hydrate（已做）  
-- 后期：展示 compress 提示、skill 名、多会话列表（可复用 Rust conversations）
+- Pass: question, document_id/job_id, conversation_id, stream, LLM credentials
+- Consumption: SSE + citations + image hydrate (already done)
+- Post-production: Display compress Prompt:skill Name, multi-session list (reusable) Rust conversations）
 
-### AI 服务
+### AI Service
 
-- 读：Rust search/documents/favorites + job 目录  
-- 写：仅经 Rust append conversation messages  
+- Read: Rust search/documents/favorites + job directory
+- By approval only. Rust append conversation messages  
 
 ---
 
-## 9. 安全与策略
+## 9. Security and Policies
 
-| 策略 | 说明 |
+| Strategy | Description |
 |------|------|
-| Document scope | 阅读器会话强制 `document_id`；工具层注入（现有 `_scope_tool_arguments`） |
-| 禁止隐式全库 | 有 job 无 document 时 fail closed（现有） |
-| Tool 副作用 | v1 tools 全部只读；写操作（改收藏等）需显式 skill + 确认 |
-| 密钥 | LLM key 可请求级下发；不写 job snapshot / 不回显 |
-| 引用诚实 | 系统提示要求事实带 [n]；可选 critic 后置检查 |
+| Document scope | Force Reader Session `document_id`tool layer injection (existing `_scope_tool_arguments`） |
+| No implicit full-library imports. | When there is job but no document, fail closed (existing) |
+| Tool Side effects | v1 tools All read-only; write operations (e.g., modifying favorites) require explicit action. skill + confirmation |
+| Secret key | LLM key Can be issued per request; do not write. job snapshot / No echo. |
+| Cite honestly | system prompt requires facts to include [n]Optional critic Post-check |
 
 ---
 
-## 10. 测试策略
+## 10. Test strategy
 
-| 层 | 测什么 |
+| Layer | What to test |
 |----|--------|
-| tools | schema、handler 纯函数、image_urls 路径 |
-| runtime loop | mock chat_fn：工具轮 → 收尾轮 → budget 耗尽 |
-| memory | 窗口裁剪、摘要替换后 token 下降、evidence 保留 |
-| app SSE | 事件顺序、done 含 citations |
-| 契约 | OpenAPI/示例与前端 mock 一致 |
+| tools | schema, handler Pure function, Pure function, Pure function. Pure function, image_urls path |
+| runtime loop | mock chat_fnTool Wheel → Final round. → budget Exhausted |
+| memory | After window cropping and summary replacement token Descend, evidence preserved |
+| app SSE | Event order, done includes citations |
+| Contract | OpenAPI/Examples and Frontend mock Consistent |
 
-不强制 e2e 真打 DeepSeek；mock chat 即可。
+Not enforced. e2e Main Event DeepSeek；mock chat That's all.
 
 ---
 
-## 11. 分阶段落地（PR 粒度）
+## 11. Phased rollout (PR Granularity)
 
-| Phase | 交付 | 用户可见 |
+| Phase | Delivery | User-visible |
 |-------|------|----------|
-| **C** | 本文档集 | 无 |
-| **B1** | Session 协议 + 前端 `conversation_id` 贯通 | 多轮有记忆 |
-| **B2** | Memory 压缩管道 + `compress` 事件 | 长聊不爆、可提示「已压缩」 |
-| **S1** | Skill 加载 + literature-qa 外置 | 行为近似，可热加 skill |
-| **D0** | Orchestrator 占位 + 可选 analyst 拆分 | 回答质量/结构提升 |
+| **C** | This documentation set | None |
+| **B1** | Session protocol + frontend `conversation_id` integration | Multi-turn with memory |
+| **B2** | Memory Compress pipeline + `compress` event | Long chat, no context blowup, promptable. "Compressed" |
+| **S1** | Skill Loading + literature-qa External | Behavior similar, hot-addable. skill |
+| **D0** | Orchestrator placeholder + optional analyst Split | Answer quality/Hoisting |
 
-每阶段保持 `/v1/ask` 兼容；废弃路径给一个小版本窗口。
-
----
-
-## 12. 刻意不做（本阶段）
-
-- 绑定某一 agent 框架为唯一实现  
-- AI 服务本地写业务库  
-- 无限多 agent 无 budget 对话  
-- 前端再实现一套 tool 协议  
-- 云端多租户路由（非当前产品形态）
+Maintain per phase. `/v1/ask` Maintain compatibility; deprecate path with a minor version window.
 
 ---
 
-## 13. 决策记录（开放问题）
+## 12. Intentionally skipped (this phase)
 
-| ID | 问题 | 倾向 | 状态 |
+- Bind specific agent Framework is the sole implementation.  
+- AI Service writes to local business database.  
+- Unlimited agent no budget Dialogue
+- Reimplement frontend. tool protocol
+- Cloud multi-tenant routing (not current product form)
+
+---
+
+## 13. Decision records (open issues)
+
+| ID | Issue | Preference | Status |
 |----|------|------|------|
-| D1 | `answer_delta` 传增量还是累积？ | **固定累积全文**（与现实现一致），文档写死 | 建议批准 |
-| D2 | summary 存在哪？ | assistant 旁路 `metadata_json` 或 kind=`summary` 消息 | 见 Session 文档 |
-| D3 | 压缩用 LLM 还是抽取式？ | v1 **抽取式**（引用+问题关键词）；v2 可选 LLM 摘要 | 建议批准 |
-| D4 | multi-agent 默认开吗？ | 默认关；feature flag / skill 配置 | 建议批准 |
+| D1 | `answer_delta` Incremental or cumulative? | **Pin cumulative full text**In line with current implementation, hardcoded in docs. | Approve |
+| D2 | summary Where is it stored? | assistant Bypass `metadata_json` or kind=`summary` message | See Session doc |
+| D3 | For compression LLM Or extractive? | v1 **Extractive**(Quote+Issue keywords); v2 optional LLM summary | Recommended approval |
+| D4 | multi-agent Enabled by default? | Default off. feature flag / skill config | Recommend approval. |
 
 ---
 
-## 14. 参考代码锚点
+## 14. Reference code anchor
 
-| 路径 | 角色 |
+| Path | DeepSeek. |
 |------|------|
-| `backend/ai_service/retainpdf_ai/agent.py` | 现循环 / 引用编号 |
-| `backend/ai_service/retainpdf_ai/tools.py` | 原子工具 |
+| `backend/ai_service/retainpdf_ai/agent.py` | Current Loop / Reference Number |
+| `backend/ai_service/retainpdf_ai/tools.py` | Atomic Tools |
 | `backend/ai_service/retainpdf_ai/app.py` | SSE / history / persist |
-| `backend/ai_service/retainpdf_ai/rust_client.py` | 会话与检索客户端 |
-| `frontend/.../use-reader-ask-runtime.ts` | 前端消费 ask |
-| `frontend/.../answer-enhance.ts` | 引用跳转与图 |
+| `backend/ai_service/retainpdf_ai/rust_client.py` | Session and Search Client |
+| `frontend/.../use-reader-ask-runtime.ts` | Frontend consumption ask |
+| `frontend/.../answer-enhance.ts` | Reference Navigation and Graph |

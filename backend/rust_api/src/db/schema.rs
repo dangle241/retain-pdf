@@ -1,13 +1,17 @@
 use anyhow::Result;
 use rusqlite::Connection;
 
-/// 图书馆数据层的编号迁移阶梯(PRAGMA user_version)。
+/// Numbered migration ladder for the library data layer
+/// (PRAGMA `user_version`).
 ///
-/// 现有 ensure_schema 的幂等 DDL 与 ensure_*_column 增量加列继续负责
-/// 任务系统的表;平台新表(documents/favorites/...)从这里走版本化
-/// 迁移,后续破坏性变更只能追加新版本,不允许改历史条目。
+/// The existing `ensure_schema` idempotent DDL and the `ensure_*_column`
+/// incremental column additions still own the job-system tables. New
+/// platform tables (`documents`, `favorites`, ...) go through this
+/// versioned migration path. Future breaking changes must append a new
+/// version — historical entries must not be edited.
 const VERSIONED_MIGRATIONS: &[&str] = &[
-    // v1: 图书馆地基 —— 文档一等公民 + 锚点收藏 + 合集/标签 + FTS5
+    // v1: library foundation — documents as first-class citizens +
+    // anchored favorites + collections/tags + FTS5.
     r#"
     CREATE TABLE IF NOT EXISTS documents (
         document_id     TEXT PRIMARY KEY,
@@ -66,12 +70,14 @@ const VERSIONED_MIGRATIONS: &[&str] = &[
         tokenize='trigram'
     );
     "#,
-    // v2: 资产存储(内容寻址,收藏图片附件)+ AI 问答会话/消息。
-    // 设计原则:用户策展(收藏)是硬锚点,机器生成(问答引用)是软锚点
-    // ——引用只存 citations_json 快照,不做 job 删除保护。
+    // v2: asset storage (content-addressed, used for favorite image
+    // attachments) + AI Q&A conversations / messages.
+    // Design principle: user curation (favorites) is a HARD anchor; machine
+    // generation (Q&A citations) is a SOFT anchor — citations persist only
+    // as a `citations_json` snapshot with no job-deletion protection.
     r#"
     CREATE TABLE IF NOT EXISTS assets (
-        asset_id    TEXT PRIMARY KEY,          -- sha256(文件字节)
+        asset_id    TEXT PRIMARY KEY,          -- sha256(file bytes)
         mime        TEXT NOT NULL,
         bytes       INTEGER NOT NULL,
         width       INTEGER,
@@ -101,9 +107,13 @@ const VERSIONED_MIGRATIONS: &[&str] = &[
     ALTER TABLE favorites ADD COLUMN asset_id  TEXT NOT NULL DEFAULT '';
     ALTER TABLE favorites ADD COLUMN rect_json TEXT NOT NULL DEFAULT '';
     "#,
-    // v3: AI 消息树分支 —— parent_id 形成兄弟分支; head_id 记录当前可见叶。
-    // 与 ChatGPT / assistant-ui 一致:同 parent 的多条 message 即 alternate。
-    // 兼容:旧行 parent_id 为空,按 seq 串成线性链;load 时无 head 或 max(seq)。
+    // v3: AI message-tree branching — `parent_id` forms sibling
+    // branches; `head_id` records the currently-visible leaf. Aligns
+    // with ChatGPT / assistant-ui: multiple messages under the same
+    // parent are alternates.
+    // Compatibility: legacy rows have empty `parent_id` and are linked
+    // linearly by `seq`; on load, the head is the row with the largest
+    // `seq` when no explicit `head_id` is set.
     r#"
     ALTER TABLE ai_conversations ADD COLUMN head_id TEXT NOT NULL DEFAULT '';
     ALTER TABLE ai_messages ADD COLUMN parent_id TEXT NOT NULL DEFAULT '';

@@ -1,11 +1,11 @@
-// 主页「软打开」阅读器：不 location.assign，用 history.pushState + 全屏层，
-// 主页 DOM 不卸载 → 关闭不刷新、滚动天然保留。
-// 地址栏会变成 reader.html?…，但 document 仍是主页 SPA。
+// "Soft open" Reader from main page: don't use location.assign; use history.pushState + full‑screen layer.
+// Main page DOM is not unmounted → close doesn't refresh, scroll position persists.
+// URL bar becomes reader.html?... but document is still the main page SPA.
 
 export const SOFT_READER_HISTORY_FLAG = "retainpdfSoftReader";
 export const SOFT_READER_OPEN_EVENT = "retainpdf:soft-reader-open";
 export const SOFT_READER_FORCE_CLOSE_EVENT = "retainpdf:soft-reader-force-close";
-/** iframe → 父页：请求关闭软阅读层 */
+/** iframe → parent page: request to close soft reader layer */
 export const SOFT_READER_CLOSE_MESSAGE = "retainpdf:soft-reader-close";
 
 export type SoftReaderHistoryState = {
@@ -28,7 +28,7 @@ export function isSoftReaderHistoryState(state: unknown): state is SoftReaderHis
   );
 }
 
-/** 主页 SPA 是否仍挂着（软打开后 URL 已是 reader.html，但 #app-shell 还在） */
+/** Whether the main page SPA is still mounted (after soft open, URL is reader.html but #app‑shell is still there) */
 export function isHomeSpaAlive(doc: Document = globalThis.document): boolean {
   if (typeof doc === "undefined" || !doc) return false;
   return Boolean(
@@ -40,9 +40,9 @@ export function isHomeSpaAlive(doc: Document = globalThis.document): boolean {
 }
 
 /**
- * 在主页 SPA 上软打开；成功返回 true。
- * 注意：软打开后 location.pathname 会变成 reader.html，但 document 仍是主页。
- * 因此不能只用 pathname 判断，否则第二次打开会误走 location.assign → 白屏/整页跳。
+ * Soft open on the main page SPA; returns true on success.
+ * Note: after soft open, location.pathname becomes reader.html, but document is still the main page.
+ * So don't rely solely on pathname; otherwise the second open will mistakenly use location.assign → white screen / full page reload.
  */
 export function trySoftOpenReader(url: string): boolean {
   if (typeof window === "undefined") return false;
@@ -53,11 +53,11 @@ export function trySoftOpenReader(url: string): boolean {
   const alreadySoft = isSoftReaderHistoryState(window.history.state);
   const spaAlive = isHomeSpaAlive();
 
-  // 仅当主页 SPA 还在时才能软开；独立打开的 reader.html 整页不走这条
+  // Soft open only possible when main page SPA is still mounted; standalone reader.html full page doesn't go through this path
   if (!onHomePath && !alreadySoft && !spaAlive) {
     return false;
   }
-  // pathname 已是 reader.html 且 SPA 已卸掉 → 交给 location.assign
+  // pathname is already reader.html and SPA is unmounted → hand over to location.assign
   if (!spaAlive && !onHomePath) {
     return false;
   }
@@ -71,7 +71,7 @@ export function trySoftOpenReader(url: string): boolean {
       [SOFT_READER_HISTORY_FLAG]: true,
       readerUrl: absolute,
     };
-    // 已在软阅读层：replace，避免 history 堆一串 reader
+    // Already in soft reader: replace, avoid stacking many reader entries in history
     if (alreadySoft || (!onHomePath && spaAlive)) {
       window.history.replaceState(state, "", absolute);
     } else {
@@ -88,17 +88,17 @@ export function trySoftOpenReader(url: string): boolean {
   }
 }
 
-/** 父页收到关闭请求：优先 history.back 卸掉软层 */
+/** Parent page receives close request: prefer history.back to remove the soft layer */
 export function closeSoftReaderOnHost() {
   if (typeof window === "undefined") return;
   if (isSoftReaderHistoryState(window.history.state)) {
     window.history.back();
     return;
   }
-  // 无对应 history 条目时：URL 改回主页并强制卸层
+  // When there's no corresponding history entry: rewrite URL to main page and force layer removal
   try {
     const home = new URL("./index.html", window.location.href);
-    // 保留目录前缀：/foo/reader.html → /foo/index.html
+    // Preserve directory prefix: /foo/reader.html → /foo/index.html
     const homePath = home.pathname.replace(/reader\.html$/i, "index.html");
     const href = `${homePath}${home.search}${home.hash}` || "./index.html";
     window.history.replaceState(null, "", href);
@@ -107,3 +107,7 @@ export function closeSoftReaderOnHost() {
   }
   window.dispatchEvent(new CustomEvent(SOFT_READER_FORCE_CLOSE_EVENT));
 }
+
+
+
+

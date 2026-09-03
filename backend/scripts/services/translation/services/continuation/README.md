@@ -1,38 +1,38 @@
-# Continuation 子包说明
+# Continuation Subpackage description
 
-这个子包专门放段落连续性相关逻辑，也就是判断哪些 OCR 块应该连成同一个翻译单元。
+This subpackage contains paragraph continuity logic, i.e., determining which... OCR blocks should be combined into the same translation unit.
 
-## 分工
+## Division of labor
 
 - `rules.py`
-  文本起止特征、bbox 几何关系、join/break 评分。
+  Text start and end characteristics,bbox Geometric Relations,join/break scoring.
 - `state.py`
-  先消费 provider hint，再把规则结果写回 payload，维护 continuation group 和 candidate 标记。
+First consume provider hint, then write rule results back to payload, maintain continuation group and candidate markers.
 - `pairs.py`
-  导出候选 pair，以及审批通过后的 join 回写。
+  Export candidates pairand after approval join Write back.
 - `review.py`
-  把候选 pair 送给模型审阅。
+  Candidate pair Send to model for review.
 
-## 当前策略
+## Current strategy
 
-当前 continuation 采用 provider-first，但不是 provider-only：
+Current continuation adopts provider-first, but not provider-only:
 
-- 如果 payload 已带 `ocr_continuation_*` 字段，且属于同页 `intra_page` provider hint，`state.py` 会优先直接建组
-- 如果属于跨页 `cross_page` provider hint，当前只在“相邻两页 + reading_order 唯一 + layout_zone 命中页尾/页首阅读边界 + 文本长度足够”时受控消费
-- 这些 item 标记为 `provider_joined`，后续规则不再重复消费
-- 没有可用 provider hint 的部分，仍继续走本地规则拼接
-- 不满足受控条件的 `cross_page` provider hint 会继续保留在 payload 里，但不会直接驱动拼接
-- 规则扫描不得因中间缺页（payload 里 page_idx 不连续）整段中止；`pair_join_score` 仍只允许相邻 `page_idx` 直接 join
-- 双栏 L→R 优先信 `layout_zone`，窄栏缝（&lt;8pt）也允许 bbox 判定
-- 后一段若像章节号标题（如 `2.2.1 Title`），硬 break，避免把残句拼进新小节
+- If payload Included `ocr_continuation_*` Field, same page. `intra_page` provider hint，`state.py` Prioritize direct group creation.
+- If cross-page `cross_page` provider hint currently only in "two adjacent pages" + unique reading_order + layout_zone hits page end/start reading boundary + controlled consumption when text length sufficient.
+- These items marked as provider_joined, subsequent rules will not re-consume
+- Not available provider hint Part continues local-rule concatenation.
+- Controlled condition not met `cross_page` provider hint Will remain in payload inside, but will not directly drive concatenation.
+- Rule scanning must not fail due to missing intermediate pages (payload page_idx segmentation fault. pair_join_score still only allows adjacent page_idx direct join)
+- Two-column L→R Priority Letter `layout_zone`narrow column gap (&lt;8ptalso allowed bbox Judgment
+- If latter paragraph like chapter-number heading (e.g. `2.2.1 Title`), hard breakAvoid incomplete sentences. Start new paragraph.
 
-这样做的目的很明确：
+The purpose of this is clear:
 
-- 已经会同页拼接的新 OCR 模型，不需要再被本地规则二次猜测
-- 还不会拼接的模型，继续复用现有规则
-- 后续如果出现能稳定提供跨页连续组的新模型，也只需要扩展 hint 消费策略，不需要把 provider 私有结构灌进翻译主线
+- New, already stitched with page. OCR Model, no further local-rule re-guessing.
+- For models not yet supporting concatenation, continue reusing existing rules.
+- If a new model that can reliably provide cross-page continuous groups appears later, only extension is needed. hint Consumption strategy not required. provider Inject private structures into translation mainline.
 
-## 对外接口
+## External API
 
 ```python
 from services.translation.services.continuation import annotate_continuation_context

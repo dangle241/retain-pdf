@@ -1,10 +1,10 @@
-# 错误排查
+# Troubleshooting
 
-更细的任务详情、事件流、失败协议和阶段时间线，请优先看 [Rust API 说明](../rust_api/README.md)。
+For detailed task details, event stream, failure protocol, and phase timeline, first refer to Rust API description.
 
-## 优先看什么
+## Read README first.
 
-任务失败时按这个顺序排查：
+When a task fails, troubleshoot in this order:
 
 1. `GET /api/v1/jobs/{job_id}`
 2. `failure`
@@ -13,9 +13,9 @@
 5. `GET /api/v1/jobs/{job_id}/events`
 6. `runtime.stage_history`
 
-`failure` 是结构化失败真源；`failure_diagnostic` 是给旧前端和简化展示保留的兼容视图。
+`failure` It is the root cause of structured failure;`failure_diagnostic` Compatibility view retained for legacy frontend and simplified display.
 
-## 常用命令
+## Common commands
 
 ```bash
 curl http://127.0.0.1:41000/health
@@ -30,9 +30,9 @@ curl -H "X-API-Key: your-key" \
   http://127.0.0.1:41000/api/v1/jobs/{job_id}/artifacts-manifest
 ```
 
-## 任务目录
+## Task directory
 
-重点看：
+Key points:
 
 - `DATA_ROOT/jobs/{job_id}/logs/pipeline_events.jsonl`
 - `DATA_ROOT/jobs/{job_id}/ocr/`
@@ -40,11 +40,11 @@ curl -H "X-API-Key: your-key" \
 - `DATA_ROOT/jobs/{job_id}/rendered/`
 - `DATA_ROOT/jobs/{job_id}/artifacts/`
 
-历史任务可能使用 `logs/events.jsonl`。
+Previous tasks may be used. `logs/events.jsonl`。
 
-## 下载按钮不可用
+## Download button disabled
 
-不要只看 `status`。应检查：
+Do not just look at `status`. Should check:
 
 - `actions.download_pdf.enabled`
 - `actions.open_markdown.enabled`
@@ -55,40 +55,40 @@ curl -H "X-API-Key: your-key" \
 - `artifacts.bundle.ready`
 - `artifacts-manifest.items[].ready`
 
-如果 `ready=false` 或 `enabled=false`，不要自行拼接下载链接强行访问。
+If ready=false or enabled=false, do not manually construct download URLs or force access.
 
-## Provider 错误
+## Provider errors
 
-常见原因：
+Common causes:
 
-- `mineru_token`、`paddle_token`、`api_key` 缺失或无效。
-- PDF 超过上游 Provider 限制。
-- 后端宿主机 DNS、代理或网络异常。
-- 上游接口短时断连。
+- `mineru_token`、`paddle_token`、`api_key` Missing or invalid.
+- PDF Exceeds upstream Provider Restrictions.
+- Backend host machine DNSProxy or network anomaly. Check connection.
+- Upstream interface temporary disconnect.
 
-优先看：
+Source text missing. Provide content to translate.
 
 - `provider_trace_id`
 - `failure.provider`
 - `failure.root_cause`
 - `failure.suggestion`
-- `log_tail` 里的 `CAUSE[n]`
+- log_tail contains CAUSE[n] lines.
 
-## 翻译调试
+## Translation debugging
 
-翻译阶段异常时查看：
+Check when translation phase exception occurs:
 
 - `GET /api/v1/jobs/{job_id}/translation/diagnostics`
 - `GET /api/v1/jobs/{job_id}/translation/items`
 - `GET /api/v1/jobs/{job_id}/translation/items/{item_id}`
 - `POST /api/v1/jobs/{job_id}/translation/items/{item_id}/replay`
 
-这些接口面向开发和排障，不建议作为普通用户主流程依赖。
+These interfaces are for development and troubleshooting; not recommended as dependencies for normal user workflows.
 
-## 常见错误码
+## Common error codes
 
-- `40000`：请求错误，如字段缺失、JSON 结构不符合契约。
-- `40100`：缺少或错误的 `X-API-Key`。
-- `40400`：任务、artifact 或资源不存在。
-- `40900`：任务状态冲突。
-- `50000`：后端内部错误。
+- `40000`Request error, e.g., missing fields.JSON Structure does not match contract.
+- `40100`Missing or invalid `X-API-Key`。
+- `40400`Task:artifact or resource not found.
+- `40900`Task status conflict.
+- `50000`Backend internal error.

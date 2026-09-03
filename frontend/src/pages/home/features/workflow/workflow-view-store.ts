@@ -1,25 +1,25 @@
 import { createStore } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-// workflow 域视图 store + React viewPort。
+// Workflow domain view store + React viewPort.
 //
-// mountWorkflowFeature(纯逻辑控制器,原样复用)的 viewPort 契约在这里落到
-// store,由 WorkflowPanel/HeroUpload/PageRangeDialog 订阅渲染。
+// mountWorkflowFeature (pure logic controller, reused as-is) viewPort contract lands here
+// in store, rendered by WorkflowPanel/HeroUpload/PageRangeDialog subscriptions.
 // applyMockUpload/applyWorkflowUpload/setSubmitControls/renderBudgetNote
-// 逐条镜像 features/workflow/view.js 的语义(该文件属旧 DOM 视图,禁 import)。
+// mirror features/workflow/view.js semantics entry by entry (that file is legacy DOM view, do not import).
 //
-// 开发者设置对话框(developer-settings-dialog)是 3b 杂项范围:
-// setDeveloperDialog/readDeveloperDialog 先以 store 值往返(不接 DOM 表单),
-// 3b React 化该对话框时替换这两个方法的实现即可,控制器无感。
+// Developer settings dialog (developer-settings-dialog) is a 3b misc-item scope:
+// setDeveloperDialog/readDeveloperDialog first round-trip via store values (not DOM form),
+// when 3b React-ifies this dialog, replace these two method implementations; controller is unaffected.
 
-/** 开发者设置里可选术语表选项（归一化后） */
+/** Developer settings selectable glossary options (normalized) */
 export type WorkflowGlossaryOption = {
   glossaryId: string;
   name: string;
   entryCount: number | null;
 };
 
-/** API 列表原始项（setDeveloperGlossaryOptions 输入） */
+/** API list raw items (setDeveloperGlossaryOptions input) */
 export type WorkflowGlossarySource = {
   glossary_id?: string;
   name?: string;
@@ -35,7 +35,7 @@ export type WorkflowBudgetNote = {
   topUpUrl: string;
 };
 
-/** 开发者对话框持久字段（形状由 controller 写入，消费时按需读） */
+/** Developer dialog persistent fields (shape written by controller, read on demand) */
 export type WorkflowDeveloperDialog = {
   workflow?: string;
   renderSourceJobId?: string;
@@ -72,7 +72,7 @@ export type WorkflowViewActions = {
 
 export type WorkflowViewStore = Store<WorkflowViewState, WorkflowViewActions>;
 
-/** workflow → upload 瓦片端口（upload-view-store.uploadTilePort） */
+/** Workflow → upload tile port (upload-view-store.uploadTilePort) */
 export type WorkflowUploadTilePort = {
   setUploadActionSlotVisible?: (visible?: boolean) => void;
   setUploadTileLocked?: (options?: { locked?: boolean; enabled?: boolean }) => void;
@@ -91,7 +91,7 @@ export function createWorkflowViewStore(): WorkflowViewStore {
   return createStore<WorkflowViewState, WorkflowViewActions>({
     name: "homeWorkflowView",
     initialState: {
-      submitLabel: "直接翻译",
+      submitLabel: "Translate directly",
       submitDisabled: true,
       submitBusy: false,
       pageRangeButtonVisible: true,
@@ -145,7 +145,7 @@ export function createWorkflowViewFeature({
     patch({ jobWarningVisible: Boolean(visible) });
   }
 
-  // ---- features/workflow/view.js 镜像 ----
+  // ---- features/workflow/view.js mirror ----
 
   function setSubmitControls({
     disabled,
@@ -189,10 +189,10 @@ export function createWorkflowViewFeature({
   } = {}) {
     uploadTilePort?.setUploadTileLocked({ locked: true, enabled: false });
     uploadTilePort?.setUploadTileText({
-      label: "Mock 模式",
+      label: "Mock mode",
       labelTitle: "",
-      help: `当前为 mock 模式：${mockScenario || "running"}。不会上传文件，也不会请求真实后端。`,
-      status: "Mock 模式已启用，可直接点击开始翻译。",
+      help: `Currently in mock mode: ${mockScenario || "running"}. No file upload, no real backend requests.`,
+      status: "Mock mode enabled. You can click to start translation directly.",
       statusVisible: true,
     });
     setSubmitControls({
@@ -218,13 +218,13 @@ export function createWorkflowViewFeature({
   } = {}) {
     uploadTilePort?.setUploadTileLocked({ locked: !needsUpload, enabled: needsUpload });
     uploadTilePort?.setUploadTileText({
-      label: !uploadReady ? (needsUpload ? defaultFileLabel : "复用已有任务产物") : "",
+      label: !uploadReady ? (needsUpload ? defaultFileLabel : "Reuse existing task output") : "",
       labelTitle: "",
       help: headline,
       status: !needsUpload
         ? (renderSourceJobId
-            ? `当前将复用任务: ${renderSourceJobId}`
-            : "请先在开发者设置里填写 Render 源任务 ID。")
+            ? `Will reuse task: ${renderSourceJobId}`
+            : "Enter the render source job ID in developer settings first.")
         : "",
       statusVisible: !needsUpload ? true : (!uploadReady ? false : null),
     });
@@ -248,7 +248,7 @@ export function createWorkflowViewFeature({
     });
   }
 
-  // ---- 开发者设置对话框(3b 接管点) ----
+  // ---- Developer settings dialog (3b takeover point) ----
 
   function setDeveloperDialog(config: WorkflowDeveloperDialog = {}) {
     patch({ developerDialog: { ...config } });
@@ -302,3 +302,8 @@ export function createWorkflowViewFeature({
     viewPort,
   };
 }
+
+
+
+
+

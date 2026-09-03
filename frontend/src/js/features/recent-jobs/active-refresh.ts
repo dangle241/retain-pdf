@@ -20,9 +20,9 @@ export function recentJobsEligibleForActiveRefresh(items = [], currentJobId = ""
 }
 
 /**
- * 仅轮询「其它活跃任务」详情并单卡 patch。
- * 不再周期 loadRecentJobs 全量列表——那会与 soft/silent reload 叠成网格闪烁。
- * 全量对齐留给：首屏、搜索、删除/创建后、手动刷新、scheduleRefresh。
+ * Only poll other active jobs' details and patch individual cards.
+ * Stop loading full list periodically via loadRecentJobs to avoid grid flashing with soft/silent reload.
+ * Full list alignment reserved for: initial load, search, delete/create, manual refresh, scheduleRefresh.
  */
 export function createActiveLibraryRefreshLoop({
   getItems,
@@ -30,7 +30,7 @@ export function createActiveLibraryRefreshLoop({
   fetchJobPayload,
   apiPrefix,
   updateFromRuntime,
-  // 保留参数兼容旧调用方，周期路径不再使用
+  // Retained parameter for caller compatibility; no longer used in periodic path
   loadRecentJobs: _loadRecentJobs,
   isRecentJobsLoading,
   environment = defaultRecentJobsRefreshEnvironment,
@@ -84,3 +84,6 @@ export function createActiveLibraryRefreshLoop({
     stop,
   };
 }
+
+
+
