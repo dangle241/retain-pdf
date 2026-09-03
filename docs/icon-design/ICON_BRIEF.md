@@ -42,7 +42,7 @@ Existing Lottie in `frontend/src/assets/animations/`:
 | `typst_rendering.json` | typesetting / rendering |
 | `pdf_download_Lottie.json` | download / output |
 
-If you want "smoother animations", prioritize changing these 5 + provide source text. **P0 Dynamic** is sufficient.
+If you want smoother animations, prioritize changing these five. **P0 Dynamic** alone is sufficient.
 
 ---
 

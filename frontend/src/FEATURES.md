@@ -27,7 +27,7 @@ frontend/src/
 | Page React | pages/*/features or pages/reader/* | UI, hooks, page store | new UI / new interaction |
 | Imperative domain | js/features/* | Mount, poll, form ports | reusable UI logic not needed across pages; simplify |
 | **Share API** | `js/api/*` | fetch Encapsulation | New backend endpoint client |
-| **Assembly** | `pages/home/composition/*` | Wiring only. No business logic. | Provide source text. wiring |
+| **Assembly** | `pages/home/composition/*` | Wiring only. No business logic. | Composition entry points for the home page. |
 
 ---
 

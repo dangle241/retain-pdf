@@ -62,7 +62,7 @@ DELETE /api/v1/favorites/:favorite_id
 - `kind`: `sentence | data | figure`, default `sentence`;
 - `char_start / char_end` In-block selection(Optional, No argument means entire block).
 
-### 3. Full-text search(Provide source text.)
+### 3. Full-text search
 
 ```
 GET /api/v1/search?q=optical spectroscopy&limit=20
@@ -198,7 +198,7 @@ reference, backend response **409**, message contains reference count ââ
 
 1. **Step 1: incremental only**: Reader add "Select â Favorite" and favorites sidebar (new only, leave existing pages untouched).
    Favorite Redirect:Use the one in the anchor. `job_id + page_idx + block_id` Reuse existing reader positioning.
-2. **Step 2**Incomplete. Provide source text. `/api/v1/library/books` Switch projection to `/api/v1/documents`,
+2. **Step 2** (deferred): switch the projection from `/api/v1/library/books` to `/api/v1/documents`,
    Get Tag / Read status / Collections
 
 ## appendix:Field quick reference
