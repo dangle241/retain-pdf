@@ -1319,7 +1319,7 @@ async fn retention_preserves_document_backed_uploads() {
         stored_path: "uploads/up-old-ingest/keep.pdf".to_string(),
         bytes: 3,
         page_count: 1,
-        uploaded_at: "2020-01-01T00:00:00Z".to_string(), // 远早于任何保留期
+        uploaded_at: "2020-01-01T00:00:00Z".to_string(), // Far earlier than any retention window
         developer_mode: false,
         content_hash: hash.clone(),
     };

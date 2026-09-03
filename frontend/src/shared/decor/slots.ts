@@ -38,29 +38,29 @@ export type DecorSlotDefinition = {
  * map to this slot set.
  */
 export const DECOR_SLOTS: readonly DecorSlotDefinition[] = [
-  { id: "backdrop", band: "bg", area: "全屏 100%×100%", overUi: false },
+  { id: "backdrop", band: "bg", area: "Full screen 100%×100%", overUi: false },
 
   // Left/right wings: figures, dragon carvings, vases, horses, eagle stands from concept mockups
-  { id: "left-top", band: "mid", area: "左上 0~25% × 0~40%", overUi: false },
-  { id: "left-bottom", band: "mid", area: "左下 0~25% × 55~100%", overUi: false },
-  { id: "right-top", band: "mid", area: "右上 75~100% × 0~40%", overUi: false },
-  { id: "right-bottom", band: "mid", area: "右下 75~100% × 55~100%", overUi: false },
+  { id: "left-top", band: "mid", area: "Top-left 0~25% × 0~40%", overUi: false },
+  { id: "left-bottom", band: "mid", area: "Bottom-left 0~25% × 55~100%", overUi: false },
+  { id: "right-top", band: "mid", area: "Top-right 75~100% × 0~40%", overUi: false },
+  { id: "right-bottom", band: "mid", area: "Bottom-right 75~100% × 55~100%", overUi: false },
 
   // Top center: arched ornaments / butterflies / birds above the navigation
-  { id: "top-center", band: "mid", area: "顶部 30~70% × 0~12%", overUi: false },
+  { id: "top-center", band: "mid", area: "Top 30~70% × 0~12%", overUi: false },
 
   // Hero position: characters in the top banner area (reading girl/boy from the three mockups)
-  { id: "hero", band: "mid", area: "顶部横幅区 40~70% × 10~30%", overUi: false },
+  { id: "hero", band: "mid", area: "Top banner area 40~70% × 10~30%", overUi: false },
 
   // Foreground edges: branches, tassels, and pendants reaching into panel edges
-  { id: "edge-left", band: "fg", area: "左缘 0~12% × 全高", overUi: true },
-  { id: "edge-right", band: "fg", area: "右缘 88~100% × 全高", overUi: true },
+  { id: "edge-left", band: "fg", area: "Left edge 0~12% × full height", overUi: true },
+  { id: "edge-right", band: "fg", area: "Right edge 88~100% × full height", overUi: true },
 
   // Bottom‑right foreground: fg version of right‑bottom — for cases where figures/props need to overlap the panel
-  { id: "right-bottom-fg", band: "fg", area: "右下 75~100% × 55~100%", overUi: true },
+  { id: "right-bottom-fg", band: "fg", area: "Bottom-right 75~100% × 55~100%", overUi: true },
 
   // Inscription banner ("知其所来 明其所往"): vertical text position
-  { id: "quote", band: "mid", area: "右上 82~98% × 5~35%", overUi: false, textCapable: true },
+  { id: "quote", band: "mid", area: "Top-right 82~98% × 5~35%", overUi: false, textCapable: true },
 ] as const;
 
 export type DecorSlotId = (typeof DECOR_SLOTS)[number]["id"];

@@ -1,12 +1,13 @@
-// 四个侧抽屉(Excerpt/annotations/Markdown/AI)的 React 壳,替代旧 side-drawers.js 的
-// is-open/inert 写入.语义保全:
-// - 互斥开合由 drawer store 决定(单一 active);
-// - favorites 抽屉永不 inert(旧实现特例:钉住的Excerpt浮层交互依赖它);
-// - AI 抽屉None独立Close按钮(走右栏折叠把手或顶栏开合);
-// - 抽屉内容容器yes命令式孤岛:favorites List(drawer-renderer), markdown 正文
-//   (markdown-preview)按 id 查找容器写入,React 首次 commit 后不触碰;
-//   annotations面板直接复用 islands/reader-annotations 的组件源码(不再走预Compile产物);
-//   AI 线程/composer/会话栏yes React(ReaderAiChat).
+// Four side drawers (Excerpt/annotations/Markdown/AI) React shell, replacing old side-drawers.js
+// is-open/inert writes. Semantic preservation:
+// - Mutual open/close decided by drawer store (single active);
+// - Favorites drawer never gets inert (old implementation special case: pinned excerpt float
+//   layer interaction depends on it);
+// - AI drawer has no independent close button (uses right column collapse handle or topbar toggle);
+// - Drawer content containers are imperative islands: favorites list (drawer-renderer), markdown
+//   body (markdown-preview) find container by id and write, React does not touch after first commit;
+//   annotations panel directly reuses islands/reader-annotations component source (no longer goes
+//   through pre-compiled output); AI thread/composer/chat bar are React (ReaderAiChat).
 
 import { useMemo } from "react";
 import { ReaderAnnotationsPanel } from "../../../../js/islands/reader-annotations/reader-annotations-app.jsx";
@@ -17,7 +18,8 @@ function drawerProps(active, key) {
   const open = active === key;
   return {
     className: `reader-side-drawer reader-${key}-drawer${open ? " is-open" : ""}`,
-    // favorites 特例照搬旧实现;其余抽屉Close时 inert(不可聚焦/不可交互)
+    // Favorites special case follows old implementation; other drawers get inert when closed
+    // (not focusable/not interactive)
     inert: key === "favorites" ? false : !open,
   };
 }
@@ -48,7 +50,7 @@ export function ReaderFavoritesDrawer({ drawerStore }) {
 export function ReaderAnnotationsDrawer({ drawerStore, ports }) {
   const active = useDrawerActive(drawerStore);
   const open = active === "annotations";
-  // annotations面板的端口:boot 提供Data端口,开合订阅在此桥接到 drawer store
+  // annotations panel ports: boot provides data port, open/close subscription bridges to drawer store
   const panelPorts = useMemo(() => {
     if (!ports) {
       return null;
@@ -134,7 +136,5 @@ export function ReaderAiDrawer({ drawerStore, chatPorts }) {
     </aside>
   );
 }
-
-
 
 

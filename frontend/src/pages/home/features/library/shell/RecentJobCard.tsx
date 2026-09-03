@@ -1,5 +1,5 @@
-// 兼容导出: 一等组件已迁至 BookCard.jsx.
-// 新代码请 import { BookCard } from "../shell/BookCard.jsx" 或 library/index.js.
+// Compatibility export: first-class component moved to BookCard.jsx.
+// For new code, import { BookCard } from "../shell/BookCard.jsx" or library/index.js.
 
 export {
   BookCard as RecentJobCard,

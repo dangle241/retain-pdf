@@ -1,5 +1,5 @@
-// 书架Filter(照搬 PDF_MD_lib 的 LibraryFilterModal,做成轻量 popover 而非 Radix
-// 弹窗——满载测试下少一个重型 modal 更稳):按Status + TagsFilter,客户端过滤已加载items.
+// Bookshelf Filter (adapted from PDF_MD_lib's LibraryFilterModal, made as lightweight popover instead of Radix
+// modal — fewer heavy modals more stable under load testing): filter by Status + Tags, client-side filtering of loaded items.
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -61,9 +61,9 @@ export function LibraryFilterMenu({
       </button>
 
       {open ? (
-        // 非 Radix 的轻量 popover(满载测试下比重型 modal 稳),没有 Presence 卸载延迟,
-        // Close只能瞬间收起——但至少进场要有生命感:从触发按钮所在的右上角
-        // 展开(origin-top-right),不从 scale(0) 凭空出现(emil-design-eng skill).
+        // Lightweight non-Radix popover (more stable under load testing than heavy modal), no Presence unmount delay,
+        // Close can only snap shut instantly — but at least entry should feel alive: expand from the top-right
+        // where the trigger button is (origin-top-right), not popping into existence from scale(0) (emil-design-eng skill).
         <div className="absolute right-0 z-30 mt-2 w-64 origin-top-right rounded-2xl border border-border bg-paper p-4 shadow-[0_16px_40px_color-mix(in_srgb,var(--shadow-color)_16%,transparent)] transition-[opacity,transform] duration-150 ease-[var(--ease-out)] starting:scale-95 starting:opacity-0">
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">TranslationStatus</p>
           <div className="flex flex-wrap gap-2">
@@ -99,7 +99,7 @@ export function LibraryFilterMenu({
   );
 }
 
-// 客户端Filter谓词(和 sort 一样只作用已加载items).
+// Client-side filter predicate (same as sort, only acts on loaded items).
 export function matchesLibraryFilter(item, statusFilter, tagFilter, { isLibraryOnly, isActive }) {
   if (tagFilter && !(Array.isArray(item.tags) ? item.tags : []).includes(tagFilter)) {
     return false;

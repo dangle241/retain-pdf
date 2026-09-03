@@ -1,9 +1,9 @@
-// Translation调试:Item 详情 + 重放——JSX 重写
+// Translation debug: Item Detail + Replay — JSX rewrite of
 // features/status-detail/translation-renderer.js#renderTranslationItemDetail/
-// #renderTranslationReplay(markup 拼接)的结构化版books.纯格式化函数
+// #renderTranslationReplay (markup concatenation). Pure formatting functions
 // (boolLabel/diagnosticsOf/normalizeRoutePath/routePathOf/pageNumberOf/
-// finalStatusOf/fallbackToOf/degradationReasonOf)保留直接 import;
-// renderField/renderTextBlock 换成 InfoRow/TextBlock 两个 JSX 组件.
+// finalStatusOf/fallbackToOf/degradationReasonOf) are kept for direct import;
+// renderField/renderTextBlock are replaced with InfoRow/TextBlock JSX components.
 
 import { InfoRow, TextBlock } from "./TranslationInfoBlocks.jsx";
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
@@ -100,8 +100,6 @@ export function TranslationItemDetailPanel({ translation, onReplay }) {
     </section>
   );
 }
-
-
 
 
 

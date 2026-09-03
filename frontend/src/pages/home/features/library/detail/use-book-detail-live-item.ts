@@ -1,6 +1,6 @@
-// 详情弹窗: payload + 书架 live 行合并.
-// 与 status/merge-snapshot-with-fallback total用 isPollingBootstrapPlaceholder, 
-// 避免 startPolling 首帧把Complete书盖成"Queued".
+// Detail dialog: payload + library live row merge.
+// Uses isPollingBootstrapPlaceholder together with status/merge-snapshot-with-fallback to avoid
+// startPolling's first frame covering "Complete" books with "Queued".
 
 import { useMemo } from "react";
 import { useStoreSnapshot } from "../../../../../shared/react/use-store.js";

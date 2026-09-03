@@ -1,4 +1,4 @@
-// 多会话 CRUD: List切换 / 新建 / Rename / Delete
+// Multi-session CRUD: list switching / create / rename / delete
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
@@ -43,8 +43,8 @@ export function ReaderConversationBar({
   const [editTitle, setEditTitle] = useState("");
   const rootRef = useRef<HTMLDivElement | null>(null);
   const listId = useId();
-  // fork Title存储格式yes机器友好的 "fork-N-原Title"(序号parse依赖, 不动存储), 
-  // Display层Translation成 "原Title · branchN"；RenameEdit框仍展示原始值
+  // Fork title storage format is machine-friendly "fork-N-originalTitle" (sequence number parsing depends on it, don't change storage),
+  // display layer translates to "originalTitle · branchN"; rename edit field still shows the raw value
   function displaySessionTitle(raw: string): string {
     const m = `${raw || ""}`.match(/^fork-(\d+)-(.*)$/i);
     if (!m) return raw;
@@ -58,7 +58,7 @@ export function ReaderConversationBar({
   const label = active
     ? (active.messageCount ? displaySessionTitle(active.title) : `${displaySessionTitle(active.title)}(空)`)
     : hasSessions
-      ? "Select以往对话"
+      ? "Select previous conversation"
       : "New conversation";
 
   useEffect(() => {
@@ -141,7 +141,7 @@ export function ReaderConversationBar({
   const handleDelete = (s: ReaderAskSessionSummary) => {
     if (locked || pickingRef.current) return;
     const name = s.title || "Untitled conversation";
-    const ok = globalThis.confirm?.(`确定Delete conversation"${name}"?This cannot be resumed.`);
+    const ok = globalThis.confirm?.(`Delete conversation "${name}"? This cannot be resumed.`);
     if (!ok) return;
     pickingRef.current = true;
     beginSessionSwitchIsolation(800, 0);
@@ -170,7 +170,7 @@ export function ReaderConversationBar({
         <button
           type="button"
           className={`aui-session-trigger${open ? " is-open" : ""}`}
-          aria-label="切换对话窗口"
+          aria-label="Switch conversation"
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={listId}
@@ -188,7 +188,7 @@ export function ReaderConversationBar({
           type="button"
           className="aui-session-btn"
           disabled={locked}
-          title="New conversation窗口"
+          title="New conversation window"
           aria-label="New conversation"
           onClick={() => {
             if (locked || pickingRef.current) return;
@@ -221,7 +221,7 @@ export function ReaderConversationBar({
           id={listId}
           className="aui-session-list"
           role="listbox"
-          aria-label="以往对话"
+          aria-label="Previous conversations"
         >
           {sessions.map((s) => {
             const text = s.messageCount

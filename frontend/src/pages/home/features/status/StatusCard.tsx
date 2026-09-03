@@ -1,8 +1,8 @@
-// StatusCard 入口: 主Workflow / Book Details两套展示拆成独立Files.
+// StatusCard entry point: main workflow / Book Details two display variants split into separate files.
 //
-// - StatusCardMain: 工作流弹窗 #job-status-card(DOM 契约 / smoke)
-// - StatusCardEmbedded: 详情 #book-detail-job-status-card(bd-job-status-* 固定高度)
-// - useStatusCardModel: total享 store → display / lottie / progress
+// - StatusCardMain: workflow dialog #job-status-card (DOM contract / smoke)
+// - StatusCardEmbedded: details #book-detail-job-status-card (bd-job-status-* fixed height)
+// - useStatusCardModel: shared store → display / lottie / progress
 
 import { StatusCardMain } from "./StatusCardMain.jsx";
 import { StatusCardEmbedded } from "./StatusCardEmbedded.jsx";

@@ -1,5 +1,5 @@
-// library 域total享Type: Grid卡片 item, controller 契约, viewPort / viewStore.
-// 字段从 shapeDocumentCardItem / mergeLibraryJobItem / cardSignatureOf 反推.
+// library domain shared types: Grid card item, controller contract, viewPort / viewStore.
+// Fields reverse-engineered from shapeDocumentCardItem / mergeLibraryJobItem / cardSignatureOf.
 
 import type { DialogStore } from "../../state/dialog-store.js";
 import type {
@@ -7,9 +7,9 @@ import type {
   StoreChangeMeta,
 } from "../../composition/external.js";
 
-// ─── Progress / 运行时 ───────────────────────────────────────────────
+// ─── Progress / Runtime ───────────────────────────────────────────────
 
-/** job Progressentries(top-level progress 或 runtime_status.progress) */
+/** job progress entry (top-level progress or runtime_status.progress) */
 export type LibraryProgress = {
   current?: number | null;
   total?: number | null;
@@ -18,7 +18,7 @@ export type LibraryProgress = {
   [key: string]: unknown;
 };
 
-/** 运行时Status快照(轮询 / stage adapter 写入) */
+/** Runtime status snapshot (written by polling / stage adapter) */
 export type LibraryRuntimeStatus = {
   stageKey?: string;
   publicStage?: string;
@@ -30,7 +30,7 @@ export type LibraryRuntimeStatus = {
   [key: string]: unknown;
 };
 
-/** background lane 合并时附带的Stage片段 */
+/** Stage fragment attached when merging background lanes */
 export type LibraryBackgroundStage = {
   display_stage?: string;
   stage?: string;
@@ -41,7 +41,7 @@ export type LibraryBackgroundStage = {
   [key: string]: unknown;
 };
 
-/** book 载荷上的Summary(merge 时回填 source_file_name / page_count) */
+/** Summary on book payload (filled back during merge for source_file_name / page_count) */
 export type LibraryBookSummary = {
   source_file_name?: string;
   page_count?: number | null;
@@ -49,26 +49,26 @@ export type LibraryBookSummary = {
   [key: string]: unknown;
 };
 
-// ─── Grid卡片 item ───────────────────────────────────────────────
+// ─── Grid Card Item ───────────────────────────────────────────────
 
 /**
- * 书架Grid/List/详情total用的卡片投影.
- * - Translated: 真实 job_id + library/books 活态
- * - Library: library_only + 合成 job_id `doc:<document_id>`
+ * Card projection used by bookshelf Grid/List/detail for all.
+ * - Translated: real job_id + library/books live state
+ * - Library: library_only + synthesized job_id `doc:<document_id>`
  *
- * 扩展字段经 index signature 放行；已知字段尽量列全, 避免 any.
+ * Extended fields allowed through index signature; known fields listed as fully as possible, avoiding any.
  */
 export type LibraryCardItem = {
-  // 身份
+  // Identity
   job_id?: string;
   id?: string;
   document_id?: string;
   active_job_id?: string;
   library_only?: boolean;
-  /** 打开详情时优先落在"Translation"Tab(Progress在 Tab 内, 不弹工作流窗) */
+  /** When opening details, prefer landing on the "Translation" tab (progress inside tab; no workflow popup) */
   prefer_translate_tab?: boolean;
 
-  // 展示
+  // Display
   title?: string;
   display_name?: string;
   source_file_name?: string;
@@ -80,7 +80,7 @@ export type LibraryCardItem = {
   added_at?: string;
   last_opened_at?: string | null;
 
-  // Documents元Data
+  // Documents metadata
   reading_status?: string;
   tags?: string[];
   source_pdf_url?: string;
@@ -101,17 +101,17 @@ export type LibraryCardItem = {
   workflow?: string;
   job_type?: string;
 
-  // runtime merge / API 可能附带额外字段
+  // runtime merge / API may carry extra fields
   [key: string]: unknown;
 };
 
-/** job 中心命名别名(与 LibraryCardItem 同一形状) */
+/** Job-centric naming alias (same shape as LibraryCardItem) */
 export type LibraryJobItem = LibraryCardItem;
 
-/** History命名别名(recent-jobs 引擎侧) */
+/** History naming alias (recent-jobs engine side) */
 export type RecentJobItem = LibraryCardItem;
 
-// ─── 卡片Action / 徽标 ─────────────────────────────────────────────
+// ─── Card Action / Badge ─────────────────────────────────────────────
 
 export type BookCardAction = {
   id: string;
@@ -149,7 +149,7 @@ export type TranslateDocumentPayload = {
   [key: string]: unknown;
 };
 
-/** POST /documents/:id/translate 返回(JobSubmissionView) */
+/** POST /documents/:id/translate response (JobSubmissionView) */
 export type JobSubmissionView = {
   job_id?: string;
   id?: string;
@@ -193,10 +193,10 @@ export type LibraryEventPort = {
   publishJobUpdated?: (job?: LibraryCardItem | Record<string, unknown> | null) => void;
 };
 
-/** 乐观删卡: 从Grid store 按 document_id 过滤(可选注入) */
+/** Optimistic card removal: filter from Grid store by document_id (optional injection) */
 export type RemoveLibraryDocumentsFn = (documentIds: string[]) => void;
 
-/** 乐观改卡: 按 document_id 合并字段 */
+/** Optimistic card patch: merge fields by document_id */
 export type PatchLibraryDocumentItemFn = (
   documentId: string,
   patch: Partial<LibraryCardItem>,
@@ -206,9 +206,9 @@ export type LibraryControllerDeps = {
   documentRef?: Pick<Document, "dispatchEvent"> | null;
   libraryEventPort?: LibraryEventPort | null;
   reloadRecentJobs?: (opts?: ReloadRecentJobsOptions) => void | Promise<void>;
-  /** 乐观RemoveGrid行；缺省则只靠 silent reload */
+  /** Optimistically remove Grid rows; if absent, relies on silent reload only */
   removeLibraryDocuments?: RemoveLibraryDocumentsFn | null;
-  /** 乐观UpdatesGrid行元Data */
+  /** Optimistically update Grid row metadata */
   patchLibraryDocumentItem?: PatchLibraryDocumentItemFn | null;
   deleteJob?: (jobId: string) => void | Promise<void>;
   buildTranslateConfig?: (
@@ -236,8 +236,8 @@ export type LibraryController = {
   deleteCard: (target?: DeleteCardTarget) => void;
   openBookDetail: (item?: LibraryCardItem | null) => void;
   /**
-   * Grid选中任务: 有 document_id → 详情Translation Tab + silent Progress；
-   * no则 fallbackSelectJob(旧工作流弹窗).
+   * Grid job selection: has document_id → detail Translation tab + silent progress;
+   * otherwise falls back to fallbackSelectJob (old workflow dialog).
    */
   selectJobForDetail: (
     jobId?: string | null,
@@ -250,7 +250,7 @@ export type LibraryController = {
     documentId?: string | null,
     payload?: UpdateDocumentPayload,
   ) => Promise<unknown>;
-  /** 详情内嵌Progress: 静默 startPolling, 不弹工作流, 不亮主Status区 */
+  /** Detail embedded progress: silently start polling, no workflow popup, main status area not lit */
   attachJobProgress: (jobId?: string | null) => void;
 };
 
@@ -312,7 +312,7 @@ export type RecentJobsReactViewPort = {
   setLoadMoreLoading: () => void;
 };
 
-// 再导出 StoreChangeMeta 供订阅方如需标注 meta 使用
+// Re-export StoreChangeMeta for subscribers that need to annotate meta
 export type { StoreChangeMeta };
 
 

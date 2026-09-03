@@ -1,5 +1,5 @@
-// 书架Tools栏(照搬 PDF_MD_lib 的 LibraryCollectionContextBar):左侧上下文Tags +
-// 数量;右侧Sort下拉 + Grid/List切换(Filter按钮在后续Stage接).
+// Bookshelf tools bar (adapted from PDF_MD_lib's LibraryCollectionContextBar): left side context Tags +
+// count; right side Sort dropdown + Grid/List toggle (Filter button in later stage).
 
 import { cn } from "@/lib/utils";
 

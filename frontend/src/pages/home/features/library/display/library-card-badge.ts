@@ -1,5 +1,5 @@
-// 书架卡片右上角终态徽标.
-// In progress(queued/OCR/Translation/Rendering)不在角标写文案(易截断), 改由封面中央加载动画表达.
+// Terminal-state badge in the top-right corner of bookshelf card.
+// In progress (queued/OCR/Translation/Rendering) does not write process text in corner badge (easily truncated), instead show loading animation in cover center.
 
 import type { LibraryCardBadge, LibraryCardItem } from "../types.js";
 import {
@@ -9,7 +9,7 @@ import {
 } from "../../../composition/external.js";
 
 /**
- * @returns 终态/Library徽标；In progress返回 null(用中央 loading 代替)
+ * @returns Terminal/Library badge; returns null for in-progress (use center loading instead)
  */
 export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge | null {
   if (isLibraryOnlyItem(item)) {
@@ -38,7 +38,7 @@ export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge |
     };
   }
 
-  // In progress(含Retry): 不角标, 封面中央 loading
+  // In progress (including Retry): no corner badge, center loading on cover
   if (isLibraryCardProcessing(item)) {
     return null;
   }
@@ -52,12 +52,12 @@ export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge |
     };
   }
 
-  // queued / 运行中(兜底)
+  // queued / running (fallback)
   if (isRecentJobActive(item) || status === "queued" || status === "running") {
     return null;
   }
 
-  // 兜底: 有 done Stage
+  // Fallback: has done Stage
   if (stageKey === "done") {
     return {
       label: "Translated",
@@ -69,21 +69,21 @@ export function libraryCardBadge(item: LibraryCardItem = {}): LibraryCardBadge |
   return null;
 }
 
-/** yesno应在封面中央DisplayProcessing加载动画 */
+/** Whether to show the processing loading animation in the cover center */
 export function isLibraryCardProcessing(item: LibraryCardItem = {}): boolean {
   if (isLibraryOnlyItem(item)) return false;
   const status = `${item.status || ""}`.trim().toLowerCase();
   if (status === "failed" || status === "canceled" || status === "cancelled") {
     return false;
   }
-  // 明确运行中
+  // Explicitly running
   if (status === "queued" || status === "running" || status === "pending") {
     return true;
   }
-  // Retry后偶发 status 未及时变, 但 stage 已回到 ocr/Translation/Rendering
+  // After Retry: status may not update in time, but stage has already returned to ocr/translate/render
   const stage = stageKeyForRecentJobLabel(item);
   if (["ocr", "translate", "render", "queued"].includes(stage)) {
-    // succeeded + stage=done yes真Done；succeeded + stage=ocr 视为Retry脏态 → 仍转圈
+    // succeeded + stage=done is truly done; succeeded + stage=ocr treated as Retry dirty state → still spin
     if (status === "succeeded" && stage === "done") return false;
     if (status === "succeeded" || status === "") return true;
   }

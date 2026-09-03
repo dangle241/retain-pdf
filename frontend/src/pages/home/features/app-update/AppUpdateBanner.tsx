@@ -1,24 +1,28 @@
-// AppUpdateBanner(React 版 app-update 按钮 + 详情 dialog,蓝图 §5).
+// AppUpdateBanner (React version: app-update button + detail dialog, blueprint §5).
 //
-// 旧世界"两处 DOM m属两个宿主"的Question(按钮在 app-settings-dialog 模板,
-// 详情 dialog 在 app-shell-header.js)在这里合并成同一个组件:books组件整体挂载
-// 在 SettingsHubDialog.jsx"Updates"tab 面板下(该面板用 hidden 属性切换,不卸载
-// ——见 SettingsHubDialog.jsx 头注释同款处理),按钮与 dialog 都yes这里的常驻
-// 子节点.dialog 只会在用户点击books组件自己的按钮时才打开(此时"Updates"
-// tab 必然yes激活态, 祖先没有 hidden),不存在"父级隐藏时误开 dialog"的场景.
+// Old world "two DOM nodes belonging to two hosts" issue (button in app-settings-dialog
+// template, detail dialog in app-shell-header.js) merged into one component here: this
+// component is entirely mounted under SettingsHubDialog.jsx "Updates" tab panel (that panel
+// uses the hidden attribute to toggle, not unmount — same treatment as
+// SettingsHubDialog.jsx header comment), both button and dialog are permanent child nodes
+// here. Dialog only opens when user clicks this component's own button (at which point the
+// "Updates" tab is certainly active, ancestors have no hidden), no "parent hidden causing
+// accidental dialog open" scenario.
 //
-// Dialog Rendering层(Stage C,shadcn 改造):详情 dialog 从原生 <dialog>+
-// showModal/close 换成 radix-ui 的 Dialog 原语,不经 src/components/ui/dialog.jsx
-// 默认皮肤(className 继续用 desktop-dialog/desktop-shell/app-update-* 这套
-// bespoke CSS).open 受控于books地 useAppUpdateDialogOpen(纯 UI 瞬态,不进
-// store——这entries既有决策不变),onOpenChange 在 next===false 时统一调用
-// setDialogOpen(false),Escape/背板点击/Close按钮三entries路径都走这一个回调.
-// 不 forceMount(同 CredentialsDialog.jsx 头注释的Conclusion,避免 hideOthers 永久
-// 生效的None障碍缺陷)——books详情 dialog 内容Allyes只读展示(Status文案/说明/
-// 链接),没有表单输入,Close时卸载不会丢任何Data.
+// Dialog rendering layer (Stage C, shadcn refactor): detail dialog switched from native
+// <dialog> + showModal/close to radix-ui Dialog primitives, not going through
+// src/components/ui/dialog.jsx default skin (className continues using the bespoke
+// desktop-dialog/desktop-shell/app-update-* CSS). open controlled by the local
+// useAppUpdateDialogOpen (pure UI transient, not in store — this entry's decisions are
+// immutable), onOpenChange calls setDialogOpen(false) uniformly when next===false, three
+// entry paths (Escape / backdrop click / Close button) all go through this one callback.
+// No forceMount (same conclusion as CredentialsDialog.jsx header comment, avoids the null
+// obstacle defect where hideOthers permanently takes effect) — this detail dialog content is
+// always read-only display (status text / description / links), no form input, unloading on
+// Close loses no data.
 //
-// AppShellHeader.jsx 不再残留 app-update-dialog 模板骨架(3a 遗留,已清理,
-// 避免 id 重复违反视觉基线/门禁).
+// AppShellHeader.jsx no longer has residual app-update-dialog template skeleton
+// (3a legacy, already cleaned up; avoids id duplication violating visual baseline/guard).
 
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
@@ -28,11 +32,12 @@ import { APP_UPDATE_IDS } from "./app-update-contract.js";
 import { useAppUpdateDialogOpen } from "./useAppUpdateDialogOpen.js";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size 在未注解源Files里被推断为必填;unstyled 路径运行时不用 size.
+// Button.size is inferred as required in unannotated source files; unstyled path doesn't use size at runtime.
 const Button = ButtonBase as any;
 
-// 抄自 src/js/features/app-update/view.js:47-60(formatReleaseNotes)——纯函数,
-// 逐字符保留,拷贝进books组件(蓝图 §5:AppUpdateBanner agent Scope).
+// Copied from src/js/features/app-update/view.js:47-60 (formatReleaseNotes) — pure
+// function, character-for-character preserved, copied into this component (blueprint
+// §5: AppUpdateBanner agent scope).
 function formatReleaseNotes(markdown = "") {
   return `${markdown || ""}`
     .replace(/\r\n/g, "\n")

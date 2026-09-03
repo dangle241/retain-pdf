@@ -1,7 +1,8 @@
-// StatusDetailDialog 家族的唯一装配面(蓝图 §1.2)——把 composition.js 的
-// statusDetail 域(services.statusDetail:{store, dialogStore, controller})
-// 折成一个 hook,组件只订阅required的切片,不各自重复 useStoreSnapshot/
-// useDialogState 样板(镜像 useCredentialsController.js 的先例).
+// StatusDetailDialog family's only assembly surface (blueprint §1.2) — folds the
+// statusDetail domain (services.statusDetail:{store, dialogStore, controller})
+// from composition.js into a single hook; components subscribe only to required
+// slices, avoiding repeated useStoreSnapshot/useDialogState boilerplate
+// (mirrors the precedent in useCredentialsController.js).
 
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
 import { useHomeServices } from "../../home-services-context.js";
@@ -18,7 +19,7 @@ import type {
 } from "./status-detail-dialog-store.js";
 import type { DialogState } from "../../state/dialog-store.js";
 
-/** controller 表面(JSX 直接调用的方法) */
+/** Controller surface (methods called directly by JSX) */
 export type StatusDetailControllerApi = {
   openStatusDetailDialog: (tabName?: string) => void;
   activateDetailTab: (tabName?: string) => void;
@@ -66,5 +67,4 @@ export function useStatusDetailOverview(): StatusDetailOverviewHook {
     dialogStore,
   };
 }
-
 

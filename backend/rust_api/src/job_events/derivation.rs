@@ -66,7 +66,7 @@ pub(super) fn derive_events(
             substage: event_provider_stage(current),
             progress_unit: progress_unit_for_event(current.stage.as_deref(), "job_created"),
             event: "job_created".to_string(),
-            message: "任务已创建".to_string(),
+            message: "Job created".to_string(),
             progress_current: current.progress_current,
             progress_total: current.progress_total,
             retry_count: event_retry_count(current),
@@ -97,7 +97,7 @@ pub(super) fn derive_events(
             substage: event_provider_stage(current),
             progress_unit: progress_unit_for_event(current.stage.as_deref(), "status_changed"),
             event: "status_changed".to_string(),
-            message: format!("任务状态变更为 {}", status_name(&current.status)),
+            message: format!("Job status changed to {}", status_name(&current.status)),
             progress_current: current.progress_current,
             progress_total: current.progress_total,
             retry_count: event_retry_count(current),
@@ -121,7 +121,7 @@ pub(super) fn derive_events(
                 substage: event_provider_stage(current),
                 progress_unit: progress_unit_for_event(current.stage.as_deref(), "job_terminal"),
                 event: "job_terminal".to_string(),
-                message: format!("任务进入终态 {}", status_name(&current.status)),
+                message: format!("Job entered terminal state {}", status_name(&current.status)),
                 progress_current: current.progress_current,
                 progress_total: current.progress_total,
                 retry_count: event_retry_count(current),
@@ -159,7 +159,7 @@ pub(super) fn derive_events(
                 .stage_detail
                 .clone()
                 .or_else(|| current.stage.clone())
-                .unwrap_or_else(|| "任务进度更新".to_string()),
+                .unwrap_or_else(|| "Job progress update".to_string()),
             progress_current: current.progress_current,
             progress_total: current.progress_total,
             retry_count: event_retry_count(current),
@@ -192,7 +192,7 @@ pub(super) fn derive_events(
                 .stage_detail
                 .clone()
                 .or_else(|| current.stage.clone())
-                .unwrap_or_else(|| "任务进度更新".to_string()),
+                .unwrap_or_else(|| "Job progress update".to_string()),
             progress_current: current.progress_current,
             progress_total: current.progress_total,
             retry_count: event_retry_count(current),

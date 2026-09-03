@@ -1,5 +1,6 @@
-// AI Q&A UI: 会话栏 + 消息线程 + 输入区.
-// 气泡正文仍yes命令式孤岛(answer-view 句柄), 结构 id 与测试契约保持不变.
+// AI Q&A UI: chat bar + message thread + input area.
+// Bubble body still an imperative island (answer-view handles it), structural ids and
+// test contracts stay unchanged.
 
 import { memo, useEffect } from "react";
 import { Loader2, Plus, Send, Trash2 } from "lucide-react";
@@ -19,7 +20,7 @@ const AiMessage = memo(function AiMessage({ entry }: { entry: AiMessageEntry }) 
       ref={entry.view.attachRoot}
     >
       <span className="reader-ai-message-role">{entry.title}</span>
-      {/* body 为 div:Markdown 会产出块级元素,不能塞进 <p> */}
+      {/* body is div: Markdown produces block-level elements, cannot stuff into <p> */}
       <div
         className="reader-ai-message-body-el"
         data-reader-ai-message-body="1"
@@ -56,7 +57,7 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
           <select
             id="reader-ai-session-select"
             className="reader-ai-session-select"
-            aria-label="切换History对话"
+            aria-label="Switch conversation"
             value={chat.activeSessionId}
             disabled={chat.sessions.length <= 1 || busy}
             onChange={(event) => {
@@ -68,7 +69,7 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
           >
             {chat.sessions.map((session) => (
               <option key={session.id} value={session.id}>
-                {session.messageCount ? session.title : `${session.title}(空)`}
+                {session.messageCount ? session.title : `${session.title} (empty)`}
               </option>
             ))}
           </select>
@@ -76,8 +77,8 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
             id="reader-ai-new-btn"
             type="button"
             className="reader-ai-session-btn"
-            title="新建对话"
-            aria-label="新建对话"
+            title="New conversation"
+            aria-label="New conversation"
             disabled={busy}
             onClick={() => void chat.newConversation()}
           >
@@ -88,8 +89,8 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
             id="reader-ai-delete-btn"
             type="button"
             className="reader-ai-session-btn reader-ai-session-btn-danger"
-            title="DeleteCurrent对话"
-            aria-label="DeleteCurrent对话"
+            title="Delete current conversation"
+            aria-label="Delete current conversation"
             disabled={onlyEmptySession || busy}
             onClick={() => void chat.deleteConversation()}
           >
@@ -98,7 +99,7 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
           </button>
         </div>
       ) : (
-        // 契约 id 仍挂在 DOM, 供测试/自动化Locate(视觉上折叠)
+        // Contract ids still on DOM for test/automation locate (visually collapsed)
         <div className="reader-ai-sessions is-collapsed" data-reader-ai-sessions="" hidden>
           <select
             id="reader-ai-session-select"
@@ -120,8 +121,8 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
       <div id="reader-ai-thread" className="reader-ai-thread" aria-live="polite" ref={chat.threadRef}>
         {chat.messages.length === 0 ? (
           <div className="reader-float-ai-thread-hint" data-reader-ai-empty-hint="">
-            <p>ForCurrent整份Documents提问</p>
-            <span>Answer会尽量引用文中Paragraph, 可点击跳转</span>
+            <p>Ask about the entire document</p>
+            <span>Answers will cite paragraphs, click to navigate</span>
             <div className="reader-float-ai-suggestions" role="group" aria-label="Suggested questions">
               {SUGGESTIONS.map((text) => (
                 <button
@@ -152,8 +153,8 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
       >
         <textarea
           id="reader-ai-input"
-          placeholder={disabled ? "暂不Ready" : "输入Question, Enter Send · Shift+Enter new line"}
-          aria-label="输入Question"
+          placeholder={disabled ? "Not ready" : "Enter question, Enter sends · Shift+Enter new line"}
+          aria-label="Enter question"
           rows={2}
           value={chat.input}
           disabled={disabled}
@@ -175,7 +176,7 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
             {busy ? (
               <Loader2 className="reader-ai-status-spin" size={13} strokeWidth={2.4} aria-hidden />
             ) : null}
-            <span>{chat.composer.text || (ready ? "可以提问" : "")}</span>
+            <span>{chat.composer.text || (ready ? "Ready to answer" : "")}</span>
           </span>
           <button
             id="reader-ai-submit-btn"
@@ -200,7 +201,5 @@ export function ReaderAiChat({ ports, controllerRef = null }) {
     </div>
   );
 }
-
-
 
 

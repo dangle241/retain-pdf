@@ -1,15 +1,15 @@
-// BookDetailShell —— Book Details弹窗"壳".
+// BookDetailShell — the Book Details dialog "shell".
 //
-// 只负责:
-//   - Radix Dialog 开合 / 遮罩 / Close钮
-//   - 固定 id="book-detail-dialog"(测试与样式锚点)
-//   - 双栏布局槽位 left / right
+// Only responsible for:
+//   - Radix Dialog open/close / overlay / close button
+//   - Fixed id="book-detail-dialog" (test + style anchor)
+//   - Two-column layout slots: left / right
 //
-// 不负责:
-//   - 拉 document, Translation, Delete, Collection等业务
-//   - 决定左栏放哪些按钮, 右栏有哪些区块
+// NOT responsible for:
+//   - Loading document, translation, delete, collection business logic
+//   - Deciding which buttons go in the left column or which sections in the right
 //
-// 用法:
+// Usage:
 //   <BookDetailShell open={...} onOpenChange={...} left={...} right={...} />
 
 import { Dialog as DialogPrimitive } from "radix-ui";
@@ -19,9 +19,9 @@ import { Dialog as DialogPrimitive } from "radix-ui";
  * @param {boolean} props.open
  * @param {(open: boolean) => void} props.onOpenChange
  * @param {(event: Event) => void} [props.onCloseAutoFocus]
- * @param {string} [props.title] None障碍Title(默认"Book Details")
- * @param {import("react").ReactNode} props.left  左栏(封面, 主Action)
- * @param {import("react").ReactNode} props.right 右栏(元Data, Translation, Collection...)
+ * @param {string} [props.title] a11y title (default "Book Details")
+ * @param {import("react").ReactNode} props.left  left column (cover, primary actions)
+ * @param {import("react").ReactNode} props.right right column (metadata, translation, collections, ...)
  * @param {string} [props.contentClassName]
  */
 export function BookDetailShell({
@@ -58,7 +58,7 @@ export function BookDetailShell({
 
           <div className="book-detail-shell-grid grid grid-cols-1 gap-7 sm:grid-cols-[236px_1fr]">
             <div className="book-detail-shell-left">{left}</div>
-            {/* pr-10: 给右上角Close钮留空, 避免 tab 顶到 × */}
+            {/* pr-10: leave room for the top-right close button so tabs don't collide with the × */}
             <div className="book-detail-shell-right min-w-0 space-y-4 pr-10">{right}</div>
           </div>
         </DialogPrimitive.Content>

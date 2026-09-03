@@ -1,9 +1,10 @@
-// Translation调试:Item List + mpages——JSX 重写
-// features/status-detail/translation-renderer.js#renderTranslationItems 与
-// status-detail-dialog-translation.js#renderTranslationItems 两段(markup 拼接
-// + DOM 三态切换)的结构化版books;逐items断言取代 markup 断言(蓝图 §1.1).
-// 纯格式化函数(finalStatusOf/finalStatusLabel/finalStatusClass/previewText/
-// pageNumberOf/errorTypesOf)保留直接 import.
+// Translation debug: Item List + pagination — JSX rewrite of
+// features/status-detail/translation-renderer.js#renderTranslationItems and
+// status-detail-dialog-translation.js#renderTranslationItems (markup concatenation
+// + DOM three-state toggle), structured version. Item-level assertions replace
+// markup assertions (blueprint §1.1). Pure formatting functions (finalStatusOf/
+// finalStatusLabel/finalStatusClass/previewText/pageNumberOf/errorTypesOf) are
+// kept for direct import.
 
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
 import {
@@ -101,7 +102,6 @@ export function TranslationItemsPanel({ translation, onSelect, onChangePage }) {
     </section>
   );
 }
-
 
 
 

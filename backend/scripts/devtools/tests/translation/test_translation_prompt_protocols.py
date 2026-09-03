@@ -298,8 +298,10 @@ def test_build_messages_direct_typst_includes_inline_math_and_local_ocr_repair_g
     assert "请主动用 `$...$` 包裹" in system_prompt
     assert "使用单个反斜杠" in system_prompt
     assert r"\mathrm{M}" in system_prompt
-    # 间距、紧贴、双反斜杠等机械格式规则由 normalize_direct_typst_translation
-    # 在翻译时统一规整,不再占用提示词。
+    # Mechanical formatting rules (spacing, tight runs, double backslashes,
+    # etc.) are normalized at translation time by
+    # `normalize_direct_typst_translation`, so they no longer need to
+    # occupy prompt budget.
     assert "空格隔开" not in system_prompt
     assert "$...$$...$" not in system_prompt
     assert r"\\text{g}" not in system_prompt
@@ -333,8 +335,10 @@ def test_build_single_item_fallback_messages_direct_typst_includes_inline_math_a
     assert "请主动用 `$...$` 包裹" in system_prompt
     assert "使用单个反斜杠" in system_prompt
     assert r"\mathrm{M}" in system_prompt
-    # 间距、紧贴、双反斜杠等机械格式规则由 normalize_direct_typst_translation
-    # 在翻译时统一规整,不再占用提示词。
+    # Mechanical formatting rules (spacing, tight runs, double backslashes,
+    # etc.) are normalized at translation time by
+    # `normalize_direct_typst_translation`, so they no longer need to
+    # occupy prompt budget.
     assert "空格隔开" not in system_prompt
     assert "$...$$...$" not in system_prompt
     assert r"\\text{g}" not in system_prompt
@@ -464,8 +468,10 @@ def test_parse_translation_payload_accepts_well_formed_tagged_blocks() -> None:
 
 
 def test_parse_translation_payload_recovers_item_with_damaged_trailing_end_tag() -> None:
-    # 真实事故形态(job ffc511 batch 2/8):模型在输出末尾把 <<<END>>>
-    # 打成 <<<END>>,少一个 >。内容完好,不允许丢条目。
+    # Real incident shape (job ffc511 batch 2/8): the model emitted the
+    # trailing `<<<END>>` instead of `<<<END>>>` at the end of its
+    # output — one `>` short. The content is intact; the item must not
+    # be dropped.
     content = (
         "<<<ITEM item_id=a>>>\n译文A\n<<<END>>>\n"
         "<<<ITEM item_id=b>>>\n译文B,包含公式 $x^2$。\n<<<END>>"
@@ -492,8 +498,11 @@ def test_parse_translation_payload_does_not_cut_literal_end_text_mid_content() -
 
 
 def test_direct_typst_single_prompt_warns_model_about_unbalanced_source_dollars() -> None:
-    # 源文本 $ 为奇数(OCR 丢了配对的 $)时,用户消息里要先提示模型按
-    # 语义修复,而不是直接交给模型产出必然不平衡的译文。
+    # When the source has an odd number of `$` delimiters (OCR dropped a
+    # paired `$`), we must warn the model in the user message and ask it
+    # to fix the imbalance semantically, instead of handing the source
+    # straight to the model and getting a guaranteed-unbalanced
+    # translation back.
     messages = deepseek_client.build_single_item_fallback_messages(
         {
             "item_id": "p009-b008",
@@ -522,8 +531,10 @@ def test_direct_typst_single_prompt_has_no_delimiter_warning_for_balanced_source
 
 
 def test_direct_typst_single_prompt_lists_mitex_rewrites_found_in_source() -> None:
-    # 数据驱动提示:源公式匹配到数据库条目时,把需要的替换写进提示词,
-    # 由模型在语义层完成替换——复杂公式里正则改写不可靠。
+    # Data-driven hint: when the source formula matches an entry in the
+    # rewrite database, the needed replacements are written into the
+    # prompt so the model performs the substitution at the semantic
+    # level — regex rewriting in complex formulas is not reliable.
     messages = deepseek_client.build_single_item_fallback_messages(
         {
             "item_id": "p001-b001",
@@ -539,7 +550,8 @@ def test_direct_typst_single_prompt_lists_mitex_rewrites_found_in_source() -> No
     assert r"`\hbar` 改用 `ℏ`" in user_prompt
     assert r"`\varPhi` 改用 `\Phi`" in user_prompt
     assert r"`\rangle` 改用 `⟩`" in user_prompt
-    # 数据库里有但本段没出现的命令,不应进提示词
+    # Commands present in the database but absent from this snippet must
+    # not be added to the prompt.
     assert r"\mathscr" not in user_prompt
 
 
@@ -573,8 +585,9 @@ def _cg_item(**overrides):
 
 
 def test_group_members_retries_when_member_ids_are_missing() -> None:
-    # 此前缺 member id 会静默退化成几何切分;现在先重试一次,第二次
-    # 返回完整就采用结构化切分。
+    # Previously, a missing member id would silently degrade to geometric
+    # splitting; we now retry once and, if the second response is
+    # complete, use the structured splits.
     responses = iter([
         json.dumps({
             "translated_text": "能量 $E = mc^2$ 开始并在此继续。",
@@ -605,8 +618,10 @@ def test_group_members_retries_when_member_ids_are_missing() -> None:
 
 
 def test_group_members_drops_splits_when_member_math_stays_unbalanced() -> None:
-    # 公式跨 member 断开:整体 $ 奇偶数正确,但逐 member 都是坏的。
-    # 重试后仍坏则丢弃 member 切分(显式走几何兜底),整体译文保留。
+    # Formula split across members: the aggregate `$` balance is correct
+    # but each member's portion is broken. If retries still fail, we
+    # discard the member splits (explicit geometric fallback) and keep
+    # the aggregate translation.
     bad = json.dumps({
         "translated_text": "能量 $E = mc^2$ 开始并在此继续。",
         "member_translations": [
@@ -624,8 +639,9 @@ def test_group_members_drops_splits_when_member_math_stays_unbalanced() -> None:
 
 
 def test_group_members_salvages_aggregate_text_from_broken_json() -> None:
-    # LaTeX 反斜杠转义损坏导致 JSON 无法解析:两轮解析都失败后,
-    # 抢救 translated_text 字符串,不再整段丢弃。
+    # Corrupted LaTeX backslash escapes can prevent JSON from parsing:
+    # once both parse attempts fail, we salvage the `translated_text`
+    # string instead of dropping the whole payload.
     broken = (
         '{"translated_text": "能量守恒在此继续。",\n'
         '"member_translations": [{"item_id": "p010-b001", "translated_text": "能量 $\\alpha 守恒"'
@@ -642,8 +658,10 @@ def test_group_members_salvages_aggregate_text_from_broken_json() -> None:
 def test_context_bleed_downgraded_to_warning_for_continuation_items() -> None:
     from services.translation.llm.validation.quality import review_translation_item
 
-    # 连续段片段按设计无终止标点,后文公式泄漏由 apply 层机械修剪,
-    # 不应触发昂贵的错误级重试。
+    # Continuation fragments are by design sentences with no terminating
+    # punctuation; any trailing-formula leak is trimmed mechanically by
+    # the apply layer, so this case must not trigger an expensive
+    # error-level retry.
     item = {
         "item_id": "p001-b001",
         "protected_source_text": "the reaction rate depends on",
@@ -665,8 +683,10 @@ def test_context_bleed_downgraded_to_warning_for_continuation_items() -> None:
 
 
 def test_direct_typst_single_prompt_moves_scoped_terms_into_user_message() -> None:
-    # 词表按条目匹配后逐条不同,放 system 会打掉前缀缓存;
-    # 匹配到的术语经 item 注入 user 消息。
+    # The term list is matched per item and varies across requests;
+    # putting it in the system prompt would defeat the prefix cache.
+    # Matched terms are therefore injected into the user message via the
+    # item.
     messages = deepseek_client.build_single_item_fallback_messages(
         {
             "item_id": "p001-b001",

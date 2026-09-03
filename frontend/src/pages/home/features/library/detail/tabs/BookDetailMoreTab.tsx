@@ -1,11 +1,12 @@
-// Tab"Other Actions"——Reading status / Collection / 占位 / Delete.
-// 后续导出, Rename等接在books组件内, 不必动其他 tab.
+// "Other Actions" tab — reading status / collections / placeholder / delete.
+// Future export, rename, etc. hook into this component so the other tabs
+// stay untouched.
 
 import { ReadingStatusPanel } from "../panels/ReadingStatusPanel.jsx";
 import { CollectionsPanel } from "../panels/CollectionsPanel.jsx";
 import { DeleteFooterPanel } from "../panels/DeleteFooterPanel.jsx";
 
-/** 占位: 后续接导出 / share等. */
+/** Placeholder: future export / share / etc. hooks land here. */
 export function BookDetailMorePlaceholder() {
   return (
     <div

@@ -1,4 +1,4 @@
-// 主Workflow StatusCard 展示: status-card-shell + hero(DOM 契约 id 保留).
+// Main workflow StatusCard display: status-card-shell + hero (DOM contract ids preserved).
 
 import { StageFlow } from "./StageFlow.jsx";
 import { SubstageFlow } from "./SubstageFlow.jsx";

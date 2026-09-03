@@ -1,5 +1,6 @@
-// 书架ListView的行(照搬 PDF_MD_lib 的 BookListRow):小封面缩略图 + Title/副Title/
-// Updates日期 + 右侧眼睛(快速阅读).点行 → Book Details弹窗.Data/动作与卡片一致.
+// Bookshelf ListView row (copied from PDF_MD_lib's BookListRow): small cover thumbnail +
+// Title/subtitle / Updates date + right-side eye (quick read). Click row → Book Details popup.
+// Data/actions consistent with card.
 
 import { memo } from "react";
 import { cn } from "@/lib/utils";
@@ -89,7 +90,7 @@ function BookListRowImpl({
       if (documentId) onToggleSelect?.(documentId);
       return;
     }
-    // 优先详情弹窗(Translation Tab 内嵌Progress)；不走旧工作流弹窗
+    // Prefer detail popup (Translation tab with embedded progress); don't go through old workflow dialog
     if (onOpenDetail && (documentId || jobId)) {
       onOpenDetail(item);
       return;

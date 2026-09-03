@@ -1,6 +1,7 @@
-// Translation调试:StatusFilter + Search输入(受控草稿态,点击"刷新"或回车才提交
-// applyTranslationFilter——镜像旧世界 readTranslationFilterQuery 只在提交时
-// 读一次表单值的语义,不yes每个按键都请求).
+// Translation debug: StatusFilter + Search input (controlled draft state; filter is
+// submitted only on "Refresh" click or Enter key press via applyTranslationFilter —
+// mirrors the old world's readTranslationFilterQuery, which read form values only on
+// submission, not on every keystroke).
 
 import { useState } from "react";
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
@@ -58,6 +59,5 @@ export function TranslationFilterPanel({ query, onApply }) {
     </section>
   );
 }
-
 
 

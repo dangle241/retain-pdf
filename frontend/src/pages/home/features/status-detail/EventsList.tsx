@@ -1,10 +1,12 @@
-// Events流List:src/js/status-detail/events.js 的 buildEventsPresentation
-// (字符串模板拼接)的 JSX 重写,类名/结构照搬(蓝图 §1.1 判决表:events.js
-// markup 拼接部m不用,改读原始Data数组;逐entries断言取代 markup 断言).
+// Events stream list: JSX rewrite of src/js/status-detail/events.js's buildEventsPresentation
+// (string template assembly), class names/structure copied (blueprint §1.1 verdict table:
+// events.js markup assembly part not used, reads raw data array instead; per-entry
+// assertions replace markup assertions).
 //
-// tone 判定 + Sort规则从 events.js 原样照搬(与 detail pages EventsTimeline.jsx
-// 的 formatEventPayload 先例一致,小函数直接拷贝进组件Files,不新增一层
-// model.js——旧Filesbooks身不可 import,拷贝面很小).
+// Tone determination + sort rules copied verbatim from events.js (consistent with
+// detail pages EventsTimeline.jsx's formatEventPayload precedent; small functions
+// copied directly into component files, no new model.js layer — old files themselves
+// cannot be imported, the copied surface is tiny).
 
 import { useState } from "react";
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
@@ -76,8 +78,8 @@ export function EventsList({ eventsPayload }) {
       <div id={ids.empty} className={hasItems ? "events-empty hidden" : "events-empty"}>No Events</div>
       <div id={ids.list} className={hasItems ? "events-list" : "events-list hidden"}>
         {entries.map(({ item }, index) => (
-          // Sort后位次前缀保证唯一——不能只用 item.seq/event_id(mock/真实Data都
-          // 观测到部mEvents缺这两个字段,退回 index 会和"确实带 seq"的entries目撞键).
+          // Sort position prefix guarantees uniqueness — cannot use item.seq/event_id alone (both mock and real data
+          // have been observed to lack these two fields in some events; falling back to index would collide with entries that do have seq).
           <EventItem key={`${index}-${item?.seq ?? item?.event_id ?? ""}`} item={item} />
         ))}
       </div>

@@ -1,20 +1,24 @@
-// 结果Action行(蓝图 §2 features/status/;镜像 job-status-card-rendering.js 的
-// syncPrimaryActions/setActionLinkState——DOM 契约逐 id/class 保留).
+// Result action row (blueprint §2 features/status/; mirrors
+// job-status-card-rendering.js syncPrimaryActions/setActionLinkState — DOM
+// contract preserved by id/class).
 //
-// "Side-by-side Reader"链接(dialogs 蓝图 §4 施工ScopePage 6 entries ①):运行时复核确认
-// 3b 只Rendering了裸 <a href="reader.html?...">,没有拦截点击——整pages跳转会
-// 打断 SPA 的对话框体验,补上 onClick(preventDefault + onReaderClick)
-// 走 ReaderDialog 统一的 openReaderRequested 入口,href 保留作为
-// JS 失效时的Ready兜底.
+// "Side-by-side Reader" link (dialogs blueprint §4 scope page 6 entry ①):
+// runtime verification confirmed it only renders a bare <a href="reader.html?...">,
+// with no click interception — full-page navigation would interrupt the SPA dialog
+// experience. Added onClick (preventDefault + onReaderClick) to route through
+// ReaderDialog's unified openReaderRequested entry; href is kept as a fallback
+// for when JS is disabled.
 //
-// markdownBundle/sourcePdf/pdf 三个下载链接(dialogs 蓝图 §7):这几个 id
-// 命中 artifact-downloads 域的 document 级委托点击(controller.js 的
-// handleProtectedArtifactClick,composition.js 已挂载 bindEvents()),点击
-// 时该处理器会先于原生 <a> 默认跳转执行 event.preventDefault()——按钮books身不
-// required额外接 onClick(委托点击与谁Rendering了按钮None关).这里只订阅
-// artifact-download-busy-store.js 的对应 actionId m片,驱动"Downloading...".
-// 文案与禁用态(方案二:避免父组件因轮询重Rendering把命令式写入的下载Progress文案
-// 覆盖回原始 label).
+// markdownBundle/sourcePdf/pdf three download links (dialogs blueprint §7):
+// these ids hit the artifact-downloads domain's document-level delegated click
+// (controller.js handleProtectedArtifactClick, mounted via bindEvents() in
+// composition.js; that handler runs event.preventDefault() before the native <a>
+// default navigation — the button itself does not need to attach onClick (delegated
+// click is independent of which component Rendering the button). Here we only
+// subscribe to the corresponding actionId slice of artifact-download-busy-store.js
+// to drive the "Downloading..." label and disabled state (approach 2: avoids the
+// parent component's polling re-renders overwriting the imperative download progress
+// text with the original label).
 
 import { useHomeServices } from "../../home-services-context.js";
 import { useArtifactDownloadBusy } from "../../state/use-artifact-download-busy.js";
@@ -94,7 +98,5 @@ export function ResultActions({
     </div>
   );
 }
-
-
 
 

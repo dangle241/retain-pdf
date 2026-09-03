@@ -1,4 +1,4 @@
-// 主pages AI Q&A: Notion 式 —— 左History侧栏(可折叠)+ 中空态居中 / 对话流
+// Main page AI Q&A: Notion-style — left history sidebar (collapsible) + center empty state / chat flow
 
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
@@ -50,7 +50,7 @@ export function HomeAskView() {
   } = useHomeAskRuntime();
   const [scopes, setScopes] = useState<HomeAskScope[]>([]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(loadSidebarCollapsed);
-  // credentialsSave后立刻重算门禁: 订阅 credentials store + 自定义Events
+  // Recompute guard immediately after credentials save: subscribe to credentials store + custom events
   const [credTick, setCredTick] = useState(0);
   const credentialsSnap = useStoreSnapshot(services.ports.credentialsStatePort.store);
   const empty = messages.length === 0;

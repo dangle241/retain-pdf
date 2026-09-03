@@ -1,5 +1,5 @@
-// job-runtime / recent-jobs / artifact-downloads —— 在 composition Stage一次挂齐, 
-// 不放进 initialize 的 if 懒挂载.
+// job-runtime / recent-jobs / artifact-downloads — mounted together in one shot at
+// composition Stage; not lazy-mounted inside the initialize if block.
 
 import {
   API_PREFIX,
@@ -38,7 +38,7 @@ import type {
 } from "./types.js";
 import type { RecentJobsReactViewPort } from "../features/library/types.js";
 
-/** mountJobRuntimeFeature 外壳端口(只声明 composition 实际传入的面) */
+/** Shell port for mountJobRuntimeFeature (declares only the surface composition actually passes in) */
 type JobRuntimeShellViewPort = {
   closeDialogs: () => void;
   isReaderOpen: () => boolean;
@@ -46,7 +46,7 @@ type JobRuntimeShellViewPort = {
   setCancelDisabled: (disabled: boolean) => void;
 };
 
-/** artifact-downloads viewPort 局部 adapter */
+/** artifact-downloads viewPort local adapter */
 type ArtifactDownloadsViewPort = {
   bindProtectedLinks: (handler: (event: Event, link: Element) => void) => void;
   isLinkDisabled: (link: Element) => boolean;
@@ -143,7 +143,8 @@ export function createRuntimeFeatures({
     clearPageRanges: () => features.uploadFeature.clearPageRanges(),
     updateJobWarning: bridge.updateJobWarning,
     activateDetailTab: bridge.activateDetailTab,
-    // 主pages不再嵌入阅读 iframe；sync/close 保留给 job-runtime 契约, 实现为空.
+    // Main pages no longer embed the reading iframe; sync/close remain as job-runtime
+    // contract stubs with empty implementations.
     onReaderDialogSync: () => {},
     onReaderDialogClose: () => {},
     uploadStatePort,
@@ -156,7 +157,8 @@ export function createRuntimeFeatures({
     state: jobRuntimeState,
     fetchProtected,
     setText: bridge.setText,
-    // currentJobIdFor(state) 与默认 `() => ""` 形参签名不一致, 运行时 port 会把 state 透传.
+    // currentJobIdFor(state) has a different signature from the default `() => ""`;
+    // the runtime port passes state through.
     runtimePort: createArtifactDownloadsRuntimePort({
       currentJobId: (state?: unknown) => currentJobIdFor(state),
     }),
@@ -168,7 +170,8 @@ export function createRuntimeFeatures({
   }) as ArtifactDownloadsFeature;
   artifactDownloadsFeature.bindEvents();
 
-  // startPolling/openReader 已由 jobRuntimePort/readerPort/navigationPort 注入；签名仍标必填.
+  // startPolling/openReader already injected via jobRuntimePort/readerPort/navigationPort;
+  // signatures still mark them as required.
   const recentJobsFeature = mountRecentJobsFeature({
     fetchJobList,
     fetchJobPayload,

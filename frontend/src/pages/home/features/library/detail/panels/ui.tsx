@@ -1,4 +1,5 @@
-// 详情弹窗 panel total用小Tools(样式 / 图标), None业务.
+// Small UI helpers (styles / icons) shared by the detail-dialog panels.
+// No business logic lives here.
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button.jsx";

@@ -3,8 +3,8 @@ import {
   mockScenario,
 } from "../../composition/external.js";
 
-// Mock 演示模式提示entries: URL 带 ?mock=demo / parallel 等时Display.
-// 引导用户打开Library书 → Translation Tab → Translation整books, 看 live Progress动画.
+// Mock demo mode tip entry: displayed when URL has ?mock=demo / parallel etc. Guides user
+// to open a library book → Translation tab → translate entire book, watch live progress animation.
 
 export function MockModeBanner() {
   if (!isMockMode()) {

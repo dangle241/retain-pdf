@@ -16,7 +16,7 @@ export const DECOR_MANIFEST_VERSION = 1;
 
 /* ---------- Asset budgets (ground truth for pipeline gates and validation) ---------- */
 
-/** 单个 glb 模型体积上限(Draco+KTX2 压缩后) */
+/** Max size per glb model (after Draco+KTX2 compression) */
 export const MODEL_BUDGET_KB = 2048;
 /** Max triangles per model (as reported by gltf-transform inspect) */
 export const MODEL_MAX_TRIANGLES = 50_000;

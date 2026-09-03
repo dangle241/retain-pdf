@@ -1,9 +1,9 @@
-// BatchSelectTools栏(照搬 PDF_MD_lib 的 LibraryBatchToolbar,按我们后端能力收窄:
-// 没有BatchDelete端点,逐个复用 deleteDocument;Add to collectionbooks身就yesBatch端点,直接
-// 传数组).视觉上不搬参考items目的"贴底通栏",改成和booksitems目已有的
-// library-search-dock/library-bottom-actions 同一套"悬浮圆角胶囊"Language——
-// Batch模式下占用搜索框原来的底部居中位置(RecentJobsLibrary 切换时隐藏
-// LibrarySearchDock,两者不会同时出现).
+// Batch select tools bar (adapted from PDF_MD_lib's LibraryBatchToolbar, narrowed to our backend capabilities:
+// no BatchDelete endpoint, reuse deleteDocument one by one; Add to collection already has a Batch endpoint, directly
+// pass array). Visually not following the reference's "stick to bottom full-width bar", changed to the same
+// "floating rounded capsule" language as the existing library-search-dock/library-bottom-actions —
+// Batch mode occupies the search box's original bottom-center position (RecentJobsLibrary hides
+// LibrarySearchDock when switching, the two will not appear simultaneously).
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";

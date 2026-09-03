@@ -1,9 +1,9 @@
-// Progress区块(蓝图 §2 features/status/;镜像
-// job-status-card-progress-renderer.js 的 renderProgressComponents/
-// renderProgressModel——DOM 契约逐 id/class/CSS 变量保留(蓝图风险 §8.7:
-// --status-ring-percent, --status-progress-percent, data-value, 
-// aria-valuenow).renderOptions 来自 useStagedProgressAnimation 的输出,
-// books组件只管声明式Rendering,不持有动画Status.
+// Progress block (Blueprint §2 features/status/; mirrors
+// job-status-card-progress-renderer.js renderProgressComponents/
+// renderProgressModel——DOM contract preserves ids/classes/CSS variables (Blueprint risk §8.7:
+// --status-ring-percent, --status-progress-percent, data-value,
+// aria-valuenow). renderOptions from useStagedProgressAnimation output.
+// Book components only handle declarative rendering; they do not hold animation state.
 
 import type { CSSProperties } from "react";
 import { buildProgressRenderModel, type ProgressRenderModelInput } from "./progress-model.js";

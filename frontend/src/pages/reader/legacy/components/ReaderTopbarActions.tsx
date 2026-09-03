@@ -1,6 +1,7 @@
-// 顶栏动作组:四个Tools开合按钮 + 下载菜单.
-// 开合Status订阅 drawer store(替代旧 side-drawers.js 对按钮 aria-expanded/is-active
-// 的命令式写入);下载菜单为 React 组件,context 由 boot 在清单加载后注入.
+// Topbar action group: four tool toggle buttons + download menu.
+// Open/close status subscribes to drawer store (replaces old side-drawers.js imperative
+// aria-expanded/is-active writes); download menu is a React component, context injected
+// by boot after manifest loads.
 
 import { useDrawerActive } from "../state/use-drawer-active.js";
 import { ReaderDownloadMenu } from "./ReaderDownloadMenu.jsx";
@@ -34,6 +35,5 @@ export function ReaderTopbarActions({ drawerStore, downloadContext }) {
     </div>
   );
 }
-
 
 

@@ -1,7 +1,7 @@
-// Translation调试 tab(Advanced Diagnostics)——组合 Summary/FilterPanel/ItemsPanel/DetailPanel,
-// 外层 status/empty/content 三态切换 JSX 重写
-// status-detail-dialog-translation.js#renderTranslationSummary 的 hidden branch
-// (蓝图 §1.2 组件表:TranslationDebugTab 家族).
+// Translation debug tab (Advanced Diagnostics) — composes Summary/FilterPanel/ItemsPanel/DetailPanel,
+// with outer status/empty/content three-state toggle, JSX rewrite of
+// status-detail-dialog-translation.js#renderTranslationSummary hidden branch
+// (blueprint §1.2 component table: TranslationDebugTab family).
 
 import { TranslationSummary } from "./TranslationSummary.jsx";
 import { TranslationFilterPanel } from "./TranslationFilterPanel.jsx";
@@ -39,7 +39,6 @@ export function TranslationDebugTab({ translation, controller }) {
     </section>
   );
 }
-
 
 
 

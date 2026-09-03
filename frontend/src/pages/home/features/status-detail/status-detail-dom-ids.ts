@@ -1,11 +1,13 @@
-// StatusDetailDialog 的 DOM 契约 id 拷贝(蓝图 §1 + §0.1).
+// StatusDetailDialog DOM contract ID copy (blueprint §1 + §0.1).
 //
-// 拷贝自 src/js/components/dialogs/status-detail-dialog-dom-contract.js(该
-// 目录整体属旧自定义元素View层,architecture-boundaries.test.mjs 的
-// `/js/components/` 防回弹正则禁止 pages/** 直接 import)——CredentialsDialog
-// 域已用同一手法拷贝出 credentials-dom-ids.js,这里照此处理.id 字符串逐一
-// 保留,视觉基线(status-dialog-failed/status-dialog-translation)与门禁按
-// 这些 id 断言,新增/改动一律不改名旧世界字符串.
+// Copied from src/js/components/dialogs/status-detail-dialog-dom-contract.js (that
+// directory is the old custom element View layer; architecture-boundaries.test.mjs's
+// `/js/components/` anti-bounce regex prohibits pages/** direct imports) —
+// CredentialsDialog domain already used the same approach to produce
+// credentials-dom-ids.js, and this follows the same pattern. ID strings are
+// preserved one-by-one; visual baselines (status-dialog-failed/status-dialog-translation)
+// and gate assertions depend on these IDs, so renaming any old-world string is
+// forbidden for new/changed work.
 
 export const STATUS_DETAIL_DIALOG_IDS = {
   openButton: "status-detail-btn",
@@ -89,10 +91,10 @@ export const STATUS_DETAIL_DIALOG_IDS = {
   },
 };
 
-// 拷贝自 src/js/contracts/download-action-contract.js 的 MARKDOWN_BUNDLE id
-// (该Files不在防回弹禁区,但Overview面板下载行的 id 属 StatusDetailDialog 自身
-// 模板契约,和 status-card-dom-ids.js 的 STATUS_MARKDOWN_BUNDLE yes两个不同的
-// 物理 id,不冲突——直接内联避免多一层 re-export).
+// Copied from src/js/contracts/download-action-contract.js MARKDOWN_BUNDLE id
+// (that file is not in an anti-bounce restricted zone; but the id for the
+// Overview panel download row belongs to StatusDetailDialog's own template
+// contract — it is a different physical id from status-card-dom-ids.js's
+// STATUS_MARKDOWN_BUNDLE, so no conflict — inline it to avoid an extra re-export).
 export const STATUS_DETAIL_MARKDOWN_BUNDLE_ID = "markdown-bundle-btn";
-
 

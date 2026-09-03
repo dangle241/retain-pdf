@@ -1,5 +1,5 @@
-// StatusCard total享模型: store → snapshot → display / lottie / progress.
-// Main 与 Embedded 只消费books hook 的返回值, 不各自再拼一遍.
+// StatusCard shared model: store → snapshot → display / lottie / progress.
+// Main and Embedded only consume this hook's return value; no separate assembly needed.
 
 import { useMemo } from "react";
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";

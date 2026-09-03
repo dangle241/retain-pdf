@@ -1,4 +1,4 @@
-// 详情: 拉 document 全文, Title/TagsEdit, Reading status, Collection, Delete.
+// Detail: fetch document full text, Title/Tags Edit, Reading status, Collection, Delete.
 
 import { useEffect, useMemo, useState } from "react";
 import {

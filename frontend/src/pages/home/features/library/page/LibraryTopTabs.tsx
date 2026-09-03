@@ -1,13 +1,13 @@
-// 主pages顶部"Library / Collection / Favorite / AI Q&A"m栏(裸 Tabs 原语,不经 src/components/ui/tabs.jsx
-// 默认皮肤——同 StatusDetailDialog/SettingsHubDialog 的既有Select,用items目自有
-// class,不接 shadcn 默认视觉).
+// Main page top "Library / Collection / Favorite / AI Q&A" bar (bare Tabs primitive, not going through src/components/ui/tabs.jsx
+// default skin — same as StatusDetailDialog/SettingsHubDialog's existing Select, use project's own
+// classes, don't hook into shadcn default visuals).
 //
-// 图标化:每个 tab 前置语义图标 + 短文字(纯图标伤 wayfinding).
-// 激活 tab yes纯Pages级 UI 态(HomeApp useState),不持久化——刷新回到Library.
+// Iconized: each tab prefixed with semantic icon + short text (pure icon hurts wayfinding).
+// Active tab is pure page-level UI state (HomeApp useState), not persisted — refresh returns to Library.
 
 import { Tabs as TabsPrimitive } from "radix-ui";
 
-// Library:书脊排列在书架上
+// Library: book spines arranged on a bookshelf
 function IconLibrary() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -18,7 +18,7 @@ function IconLibrary() {
     </svg>
   );
 }
-// Collection:多层叠书
+// Collection: stacked books
 function IconLayers() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -28,7 +28,7 @@ function IconLayers() {
     </svg>
   );
 }
-// Favorite:书签(Paragraph级Excerpt/Note,与Collection=Documentsm组区m)
+// Favorite: bookmark (paragraph-level Excerpt/Note, distinct from Collection=document grouping)
 function IconBookmark() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -36,7 +36,7 @@ function IconBookmark() {
     </svg>
   );
 }
-// AI Q&A:星芒
+// AI Q&A: sparkles
 function IconSparkles() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -46,8 +46,8 @@ function IconSparkles() {
   );
 }
 
-// key 保持 "categories"(契约 id library-top-tab-categories / 测试引用不变).
-// "favorites" / "ask" 为后续入口.
+// key kept as "categories" (contract id library-top-tab-categories / test references must not change).
+// "favorites" / "ask" are future entry points.
 const TABS = [
   { key: "library", label: "Library", Icon: IconLibrary },
   { key: "categories", label: "Collection", Icon: IconLayers },
@@ -72,7 +72,7 @@ export function LibraryTopTabs({ active, onChange }) {
           >
             <tab.Icon />
             <span>{tab.label}</span>
-            {/* 装饰钩子: 默认None样式零Rendering, 皮肤可在 CSS 里给 tab 贴图换装 */}
+            {/* Decoration hook: default zero-rendering None style, skin can add graphics to tab via CSS */}
             <span className="library-top-tab-ornament" aria-hidden="true" />
           </TabsPrimitive.Trigger>
         ))}

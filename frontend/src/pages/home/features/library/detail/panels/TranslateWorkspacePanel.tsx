@@ -1,5 +1,6 @@
-// 兼容入口: Translation Tab 工作台 = BookTranslationWorkflowPanel.
-// 新代码请直接 import BookTranslationWorkflowPanel.
+// Backwards-compatible entry point: the Translation tab workspace is
+// BookTranslationWorkflowPanel. New code should import BookTranslationWorkflowPanel
+// directly.
 
 export {
   BookTranslationWorkflowPanel as TranslateWorkspacePanel,

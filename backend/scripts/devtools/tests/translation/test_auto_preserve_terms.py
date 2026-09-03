@@ -160,7 +160,8 @@ def test_execution_plan_uses_high_configured_workers_for_deepseek(tmp_path: Path
     assert summary["configured_workers"] == 1000
     assert summary["adaptive_concurrency"]["configured_limit"] == 1000
     assert summary["adaptive_concurrency"]["initial_limit"] == 1000
-    # deepseek 默认开启前缀缓存预热:首条请求完成前 current_limit 压为 1
+    # DeepSeek has prefix-cache warmup enabled by default: current_limit
+    # is clamped to 1 until the first request completes.
     assert summary["adaptive_concurrency"]["current_limit"] == 1
     assert summary["adaptive_concurrency"]["floor_limit"] == 8
 
@@ -205,7 +206,8 @@ def test_execution_plan_can_cap_deepseek_initial_concurrency(tmp_path: Path, mon
 
     assert summary["adaptive_concurrency"]["configured_limit"] == 1000
     assert summary["adaptive_concurrency"]["initial_limit"] == 250
-    # 前缀缓存预热生效期间 current_limit 为 1,首条请求完成后恢复到 250
+    # While prefix-cache warmup is in effect, current_limit is 1; once
+    # the first request completes, it is restored to 250.
     assert summary["adaptive_concurrency"]["current_limit"] == 1
 
 
@@ -241,7 +243,8 @@ def test_prefix_cache_warmup_releases_gate_even_when_first_request_fails() -> No
     )
     diagnostics.configure_adaptive_concurrency(initial_limit=100, warmup=True)
     diagnostics.acquire_request_slot()
-    # 首条请求失败:预热放弃,但不能把整个运行钉死在串行
+    # First request failed: warmup is abandoned, but the entire run
+    # must not be stuck in serial mode.
     diagnostics.release_request_slot(success=False, elapsed_ms=20000, status_code=None, error_class="ReadTimeout")
     assert diagnostics.build_summary()["adaptive_concurrency"]["current_limit"] > 1
 
@@ -258,16 +261,17 @@ def test_aimd_backs_off_on_sustained_connect_timeout_storm() -> None:
         configured_classify_batch_size=1,
     )
     diagnostics.configure_adaptive_concurrency(initial_limit=100)
-    # 孤立超时容忍:前 4 次不降速
+    # Isolated timeouts are tolerated: no slowdown in the first 4 events.
     for _ in range(4):
         diagnostics.acquire_request_slot()
         diagnostics.release_request_slot(success=False, elapsed_ms=20000, status_code=None, error_class="ConnectTimeout")
     assert diagnostics.build_summary()["adaptive_concurrency"]["current_limit"] == 100
-    # 第 5 次:风暴确认,温和降速一档
+    # Fifth event: a storm is confirmed, so we step the limit down
+    # one notch (multiplicative decrease).
     diagnostics.acquire_request_slot()
     diagnostics.release_request_slot(success=False, elapsed_ms=20000, status_code=None, error_class="ConnectTimeout")
     assert diagnostics.build_summary()["adaptive_concurrency"]["current_limit"] == 85
-    # 成功清零计数,不再继续降
+    # A success zeroes the failure counter so no further backoff happens.
     diagnostics.acquire_request_slot()
     diagnostics.release_request_slot(success=True, elapsed_ms=5000, status_code=200)
     for _ in range(4):

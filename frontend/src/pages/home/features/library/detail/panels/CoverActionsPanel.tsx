@@ -1,6 +1,8 @@
-// 左栏: 封面 + Side-by-side/原版主Action.
-// 元信息Summary(Pages/Size/Added/Collection)已迁到右栏Overview Tab 的信息Grid
-// (BookDetailOverviewTab)——左栏纯粹化, 右栏不再空旷.
+// Left column: cover + Side-by-side / original primary actions.
+// Metadata summary (Pages / Size / Added / Collection) was moved to the
+// info grid in the Overview tab on the right (BookDetailOverviewTab), so the
+// left column is now pure cover + primary action and the right column is no
+// longer empty.
 
 import { btn, IconCompare, IconEye } from "./ui.jsx";
 import { BookCardProcessingOverlay } from "../../display/BookCardProcessingOverlay.jsx";
@@ -11,7 +13,7 @@ import { BookCardProcessingOverlay } from "../../display/BookCardProcessingOverl
  * @param {boolean} props.readerAvailable
  * @param {string} props.documentId
  * @param {string|boolean} props.busy
- * @param {boolean} [props.processing] Translation/RetryIn progress: 封面中央 loading
+ * @param {boolean} [props.processing] translation / retry in progress: shows a centered loading overlay on the cover
  * @param {() => void} props.onCompare
  * @param {() => void} props.onReadSource
  */

@@ -1,4 +1,4 @@
-// 主pages AI 输入entries: @ 选Documents / Collection + chips + Send
+// Main page AI input entry: @ select documents / collections + chips + send
 
 import {
   useCallback,
@@ -22,13 +22,13 @@ const MAX_SCOPES = 4;
 export type HomeAskComposerProps = {
   disabled?: boolean;
   isRunning?: boolean;
-  /** not configured模型 Key 时禁用Send并提示 */
+  /** disabled with prompt when model key is not configured */
   missingLlmKey?: boolean;
   scopes: HomeAskScope[];
   onScopesChange: (next: HomeAskScope[]) => void;
   onSend: (question: string) => void;
   onStop?: () => void;
-  /** hero: 空态居中大输入；dock: 对话底栏 */
+  /** hero: empty-state centered large input; dock: conversation bottom bar */
   variant?: "hero" | "dock";
 };
 

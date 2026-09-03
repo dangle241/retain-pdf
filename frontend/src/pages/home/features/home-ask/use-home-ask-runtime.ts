@@ -1,4 +1,4 @@
-// 主pagesLibrary级 AI Q&A: 全库 / @ Documents + 会话List(侧栏History)
+// Main page library-level AI Q&A: full library / @ documents + session list (sidebar history)
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { askLibraryAi, AiAskError } from "../../../../js/api/ai.js";
@@ -103,7 +103,7 @@ function buildScopedQuestion(
   return `Search and answer within the following scope: \n${scopeLines}\n\nQuestion: ${q}`;
 }
 
-/** 展开 scopes → DocumentsList；单Documents硬 scope 时返回 primary */
+/** Expand scopes → document list; returns primary when single document hard scope */
 async function resolveScopesForAsk(scopes: HomeAskScope[]): Promise<{
   primaryDoc: HomeAskDocScope | null;
   resolvedDocs: HomeAskDocScope[];
@@ -132,11 +132,11 @@ async function resolveScopesForAsk(scopes: HomeAskScope[]): Promise<{
         }
       }
     } catch {
-      // Collection展开Failed时仍靠 prompt 里的Collection名提示模型
+      // If collection expansion fails, still rely on collection name in prompt to hint model
     }
   }
 
-  // 仅一个Documents(None论直接 @ 还yesCollection里只有一documents)→ 硬限定
+  // Only one document (whether directly @ or collection has only one document) → hard scope
   const primaryDoc = docs.length === 1 ? docs[0] : null;
   return { primaryDoc, resolvedDocs: docs };
 }
@@ -195,7 +195,7 @@ export function useHomeAskRuntime() {
   const runningRef = useRef(false);
   const conversationIdRef = useRef(conversationId);
   const abortRef = useRef<AbortController | null>(null);
-  /** Current流式 assistant 消息 id, 停止时用于收尾文案 */
+  /** Current streaming assistant message id, used for final copy on stop */
   const streamingAssistantIdRef = useRef("");
   conversationIdRef.current = conversationId;
 
@@ -212,7 +212,7 @@ export function useHomeAskRuntime() {
         .filter((s) => s.id);
       setSessions(list);
     } catch {
-      // ListFailed不挡主Workflow
+      // List failure does not block main workflow
     } finally {
       setSessionsLoading(false);
     }
@@ -222,7 +222,7 @@ export function useHomeAskRuntime() {
     void refreshSessions();
   }, [refreshSessions]);
 
-  // Start时若有粘性 conversationId, 尝试 hydrate(Failed则当New conversation)
+  // On start, if sticky conversationId exists, try to hydrate (if failed, treat as new conversation)
   useEffect(() => {
     const id = loadConversationId();
     if (!id) return;
@@ -258,7 +258,7 @@ export function useHomeAskRuntime() {
   }, []);
 
   const newSession = useCallback(() => {
-    // New conversation时若正在生成, 先中止
+    // If new conversation while generation is in progress, abort first
     if (runningRef.current) {
       try {
         abortRef.current?.abort();
@@ -284,7 +284,7 @@ export function useHomeAskRuntime() {
       saveConversationId(next);
       setMessages(messagesFromDetail(detail));
     } catch {
-      // 切Failed保持现状
+      // Switch failure keeps current state
     } finally {
       setSessionBusy(false);
     }
@@ -336,7 +336,7 @@ export function useHomeAskRuntime() {
     const question = `${rawQuestion || ""}`.trim();
     if (!question || runningRef.current) return;
 
-    // 门禁: None LLM Key 不发起任何Search/会话写, 避免"先忙活再报错"
+    // Guard: no LLM key → do not start any search/write, avoid "busy then error"
     const config = resolveReaderAiConfig();
     const apiKey = `${config.apiKey || ""}`.trim();
     if (!apiKey) {
@@ -358,7 +358,7 @@ export function useHomeAskRuntime() {
       ? `${question}\n\n${scopes.map((s) => (s.kind === "collection" ? `@Collection:${s.title}` : `@${s.title}`)).join(" ")}`
       : question;
 
-    // 新请求前中止上一轮
+    // Abort the previous round before a new request
     try {
       abortRef.current?.abort();
     } catch {
@@ -465,7 +465,7 @@ export function useHomeAskRuntime() {
         || abort.signal.aborted
       );
       if (aborted) {
-        // 保留已流式输出的正文, 追加"已停止"
+        // Keep streamed output text, append "stopped"
         setMessages((prev) => prev.map((m) => {
           if (m.id !== assistantId) return m;
           const partial = `${m.content || ""}`.trim();
@@ -508,7 +508,7 @@ export function useHomeAskRuntime() {
     sessions,
     sessionsLoading,
     sessionBusy,
-    /** yesno已配置模型 Key(门禁；每次调用现读 storage) */
+    /** Whether model key is configured (guard; reads storage on each call) */
     hasLlmKey: hasModelApiKey,
     send,
     stop,

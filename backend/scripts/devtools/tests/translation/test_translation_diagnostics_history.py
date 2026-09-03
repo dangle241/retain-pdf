@@ -12,7 +12,9 @@ from services.translation.core.payload.parts.diagnostics import record_translati
 
 
 def test_top_level_merge_semantics_unchanged() -> None:
-    # 契约:顶层仍是 dict、覆盖式 merge——现有读方(前端/Rust/debug index)零感知。
+    # Contract: the top level remains a dict with overwrite-merge
+    # semantics — existing readers (frontend / Rust / debug index) see
+    # no change.
     item = {
         "translation_diagnostics": {
             "route_path": ["batch"],
@@ -30,8 +32,9 @@ def test_top_level_merge_semantics_unchanged() -> None:
 
 
 def test_history_preserves_per_stage_updates() -> None:
-    # 此前 degradation_reason/fallback_to 被后写阶段覆盖即丢历史;
-    # 现在每个阶段的 updates 都留在 history 里。
+    # Previously `degradation_reason` / `fallback_to` would be overwritten
+    # by later stages and the prior history was lost; now every stage's
+    # `updates` is preserved in `history`.
     item: dict = {}
 
     record_translation_diagnostics(
@@ -50,8 +53,10 @@ def test_history_preserves_per_stage_updates() -> None:
 
 
 def test_rereads_item_state_instead_of_stale_snapshot() -> None:
-    # 覆盖旧模式的病灶:"先构造快照、中间别人写入、再整段回写"。
-    # helper 写入前必须重读 item 当前诊断。
+    # Targets the failure mode of the old pattern: "snapshot first,
+    # someone else writes in between, then we rewrite the whole thing".
+    # The helper must re-read the item's current diagnostics before
+    # writing.
     item = {"translation_diagnostics": {"a": 1}}
     item["translation_diagnostics"] = {**item["translation_diagnostics"], "written_in_between": True}
 

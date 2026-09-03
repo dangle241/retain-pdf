@@ -1,6 +1,6 @@
-// CSV 导入面板(Side-by-side glossary-manager-dialog-template.js 的
-// .glossary-import-panel 区块镜像).parse动作复用 controller.js 的
-// applyImport(内部走 js/api/glossaries.js:parseGlossaryCsv).
+// CSV import panel (side-by-side mirror of glossary-manager-dialog-template.js's
+// .glossary-import-panel block). Parse action reuses controller.js's applyImport
+// (internally calls js/api/glossaries.js:parseGlossaryCsv).
 
 import { GLOSSARY_DOM_IDS } from "./glossaries-dom-ids.js";
 

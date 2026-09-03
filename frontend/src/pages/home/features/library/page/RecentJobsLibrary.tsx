@@ -1,14 +1,14 @@
-// LibraryGrid根组件(蓝图 §2 features/library/).
+// LibraryGrid root component (Blueprint §2 features/library/).
 //
-// 订阅设计(蓝图 §3):Library books体走None selector 全快照订阅——重渲 grid 函数
-// books体便宜,真正的性能隔离靠 BookCard 的 memo + cardSignatureOf(见
-// BookCard.jsx),不做 per-card store 订阅(收益零,蓝图已验证).
+// Subscription design (Blueprint §3): Library book body uses no-selector full snapshot subscription——
+// re-rendering grid function is cheap; real performance isolation relies on BookCard's memo +
+// cardSignatureOf (see BookCard.jsx), not per-card store subscription (zero gain; Blueprint verified).
 //
-// 展示模式派生(经与引擎实测核实,非直觉设计——见 library-view-store.js 顶部
-// 注释):recentJobsStatePort 的 batch() mpages提交在 storeDrivenRendering:true
-// 下从不触发 viewPort.renderList/renderEmpty,所以"items.length > 0 优先"yes
-// 唯一不会陈旧的信号源;libraryViewStore 的 mode 只在 items 为空时才可信
-// (loading/empty/error 三态由 renderLoading()/actions.js 的边缘路径驱动).
+// Display mode derivation (verified with engine testing; non-intuitive design——see library-view-store.js
+// top comment): recentJobsStatePort batch() page submission under storeDrivenRendering:true
+// never triggers viewPort.renderList/renderEmpty, so "items.length > 0 first" is the
+// only signal source that never becomes stale; libraryViewStore mode is trustworthy only when
+// items is empty (loading/empty/error three states driven by renderLoading()/actions.js edge paths).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -29,7 +29,7 @@ import {
   isRecentJobActive,
 } from "../../../composition/external.js";
 
-// 客户端Sort(只排已加载的这几pages;/documents None sort 参数,和参考items目一样在前端排).
+// Client-side sort (only sorts loaded pages; /documents has no sort param; sorted on frontend like reference items).
 function sortItems(items, sortMode) {
   const arr = [...items];
   const desc = (key) => (a, b) => `${b?.[key] || ""}`.localeCompare(`${a?.[key] || ""}`);
@@ -65,9 +65,9 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState("");
 
-  // BatchSelect(#31):选中态用 document_id 做 key(和Grid主键一致);Batch模式
-  // 开关经 onBatchModeChange 上报给 HomeApp,由它把底部栏(AppBottomBar)用
-  // CSS 隐藏(batchMode 期间让位给这entriesBatchTools栏——两者都固定在底部居中).
+  // BatchSelect (#31): selected state uses document_id as key (consistent with Grid primary key);
+  // batch mode toggle reported to HomeApp via onBatchModeChange; HomeApp hides the bottom bar
+  // (AppBottomBar) with CSS (batchMode yields to this BatchTools bar——both fixed at bottom center).
   const [batchMode, setBatchModeState] = useState(false);
   const [selectedIds, setSelectedIds] = useState(() => new Set<string>());
   const [batchBusy, setBatchBusy] = useState(false);
@@ -78,9 +78,9 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
     if (!next) setSelectedIds(new Set());
     onBatchModeChange?.(next);
   }
-  // useCallback:稳定引用——传给每张卡片当 onToggleSelect,不然
-  // areCardPropsEqual 里的 onToggleSelect 每次 render 都判不相等,
-  // RecentJobsLibrary 一重渲就拖着所有卡片一起重渲(memo 白做).
+  // useCallback: stable reference——passed to each card as onToggleSelect; otherwise
+  // areCardPropsEqual's onToggleSelect is judged unequal every render,
+  // RecentJobsLibrary re-rendering drags all cards to re-render together (memo wasted).
   const toggleSelect = useCallback((documentId) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -101,7 +101,7 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
 
   const items = Array.isArray(recentJobs.items) ? recentJobs.items : [];
 
-  // TagsList + 各Status计数(供Filter面板Display,基于已加载items).
+  // TagsList + per-status counts (for Filter panel display, based on loaded items).
   const { tags, statusCounts } = useMemo(() => {
     const tagSet = new Set<string>();
     const counts = { done: 0, untranslated: 0, active: 0, failed: 0 };
@@ -123,8 +123,8 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
     return sortItems(filtered, sortMode);
   }, [items, statusFilter, tagFilter, sortMode]);
 
-  // BatchSelect只作用"可选中"的items(有 document_id 的);极少见的运行时插入
-  // job-only items(None document_id)选不了,也不计入"Select all loaded"的m母.
+  // BatchSelect only applies to "selectable" items (those with document_id); rare runtime-inserted
+  // job-only items (no document_id) cannot be selected and are not included in "Select all loaded" count.
   const selectableIds = useMemo(
     () => visibleItems.map((item) => `${item.document_id || ""}`.trim()).filter(Boolean),
     [visibleItems],
@@ -187,7 +187,7 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
     viewPort,
   });
 
-  // 从Reader返回: List有高度后再resume #recent-jobs-scroll-body 滚动
+  // Returning from Reader: resume #recent-jobs-scroll-body scroll only after List has height
   useHomeReturnRestore(hasItems || mode === "empty" || mode === "error");
 
   function handleLoadMoreClick() {
@@ -262,7 +262,7 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
                 <BookCard
                   key={item.job_id}
                   item={item}
-                  // 壳 + 按钮:默认只有"快速阅读";要加Translation等在此 concat 即可
+                  // Shell + buttons: default only "Quick Read"; add Translation etc. by concatenating here
                   actions={buildDefaultBookCardActions(item, {
                     onReader: actions.openJobReader,
                     onReadSource: actions.openSourceReader,
@@ -306,10 +306,10 @@ export function RecentJobsLibrary({ onBatchModeChange }: any = {}) {
   );
 }
 
-// 使用 handleSearchChange 的搜索输入框自身留在 LibraryBottomBar(HomeApp.jsx)
-// 骨架里——LibraryGrid与底部搜索栏yes同级兄弟节点,不yes父子关系(镜像
-// partials/main-content.html).导出这个 hook 供 HomeApp.jsx 复用同一entries
-// onSearch/query 通道,避免出现两entries平行实现.
+// The search input using handleSearchChange stays in LibraryBottomBar (HomeApp.jsx)
+// skeleton——LibraryGrid and bottom search bar are siblings, not parent-child (mirrors
+// partials/main-content.html). Export this hook for HomeApp.jsx to reuse the same
+// onSearch/query channel; avoids two parallel implementations.
 export function useLibrarySearchBinding() {
   const services = useHomeServices();
   const { viewPort } = services.library;

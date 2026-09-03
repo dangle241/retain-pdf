@@ -1,41 +1,48 @@
-// StatusDetailDialog(蓝图 §1 主组件)——Side-by-side
-// components/dialogs/status-detail-dialog-template.js 逐 id/class 镜像.
+// StatusDetailDialog (blueprint §1 primary component) — Side-by-side
+// mirror of components/dialogs/status-detail-dialog-template.js by id/class.
 //
-// Dialog Rendering层(Stage C 第二batches,shadcn 改造):从原生 <dialog>+showModal/close
-// 换成 radix-ui 的 Dialog 原语(DialogPrimitive.Root/Portal/Overlay/Content),
-// 不经 src/components/ui/dialog.jsx 默认皮肤(className 继续用现有的
-// desktop-dialog/desktop-shell 这套 bespoke CSS,和 status-detail-dialog 专属
-// 覆盖并存).open 受控于 dialogStore(useStatusDetailOverview 的 open),
-// onOpenChange 在 next===false 时统一调用 dialogStore.close()——这不yes
-// TranslationWorkflowDialog 那种两态语义(Upload/Status),Close就yesClose,不required
-// m流.Escape, 点击背板(DismissableLayer 的 outside-click 检测), 点击Close
-// 按钮(DialogPrimitive.Close,替代原来 <form method="dialog"> 的
-// type="submit" 隐式提交Close)三entries路径都走这一个回调.
+// Dialog Rendering layer (Stage C second batch, shadcn refactor): switched from
+// native <dialog>+showModal/close to radix-ui Dialog primitives
+// (DialogPrimitive.Root/Portal/Overlay/Content), bypassing src/components/ui/dialog.jsx
+// default skin (className continues to use existing bespoke CSS — desktop-dialog/
+// this desktop-shell bespoke CSS and status-detail-dialog-specific overrides coexist). open
+// is controlled by dialogStore (from useStatusDetailOverview's open);
+// onOpenChange calls dialogStore.close() uniformly when next===false — unlike
+// TranslationWorkflowDialog's two-state semantics (Upload/Status), Close means
+// Close, no "open" flow required. All three entry paths — Escape key, backdrop
+// click (DismissableLayer outside-click detection), and Close button
+// (DialogPrimitive.Close, replacing the old <form method="dialog"> type="submit"
+// implicit close) — route through this single callback.
 //
-// 不 forceMount Content(同 CredentialsDialog 等 4 个Stage C 第一batches对话框的
-// 决策,见 use-dialog-return-focus.js 头注释——forceMount 会让 Radix modal
-// Content 内部的 hideOthers() 副作用在应用Start时就永久生效).
+// No forceMount on Content (same decision as the 4 Stage C first-batch dialogs;
+// see use-dialog-return-focus.js header — forceMount causes Radix modal
+// Content's internal hideOthers() side effect to permanently activate at app start).
 //
-// 双层 forceMount 交互(booksFiles的风险点):内层 4 个 tab 依旧各自
-// TabsPrimitive.Content forceMount + 显式 hidden 覆盖(Stage B 决策, 语义见下方
-// 面板函数注释)——外层 Dialog 不再 forceMount 意味着对话框整个Close时 Content
-// 连同内部 4 个 Tabs 一起卸载,tab 内部 useState(TranslationDebugTab 选中的
-// item 等)会被清空.这在产品语义上yes可接受的: forceMount+hidden 的常驻挂载
-// 语义原books就只服务于"对话框打开期间切 tab 不丢Status", 从未承诺"对话框Close
-// 再重开也保留", 两者并不冲突(已用 fresh Playwright 实测: 打开期间切 4 个
-// tab, Translation调试选中态跨切换保留, 见Stage C 报告).
+// Dual forceMount interaction (key migration risk): the inner 4 tabs still each
+// use TabsPrimitive.Content forceMount + explicit hidden override (Stage B
+// decision; semantic rationale in the panel function comments below) — but the
+// outer Dialog no longer forceMounts, meaning the entire dialog unmounts when
+// closed, along with the 4 inner Tabs, clearing tab-internal useState (e.g.,
+// TranslationDebugTab selected item). This is acceptable: forceMount+hidden's
+// persistent-mount semantics were designed only for "tab switching within an open
+// dialog preserves state", never promising "close and reopen also preserves it" —
+// the two are not in conflict (verified with fresh Playwright: switching among
+// 4 tabs during dialog open preserves Translation debug selection state across
+// switches; see Stage C report).
 //
-// Tabs 实现(Stage B,shadcn 改造):同 SettingsHubDialog/CredentialsDialog 的
-// Select——直接用 radix-ui 的 Tabs 原语(不经 src/components/ui/tabs.jsx 默认
-// 皮肤,避免和 detail-tabs/detail-tab-panel 这套 bespoke CSS 冲突).activeTab
-// 由 useStatusDetailOverview 的 controller.activateDetailTab 驱动,Radix 走
-// 受控模式.4 个面板All转成 TabsPrimitive.Content(forceMount + 显式 hidden
-// 覆盖),验证过 Radix 的 forceMount 只保证"强制Rendering children", 可见性仍由
-// contentProps 里显式传入的 hidden 决定(晚于 Radix 内部计算的 hidden 展开,
-// 会覆盖它)——StageHistoryList/EventsList/TranslationDebugTab 的内部 useState
-// 因此继续不受 tab 切换影响,这yesbooksFiles迁移的最大风险点,已用组件测试 +
-// fresh Playwright 验证(见 status-detail-dialog-component.test.mjs 与Stage B/C
-// 报告).
+// Tabs implementation (Stage B, shadcn refactor): same approach as
+// SettingsHubDialog/CredentialsDialog Select — uses radix-ui Tabs primitives
+// directly, bypassing src/components/ui/tabs.jsx default skin to avoid conflicts
+// with detail-tabs/detail-tab-panel bespoke CSS. activeTab is driven by
+// useStatusDetailOverview's controller.activateDetailTab, with Radix in controlled
+// mode. All 4 panels converted to TabsPrimitive.Content (forceMount + explicit
+// hidden override); verified that Radix forceMount guarantees "force Rendering
+// children" only — visibility is still controlled by the explicitly passed hidden
+// prop, which overrides Radix's internal hidden calculation — so
+// StageHistoryList/EventsList/TranslationDebugTab internal useState is unaffected
+// by tab switching. This is the biggest migration risk point; verified with
+// component tests + fresh Playwright (see status-detail-dialog-component.test.mjs
+// and Stage B/C reports).
 
 import { Dialog as DialogPrimitive, Tabs as TabsPrimitive } from "radix-ui";
 import { useDialogReturnFocus } from "../../../../shared/react/use-dialog-return-focus.js";
@@ -58,9 +65,10 @@ const TABS = [
 ];
 
 function DetailItem({ id, label, value, optional = false }) {
-  // optional 行照搬旧世界 view.js#toggleOptionalRuntimeRow 的语义:元素常驻
-  // DOM,只在值为空/"-"时给容器加 hidden 类(不yes整行卸载)——lastTransition/
-  // terminalReason 两行yes这个语义唯一的两个消费者.
+  // optional rows follow the same semantics as the old world's view.js#toggleOptionalRuntimeRow:
+// the element stays permanently in the DOM; only a hidden class is added when the
+// value is empty or "-" — not a full row unmount. lastTransition/terminalReason are
+// the only two consumers of this semantics.
   const text = `${value ?? "-"}`.trim();
   const rowHidden = optional && (!text || text === "-");
   return (
@@ -69,13 +77,16 @@ function DetailItem({ id, label, value, optional = false }) {
 }
 
 function OverviewMarkdownBundleLink() {
-  // artifact-downloads 域(蓝图 §7)——下载Status源于 statusCardStore(与
-  // ResultActions.jsx 同一份 renderJob 回调注入点的产物,status-detail 打开时
-  // 展示的永远yes同一个Current轮询 job,详见 composition.js"StatusDetailDialog
-  // 域"装配块注释;overview 自身的 fetch 段(events/diagnostics/resumePlan)
-  // 不含 markdownBundleUrl/Ready,不重复造一份派生逻辑).点击行为走 document
-  // 级委托点击(controller.js 已在 composition.js 挂载 bindEvents()),books组件
-  // 不required接 onClick,只订阅 busy store 驱动"Downloading..."文案(方案二).
+  // artifact-downloads domain (blueprint §7) — download status originates from
+  // statusCardStore (same renderJob callback injection point as ResultActions.jsx;
+  // status-detail always shows the current polling job when opened — see
+  // composition.js "StatusDetailDialog domain" assembly block comment; the
+  // overview's own fetch phase (events/diagnostics/resumePlan) does not include
+  // markdownBundleUrl/Ready, so no duplicate derived logic is created here).
+  // Click behavior routes through document-level delegated click (controller.js
+  // has bindEvents() mounted in composition.js), so the component does not need
+  // to attach onClick — it only subscribes to the busy store to drive the
+  // "Downloading..." label and disabled state (approach 2).
   const services = useHomeServices();
   const cardSnapshot = useStoreSnapshot(services.statusCard.store);
   const busyState = useArtifactDownloadBusy(services.artifactDownloads.busyStore, STATUS_DETAIL_MARKDOWN_BUNDLE_ID);
@@ -215,9 +226,10 @@ export function StatusDetailDialog() {
   const ids = STATUS_DETAIL_DIALOG_IDS;
   const { onCloseAutoFocus } = useDialogReturnFocus(open);
 
-  // Escape / 背板点击(DismissableLayer 的 outside-click 检测)/ Close按钮
-  // (DialogPrimitive.Close)都经这一个回调回写 store——不yes TranslationWorkflowDialog
-  // 那种两态语义,next===false 直接 close() 即可.
+  // Escape / backdrop click (DismissableLayer outside-click detection) / Close
+  // button (DialogPrimitive.Close) all route through this one callback — unlike
+  // TranslationWorkflowDialog's two-state semantics, when next===false simply
+  // call close().
   function handleOpenChange(nextOpen) {
     if (!nextOpen) {
       dialogStore.close();
@@ -293,7 +305,6 @@ export function StatusDetailDialog() {
     </DialogPrimitive.Root>
   );
 }
-
 
 
 

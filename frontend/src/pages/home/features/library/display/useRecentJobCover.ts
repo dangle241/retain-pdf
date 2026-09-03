@@ -1,14 +1,15 @@
-// 卡片封面图加载 hook(蓝图 §2 features/library/,风险缓解 §8.3).
+// Card cover image loading hook (blueprint §2 features/library/, risk mitigation §8.3).
 //
-// 复用:image-loader.js facade 的 loadFirstRecentJobImage(模块级 objectURL
-// 缓存,从不 revoke——React 卸载**不得** revoke,失效只走
-// invalidateRecentJobImages,这里完全不触碰缓存生命周期);card-presenter.js
-// facade 的 recentJobRawImageUrls 取候选 URL List.
+// Reuses: image-loader.js facade's loadFirstRecentJobImage (module-level objectURL
+// cache, never revoke——React unmount **must not** revoke; invalidation only via
+// invalidateRecentJobImages; this hook doesn't touch cache lifecycle at all); card-presenter.js
+// facade's recentJobRawImageUrls to get candidate URL list.
 //
-// imageCacheVersionOf 从 recent-job-card.js:12-29 拷贝(facade 未导出这个纯
-// 函数,按蓝图口径直接拷贝而非新增导出面).token 防竞态:job 切换或候选 URL
-// 变化时递增 token,异step resolve 回来时核对 token 仍yes最新才写 state,防止
-// 卡片快速复用时旧请求的图片覆盖新请求.
+// imageCacheVersionOf copied from recent-job-card.js:12-29 (facade doesn't export this pure
+// function; per blueprint we copied directly rather than adding a new export surface). Token for
+// race condition prevention: increment token when job switches or candidate URLs change; on
+// out-of-order resolve, verify token is still the latest before writing state, preventing
+// old request images from overwriting new ones during fast card reuse.
 
 import { useEffect, useRef, useState } from "react";
 import type { LibraryCardItem } from "../types.js";
@@ -17,17 +18,18 @@ import {
   recentJobRawImageUrls,
 } from "../../../composition/external.js";
 
-// 缓存版books只在"封面可能真的变了"时才变.封面由后端 /jobs/{id}/cover Rendering
-// (运行中 = Source PDF 首pages,任务Done后才可能换成成品封面),运行过程中封面
-// 内容并不变.原实现把 updated_at + progress.current/percent 等"每一拍轮询都在
-// 变"的字段计入缓存版books → 每s都命中一次缓存 miss → 重新 fetch 封面 blob, 
-// 生成新的 objectURL, <img> src 一换就闪一下(还每拍泄漏一个 objectURL).这
-// 正yes用户看到的"Library卡片运行中闪烁".
+// Cached version only changes when "cover may have actually changed". Cover is rendered by backend /jobs/{id}/cover
+// (in-progress = source PDF first pages; may switch to finished cover only after task is done), so cover
+// content doesn't change during execution. Original implementation included updated_at + progress.current/percent
+// fields that "change on every poll" in the cache version key → cache miss every poll → refetch cover blob,
+// generate new objectURL, <img> src swap causes flicker (also leaks one objectURL per poll). This is exactly
+// the "Library card flickering during execution" users see.
 //
-// 修:非终态只按 status 计版books(queued/running 期间恒定,封面拉一次就够,不再
-// 每拍重拉);到终态(succeeded/failed/canceled)才把 updated_at 计入——这时
-// 封面可能刚产出/Updates,required bust 一次;updated_at 也能区m不同 run(rerun会有
-// 新的DoneTime戳,封面随之刷新),不丢原来"rerun后换新封面"的能力.
+// Fix: non-terminal states only count status for cache version (queued/running constant, cover fetched once is
+// enough; no refetch every poll); only at terminal state (succeeded/failed/canceled) do we include updated_at
+// — at that point the cover may have just been produced/updated, need one bust; updated_at can also distinguish
+// different runs (rerun has new done timestamp, cover refreshes accordingly), preserving the original "cover
+// changes after rerun" capability.
 const TERMINAL_COVER_STATUSES = new Set(["succeeded", "failed", "canceled", "cancelled"]);
 
 function imageCacheVersionOf(item: LibraryCardItem = {}) {
@@ -70,8 +72,8 @@ export function useRecentJobCover(item?: LibraryCardItem | null) {
     return () => {
       cancelled = true;
     };
-    // rawUrlsKey/cacheVersion yes rawUrls/cacheVersion 的 primitive 化,用作
-    // effect 依赖(数组/对象每次Rendering新引用,不能直接进依赖表).
+    // rawUrlsKey/cacheVersion are the primitive forms of rawUrls/cacheVersion, used as
+    // effect dependencies (arrays/objects get new reference each render, can't go directly into deps table).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawUrlsKey, cacheVersion]);
 

@@ -1,11 +1,11 @@
-// 右栏: Collection成员切换.
+// Right column: collection membership toggle.
 
 import { cn } from "@/lib/utils";
 
 /**
  * @param {object} props
  * @param {Array<{ collection_id: string, name: string, member: boolean }>} props.collections
- * @param {string} props.collectionsBusy Current busy 的 collection_id
+ * @param {string} props.collectionsBusy currently busy collection_id
  * @param {(collectionId: string, nextMember: boolean) => void} props.onToggle
  */
 export function CollectionsPanel({ collections, collectionsBusy, onToggle }) {

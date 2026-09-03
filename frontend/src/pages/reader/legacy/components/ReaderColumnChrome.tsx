@@ -1,7 +1,9 @@
-// 栏间separatedentries与折叠把手:基线截图里可见(1px 竖线 + 栏边界中部小圆片),
-// 位置All由 CSS 变量(--reader-left-w / --reader-right-w)计算,静态Rendering即可对齐.
-// 探针Stage拖拽/折叠交互不接线(旧实现yes column-resizer.js / panel-collapse.js);
-// 2b 决定由 rrp 统管三栏宽度还yes复用旧控制器.
+// Column separators and collapse handles: visible in baseline screenshot (1px vertical line
+// + small circle at mid column boundary), position all calculated by CSS variables
+// (--reader-left-w / --reader-right-w), static rendering aligns them.
+// Probe stage drag/collapse interaction not wired yet (old implementation uses
+// column-resizer.js / panel-collapse.js); Phase 2b decides whether rrp manages all
+// three column widths or reuses old controllers.
 
 export function ReaderColumnChrome() {
   return (
@@ -13,6 +15,5 @@ export function ReaderColumnChrome() {
     </>
   );
 }
-
 
 

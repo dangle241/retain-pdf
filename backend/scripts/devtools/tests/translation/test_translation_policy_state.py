@@ -52,7 +52,9 @@ def test_mark_translation_required_clears_skip_state_without_touching_translatio
 
 
 def test_seed_orchestration_metadata_preserves_policy_skip_reason() -> None:
-    # 回归:编排阶段曾无条件用 classification_label 覆盖 policy 写的详细 skip_reason。
+    # Regression: the orchestration stage once overwrote the detailed
+    # `skip_reason` written by the policy stage with a `classification_label`
+    # unconditionally.
     item = {
         "item_id": "p1-b2",
         "classification_label": "formula",
@@ -64,7 +66,8 @@ def test_seed_orchestration_metadata_preserves_policy_skip_reason() -> None:
     seed_orchestration_metadata(item)
 
     assert item["skip_reason"] == "保留公式原文，避免破坏 LaTeX"
-    # 后半段编排字段仍必须被写入(证明修复没有跳过函数其余职责)。
+    # The later orchestration fields must still be written, proving
+    # the fix did not skip the rest of the function's responsibilities.
     assert item["translation_unit_id"] == "p1-b2"
     assert item["translation_unit_kind"] == "single"
     assert item["translation_unit_member_ids"] == ["p1-b2"]

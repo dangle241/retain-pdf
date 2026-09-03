@@ -1,5 +1,5 @@
-// 根据total享滚动壳内阅读焦点线估算Current page(1-based).
-// 与 measurePageScrollProgress / 滚动锚点使用同一 pickPageAtFocus 规则.
+// Estimates the current page (1-based) based on the reading focus line within the shared scroll shell.
+// Uses the same pickPageAtFocus rule as measurePageScrollProgress / scroll anchors.
 
 import { useEffect, useState } from "react";
 import type { RefObject } from "react";
@@ -16,9 +16,9 @@ export function useCurrentPage(
   scrollRef: RefObject<HTMLElement | null>,
   numPages: number,
   enabled = true,
-  /** 缩放 / 模式导致节点变化时重绑 */
+  /** Re-bind when zoom / mode changes cause node changes */
   observeKey: string | number = "",
-  /** 只看某一栏的pages；空则看All */
+  /** Only look at pages of a specific column; empty means all */
   pane?: ReaderPaneId | null,
 ): number {
   const [currentPage, setCurrentPage] = useState(1);

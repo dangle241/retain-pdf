@@ -1,7 +1,7 @@
-// Book Details"Translation"Tab Progress: 
-// - StageFlow: 纯Stage导航
-// - Progress文案行右侧: 仅Current选中Stage的"Run OCR Again / Translation / Rendering"
-//   (动作与导航m离, 不挤 pill, 不顶乱布局)
+// Book Details "Translation" Tab Progress:
+// - StageFlow: pure stage navigation
+// - Right of Progress text line: only current selected Stage's "Run OCR Again / Translation / Rendering"
+//   (action separated from navigation; no crowding on pill, no layout disruption)
 
 import { StageFlow } from "./StageFlow.jsx";
 import { buildProgressRenderModel, type ProgressRenderModelInput } from "./progress-model.js";
@@ -117,10 +117,10 @@ function isRedundantDoneDetail(detail: string, value: string, title: string) {
 }
 
 /**
- * 仅For"Current选中Stage"返回一颗Retry按钮配置.
- * - OCR: 有 job 即可(不看Failed)
- * - Translation/Rendering: can_retry 或 Failed/成功
- * - Done: 不Display
+ * Returns Retry button config for "currently selected Stage" only.
+ * - OCR: needs a job (doesn't check failed)
+ * - Translation/Rendering: can_retry or Failed/succeeded
+ * - Done: not displayed
  */
 function resolveSelectedRetry(options: {
   hasJob: boolean;
@@ -284,7 +284,7 @@ export function StatusCardEmbedded({
 
           <div className="bd-job-status-main">
             <div className="bd-job-status-copy">
-              {/* Title行: 左侧Status文案, 右侧"重新 xxx"(仅Current Stage) */}
+              {/* Title row: status text on the left, "Re-run xxx" on the right (current stage only) */}
               <div className="bd-job-status-value-row">
                 <div id={ids.ringValue} className="bd-job-status-value">
                   {valueText}

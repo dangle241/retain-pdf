@@ -1,6 +1,7 @@
-// CollectionManageDialog 的开合Status实例(state/dialog-store.js 通用工厂,镜像
-// glossaries-dialog-store.js).payload = 正在Edit的 CollectionRecord,或 null
-// (新建模式)——open(collection) 传入即区m新建/Edit,不required额外的 mode 字段.
+// CollectionManageDialog open/close state instance (state/dialog-store.js generic
+// factory, mirroring glossaries-dialog-store.js). payload = CollectionRecord being edited,
+// or null (new mode) — open(collection) passed in distinguishes new/edit without needing
+// an extra mode field.
 
 import { createDialogStore } from "../../state/dialog-store.js";
 

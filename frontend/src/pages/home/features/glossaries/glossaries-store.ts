@@ -1,11 +1,12 @@
-// GlossariesDialog 的纯View态 + 与 features/glossaries/controller.js(kept
-// 控制器)对接的 store 驱动 viewPort(蓝图 §3,镜像
-// credentials-view-store.js 的写法).
+// GlossariesDialog's pure view state + store-driven viewPort interfacing with
+// features/glossaries/controller.js (kept controller) (blueprint §3, mirrors
+// credentials-view-store.js's approach).
 //
-// 旧世界 glossary-view-port.js/view.js Allyes DOM 直写(死,不 import);这里
-// 用同名方法签名重新实现,只yes"写"的目的地从 DOM 换成 store,让
-// GlossariesDialog.jsx 系的组件订阅Rendering.controller.js(reload/select/save/
-// delete/export/applyImport 等编排逻辑)一行不改地复用.
+// Old world glossary-view-port.js/view.js all wrote directly to DOM (dead, not imported);
+// here reimplemented with same method signatures, only the "write" destination changed from
+// DOM to store, letting GlossariesDialog.jsx family components subscribe for rendering while
+// controller.js (reload/select/save/delete/export/applyImport orchestration logic) is reused
+// without a single line changed.
 
 import type { DialogStore } from "../../state/dialog-store.js";
 import type { HandlersBag } from "../../composition/types.js";
@@ -22,7 +23,7 @@ export type GlossaryListItem = {
   [key: string]: unknown;
 };
 
-/** Edit器行(受控表格) */
+/** Editor row (controlled table) */
 export type GlossaryEntryRow = {
   source: string;
   target: string;
@@ -36,7 +37,7 @@ export type GlossaryDraft = {
   entries: GlossaryEntryRow[];
 };
 
-/** save() 读取的Edit器 payload(含 preserve 语义) */
+/** Editor payload read by save() (includes preserve semantics) */
 export type GlossaryEditorPayload = {
   name: string;
   entries: Array<{
@@ -98,11 +99,11 @@ function normalizeEntryForRow(entry: Partial<GlossaryEntryRow> = {}): GlossaryEn
   };
 }
 
-// 抄自 src/js/features/glossaries/view.js:155-184
-// (readGlossaryEditorPayload)——尤其Page 165 行的 preserve 语义必须原样保留:
-// level==="preserve" 且用户没有手填Translation时,target 用 source 回填(“保留原词”
-// 语义,不yes“Translation缺失”);level 不yes preserve 时留空则视为“漏填Translation”,计入
-// skippedMissingTarget,由 controller.js 的 save() 拦截并提示错误.
+// Copied from src/js/features/glossaries/view.js:155-184
+// (readGlossaryEditorPayload) — especially the preserve semantics on page 165 must be preserved verbatim:
+// when level==="preserve" and user hasn't manually filled in a translation, target is backfilled from source ("preserve original term"
+// semantics, not "translation missing"); when level is not preserve, leaving it empty counts as "missing translation", added to
+// skippedMissingTarget, intercepted by controller.js's save() with error feedback.
 function readEditorPayloadFromDraft(draft: GlossaryDraft): GlossaryEditorPayload {
   const entries: GlossaryEditorPayload["entries"] = [];
   const skippedMissingTarget: string[] = [];
@@ -196,11 +197,11 @@ export function createGlossariesViewFeature({
     },
   });
 
-  // controller.js 在装配时sync调用一次 feature.bindEvents()(见
-  // composition.js)捕获 open/close/reload/selectGlossary/createNew/addRow/
-  // save/deleteCurrent/exportCurrent/showImport/hideImport/applyImport 等
-  // 处理函数——React 世界没有旧 view.js 那种全局 DOM 监听step骤,JSX 按钮的
-  // onClick 直接从这里取用(见 useGlossariesController.js).
+  // controller.js calls feature.bindEvents() once synchronously at assembly time (see
+  // composition.js) to capture open/close/reload/selectGlossary/createNew/addRow/
+  // save/deleteCurrent/exportCurrent/showImport/hideImport/applyImport handlers —
+  // React world has no global DOM listener step like old view.js; JSX buttons'
+  // onClick directly use these (see useGlossariesController.js).
   const handlersRef: { current: HandlersBag | null } = { current: null };
 
   const viewPort = {
@@ -225,7 +226,4 @@ export function createGlossariesViewFeature({
     handlersRef,
   };
 }
-
-
-
 

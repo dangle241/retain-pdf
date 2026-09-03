@@ -1,10 +1,10 @@
-// buildProgressRenderModel 拷贝自 components/status/job-status-card-rendering.js
-// Page 45-164 行(蓝图 §1 components/status/ 判决,该Files整体死于 cutover——
-// js/components/ yes防回弹门禁禁区,只能拷贝纯函数,不能 import).
-// 逐字保留,不做任何行为改写;ProgressBlock.jsx / useStagedProgressAnimation.js
-// total用booksFiles.
+// buildProgressRenderModel copied from components/status/job-status-card-rendering.js
+// page 45-164 (blueprint §1 components/status/ verdict; the file is entirely cut
+// over — js/components/ is a prohibited import zone due to anti-bounce regex;
+// can only copy pure functions, cannot import). Kept verbatim; no behavioral
+// changes. ProgressBlock.jsx / useStagedProgressAnimation.js both use this file.
 
-/** useStagedProgressAnimation / buildProgressOptions 输出 → ProgressBlock 输入 */
+/** useStagedProgressAnimation / buildProgressOptions output → ProgressBlock input */
 export type ProgressRenderModelInput = {
   current?: number;
   total?: number;
@@ -167,7 +167,5 @@ export function buildProgressRenderModel({
     legacyIndeterminate: false,
   };
 }
-
-
 
 

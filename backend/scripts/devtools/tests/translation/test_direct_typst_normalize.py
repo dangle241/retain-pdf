@@ -68,8 +68,10 @@ NORMALIZE_CASES = [
         "expected": "纯正文，没有公式。",
     },
     {
-        # 字面 $ 变量(如 Q-Chem 的 $rem 输入段)会被扫描器误判成公式跨度,
-        # ASCII 相邻时必须原样保留,守护 test_direct_typst_protocol_shell 的契约。
+        # Literal `$` variables (e.g. the `$rem` input block in Q-Chem) are
+        # misread as math spans by the scanner, so when they sit next to
+        # ASCII they must be preserved verbatim. This guards the contract
+        # exercised by `test_direct_typst_protocol_shell`.
         "name": "literal_dollar_variables_untouched",
         "source": "要启用该计算，请在 $rem 部分设置 INCDFT = 2，并使用 $active_orbitals 输入段。",
         "expected": "要启用该计算，请在 $rem 部分设置 INCDFT = 2，并使用 $active_orbitals 输入段。",

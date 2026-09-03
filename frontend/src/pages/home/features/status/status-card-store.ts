@@ -6,29 +6,29 @@ import {
 } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-// Status卡 store + presenter(蓝图 §2 features/status/,§4 生命周期).
+// Status card store + presenter (Blueprint §2 features/status/, §4 lifecycle).
 //
-// 唯一 VM 源:job-status/status-card-runtime-source.js 的
-// buildRuntimeStatusCardSnapshot——直接镜像 components/status/
-// connected-job-status-card.js 的 createRuntimeStatusCardSource 语义:None论
-// renderMain(主轮询命中)还yes renderPatch(events/manifest/stageActions 三路
-// 二级补丁中的任意一路),统一从 currentJobStore + secondaryResourceStore 两个
-// canonical store **重新整体计算**一份快照写回 statusCardStore(蓝图风险 10:
-// "renderPatch 收敛"——不按 source branch做局部补丁,规避三份局部Updates逻辑各自
-// 漂移的风险).
+// Single VM source: job-status/status-card-runtime-source.js buildRuntimeStatusCardSnapshot——
+// directly mirrors components/status/ connected-job-status-card.js createRuntimeStatusCardSource semantics:
+// regardless of whether renderMain (main poll hit) or renderPatch (any of the three secondary patches:
+// events/manifest/stageActions), always recomputes a full snapshot from currentJobStore +
+// secondaryResourceStore and writes it back to statusCardStore (Blueprint risk 10:
+// "renderPatch convergence"——no per-source-branch partial patching; avoids three partial-update
+// logic paths drifting apart).
 //
-// 风险 6(首帧 placeholder):jobRuntimeFeature.startPolling() 的sync链里
-// renderJob() 会在 await 网络请求之前先落一次 placeholder 快照
-// (render-context.js 的 applyJobRuntimeSnapshot sync写 currentJobStore),
-// renderMain 在此刻被sync调用,books store 因此在 React 首次Rendering前就已有Data,
-// 不会闪空卡.
+// Risk 6 (first-frame placeholder): in jobRuntimeFeature.startPolling() sync chain,
+// renderJob() places a placeholder snapshot before awaiting the network request
+// (render-context.js applyJobRuntimeSnapshot writes currentJobStore synchronously).
+// renderMain is called synchronously at this moment, so the books store already has data
+// before React's first render——no empty card flash.
 //
-// elapsed 故意不进books store(蓝图 §3.5):resolveLiveDurations 每s都变,若随
-// 主快照一起写 store,statusCardStore 的 useStoreSnapshot 会被拖着每s重渲
-// 整卡;真正的s表由 useElapsedTicker.js 独立驱动(读 snapshot.job 的
-// started_at/finished_at,不读books store 的任何"已计算好的" elapsed 字段).
+// elapsed deliberately not in books store (Blueprint §3.5): resolveLiveDurations changes every
+// second; if written to store alongside main snapshot, statusCardStore's useStoreSnapshot would
+// re-render the whole card every second. The real timer is driven independently by
+// useElapsedTicker.js (reads snapshot.job started_at/finished_at; does not read any
+// "pre-computed" elapsed field from books store).
 
-/** StageRetry按钮(normalizeStageRetryActions 输出) */
+/** StageRetry button (output of normalizeStageRetryActions) */
 export type StatusCardStageRetryAction = {
   stage: string;
   label: string;
@@ -37,7 +37,7 @@ export type StatusCardStageRetryAction = {
   danger: boolean;
 };
 
-/** StageProgressm片(stageProgressByKey / selectedProgress) */
+/** StageProgress slice (stageProgressByKey / selectedProgress) */
 export type StatusCardStageProgress = {
   current?: number;
   total?: number;
@@ -55,7 +55,7 @@ export type StatusCardStageProgress = {
   [key: string]: unknown;
 };
 
-/** job 原始载荷(API 形状宽, Status卡只读子集 + 透传) */
+/** job raw payload (wide API shape; Status card read-only subset + passthrough) */
 export type StatusCardJobRecord = {
   job_id?: string;
   status?: string;
@@ -91,8 +91,8 @@ export type StatusCardSummary = {
 };
 
 /**
- * statusCardStore.snapshot 的完整形状.
- * 字段来自 EMPTY 默认值 + buildJobStatusViewModel + summary 合并.
+ * Full shape of statusCardStore.snapshot.
+ * Fields from EMPTY defaults + buildJobStatusViewModel + summary merge.
  */
 export type StatusCardSnapshot = {
   jobId: string;
@@ -123,12 +123,12 @@ export type StatusCardSnapshot = {
   sourcePdfReady: boolean;
   sourcePdfUrl: string;
   cancelEnabled: boolean;
-  /** EMPTY 默认携带；运行时以 StatusCardState.cancelDisabled 为准 */
+  /** EMPTY carries defaults; runtime uses StatusCardState.cancelDisabled */
   cancelDisabled?: boolean;
   backgroundStages: unknown[];
   job: StatusCardJobRecord | null;
   summary: StatusCardSummary | null;
-  /** runtime VM 可能附带的Stage呈现(merge 时透传) */
+  /** Stage presentation that runtime VM may attach (passed through during merge) */
   stagePresentation?: Record<string, unknown> | null;
   elapsed?: string;
 };
@@ -169,9 +169,10 @@ export type StatusCardPresenterDeps = {
   statusCardStore: StatusCardStore;
 };
 
-// 拷贝自 components/status/job-status-card-snapshot.js 的零参默认值(该Files
-// 属"死,由 StatusCard.jsx 家族替代"清单,不可 import——js/components/ yes
-// 防回弹门禁的显式禁区).只用于 currentJob 尚不存在时的占位快照.
+// Copied from components/status/job-status-card-snapshot.js zero-arg defaults (that file
+// is "dead", on the "to be replaced by StatusCard.jsx family" list; cannot import——js/components/
+// is an explicit forbidden zone for bounce-back prevention). Only used as placeholder snapshot
+// when currentJob does not yet exist.
 const EMPTY_STATUS_CARD_SNAPSHOT: StatusCardSnapshot = Object.freeze({
   jobId: "",
   status: "",
@@ -234,7 +235,7 @@ export function createStatusCardPresenter({
   function recompute() {
     const currentJob = currentJobStore.getSnapshot();
     const secondaryResources = secondaryResourceStore.getSnapshot();
-    // runtime-source 接受 string | () => string；函数形式走 finishedAtFallbackForStatusCardRuntime
+    // runtime-source accepts string | () => string; function form uses finishedAtFallbackForStatusCardRuntime
     const rawSnapshot = buildRuntimeStatusCardSnapshot({
       currentJob,
       secondaryResources,
@@ -257,9 +258,10 @@ export function createStatusCardPresenter({
   }
 
   return {
-    // renderJob(renderContext) / renderJobSecondaryPatch({context,source}) 两个回调
-    // 签名不同,但都只required"重算一次"——参数books身不使用,Data永远从两个 canonical
-    // store 读(controller.js 在调用这两个回调之前已经sync写完 store).
+    // renderJob(renderContext) / renderJobSecondaryPatch({context,source}) two callbacks
+    // have different signatures, but both only require "recompute once"——the params themselves
+    // are unused; data always read from two canonical stores (controller.js has already
+    // synchronously written to store before calling these callbacks).
     renderMain: recompute,
     renderPatch: recompute,
     recompute,

@@ -16,8 +16,10 @@ from services.translation.services.postprocess.garbled_reconstruction import (
 )
 
 
-# 含 reasoning 泄漏的模型输出:命中 "我选择"/"更简洁"/"因此输出" 三个 marker,
-# salvage 应抽出 "因此输出：" 之后的成品译文。
+# Model output that leaks reasoning: it matches three Chinese markers
+# (`WO XUAN ZE` = "I choose", `GENG JIAN JIE` = "more concise",
+# `YIN CI SHU CHU` = "therefore output") that the salvage routine scans
+# for, and the final translation it extracts follows the third one.
 _LEAKY_OUTPUT = "我选择更简洁的表达。因此输出：金属氧化物在高温下保持稳定。"
 _SALVAGED = "金属氧化物在高温下保持稳定。"
 
@@ -49,13 +51,15 @@ def test_clean_reconstructed_text_leaves_clean_output_untouched() -> None:
 
 
 def test_apply_reconstruction_writes_cleaned_text_and_breadcrumb(monkeypatch) -> None:
-    # 隔离校验器:只验证 _apply_reconstruction 落盘的是清洗后的文本。
+    # Isolated validator: we only verify that `_apply_reconstruction`
+    # persists the cleaned text.
     monkeypatch.setattr(garbled_reconstruction, "_validate_reconstruction", lambda *a, **k: [])
     item = _garbled_item()
 
     _apply_reconstruction([item], _LEAKY_OUTPUT)
 
-    # 六个译文字段全部落盘 salvage 后的文本,而不是模型原始泄漏输出。
+    # All six translation fields are persisted with the salvaged text,
+    # not the model's raw leaky output.
     for field in (
         "translated_text",
         "protected_translated_text",
@@ -75,7 +79,9 @@ def test_apply_reconstruction_writes_cleaned_text_and_breadcrumb(monkeypatch) ->
 
 
 def test_apply_reconstructed_unit_text_keeps_all_six_fields_in_sync() -> None:
-    # 整单元替换入口:六个译文字段同值,group_* 与 translation_unit_* 不会 desync。
+    # Whole-unit replacement entry point: all six translation fields hold
+    # the same value, so `group_*` and `translation_unit_*` cannot drift
+    # out of sync.
     items = [{"item_id": "p1-b1"}, {"item_id": "p1-b2"}]
 
     apply_reconstructed_unit_text(items, _SALVAGED)

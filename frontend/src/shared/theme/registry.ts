@@ -18,7 +18,7 @@ export type ThemeGroup = "light" | "dark" | "accent";
 
 /**
  * Theme series (product line dimension, orthogonal to light/dark group):
- * Schools of Thought / 王朝 / 二次元 ... skins are grouped by series field;
+ * Schools of Thought / Dynasty / Anime ... skins are grouped by series field;
  * new series = add one row to this table, Appearance panel automatically gets a new section.
  */
 export type ThemeSeries = {
@@ -31,8 +31,8 @@ export type ThemeSeries = {
 export const THEME_SERIES: readonly ThemeSeries[] = [
   { id: "base", label: "Basic", order: 10 },
   { id: "baijia", label: "Schools of Thought", order: 20 },
-  // Planned: { id: "wangchao", label: "王朝", order: 30 },
-  //          { id: "niji", label: "二次元", order: 40 },
+  // Planned: { id: "wangchao", label: "Dynasty", order: 30 },
+  //          { id: "niji", label: "Anime", order: 40 },
 ] as const;
 
 export type ThemeDefinition = {

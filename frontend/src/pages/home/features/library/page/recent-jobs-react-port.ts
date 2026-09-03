@@ -1,15 +1,15 @@
-// recent-jobs 引擎的 viewPort 契约 → React 实现(蓝图 §2 features/library/).
+// recent-jobs engine viewPort contract → React implementation (blueprint §2 features/library/).
 //
-// 铁律:轮询/补丁/节流引擎(controller/runtime/loader/commit/bindings...)一行不
-// 改;这里只满足 view-port.js 定义的 10 个方法契约,把副作用从"Action DOM"换成
-// "写 libraryViewStore".renderList 故意忽略 items 参数——React 组件直接订阅
-// recentJobsStatePort.store 读取List内容,这里只搬运 hasMore 用于 load-more
-// 按钮可见性.
+// Iron rule: polling/patch/throttle engine (controller/runtime/loader/commit/bindings...) not one
+// line changed; this only satisfies the 10-method contract defined in view-port.js, replacing side effects from "Action DOM" with
+// "write to libraryViewStore". renderList intentionally ignores items parameter — React components subscribe directly to
+// recentJobsStatePort.store to read list content, this only carries hasMore for load-more
+// button visibility.
 //
-// hasView() 恒 true:loader.js 用它做"host 不存在就跳过加载"的短路判断,React
-// 世界的LibraryView永远挂载.replaceCard() 恒 true:引擎在 storeDrivenRendering
-// 下不会真正依赖其返回值做entries件Renderingbranch,React 卡片改由 memo 签名比较驱动重渲
-// (见 RecentJobCard.jsx),这里返回 true 只yes满足调用方"未Failed"的语义.
+// hasView() always true: loader.js uses it for "if host doesn't exist, skip loading" short-circuit judgment, in the React
+// world LibraryView is always mounted. replaceCard() always true: engine in storeDrivenRendering
+// doesn't truly depend on its return value for conditional event rendering branch, React cards driven by memo signature comparison for re-render
+// (see RecentJobCard.jsx), returning true here just satisfies the caller "not failed" semantics.
 
 import { createLibraryViewStore } from "./library-view-store.js";
 import type {
@@ -48,8 +48,8 @@ export function createRecentJobsReactViewPort({
       viewStore.actions.setErrorReset(message);
       return;
     }
-    // 镜像旧 applyRecentJobsErrorState 的 reset:false branch:只清 load-more
-    // 的加载态,不展示错误文案(错误提示走 error-box 通道,不在此越权Rendering).
+    // Mirror old applyRecentJobsErrorState's reset:false branch: only clear load-more
+    // loading state, don't show error copy (error display goes through error-box channel, not overstepping rendering here).
     viewStore.actions.clearLoadMoreLoading();
   }
 
@@ -66,16 +66,16 @@ export function createRecentJobsReactViewPort({
   }
 
   function setDialogOpen() {
-    // recent-jobs-dialog 元素形态在主View不启用(蓝图 §2),契约方法保留为
-    // no-op,避免引擎里任何遗留调用路径抛错.
+    // recent-jobs-dialog element form not enabled in main view (blueprint §2), contract method kept as
+    // no-op, to prevent any legacy call paths in the engine from throwing errors.
   }
 
   function scheduleAutoLoadCheck(options?: AutoLoadCheckOptions) {
     autoLoadCheckerRef.current?.(options);
   }
 
-  // 非契约方法:useLibraryAutoLoad 用它把自己的几何检查函数接进
-  // scheduleAutoLoadCheck 的调用链(refresh-scheduler.js 在每次mpages提交后调用).
+  // Non-contract method: useLibraryAutoLoad uses this to hook its geometry check function into
+  // scheduleAutoLoadCheck's call chain (refresh-scheduler.js calls after each page submission).
   function registerAutoLoadChecker(
     checker: ((options?: AutoLoadCheckOptions) => void) | null | undefined,
   ) {

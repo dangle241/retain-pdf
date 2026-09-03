@@ -182,13 +182,14 @@ def test_quality_allows_normal_length_chinese_translation() -> None:
 def test_long_english_residue_span_skips_data_dense_nmr_segments() -> None:
     from services.translation.llm.validation.english_residue import _has_long_english_residue_span
 
-    # NMR 谱线数据数字密集,是合法保留的数据而非未译散文
+    # NMR spectrum data has high digit density; it is data that should
+    # be kept verbatim, not untranslated prose.
     nmr = (
         "NMR (CDCl3, 400 MHz): delta = 7.90 (s, 1H), 7.55 (d, J=8.5 Hz, 1H), "
         "7.49 (t, J=8.0 Hz, 1H), 6.64 (d, J=7.5 Hz, 1H), 4.20 (s, 2H), 3.03 (s, 3H)"
     )
     assert not _has_long_english_residue_span(nmr)
-    # 真正的英文散文残留仍然要抓
+    # Real English-prose residue must still be caught.
     prose = "the reaction mixture was stirred at room temperature for several hours before the product was isolated by filtration"
     assert _has_long_english_residue_span(prose)
 
@@ -207,6 +208,7 @@ def test_agent_repair_skips_items_already_repaired_in_flight() -> None:
 
 
 def test_fast_agent_repair_only_runs_with_blocking_items() -> None:
-    # 任务干净时不再按篇幅跑警告级候选
+    # When the job is already clean, we no longer run warning-tier
+    # candidates based on document length.
     assert _fast_agent_repair_limit(payload_size=5000, blocking_untranslated_count=0) == 0
     assert _fast_agent_repair_limit(payload_size=5000, blocking_untranslated_count=3) == 3

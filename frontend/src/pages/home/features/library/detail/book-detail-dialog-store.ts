@@ -1,9 +1,9 @@
-// Book Details弹窗的开合Status(参考 PDF_MD_lib 的 BookDetailModal).
-// payload = 被点开的那张Grid卡片 item(含 document_id / job_id / status /
-// library_only / reading_status / tags 等即时字段),弹窗再按 document_id 拉一次
-// 完整Documents补齐Authors/年份/DOI/字节/日期这些卡片上没有的元Data.
+// Book Details dialog open/close state (reference PDF_MD_lib's BookDetailModal).
+// payload = the Grid card item that was clicked (including document_id / job_id / status /
+// library_only / reading_status / tags and other immediate fields), dialog then fetches
+// full Documents by document_id to supplement Authors/year/DOI/bytes/date metadata not on the card.
 //
-// 复用通用 createDialogStore({ open, payload })——同 CollectionManageDialog.
+// Reuses generic createDialogStore({ open, payload }) — same as CollectionManageDialog.
 
 import { createDialogStore } from "../../../state/dialog-store.js";
 import type { LibraryCardItem } from "../types.js";

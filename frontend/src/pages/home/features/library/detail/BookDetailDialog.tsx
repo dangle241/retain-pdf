@@ -1,5 +1,5 @@
-// BookDetailDialog —— 容器: 组合 hooks + shell/tabs.
-// 业务Status见 use-book-detail-*.js；UI 见 shell / tabs / panels.
+// BookDetailDialog — container: composes hooks + shell/tabs.
+// Business state lives in use-book-detail-*.js; UI lives in shell / tabs / panels.
 
 import { useEffect, useState } from "react";
 import { useHomeServices } from "../../../home-services-context.js";
@@ -60,12 +60,14 @@ export function BookDetailDialog() {
   const canTranslate = libraryOnly || `${item.status || ""}`.trim() === "failed";
   const isActive = isRecentJobActive(item)
     || ["running", "queued", "pending"].includes(cardStatus);
-  // 封面转圈: 书架 live 行 + statusCard 正在跑(Retry后 payload 可能仍yes旧 succeeded)
+  // Cover spinner: shelf live row + statusCard currently running (after a retry
+  // the payload may still report the stale "succeeded" status)
   const coverProcessing = isActive
     || isLibraryCardProcessing(item)
     || (Boolean(cardJobId) && ["running", "queued", "pending"].includes(cardStatus));
 
-  // 点"Translation整books"/ Grid选中活跃任务: 强制Translation Tab, Progress在 bd-job-status-inner
+  // Click on "Translate whole book" / selecting an active job in the Grid:
+  // force the Translate tab; progress renders in bd-job-status-inner
   const [preferTranslateTab, setPreferTranslateTab] = useState(false);
   useEffect(() => {
     if (!open) {

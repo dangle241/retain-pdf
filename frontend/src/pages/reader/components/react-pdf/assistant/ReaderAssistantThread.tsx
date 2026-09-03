@@ -1,4 +1,4 @@
-// assistant-ui Reader问答: Progress与正文m离；Done后一次性 Markdown+公式+引用.
+// assistant-ui Reader Q&A: separate Progress from body; on Done, render Markdown+formulas+citations all at once.
 
 import {
   createContext,
@@ -57,7 +57,7 @@ import {
   MISSING_MODEL_API_KEY_MESSAGE,
 } from "../../../../../js/reader/ai/config.js";
 
-/** Notion 侧栏式Suggestion: 图标 + 短Title */
+/** Notion sidebar-style suggestions: icon + short title */
 const SUGGESTIONS: Array<{
   prompt: string;
   label: string;
@@ -89,13 +89,13 @@ export type ReaderAssistantThreadProps = {
   jobId?: string;
   citationsByMessageId?: Record<string, AiCitationLike[]>;
   progressByMessageId?: Record<string, string>;
-  /** store 正文旁路, 保证流式 token 能立刻Rendering */
+  /** Store body bypass: ensures streaming tokens render immediately */
   contentByMessageId?: Record<string, string>;
-  /** Current正在生成的 assistant id(旁路 status, 避免 aui 不刷 running) */
+  /** Current assistant id being generated (bypasses status to prevent aui from not refreshing running state) */
   streamingAssistantId?: string;
   isRunning?: boolean;
   onJumpCitation?: (citation: AiCitationLike) => void;
-  /** 从助手Answer开新会话窗口(Copy到该点的History) */
+  /** Open a new conversation window from the assistant's Answer (copy history up to that point) */
   onBranchFromAnswer?: (assistantMessageId: string) => void | Promise<boolean | void>;
   branchBusy?: boolean;
 };
@@ -129,7 +129,7 @@ function messageIsStreaming(
   const status = (message as { status?: { type?: string } } | null)?.status;
   if (status?.type === "running") return true;
   if (status?.type === "complete" || status?.type === "incomplete") return false;
-  // aui 有时不把 ExternalStore 的 status 映到 useMessage；用旁路 id 兜底
+  // aui sometimes doesn't map ExternalStore's status to useMessage; fall back to bypass id
   if (!isRunning || !streamingAssistantId) return false;
   const id = `${(message as { id?: string } | null)?.id || ""}`;
   const storeId = `${(message as { metadata?: { custom?: { storeId?: string } } } | null)
@@ -154,7 +154,7 @@ function useViewportStickBottom(
       stick.current = distance < 120;
     };
     const scrollBottom = () => {
-      // branch/切会话 remount 时禁止强行滚底, no则体感像"刷新并跳转"
+      // Don't force-scroll to bottom on branch/session remount, otherwise it feels like a refresh and jump
       if (suppressRef.current) return;
       if (el.dataset.suppressAutoscroll === "1") return;
       if (!stick.current) return;
@@ -172,7 +172,7 @@ function useViewportStickBottom(
       if (structural) schedule();
     });
     mo.observe(el, { childList: true, subtree: true });
-    // 仅首挂且未 suppress 时贴底
+    // Only stick to bottom on first mount and when not suppressed
     if (!suppressAutoScroll) schedule();
     return () => {
       el.removeEventListener("scroll", onScroll);
@@ -225,21 +225,21 @@ function MarkdownText() {
   } = useContext(AskUiContext);
   const meta = readMessageCustom(message);
   const streaming = messageIsStreaming(message, streamingAssistantId, isRunning);
-  // 优先 metadata.custom(稳定)；回退 store map
+  // Prefer metadata.custom (stable); fall back to store map
   const citations = meta.citations.length
     ? meta.citations
     : (citationsByMessageId[meta.storeId] || citationsByMessageId[meta.messageId] || []);
   const rootRef = useRef<HTMLDivElement | null>(null);
-  // 流式: 优先 contentByMessageId(store/旁路直通), 避免 aui Parts 缓存导致"答完才Rendering"
+  // Streaming: prefer contentByMessageId (store/bypass direct), avoid aui Parts cache causing "render only after answer completes"
   const storeText =
     contentByMessageId[meta.storeId]
     || contentByMessageId[meta.messageId]
     || "";
-  // 流式过程不要 trim 尾部, 避免半句被吃掉；Done后再 trim
+  // Don't trim trailing content during streaming, to avoid half-sentences being dropped; trim after Done
   const bodyText = streaming
     ? `${storeText || text || ""}`
     : `${storeText || text || ""}`.trim();
-  // branch remount 时 id 变了但正文相同: 用缓存避免闪 pending
+  // On branch remount, id changes but body is the same: use cache to avoid pending flash
   const [finalHtml, setFinalHtml] = useState<string | null>(() =>
     (streaming || !bodyText ? null : peekFinalAnswerHtmlCache(bodyText)),
   );
@@ -260,7 +260,7 @@ function MarkdownText() {
     [citations],
   );
 
-  // 流式: sync轻量 HTML, 绝不走 MathJax 异step(no则会"写完才Display")
+  // Streaming: sync lightweight HTML, never go through MathJax async step (otherwise it "displays only after writing finishes")
   const streamingHtml = useMemo(
     () => (streaming && bodyText ? renderStreamingPreviewHtml(bodyText) : ""),
     [streaming, bodyText],
@@ -303,8 +303,8 @@ function MarkdownText() {
     const root = rootRef.current;
     if (!root || streaming || finalHtml == null || !finalHtml) return;
 
-    // 覆盖前回收上一轮 hydrate 的 blob URL(重Rendering反复生成新 blob, 
-    // 旧的会泄漏到PagesClose——审计 P1-5)
+    // Revoke blob URLs from previous round's hydrate before overwriting (re-rendering repeatedly generates new blobs;
+    // old ones would leak until page close — audit P1-5)
     revokeHydratedImageUrls(root);
     root.innerHTML = finalHtml;
     neutralizeMarkdownAnchors(root, {
@@ -327,7 +327,7 @@ function MarkdownText() {
     }
   }, [streaming, finalHtml, citationByRef, citations, onJumpCitation, bodyText]);
 
-  // 卸载(切消息/关浮窗)回收books气泡的 blob
+  // On unmount (switch message/close floating window), revoke blobs for file bubbles
   useEffect(() => () => {
     revokeHydratedImageUrls(rootRef.current);
   }, []);
@@ -377,9 +377,9 @@ function messagePlainText(message: unknown): string {
 }
 
 /**
- * 兄弟节点切换器.
- * - path: 同一Answer下的多entries续问路径
- * - answer: 同一Question下的多版RetryAnswer
+ * Sibling node switcher.
+ * - path: follow-up path under the same Answer with multiple entries
+ * - answer: multiple retry versions of the same Question
  */
 function MessageBranchPicker({ kind }: { kind: "path" | "answer" }) {
   const label = kind === "path" ? "branch" : "Answer";
@@ -387,7 +387,7 @@ function MessageBranchPicker({ kind }: { kind: "path" | "answer" }) {
     <BranchPickerPrimitive.Root
       className={`aui-branch-picker aui-branch-picker-${kind}`}
       hideWhenSingleBranch
-      title={kind === "path" ? "切换从此Answerm出的路径" : "切换不同Answer版books"}
+      title={kind === "path" ? "Switch to another path branched from this Answer" : "Switch to a different version of this Answer"}
     >
       <span className="aui-branch-kind" aria-hidden>
         {label}
@@ -396,7 +396,7 @@ function MessageBranchPicker({ kind }: { kind: "path" | "answer" }) {
         <button
           type="button"
           className="aui-branch-btn"
-          aria-label={kind === "path" ? "上一个branch" : "上一个Answer"}
+          aria-label={kind === "path" ? "Previous branch" : "Previous Answer"}
         >
           <ChevronLeft size={14} strokeWidth={2.4} aria-hidden />
         </button>
@@ -410,7 +410,7 @@ function MessageBranchPicker({ kind }: { kind: "path" | "answer" }) {
         <button
           type="button"
           className="aui-branch-btn"
-          aria-label={kind === "path" ? "下一个branch" : "下一个Answer"}
+          aria-label={kind === "path" ? "Next branch" : "Next Answer"}
         >
           <ChevronRight size={14} strokeWidth={2.4} aria-hidden />
         </button>
@@ -420,8 +420,8 @@ function MessageBranchPicker({ kind }: { kind: "path" | "answer" }) {
 }
 
 /**
- * 从助手Answer开"新会话窗口": 
- * Copy root→booksAnswer 的History到新 conversation, 原会话不动(类似 ChatGPT Branch in new chat).
+ * Open a "new conversation window" from the assistant's Answer:
+ * Copy the history from root to this Answer into a new conversation, original session unchanged (similar to ChatGPT Branch in new chat).
  */
 function AssistantMessage() {
   const message = useMessage();
@@ -453,7 +453,7 @@ function AssistantMessage() {
     if (!onBranchFromAnswer || !assistantId || branchBusy || forking) return;
     setForking(true);
     try {
-      // 等 click 完全结束后再上全屏遮罩, 绝不能在 pointerdown 就盖住按钮
+      // Wait for the click to fully end before applying full-screen shield, must never cover the button on pointerdown
       await new Promise<void>((r) => {
         window.setTimeout(r, 0);
       });
@@ -461,7 +461,7 @@ function AssistantMessage() {
       lockReaderAiNavigation(1200);
       const ok = await onBranchFromAnswer(assistantId);
       if (!ok) {
-        // Failed时也给一点反馈Time(sessionError 在会话entries)
+        // Give some feedback on failure too (sessionError is in the conversation entries)
         armReaderAiClickShield(200, { overlayDelayMs: 0 });
       }
     } finally {
@@ -489,21 +489,21 @@ function AssistantMessage() {
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* 同Question多版Answer切换(仍在Current窗口；真正开新窗用下面"开New conversation") */}
+          {/* Switch between multiple versions of the same Question's Answer (still in the current window; for a truly new window use "Open new conversation" below) */}
           <MessageBranchPicker kind="answer" />
           <button
             type="button"
             className="aui-action-btn aui-action-btn-branch"
             onPointerDown={(e) => {
-              // 只 stopPropagation, 不要 preventDefault, no则可能丢 click
+              // Only stopPropagation, don't preventDefault — otherwise clicks may be lost
               e.stopPropagation();
             }}
             onClick={(e) => {
               void handleBranch(e);
             }}
             disabled={Boolean(branchBusy || forking || !onBranchFromAnswer)}
-            aria-label="从此Answer开New conversation"
-            title="Copy到此Answer为止的上文, 开一个New conversation继续问(原对话不变, 避免上下文污染)"
+            aria-label="Open new conversation from this Answer"
+            title="Copy conversation up to this Answer, open a new conversation to continue asking (original conversation unchanged, avoids context pollution)"
           >
             {forking ? (
               <Loader2 className="aui-spin" size={13} strokeWidth={2.4} aria-hidden />
@@ -517,8 +517,8 @@ function AssistantMessage() {
               <button
                 type="button"
                 className="aui-action-btn"
-                aria-label="重新生成Answer"
-                title="同一Question再生成一版Answer(仍在Current窗口)"
+                aria-label="Regenerate answer"
+                title="Regenerate another version of the answer to the same question (still in the current window)"
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -641,7 +641,7 @@ export function ReaderAssistantThread({
     [],
   );
 
-  // None模型 Key 时禁止输入/Send(与主pages一致: 只认Settings → credentials)
+  // No model key: disable input/Send (consistent with main page: only accepts Settings → credentials)
   const [credTick, setCredTick] = useState(0);
   useEffect(() => {
     const bump = () => setCredTick((n) => n + 1);
@@ -665,7 +665,7 @@ export function ReaderAssistantThread({
           className="aui-viewport"
           data-reader-ai-viewport="true"
           turnAnchor="top"
-          // branch/切会话时Close库内 autoScroll, 避免整列Jump to底像"刷新"
+          // Disable autoScroll in the library during branch/session switch, to avoid the whole column jumping to bottom like a "refresh"
           autoScroll={!branchBusy}
           scrollToBottomOnRunStart={!branchBusy}
         >
@@ -689,7 +689,7 @@ export function ReaderAssistantThread({
           </div>
         ) : (
           <ComposerPrimitive.Root className="aui-composer" compact>
-            {/* Notion 式一体圆角输入卡: 正文 + 底栏Tools */}
+            {/* Notion-style unified rounded input card: body + bottom toolbar Tools */}
             <div className="aui-composer-shell">
               <ComposerPrimitive.Input
                 className="aui-input"
@@ -702,7 +702,7 @@ export function ReaderAssistantThread({
                   <BookOpen size={12} strokeWidth={2.2} aria-hidden />
                   CurrentDocuments
                 </span>
-                {/* 停止/Send互斥占同一位: 双钮常驻会让"停止"在 95% Timeyes死按钮 */}
+                {/* Stop/Send are mutually exclusive and share the same position: having both buttons permanently visible would make "Stop" a dead button 95% of the time */}
                 <div className="aui-composer-actions">
                   <ThreadPrimitive.If running>
                     <ComposerPrimitive.Cancel asChild>
@@ -721,7 +721,7 @@ export function ReaderAssistantThread({
                 </div>
               </div>
             </div>
-            <p className="aui-hint">Enter Send · Shift+Enter new line · 点Answer [n] jump to page</p>
+            <p className="aui-hint">Enter to send · Shift+Enter new line · Click Answer [n] to jump to page</p>
           </ComposerPrimitive.Root>
         )}
       </ThreadPrimitive.Root>

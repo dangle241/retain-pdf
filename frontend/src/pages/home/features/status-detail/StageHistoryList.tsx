@@ -1,9 +1,11 @@
-// 过程Time线List:src/js/status-detail/history.js 的 buildStageHistoryPresentation
-// (字符串模板拼接)的 JSX 重写,类名/结构照搬(蓝图 §1.1 判决表:history.js
-// markup 拼接部m不用,改读原始Data数组;逐entries断言取代 markup 断言).
+// Process timeline list: JSX rewrite of src/js/status-detail/history.js's
+// buildStageHistoryPresentation (string template assembly), class names/structure
+// copied (blueprint §1.1 verdict table: history.js markup assembly part not used,
+// reads raw data array instead; per-entry assertions replace markup assertions).
 //
-// 耗时/Time戳计算复用保留的纯逻辑 job/stage-history.js + status-detail/utils.js
-// (与 detail pages EventsTimeline.jsx 的先例一致,不重新发明这部m公式).
+// Duration/timestamp calculations reuse the kept pure logic job/stage-history.js +
+// status-detail/utils.js (consistent with detail pages EventsTimeline.jsx precedent,
+// no need to reinvent this part's formula).
 
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
 import {

@@ -1,5 +1,5 @@
-// 底部pages码 HUD:初始 hidden,pages码/Progress/模式文案由命令式 view 层写入
-// (view.js setPageIndicator / setReaderModeHud,经 interaction-flow 驱动).
+// Bottom page number HUD: initially hidden, page number/progress/mode text written by
+// imperative view layer (view.js setPageIndicator / setReaderModeHud, driven by interaction-flow).
 
 export function ReaderPageHud() {
   return (
@@ -12,7 +12,5 @@ export function ReaderPageHud() {
     </div>
   );
 }
-
-
 
 

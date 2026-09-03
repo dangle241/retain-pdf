@@ -50,9 +50,9 @@ fn build_job_diagnostics_view(
                 job.error
                     .clone()
                     .filter(|value| !value.trim().is_empty())
-                    .unwrap_or_else(|| "任务失败，但暂未识别出明确原因".to_string())
+                    .unwrap_or_else(|| "Job failed, but no clear root cause was identified".to_string())
             } else {
-                "任务当前没有失败诊断".to_string()
+                "Job currently has no failure diagnostics".to_string()
             },
             detail: job.error.clone(),
             suggestion: None,

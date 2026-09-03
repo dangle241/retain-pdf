@@ -1,4 +1,5 @@
-// 左栏(导航占位):三栏骨架的常驻左栏,宽度由 --reader-left-w CSS 变量驱动(reader-page.css).
+// Left column (navigation placeholder): permanent left column in three-column skeleton,
+// width driven by --reader-left-w CSS variable (reader-page.css).
 
 export function ReaderLeftNav() {
   return (
@@ -11,6 +12,5 @@ export function ReaderLeftNav() {
     </aside>
   );
 }
-
 
 

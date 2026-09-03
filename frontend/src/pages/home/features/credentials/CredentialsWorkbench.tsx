@@ -1,14 +1,14 @@
-// CredentialsWorkbench: credentials表单主体(API/任务选items双 tab + 面板 + Save行), 
-// 从 CredentialsDialog 抽出的双宿主组件: 
-//   1. SettingsHubDialog 的 API 区内嵌(常规入口, None二层弹窗)
-//   2. CredentialsDialog(仅剩First-run setup门 setupMode 一个场景)
-// 两个宿主互斥挂载(Settingsyes模态, 门弹窗只从Upload引导触发), BROWSER_IDS 的
-// DOM id 不会同屏重复.Status/Save/校验All走 useCredentialsController 的
-// 单例 store——宿主只yes壳.
+// CredentialsWorkbench: credentials form body (API / task options dual tab + panels + save row),
+// dual-host component extracted from CredentialsDialog:
+//   1. Embedded in SettingsHubDialog API section (normal entry; not a second-level dialog)
+//   2. CredentialsDialog (only remaining scenario is first-run setup gate setupMode)
+// Two hosts are mutually exclusive mounts (Settings is modal; gate dialog only triggered from
+// upload flow), BROWSER_IDS DOM ids won't duplicate on screen. Status/Save/validation all go
+// through useCredentialsController's singleton store — hosts are just shells.
 //
-// TaskOptionsPanel 常驻挂载(不随 tab 卸载)的约束沿用 CredentialsDialog
-// 头注释Conclusion: 其字段 ref 在Save时被统一读取, 卸载会复现"切到 API 面板点
-// Save, 任务选items静默丢失".
+// TaskOptionsPanel permanently mounted (not unmounted with tab) constraint carried over from
+// CredentialsDialog header comment conclusion: its field refs are read uniformly on save;
+// unmounting reproduces "switch to API tab, click Save, task options silently lost".
 
 import { Tabs as TabsPrimitive } from "radix-ui";
 import { CREDENTIAL_DOM_IDS } from "./credentials-dom-ids.js";
@@ -18,7 +18,7 @@ import { DeepSeekPanel } from "./DeepSeekPanel.jsx";
 import { TaskOptionsPanel } from "./TaskOptionsPanel.jsx";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size 在未注解源Files里被推断为必填;unstyled 路径运行时不用 size.
+// Button.size is inferred as required in unannotated source files; unstyled path doesn't use size at runtime.
 const Button = ButtonBase as any;
 
 const { browser: BROWSER_IDS } = CREDENTIAL_DOM_IDS;
@@ -84,8 +84,8 @@ export function CredentialsWorkbench() {
               <DeepSeekPanel />
             </div>
           </TabsPrimitive.Content>
-          {/* 不套 TabsPrimitive.Content 的理由见 CredentialsDialog 原注释: 
-              TaskOptionsPanel 自带 role=tabpanel, 再包一层语义重复 */}
+          {/* Reason for not wrapping in TabsPrimitive.Content: see CredentialsDialog original comment.
+              TaskOptionsPanel has its own role=tabpanel; wrapping adds redundant semantics */}
           <TaskOptionsPanel hidden={activeTab !== "task"} />
         </div>
         <div className="actions credential-dialog-actions">

@@ -1,13 +1,13 @@
-// library 域对外入口 —— Pages/composition 只从这里 import, 勿深挖子路径(测试除外).
+// library domain public entry — Pages/composition should only import from here, no deep sub-path digging (except for tests).
 //
-// 目录:
-//   shell/      通用壳(BookCard, BookListRow)
-//   actions/    卡片Action工厂(read / translate)
-//   display/    展示辅助(封面, 徽标)
-//   page/       书架pages编排(Grid, Toolsentries, viewPort)
+// Directory:
+//   shell/      Common shell (BookCard, BookListRow)
+//   actions/    Card action factory (read / translate)
+//   display/    Display helpers (cover, badge)
+//   page/       Bookshelf page layout (Grid, Tool entries, viewPort)
 //   categories/ Collection tab
-//   favorites/  Favorite tab(Excerpt/Note)
-//   detail/     Book Details(shell 壳 + Dialog 容器)
+//   favorites/  Favorites tab (Excerpt/Note)
+//   detail/     Book Details (shell + Dialog container)
 //   domain/     Domain controller
 
 export { BookCard, BookCardActionButton, cardSignatureOf } from "./shell/BookCard.jsx";

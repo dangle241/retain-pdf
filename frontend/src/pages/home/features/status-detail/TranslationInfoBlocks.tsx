@@ -1,9 +1,9 @@
 import { stringifyPretty } from "../../composition/external.js";
 
-// Translation调试详情/重放面板total用的两个小展示块——JSX 重写
-// features/status-detail/formatters.js 的 renderField/renderTextBlock(两者
-// 都yes markup 拼接,蓝图 §1.1 判死;stringifyPretty yes纯格式化函数,保留
-// 直接 import).
+// Two small display blocks used by Translation debug detail/replay panels — JSX rewrite
+// of features/status-detail/formatters.js renderField/renderTextBlock (both were
+// markup concatenation, condemned by blueprint §1.1); stringifyPretty is a pure
+// formatting function, kept for direct import.
 
 export function InfoRow({ label, value }) {
   return (
@@ -24,6 +24,5 @@ export function TextBlock({ label, value }) {
     </section>
   );
 }
-
 
 

@@ -285,7 +285,7 @@ export async function askLibraryAi({
       throw new AiAskError(`${hint}(${resp.status})`, 401);
     }
     // 400 missing LLM key: point at the model API key in "Settings → credentials"
-    // Regex keeps 模型 API Key to match backend Chinese error text (compat).
+    // Regex keeps "LLM" / "model API Key" to match backend error text (compat).
     if (resp.status === 400 && /LLM|模型\s*API\s*Key|api key/i.test(message)) {
       throw new AiAskError(
         message.includes("credentials") || message.includes("Settings")

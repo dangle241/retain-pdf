@@ -1,5 +1,5 @@
-// 把需鉴权 / mock:// 的 PDF URL 拉成 react-pdf Ready的 { data: Uint8Array }.
-// 会话层会先整FilesDownload complete再展示；books hook 也可独立使用.
+// Convert auth-required / mock:// PDF URLs into react-pdf-ready { data: Uint8Array }.
+// The session layer waits for FilesDownload to complete before displaying; the files hook can also be used independently.
 
 import { useEffect, useState } from "react";
 import { fetchProtected } from "../external.js";
@@ -50,7 +50,7 @@ export async function loadProtectedPdfFile(
   return file;
 }
 
-/** 并行下载多份 PDF, AllDone才 resolve；onItem 用于Progress文案 */
+/** Downloads multiple PDFs in parallel, resolves only when all done; onItem provides progress text */
 export async function loadProtectedPdfFiles(
   urls: string[],
   {
@@ -80,7 +80,7 @@ export async function loadProtectedPdfFiles(
 
 export function useProtectedPdfFile(
   url = "",
-  /** 会话已预下载时直接注入, 跳过二次请求 */
+  /** When the session has already pre-downloaded, inject directly and skip the secondary request */
   preloaded: ProtectedPdfFile | null = null,
 ): ProtectedPdfState {
   const [file, setFile] = useState<ProtectedPdfFile | null>(

@@ -1,8 +1,8 @@
-// s表 hook(蓝图 §2 features/status/,§3.5).
+// Elapsed timer hook (Blueprint §2 features/status/, §3.5).
 //
-// 独立于 statusCardStore 驱动(store 里故意不放 elapsed——见
-// status-card-store.js 顶部注释).1s tick,终态(succeeded/failed/canceled)
-// 即停,直接复用 job/elapsed-view-model.js 的纯函数.
+// Driven independently from statusCardStore (elapsed deliberately not placed in store——see
+// status-card-store.js top comment). 1s tick, stops at terminal state (succeeded/failed/canceled),
+// directly reuses pure functions from job/elapsed-view-model.js.
 
 import { useEffect, useState } from "react";
 import {
@@ -24,7 +24,7 @@ export function useElapsedTicker(job, { finishedAtFallback = "" } = {}) {
     return () => clearInterval(timer);
   }, [terminal, job?.job_id, status]);
 
-  void tick; // 仅用于每s触发重渲,值books身不参与计算
+  void tick; // only used to trigger re-render every second; the value itself is not used in calculations
   return buildElapsedViewModel(job, { finishedAtFallback });
 }
 

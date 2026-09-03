@@ -48,7 +48,7 @@ async fn should_skip_job_execution(deps: &ProcessRuntimeDeps, job_id: &str) -> R
 fn persist_queued_job(deps: &ProcessRuntimeDeps, job: &mut JobSnapshot) -> Result<()> {
     job.status = JobStatusKind::Queued;
     job.stage = Some("queued".to_string());
-    job.stage_detail = Some("任务排队中，等待可用执行槽位".to_string());
+    job.stage_detail = Some("Job queued, waiting for an available execution slot".to_string());
     job.updated_at = now_iso();
     job.sync_runtime_state();
     job.replace_failure_info(None);

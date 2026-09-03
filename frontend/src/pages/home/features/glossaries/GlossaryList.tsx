@@ -1,5 +1,5 @@
-// 术语表列表面板(对照 glossary-manager-dialog-template.js 的
-// .glossary-list-panel 区块 + view.js:renderGlossaryList 逐节点镜像)。
+// Glossary list panel (mirrors the .glossary-list-panel block from
+// glossary-manager-dialog-template.js + view.js:renderGlossaryList node by node).
 
 import { EmptyState } from "../../../../shared/icons/EmptyState.jsx";
 import { GLOSSARY_DOM_IDS } from "./glossaries-dom-ids.js";

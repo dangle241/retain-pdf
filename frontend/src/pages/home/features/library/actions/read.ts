@@ -1,18 +1,20 @@
-// BookCard"快速阅读"动作 —— 独立模块, 改阅读逻辑只动booksFiles.
+// BookCard "Quick read" action — kept in its own module so the read entry
+// point only needs edits here.
 //
-// 行为:
-// - Complete job → Side-by-side Reader (onReader(jobId))
-// - no则有 document → Read Source (onReadSource(documentId))
-// - Failed且None document → 仍返回按钮, 点击 no-op(兼容旧 UI/测试)
+// Behavior:
+// - Completed job  -> Side-by-side Reader (onReader(jobId))
+// - No job, has document -> Read Source (onReadSource(documentId))
+// - Failed and no document -> still returns a button; click is a no-op
+//   (keeps older UI / tests working)
 
 import type { BookCardAction, BookCardActionHandlers, LibraryCardItem } from "../types.js";
 
 export const BOOK_CARD_ACTION_READ = "read";
 
 /**
- * @param item 书架 item
+ * @param item shelf item
  * @param handlers onReader / onReadSource
- * @returns 0 或 1 个 action(Current始终 1 个)
+ * @returns 0 or 1 actions (currently always 1)
  */
 export function buildReadBookCardAction(
   item: LibraryCardItem = {},
@@ -41,7 +43,7 @@ export function buildReadBookCardAction(
     id: BOOK_CARD_ACTION_READ,
     label,
     icon: "eye",
-    // History测试锚点 .recent-job-reader
+    // History test anchor .recent-job-reader
     className: "book-card-action book-card-action-read recent-job-reader",
     onClick,
   }];

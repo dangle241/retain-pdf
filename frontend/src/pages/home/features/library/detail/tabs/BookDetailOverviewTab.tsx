@@ -1,6 +1,8 @@
-// Tab"书籍Overview"——Title / Authors / Tags / Edit + 元信息Grid.
-// 改Overview相关 UI 只动booksFiles(或 TitleMetaPanel).
-// 元信息(Pages/Size/Added/Collection)自左栏迁入: 右栏不再空旷, 左栏纯粹封面+主Action.
+// "Book overview" tab — title / authors / tags / edit + metadata grid.
+// Changes to overview UI only need to touch this file (or TitleMetaPanel).
+// Metadata (pages/size/added/collection) moved out of the left column so the
+// right column is no longer empty, while the left column is pure cover + primary
+// action.
 
 import { IconLayers } from "../panels/ui.jsx";
 import { TitleMetaPanel } from "../panels/TitleMetaPanel.jsx";
@@ -33,7 +35,7 @@ function MetaCell({ label, children }) {
 }
 
 /**
- * @param {object} props TitleMetaPanel 业务 props + 元信息(pageCount/bytes/addedAt/memberCollections)
+ * @param {object} props TitleMetaPanel business props + metadata (pageCount/bytes/addedAt/memberCollections)
  */
 export function BookDetailOverviewTab({
   pageCount,

@@ -1,4 +1,4 @@
-// 双栏挂载/可见性 + Pages + metrics 修订: 从 ReaderAppReactPdf 抽出.
+// Dual-pane mount/visibility + pages + metrics revision: extracted from ReaderAppReactPdf.
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { ReaderMode } from "./use-reader-session.js";

@@ -1,5 +1,5 @@
-// 单栏 PDF: 栏不滚动；纵向由total享 scroll shell 负责(对齐旧 reader-scroll-shell).
-// Side-by-side等高由父级 usePageRowSync Done, 不做 display:contents.
+// Single-column PDF: the column does not scroll; vertical scrolling is handled by the shared scroll shell (aligning with old reader-scroll-shell).
+// Side-by-side equal height is handled by parent usePageRowSync, not display:contents.
 
 import {
   forwardRef,
@@ -23,8 +23,8 @@ import type { PageRowHeights } from "./usePageRowSync.js";
 import type { ReaderPaneId } from "./reader-dom-contract.js";
 
 /**
- * pages宽按"shell 全宽 × zoom%"计算, 与Current栏宽None关.
- * pageWidthOverride 在此语义下应传 shell 全宽(不yes半宽).
+ * Page width is calculated as shell full width × zoom%, unrelated to current column width.
+ * pageWidthOverride should receive the shell full width (not half width) in this context.
  */
 
 setupReactPdf();
@@ -43,11 +43,11 @@ export type PdfDocumentPaneProps = {
   emptyLabel?: string;
   scrollRoot?: HTMLElement | null;
   /**
-   * 阅读区全宽(shell clientWidth).
-   * pages绘制宽 = pageWidthFromShell(此值, userZoom), 不随单栏/半栏变化.
+   * Full reading area width (shell clientWidth).
+   * Page rendered width = pageWidthFromShell(this value, userZoom), unchanged by single/half column mode.
    */
   pageWidthOverride?: number | null;
-  /** Side-by-side行高sync */
+  /** Side-by-side row height sync */
   rowHeights?: PageRowHeights;
   onMetrics?: () => void;
   onLoadSuccess?: (info: { numPages: number; pane: ReaderPaneId }) => void;
@@ -85,7 +85,7 @@ const PdfDocumentPaneInner = forwardRef<HTMLElement, PdfDocumentPaneProps>(
 
     useImperativeHandle(ref, () => paneEl as HTMLElement, [paneEl]);
 
-    // pages宽只跟 shell 全宽 + zoom 走, 禁止用books栏 clientWidth(Side-by-side会变成 25%)
+    // Page width follows only shell full width + zoom; do not use column clientWidth (it becomes 25% in side-by-side)
     useEffect(() => {
       const w = pageWidthOverride && pageWidthOverride >= 80
         ? pageWidthOverride
@@ -96,7 +96,7 @@ const PdfDocumentPaneInner = forwardRef<HTMLElement, PdfDocumentPaneProps>(
       setPaneWidth(w);
     }, [pageWidthOverride, scrollRoot, visible]);
 
-    // shell 尺寸变化时sync
+    // Sync when shell size changes
     useEffect(() => {
       if (!scrollRoot || typeof ResizeObserver === "undefined") return;
       if (pageWidthOverride && pageWidthOverride >= 80) return;

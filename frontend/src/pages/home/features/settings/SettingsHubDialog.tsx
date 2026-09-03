@@ -1,23 +1,28 @@
-// SettingsHubDialog v2: 左导航 + 右内容区(原"门厅弹窗"横向 pill 布局退役).
+// SettingsHubDialog v2: left nav + right content area (former "lobby dialog"
+// horizontal pill layout retired).
 //
-// 布局: 左侧竖排导航(图标+名称, Radix Tabs orientation=vertical, 方向键Ready), 
-// 右侧内容窗格(每区自带Title行 + 正文, 独立滚动).Appearance区升格为Theme卡片Grid
-// 的主舞台；API/Glossary因真实表单仍yes独立顶层对话框(CredentialsDialog/
-// GlossariesDialog, 各有 controller/store/测试契约), books面板作为"Start区"
-// 保留入口按钮——后续如要内嵌, 动的yes那两个 feature, 不yes这里.
+// Layout: left vertical nav (icon + name, Radix Tabs orientation=vertical,
+// arrow-key ready), right content pane (each section has its own Title row +
+// body, independent scrolling). Appearance section is promoted as the main stage
+// for the Theme card Grid; API/Glossary still have their own top-level dialogs
+// (CredentialsDialog/GlossariesDialog, each with its own controller/store/test
+// contract), and this panel serves as the "entry point" for them — if embedding
+// is needed later, the change goes to those two features, not here.
 //
-// 【测试契约, 改版不许破】(credentials/glossaries/app-update component tests): 
+// 【Test contracts, must not break】 (credentials/glossaries/app-update component tests):
 // - #app-settings-dialog / #app-settings-close-btn
-// - [data-settings-tab="api|glossary|appearance|update"] 可点击
-// - [data-settings-panel=...] forceMount + hidden 属性切换(测试断言 .hidden)
-// - #credentials-btn / #glossary-btn 打开对应子对话框
-// - Appearance面板 #theme-appearance-panel 与 #theme-option-<id>
+// - [data-settings-tab="api|glossary|appearance|update"] clickable
+// - [data-settings-panel=...] forceMount + hidden attribute toggle (test asserts .hidden)
+// - #credentials-btn / #glossary-btn open corresponding sub-dialogs
+// - Appearance panel #theme-appearance-panel and #theme-option-<id>
 //
-// 开合Status跨子树走 settings-hub-dialog-store；tab 切换yes子树内瞬态(useState).
-// 不 forceMount Dialog 的 Content/Overlay(Radix hideOthers 依赖真实
-// mount/unmount, 见 CredentialsDialog 头注释).AppUpdateBanner 的挂载生命
-// 周期说明见旧版头注释Conclusion: 后台自检由 composition 的纯逻辑控制器驱动, 
-// 与books组件yesno挂载None关.
+// Open/close state across subtrees goes through settings-hub-dialog-store; tab
+// switching is transient within the subtree (useState). Content/Overlay are NOT
+// forceMounted (Radix hideOthers depends on real mount/unmount; see
+// CredentialsDialog header comment). AppUpdateBanner mount lifecycle note:
+// background health check is driven by composition's pure logic controller, with
+// no relation to the component's yes/no mount state (see old file header
+// conclusion).
 
 import { useEffect, useState } from "react";
 import { Dialog as DialogPrimitive, Tabs as TabsPrimitive } from "radix-ui";
@@ -30,7 +35,8 @@ import { CredentialsWorkbench } from "../credentials/CredentialsWorkbench.jsx";
 import { ThemeAppearancePanel } from "./ThemeAppearancePanel.jsx";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size 在未注解源Files里被推断为必填;unstyled 路径运行时不用 size.
+// Button.size is inferred as required in an untyped source file; unstyled path
+// does not need size at runtime.
 const Button = ButtonBase as any;
 
 function IconKey(props) {
@@ -106,8 +112,10 @@ export function SettingsHubDialog() {
     }
   }, [open]);
 
-  // API 区内嵌credentials工作台: 进入 api tab 时从credentialsStatus回填表单(不开二层弹窗).
-  // forceMount 保证面板已挂载；rAF 再补一次, 避免 ref 尚未挂上导致密码框空白, Save读到空串.
+  // API section embeds credentials workbench: populates form from credentials state
+  // when entering the api tab (no second-level dialog). forceMount guarantees the
+  // panel is mounted; rAF runs a second time to avoid a blank password field if
+  // the ref hasn't attached yet, so Save doesn't read an empty string.
   useEffect(() => {
     if (!open || activeTab !== "api") {
       return;
@@ -129,7 +137,8 @@ export function SettingsHubDialog() {
   }
 
   function panelClass(tab: string) {
-    // 纯字面量拼接(含空格separated), 避开 v4 扫描器的 `x${y}` 模板坑
+    // Plain literal concatenation (with space-separated values) to avoid the v4
+    // scanner's `x${y}` template literal pitfall.
     return activeTab === tab ? "app-settings-panel is-current" : "app-settings-panel";
   }
 
@@ -187,8 +196,8 @@ export function SettingsHubDialog() {
                   data-settings-panel="api"
                 >
                   <PaneHead tab="api" />
-                  {/* credentials工作台直接内嵌(None二层弹窗)；与First-run setup门total用
-                      CredentialsWorkbench, Status同源. */}
+                  {/* Credentials workbench embedded directly (no second-level dialog);
+                      shares status source with First-run setup. */}
                   <CredentialsWorkbench />
                 </TabsPrimitive.Content>
 
@@ -230,8 +239,9 @@ export function SettingsHubDialog() {
                   data-settings-panel="update"
                 >
                   <PaneHead tab="update" />
-                  {/* AppUpdateBanner:按钮 + 详情 dialog 合并一体(蓝图 §5).
-                      挂载生命周期与后台自检解耦的Conclusion见Files头注释. */}
+                  {/* AppUpdateBanner: button + detail dialog combined (blueprint §5).
+                      Mount lifecycle decoupled from background health check — conclusion
+                      in file header. */}
                   <AppUpdateBanner />
                 </TabsPrimitive.Content>
               </div>
@@ -242,7 +252,6 @@ export function SettingsHubDialog() {
     </DialogPrimitive.Root>
   );
 }
-
 
 
 

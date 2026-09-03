@@ -1,9 +1,9 @@
-// 封面中央"Processing"加载层: queued/OCR/Translation/Rendering时用, 不在角标写过程文案.
+// Cover center "Processing" loading overlay: used during queued/OCR/Translation/Rendering, process text not written in corner badge.
 
 import { cn } from "@/lib/utils";
 
 type BookCardProcessingOverlayProps = {
-  /** List缩略图用更小尺寸 */
+  /** Use smaller size for list thumbnails */
   compact?: boolean;
   className?: string;
 };

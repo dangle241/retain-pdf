@@ -1,18 +1,19 @@
-// GlossariesDialog 家族(GlossariesDialog/GlossaryList/GlossaryEditor/
-// GlossaryImportPanel)的唯一装配面(镜像 useCredentialsController.js)——把
-// composition.js 的 glossaries 域(services.glossaries:{feature, view,
-// dialogStore})折成一个 hook.
+// GlossariesDialog family (GlossariesDialog/GlossaryList/GlossaryEditor/
+// GlossaryImportPanel) single assembly surface (mirrors useCredentialsController.js) —
+// folds the glossaries domain from composition.js (services.glossaries:{feature, view,
+// dialogStore}) into one hook.
 //
-// 打开触发:SettingsHubDialog"Glossary"tab 的 #glossary-btn 直接调
-// services.glossaries.dialogStore.open()(蓝图 §0.4 占位调用点,composition
-// 就位后即生效),不经 APP_EVENTS——books hook 用一个 open Status迁移 effect 把
-// "对话框被打开"这件事接回 controller.js 的 open()(内部会 openDialog() +
-// reloadGlossaries()),语义等价旧世界"点击Glossary按钮 → open()"的单一入口,
-// 不required改 SettingsHubDialog.jsx 的既有占位调用.
+// Open trigger: SettingsHubDialog "Glossary" tab's #glossary-btn directly calls
+// services.glossaries.dialogStore.open() (blueprint §0.4 placeholder call site,
+// effective once composition is in place), bypassing APP_EVENTS — this hook uses an
+// open state-migration effect to pipe "dialog opened" back to controller.js's open()
+// (which internally calls openDialog() + reloadGlossaries()), semantically equivalent to
+// the old-world single entry point "click Glossary button → open()", no change required
+// to SettingsHubDialog.jsx's existing placeholder call.
 //
-// APP_EVENTS.refreshGlossaries(蓝图 §0.6)用 useAppEvent 消费,调用
-// handlers.reload(controller.js bindEvents 捕获的 reload 处理函数,内部已带
-// try/catch → setStatus 错误提示).
+// APP_EVENTS.refreshGlossaries (blueprint §0.6) consumed via useAppEvent, calling
+// handlers.reload (the reload handler captured by controller.js's bindEvents, which
+// already carries try/catch → setStatus error feedback).
 
 import { useEffect, useRef } from "react";
 import { useStoreSnapshot } from "../../../../shared/react/use-store.js";
@@ -36,9 +37,9 @@ export function useGlossariesController() {
   const wasOpenRef = useRef(false);
   useEffect(() => {
     if (open && !wasOpenRef.current) {
-      // controller.js 的 open() = openDialog()(dialogStore.open() 幂等) +
-      // "Loading glossary..." Status + reloadGlossaries() + 清空/错误Status,一次性
-      // 复用,不在这里重新拼一遍等价逻辑.
+      // controller.js's open() = openDialog() (dialogStore.open() idempotent) +
+      // "Loading glossary..." status + reloadGlossaries() + clear/error status, all in one shot;
+      // reused; not re-assembling equivalent logic here.
       void feature?.open?.();
     }
     wasOpenRef.current = open;

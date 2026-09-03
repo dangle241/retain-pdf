@@ -1,5 +1,6 @@
-// 顶栏三 tab(Source/Translation/Side-by-side).探针Stage初始Rendering即 compare 激活态;
-// 点击切换由 mode-controller(命令式)接管,React 不重Rendering这些按钮.
+// Topbar three tabs (Source/Translation/Side-by-side). Probe stage initial rendering compares
+// active state; click switching is handled by mode-controller (imperative), React does not
+// re-render these buttons.
 
 export function ReaderTopbar() {
   return (
@@ -12,5 +13,4 @@ export function ReaderTopbar() {
     </header>
   );
 }
-
 

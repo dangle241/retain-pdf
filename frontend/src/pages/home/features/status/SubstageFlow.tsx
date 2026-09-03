@@ -1,7 +1,7 @@
-// 子StageWorkflowentries(蓝图 §2 features/status/;Data源 buildSubstageViewModel yes
-// job-status/substage-view-model.js 纯 VM,原样 import——镜像
-// job-status-card-substages.js 的 syncStageSubstageStates DOM 结构,
-// --status-substage-count CSS 变量契约保留).
+// Sub-stage workflow entries (Blueprint §2 features/status/; data source buildSubstageViewModel is
+// a pure VM from job-status/substage-view-model.js, imported as-is——mirrors
+// job-status-card-substages.js syncStageSubstageStates DOM structure;
+// --status-substage-count CSS variable contract preserved).
 
 import type { StatusCardSnapshot, StatusCardStageProgress } from "./status-card-store.js";
 import type { CSSProperties } from "react";

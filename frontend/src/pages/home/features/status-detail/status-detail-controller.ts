@@ -1,23 +1,23 @@
-// StatusDetailDialog 的组合逻辑(蓝图 §1 判决表的落地点).
+// StatusDetailDialog composition logic (blueprint §1 verdict table landing spot).
 //
-// 与旧世界 features/status-detail/controller.js 的关系(关键偏离,写进汇报):
-// controller.js 的公开返回值只有 { activateDetailTab, bindEvents,
+// Relationship with old-world features/status-detail/controller.js (key deviation, noted for report):
+// controller.js's public return values are only { activateDetailTab, bindEvents,
 // openStatusDetailDialog, buildDetailPageUrl, ensureTranslationData,
-// syncRerunAction, ensureOverviewData } —— applyFilter/changePage/loadItem/
-// replay/rerunCurrentJob Allyes内部闭包,只能通过 bindEvents() 接的
-// event-commands.js 触达(document 委托点击,DOM Events驱动设计).JSX 组件required
-// 直接调用这些动作(受控 select/input, 按钮 onClick),这个"回调只认 DOM
-// Events"的窄公开面在 React 世界不可行.
+// syncRerunAction, ensureOverviewData } — applyFilter/changePage/loadItem/
+// replay/rerunCurrentJob are all internal closures, reachable only through bindEvents()
+// event-commands.js (document-delegated clicks, DOM Events-driven design). JSX components
+// need to call these actions directly (controlled select/input, button onClick); this narrow
+// public surface of "callbacks only accept DOM Events" is unworkable in the React world.
 //
-// 因此booksFiles不 import controller.js/translation-tab-port.js/
+// Therefore this file does NOT import controller.js/translation-tab-port.js/
 // event-commands.js/navigation-view-port.js/dialog-view-port.js/
-// resume-view-port.js/translation-renderer.js/view.js(蓝图判死清单 + 均属
-// architecture-boundaries 防回弹禁区),改为直接组合蓝图判"保留"的纯逻辑层:
-// overview-coordinator.js / resume-actions.js / translation-data-port.js /
-// translation-tab-coordinator.js / translation-state.js / status-detail/
-// snapshot.js —— 用自己的 viewPort/render* 回调把它们的输出写进
-// status-detail-store.js,而不yes拼 DOM markup.逐个方法在 pages 层重新
-// 暴露,JSX 直接调用.
+// resume-view-port.js/translation-renderer.js/view.js (blueprint death list + all
+// architecture-boundaries anti-rollback zone), instead directly composing the pure logic
+// layers the blueprint verdict marks "keep": overview-coordinator.js / resume-actions.js /
+// translation-data-port.js / translation-tab-coordinator.js / translation-state.js /
+// snapshot.js — using its own viewPort/render* callbacks to write their output to
+// status-detail-store.js, not assembling DOM markup. Each method re-exposed at the pages
+// layer, JSX calls directly.
 
 import type { StatusDetailRuntimePort } from "./status-detail-runtime-port.js";
 import type { StatusDetailStore, StatusDetailTranslation } from "./status-detail-store.js";
@@ -106,8 +106,8 @@ export function createStatusDetailController({
     return runtimePort.currentJobId();
   }
 
-  // ---- resume/rerun(resume-actions.js 保留;resumeViewPort 换 store 驱动,
-  //      不再走 view.js 的 dialogComponent() DOM 查询) ----
+  // ---- resume/rerun (resume-actions.js kept; resumeViewPort switched to store-driven,
+  //      no longer queries view.js's dialogComponent() DOM) ----
   const resumeViewPort: StatusDetailResumeViewPort = {
     closeDialog: () => dialogStore.close(),
     setRerunAction: ({ enabled, status }: { enabled?: boolean; status?: string } = {}) => {
@@ -136,10 +136,10 @@ export function createStatusDetailController({
     });
   }
 
-  // ---- overview(overview-coordinator.js 保留;renderOverviewSnapshot 落到
-  //      store,job/eventsPayload 存原始值——蓝图 §1 判决表:history.js/
-  //      events.js 的 markup 拼接部m不用,StageHistoryList/EventsList 从这
-  //      两个原始字段用纯函数各自计算结构化数组) ----
+  // ---- overview (overview-coordinator.js kept; renderOverviewSnapshot lands on
+  //      store, job/eventsPayload stores raw values — blueprint §1 verdict table: history.js/
+  //      events.js markup assembly part not used, StageHistoryList/EventsList compute
+  //      structured arrays from these two raw fields via pure functions) ----
   function renderOverviewSnapshot(context: StatusDetailOverviewRenderContext | null | undefined) {
     const job = context?.job || null;
     const eventsPayload = context?.events || null;
@@ -178,9 +178,9 @@ export function createStatusDetailController({
     await overviewTab.ensureLoaded({ force });
   }
 
-  // ---- translation(translation-data-port.js + translation-tab-coordinator.js
-  //      保留;render* 回调改成"浅拷贝 translationState 写 store"——store 的
-  //      translation 段就yes这份Status袋的镜像,加少量纯 UI 态(*Loading/
+  // ---- translation (translation-data-port.js + translation-tab-coordinator.js
+  //      kept; render* callbacks changed to "shallow-copy translationState write to store" — store's
+  //      translation segment is a mirror of this status bag, plus a small amount of pure UI state (*Loading/
   //      *ErrorText)) ----
   const translationState = createTranslationState();
   const dataPort = createStatusDetailTranslationDataPort({
@@ -252,8 +252,8 @@ export function createStatusDetailController({
     }
   }
 
-  // ---- 对外统一入口(蓝图 §1:ResultActions.jsx 的 #status-detail-btn 直调
-  //      openStatusDetailDialog("overview"),不yesEventsm发) ----
+  // ---- External unified entry point (blueprint §1: ResultActions.jsx's #status-detail-btn
+  //      directly calls openStatusDetailDialog("overview"), not events) ----
   function activateDetailTab(name = "overview") {
     dialogStore.open({ activeTab: name });
     if (name === "translation") {

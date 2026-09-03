@@ -1,4 +1,4 @@
-// AI Q&A悬浮窗: assistant-ui 线程 + 会话窗口 + branch开窗
+// AI Q&A floating window: assistant-ui thread + conversation window + branch window
 
 import { useCallback, useState } from "react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
@@ -17,7 +17,7 @@ export type ReaderAiPanelProps = {
   jobId: string;
   sourceOnly: boolean;
   onClose: () => void;
-  /** page_idx 为 0 基；由Reader goToPage(page_idx+1) */
+  /** page_idx is 0-based; called by Reader goToPage(page_idx+1) */
   onJumpCitation: (citation: AiCitationLike) => void;
 };
 
@@ -57,13 +57,13 @@ export function ReaderAiPanel({
     const ok = await branchFromAnswer(assistantId);
     if (ok) {
       setBranchNotice(
-        "Saved a new conversation (forked from the original). The original conversation remains unchanged. Use the top list to switch..",
+        "Saved a new conversation (forked from the original). The original conversation remains unchanged. Use the top list to switch.",
       );
       window.setTimeout(() => setBranchNotice(""), 6000);
     }
   }, [branchFromAnswer]);
 
-  // branch/切会话锁定期内不跳 PDF, 避免误触引用
+  // Don't jump to PDF during branch/switch session lock period, to avoid accidentally triggering citations
   const safeJumpCitation = useCallback((citation: AiCitationLike) => {
     if (isReaderAiNavigationLocked()) return;
     onJumpCitation(citation);

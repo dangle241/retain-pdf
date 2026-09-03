@@ -1,10 +1,10 @@
-// "Collection"tab 的内容:Files夹卡片Grid + 点开一个Files夹后的书目List.
+// "Collection" tab content: folder card Grid + book list after opening a folder.
 //
-// LibraryGrid的Data链路完全不动(调研计划"设计决策 2")——Files夹展开时走
-// collection_id → documents(拿 active_job_id)→ job_ids 过滤 library/books
-// 这entries桥接路径(services.collections.controller.fetchFolderBooks),换回来的
-// Data形状和Library首pages卡片完全一致,直接复用 BookCard,不用
-// 另外做一套"Files夹详情卡片"Rendering,也不会有第二套Delete确认气泡Status.
+// LibraryGrid data pipeline left completely untouched (research plan "Design Decision 2") — folder expansion goes through
+// collection_id → documents (get active_job_id) → job_ids filter library/books
+// this entry bridge path (services.collections.controller.fetchFolderBooks), the returned
+// data shape is exactly the same as Library first-page cards, directly reuse BookCard, no need to
+// make a separate "folder detail card" rendering, and there won't be a second set of Delete confirmation popover state.
 
 import { useCallback, useEffect, useState } from "react";
 import { useHomeServices } from "../../../home-services-context.js";
@@ -13,10 +13,10 @@ import { EmptyState } from "../../../../../shared/icons/EmptyState.jsx";
 import { BookCard, buildDefaultBookCardActions } from "../shell/BookCard.jsx";
 import { useRecentJobCover } from "../display/useRecentJobCover.js";
 
-// Files夹卡片的封面堆叠预览(参考 PDF_MD_lib 的 FolderCard.tsx:最多 4 books书的
-// 封面像扑克牌一样扇形叠放,越靠前的书 z 越高, 叠在最外面).封面图沿用
-// BookCard 同一个 useRecentJobCover hook(同一份 objectURL 缓存,不会
-// 因为这里多Rendering一份而重复请求).
+// Folder card cover stack preview (reference PDF_MD_lib's FolderCard.tsx: up to 4 book
+// covers stacked like a deck of cards in a fan shape, books further forward have higher z, stacked outermost). Cover images use
+// BookCard's same useRecentJobCover hook (same objectURL cache, won't
+// make duplicate requests just because one more render here).
 const MAX_STACK = 4;
 
 function FolderCoverStackLayer({ item, index, total }) {
@@ -73,15 +73,15 @@ export function CategoriesView() {
   const services = useHomeServices();
   const { controller, dialogStore, reloadSignal } = services.collections;
   const { actions } = services.library;
-  // CollectionManageDialog 挂在 HomeApp.jsx 顶层,和这个组件yes兄弟节点
-  // (不yes父子),Save/Delete后没法直接 prop 回调回来——靠一个total享的版books号信号
-  // 桥接:对话框Save成功就 bump 一次,这里订阅到变化就重新拉取List.
+  // CollectionManageDialog is mounted at HomeApp.jsx top level, sibling to this component
+  // (not parent-child), after Save/Delete can't directly prop callback — rely on a shared version number signal
+  // to bridge: dialog Save success bumps once, this component subscribes to change and re-fetches list.
   const { version } = useStoreSnapshot(reloadSignal);
 
   const [collections, setCollections] = useState([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState("");
-  // Files夹卡片的封面堆叠预览:collection_id → 该Files夹前几books书(job 卡片形状).
+  // Folder card cover stack preview: collection_id → first few books in that folder (job card shape).
   const [previews, setPreviews] = useState({});
 
   const [openFolder, setOpenFolder] = useState(null);
@@ -90,7 +90,7 @@ export function CategoriesView() {
   const [folderError, setFolderError] = useState("");
 
   const reload = useCallback((options: { soft?: boolean } = {}) => {
-    // soft: version bump / 二次拉取时保留旧List, 不整表切成 loading(Category tab 闪一下)
+    // soft: on version bump / second fetch retain old list, don't switch entire table to loading (Category tab would flicker)
     const soft = Boolean(options.soft);
     if (!soft) {
       setListLoading(true);
@@ -100,7 +100,7 @@ export function CategoriesView() {
       .listCollections()
       .then(({ collections: items = [] } = {}) => {
         setCollections(items);
-        // 正在View的Files夹如果被删了(Manage弹窗里点了Delete),退回Files夹Grid.
+        // If the folder being viewed is deleted (Delete clicked in Manage dialog), return to folder Grid.
         setOpenFolder((current) => {
           if (!current) {
             return current;
@@ -118,7 +118,7 @@ export function CategoriesView() {
   }, [controller]);
 
   useEffect(() => {
-    // 首屏 hard loading；Manage弹窗 bump version 后 soft 刷新
+    // First screen hard loading; soft refresh after Manage dialog bumps version
     reload({ soft: version > 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload, version]);
@@ -129,8 +129,8 @@ export function CategoriesView() {
       return undefined;
     }
     let cancelled = false;
-    // 每个Files夹卡片的封面堆叠预览各自独立拉取,互不阻塞——某个Files夹加载慢
-    // 不该拖住其余卡片先Display出来.
+    // Each folder card's cover stack preview fetches independently, non-blocking — slow-loading folder
+    // should not drag down other cards from displaying first.
     collections.forEach((collection) => {
       controller
         .fetchFolderBooks(collection.collection_id)
@@ -150,10 +150,10 @@ export function CategoriesView() {
     return () => {
       cancelled = true;
     };
-    // collectionIdsKey 只在"Files夹集合books身"变化时变——只加/删书(Files夹集合
-    // 不变)不会触发这个 key 变化.version 补上这一半:Manage弹窗Save成功就
-    // bump 一次,不管这次改的yes名称还yes成员,预览缩略图都要跟着刷新,no则
-    // Edit完书目后卡片上的封面堆叠会停在旧Data,直到下次新建/DeleteFiles夹.
+    // collectionIdsKey only changes when "the folder set itself" changes — adding/removing books (folder set
+    // unchanged) won't trigger this key change. version supplements this half: Manage dialog Save success bumps
+    // once, regardless of whether this change was to name or members, preview thumbnails must refresh accordingly, otherwise
+    // after editing book list the cover stack on the card stays with old data until next new/delete folder.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, collectionIdsKey, version]);
 
@@ -187,12 +187,12 @@ export function CategoriesView() {
         }
         setFolderLoading(false);
       });
-    // 用 collection_id(原始Type)而不yes openFolder(对象引用)做依赖——
-    // reload() 每次都会给同一个Files夹造一个新对象(见上面 setOpenFolder 里
-    // 的 items.find(...)),按对象引用算依赖会导致"没真的切换Files夹"也
-    // 重新请求一次;更关键的yes原来那版完全没有 cancelled 守卫,快速切换
-    // 两个Files夹时后发的请求可能先resolve, 先发的请求后resolve,导致Title
-    // Display B Files夹, 书目List却yes A Files夹的旧Data.
+    // Use collection_id (primitive) not openFolder (object reference) for dependency —
+    // reload() creates a new object for the same folder each time (see items.find(...) above in setOpenFolder),
+    // counting object reference as dependency causes "didn't actually switch folders" to also
+    // re-request once; more critically, the original version had zero cancelled guards, fast-switching
+    // between two folders the later request may resolve first, the earlier request resolves later, causing Title
+    // to display B folder but book list showing A folder's old data.
     return () => {
       cancelled = true;
     };

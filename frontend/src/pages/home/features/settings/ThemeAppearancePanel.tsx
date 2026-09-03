@@ -1,5 +1,6 @@
-// Settings · Appearance: Theme皮肤切换(注册表驱动, 后期加皮肤None需改booksFiles)
-// 真值: html[data-theme] + localStorage(shared/theme)
+// Settings · Appearance: Theme skin switching (registry-driven; adding "None" skin
+// later requires changes to this file). The truth: html[data-theme] + localStorage
+// (shared/theme).
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -12,8 +13,9 @@ import {
 
 export function ThemeAppearancePanel() {
   const [active, setActive] = useState<ThemeId>(() => getTheme());
-  // 按产品系列m区(Basic/Schools of Thought/王朝/二次元...), 系列注册表见
-  // shared/theme/registry.ts 的 THEME_SERIES——新系列加一行即出新m区
+  // Organized by product series (Basic/Schools of Thought/Dynasty/CGD...); new
+  // series added to shared/theme/registry.ts THEME_SERIES creates a new theme
+  // area automatically.
   const groups = listThemesBySeries();
 
   useEffect(() => {
@@ -27,7 +29,8 @@ export function ThemeAppearancePanel() {
 
   return (
     <div className="theme-appearance" id="theme-appearance-panel">
-      {/* 说明文案由Settings面板的 pane-head 承担, 此处不再重复 hint */}
+      {/* Explanation copy is handled by the Settings pane's pane-head; no need to
+          repeat hints here. */}
       {groups.map(({ series, label, themes }) => (
         <div key={series} className="theme-appearance-group" data-theme-series={series}>
           <h3 className="theme-appearance-group-title">{label}</h3>
@@ -39,9 +42,10 @@ export function ThemeAppearancePanel() {
             {themes.map((meta) => {
               const swatch = meta.preview;
               const selected = active === meta.id;
-              // className 用 cn + 纯字面量: v4 扫描器提不出 `x${y}` 模板里的
-              // 类名(tailwind-theme.css 头注释记录的坑, theme-option 曾因此
-              // 整entries @utility 静默丢失)
+              // className uses cn with plain string literals: v4 scanner cannot
+              // extract class names from `x${y}` template literals (the tailwind-theme.css
+              // header records this known issue; theme-option once silently lost an
+              // entire @utility entry because of this).
               return (
                 <button
                   key={meta.id}
@@ -99,6 +103,5 @@ export function ThemeAppearancePanel() {
     </div>
   );
 }
-
 
 

@@ -1,9 +1,9 @@
-// StageWorkflowentries(蓝图 §2 features/status/;镜像 job-status-card-stage-flow.js
-// 的 syncStageFlow 语义,DOM 契约逐 id/class 保留——smoke 依赖
+// Stage workflow entries (Blueprint §2 features/status/; mirrors job-status-card-stage-flow.js
+// syncStageFlow semantics; DOM contract preserves ids/classes——smoke relies on
 // .status-stage-step[data-stage-key][aria-selected]).
 //
-// RetryAction不放在Stage pill 上(拥挤, 易顶歪布局), 由 StatusCardEmbedded
-// 在Progress文案行右侧按"Current选中Stage"单独Rendering.
+// RetryAction not placed on Stage pill (crowded, easy to misalign layout); rendered by StatusCardEmbedded
+// on the right side of the Progress text line, per "currently selected Stage".
 
 import { useStatusCardIds } from "./status-card-ids-context.js";
 import {
@@ -13,7 +13,7 @@ import {
   statusStageIndex,
 } from "../../composition/external.js";
 
-/** @deprecated Retry已迁出 StageFlow；保留Type以免旧 import 断裂 */
+/** @deprecated Retry moved out of StageFlow; keep Type to avoid old imports breaking */
 export type StageFlowRetryAction = {
   label: string;
   enabled: boolean;
@@ -25,9 +25,9 @@ type StageFlowProps = {
   currentStageKey?: string;
   selectedStageKey?: string;
   onSelectStage?: (stageKey: string) => void;
-  /** 覆盖上下文 id；默认走 StatusCardIdsContext */
+  /** Override context id; defaults to StatusCardIdsContext */
   id?: string;
-  /** @deprecated 忽略；Retry由外层Progress区Rendering */
+  /** @deprecated Ignored; Retry rendered by outer Progress area */
   stageRetries?: Partial<Record<string, StageFlowRetryAction | null | undefined>>;
 };
 

@@ -1,9 +1,10 @@
-// GlossaryEdit器表格(Side-by-side glossary-manager-dialog-template.js 的
-// .glossary-editor-panel 表格区块 + view.js:appendGlossaryEntryRow 逐列镜像).
+// Glossary editor table (side-by-side mirror of glossary-manager-dialog-template.js's
+// .glossary-editor-panel table block + view.js:appendGlossaryEntryRow column by column).
 //
-// 命令式 DOM 行Action → 结构化数组 + .map Rendering(蓝图 §3):entries All来自
-// glossaries-store.js 的 draft.entries,每格yes受控 input/select,onChange 直接
-// 写 store(updateEntryField),不再手写行级 DOM 增删.
+// Imperative DOM row actions → structured array + .map rendering (blueprint §3):
+// entries all come from glossaries-store.js's draft.entries; every cell is a
+// controlled input/select, onChange writes directly to store (updateEntryField),
+// no hand-written row-level DOM add/remove.
 
 import { EmptyState } from "../../../../shared/icons/EmptyState.jsx";
 import { GLOSSARY_DOM_IDS, ENTRY_LEVEL_OPTIONS, MATCH_MODE_OPTIONS } from "./glossaries-dom-ids.js";
@@ -25,7 +26,7 @@ export function GlossaryEditor({ entries, onFieldChange, onRemoveRow }) {
         </thead>
         <tbody id={GLOSSARY_DOM_IDS.entries}>
           {entries.map((row, index) => (
-            // eslint-disable-next-line react/no-array-index-key -- 行None稳定 id(旧世界也yes纯位置化 DOM 行),索引键与旧行为等价
+            // eslint-disable-next-line react/no-array-index-key -- row has no stable id (old world also pure positional DOM rows), index key equivalent to old behavior
             <tr key={index} className="glossary-entry-row">
               <td>
                 <input

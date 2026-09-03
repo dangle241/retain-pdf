@@ -1,21 +1,23 @@
-// 新建/Manage collection对话框(shadcn 改造后新增的Page 10 个对话框,和其余 9 个同一套
-// 路:DialogPrimitive.Root/Portal/Overlay/Content + desktop-dialog/
-// desktop-shell + useDialogReturnFocus).
+// New / Manage collection dialog (one of the 10 new dialogs added after shadcn refactor,
+// same pattern as the other 9: DialogPrimitive.Root/Portal/Overlay/Content +
+// desktop-dialog/desktop-shell + useDialogReturnFocus).
 //
-// 交互借鉴参考items目 PDF_MD_lib 的 FolderManageModal(名称输入 + 从书库勾选),
-// 简化成单栏勾选(不做手动Sort——books次不做拖拽/Sort,见调研计划"不做的事").
+// Interaction design referenced PDF_MD_lib's FolderManageModal (name input + select
+// from library), simplified to single-column selection (no manual sort — not doing drag
+// / sort this time; see research plan "things not to do").
 //
-// dialogStore.payload = 正在Edit的 CollectionRecord,或 null(新建模式).
-// open() 由 CategoriesView.jsx 调用.这个对话框和 CategoriesView yes HomeApp.jsx
-// 下的兄弟节点(不yes父子),Save/Delete成功后没法直接 prop 回调回去——靠
-// services.collections.reloadSignal(一个只有 version 字段的极简 store)桥接,
-// 这里 bump 一次,CategoriesView 订阅到变化就重新拉取List.
+// dialogStore.payload = CollectionRecord being edited, or null (new mode). open() called
+// by CategoriesView.jsx. This dialog and CategoriesView are siblings under HomeApp.jsx
+// (not parent-child), so after Save/Delete success there's no direct prop callback —
+// relies on services.collections.reloadSignal (an extremely minimal store with only a
+// version field) as a bridge: bump it once here, CategoriesView subscribes to the change
+// and refetches the list.
 
 import { useEffect, useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { Button as ButtonBase } from "../../../../components/Button.jsx";
 
-// Button.size 在未注解源Files里被推断为必填;unstyled 路径运行时不用 size.
+// Button.size is inferred as required in unannotated source files; unstyled path doesn't use size at runtime.
 const Button = ButtonBase as any;
 import { useHomeServices } from "../../home-services-context.js";
 import { useDialogState } from "../../state/use-dialog-state.js";
@@ -47,7 +49,8 @@ export function CollectionManageDialog() {
     let cancelled = false;
     setError("");
     setName(editing?.name || "");
-    // 已有书目Data时 soft 重拉(切Edit目标), 不整表 loading 闪空
+    // Already has book data: soft refetch when switching edit target; avoids whole-table
+    // loading flash leaving empty state visible
     setLoading((prev) => (allDocuments.length === 0 ? true : prev));
     const documentsPromise = controller.listAllDocuments();
     const memberIdsPromise = editing
@@ -74,9 +77,10 @@ export function CollectionManageDialog() {
         }
         setLoading(false);
       });
-    // Close后快速为另一个Collection重新打开(比如先Edit"化学"再Edit"机器学习"),
-    // 两次 fetch 谁先 resolve 不确定——没有这个守卫的话,后Close的那次请求
-    // 如果晚到,会把已经在Display"机器学习"的表单覆盖回"化学"的书目Data.
+    // After close, quickly reopens for another collection (e.g., first edit "Chemistry" then
+    // edit "Machine Learning"). The two fetches' order of resolution is uncertain — without
+    // this guard, the later-closing request, if it arrives late, would overwrite the already
+    // displayed "Machine Learning" form back to "Chemistry"'s book data.
     return () => {
       cancelled = true;
     };

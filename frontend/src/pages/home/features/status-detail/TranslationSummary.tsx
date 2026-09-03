@@ -1,7 +1,8 @@
-// Translation调试:计数卡片 + CurrentFilter提示——JSX 重写
-// status-detail-dialog-translation.js#renderTranslationSummary 的 DOM 写入
-// 逻辑(finalStatusCounts 优先于 counts,和旧世界一致);summarizeTranslationFilter
-// yes纯格式化函数,保留直接 import.
+// Translation debug: count cards + CurrentFilter hint — JSX rewrite of
+// status-detail-dialog-translation.js#renderTranslationSummary DOM-writing
+// logic (finalStatusCounts takes priority over counts, consistent with the old
+// world); summarizeTranslationFilter is a pure formatting function, kept for
+// direct import.
 
 import { STATUS_DETAIL_DIALOG_IDS } from "./status-detail-dom-ids.js";
 import { summarizeTranslationFilter } from "../../composition/external.js";
@@ -29,6 +30,5 @@ export function TranslationSummary({ translation }) {
     </section>
   );
 }
-
 
 

@@ -1,6 +1,7 @@
-// GlossariesDialog 的开合Status实例(state/dialog-store.js 通用工厂,镜像
-// credentials-dialog-store.js).payload 通道books域暂未使用,保留与通用契约
-// 一致,便于未来"带参数打开"(例如从 developer Glossary下拉直接Locate某entries).
+// GlossariesDialog open/close state instance (state/dialog-store.js generic factory,
+// mirrors credentials-dialog-store.js). Payload channel is unused by this domain for now,
+// kept to match the generic contract for future "open with parameters" use (e.g., opening
+// directly to a specific entry from the developer Glossary dropdown).
 
 import { createDialogStore } from "../../state/dialog-store.js";
 

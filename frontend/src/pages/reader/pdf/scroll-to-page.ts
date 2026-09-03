@@ -1,5 +1,6 @@
-// total享滚动壳Locate: 按"pages + pages内比例"resume阅读位置.
-// 模式切换时必须用切换前锁定的 progress, 禁止在resume过程中重新 measure(会漂到末pages).
+// Shared scroll shell positioning: resume reading position by "page + in-page fraction".
+// On mode switch, must use the locked progress from before switch; forbid re-measuring during resume
+// (would drift to the last page).
 
 import {
   getPageAttr,
@@ -12,7 +13,7 @@ export type PageScrollProgress = {
   fraction: number;
 };
 
-/** 视口内"阅读线"相对滚动容器顶的偏移(与 measure/apply / HUD Current page必须一致) */
+/** Offset of the "reading line" within viewport relative to scroll container top (must match measure/apply / HUD current page) */
 export const READER_SCROLL_FOCUS_PX = 48;
 
 /** Y coordinate of reading focus line in viewport coords */
@@ -39,7 +40,7 @@ export function pickPageAtFocus(
   let bestTop = -Infinity;
   for (const el of pages) {
     const rect = el.getBoundingClientRect();
-    // 隐藏栏 / 未布局: 跳过, 避免量到 0 高导致误判末pages
+    // Hidden column / not yet laid out: skip to avoid measuring 0 height and misidentifying last page
     if (rect.height < 8 || rect.width < 8) {
       continue;
     }
@@ -50,7 +51,7 @@ export function pickPageAtFocus(
   }
 
   if (!best) {
-    // All在阅读线下方 → 第一pages；All在上方 → 最后一pages
+    // All below reading line → first page; all above → last page
     const first = pages.find((el) => {
       const r = el.getBoundingClientRect();
       return r.height >= 8 && r.width >= 8;
@@ -134,7 +135,7 @@ export function applyPageScrollProgress(
   }
   const rootRect = root.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
-  // pages尚未布局: Failed, 等下一轮
+  // Pages not yet laid out: failed, wait for next round
   if (rootRect.height <= 0 || (elRect.height < 8 && el.offsetHeight < 8)) {
     return false;
   }
@@ -163,7 +164,7 @@ export function scrollShellToPage(
   );
 }
 
-/** @deprecated 兼容旧名 */
+/** @deprecated Compatible old name */
 export function scrollPaneToPage(
   root: HTMLElement | null | undefined,
   pageNumber: number,
@@ -173,8 +174,8 @@ export function scrollPaneToPage(
 }
 
 /**
- * 用锁定的 progress resume位置.
- * 布局未稳时Retry；同一 progress 反复 apply yes幂等的(不会越滚越远).
+ * Resume position with locked progress.
+ * Retry when layout unstable; same progress applied repeatedly is idempotent (won't scroll further).
  */
 export function alignShellToProgress(
   getRoot: () => HTMLElement | null | undefined,
@@ -187,7 +188,7 @@ export function alignShellToProgress(
   },
 ): () => void {
   const behavior = options?.behavior ?? "auto";
-  // 少而稳: 等栏宽/pages高落稳后再钉几次同一锚点
+  // Few and stable: wait for column width / page height to settle, then pin the same anchor a few times
   const delays = options?.delaysMs ?? [0, 32, 120, 280];
   let cancelled = false;
   let done = false;
@@ -247,7 +248,7 @@ export function clampPageNumber(page: number, numPages: number): number {
     return 1;
   }
   const target = Math.max(1, Math.floor(page));
-  // 总pagesUnknown时不要钳到 1(AI 引用跳转会因此全落Page 1 pages)
+  // When total pages unknown, don't clamp to 1 (AI citation jumps would all land on page 1)
   if (!Number.isFinite(numPages) || numPages <= 0) {
     return target;
   }
@@ -260,6 +261,7 @@ export function cloneProgress(p: PageScrollProgress): PageScrollProgress {
     fraction: Math.min(1, Math.max(0, Number(p.fraction) || 0)),
   };
 }
+
 
 
 

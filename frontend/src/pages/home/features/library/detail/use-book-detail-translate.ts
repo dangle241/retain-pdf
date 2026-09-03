@@ -1,5 +1,5 @@
-// 详情"Translation"Tab: pages码Scope + Start translation + 静默 attachJobProgress.
-// Progress只在 bd-job-status-inner, 不打开工作流弹窗.
+// Detail "Translation" Tab: page range scope + Start translation + silent attachJobProgress.
+// Progress only in bd-job-status-inner, does not open workflow dialog.
 
 import { useEffect, useState } from "react";
 
@@ -8,10 +8,10 @@ import { useEffect, useState } from "react";
  * @param {boolean} options.open
  * @param {string} options.documentId
  * @param {number} options.pageCount
- * @param {object} options.actions library.actions(含 attachJobProgress / translateDocument)
+ * @param {object} options.actions library.actions (includes attachJobProgress / translateDocument)
  * @param {(key: string, fn: Function, fail: string) => Promise<void>} options.withBusy
  * @param {(msg: string) => void} options.setError
- * @param {() => void} [options.onTranslateStarted] 成功提交后切到Translation Tab 等
+ * @param {() => void} [options.onTranslateStarted] Switch to Translation Tab after successful submission, etc.
  */
 export function useBookDetailTranslate({
   open,
@@ -58,13 +58,13 @@ export function useBookDetailTranslate({
       payload.ocr = { page_ranges: `${s}-${e}` };
       payload.translation = { start_page: s, end_page: e };
     }
-    // 先切到Translation Tab, 保证 bd-job-status-inner 在视口内再接Progress
+    // Switch to Translation Tab first, ensure bd-job-status-inner is in viewport before receiving Progress
     onTranslateStarted?.();
     await withBusy(
       "translate",
       async () => {
-        // promoteDocumentToJob: 改详情 payload + silent attachJobProgress
-        // 不 openTranslationWorkflow
+        // promoteDocumentToJob: update detail payload + silent attachJobProgress
+        // do not openTranslationWorkflow
         await actions.translateDocument(documentId, payload);
         onTranslateStarted?.();
       },

@@ -1,7 +1,7 @@
-// 主页「收藏」tab：跨书摘录/笔记列表。
+// Home "Favorites" tab: cross-book excerpts/notes list.
 //
-// 与「合集」区分：合集 = 文档分组；收藏 = 阅读器里标的句子/图表/笔记。
-// 首版：拉全量 favorites → 空态 / 列表；点一项带锚点打开阅读器。
+// Distinguished from "Collection": Collection = document grouping; Favorites = sentences/figures/notes marked in the reader.
+// First version: fetch all favorites → empty state / list; clicking an item opens the reader with anchor.
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";

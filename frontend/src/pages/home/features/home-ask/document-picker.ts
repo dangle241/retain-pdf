@@ -1,4 +1,4 @@
-// @ Select器: Documents + Collection, books地过滤
+// @ Selector: documents + collections, local filtering
 
 import { API_PREFIX } from "../../../../js/config/api-constants.js";
 import { listCollections } from "../../../../js/api/collections.js";
@@ -19,7 +19,7 @@ export function documentToScope(doc: DocumentRecord | Record<string, unknown>): 
   };
 }
 
-/** 兼容旧测试/调用 */
+/** Compatible with old tests/calls */
 export function documentToRef(doc: DocumentRecord | Record<string, unknown>): HomeAskDocScope {
   return documentToScope(doc);
 }
@@ -51,7 +51,7 @@ export async function loadCollectionPickerOptions(): Promise<HomeAskCollectionSc
     .filter((c) => c.id);
 }
 
-/** Documents + Collection一并加载, Collection排在前面便于found */
+/** Loads documents + collections together; collections first for easy discovery */
 export async function loadPickerOptions(docLimit = 100): Promise<HomeAskScope[]> {
   const [docs, cols] = await Promise.all([
     loadDocumentPickerOptions(docLimit).catch(() => [] as HomeAskDocScope[]),
@@ -81,7 +81,7 @@ export function filterDocumentOptions(
     .slice(0, 16);
 }
 
-/** 展开Collection为DocumentsList(用于Question scope) */
+/** Expand collection to document list (used for question scope) */
 export async function resolveCollectionDocuments(
   collectionId: string,
   limit = 80,
@@ -97,7 +97,7 @@ export async function resolveCollectionDocuments(
   return docs.map((d) => documentToScope(d)).filter((d) => d.id);
 }
 
-/** 从 textarea 文books里parseCurrent @ 查询 */
+/** Parse current @ query from textarea content */
 export function parseAtQuery(text: string, caret: number): { start: number; query: string } | null {
   const head = `${text || ""}`.slice(0, Math.max(0, caret));
   const match = head.match(/(^|[\s\u3000])@([^\s@]*)$/);

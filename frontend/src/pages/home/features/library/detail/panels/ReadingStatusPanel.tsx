@@ -1,4 +1,4 @@
-// 右栏: Reading status(Unread / Reading / Finished).
+// Right column: reading status (Unread / Reading / Finished).
 
 import { cn } from "@/lib/utils";
 

@@ -1,5 +1,6 @@
-// StartProgress浮层:初始可见,Progress文案/Progressentries/隐藏均由命令式 view 层驱动
-// (src/js/reader/view.js + progress-presenter.js),React 只Rendering一次容器.
+// Boot progress overlay: initially visible, progress text/entries/hidden all driven by
+// imperative view layer (src/js/reader/view.js + progress-presenter.js), React renders
+// container once only.
 
 export function ReaderBootLoading() {
   return (
@@ -13,6 +14,5 @@ export function ReaderBootLoading() {
     </div>
   );
 }
-
 
 

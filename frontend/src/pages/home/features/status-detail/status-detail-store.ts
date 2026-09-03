@@ -1,20 +1,23 @@
 import { createStore } from "../../composition/external.js";
 import type { Store } from "../../composition/external.js";
 
-// StatusDetailDialog 的读面 store(蓝图 §1 "新 store"清单).
+// StatusDetailDialog read-side store (blueprint §1 "new store" list).
 //
-// 两个并行段(Data源铁律,蓝图 §1.0 + §0 全局found):
-// - overview 段:headline/runtime/failure/rerun/job/eventsPayload——job/
-//   eventsPayload yes原始Data(不yes预拼好的 markup),StageHistoryList/
-//   EventsList 直接从这两个字段用纯函数计算结构化数组(见对应组件Files).
-// - translation 段:createTranslationState() Status袋的浅拷贝 + 少量 UI 态
-//   (itemsLoading/itemDetailLoading/replayLoading/emptyMessage/errorText),
-//   随 translation-data-port.js(kept)每次读写后sync.
+// Two parallel segments (data source iron law, blueprint §1.0 + §0 global found):
+// - overview segment: headline/runtime/failure/rerun/job/eventsPayload — job/
+//   eventsPayload are raw data (not pre-built markup), consumed directly by
+//   StageHistoryList/EventsList using pure functions on these two fields
+//   (see corresponding component files).
+// - translation segment: shallow copy of createTranslationState() Status bag
+//   + small amount of UI state (itemsLoading/itemDetailLoading/replayLoading/
+//   emptyMessage/errorText), synced after every read/write via
+//   translation-data-port.js (kept).
 //
-// books store 与 features/status/status-card-store.js 的 statusCardStore yes两entries
-// 平行读路径,不合并——status-detail 自己 fetch(events/diagnostics/
-// resumePlan),写入频率远低于Status卡的 1s 轮询,合并会污染 StatusCard 的高频
-// 订阅快照(蓝图 §1.0 明确铁律).
+// This store and status-card-store.js's statusCardStore are two parallel read
+// paths; they are not merged — status-detail fetches its own
+// (events/diagnostics/resumePlan) and writes far less frequently than StatusCard's
+// 1s polling; merging would pollute StatusCard's high-frequency subscription
+// snapshots (blueprint §1.0 explicit iron law).
 
 export type StatusDetailHeadline = {
   iconMarkup: string;
@@ -49,16 +52,16 @@ export type StatusDetailRerun = {
   status: string;
 };
 
-/** 原始 job 载荷(StageHistoryList 等直接消费；API 形状宽) */
+/** Raw job payload (StageHistoryList etc. consume directly; API shape is wide) */
 export type StatusDetailJobPayload = Record<string, unknown>;
 
-/** 原始 events 载荷(EventsList 直接消费) */
+/** Raw events payload (EventsList consumes directly) */
 export type StatusDetailEventsPayload = {
   items?: unknown[];
   [key: string]: unknown;
 };
 
-/** overview 段: buildStatusDetailSnapshot + job/events 原始载荷 */
+/** overview segment: buildStatusDetailSnapshot + job/events raw payloads */
 export type StatusDetailOverview = {
   headline: StatusDetailHeadline;
   runtime: StatusDetailRuntime;
@@ -77,8 +80,8 @@ export type StatusDetailTranslationQuery = {
 };
 
 /**
- * Translation诊断 summary(嵌套 summary 口袋 + 顶层扩展字段).
- * TranslationSummary 读 summary.summary.{status_summary,counts,provider_*}.
+ * Translation diagnostic summary (nested summary bag + top-level extension fields).
+ * TranslationSummary reads summary.summary.{status_summary,counts,provider_*}.
  */
 export type StatusDetailTranslationSummaryInner = {
   status_summary?: Record<string, unknown>;
@@ -94,7 +97,7 @@ export type StatusDetailTranslationSummary = {
   [key: string]: unknown;
 } | null;
 
-/** Item List行(TranslationItemsPanel) */
+/** Item List row (TranslationItemsPanel) */
 export type StatusDetailTranslationListItem = {
   item_id?: string;
   block_type?: string;
@@ -104,7 +107,7 @@ export type StatusDetailTranslationListItem = {
   [key: string]: unknown;
 };
 
-/** 选中 item 详情(TranslationItemDetailPanel) */
+/** Selected item detail (TranslationItemDetailPanel) */
 export type StatusDetailTranslationSelectedItem = {
   item_id?: string;
   item?: StatusDetailTranslationListItem | null;
@@ -112,7 +115,7 @@ export type StatusDetailTranslationSelectedItem = {
   [key: string]: unknown;
 } | null;
 
-/** 重放结果袋 */
+/** Replay result bag */
 export type StatusDetailTranslationReplay = {
   payload?: {
     policy_before?: unknown;
@@ -124,7 +127,7 @@ export type StatusDetailTranslationReplay = {
   [key: string]: unknown;
 } | null;
 
-/** translation 段: createTranslationState 镜像 + UI loading/error */
+/** translation segment: createTranslationState mirror + UI loading/error */
 export type StatusDetailTranslation = {
   jobId: string;
   loaded: boolean;
@@ -242,7 +245,6 @@ export function createStatusDetailStore(): StatusDetailStore {
 }
 
 export { EMPTY_OVERVIEW, EMPTY_TRANSLATION };
-
 
 
 

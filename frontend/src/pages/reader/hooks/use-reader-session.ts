@@ -1,7 +1,7 @@
-// React 阅读会话: 
+// React reading session:
 // 1) parse job/document → URL
-// 2) 整Files下载完Source/Translation PDF(遮罩不关)
-// 3) 再展示Reader；可见pagesRendering等优化在Display之后进行
+// 2) download complete Source/Translation PDF (overlay does not close)
+// 3) then display Reader; visible-page rendering optimizations happen after display
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -25,13 +25,13 @@ import {
 
 export type ReaderMode = "source" | "translated" | "compare";
 
-/** 与 legacy ReaderDownloadMenu 相同的下载上下文 */
+/** Download context same as legacy ReaderDownloadMenu */
 export type ReaderDownloadContext = {
   fetchProtected: typeof defaultReaderDataPort.fetchProtected;
   jobId: string;
   jobPayload: Record<string, unknown> | null;
   manifestPayload: Record<string, unknown> | null;
-  /** Library只读等None job 时直接用Parsed URL */
+  /** Library read-only (no job) directly uses parsed URL */
   sourceUrl: string;
   translatedUrl: string;
   sourceOnly: boolean;
@@ -45,10 +45,10 @@ export type ReaderSessionState = {
   setMode: (mode: ReaderMode) => void;
   sourceUrl: string;
   translatedUrl: string;
-  /** 预Download complete的 PDF 字节；展示前is ready */
+  /** Pre-downloaded complete PDF bytes; ready before display */
   sourceFile: ProtectedPdfFile | null;
   translatedFile: ProtectedPdfFile | null;
-  /** Download complete, 可以挂载 Document */
+  /** Download complete; can mount Document */
   assetsReady: boolean;
   boot: {
     loading: boolean;
@@ -243,7 +243,7 @@ export function useReaderSession(): ReaderSessionState {
             failed: false,
           });
           postProgress({ percent: 100, text: READER_PROGRESS_COPY.ready, stage: "ready" });
-          // URL 锚点jump to page见 useUrlAnchorJump(react-pdf 控制器)
+          // URL anchor jump to page: see useUrlAnchorJump (react-pdf controller)
           return;
         }
 
@@ -287,7 +287,7 @@ export function useReaderSession(): ReaderSessionState {
           return;
         }
 
-        // 先下完所有 PDF, 再允许界面挂载 Document
+        // Download all PDFs first, then allow UI to mount Document
         setBootProgress(setBoot, 25, "Downloading PDF...", "download");
         const tasks: Promise<void>[] = [];
         let sourceBytes: ProtectedPdfFile | null = null;
@@ -335,7 +335,7 @@ export function useReaderSession(): ReaderSessionState {
           failed: false,
         });
         postProgress({ percent: 100, text: READER_PROGRESS_COPY.ready, stage: "ready" });
-        // URL 锚点jump to page见 useUrlAnchorJump(react-pdf 控制器)
+        // URL anchor jump to page: see useUrlAnchorJump (react-pdf controller)
       } catch (err) {
         if (cancelled) return;
         const text = err instanceof Error ? err.message : READER_PROGRESS_COPY.failed;

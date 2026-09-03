@@ -24,11 +24,11 @@ pub(super) fn attach_paddle_runtime_error(
         },
         provider_code: None,
         provider_message: Some(err.to_string()),
-        operator_hint: Some("请结合 job 日志和 Paddle 任务状态继续排查".to_string()),
+        operator_hint: Some("Combine job logs and Paddle job status to continue debugging".to_string()),
         trace_id: job_artifacts_mut(job).provider_trace_id.clone(),
         http_status: None,
     };
-    apply_paddle_error(job, info, format!("Paddle {stage} 失败: {}", err));
+    apply_paddle_error(job, info, format!("Paddle {stage} failed: {}", err));
     err
 }
 
