@@ -47,7 +47,7 @@ The main risk does not lie in `pretext` Not whether valuable, but whether close 
 - Its layout model is not equivalent to. Typst, cannot directly treat the output as Typst Truth value.
 - Font measurement consistency may still be affected by browser,Canvas Font loading and platform font differences impact.
 - If we need strong control. `letter-spacing`paragraph spacing, Chinese punctuation compression, or formula placeholder width, additional adapters may be required adapter。
-- If samples mainly come from OCR Provide source text. PDF Block size. Normal text layout metrics insufficient; add separate ones. OCR/Typst Compare Scores.
+- If samples mainly come from OCR-derived PDF block sizes, normal text layout metrics are insufficient; add separate OCR/Typst compare scores.
 
 ## Recommended location
 

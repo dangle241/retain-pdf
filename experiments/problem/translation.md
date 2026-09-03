@@ -4,7 +4,7 @@
 
 Do not translate by page. Do not press bare. block Recommended translation unit, TU as minimum translation unit.
 
-But the TU here TU Input not recognized. Provide source text for translation. OCR blockIt must be a structured object with constraints.
+But the TU here does not take OCR block input directly. It must be a structured object with constraints.
 
 ```json
 {
@@ -197,7 +197,7 @@ That is, even if judging two blocks are continuation, do not delete the original
 }
 ```
 
-Provide source text to translate. TU or adjacent TUbut backfill still press block anchor cut back.
+Otherwise, backfill the missing TU or an adjacent TU, but keep the original block anchor intact when the translation is short.
 
 If switching back is difficult, let one. TU For multiple block Generate translated_segments：
 
@@ -236,7 +236,7 @@ These issues cannot be overlooked:
 | item quantity error | input 10 TUs, output 9 or 11 | retry |
 | placeholder Missing | `⟦PH_001⟧` Data inconsistency. Clean duplicates. Validate inputs. | repairFailure tolerated. |
 | Formula Corruption | LaTeX token Lost formula numbering. | repair or Rollback |
-| Explain leakage | Meta-phrase omitted. Provide source text for translation.Here is the translation” | repair |
+| Explain leakage | Meta-phrase like "Here is the translation" is omitted from the output. | repair |
 | Obviously not translated | Whole paragraph of English remains, and the target is Chinese | retry/repair |
 | Severe truncation. | target abnormally short length, semantically obviously incomplete | retry |
 | Error page/wrong id | target written to another tu_id | Block |
