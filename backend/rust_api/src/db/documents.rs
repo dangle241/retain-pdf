@@ -1025,7 +1025,7 @@ mod tests {
             char_end: None,
             kind: "sentence".to_string(),
             quote_text: "quoted source".to_string(),
-            translated_quote_text: "引文快照".to_string(),
+            translated_quote_text: "citation snapshot".to_string(),
             note: String::new(),
             asset_id: String::new(),
             rect_json: String::new(),
@@ -1103,26 +1103,26 @@ mod tests {
                 page_idx: 2,
                 block_id: "p003-b0001".to_string(),
                 source_text: "vibrationally resolved optical spectra".to_string(),
-                translated_text: "振动分辨光学光谱的有效计算方法".to_string(),
+                translated_text: "Effective computational methods for vibrationally resolved optical spectra".to_string(),
             }],
         )
         .expect("fts insert");
-        let hits = db.search_blocks("光学光谱", 10, None).expect("search zh");
+        let hits = db.search_blocks("optical spectra", 10, None).expect("search zh");
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].document_id, hash);
         assert_eq!(hits[0].page_idx, 2);
         assert_eq!(hits[0].block_id, "p003-b0001");
         // 2-character queries fall back to LIKE scanning.
-        let short_hits = db.search_blocks("光谱", 10, None).expect("search short");
+        let short_hits = db.search_blocks("spectra", 10, None).expect("search short");
         assert_eq!(short_hits.len(), 1);
         // Single-document filter: an unknown `document_id` must produce
         // zero hits.
         let scoped_miss = db
-            .search_blocks("光学光谱", 10, Some("no-such-doc"))
+            .search_blocks("optical spectra", 10, Some("no-such-doc"))
             .expect("search scoped miss");
         assert!(scoped_miss.is_empty());
         let scoped_hit = db
-            .search_blocks("光学光谱", 10, Some(&hash))
+            .search_blocks("optical spectra", 10, Some(&hash))
             .expect("search scoped hit");
         assert_eq!(scoped_hit.len(), 1);
         // Idempotent rebuild: replacing again still leaves only one row.
@@ -1133,11 +1133,11 @@ mod tests {
                 page_idx: 2,
                 block_id: "p003-b0001".to_string(),
                 source_text: "updated".to_string(),
-                translated_text: "更新后的光学光谱".to_string(),
+                translated_text: "updated optical spectra".to_string(),
             }],
         )
         .expect("fts rebuild");
-        let rebuilt = db.search_blocks("光学光谱", 10, None).expect("search rebuilt");
+        let rebuilt = db.search_blocks("optical spectra", 10, None).expect("search rebuilt");
         assert_eq!(rebuilt.len(), 1);
         assert_eq!(rebuilt[0].job_id, "job-2");
     }
@@ -1154,20 +1154,20 @@ mod tests {
         let updated = db
             .update_document_fields(
                 &hash,
-                Some("光谱计算方法综述"),
+                Some("A review of spectral computational methods"),
                 Some("reading"),
                 Some(&["化学".to_string(), "光谱".to_string()]),
             )
             .expect("patch");
-        assert_eq!(updated.title, "光谱计算方法综述");
+        assert_eq!(updated.title, "A review of spectral computational methods");
         assert_eq!(updated.reading_status, "reading");
         assert_eq!(updated.tags, vec!["光谱".to_string(), "化学".to_string()]);
         let filtered = db
-            .list_documents(10, 0, None, Some("化学"), None)
+            .list_documents(10, 0, None, Some("chemistry"), None)
             .expect("list by tag");
         assert_eq!(filtered.len(), 1);
         let missed = db
-            .list_documents(10, 0, None, Some("生物"), None)
+            .list_documents(10, 0, None, Some("biology"), None)
             .expect("list by other tag");
         assert!(missed.is_empty());
     }

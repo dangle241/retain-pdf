@@ -56,7 +56,7 @@ export function ReaderConversationBar({
 
   const active = sessions.find((s) => s.id === activeId) || null;
   const label = active
-    ? (active.messageCount ? displaySessionTitle(active.title) : `${displaySessionTitle(active.title)}(空)`)
+    ? (active.messageCount ? displaySessionTitle(active.title) : `${displaySessionTitle(active.title)}(null)`)
     : hasSessions
       ? "Select previous conversation"
       : "New conversation";
@@ -226,7 +226,7 @@ export function ReaderConversationBar({
           {sessions.map((s) => {
             const text = s.messageCount
               ? displaySessionTitle(s.title)
-              : `${displaySessionTitle(s.title)}(空)`;
+              : `${displaySessionTitle(s.title)}(null)`;
             const selected = s.id === activeId;
             const editing = editingId === s.id;
             return (

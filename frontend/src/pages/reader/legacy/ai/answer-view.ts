@@ -101,7 +101,7 @@ export function formatCitations(citations = []) {
   if (!Array.isArray(citations) || !citations.length) {
     return "";
   }
-  return `\n\n引用: \n${citations
+  return `\n\ncitation: \n${citations
     .slice(0, 4)
     .map((item, index) => `${index + 1}. ${item.title || "Relevant snippet"}${item.page ? ` · Page ${item.page} pages` : ""}${item.snippet ? `: ${item.snippet}` : ""}`)
     .join("\n")}`;
@@ -114,7 +114,7 @@ export function describeToolEvent(event: AiToolEvent = {}) {
     return "";
   }
   const label = TOOL_EVENT_LABELS[tool] || tool;
-  const action = label ? `正在${label}...` : "Searching documents...";
+  const action = label ? `Currently${label}...` : "Searching documents...";
   // No longer emphasizing "Page n round"; more like ordinary chat progress
   return action;
 }

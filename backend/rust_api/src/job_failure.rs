@@ -365,7 +365,7 @@ mod tests {
         job.status = JobStatusKind::Failed;
         job.error = Some("PlaceholderInventoryError: placeholder inventory mismatch".to_string());
         job.stage = Some("translation".to_string());
-        job.stage_detail = Some("正在翻译".to_string());
+        job.stage_detail = Some("translating".to_string());
 
         let failure = classify_job_failure(&job).expect("failure");
         assert_eq!(failure.category, "placeholder_unstable");
@@ -382,7 +382,7 @@ mod tests {
         job.status = JobStatusKind::Failed;
         job.error = Some("PlaceholderInventoryError: placeholder inventory mismatch".to_string());
         job.stage = Some("translation".to_string());
-        job.stage_detail = Some("正在翻译".to_string());
+        job.stage_detail = Some("translating".to_string());
         job.log_tail = vec![
             "auto render mode selected: overlay (removable_items=18, checked_items=18, removable_ratio=1.00)"
                 .to_string(),
@@ -403,7 +403,7 @@ mod tests {
         job.status = JobStatusKind::Failed;
         job.error = Some("typst compile failed: font not found".to_string());
         job.stage = Some("translation".to_string());
-        job.stage_detail = Some("正在翻译".to_string());
+        job.stage_detail = Some("translating".to_string());
 
         let failure = classify_job_failure(&job).expect("failure");
         assert_eq!(failure.category, "render_failed");
@@ -423,7 +423,7 @@ mod tests {
                 .to_string(),
         );
         job.stage = Some("rendering".to_string());
-        job.stage_detail = Some("正在准备渲染".to_string());
+        job.stage_detail = Some("preparing to render".to_string());
 
         let failure = classify_job_failure(&job).expect("failure");
         assert_eq!(failure.category, "typst_dependency_download_failed");
@@ -441,7 +441,7 @@ mod tests {
         job.status = crate::models::JobStatusKind::Failed;
         job.stage = Some("failed".to_string());
         job.error = Some(
-            "Traceback (most recent call last):\nRuntimeError: boom\nstructured failure json: {\"stage\":\"normalization\",\"error_type\":\"document_schema_validation_failed\",\"summary\":\"标准化文档校验失败\",\"detail\":\"normalized document schema validation failed\",\"retryable\":false,\"upstream_host\":\"\",\"provider\":\"ocr\",\"raw_exception_type\":\"RuntimeError\",\"raw_exception_message\":\"normalized document schema validation failed\",\"traceback\":\"Traceback (most recent call last):\\nRuntimeError: boom\"}\n"
+            "Traceback (most recent call last):\nRuntimeError: boom\nstructured failure json: {\"stage\":\"normalization\",\"error_type\":\"document_schema_validation_failed\",\"summary\":\"normalized document validation failed\",\"detail\":\"normalized document schema validation failed\",\"retryable\":false,\"upstream_host\":\"\",\"provider\":\"ocr\",\"raw_exception_type\":\"RuntimeError\",\"raw_exception_message\":\"normalized document schema validation failed\",\"traceback\":\"Traceback (most recent call last):\\nRuntimeError: boom\"}\n"
                 .to_string(),
         );
 
@@ -488,7 +488,7 @@ mod tests {
         assert_eq!(failure.provider_code.as_deref(), Some("A0211"));
         assert_eq!(failure.raw_excerpt.as_deref(), Some("token expired"));
         assert_eq!(failure.raw_error_excerpt.as_deref(), Some("token expired"));
-        assert_eq!(failure.suggestion.as_deref(), Some("更新 Token"));
+        assert_eq!(failure.suggestion.as_deref(), Some("update Token"));
     }
 
     #[test]
@@ -519,7 +519,7 @@ mod tests {
         );
         job.status = crate::models::JobStatusKind::Failed;
         job.stage = Some("failed".to_string());
-        job.stage_detail = Some("Python worker 执行失败".to_string());
+        job.stage_detail = Some("Python worker execution failed".to_string());
         job.error = Some("plain worker failure".to_string());
         job.result = Some(crate::models::ProcessResult {
             success: false,

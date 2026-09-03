@@ -211,13 +211,13 @@ mod tests {
         db.init().expect("init");
 
         let a = db
-            .create_collection("col-a", "化学", None)
+            .create_collection("col-a", "chemistry", None)
             .expect("create a");
         assert_eq!(a.sort_order, 0);
         assert_eq!(a.document_count, 0);
 
         let b = db
-            .create_collection("col-b", "机器学习", None)
+            .create_collection("col-b", "machine learning", None)
             .expect("create b");
         assert_eq!(b.sort_order, 1);
 
@@ -227,9 +227,9 @@ mod tests {
         assert_eq!(listed[1].collection_id, "col-b");
 
         let renamed = db
-            .update_collection("col-a", Some("有机化学"), None)
+            .update_collection("col-a", Some("organic chemistry"), None)
             .expect("rename");
-        assert_eq!(renamed.name, "有机化学");
+        assert_eq!(renamed.name, "organic chemistry");
 
         let reordered = db
             .update_collection("col-a", None, Some(5))
@@ -256,7 +256,7 @@ mod tests {
         let fs = TestDbFs::new("collections-membership");
         let db = fs.db();
         db.init().expect("init");
-        db.create_collection("col-a", "化学", None)
+        db.create_collection("col-a", "chemistry", None)
             .expect("create");
 
         // The `collection_documents.document_id` foreign key requires a

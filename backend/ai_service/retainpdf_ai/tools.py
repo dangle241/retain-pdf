@@ -266,7 +266,7 @@ def build_default_registry(settings: Settings, rust: RustApiClient) -> ToolRegis
                 parameters={
                     "type": "object",
                     "properties": {
-                        "query": {"type": "string", "description": "检索关键词或短语"},
+                        "query": {"type": "string", "description": "search keyword or phrase"},
                         "document_id": {
                             "type": "string",
                             "description": "限定单文档;整本问答时必传当前 document_id",

@@ -286,7 +286,7 @@ export async function askLibraryAi({
     }
     // 400 missing LLM key: point at the model API key in "Settings → credentials"
     // Regex keeps "LLM" / "model API Key" to match backend error text (compat).
-    if (resp.status === 400 && /LLM|模型\s*API\s*Key|api key/i.test(message)) {
+    if (resp.status === 400 && /LLM|model\s*API\s*Key|api key/i.test(message)) {
       throw new AiAskError(
         message.includes("credentials") || message.includes("Settings")
           ? `${message}(${resp.status})`

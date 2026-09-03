@@ -383,7 +383,7 @@ mod tests {
         let mut current = previous.clone();
         current.status = JobStatusKind::Running;
         current.stage = Some(job_stage_str(JobStage::Translating).to_string());
-        current.stage_detail = Some("正在翻译".to_string());
+        current.stage_detail = Some("translating".to_string());
         current.request_payload.ocr.provider = "paddle".to_string();
         current.started_at = Some("2026-04-11T00:00:00Z".to_string());
         current.updated_at = "2026-04-11T00:00:05Z".to_string();
@@ -411,7 +411,7 @@ mod tests {
         );
         assert!(payload.get("runtime").is_some());
         assert!(payload.get("stage_history").is_some());
-        assert_eq!(transition.stage_detail.as_deref(), Some("正在翻译"));
+        assert_eq!(transition.stage_detail.as_deref(), Some("translating"));
         assert_eq!(transition.provider.as_deref(), Some("paddle"));
         assert_eq!(transition.event, "stage_transition");
         assert_eq!(transition.user_stage.as_deref(), Some("translation"));
@@ -435,12 +435,12 @@ mod tests {
             failure_category: Some("timeout".to_string()),
             provider_stage: None,
             provider_code: None,
-            summary: "外部服务请求超时".to_string(),
-            root_cause: Some("测试".to_string()),
+            summary: "external service request timed out".to_string(),
+            root_cause: Some("test".to_string()),
             retryable: true,
             upstream_host: Some("api.deepseek.com".to_string()),
             provider: Some("deepseek".to_string()),
-            suggestion: Some("重试".to_string()),
+            suggestion: Some("retry".to_string()),
             last_log_line: Some("ReadTimeout".to_string()),
             raw_excerpt: Some("ReadTimeout".to_string()),
             raw_error_excerpt: Some("ReadTimeout".to_string()),
@@ -468,7 +468,7 @@ mod tests {
         );
         assert_eq!(
             payload.get("failure_summary").and_then(Value::as_str),
-            Some("外部服务请求超时")
+            Some("external service request timed out")
         );
         let failure = events
             .iter()

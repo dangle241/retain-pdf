@@ -133,7 +133,7 @@ export function DecorStage() {
             <button
               type="button"
               className="decor-hotspot"
-              aria-label="听一句语录"
+              aria-label="Hear a quote"
               onClick={() => showVerse(layer.slot, layer.clickQuote as string)}
             >
               {verse && verse.slot === layer.slot ? (

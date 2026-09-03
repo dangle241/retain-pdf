@@ -62,7 +62,7 @@ mod tests {
     fn ocr_stage_detail_prefers_page_progress_when_available() {
         assert_eq!(
             ocr_stage_detail_with_progress(
-                Some("Paddle 正在解析文件".to_string()),
+                Some("Paddle parsing file".to_string()),
                 Some(12),
                 Some(34)
             )

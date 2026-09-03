@@ -230,7 +230,7 @@ export function useReaderSession(): ReaderSessionState {
               stage: "failed",
               failed: true,
             });
-            postProgress({ percent: 100, text: "源FilesDownload failed", stage: "failed" });
+            postProgress({ percent: 100, text: "sourceFilesDownload failed", stage: "failed" });
             return;
           }
           setSourceFile(file);
@@ -316,7 +316,7 @@ export function useReaderSession(): ReaderSessionState {
           setBoot({
             loading: false,
             percent: 100,
-            text: "PDF Download failed, 请Retry",
+            text: "PDF Download failed, pleaseRetry",
             stage: "failed",
             failed: true,
           });

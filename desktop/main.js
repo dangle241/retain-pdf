@@ -329,7 +329,7 @@ async function startBundledBackend() {
     waitingProgress = Math.min(waitingProgress + 3, 88);
     updateSplashProgress(
       waitingProgress,
-      "正在连接本地服务",
+      "connecting to the local service",
       "首次启动可能稍慢，请稍候",
     );
   }, 500);
@@ -423,7 +423,7 @@ if (gotSingleInstanceLock) {
         const desktopLogPath = getDesktopLogPath();
         const dialogDetail = [
           String(error && error.message ? error.message : error),
-          desktopLogPath ? `\n完整日志: ${desktopLogPath}` : "",
+          desktopLogPath ? `\nfull log: ${desktopLogPath}` : "",
         ].filter(Boolean).join("\n");
         dialog.showErrorBox("RetainPDF startup failed", dialogDetail);
         app.quit();

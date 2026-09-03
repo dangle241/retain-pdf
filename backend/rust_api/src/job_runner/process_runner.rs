@@ -358,7 +358,7 @@ print(json.dumps({
         job.request_payload.translation.base_url = "https://api.deepseek.com/v1".to_string();
         job.status = JobStatusKind::Failed;
         job.stage = Some("failed".to_string());
-        job.stage_detail = Some("Python worker 执行失败".to_string());
+        job.stage_detail = Some("Python worker execution failed".to_string());
         job.error = Some("Traceback (most recent call last):\nRuntimeError: boom".to_string());
         job.failure = Some(JobFailureInfo {
             stage: "translation".to_string(),
@@ -374,7 +374,7 @@ print(json.dumps({
             retryable: true,
             upstream_host: None,
             provider: Some("translation".to_string()),
-            suggestion: Some("查看日志".to_string()),
+            suggestion: Some("view logs".to_string()),
             last_log_line: Some("RuntimeError: boom".to_string()),
             raw_excerpt: Some("RuntimeError: boom".to_string()),
             raw_error_excerpt: Some("RuntimeError: boom".to_string()),

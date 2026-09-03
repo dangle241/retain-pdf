@@ -216,7 +216,7 @@ export function useReaderAiChat(ports) {
     let streamed = false;
     const streamRenderer = createStreamingMarkdownRenderer(assistantView);
     try {
-      setComposerState("busy", remoteAnswerer ? "Thinking..." : "SearchDocuments中...");
+      setComposerState("busy", remoteAnswerer ? "Thinking..." : "SearchDocumentsin...");
       showProgress(remoteAnswerer ? "Searching documents..." : "正在从Documents中查找...");
       const { fallback, reason, result } = await answerWithFallback({
         context: aiContext?.context?.(),

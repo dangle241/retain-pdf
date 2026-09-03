@@ -550,7 +550,7 @@ mod tests {
         let entries = normalize_glossary_entries(&[
             GlossaryEntryInput {
                 source: " DNA ".to_string(),
-                target: " 脱氧核糖核酸 ".to_string(),
+                target: " DNA ".to_string(),
                 note: String::new(),
                 level: "preserve".to_string(),
                 match_mode: "case-insensitive".to_string(),
@@ -576,13 +576,13 @@ mod tests {
 
     #[test]
     fn parse_glossary_csv_supports_header_and_note() {
-        let entries = parse_glossary_csv_text("source,target,note,level,match_mode,context\nabstract,摘要,section title,canonical,case-insensitive,paper\n")
+        let entries = parse_glossary_csv_text("source,target,note,level,match_mode,context\nabstract,digest,section title,canonical,case-insensitive,paper\n")
             .expect("parse csv");
         assert_eq!(
             entries,
             vec![GlossaryEntryInput {
                 source: "abstract".to_string(),
-                target: "摘要".to_string(),
+                target: "digest".to_string(),
                 note: "section title".to_string(),
                 level: "canonical".to_string(),
                 match_mode: "case_insensitive".to_string(),
@@ -597,8 +597,8 @@ mod tests {
             source: " Hartree-Fock ".to_string(),
             target: String::new(),
             note: String::new(),
-            level: "不翻译".to_string(),
-            match_mode: "忽略大小写".to_string(),
+            level: "do not translate".to_string(),
+            match_mode: "case-insensitive".to_string(),
             context: String::new(),
         }])
         .expect("normalize preserve entry");
@@ -656,7 +656,7 @@ mod tests {
     fn merge_glossary_entries_prefers_overlay() {
         let merged = merge_glossary_entries(
             &[entry("DNA", "脱氧核糖核酸"), entry("abstract", "摘要")],
-            &[entry("DNA", "DNA"), entry("band gap", "带隙")],
+            &[entry("DNA", "DNA"), entry("band gap", "band gap")],
         );
         assert_eq!(merged.len(), 3);
         assert_eq!(merged[0].source, "DNA");
@@ -682,7 +682,7 @@ mod tests {
         .expect("create glossary");
         let mut input = CreateJobInput::default();
         input.translation.glossary_id = glossary.glossary_id.clone();
-        input.translation.glossary_entries = vec![entry("DNA", "DNA"), entry("band gap", "带隙")];
+        input.translation.glossary_entries = vec![entry("DNA", "DNA"), entry("band gap", "band gap")];
 
         let resolved =
             resolve_task_glossary_request(state.db.as_ref(), &input).expect("resolve glossary");
@@ -705,7 +705,7 @@ mod tests {
                 source_lang: "en".to_string(),
                 target_lang: "zh-CN".to_string(),
                 enabled: true,
-                entries: vec![entry("band gap", "带隙")],
+                entries: vec![entry("band gap", "band gap")],
             },
         )
         .expect("create glossary");
@@ -755,7 +755,7 @@ mod tests {
                 source_lang: "en".to_string(),
                 target_lang: "zh-CN".to_string(),
                 enabled: true,
-                entries: vec![entry("band gap", "带隙")],
+                entries: vec![entry("band gap", "band gap")],
             },
         )
         .expect("create glossary");
@@ -770,7 +770,7 @@ mod tests {
                 source_lang: "en".to_string(),
                 target_lang: "zh-CN".to_string(),
                 enabled: false,
-                entries: vec![entry("exciton", "激子")],
+                entries: vec![entry("exciton", "exciton")],
             },
         )
         .expect("import update");
@@ -826,7 +826,7 @@ mod tests {
     fn resolve_task_glossary_request_rejects_merged_entries_over_limit() {
         let state = test_state();
         let resource_entries = (0..MAX_GLOSSARY_ENTRIES)
-            .map(|index| entry(&format!("term-{index}"), &format!("词-{index}")))
+            .map(|index| entry(&format!("term-{index}"), &format!("term-{index}")))
             .collect();
         let glossary = create_glossary(
             state.db.as_ref(),
@@ -844,7 +844,7 @@ mod tests {
 
         let mut input = CreateJobInput::default();
         input.translation.glossary_id = glossary.glossary_id;
-        input.translation.glossary_entries = vec![entry("extra-term", "额外词")];
+        input.translation.glossary_entries = vec![entry("extra-term", "extra term")];
 
         let err =
             resolve_task_glossary_request(state.db.as_ref(), &input).expect_err("should reject");

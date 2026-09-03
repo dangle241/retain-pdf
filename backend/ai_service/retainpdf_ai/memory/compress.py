@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-SUMMARY_PREFIX = "【对话摘要】"
+SUMMARY_PREFIX = "【conversation summary】"
 CITATION_RE = re.compile(r"\[(\d+)\]")
 
 
@@ -102,12 +102,12 @@ def build_extractive_summary(turns: list[dict[str, Any]], *, max_chars: int = 18
                 parts = [f"[{ref}]", page_label, block, snippet]
                 evidence_lines.append(" ".join(p for p in parts if p))
 
-    lines = [SUMMARY_PREFIX, "- 用户关注："]
+    lines = [SUMMARY_PREFIX, "- user focus："]
     if user_questions:
         for q in user_questions[-8:]:
             lines.append(f"  · {q}")
     else:
-        lines.append("  · （无）")
+        lines.append("  · （none）")
 
     lines.append("- 已确认结论（含引用）：")
     if cited_lines:
@@ -116,7 +116,7 @@ def build_extractive_summary(turns: list[dict[str, Any]], *, max_chars: int = 18
     else:
         lines.append("  · （早期回答未标注 [n]，仅保留主题）")
 
-    lines.append("- 重要证据：")
+    lines.append("- important evidence：")
     if evidence_lines:
         # Deduplicate while preserving order
         seen: set[str] = set()
@@ -128,7 +128,7 @@ def build_extractive_summary(turns: list[dict[str, Any]], *, max_chars: int = 18
             if len(seen) >= 12:
                 break
     else:
-        lines.append("  · （无结构化 citations）")
+        lines.append("  · （unstructured citations）")
 
     text = "\n".join(lines)
     if len(text) > max_chars:

@@ -167,11 +167,11 @@ def _friendly_llm_error(status_code: int, detail: str = "") -> RuntimeError:
         if status_code >= 500:
             hint = "模型服务暂时不可用（上游故障）：请稍后重试"
         else:
-            hint = f"模型服务返回错误（HTTP {status_code}）"
+            hint = f"model service returned an error（HTTP {status_code}）"
     snippet = f"{detail or ''}".strip().replace("\n", " ")
     if len(snippet) > 200:
         snippet = f"{snippet[:200]}…"
-    return RuntimeError(f"{hint}" + (f"（上游信息：{snippet}）" if snippet else ""))
+    return RuntimeError(f"{hint}" + (f"（upstream information：{snippet}）" if snippet else ""))
 
 
 def build_deepseek_chat_fn(
@@ -188,7 +188,7 @@ def build_deepseek_chat_fn(
         def _missing_key(_messages: list[dict[str, Any]], _tools: list[dict[str, Any]]) -> dict[str, Any]:
             raise RuntimeError(
                 "缺少 LLM API Key：请在前端「设置 → 凭据」填写模型 API Key，"
-                "或配置环境变量 RETAIN_AI_LLM_API_KEY。"
+                "or configure the environment variable RETAIN_AI_LLM_API_KEY。"
             )
         return _missing_key
     headers = {"Authorization": f"Bearer {api_key}"}
@@ -252,10 +252,10 @@ class RetrievalAgent:
         if scoped_document_id:
             # Hard scope hint + tool-layer forced injection of document_id (see _scope_tool_arguments)
             user_content = (
-                f"(限定文档 document_id={scoped_document_id}"
+                f"(scoped document document_id={scoped_document_id}"
                 f"{f', job_id={scoped_job_id}' if scoped_job_id else ''}"
                 f"。search_fulltext / search_favorites / list_documents / read_blocks "
-                f"必须只在该文档内操作。)\n{user_content}"
+                f"must operate only within this document。)\n{user_content}"
             )
         messages: list[dict[str, Any]] = [
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -347,7 +347,7 @@ class RetrievalAgent:
         )
         # Must use request-level chat (chat_fn or self._chat): in deployments where env has no key
         # and the frontend passes a per-request key, self._chat is _missing_key — a question that
-        # exhausts tool rounds would falsely report "缺少 LLM API Key" in the final round (Audit A1).
+        # exhausts tool rounds would falsely report "missing LLM API Key" in the final round (Audit A1).
         message = chat(messages, [])
         answer = _sanitize_answer_text(str(message.get("content") or "").strip(), citations)
         return AskResult(

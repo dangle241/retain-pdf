@@ -215,7 +215,7 @@ mod tests {
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-            .contains("Token 已过期"));
+            .contains("Token expired"));
     }
 
     #[test]
@@ -230,7 +230,7 @@ mod tests {
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-            .contains("Token 无效"));
+            .contains("Token invalid"));
     }
 
     #[test]
@@ -245,7 +245,7 @@ mod tests {
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-            .contains("Token 已过期"));
+            .contains("Token expired"));
     }
 
     #[test]
@@ -260,6 +260,6 @@ mod tests {
             .stage_detail
             .as_deref()
             .unwrap_or_default()
-            .contains("Token 无效"));
+            .contains("Token invalid"));
     }
 }
