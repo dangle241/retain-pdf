@@ -623,15 +623,15 @@ Responsibilities:
 - `process_runner.rs`
 Only keep worker execution orchestrator
 - `startup.rs`
-  No source text provided. Send Chinese source for translation. worker Start,pid Persist and cancel short-circuit after startup; only take. `JobPersistDeps + canceled_jobs + WorkerProcessRuntimeConfig`
+  Owns worker startup: starts the process, persists the PID, and short-circuits cancellation that arrives during startup. Only takes `JobPersistDeps + canceled_jobs + WorkerProcessRuntimeConfig`.
 - `execution.rs`
-Handles stdout/stderr taskProcess waits on signal. timeout Diversion; take only. `JobPersistDeps + canceled_jobs + WorkerProcessRuntimeConfig`
+  Handles stdout/stderr reading, waits for the task process to exit on signal, and routes to the timeout fallback. Only takes `JobPersistDeps + canceled_jobs + WorkerProcessRuntimeConfig`.
 - `completion.rs`
-Handles timeout Final state classification excluded.shutdown noise Success determination,failure Backfill
+  Handles the final-state classification: success determination, failure backfill, and filtering out shutdown noise. Timeout handling lives elsewhere.
 - `timeout_support.rs`
-Handles timeout Failure fallback state; fetch only. `JobPersistDeps + project_root`
+  Owns the timeout-failure fallback state. Only takes `JobPersistDeps + project_root`.
 - `failure_ai_diagnosis.rs`
-Handles AI Failure Diagnosis Assistance
+  Handles AI-assisted failure diagnosis.
 - `io_support.rs`
 Handles stdout/stderr Consumption and cancel Special case; leaf helper Discard entire package. `ProcessRuntimeDeps`
 

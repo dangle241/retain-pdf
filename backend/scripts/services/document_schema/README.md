@@ -368,7 +368,7 @@ When `mode = "validate"`:
 
 That is:
 
-- No source text provided. Send the Chinese .md content to translate. adapter / defaults / detection details see `normalization`
+- For adapter, defaults, and detection details see `normalization`
 - Stable lightweight summary first. `normalization_summary`
 - View top-level validation results. `validation`
 

@@ -4,10 +4,10 @@ Source:
 
 - GitHub Official documentation:
   <https://github.com/PaddlePaddle/PaddleOCR/blob/main/docs/version3.x/pipeline_usage/PaddleOCR-VL.md>
-- Please provide the source text to translate.
+- Local copy of the same documentation in this repo:
   `backend/rust_api/src/ocr_provider/paddle/AsyncParse.md`
 
-This excerpt only retains content related to this repository. provider Đã hiểu. Chỉ dịch phần liên quan trực tiếp đến tích hợp, không sao chép toàn bộ hướng dẫn.  Vui lòng cung cấp nội dung cần dịch.
+This excerpt only retains content related to this repository's PaddleOCR-VL integration. It translates only the parts directly relevant to the integration and does not copy the entire upstream guide.
 
 ## 1. Present in official response. Markdown
 

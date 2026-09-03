@@ -110,7 +110,7 @@ Table cell: one cell or a group of cells of the same kind
 caption: complete caption
 Title: Separate TU
 Formula description: text outside formulas separate. TUFormula itself protected.
-Footnote: separate TUPlease provide the source text to translate.
+Footnote: separate TU.
 ```
 
 Don't pursue. TU Bigger is better.
@@ -155,7 +155,7 @@ continuation Signal candidates use rules first.
 - Cross-column order jump?
     - whether cross-page continuity from last body text on previous page to first body text on next page
 
-Please provide the source text to translate. yes/nobut rather:
+Not a yes/no question, but rather:
 
 ```json
 {
@@ -686,7 +686,7 @@ prompt is just a soft constraint.
 
 Production systems cannot rely on a single "output translation only" instruction to solve problems.
 
-No source text provided. Send Chinese text to translate. schema：
+For the schema:
 
 ```json
 {

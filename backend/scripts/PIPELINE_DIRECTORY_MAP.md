@@ -77,7 +77,7 @@ Do not assemble provider Process yourself, not directly touching translation./De
   - [`run_book.py`](/home/wxyhgk/tmp/Code/backend/scripts/entrypoints/run_book.py)
 Normalized OCR -> translate -> render main entry.
   - [`run_translate_only.py`](/home/wxyhgk/tmp/Code/backend/scripts/entrypoints/run_translate_only.py)
-    Please provide the source text for translation.
+    Translate-only entry point. Takes an already-normalized document and produces a translated PDF.
   - [`run_render_only.py`](/home/wxyhgk/tmp/Code/backend/scripts/entrypoints/run_render_only.py)
     Pure rendering entry point.
 

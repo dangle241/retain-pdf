@@ -2,7 +2,7 @@
 
 These documents are RetainPDF Backend implementation and collaboration boundary entry.
 
-If integrating HTTP APIPlease provide the source text for translation.
+If you are integrating the HTTP API, start here.
 
 - RetainPDF backend API main entry
 

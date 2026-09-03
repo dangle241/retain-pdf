@@ -97,7 +97,7 @@ Writes by default:
 - `backend/scripts/devtools/promptfoo/fixtures/cases.csv`
 - `backend/scripts/devtools/promptfoo/fixtures/cases/<job>--<item>.json`
 
-This JSON case artifact. Please provide the source text to translate.
+This JSON case artifact is the per-case fixture used to record and replay a single promptfoo scenario. It contains:
 
 - saved item Snapshot
 - current replay result

@@ -261,7 +261,7 @@ Recommended:
 - When the frontend maintains the "Naming Glossary" list, first call `POST /api/v1/glossaries` Save; pass only in task. `translation.glossary_id`
 - For one-off temporary terminology, pass directly. `translation.glossary_entries`
 - If the user uploads ExcelFrontend first parses into JSONBackend does not parse directly. Excel
-- Incomplete source. Please provide the full Chinese text to translate. CSV Text, call first. `POST /api/v1/glossaries/parse-csv` Convert to standard entry.
+- For CSV text, first call `POST /api/v1/glossaries/parse-csv` to convert it into the standard entry format.
 
 Merge rules:
 

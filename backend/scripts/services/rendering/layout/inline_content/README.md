@@ -129,7 +129,7 @@ Not a main chain core capability; a compatibility layer:
 - Handle legacy formats
 - to placeholder / PNG fallback More stable input
 
-If a rule only serves legacy data, do not include it. `core/`Please provide the source text to translate.
+If a rule only serves legacy data, do not include it in `core/`.
 
 ### `fallback/png_renderer.py`
 

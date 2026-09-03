@@ -136,7 +136,7 @@ Deletion behavior:
 - Delete `DATA_ROOT/jobs/{job_id}`
 - Delete DATA_ROOT/downloads/{job_id}.zip
 - If exists. `{job_id}-ocr` Delete subtasks as well.
-- Default: do not delete. `uploads` Please provide the source text for translation.
+- Default: do not delete `uploads`.
 - `queued` / `running` Reject deletion by default unless passed. `force=true`
 
 ## 4. Upload endpoint
@@ -555,7 +555,7 @@ Each item includes:
 - `region_type`
 - `status`
 
-Coordinate units fixed to. PDF point, with the origin at the top-left corner. The frontend can use `item_id` Please provide the source text to translate. hover to the original bbox mapping, or you can directly use `text` / `markdown` Copy menu.
+Coordinate units are fixed to PDF points, with the origin at the top-left corner. The frontend can use `item_id` plus `region_type` to map back to the original bbox on hover, or use the `text` / `markdown` field directly from the copy menu.
 
 PDF Metadata:
 
@@ -632,7 +632,7 @@ Field description:
   - `case_insensitive`Ignore case.
   - `regex`Regular expression matching.
 - `context`Optional. Activates only if context includes term.
-- `note`Please provide the source text to translate. prompt For explanation.
+- `note`: free-form explanation surfaced to the model in the prompt.
 
 Create glossary:
 

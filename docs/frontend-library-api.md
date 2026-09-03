@@ -125,7 +125,7 @@ Frontend rendering essentials:
 ```
 POST /api/v1/assets                    â multipart, field name file(png/jpeg/webp, â¤20MB)
      → data: { asset_id, mime, bytes, created_at }
-GET  /api/v1/assets/:asset_id          ← No source text provided. Send the file content to translate.;Content Addressing,Response Ribbon immutable Cache Headers,Safe <img src>
+GET  /api/v1/assets/:asset_id          ← Content-addressed lookup; response carries immutable cache headers; safe to use directly as <img src>
 ```
 
 - `asset_id` = file sha256: Duplicate image uploads auto-merge, get same id;
