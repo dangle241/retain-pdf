@@ -59,9 +59,7 @@ pub(super) fn reconcile_stale_running_jobs(config: &AppConfig, db: &Db) -> Resul
 
         let (detail, failure_category, failure_code) = match reason {
             StaleReason::Orphaned(pid) => (
-                format!(
-                    format!("Stale running job found at startup; worker process {pid} still alive (orphaned), terminated")
-                ),
+                format!("Stale running job found at startup; worker process {pid} still alive (orphaned), terminated"),
                 "worker_orphaned_after_restart",
                 "worker_orphaned_after_restart",
             ),
